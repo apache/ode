@@ -1,0 +1,162 @@
+<project>
+  <groupId>ode</groupId>
+  <artifactId>ode</artifactId>
+  <name>ODE</name>
+
+  <packaging>pom</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <version>0.1-SNAPSHOT</version>
+  <url>http://incubator.apache.org/projects/ode.html</url>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://issues.fivesight.com/jira/</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>Apache License v2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/ode/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/ode/trunk</developerConnection>
+    <url>http://svn.apache.org/repos/asf/incubator/ode/trunk</url>
+  </scm>
+
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://www.apache.org</url>
+  </organization>
+
+
+  <properties>
+    <maven.test.skip>true</maven.test.skip>
+    <commonsLoggingVersion>1.0.3</commonsLoggingVersion>
+    <commonsPoolVersion>1.2</commonsPoolVersion>
+    <log4jVersion>1.2.12</log4jVersion>
+    <wsdl4jVersion>1.5.1</wsdl4jVersion>
+  </properties>
+
+  <!--|
+      | List of ODE modules to build
+      |
+  -->
+  <modules>
+    <module>bpel-bom</module>
+    <module>bpel-parser</module>
+    <module>utils</module>
+  </modules>
+
+  <dependencies>
+
+  </dependencies>
+
+  <!-- |
+       | Setup plugins used by the modules.
+       |
+  -->
+  <build>
+    <defaultGoal>package</defaultGoal>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <!--|
+      | List of repositories for all the various dependencies,
+      | and Maven plugins.
+      |
+  -->
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <url>http://repo1.maven.org/maven2</url>
+    </repository>
+    <repository>
+      <id>apache</id>
+      <name>Apache Repository</name>
+      <url>http://cvs.apache.org/repository</url>
+      <layout>legacy</layout>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>codehaus</id>
+      <name>Maven Central Plugins Development Repository</name>
+      <url>http://snapshots.maven.codehaus.org/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>ode</groupId>
+        <artifactId>ode-bpel-bom</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ode</groupId>
+        <artifactId>ode-bpel-parser</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ode</groupId>
+        <artifactId>ode-utils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4jVersion}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>wsdl4j</groupId>
+        <artifactId>wsdl4j</artifactId>
+        <version>${wsdl4jVersion}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commonsLoggingVersion}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-pool</groupId>
+        <artifactId>commons-pool</artifactId>
+        <version>${commonsPoolVersion}</version>
+        <exclusions>
+          <!-- These need to be excluded, we are on JDK5 -->
+          <exclusion>
+            <artifactId>xerces</artifactId>
+            <groupId>xerces</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>xml-apis</artifactId>
+            <groupId>xml-apis</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+</project>
