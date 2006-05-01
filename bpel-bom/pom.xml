@@ -1,0 +1,32 @@
+<project>
+  <artifactId>ode-bpel-bom</artifactId>
+  <name>ODE :: BPEL Object Model</name>
+  <description>
+    A DOM-like structure to represent BPEL documents (API).
+  </description>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <groupId>ode</groupId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>wsdl4j</groupId>
+      <artifactId>wsdl4j</artifactId>
+    </dependency>
+
+  </dependencies>
+
+</project>

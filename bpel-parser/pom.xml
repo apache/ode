@@ -1,0 +1,29 @@
+<project>
+  <groupId>ode</groupId>
+  <artifactId>ode-bpel-parser</artifactId>
+  <name>ODE :: BPEL Parser</name>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <version>0.1-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-bom</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>wsdl4j</groupId>
+      <artifactId>wsdl4j</artifactId>
+    </dependency>
+
+  </dependencies>
+</project>

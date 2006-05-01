@@ -1,0 +1,24 @@
+<project>
+  <groupId>ode</groupId>
+  <artifactId>ode-utils</artifactId>
+  <name>ODE :: Utilities</name>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <version>0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+    </dependency>
+  </dependencies>
+</project>
