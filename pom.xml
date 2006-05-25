@@ -45,6 +45,7 @@
   -->
   <modules>
     <module>bpel-bom</module>
+    <module>bpel-api</module>
     <module>bpel-parser</module>
     <module>utils</module>
   </modules>
