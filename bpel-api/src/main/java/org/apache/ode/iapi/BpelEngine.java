@@ -1,6 +1,6 @@
 package org.apache.ode.iapi;
 
-import javax.xml.namespace.QName;
+import java.util.Map;
 
 /**
  * Interface exposing the BPEL "engine". Basically, this interface facilitates
@@ -47,6 +47,18 @@ public interface BpelEngine {
    * @return associated message exchange 
    */
   MessageExchange getMessageExchange(String mexId);
+  
+  
+  
+  /**
+   * Call-back to the engine used by the {@link Scheduler} implementation
+   * for executing scheduled jobs.
+   * @param jobId job identifier returned by the {@link Scheduler}.scheduleXXX
+   *        methods.
+   * @param jobDetail job details as passed in to the 
+   *        {@link Scheduler}.scheduleXXX methods
+   */
+  void onScheduledJob(String jobId, Map<String, Object> jobDetail);
 
 
 }
