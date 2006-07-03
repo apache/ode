@@ -1,0 +1,23 @@
+<project name="ManagementAPI" default="list"  >
+
+  <import file="../example-build.xml" />
+
+  <target name="compile" depends="init" description="Compile the example Native Protocol Adapter invoker." >
+    <mkdir dir="${build.dir}/classes" />
+    <javac srcdir="java"
+      destdir="${build.dir}/classes"
+      source="1.5"
+      classpathref="cpath.pxe" />
+  </target>
+
+  <target name="list" depends="compile" description="Get a list of processes." >
+    <echo message="pxe.url=${pxe.url}"/>
+    <java classname="BpelManagementExample" fork="true">
+      <classpath>
+        <pathelement location="${build.dir}/classes" />
+        <path refid="cpath.pxe" />
+      </classpath>
+      <jvmarg value="-Dpxe.url=${pxe.url}"/>
+    </java>
+  </target>
+</project>

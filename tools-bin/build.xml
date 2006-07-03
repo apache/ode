@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project name="tools-bin" default="tarball">
+
+  <property file="../build.properties" />
+
+  <property name="src" value="src/main" />
+  <property name="src.bin" value="${src}/dist/bin" />
+  <property name="stage" location="target/stage" />
+  <property name="stage.bin" location="${stage}/bin" />
+  <property name="stage.etc" location="${stage}/etc" />
+
+
+  <target name="tarball" depends="stage">
+    <tar destfile="target/tarball.tar" longfile="gnu" >
+       <tarfileset dir="${stage}" username="pxe" group="pxe" />
+       <tarfileset dir="${stage.bin}" prefix="bin/" username="pxe" group="pxe" mode="755" />
+    </tar>
+  </target>
+ 
+  <target name="stage" depends="stage_executables,stage_etc" 
+	description="stage a distribution"/>
+
+  <target name="stage_etc">
+    <mkdir dir="${stage.etc}" />
+    <mkdir dir="${stage.etc}/deploy" />
+    <copy todir="${stage.etc}">
+      <filterset>
+        <filter token="PXE_HTTP_PORT" value="${pxe.default.http.port}"/>
+        <filter token="PXE_RMI_PORT" value="${pxe.default.rmi.port}"/>
+        <filter token="PXE_JMX_PORT" value="${pxe.default.jmx.port}"/>
+        <filter token="PXE_JMX_USERNAME" value="${pxe.default.jmx.username}"/>
+        <filter token="PXE_JMX_PASSWORD" value="${pxe.default.jmx.password}"/>
+        <filter token="PXE_DOMAIN" value="${pxe.default.domain}"/>
+      </filterset>
+      <fileset dir="${src}/dist/etc" includes="**/*" />
+    </copy>
+  </target>
+
+
+ 
+  <target name="stage_executables">
+    <description>
+           Build the various commandline executables and place them 
+           in the staging area.
+    </description>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="version"/>
+    </antcall>
+    
+    <antcall target="_makecommand">
+	<param name="cmd" value="ddvalidate"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-bsh"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-status"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-bsh"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-deploy"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-undeploy"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-activate"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-deactivate"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="rradd"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="rralias"/>
+    </antcall>
+    
+    <antcall target="_makecommand">
+	<param name="cmd" value="rrdrop"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="rrget"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="rrls"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="sarls"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="bpelc"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="pxe-shutdown"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="sendsoap"/>
+    </antcall>
+
+    <antcall target="_makecommand">
+	<param name="cmd" value="bpeltests"/>
+    </antcall>
+
+  </target>
+
+  <target name="_makecommand">
+
+    <!-- create the MS-DOS / Windows executable -->
+    <copy tofile="${stage.bin}/${cmd}.bat" 
+	file="${src}/template/run.bat.template" />
+
+
+    <!-- create the UNIX executable -->
+    <copy tofile="${stage.bin}/${cmd}" 
+	  file="${src}/template/run.sh.template" />
+
+    <chmod file="${stage.bin}/${cmd}" perm="755" />
+  </target>
+
+</project>

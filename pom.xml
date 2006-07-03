@@ -1,0 +1,791 @@
+<?xml version="1.0"?>
+<project>
+    <groupId>pxe</groupId>
+    <artifactId>pxe</artifactId>
+    <name>PXE</name>
+
+  <packaging>pom</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <version>2.0-SNAPSHOT</version>
+  <url>http://pxe.fivesight.com</url>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://pxe.fivesight.com/jira/</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name> Common Public License 1.0</name>
+      <url>http://pxe.fivesight.com/confluence/display/PXE/Common+Public+License+1.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+    <scm>
+        <connection>scm:svn:svn://svn.intalio.org/pxe</connection>
+        <developerConnection>scm:svn:svn+ssh://svn.intalio.org/usr/local/svn/repos/pxe/trunk/pxe</developerConnection>
+        <url>http://svn.intalio.org/viewrep/PXE-svn</url>
+    </scm>
+
+    <organization>
+        <name>Intalio</name>
+        <url>http://pxe.intalio.org</url>
+    </organization>
+
+
+    <properties>
+        <maven.test.skip>true</maven.test.skip>
+        <vendor.name>Intalio Inc.</vendor.name>
+        <vendor.address>1000 Bridge Parkway, Suite 210, Redwood City, CA</vendor.address>
+        <vendor.url>http://www.intalio.org</vendor.url>
+        <vendor.copyright>(C)1999-2006 Intalio Inc - ALL RIGHTS RESERVED</vendor.copyright>
+
+    <!--
+        Default PXE properties, these properties may be referenced in resources and the
+	like. -->
+
+        <pxe.default.http.port>8080</pxe.default.http.port>
+        <pxe.default.rmi.port>2099</pxe.default.rmi.port>
+        <pxe.default.jmx.port>8686</pxe.default.jmx.port>
+        <pxe.default.jmx.username>admin</pxe.default.jmx.username>
+        <pxe.default.jmx.password>admin</pxe.default.jmx.password>
+        <pxe.default.domain>MyDomain</pxe.default.domain>
+
+    <!--
+	|
+	| Versions of external dependencies used in build
+	| and execution.
+	|
+    -->
+        <antVersion>1.6.5</antVersion>
+        <axisVersion>1.3</axisVersion>
+        <axis2Version>1.0</axis2Version>
+        <commonsCodecVersion>1.3</commonsCodecVersion>
+        <commonsCollectionsVersion>3.1</commonsCollectionsVersion>
+        <commonsHttpClientVersion>3.0</commonsHttpClientVersion>
+        <commonsLangVersion>2.1</commonsLangVersion>
+        <commonsLoggingVersion>1.0.3</commonsLoggingVersion>
+        <commonsPoolVersion>1.2</commonsPoolVersion>
+        <hibernateVersion>3.1.2</hibernateVersion>
+        <hsqldbVersion>1.8.0.1</hsqldbVersion>
+        <geronimoSpecsVersion>1.0</geronimoSpecsVersion>
+        <jaxenVersion>1.1-beta-2</jaxenVersion>
+        <jettyVersion>5.1.9</jettyVersion>
+        <jasperVersion>4.2.20RC0</jasperVersion>
+        <jotmVersion>2.0.10</jotmVersion>
+        <junitVersion>3.8.1</junitVersion>
+        <log4jVersion>1.2.12</log4jVersion>
+        <saxonVersion>8.4</saxonVersion>
+        <servicemixVersion>3.0-SNAPSHOT</servicemixVersion>
+        <staxApiVersion>1.0</staxApiVersion>
+        <staxVersion>1.1.2-dev</staxVersion>
+        <wsdl4jVersion>1.5.1</wsdl4jVersion>
+        <xapoolVersion>1.4</xapoolVersion>
+        <xercesVersion>2.6.2</xercesVersion>
+        <xmlResolverVersion>1.1</xmlResolverVersion>
+        <xmlbeansVersion>2.1.0</xmlbeansVersion>
+        <springVersion>1.2.6</springVersion>
+        <derbyVersion>10.1.2.1</derbyVersion>
+        <quartzVersion>1.5.1</quartzVersion> 
+    
+    <!--
+	| Build number used by the intalio:release plugin
+    -->
+<release.buildnumber>1</release.buildnumber>
+
+    </properties>
+
+
+  <!--|
+      | List of PXE modules to build
+      |
+  -->
+    <modules>
+        <module>examples</module>
+        <module>tools-bin</module>
+
+    <module>bootstrap</module>
+    <module>utils</module>
+	<module>minerva</module>
+        <module>sfwk-core</module>
+        <module>sfwk-impl</module>
+
+        <module>jacob</module>
+
+        <module>bpel-scripts</module>
+        <module>bpel-schemas</module>
+        <module>bpel-bom</module>
+        <module>bpel-obj</module>
+        <module>bpel-dd</module>
+        <module>bpel-parser</module>
+        <module>bpel-api</module>
+        <module>bpel-el-xpath10</module>
+        <module>bpel-el-xpath20</module>
+        <module>bpel-compiler</module>
+        <module>bpel-runtime</module>
+        <module>bpel-ql</module>
+        <module>bpel-test</module>
+
+        <module>dao-hibernate</module>
+        <module>dao-hibernate-db-derby</module>
+        <module>dao-memory</module>
+
+        <module>jbi</module>
+        <module>jbi-install</module>
+
+        <module>jca-ra</module>
+        <module>jca-rar</module>
+        <module>standalone-kernel</module>
+        <module>standalone-modules</module>
+        <module>naming</module>
+        <module>tools</module>
+        <module>soap</module>
+        <module>bpel-scheduler-quartz</module>
+        <module>sp-bpel</module>
+        <module>sp-httpsoap</module>
+        <module>sp-httpsoap-servlet</module>
+        <module>xcontrib-sp-misc</module>
+
+        <!--module>standalone-distro</module--> 
+        <!--module>integration</module-->
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junitVersion}</version>
+        </dependency>
+    </dependencies>
+
+  <!-- |
+       | Setup plugins used by the modules.
+       |
+  -->
+    <build>
+        <defaultGoal>package</defaultGoal>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh-external</artifactId>
+                <version>1.0-alpha-6</version>
+            </extension>
+        </extensions>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+      <!-- Alex: Use specific version for release -->
+	  <!--version>2.1-SNAPSHOT</version-->
+                    <version>2.1.20060107.015454.4</version>
+                </plugin>
+	
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                    </configuration>
+                </plugin>
+	<!--|
+	    | This version uses xjavadoc-1.1-j5, which doesn't
+	    | complain on Java 5.0 constructs.
+	    |
+	-->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xdoclet-maven-plugin</artifactId>
+                    <version>1.0-alpha-2-j5</version>
+                </plugin>
+	<!--|
+	    | This version removes dependency on JSR173,
+	    | which is not available in public repositories.
+	    |
+                -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xmlbeans-maven-plugin</artifactId>
+                    <version>2.0-patched</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-one-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>install-maven-one-repository</goal>
+                                <goal>deploy-maven-one-repository</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <remoteRepositoryId>pxe</remoteRepositoryId>
+                        <remoteRepositoryUrl>scpexe://pxe.intalio.org/var/www/public/maven1</remoteRepositoryUrl>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+
+
+    <!--|
+        | List of repositories for all the various dependencies,
+        | and Maven plugins.
+        |
+    -->
+    <repositories>
+        <repository>
+            <id>pxe</id>
+            <name>PXE Maven2 repository</name>
+            <url>http://pxe.intalio.org/public/maven2</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>ibiblio</id>
+            <name>ibiblio</name>
+            <url>http://www.ibiblio.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>apache</id>
+            <name>Apache Repository</name>
+            <url>http://cvs.apache.org/repository</url>
+            <layout>legacy</layout>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>pxe</id>
+            <name>PXE Maven2 repository</name>
+            <url>http://pxe.intalio.org/public/maven2</url>
+        </pluginRepository>
+        <!--pluginRepository>
+            <id>codehaus</id>
+            <name>Maven Central Plugins Development Repository</name>
+            <url>http://snapshots.maven.codehaus.org/maven2</url>
+        </pluginRepository-->
+        <pluginRepository>
+            <id>ibiblio</id>
+            <name>ibiblio</name>
+            <url>http://www.ibiblio.org/maven2/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
+    <!-- |
+	 | Repository for distributing new releases.
+	 |
+    -->
+    <distributionManagement>
+        <repository>
+            <id>pxe-maven2</id>
+            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>pxe-maven2-snapshot</id>
+            <name>PXE Development Repository</name>
+            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+	
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-bom</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+	
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bootstrap</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-ql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-schemas</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-compiler</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-dd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-el-xpath10</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-el-xpath20</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-obj</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-parser</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-scripts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-test</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-dao-hibernate</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-dao-hibernate-db-derby</artifactId>
+                <version>${project.version}</version>
+                <type>tar</type>
+                <classifier>schema</classifier>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-dao-memory</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-jacob</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-jbi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-jbi-install</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-jca-ra</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-jca-rar</artifactId>
+                <version>${project.version}</version>
+                <type>rar</type>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-standalone-kernel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-standalone-modules</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-minerva</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-naming</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-tools</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-sfwk-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-sfwk-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-soap</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-scheduler-quartz</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-sp-bpel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-sp-httpsoap</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-xcontrib-sp-misc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-tools-bin</artifactId>
+                <type>tar</type>
+                <version>${project.version}</version>
+                <classifier>tar</classifier>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
+                <artifactId>pxe-examples</artifactId>
+                <type>tar</type>
+                <version>${project.version}</version>
+                <classifier>tar</classifier>
+            </dependency>
+            <dependency>
+                <groupId>ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>${antVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>axis</groupId>
+                <artifactId>axis-saaj</artifactId>
+                <version>${axisVersion}</version>
+            </dependency>
+            <dependency>
+                 <groupId>quartz</groupId>
+                 <artifactId>quartz</artifactId>
+                 <version>${quartzVersion}</version>
+             </dependency>
+
+            <dependency>
+                <groupId>axis2</groupId>
+                <artifactId>axis2</artifactId>
+                <version>${axis2Version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ws-commons</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axis2Version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ws-commons</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axis2Version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commonsCodecVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commonsCollectionsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>${commonsHttpClientVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commonsLangVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commonsLoggingVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-pool</groupId>
+                <artifactId>commons-pool</artifactId>
+                <version>${commonsPoolVersion}</version>
+                <exclusions>
+	<!-- These need to be excluded, we are on JDK5 -->
+                    <exclusion>
+                        <artifactId>xerces</artifactId>
+                        <groupId>xerces</groupId>
+                    </exclusion>
+	
+                    <exclusion>
+                        <artifactId>xml-apis</artifactId>
+                        <groupId>xml-apis</groupId>
+                    </exclusion>
+
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${springVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${springVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate</artifactId>
+                <version>${hibernateVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jta</artifactId>
+                        <groupId>javax.transaction</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldbVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>jaxen</groupId>
+                <artifactId>jaxen</artifactId>
+                <version>${jaxenVersion}</version>
+            </dependency>
+
+    <!--
+      | Jetty is used for the standalone-distro. The
+      | JASPER modules are actually required by Jetty
+      | but the transitive dependencies are not present.
+    -->
+
+            <dependency>
+                <groupId>jetty</groupId>
+                <artifactId>org.mortbay.jetty</artifactId>
+                <version>${jettyVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jetty</groupId>
+                <artifactId>jasper-compiler</artifactId>
+                <version>${jasperVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jetty</groupId>
+                <artifactId>jasper-runtime</artifactId>
+                <version>${jasperVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jetty</groupId>
+                <artifactId>org.mortbay.jmx</artifactId>
+                <version>${jettyVersion}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>jotm</groupId>
+                <artifactId>jotm</artifactId>
+                <version>${jotmVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jta</artifactId>
+                        <groupId>javax.transaction</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.resource</groupId>
+                        <artifactId>connector</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4jVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+                <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+                <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-qname_1.1_spec</artifactId>
+                <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-servlet_2.4_spec</artifactId>
+                <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jsp_2.0_spec</artifactId>
+                <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>incubator-servicemix</groupId>
+                <artifactId>servicemix-jbi</artifactId>
+                <version>${servicemixVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>saxon</groupId>
+                <artifactId>saxon</artifactId>
+                <version>${saxonVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>saxon</groupId>
+                <artifactId>saxon-dom</artifactId>
+                <version>${saxonVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>saxon</groupId>
+                <artifactId>saxon-xpath</artifactId>
+                <version>${saxonVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>stax</groupId>
+                <artifactId>stax-api</artifactId>
+                <version>${staxApiVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xmlbeans-jsr173-api</artifactId>
+                        <groupId>xmlbeans</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>stax</groupId>
+                <artifactId>stax</artifactId>
+                <version>${staxVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xmlbeans-jsr173-api</artifactId>
+                        <groupId>xmlbeans</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>wsdl4j</groupId>
+                <artifactId>wsdl4j</artifactId>
+                <version>${wsdl4jVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>jencks</groupId>
+                <artifactId>xapool-without-pool</artifactId>
+                <version>${xapoolVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>xerces</groupId>
+                <artifactId>xercesImpl</artifactId>
+                <version>${xercesVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>xml-resolver</groupId>
+                <artifactId>xml-resolver</artifactId>
+                <version>${xmlResolverVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>xmlbeans</groupId>
+                <artifactId>xbean</artifactId>
+                <version>${xmlbeansVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xmlbeans-jsr173-api</artifactId>
+                        <groupId>xmlbeans</groupId>
+                    </exclusion>
+                </exclusions>
+
+            </dependency>
+            <dependency>
+                <groupId>xmlbeans</groupId>
+                <artifactId>xbean_xpath</artifactId>
+                <version>${xmlbeansVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xmlbeans-jsr173-api</artifactId>
+                        <groupId>xmlbeans</groupId>
+                    </exclusion>
+                </exclusions>
+
+            </dependency>
+            <dependency>
+                <groupId>xmlbeans</groupId>
+                <artifactId>xmlpublic</artifactId>
+                <version>${xmlbeansVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xmlbeans-jsr173-api</artifactId>
+                        <groupId>xmlbeans</groupId>
+                    </exclusion>
+                </exclusions>
+
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.derby</groupId>
+                <artifactId>derby</artifactId>
+                <version>${derbyVersion}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>

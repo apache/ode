@@ -1,0 +1,20 @@
+<HTML>
+<BODY>
+<p>Contains implementations of commandline tools and Ant Tasks.</p>
+<p>Each subpackage, e.g., <code>com.fs.jlo.tools.foo</code> contains:</p>
+<ul>
+<li>One or more implementations of the {@link com.fs.jlo.tools.Command} interface
+that perform a given function.</li>
+<li>In the <code>com.fs.jlo.tools.foo.cline</code> subpackage, a class with a 
+<code>main()</code> method that uses the above {@link com.fs.jlo.tools.Command}
+implementation to perform some function, e.g., deploying a PXE system.</li>
+<li>In the <code>com.fs.jlo.tools.foo.ant</code> subpackage, a class that extends
+{@link com.fs.jlo.tools.CommandTask} (which, in turn, extends
+{@link org.apache.ant.Task}) that uses the above {@link com.fs.jlo.tools.Command}
+implementation to perform roughly the same function.</li>
+</ul>
+<p>The ultimate goal of the package is collect a set of reusable &quot;command&quot;
+representations that can be invoked under different contexts like the commandline,
+an Ant build, or from a wizard or tool in a GUI application.</p>
+</BODY>
+</HTML>

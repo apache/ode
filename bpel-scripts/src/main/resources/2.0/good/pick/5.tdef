@@ -1,0 +1,13 @@
+
+bpel=Pick5-2.0.bpel
+request.1.partnerlink=testPartnerLink
+request.1.operation=pickOp1
+request.1.msg=inMsg2.xml
+request.2.partnerlink=testPartnerLink
+request.2.operation=pickOp2
+request.2.msg=inMsg2.xml
+request.3.partnerlink=testPartnerLink
+request.3.operation=pickOp2
+request.3.msg=inMsg2.xml
+postCondition=/message/DataPart/text()='data1'
+

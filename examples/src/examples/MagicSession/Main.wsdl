@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<wsdl:definitions
+    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:wsa="http://www.w3.org/2005/08/addressing"
+    xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+
+  <types>
+    <xsd:element name="result" type="xsd:string"/>
+    <xsd:element name="dummy" type="xsd:string"/>
+    <xsd:element name="dummy2" type="xsd:string"/>
+    <xsd:element name="dummy3" type="xsd:string"/>
+  </types>
+
+  <wsdl:message name="DummyMessage">
+    <wsdl:part name="payload" element="tns:dummy"/>
+  </wsdl:message>
+
+  <wsdl:message name="Dummy2Message">
+    <wsdl:part name="payload" element="tns:dummy2"/>
+  </wsdl:message>
+
+  <wsdl:message name="Dummy3Message">
+    <wsdl:part name="payload" element="tns:dummy3"/>
+  </wsdl:message>
+
+  <wsdl:message name="EndpointMessage">
+    <wsdl:part name="payload" element="wsa:EndpointReference"/>
+  </wsdl:message>
+
+  <wsdl:message name="ResultMessage">
+    <wsdl:part name="ack" element="tns:result"/>
+  </wsdl:message>
+
+  <wsdl:portType name="MSMainInitiatePortType">
+    <wsdl:operation name="execute">
+      <wsdl:input message="tns:DummyMessage" name="dummy"/>
+      <wsdl:output message="tns:ResultMessage" name="result"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="MSMainPortType">
+    <wsdl:operation name="callback">
+      <wsdl:input message="tns:Dummy2Message" name="dummy2"/>
+    </wsdl:operation>
+    <wsdl:operation name="doubleCallback">
+      <wsdl:input message="tns:Dummy3Message" name="dummy3"/>
+    </wsdl:operation>
+    <wsdl:operation name="tripleCallback">
+      <wsdl:input message="tns:EndpointMessage" name="eprmessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:portType name="MSResponderPortType">
+    <wsdl:operation name="initiate">
+      <wsdl:input message="tns:Dummy2Message" name="dummy2"/>
+    </wsdl:operation>
+    <wsdl:operation name="doubleCall">
+      <wsdl:input message="tns:Dummy3Message" name="dummy3"/>
+    </wsdl:operation>
+    <wsdl:operation name="eprPassing">
+      <wsdl:input message="tns:EndpointMessage" name="eprmessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="MSMainInitiateBinding" type="tns:MSMainInitiatePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="execute">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:binding name="MSMainBinding" type="tns:MSMainPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="callback">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="doubleCallback">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="tripleCallback">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:binding name="MSResponderBinding" type="tns:MSResponderPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="initiate">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="doubleCall">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="eprPassing">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="MSMainService">
+    <wsdl:port name="MSMainInitiatePort" binding="tns:MSMainInitiateBinding">
+      <soap:address location="http://localhost:8080/pxe/soap/msmainInitiate"/>
+    </wsdl:port>
+    <wsdl:port name="MSMainPort" binding="tns:MSMainBinding">
+      <soap:address location="http://localhost:8080/pxe/soap/msmain"/>
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="MSResponderService">
+    <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
+      <soap:address location="http://localhost:8080/pxe/soap/msresponder"/>
+    </wsdl:port>
+  </wsdl:service>
+
+  <plnk:partnerLinkType name="InitiatorPartnerLinkType">
+      <plnk:role name="me" portType="tns:MSMainInitiatePortType"/>
+  </plnk:partnerLinkType>
+
+  <plnk:partnerLinkType name="ResponderPartnerLinkType">
+      <plnk:role name="responder" portType="tns:MSResponderPortType"/>
+      <plnk:role name="main" portType="tns:MSMainPortType"/>
+  </plnk:partnerLinkType>
+
+</wsdl:definitions>

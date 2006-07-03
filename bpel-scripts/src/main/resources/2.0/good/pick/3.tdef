@@ -1,0 +1,5 @@
+bpel=Pick3-2.0.bpel
+request.1.partnerlink=testPartnerLink
+request.1.operation=pickOp1
+request.1.msg=inMsg.xml
+postCondition=/message/DataPart/text()='onMessage'

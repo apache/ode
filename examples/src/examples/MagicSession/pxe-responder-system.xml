@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.fivesight.com/pxe/system-descriptor/ http://www.fivesight.com/pxe/system-descriptor/"
+                   xmlns:main="http://pxe/bpel/unit-test.wsdl"
+                   xmlns="http://www.fivesight.com/pxe/system-descriptor/"
+                   name="DynResponder"
+                   wsdlUri="urn:/Main.wsdl">
+  <channels>
+    <channel name="inboundChannel" />
+    <channel name="outboundChannel" />
+  </channels>
+  <services>
+    <service name="MSResponderService" provider="uri:protocoladapter.soap">
+      <imports>
+        <port name="MSResponderPort" type="main:MSResponderPortType" channel-ref="inboundChannel" />
+      </imports>
+    </service>
+    <service name="msResponderService.OutboundSoapService" provider="uri:protocoladapter.soap">
+      <properties>
+        <property name="serviceWsdlNamespace" value="http://pxe/bpel/unit-test.wsdl"/>
+        <property name="serviceWsdlName" value="MSMainService"/>
+      </properties>
+      <exports>
+        <port name="MSMainPort" type="main:MSMainPortType" channel-ref="outboundChannel"/>
+      </exports>
+    </service>
+    <service name="msResponder.BpelService" provider="uri:bpelProvider">
+      <properties>
+        <property name="compiledProcess" value="MagicSessionResponder.cbp"/>
+      </properties>
+      <imports>
+        <port name="mainPartnerLink.main" type="main:MSMainPortType" channel-ref="outboundChannel" />
+      </imports>
+      <exports>
+        <port name="mainPartnerLink.responder" type="main:MSResponderPortType" channel-ref="inboundChannel" />
+      </exports>
+    </service>
+  </services>
+</system-descriptor>

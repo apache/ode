@@ -1,0 +1,13 @@
+<xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
+           xmlns:dd="http://pxe.fivesight.com/schemas/2006/06/27/dd">
+
+  <xb:namespace uri="http://pxe.fivesight.com/schemas/2006/06/27/dd">
+    <xb:package>com.fs.pxe.axis.dd</xb:package>
+  </xb:namespace> 
+  
+  <xb:namespace uri="##any">
+    <xb:prefix></xb:prefix>
+    <xb:suffix></xb:suffix>
+  </xb:namespace>
+
+</xb:config>

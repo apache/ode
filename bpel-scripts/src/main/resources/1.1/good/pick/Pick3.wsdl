@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<wsdl:definitions 
+    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/">
+   
+   <wsdl:message name="PickMessage">
+        <wsdl:part name="DataPart" type="xsd:string"/>
+        <wsdl:part name="IdPart" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:portType name="TestPortType">
+        <wsdl:operation name="pickOp1">
+            <wsdl:input message="tns:PickMessage" name="TestIn"/>
+            <wsdl:output message="tns:PickMessage" name="TestOut"/>
+        </wsdl:operation> 
+        <wsdl:operation name="pickOp2">
+            <wsdl:input message="tns:PickMessage" name="TestIn"/>
+            <wsdl:output message="tns:PickMessage" name="TestOut"/>
+        </wsdl:operation>      
+    </wsdl:portType> 
+    
+    <plnk:partnerLinkType name="TestPartnerLinkType">
+       <plnk:role name="me">
+           <plnk:portType name="tns:TestPortType"/>
+       </plnk:role>
+    </plnk:partnerLinkType>
+    
+</wsdl:definitions>
+

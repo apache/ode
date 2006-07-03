@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!-- deep_missing_import_wsdl_inner2.wsdl -->
+<wsdl:definitions targetNamespace="foo://fneh" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:import namespace="bar://baz/qux/asdf" location="missing.wsdl" />
+</wsdl:definitions>

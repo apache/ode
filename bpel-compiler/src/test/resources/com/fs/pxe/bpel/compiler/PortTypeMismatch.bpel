@@ -1,0 +1,34 @@
+<process name="InvalidBpelFunction" suppressJoinFailure="yes" targetNamespace="http://jlo/test/compile"
+    xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:tns="http://pxe/test/compile"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://pxe/test/compile.wsdl">
+    
+    <partnerLinks>
+        <partnerLink name="testPartnerLink" 
+            partnerLinkType="test:TestPartnerLinkType" 
+            myRole="me" />
+    </partnerLinks>
+    <variables>
+        <variable name="var1" 
+            messageType="test:TestMessage1" />
+        <variable name="var2" 
+            messageType="test:TestMessage2" />
+    </variables>
+    <flow>
+       <sequence>
+           <receive 
+                  name="testReceive"
+                  partnerLink="testPartnerLink"
+                  portType="test:BogusPortType"
+                  operation="testOperation"
+                  variable="var1"/>
+           <reply name="testReply" 
+                  operation="testOperation"
+                  partnerLink="testPartnerLink"
+                  portType="test:TestPortType" 
+                  variable="var2"/>
+       </sequence>
+    </flow>
+</process>

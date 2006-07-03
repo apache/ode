@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+     jbi.xml for PXE BPEL Engine
+  -->
+<jbi
+  version="1.0"
+  xmlns="http://java.sun.com/xml/ns/jbi"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/jbi ./jbi.xsd">
+
+  <!-- identification information about this engine -->
+  <component
+    type="service-engine"
+    component-class-loader-delegation="self-first">
+
+    <identification>
+      <name>PxeBpelEngine</name>
+      <description> This is the PXE BPEL engine, adapter for JBI..
+      </description>
+    </identification>
+
+    <component-class-name description="Component Implementation" >com.fs.pxe.jbi.PxeComponent</component-class-name>
+    <component-class-path>
+        <path-element>lib/commons-pool.jar</path-element>
+        <path-element>lib/ehcache.jar</path-element>
+        <path-element>lib/jaxen.jar</path-element>
+        <!--  <path-element>lib/saxon.jar</path-element> -->
+        <path-element>lib/dom4j.jar</path-element>
+        <path-element>lib/hibernate.jar</path-element>
+        <path-element>lib/commons-collections.jar</path-element>
+        <!-- <path-element>lib/commons-logging.jar</path-element> -->
+        <!-- <path-element>lib/derby.jar</path-element> -->
+        <path-element>lib/commons-lang.jar</path-element>
+        <path-element>lib/wsdl4j.jar</path-element>
+        <path-element>lib/stax-api.jar</path-element>
+        <path-element>lib/xbean.jar</path-element>
+        <path-element>lib/cglib.jar</path-element>
+        <path-element>lib/asm.jar</path-element>
+        <path-element>lib/antlr.jar</path-element>
+
+        <path-element>lib/pxe-utils.jar</path-element>
+        <path-element>lib/pxe-bpel-bom.jar</path-element>
+        <path-element>lib/pxe-bpel-api.jar</path-element>
+        <path-element>lib/pxe-bpel-compiler.jar</path-element>
+        <path-element>lib/pxe-bpel-el-xpath10.jar</path-element>
+        <path-element>lib/pxe-bpel-el-xpath20.jar</path-element>
+        <path-element>lib/pxe-bpel-obj.jar</path-element>
+        <path-element>lib/pxe-bpel-dd.jar</path-element>
+        <path-element>lib/pxe-bpel-parser.jar</path-element>
+        <path-element>lib/pxe-bpel-runtime.jar</path-element>
+        <path-element>lib/pxe-bpel-scheduler-quartz.jar</path-element>
+        <path-element>lib/pxe-dao-hibernate.jar</path-element>
+        <path-element>lib/pxe-jacob.jar</path-element>
+        <path-element>lib/pxe-jbi.jar</path-element>
+        <path-element>lib/pxe-minerva.jar</path-element>
+    </component-class-path>
+    <bootstrap-class-name>com.fs.pxe.jbi.PxeBootstrap</bootstrap-class-name>
+    <bootstrap-class-path>
+        <path-element>lib/pxe-jbi.jar</path-element>
+    </bootstrap-class-path>
+  </component>
+</jbi>

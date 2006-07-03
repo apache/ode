@@ -1,0 +1,50 @@
+<!--
+bpws:getVariableData(varname, partname) Test Case
+- Test the XPath 1.0 function.
+- Uses varname,partname (non-query) signature
+- getVariableData function returns complex element
+-->
+
+<process name="GetVariableData3"
+  targetNamespace="http://pxe/bpel/unit-test"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:test="uri:testing">
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+      partnerLinkType="test:PartnerLinkType1"
+      myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+    <variable name="var2" type="xsd:string"/>
+  </variables>
+
+  <sequence>
+    <receive
+      createInstance="yes"
+      name="startReceive"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      operation="opTwoWay"
+      variable="var1"/>
+
+    <assign name="assign1">
+
+      <copy>
+        <from expression="bpws:getVariableData('var1','Complex1Part1')/test:StringElement"/>
+        <to variable="var1" part="StringPart2"/>
+      </copy>
+    </assign>
+
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+
+  </sequence>
+
+</process>

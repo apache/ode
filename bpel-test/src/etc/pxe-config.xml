@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<kconfig xmlns="uri:fivesight.pxe/schemas/pxe-kconfig/2005/03/16">
+
+  <!-- For setting system properties. -->
+  <!-- If pxe.home is not set explicitly here, it is expected from the launcher.
+       Failure to set pxe.home in some fashion will result in an error. -->
+  <!--setProperty name="pxe.home">c:/path/to/home/dir</setProperty-->
+
+  <!-- Imports are used in turn to try to locate classes given using the "class"
+       attribute -->
+  <import package="com.fs.pxe.kernel.modrmi"/>
+  <import package="com.fs.pxe.kernel.modjetty" />
+  <import package="com.fs.pxe.kernel.modjotm" />
+  <import package="com.fs.pxe.kernel.modsfwk" />
+  <import package="com.fs.pxe.kernel.modjmxremote" />
+  <import package="com.fs.pxe.kernel.modhibernatedao" />
+  <import package="com.fs.pxe.kernel.modfsnaming" />
+  <import package="com.fs.pxe.kernel.moddeployer" />
+  <import package="com.fs.pxe.kernel.modbpellog" />
+  <import package="com.fs.pxe.kernel.modjdbc" />
+
+  <!-- For loading MLETS -->
+  <mlet url="" />
+
+  <!-- Install (and start) a PXE kernel module -->
+  <kmodule name="com.fivesight.pxe:mod=JmxRmiRegistry" class="ModRmiRegistry">
+    <attribute name="port">2099</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=Naming" class="ModFsNaming">
+    <!-- <attribute ...> elements used to set MBean attributes (before start()). -->
+    <attribute name="providerURL">pxe</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=BpelLogger" class="ModBpelEventLogger"/>
+
+  <kmodule name="com.fivesight.pxe:mod=JOTM" class="ModJOTM">
+    <attribute name="bindInJNDI">true</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="txTimeout">30000</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=PxeDB" class="ModJdbcDS">
+    <attribute name="dataSourceName">pxe-ds</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="driver">org.apache.derby.jdbc.EmbeddedDriver</attribute>
+    <attribute name="username">sa</attribute>
+    <attribute name="password"></attribute>
+    <attribute name="url">jdbc:derby:<pxe-home/>/data</attribute>
+    <attribute name="poolMax">10</attribute>
+    <attribute name="poolMin">5</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=HibernateDAO" class="ModHibernateDAO">
+    <attribute name="bpelStateStoreConnectionFactory">bpel_sscf</attribute>
+    <attribute name="stateStoreConnectionFactory">sscf</attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="dataSource">pxe-ds</attribute>
+    <attribute name="hibernateProperties">file:<pxe-home/>/etc/hibernate.properties</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=Jetty" class="ModJetty">
+    <attribute name="config">file:<pxe-home/>/etc/jetty.xml</attribute>
+  </kmodule>
+
+  <!-- Begin definition of service providers
+  MUST PROCEED ModSfwk
+	-->
+
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Bpel" class="ModSvcProvider">
+    <attribute name="JndiName">BpelSP</attribute>
+    <attribute name="TransactionManagerName">TransactionManager</attribute>
+    <attribute name="ProviderClass">com.fs.pxe.bpel.provider.BpelServiceProvider</attribute>
+    <attribute name="ProviderURI">uri:bpelProvider</attribute>
+    <attribute name="ProviderProperties">stateStoreConnectionFactory=bpel_sscf</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
+    <attribute name="JndiName">SpexerciserSP</attribute>
+    <attribute name="TransactionManagerName">TransactionManager</attribute>
+    <attribute name="ProviderClass">com.fs.pxe.bpel.test.BpelTestServiceProvider</attribute>
+    <attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
+  </kmodule>
+
+  <!-- End ServiceProvider definition -->
+
+  <kmodule name="com.fivesight.pxe:mod=PXE" class="ModSfwk">
+    <attribute name="domainId">MyDomain</attribute>
+    <attribute name="registryPort">2099</attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="DAOConnectionFactory">sscf</attribute>
+    <attribute name="SvcProviderJndiBindings">HttpSoapSP,BpelSP,XsltSP,NativeSP,SpexerciserSP</attribute>
+  </kmodule>
+
+</kconfig>
+

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<project>
+  <groupId>pxe</groupId>
+  <artifactId>pxe-minerva</artifactId>
+  <name>PXE :: Minerva JDBC Pool</name>
+
+  <version>2.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>pxe</groupId>
+    <artifactId>pxe</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>commons-logging</groupId>
+       <artifactId>commons-logging</artifactId>
+    </dependency>
+  </dependencies>
+</project>

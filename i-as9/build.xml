@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<project name="sun-as9-lcm" default="dist">
+
+  <import file="../build/ant-common.xml" />
+  <import file="../build/ant-library.xml" />
+
+  <available property="as9" file="${deps.dir.ext}/appserv-rt.jar" />
+
+  <!-- Sun AS9 Lifecycle Module -->
+  <target name="build" depends="jar" if="as9" />
+
+  <target name="compile" if="as9" >
+     <antcall target="ant-common.compile" />
+  </target>
+  
+  <target name="dist" depends="ant-library.dist" >
+    <copy todir="${install.dir.int}" file="${jar}" />
+  </target>
+
+</project>

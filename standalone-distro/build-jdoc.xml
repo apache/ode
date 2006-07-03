@@ -1,0 +1,62 @@
+<project name="pxe-java-doc" default="javadoc-pxe-public">
+<target name="javadoc-pxe-public" 
+      depends="init" >
+
+    <mkdir dir="${build.dir.javadoc}/pxe-api"/>
+
+    <javadoc destdir="${build.dir.javadoc}/pxe-api"
+      author="false"
+      version="false"
+      use="true"
+      source="1.5" 
+      breakiterator="true"
+      additionalparam="-quiet"
+      windowtitle="Intalio PXE API Documentation">
+
+      <classpath>
+        <path refid="cpath" />
+        <fileset dir="${install.dir}" includes="**/*.jar" />
+      </classpath>
+
+     <fileset dir="../" >
+        <include name="**/*.java" />
+     </fileset>
+      
+      <doctitle><![CDATA[<h1>Intalio Process Execution Engine (PXE) JavaDoc</h1>]]></doctitle>
+      <footer><![CDATA[<small><i>Copyright &#169; 2004 FiveSight Technologies Inc. All Rights Reserved.</i></small>]]></footer>
+      <tag name="todo" scope="all" description="To do:" />
+
+      <group title="PXE Deployment and Management API"
+             packages="com.fs.pxe.sfwk.mngmt*,com.fs.pxe.sfwk.deployment*" />
+
+      <group title="PXE Service Provider API (SPI)"
+             packages="com.fs.pxe.sfwk.spi*"/>
+
+      <group title="PXE Binding API (BAPI)"
+             packages="com.fs.pxe.sfwk.bapi*" />
+
+      <group title="BPEL APIs"
+             packages="com.fs.pxe.bpel*,com.fs.pxe.bom.api*" />
+
+      <group title="PXE Protocol Adapters" packages="com.fs.pxe.adapters.*" />
+      <group title="PXE Kernel / Server"
+             packages="com.fs.pxe.server*,com.fs.pxe.kernel*"/>
+    </javadoc>
+   
+  </target>
+
+  <target name="schemadocs" 
+          description="generate schema documentation and place in the staging area." depends="init">
+    <mkdir dir="${build.dir.schemadoc}" />
+    <xslt destdir="${build.dir.schemadoc}" extension=".html" style="${xs3p.xslt}" basedir="../" includes="*/src/**/*.xsd" excludes="**/istate*">
+        <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <globmapper from="*.xsd" to="*.html" casesensitive="no"/>
+        </chainedmapper>      
+	</mapper>
+    </xslt>
+  </target>
+
+
+</project>

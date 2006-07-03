@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+
+<kconfig xmlns="http://www.fivesight.com/pxe/kconfig/">
+
+  <!-- For setting system properties. -->
+  <!-- If pxe.home is not set explicitly here, it is expected from the launcher.
+       Failure to set pxe.home in some fashion will result in an error. -->
+  <!--setProperty name="pxe.home">c:/path/to/home/dir</setProperty-->
+  
+  <classpath type="url">file:<pxe-home/>/etc/</classpath>  
+  <classpath type="jarDir"><pxe-home/>/lib</classpath>
+  
+  <!-- Imports are used in turn to try to locate classes given using the "class"
+       attribute -->
+  <import package="com.fs.pxe.kernel.modrmi"/>
+  <import package="com.fs.pxe.kernel.modjetty" />
+  <import package="com.fs.pxe.kernel.modjotm" />
+  <import package="com.fs.pxe.kernel.modsfwk" />
+  <import package="com.fs.pxe.kernel.modjmxremote" />
+  <import package="com.fs.pxe.kernel.modhibernatedao" />
+  <import package="com.fs.pxe.kernel.modfsnaming" />
+  <import package="com.fs.pxe.kernel.moddeployer" />
+  <import package="com.fs.pxe.kernel.modbpellog" />
+  <import package="com.fs.pxe.kernel.modjdbc" />
+  <import package="com.fs.pxe.kernel.modxslt" />
+
+  <kmodule name="com.fivesight.pxe:mod=RmiRegistry" class="ModRmiRegistry">
+	  <attribute name="port"><getProperty name="pxe.registry.port" 
+	  									  default="@PXE_RMI_PORT@" /></attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=Naming" class="ModFsNaming">
+    <!-- <attribute ...> elements used to set MBean attributes (before start()). -->
+    <attribute name="providerURL">pxe</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=BpelLogger" class="ModBpelEventLogger"/>
+
+  <kmodule name="com.fivesight.pxe:mod=XSLTransformer" class="ModXslt"/>
+
+  <kmodule name="com.fivesight.pxe:mod=JOTM" class="ModJOTM">
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="txTimeout">30000</attribute>
+  </kmodule>
+
+  <!--
+      - Comment out the following for MySql database.
+      -
+      -->
+  <kmodule name="com.fivesight.pxe:mod=PxeDB" class="ModJdbcDS">
+    <attribute name="dataSourceName">pxe-ds</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="driver">org.apache.derby.jdbc.EmbeddedDriver</attribute>
+    <attribute name="username">sa</attribute>
+    <attribute name="password"></attribute>
+    <attribute name="url">jdbc:derby:<pxe-home/>/data</attribute>
+    <attribute name="poolMax">10</attribute>
+    <attribute name="poolMin">5</attribute>
+	<attribute name="type">MANAGED</attribute>
+  </kmodule>
+	
+ <!--
+    - Uncomment the following for MySql database.
+    -
+
+ <kmodule name="com.fivesight.pxe:mod=PxeDB" class="ModJdbcDS">
+    <attribute name="dataSourceName">pxe-ds</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="driver">com.mysql.jdbc.Driver</attribute>
+    <attribute name="url">jdbc:mysql://localhost/pxe</attribute>
+    <attribute name="username">pxe</attribute>
+    <attribute name="password"></attribute>
+    <attribute name="poolMax">10</attribute>
+    <attribute name="poolMin">5</attribute>
+  </kmodule>
+ -->
+
+  <kmodule name="com.fivesight.pxe:mod=HibernateDAO" class="ModHibernateDAO">
+    <attribute name="bpelStateStoreConnectionFactory">bpel_sscf</attribute>
+    <attribute name="stateStoreConnectionFactory">sscf</attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="dataSource">pxe-ds</attribute>
+    <attribute name="hibernateProperties">file:<pxe-home/>/etc/hibernate.properties</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=Jetty" class="ModJetty">
+    <attribute name="config">file:<pxe-home/>/etc/jetty.xml</attribute>
+  </kmodule>
+
+  <!-- Begin definition of service providers 
+	   MUST PRECEED ModSfwk
+	-->  
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=HttpSoap" class="ModSvcProvider">
+	<attribute name="ProviderClass">com.fs.pxe.httpsoap.HttpSoapAdapter</attribute>
+	<attribute name="ProviderURI">uri:protocoladapter.soap</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Bpel" class="ModSvcProvider">
+	<attribute name="ProviderClass">com.fs.pxe.bpel.provider.BpelServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:bpelProvider</attribute>
+	<attribute name="ProviderProperties">stateStoreConnectionFactory=bpel_sscf</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Transformer" class="ModSvcProvider">
+	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:xsltServiceProvider</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Native" class="ModSvcProvider">
+	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.rpc.RpcAdapter</attribute>
+	<attribute name="ProviderURI">uri:protocoladapter.native.inbound</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
+	<attribute name="ProviderClass">com.fs.pxe.bpel.test.BpelTestServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
+  </kmodule>
+  
+  <!-- End ServiceProvider definition -->
+  
+  <kmodule name="com.fivesight.pxe:mod=PXE" class="ModSfwk">
+    <attribute name="domainId"><getProperty name="pxe.domain" default="@PXE_DOMAIN@"/></attribute>
+    <attribute name="registryPort"><getProperty name="pxe.registry.port" default="@PXE_RMI_PORT@"/></attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="DAOConnectionFactory">sscf</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.pxe:mod=Deployer" class="ModDeployer">
+    <attribute name="DeployDir"><pxe-home/>/etc/deploy</attribute>
+    <attribute name="DomainAdminMBean">
+    	<getAttribute object="com.fivesight.pxe:mod=PXE" name="domainAdminMBean"/>
+    </attribute>
+  </kmodule>
+</kconfig>

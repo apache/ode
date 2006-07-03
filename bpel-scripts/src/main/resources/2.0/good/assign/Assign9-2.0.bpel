@@ -1,0 +1,46 @@
+<process name="Assign9-2.0"
+	 targetNamespace="http://pxe/bpel/unit-test"
+	 xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+	 xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	 xmlns:test="uri:testing" >
+
+  <import location="../test.wsdl"
+	  importType="http://schemas.xmlsoap.org/wsdl/"
+	  namespace="uri:testing" />
+
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+		 partnerLinkType="test:PartnerLinkType1"
+		 myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+  </variables>
+
+  <sequence>
+    <receive
+      createInstance="yes"
+      name="startReceive"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      operation="opTwoWay"
+      variable="var1"/>
+
+    <assign name="assign">
+      <copy>
+        <from variable="var1"
+        	  property="test:testProp"/>
+        <to variable="var1"
+        	 property="test:testProp2"/>
+      </copy>
+    </assign>
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+  </sequence>
+
+</process>

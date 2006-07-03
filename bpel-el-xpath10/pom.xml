@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project>
+    <groupId>pxe</groupId>
+    <artifactId>pxe-bpel-el-xpath10</artifactId>
+    <name>PXE :: BPEL XPath 1.0</name>
+    <description>Implementation of the XPath 1.0 expression language.</description>
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>pxe</groupId>
+        <artifactId>pxe</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <version>2.0-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>pxe</groupId>
+            <artifactId>pxe-bpel-bom</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>pxe</groupId>
+            <artifactId>pxe-bpel-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>pxe</groupId>
+            <artifactId>pxe-bpel-obj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>pxe</groupId>
+            <artifactId>pxe-utils</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>jaxen</groupId>
+          <artifactId>jaxen</artifactId>
+        </dependency>
+
+    </dependencies>
+</project>

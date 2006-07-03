@@ -1,0 +1,41 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC
+ "-//Mort Bay Consulting//DTD Configure 1.2//EN"
+ "http://jetty.mortbay.org/configure_1_2.dtd">
+
+<Configure class="org.mortbay.jetty.Server">
+  <Call name="addListener">
+    <Arg>
+      <New class="org.mortbay.http.SocketListener">
+        <Set name="Port">
+          <SystemProperty name="jetty.port" default="@PXE_HTTP_PORT@"/>
+        </Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">30</Set>
+        <Set name="LowResourcePersistTimeMs">5000</Set>
+      </New>
+    </Arg>
+  </Call>
+
+  <Call name="addWebApplication">
+    <Arg>/pxe/*</Arg>
+    <Arg><SystemProperty name="pxe.home" default="."/>/etc/web/</Arg>
+
+    <Call name="addServlet">
+      <Arg>SoapServlet</Arg>
+      <Arg>/soap/*</Arg>
+      <Arg>com.fs.pxe.httpsoap.HttpSoapServlet</Arg>
+      <Call name="setInitParameter">
+        <Arg>ConnectionProperties</Arg>
+        <Arg>URL=<SystemProperty name="pxe.url" default="rmi://localhost:@PXE_RMI_PORT@/@PXE_DOMAIN@"/></Arg>
+      </Call>
+
+      <Call name="setInitParameter">
+        <Arg>ServiceProviderURI</Arg>
+        <Arg>uri:protocoladapter.soap</Arg>
+      </Call>
+
+    </Call>
+  </Call>
+
+</Configure>

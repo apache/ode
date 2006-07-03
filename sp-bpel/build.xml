@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<project name="sp-bpel" default="dist">
+  <import file="../build/ant-common.xml" />
+  <import file="../build/ant-library.xml" />
+  <import file="../jacob/ant-jacob.xml" />
+
+  <target name="build" depends="jar" />
+
+  <property name="gen.xmlbeans" location="${build.dir}/xmlbeans" />
+
+  <path id="xbean-cpath" >
+      <fileset dir="../buildlib/xmlbeans-2.1.0" includes="*.jar" />
+  </path>
+  <target name="precompile" depends="xmlbeans" />
+
+  <target name="xmlbeans" depends="init" >
+    <taskdef name="xmlbean" classname="org.apache.xmlbeans.impl.tool.XMLBean" classpathref="xbean-cpath"/>
+
+    <xmlbean
+      classgendir="${gen.xmlbeans}"
+      failonerror="yes"
+      classpathref="cpath"
+      fork="yes"
+      srconly="true"
+      srcgendir="${gen.java}"
+      javasource="1.5" >
+      <fileset dir="${src}/xsd" includes="**/*"/>
+    </xmlbean>
+
+    <copy todir="${classes}">
+      <fileset dir="${gen.xmlbeans}" />
+    </copy>
+  </target>
+
+  <target name="jar" depends="ant-common.jar">
+  </target>  
+
+  <target name="basic-test.junit" depends="init" if="test.exists">
+    <junit printsummary="yes" showoutput="true">
+      <classpath>
+        <path refid="cpath-test"/>
+        <pathelement location="${classes}"/>
+        <pathelement location="${test.junit.build}"/>
+      </classpath>
+      <formatter type="${test.format}"/>
+      <batchtest todir="${test.report.dir}" fork="yes" haltonfailure="no">
+        <fileset dir="${test.junit.src}">
+          <exclude name="**/StepCreateInstanceReceive.java"/>
+          <exclude name="**/AsyncStepTest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="step-create-instance-receive-test.junit" depends="init" if="test.exists">
+    <junit printsummary="yes" showoutput="true">
+      <classpath>
+        <path refid="cpath-test"/>
+        <pathelement location="${classes}"/>
+        <pathelement location="${test.junit.build}"/>
+      </classpath>
+      <formatter type="${test.format}"/>
+      <batchtest todir="${test.report.dir}" fork="yes" haltonfailure="no">
+        <fileset dir="${test.junit.src}">
+          <include name="**/StepCreateInstanceReceive.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+  <target name="async-step-test.junit" depends="init" if="test.exists">
+    <junit printsummary="yes" showoutput="true">
+      <classpath>
+        <path refid="cpath-test"/>
+        <pathelement location="${classes}"/>
+        <pathelement location="${test.junit.build}"/>
+      </classpath>
+      <formatter type="${test.format}"/>
+      <batchtest todir="${test.report.dir}" fork="yes" haltonfailure="no">
+        <fileset dir="${test.junit.src}">
+          <include name="**/AsyncStepTest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+</project>

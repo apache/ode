@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <groupId>pxe</groupId>
+  <artifactId>standalone-distro</artifactId>
+  <name>PXE :: Standalone Distribution</name>
+  <description>An artifact consisting of complete standalone PXE distribution.</description>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>pxe</groupId>
+    <artifactId>pxe</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    
+    <!--
+      | Dependency on the bootstrap class-loader. This is used
+      | by the various PXE command-line utilities (in the ./bin
+      | directory) to simplify classpath setting.
+    -->
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-bootstrap</artifactId>
+    </dependency>
+  
+    <!--
+      | Dependency on the pxe kernel. The kernel provides the 
+      | a very basic infrastructure for loading "modules". It 
+      | also provides a "Main" class for starting the PXE server.
+    -->
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-standalone-kernel</artifactId>
+    </dependency>
+
+    <!-- 
+      | Dependenchy on the pxe kernel modules. The "kernel modules"
+      | implemented here encapsulate all PXE functionality for the
+      | stand-alone kernel. This module incorporates all the PXE 
+      | library/module (via trasitive closure).
+    -->
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-standalone-modules</artifactId>
+    </dependency>
+
+    <!-- 
+      | Dependencies for the service provider implementations.
+    -->
+    <dependency>
+        <groupId>pxe</groupId>
+        <artifactId>pxe-sp-bpel</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>pxe</groupId>
+        <artifactId>pxe-sp-httpsoap</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>pxe</groupId>
+        <artifactId>pxe-xcontrib-sp-misc</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>pxe</groupId>
+        <artifactId>pxe-tools</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>pxe</groupId>
+        <artifactId>pxe-bpel-schemas</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+      </dependency>
+
+
+    <!--
+      | Dependency on the JDBC driver shipped with standalone distro.
+    -->
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-tools-bin</artifactId>
+      <type>tar</type>
+      <classifier>tar</classifier>
+      <scope>compile</scope>
+	  <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-examples</artifactId>
+      <type>tar</type>
+      <classifier>tar</classifier>
+      <scope>compile</scope>
+	  <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-dao-hibernate-db-derby</artifactId>
+      <type>tar</type>
+      <classifier>schema</classifier>
+      <scope>compile</scope>
+    </dependency>
+
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-antrun-plugin</artifactId>
+	<version>1.0</version>
+	<executions>
+	  <execution>
+	    <phase>generate-sources</phase>
+	    <configuration>
+              <tasks>
+		<ant antfile="build.xml" target="stage"/> 
+	      </tasks>
+	    </configuration>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-assembly-plugin</artifactId>
+	<executions>
+	  <execution>
+            <phase>package</phase>
+	    <goals>
+	      <goal>attached</goal>
+	    </goals>
+	    <configuration>
+	      <descriptors>
+		<descriptor>src/main/assembly/assembly.xml</descriptor>
+	      </descriptors>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
