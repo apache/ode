@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ant-doc">
+  
+  <property name="build.dir.javadoc" value="${build.dir}/javadoc"/>
+  
+  <target name="javadoc.init">
+    <mkdir dir="${build.dir.javadoc}"/>
+  </target>
+  
+</project>

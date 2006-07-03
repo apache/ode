@@ -1,0 +1,101 @@
+#! /bin/sh
+# (C) 2004 FiveSight Technologies Inc.
+# ALL RIGHTS RESERVED
+
+
+#
+# Universal PXE program loader.
+# Based on Apache ANT script.
+#
+
+
+cygwin=false;
+darwin=false;
+case "`uname`" in
+    Darwin*) 
+	darwin=true
+	if [ -z "$JAVA_HOME" ] ; then
+	    JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
+	fi
+	;;
+    CYGWIN*) 
+	cygwin=true 
+	;;
+esac
+
+## Try to find our home directory 
+command="$0"
+progname=`basename "$0"`
+# need this for relative symlinks
+while [ -h "$command" ] ; do
+    ls=`ls -ld "$command"`
+    link=`expr "$command" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+	command="$link"
+    else
+	command=`dirname "$command"`"/$link"
+    fi
+done
+
+PXE_BIN=`dirname "$command"`
+PXE_BIN=`cd "$PXE_BIN" && pwd`
+
+# For Cygwin, ensure paths are in UNIX format before anything is touched
+if $cygwin ; then
+    [ -n "$PXE_BIN" ] && PXE_BIN=`cygpath --unix "$PXE_BIN"`
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+fi
+
+PXE_HOME=`cd "$PXE_BIN/.." && pwd`
+PXE_LIB="$PXE_HOME/lib"
+PXE_ETC="$PXE_HOME/etc"
+
+
+if [ -z "$JAVACMD" ] ; then
+  if [ -n "$JAVA_HOME"  ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+      # IBM's JDK on AIX uses strange locations for the executables
+      JAVACMD="$JAVA_HOME/jre/sh/java"
+    else
+      JAVACMD="$JAVA_HOME/bin/java"
+    fi
+  else
+    JAVACMD=`which java 2> /dev/null `
+    if [ -z "$JAVACMD" ] ; then
+        JAVACMD=java
+    fi
+  fi
+fi
+
+if [ ! -x "$JAVACMD" ] ; then
+  echo "Error: JAVA_HOME is not defined correctly."
+  echo "  We cannot execute $JAVACMD"
+  exit 1
+fi
+
+if [ ! -d "$JAVA_HOME" ] ; then
+ echo "Error: JAVA_HOME is not defined correctly (no such directory)."
+ exit 1
+fi
+
+# Add user-specified classpath. 
+LOCALCLASSPATH="$LOCALCLASSPATH:$PXE_CLASSPATH"
+
+# For Cygwin, switch paths to Windows format before running java
+if $cygwin; then
+    PXE_HOME=`cygpath --windows "$PXE_HOME"`
+    JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
+    LOCALCLASSPATH=`cygpath --path --windows "$LOCALCLASSPATH"`
+    CYGHOME=`cygpath --windows "$HOME"`
+    PXE_LIB=`cygpath --windows "$PXE_LIB"`
+    PXE_ETC=`cygpath --windows "$PXE_ETC"`
+    PXE_BIN=`cygpath --windows "$PXE_BIN"`
+fi
+
+if [ "$1" = "--jdb" ] ; then
+   PXE_JAVAOPTS="-ea -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 $PXE_JAVAOPTS"
+   shift
+fi
+
+exec  "$JAVACMD" -server $PXE_JAVAOPTS -D"com.sun.management.config.file=${PXE_ETC}/pxe-management.properties" -Djava.system.class.loader=fivesight.bootstrap.BootLoader -D"fivesight.bootstrap.BootLoader.basedir=$PXE_HOME" -D"fivesight.bootstrap.BootLoader.cfg=$PXE_ETC/${progname}.cfg" -D"com.fs.progname=$progname" -cp "$PXE_LIB/pxe-bootstrap.jar" com.fs.utils.cli.Main "$PXE_ETC/${progname}.cfg" "$@" 
+

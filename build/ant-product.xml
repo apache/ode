@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Common file for products. -->
+
+<project name="ant-product">
+  <!-- ========================================================= -->
+  <!--           IMMUTABLE PROPERTIES (DONT CHANGE!)             -->
+  <!-- ========================================================= -->
+  
+  <!-- buildsys.dir:
+  -     Location of the build system. Because of the way ANT
+  -     relies on XML entities for include functionality, we
+  -     really can't ever change this without editing all
+  -     build files.
+  -->
+  
+  <property name="buildsys.dir" value="${basedir}/../build"/>
+  
+  <!-- Source the global build.properties file -->
+  <property file="${buildsys.dir}/build.properties"/>
+  
+  <!-- Source in the local build.properties file -->
+  <property file="${basedir}/build.properties"/>
+  
+  <!-- Define the library aliases. -->
+  <property file="../buildlib/libs.properties"/>
+  
+  <!-- Define the intermediate output directory -->
+  <property name="workdir" value="${basedir}/../"/>
+  
+  <property name="logs.dir" value="${workdir}/${dirname.logs}"/>
+  
+  <property name="install.dir" value="${workdir}/${dirname.install}"/>
+  
+  <property name="tag.opts" value=""/>
+  
+  <property name="buildnumber.properties" value="buildnumber.properties"/>
+  
+  <!-- genbuild ===================== -->
+  <!-- Generate a build.xml file for  -->
+  <!-- all libraries                  -->
+  <target name="genbuild" depends="init">
+    <genbuild projlist="${deps.module}" workdir="${workdir}"/>
+  </target>
+  
+  <target name="setup" depends="init">
+    <antcall target="genbuild"/>
+  </target>
+  
+  <target name="test-depends" depends="setup">
+    <ant dir="${workdir}" target="test"/>
+    
+    <!-- Generate a consolidated report. -->
+    <junitreport todir="${logs.dir}">
+      <fileset dir="${logs.dir}" includes="*/TEST-*.xml"/>
+      <report todir="${logs.dir}" format="${test.report.format}"/>
+    </junitreport>
+    
+  </target>
+  
+  <target name="dist-depends" depends="setup"
+    description="Invoke dist target on all dependencies">
+    <ant dir="${workdir}">
+      <property name="genbuild.failonerror" value="yes"/>
+    </ant>
+  </target>
+  
+  <target name="clean">
+    <antcall target="__clean_temp"/>
+    <ant dir="${workdir}" target="clean"/>
+  </target>
+  
+  <!-- auto  ========================================== -->
+  <!-- Execute the automated build             .        -->
+  <target name="auto" depends="setup" description="Execute the automated build">
+    
+    <!-- first try doing dist target, which may fail. If it does, the
+    report target will continue compilation so that full report
+    is generated for the modules -->
+    <tryant target="dist" failonerror="no" property="__dist_result"/>
+    
+    <!-- finish up anything that can still compile  -->
+    <tryant dir="${workdir}">
+      <property name="genbuild.failonerror" value="no"/>
+    </tryant>
+    
+    <ant dir="${workdir}" target="test"/>
+    
+    <!-- The report target will generate the module compilation report. -->
+    <antcall target="__report"/>
+    <copy todir="${report.dir}">
+      <fileset dir="${workdir}">
+        <include name="*.html"/>
+        <include name="*.xml"/>
+        <include name="*.css"/>
+        <include name="logs~"/>
+        <include name="install~"/>
+      </fileset>
+    </copy>
+    
+    <fail unless="__dist_result"/>
+    
+  </target>
+ 
+  <target name="__build_date"> 
+    <tstamp>
+      <format property="build.date" pattern="yyyyMMdd"/>
+    </tstamp>
+  </target>
+
+
+  <target name="build_number" depends="__svn_build_number" 
+          description="generate a build number">
+    <!-- The following will only be set if svn_build_number was skipped -->
+    <property name="build.number" value="SNAPSHOT-${build.date}" />
+    <property name="version"
+      value="${version.major}_${version.minor}${version.modifier}B${build.number}"/>
+    <property name="cvstag" value="${product.key}_V${version}"/>
+    <property name="version.name"
+      value="${version.major}.${version.minor}${version.modifier} (build ${build.number})"/>
+
+    <propertyfile file="${build.dir}/${product.key}.version">
+      <entry key="build.number" value="${build.number}"/>
+      <entry key="build.date" value="${DSTAMP}"/>
+      <entry key="version.major" value="${version.major}"/>
+      <entry key="version.minor" value="${version.minor}"/>
+      <entry key="version.name" value="${version.name}"/>
+      <entry key="version.rtag" value="${cvstag}"/>
+    </propertyfile>
+
+  </target>
+
+ 
+  <target name="__svn_build_number" depends="__build_date" if="is.release">
+    
+    <exec failonerror="true" executable="svn" >
+       <arg value="update"/>
+       <arg value="${buildnumber.properties}"/>
+    </exec>
+    
+    <propertyfile file="${buildnumber.properties}">
+      <entry key="build.number" default="0" type="int" operation="+" pattern="0000"/>
+    </propertyfile>
+    <property file="${buildnumber.properties}"/>
+    <exec
+      executable="svn">
+      <arg value="commit"/>
+      <arg value="-m"/>
+      <arg value="BUILDNUMBER UPDATED: ${build.number}"/>
+      <arg value="${buildnumber.properties}"/>
+    </exec>
+  </target>
+  
+  <target name="report" depends="init, build_number">
+    <antcall target="__report"/>
+  </target>
+  
+  <!-- ========================================================= -->
+  <!--            INTERNAL TARGETS (NOT FOR DIRECT USE)          -->
+  <!-- ========================================================= -->
+  
+  <!-- __report ==========================================
+  -        Generate a report on the status of the build
+  -->
+  <target name="__report" depends="init">
+    <copy todir="${logs.dir}">
+      <fileset dir="${buildsys.dir}/report" includes="*.css"/>
+      <fileset dir="${buildsys.dir}/report" includes="log.xsl"/>
+    </copy>
+    
+    <!-- Consolidate reports from all the library projects into
+    one -->
+    <style basedir="${workdir}" destdir="${logs.dir}" extension=".result.xml"
+      includes="workspace.xml" style="${buildsys.dir}/report/consolidate.xsl"/>
+    
+    <move tofile="${logs.dir}/index.xml" file="${logs.dir}/workspace.result.xml"/>
+    
+    <!-- Render the consolidated report into HTML -->
+    <style basedir="${logs.dir}" destdir="${logs.dir}" extension=".html"
+      includes="index.xml" style="${buildsys.dir}/report/report_product.xsl">
+      <param name="basedir" expression=".."/>
+      <param name="testdir" expression="tests"/>
+      <param name="title" expression="Build #${build.number}"/>
+    </style>
+  </target>
+  
+  <target name="__cvs_tag">
+  </target>
+  
+  
+  <!-- __check_build ==========================================
+  -      Check that the current ANT instance is build-system
+  -      aware.
+  -->
+  <target name="__check_build">
+    
+    <fail unless="buildsys.dir"> The "buildsys.dir" property must be set!
+    </fail>
+    
+    <available file="${buildsys.dir}" property="__buildsys.av"/>
+    <fail unless="__buildsys.av"> The build directory "${buildsys.dir}" was not found!"
+      />
+    </fail>
+    
+    <fail unless="__build_ant"> Incorrect ANT executable: use "./ant" or
+      "${buildsys.dir}/ant"!
+    </fail>
+    
+  </target>
+  
+</project>

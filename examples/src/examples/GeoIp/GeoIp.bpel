@@ -1,0 +1,47 @@
+<process name="GeoIp" 
+    targetNamespace="http://GeoIpService.bpel" 
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:gis="http://GeoIpService.wsdl" 
+    xmlns:wsn="http://www.webservicex.net"
+    xmlns:tns="http://GeoIpService.bpel"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    suppressJoinFailure="yes">
+   <partnerLinks>
+      <partnerLink name="inboundPartnerLink" 
+         partnerLinkType="gis:GeoIpServiceLinkType" 
+         myRole="inbound" />
+      
+      <partnerLink name="outboundPartnerLink" 
+         partnerLinkType="gis:GeoIpServiceLinkType" 
+         partnerRole="outbound" />
+   </partnerLinks>
+    
+   <variables>
+     <variable name="inVar" messageType="wsn:GetGeoIPSoapIn"/>
+     <variable name="responseVar" messageType="wsn:GetGeoIPSoapOut"/>
+   </variables>
+        
+   <sequence>   
+       <receive 
+          name="receive"
+          partnerLink="inboundPartnerLink"
+          portType="wsn:GeoIPServiceSoap"
+          operation="GetGeoIP"
+          variable="inVar"
+          createInstance="yes"/>
+       <invoke 
+          name="invoke"
+          partnerLink="outboundPartnerLink"
+          portType="wsn:GeoIPServiceSoap"
+          operation="GetGeoIP"
+          inputVariable="inVar"
+          outputVariable="responseVar"/>
+       <reply 
+          name="reply"
+          partnerLink="inboundPartnerLink"
+          portType="wsn:GeoIPServiceSoap"
+          operation="GetGeoIP"
+          variable="responseVar"/>
+   </sequence>
+</process>

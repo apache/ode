@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor name="HelloWorld" wsdlUri="file:test/junit/com/fs/pxe/adapters/httpsoap/HelloWorld.wsdl"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.fivesight.com/pxe/system-descriptor/ http://www.fivesight.com/pxe/system-descriptor/"
+  xmlns:hw="http://pxe/bpel/unit-test.wsdl"
+  xmlns="http://www.fivesight.com/pxe/system-descriptor/">
+  <channels>
+    <channel name="channel1"/>
+  </channels>
+
+
+  <services>
+    <service name="HelloService"
+      provider="uri:HttpSoapAdapter">
+      <imports>
+        <port name="HelloPort" type="hw:HelloPortType" channel-ref="channel1"/>
+      </imports>
+    </service>
+
+    <service name="MockPivot" provider="uri:MockProtocolConnector">
+      <exports>
+        <port name="HelloPort.in" type="hw:HelloPortType" channel-ref="channel1" />
+      </exports>
+    </service>
+  </services>
+</system-descriptor>

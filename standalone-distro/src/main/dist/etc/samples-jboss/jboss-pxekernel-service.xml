@@ -1,0 +1,25 @@
+<!-- 
+	A JBoss sar for deployment of the pxe kernel mbean.  This is
+	an alternative to the jboss-pxe-service.xml.
+	
+	The pxe kernel is responsible for locating the PXE kernel configuration
+	e.g. boss-pxekernel-config.xml.
+	
+	This service has a dependency on the pxe datasource: 
+	see jboss-pxehsqldb-ds.xml.
+-->
+<server>
+    <classpath codebase="file:/${pxe.home}/bin" archives="kernel-boot.jar"/>
+    
+    <!--
+     Requires that 'pxe.home' is set as a system property
+     or replace the ${pxe.home} below with the path to the PXE 
+     installation.
+    -->
+    <mbean code="com.fs.pxe.kernel.PxeKernel"
+           name="com.fivesight.pxe:type=Kernel">
+        <depends>jboss.jca:service=DataSourceBinding,name=pxeDS</depends>   
+        <attribute name="ConfigURL">file:${pxe.home}/etc/samples-jboss/jboss-pxe-config.xml</attribute>
+    </mbean>
+   
+</server>    

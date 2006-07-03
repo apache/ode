@@ -1,0 +1,56 @@
+<!--
+bpws:getVariableData(varname, partname,query) Test Case
+- Test the XPath 1.0 function.
+- Uses varname,partname,query signature
+- part is an element part
+- getVariableData function returns simple type
+-->
+
+<process name="GetVariableData4-2.0"
+  targetNamespace="http://pxe/bpel/unit-test"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+  xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:test="uri:testing">
+  
+  <import importType="http://schemas.xmlsoap.org/wsdl/"
+	  location="../test.wsdl"
+	  namespace="uri:testing" />
+	  
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+      partnerLinkType="test:PartnerLinkType1"
+      myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+    <variable name="var2" type="xsd:string"/>
+  </variables>
+
+  <sequence>
+    <receive
+      createInstance="yes"
+      name="startReceive"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      operation="opTwoWay"
+      variable="var1"/>
+
+    <assign name="assign1">
+
+      <copy>
+        <from>$var1.Complex1Part1/test:StringElement</from>
+        <to>$var1.StringPart2</to>
+      </copy>
+    </assign>
+
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+
+  </sequence>
+
+</process>

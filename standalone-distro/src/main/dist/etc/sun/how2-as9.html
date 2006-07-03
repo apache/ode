@@ -1,0 +1,225 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE>How2 Host PxeKernel in Glassfish (Sun AS 9.0)</TITLE>
+</HEAD>
+<BODY>
+
+<table border="1" cellpadding="4" cellspacing="3" bgcolor="#FFFFCC">
+  <thead> 
+  <tr valign="top"> 
+    <th > 
+      <p>Date</p>
+    </th>
+    <th > 
+      <p>Author</p>
+    </th>
+    <th > 
+      <p>Description</p>
+    </th>
+  </tr>
+  </thead> <tbody> 
+  <tr> 
+    <td valign="top"> 
+      <p align="right">Janurary 28, 2006</p>
+    </td>
+    <td valign="top"> 
+      <p align="left">Matt Stevens (Sun Microsystems)</p>
+    </td>
+    <td valign="top"> 
+      <p>Initial Version</p>
+    </td>
+  </tr>
+  <tr> 
+    <td valign="top"> 
+      <p align="right">Janurary 29, 2006</p>
+    </td>
+    <td valign="top"> 
+      <p align="left">Matt Stevens (Sun Microsystems)</p>
+    </td>
+    <td valign="top"> 
+      <p>HSQL Datasource configuration revised</p>
+    </td>
+  </tr>
+  <tr> 
+    <td valign="top"> 
+      <p align="right">Janurary 30, 2006</p>
+    </td>
+    <td valign="top"> 
+      <p align="left">Matt Stevens (Sun Microsystems)</p>
+    </td>
+    <td valign="top"> 
+      <p>HSQL Datasource configuration revised</p>
+    </td>
+  </tr>
+  </tbody> 
+</table>
+<br>
+<H2>Purpose</H2>
+<UL>
+  <table bgcolor="#FFFFCC">
+    <tr> 
+      <td> This provisional document describes how to host PXE Kernel in Sun Java 
+        System Application Server 9.0 Platform Edition (BETA February 2006). Sun 
+        AS9.0 PE is Sun's productization of the Java.net project Glassfish (http://glassfish.dev.java.net). 
+      </td>
+    </tr>
+  </table>
+</UL>
+
+<H2>Architecture</H2>
+<UL>
+  <table bgcolor="#FFFFCC">
+    <tr> 
+      <td> While there are many solutions (including Glassfish's Custom MBean 
+        feature for deploying MBeans), the architecture presented here is focused 
+        on leveraging the Lifecycle Module solution in Glassfish to play the same 
+        role that the fivesight.bootstrap.BootLoader and com.fs.pxe.server.Main; 
+        that is, play the role of (implementing) the PxeKernel.RuntimeContext. 
+      </td>
+    </tr>
+  </table>
+</UL>
+<H2>Prerequisites for Building PXE or Running PXE in AS9</H2>
+<UL>
+  <table bgcolor="#FFFFCC">
+    <tr> 
+      <td> 1 </td>
+      <td> <a href="https://glassfish.dev.java.net/public/downloadsindex.html">Download,</a> 
+        install and configure Glassfish. Procedure tested on <a href="https://glassfish.dev.java.net/downloads/26Jan06.html">Build 
+        32d 26-Jan-06,</a> </td>
+    </tr>
+    <tr> 
+      <td> 2 </td>
+      <td> In order to compile the sun-as9-lcm.jar in the PXE build you need to 
+        COPY <code>appserv-rt.jar</code> (approx. a 15MB file) from the lib directory 
+        of the Sun Application Server installation to the <code>./pxe/buildlib/sun-as9-beta</code> 
+        directory. </td>
+    </tr>
+  </table>
+</UL>
+<H2>Building PXE</H2>
+<UL>
+  <table bgcolor="#FFFFCC">
+    <tr> 
+      <td> <code>./pxe/build/build.properties</code> include default properties 
+        for JMX and RMI and HTTP ports and JMX credentials. Set these values as 
+        you like. These values will be used to replace tokens in many files within 
+        <code>./etc</code> and <code>./examples</code> and the default init parameters 
+        in the PXE WAR. </td>
+    </tr>
+    <tr> 
+      <td> <code>JmxCommand</code> and the related CLI and ANT interfaces have been updated to support JMXConnector.CREDENTIALS</td>
+    </tr>
+    <tr> 
+      <td> <code>com.fs.pxe.integrations.as9.PxeSunAS9LifecycleListener</code> 
+        is the implementation of the Sun AS LifecycleListener and is found in 
+        the <code>i-as9</code> module</td>
+    </tr>
+    <tr> 
+      <td> <code>sun-as9-lcm.jar</code> isolates PxeSunAS9LifecycleListener in 
+        its own JAR, distributed in <code>./pxe-lib</code> (much in the same way 
+        the <code>kernel-boot.jar</code> is created)</td>
+    </tr>
+	<tr>
+      <td> The building of the Sun AS9 modules is dependent on the pressence of the appserv-rt.jar under buildlib 
+      </td>
+    </tr>
+<tr>
+      <td> The standard J2EE WAR file is assembled and placed under <code>./etc/web/pxe.war</code> 
+      </td>
+    </tr>
+  </table>
+</UL>
+
+<H2>Installing PXE in Glassfish (8 steps)</H2>
+<UL>
+  <table bgcolor="#FFFFCC">
+    <tr> 
+      <td> The procedure below covers the installation of the PXE Lifecycle Module 
+        to a target Glassfish domain, configuration of datasource used for the 
+        PXE backing store (optionally useMemory DAO backing store) and deployment 
+        of the PXE WAR</td>
+    </tr>
+    <tr> 
+      <td> The procedure can be performed using the Web based Admin Console; alternatively 
+        the ASADMIN CLI or ASADMIN Ant tasks can be used too.</td>
+    </tr>
+  </table>
+</UL>
+
+
+<h3>STEP 1</h3>
+<p>Add the following JVM option to the AS.</p>
+<p>
+  <code>-Dpxe.home={pxe installation directory}</code> <br>
+</p>
+<p><em>Note: if working from a PXE Build environment you can assign pxe.home to 
+  the location of the stage directory in your build environment. This works very 
+  nicely for quickly testing your changes in AS after building.</em></p>
+<p><img src="images/addingPxeHome2VMOptions.png" width="686" height="785"> </p>
+<h3>STEP 2</h3>
+<p>append to {target-domain-dir}/config/server.policy</p>
+<p>
+<pre>
+// Intalio PXE classes get all permissions (todo: need to find minimal permissions)
+grant codeBase "file:${pxe.home}/pxe-lib/-" {
+  permission java.security.AllPermission;
+};
+grant codeBase "file:${pxe.home}/lib/-" {
+  permission java.security.AllPermission;
+};
+</pre>
+<h3>STEP 3 (optional) (required when using Hibernate DAO backing store)</h3>
+
+<p>Copy the clean HSQL database files from ${pxe.home}/hsql/*.* to a separate 
+  location so that installed files stay fresh.</p>
+<p><em>Note: when ${pxe.home} points the PXE dev environment stage directory, 
+  rebuilding the state will refresh the HSQL DB files automatically.</em></p>
+<h3>STEP 4 (required when using Hibernate DAO backing store)</h3>
+<p>As a prerequisite to creating the HSQL Datasource, append to the AS Domain's 
+  JVM classpath suffix <code>{pxe installation directory}/lib/hsqldb-1.8.0.1.jar</code></p>
+<p><img src="images/addingHSQLJar2ClasspathSuffix.png"><br>
+</p>
+<h3>STEP 5 (required when using Hibernate DAO backing store)</h3>
+<p>Create a new JDBC Connection Pool in the AS Domain for HSQL with the following 
+  parameters (note that HSQL does not support transaction isolation so the pool 
+  size must be one (1) connection maximum) (note: double underscores in pool name):</p>
+<p><img src="images/ConnectionPool_1.png"><br>
+</p>
+<h3>STEP 6 (required when using Hibernate DAO backing store)</h3>
+<p>Create a new JDBC Resource (binding in JNDI) to the pool created previously 
+  with the following parameters (note: double underscores name):</p>
+<p>connectionpoolid=<code>__PXEPool</code> </p>
+<p>name=<code>jdbc/pxe-ds__pm</code></p>
+<p><img src="images/JDBCResource_1.png" width="704" height="583"></p>
+<h3>STEP 7</h3>
+<p>Create Lifecycle Module with the following parameters:</p>
+<p>class-name=<code>com.fs.pxe.integrations.as9.PxeSunAS9LifecycleListener</code></p>
+<p> classpath=<code>${pxe.home}/pxe-lib/sun-as9-lcm.jar;${pxe.home}/etc;${pxe.home}/pxe-lib/utils.jar;${pxe.home}/pxe-lib/pxetools.jar;${pxe.home}/pxe-lib/kernel-boot.jar;${pxe.home}/lib/commons-collections-3.1.jar;${pxe.home}/lib/commons-lang-2.1.jar;${pxe.home}/lib/commons-logging-1.0.5.jar;${pxe.home}/lib/commons-logging-optional-1.0.5.jar;${pxe.home}/lib/commons-pool-1.2.jar;${pxe.home}/lib/spice-metaclass-1.0.jar</code></p>
+<p>enabled=<code>true</code><br>
+</p>
+<p>is-failure-fatal=<code>false</code></p>
+<p>load-order=<code>999999</code></p>
+<p>name=<code>PxeKernelLifecycleModule</code></p>
+<p>description: <code>Lifecycle Module Hosting Pxe Kernel</code></p>
+<p>property: <code>pxe.config.file=${pxe.home}/etc/sun/as9/pxe-config-aslcm.xml</code></p>
+<p>(atlernatively use MemDAO) <code>${pxe.home}/etc/sun/as9/pxe-config-memdao-aslcm.xml</code></p>
+<p><img src="images/LifecycleModule_1.png"></p>
+<p>Note: Various default values in PXE implementation are possible through system 
+  properties. See <code>${pxe.home}/etc/pxe.properties</code> for examples of 
+  these properties. A quick way to establish these PXE specific system properties 
+  (other than adding them to the JVM configuration of the domain.xml) is to specify 
+  the following optional property in the Lifecycle Module configuration. It is 
+  possible for values hardcoded in the Pxe Kernel configuration XML files to defer 
+  to system properties if they exist. This is just another way to drive the Pxe 
+  Kernel configuration.</p>
+<p>optional property: <code>pxe.sys.properties.file=${pxe.home}/etc/pxe.properties</code></p>
+<h3></h3>
+<h3>STEP 8</h3>
+<p>Deploy PXE WAR file to AS domain. The PXE WAR is found at ./etc/web/pxe.war</p>
+<p>Note: the WAR is pre-built and currently hardcoded on the RMI registry URL 
+  to the values found in ./pxe/build/build.properties. You will need to fix the 
+  web.xml in the WAR if you want a different RMI URL.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

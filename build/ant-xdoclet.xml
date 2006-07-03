@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ant-xdoclet">
+  <!-- ======================== XDoclet Tasks ============================ -->
+  
+  <!-- XDoclet properties -->
+  <property name="buildsys.dir" location="../build"/>
+  <property name="xdoclet.lib.dir" location="${buildsys.dir}/xdoclet-1.2.3"/>
+  <property name="xdoclet.src" value="${src.java}"/>
+  <property name="xdoclet.gen" value="${build.dir}/java-src"/>
+  <property name="xdoclet.java.src" value="${xdoclet.src}"/>
+  <property name="xdoclet.java.gen" value="${xdoclet.gen}"/>
+  
+  <property name="xdoclet.ejb.dir" value="${build.dir}/ejb"/>
+  
+  <property name="config.dir" value="config"/>
+  
+  <property name="ejb.classes.dir" value="${xdoclet.ejb.dir}/classes"/>
+  <property name="ejb.dd.dir" value="${xdoclet.ejb.dir}/META-INF"/>
+  
+  <property name="ejb.generic.dir" value="${xdoclet.ejb.dir}/generic-ejb"/>
+  <property name="ejb.generic.file" value="${ejb.generic.dir}/${name}-ejb.jar"/>
+  
+  <property name="ejb.weblogic.dir" value="${xdoclet.ejb.dir}/weblogic-ejb"/>
+  <property name="ejb.weblogic.file" value="${ejb.weblogic.dir}/${name}-ejb.jar"/>
+  
+  <path id="xdoclet-cpath">
+    <fileset dir="${xdoclet.lib.dir}" includes="*.jar"/>
+    <path refid="cpath"/>
+    <pathelement location="${ant.jar.path}"/>
+  </path>
+  
+  <target name="init"/>
+  
+  <!-- Prepare -->
+  <target name="xdoclet.prepare" depends="init">
+    
+    <mkdir dir="${build.dir}"/>
+    
+    <mkdir dir="${build.dir}/ejb"/>
+    <mkdir dir="${build.dir}/ejb/META-INF"/>
+    
+    <mkdir dir="${build.dir}/web"/>
+    <mkdir dir="${build.dir}/web/WEB-INF"/>
+    <mkdir dir="${build.dir}/web/WEB-INF/tlds"/>
+    <mkdir dir="${build.dir}/web/WEB-INF/classes"/>
+    
+    <mkdir dir="${build.dir}/j2ee"/>
+    <mkdir dir="${build.dir}/j2ee/META-INF"/>
+    
+    <mkdir dir="${build.dir}/jmx"/>
+    
+    <mkdir dir="${xdoclet.gen}"/>
+    <mkdir dir="${xdoclet.java.gen}"/>
+    
+    <mkdir dir="${ejb.dd.dir}"/>
+    <mkdir dir="${ejb.classes.dir}"/>
+    <mkdir dir="${ejb.generic.dir}"/>
+    <mkdir dir="${ejb.weblogic.dir}"/>
+    
+    <available property="xdoclet.java.exists" file="${xdoclet.java.src}"
+      type="dir"/>
+    
+    <available property="xdoclet.j2ee.exists" file="${xdoclet.java.src}"
+      type="dir"/>
+    
+  </target>
+  
+  <target name="jar"/>
+  
+  <!-- todo ========================================= -->
+  <!--    generate todo-list from on @todo tags       -->
+  <target name="todo" depends="init">
+    
+    <taskdef name="document" classname="xdoclet.modules.doc.DocumentDocletTask"
+      classpathref="xdoclet-cpath"/>
+    
+    <mkdir dir="${build.dir.todo}"/>
+    <document force="yes" destdir="${build.dir.todo}">
+      <fileset dir=".">
+        <include name="${src.java}/**/*.java" if="src.java.exists"/>
+      </fileset>
+      
+      <info header="Todo list" projectname="${name}" tag="todo"/>
+    </document>
+  </target>
+  <!-- =========================================================== -->
+  
+  <!-- Create EJB-JAR file -->
+  <target name="xdoclet.ejb-jar" depends="jar">
+    <property name="__attr.ClassPath" value="${deps.cpath.manifest.ejb}"/>
+    
+    <jar jarfile="${ejb.generic.file}">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Class-Path" value="${__attr.ClassPath}"/>
+        
+        <section name="common">
+          <attribute name="Implementation-Title" value="${ant.project.name}"/>
+          <attribute name="Implementation-Version" value="${TODAY}"/>
+          <attribute name="Implementation-Vendor"
+            value="FiveSight Technologies, Inc"/>
+          
+        </section>
+      </manifest>
+      <fileset dir="${ejb.classes.dir}"/>
+      <fileset dir="${xdoclet.ejb.dir}" includes="META-INF/**"/>
+    </jar>
+    <copy todir="${install.dir.int}" file="${ejb.generic.file}"/>
+  </target>
+  
+</project>

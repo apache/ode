@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+
+<!-- An invalid getCatalogRequest message. -->
+<pxe:message xmlns:pxe="http://www.fivesight.com/pxe/message">
+  <foo>
+    This part should not be here. 
+  </foo>
+</pxe:message>
+

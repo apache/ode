@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions 
+    targetNamespace="http://pxe/bpel/unit-test.wsdl" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:tns="http://pxe/bpel/unit-test.wsdl" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" 
+    xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/" 
+    xmlns:retail="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl"
+    xmlns:cfgw='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.wsdl' 
+    xmlns:order='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd'
+    xmlns:cfg='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd'
+    xmlns:agreq="http://pxe/bpel/AggregatorRequest.xsd">
+  <import 
+      namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl" 
+      location="Retailer.wsdl"/>       
+  <wsdl:types>
+    <xsd:schema>
+      <xsd:import
+          namespace="http://pxe/bpel/AggregatorRequest.xsd"
+          schemaLocation="AggregatorRequest.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="AggregatorMessage">
+    <wsdl:part name="TestPart" type="xsd:integer"/>
+  </wsdl:message>
+  <wsdl:message name="SetupSessionMessage">
+    <wsdl:part name="CustomerIdPart" type="agreq:customerId" />
+    <!-- HACK - Including orderRequest parts in incoming message -->
+    <wsdl:part name='PartsOrder' type='order:PartsOrderType'/>
+    <wsdl:part name='CustomerDetails' type='order:CustomerDetailsType'/>
+    <wsdl:part name='ConfigurationHeader' element='cfg:Configuration'/>
+    <!-- /HACK -->    
+  </wsdl:message>
+  <wsdl:message name="OrderRequest">
+    <wsdl:part name="CustomerIdPart" type="agreq:customerId" />
+    <wsdl:part name="LineItemsPart" type="agreq:lineItems" />
+  </wsdl:message>
+  <wsdl:portType name="AggregatorPortType">
+    <wsdl:operation name="setupSession">
+      <wsdl:input name="setupSession" message="tns:SetupSessionMessage" />      
+      <!--wsdl:output name="aggregatorResponse" message="retail:submitOrderResponse" /-->
+    </wsdl:operation>
+    <wsdl:operation name="submitAggregatorRequest">
+      <wsdl:input name="submitAggregatorRequest" message="tns:OrderRequest" />
+      <!--wsdl:output name="aggregatorResponse" message="retail:submitOrderResponse" /-->
+    </wsdl:operation>
+    <wsdl:operation name='submitOrder'>
+      <wsdl:documentation>Accept an order for quantities of multiple products</wsdl:documentation>
+      <wsdl:input name='submitOrderRequest' message='retail:submitOrderRequest'/>
+      <wsdl:output name='submitOrderResponse' message='retail:submitOrderResponse'/>
+      <wsdl:fault name='InvalidProductCode' message='retail:InvalidProductCodeFault'/>
+      <wsdl:fault name='BadOrder' message='retail:BadOrderFault'/>
+      <!--wsdl:fault name='ConfigurationFault' message='cfgw:ConfigurationFaultMessage'/-->
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AggregatorSoapBinding" type="tns:AggregatorPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="setupSession">
+      <soap:operation soapAction="" style="rpc" />
+      <wsdl:input>
+        <soap:body
+            parts="CustomerIdPart PartsOrder CustomerDetails ConfigurationHeader"
+            use="literal"
+            namespace="http://pxe/bpel/unit-test.wsdl" />
+        <soap:header
+            message="tns:SetupSessionMessage"
+            part="ConfigurationHeader"
+            use="literal"
+            wsdl:required="true" />
+      </wsdl:input>
+      <!--wsdl:output>
+        <soap:body 
+            use='literal' 
+            namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+      </wsdl:output-->
+    </wsdl:operation>
+    <wsdl:operation name="submitAggregatorRequest">
+      <soap:operation soapAction="" style="rpc" />
+      <wsdl:input>
+        <soap:body
+            parts="CustomerIdPart LineItemsPart"
+            use="literal"
+            namespace="http://pxe/bpel/unit-test.wsdl" />
+      </wsdl:input>
+      <!--wsdl:output>
+        <soap:body 
+            use='literal' 
+            namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+      </wsdl:output-->
+    </wsdl:operation>
+    <wsdl:operation name='submitOrder'>
+      <soap:operation soapAction='' style='rpc'/>
+      <wsdl:input>
+        <soap:body 
+            parts='PartsOrder CustomerDetails' 
+            use='literal' 
+            namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+        <soap:header 
+            message='retail:submitOrderRequest' 
+            part='ConfigurationHeader' 
+            use='literal' 
+            wsdl:required='true'>
+            <soap:headerfault 
+                message='cfgw:ConfigurationFaultMessage' 
+                part='ConfigurationFault' 
+                use='literal' 
+                wsdl:required='true'/>
+        </soap:header>
+      </wsdl:input>
+      <!--wsdl:output>
+        <soap:body 
+            use='literal' 
+            namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+      </wsdl:output-->
+      <wsdl:fault name='InvalidProductCode'>
+        <soap:fault name='InvalidProductCode' use='literal'/>
+      </wsdl:fault>
+      <wsdl:fault name='BadOrder'>
+        <soap:fault name='BadOrder' use='literal'/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AggregatorService">
+    <wsdl:port name="AggregatorPort" binding="tns:AggregatorSoapBinding">
+      <!-- The soap:address is not used by PXE directly, but is useful for JAX-RPC generation -->
+      <soap:address location="http://localhost:8090/pxe/soap/Retailer/AggregatorService/AggregatorPort"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="AggregatorPartnerLinkType">
+    <plnk:role name="me">
+      <plnk:portType name="tns:AggregatorPortType"/>
+    </plnk:role>
+    <plnk:role name="you">
+      <plnk:portType name="tns:AggregatorPortType"/>
+    </plnk:role>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="RetailerPortTypeLink">
+    <plnk:role name="RetailerPortTypeProvider">
+      <plnk:portType name="retail:RetailerPortType"/>
+    </plnk:role>
+  </plnk:partnerLinkType>
+  <bpws:property name="customerId" type="xsd:string"/>
+  <bpws:propertyAlias 
+      propertyName="tns:customerId"
+      messageType="tns:SetupSessionMessage"
+      part="CustomerIdPart" 
+      query="/CustomerIdPart/agreq:customerId"/> 
+  <bpws:propertyAlias
+      propertyName="tns:customerId"
+      messageType="tns:OrderRequest"
+      part="CustomerIdPart"
+      query="/*[1]/*[1]"/>
+</wsdl:definitions>

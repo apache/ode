@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<project name="bpel-ql" default="dist">
+  <import file="../build/ant-common.xml"/>
+  <import file="../build/ant-library.xml"/>
+	
+	<property file="build.properties"/>
+
+	<target name="build" depends="generate, jar"/>
+	
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: generate
+         - - - - - - - - - - - - - - - - - -->
+    <target name="generate">
+    	<property name="gen.packagedir" value="${gen.java}/${grammar.node.package_dir}"></property>
+    	
+    	<mkdir dir="${gen.packagedir}"/>
+    	
+    	<jjtree 
+    		target="${grammar.tree.src}" 
+    		nodepackage="${grammar.node.package}" 
+    		outputdirectory="${gen.packagedir}" 
+    		javacchome="${javacc.home}"/>
+    	
+	    <javacc 
+	    	target="${gen.java}/${grammar.syntax.src}" 
+	    	outputdirectory="${gen.packagedir}" 
+	    	javacchome="${javacc.home}"/>
+    	
+    	<copy todir="${gen.java}" overwrite="true">
+    		<fileset dir="${src}/jcc">
+    			<!--include name="**/AST*.java"/-->
+    		</fileset>
+    	</copy>
+    	
+    </target>
+
+</project>
+

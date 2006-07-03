@@ -1,0 +1,12 @@
+<project name="HelloWorld" default="sar"  >
+
+  <import file="../example-build.xml" />
+
+  <target name="test" depends="init">
+    <antcall target="_sendsoap">
+      <param name="pxe.sendsoap.url" value="http://localhost:${pxe.http.port}/pxe/soap/helloWorld"/>
+      <param name="pxe.sendsoap.filename" location="testRequest.soap"/>
+    </antcall>
+  </target>
+  
+</project>

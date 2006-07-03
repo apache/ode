@@ -1,0 +1,14 @@
+<html>
+<body>
+<p>
+This package contains the RPC Protocol Adapter.
+This adapter is used to make PXE services that implement synchronous
+WSDL operations (i.e. those following the request-response MEP) "look like"
+blocking Java calls. The RPC adapter is necessary because PXE is rather
+asynchronous and does not "block" while a request-response operation
+is performed; hence there is an impedence mismatch of sorts when attempting
+to integrate PXE into more traditional applications that expect web
+service invocations to block.     
+</p>
+</body>
+</html>

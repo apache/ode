@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+  
+  <bean id="process1" class="com.fs.pxe.daohib.bpel.hobj.HProcess">
+    <property name="processId"><value>1</value></property>
+    <property name="processName"><value>Process1</value></property>
+    <property name="processNamespace"><value>pxe.test</value></property>
+  </bean>
+  
+  <bean id="process2" class="com.fs.pxe.daohib.bpel.hobj.HProcess">
+    <property name="processId"><value>2</value></property>
+    <property name="processName"><value>Process2</value></property>
+    <property name="processNamespace"><value>pxe.test</value></property>
+  </bean>
+
+	<!--
+		Status
+		
+	  public static final short STATE_NEW = 0;
+	  public static final short STATE_READY = 10;
+	  public static final short STATE_ACTIVE = 20;
+	  public static final short STATE_COMPLETED_OK = 30;
+	  public static final short STATE_COMPLETED_WITH_FAULT = 40;
+	  public static final short STATE_SUSPENDED = 50;
+	  public static final short STATE_TERMINATED = 60;
+		
+	-->
+	
+  <bean id="instance1" class="com.fs.pxe.daohib.bpel.hobj.HProcessInstance">
+    <property name="process"><ref local="process1"/></property>
+    <property name="state"><value>20</value></property>
+  </bean>
+  
+  <bean id="instance2" class="com.fs.pxe.daohib.bpel.hobj.HProcessInstance">
+    <property name="process"><ref local="process1"/></property>
+    <property name="state"><value>60</value></property>
+  </bean>
+  
+  <bean id="testCase1" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+    <property name="processes">
+    	<list>
+	    	<ref local="process1"/>
+	    	<ref local="process2"/>
+    	</list>
+    </property>
+    <property name="instances">
+    	<list>
+	    	<ref local="instance1"/>
+	    	<ref local="instance2"/>
+    	</list>
+    </property>
+    <property name="query"><value>limit 0</value></property>
+    <property name="resultSetSize"><value>0</value></property>
+  </bean>
+  
+  <bean id="testCase2" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+    <property name="processes">
+    	<list>
+	    	<ref local="process1"/>
+	    	<ref local="process2"/>
+    	</list>
+    </property>
+    <property name="instances">
+    	<list>
+	    	<ref local="instance1"/>
+	    	<ref local="instance2"/>
+    	</list>
+    </property>
+    <property name="query"><value>limit 1</value></property>
+    <property name="resultSetSize"><value>1</value></property>
+  </bean>
+  
+  <bean id="testCase3" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+    <property name="processes">
+    	<list>
+	    	<ref local="process1"/>
+	    	<ref local="process2"/>
+    	</list>
+    </property>
+    <property name="instances">
+    	<list>
+	    	<ref local="instance1"/>
+	    	<ref local="instance2"/>
+    	</list>
+    </property>
+    <property name="query"><value>limit 2</value></property>
+    <property name="resultSetSize"><value>2</value></property>
+  </bean>
+  
+  <bean id="testCases" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCases">
+    <property name="testCases">
+			<list>
+	      <ref local="testCase1"/>
+	      <ref local="testCase2"/>
+	      <ref local="testCase3"/>
+	    </list>
+  	</property>
+  </bean>
+  
+</beans>

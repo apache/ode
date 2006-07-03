@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<!-- this will cause an error as configuration header will have a bogus url -->
+<pxe:message xmlns="" xmlns:pxe="http://www.fivesight.com/pxe/message">
+  <PartsOrder xmlns:p="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd">
+  <p:Item>
+    <p:productNumber>605006</p:productNumber>
+    <p:quantity>182</p:quantity>
+    <p:price>3.99</p:price>
+  </p:Item>
+</PartsOrder>
+<CustomerDetails xmlns:c="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd"> 
+  <c:custnbr>ABCD999999999EFG</c:custnbr>
+  <c:name>Joe Bloggs</c:name>
+  <c:street1 />
+  <c:city />
+  <c:state>NH</c:state>
+  <c:zip>03870</c:zip>
+  <c:country>USA</c:country>
+</CustomerDetails>
+
+  <h:Configuration
+	xmlns:h="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd">
+  <h:UserId>griddell@bowstreet.com</h:UserId>
+  <h:ServiceUrl Role="LoggingFacility">file://soap.systinet.net/ws/WSI/LoggingFacilityService</h:ServiceUrl>
+  <h:ServiceUrl Role="Retailer">file://soap.systinet.net/ws/WSI/RetailerService</h:ServiceUrl>
+  <h:ServiceUrl Role="WarehouseA">file://soap.systinet.net/ws/WSI/WarehouseAService</h:ServiceUrl>
+  <h:ServiceUrl Role="WarehouseB">file://soap.systinet.net/ws/WSI/WarehouseBService</h:ServiceUrl>
+  <h:ServiceUrl Role="WarehouseC">file://soap.systinet.net/ws/WSI/WarehouseCService</h:ServiceUrl>
+  <h:ServiceUrl Role="ManufacturerA">file://soap.systinet.net/ws/WSI/ManufacturerAService</h:ServiceUrl>
+  <h:ServiceUrl Role="ManufacturerB">file://soap.systinet.net/ws/WSI/ManufacturerBService</h:ServiceUrl>
+  <h:ServiceUrl Role="ManufacturerC">file://soap.systinet.net/ws/WSI/ManufacturerCService</h:ServiceUrl>
+</h:Configuration>
+
+</pxe:message>

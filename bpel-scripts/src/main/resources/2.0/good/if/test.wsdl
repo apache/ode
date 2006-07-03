@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<wsdl:definitions 
+    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+   
+   
+    <wsdl:message name="TestMessage1">
+        <wsdl:part name="TestPart" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:message name="TestMessage2">
+        <wsdl:part name="TestPart" type="xsd:int"/>
+    </wsdl:message>
+    <wsdl:portType name="TestPortType">
+        <wsdl:operation name="testOperation">
+            <wsdl:input message="tns:TestMessage1" name="TestIn"/>
+            <wsdl:output message="tns:TestMessage1" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType> 
+   <bpws:property name="testProp"
+                   type="xsd:string"/>
+   <plnk:partnerLinkType name="TestPartnerLinkType">
+       <plnk:role name="me" portType="tns:TestPortType"/>
+       <plnk:role name="you" portType="tns:TestPortType"/>
+    </plnk:partnerLinkType>
+    
+   
+</wsdl:definitions>
+

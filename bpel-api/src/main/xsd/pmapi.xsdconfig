@@ -1,0 +1,14 @@
+<xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
+           xmlns:pmapi="http://pxe.fivesight.com/schemas/2005/11/11/pmapi">
+
+
+  <xb:namespace uri="http://pxe.fivesight.com/schemas/2005/11/11/pmapi">
+    <xb:package>com.fs.pxe.bpel.pmapi</xb:package>
+  </xb:namespace> 
+  
+  <xb:namespace uri="##any">
+    <xb:prefix></xb:prefix>
+    <xb:suffix></xb:suffix>
+  </xb:namespace>
+
+</xb:config>

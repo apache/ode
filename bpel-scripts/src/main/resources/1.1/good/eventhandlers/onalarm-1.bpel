@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!--
+Test the onAlarm functionality of eventHandlers
+-->
+<bp11:process xmlns:bp11="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  name="onalarm-1-1.1"
+  targetNamespace="http://www.fivesight.com/tests/1.1/eventHandlers/onalarm-1-1.1"
+  xmlns:test="http://pxe/bpel/unit-test.wsdl">
+
+  <bp11:partnerLinks>
+    <bp11:partnerLink name="testPartnerLink"
+      partnerLinkType="test:TestPartnerLinkType"
+      myRole="me" />
+  </bp11:partnerLinks>
+
+  <bp11:variables>
+    <bp11:variable name="v"
+      messageType="test:TestMessage" />
+  </bp11:variables>
+
+  <bp11:eventHandlers>
+    <bp11:onAlarm for="'PT1S'">
+      <bp11:assign>
+        <bp11:copy>
+          <bp11:from expression="'pass'" />
+          <bp11:to variable="v"
+            part="TestPart" />
+        </bp11:copy>
+      </bp11:assign>
+    </bp11:onAlarm>
+  </bp11:eventHandlers>
+
+  
+  <bp11:sequence>
+    <bp11:receive partnerLink="testPartnerLink"
+      createInstance="yes"
+      portType="test:TestPortType"
+      operation="testOperation"
+      variable="v" />
+    <bp11:assign>
+      <bp11:copy>
+        <bp11:from expression="'fail'" />
+        <bp11:to variable="v"
+          part="TestPart" />
+      </bp11:copy>
+    </bp11:assign>
+    <bp11:wait for="'PT10S'" />
+    <bp11:reply partnerLink="testPartnerLink"
+      portType="test:TestPortType"
+      operation="testOperation"
+      variable="v" />
+  </bp11:sequence>
+
+</bp11:process>

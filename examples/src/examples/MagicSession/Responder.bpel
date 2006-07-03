@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<process name="MagicSessionResponder"
+         targetNamespace="http://pxe/bpel/responder"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://pxe/bpel/responder"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:resp="http://pxe/bpel/unit-test.wsdl">
+
+  <import location="urn:/Main.wsdl" namespace="http://pxe/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="mainPartnerLink" partnerLinkType="resp:ResponderPartnerLinkType"
+                 myRole="responder" partnerRole="main" initializePartnerRole="yes"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy2" messageType="resp:Dummy2Message"/>
+    <variable name="dummy3" messageType="resp:Dummy3Message"/>
+    <variable name="eprmessage" messageType="resp:EndpointMessage"/>
+  </variables>
+
+  <sequence>
+    <!-- Starting process and first callback -->
+    <receive name="start" partnerLink="mainPartnerLink" variable="dummy2"
+             portType="resp:MSResponderPortType" operation="initiate" createInstance="yes"/>
+
+    <invoke name="callback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="callback" inputVariable="dummy2"/>
+
+    <!-- Second callback -->
+    <receive name="doubleCall" partnerLink="mainPartnerLink" variable="dummy3"
+             portType="resp:MSResponderPortType" operation="doubleCall"/>
+
+    <invoke name="doubleCallback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="doubleCallback" inputVariable="dummy3"/>
+
+    <!-- Callback on the epr explicitly provided by partner in the message
+         (demonstrating assignment) -->
+    <receive name="eprPassing" partnerLink="mainPartnerLink" variable="eprmessage"
+             portType="resp:MSResponderPortType" operation="eprPassing"/>
+    <assign>
+      <copy>
+        <from variable="eprmessage" part="payload"/>
+        <to partnerLink="mainPartnerLink"/>
+      </copy>
+    </assign>
+    <invoke name="tripleCallback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="tripleCallback" inputVariable="eprmessage"/>
+
+  </sequence>
+</process>

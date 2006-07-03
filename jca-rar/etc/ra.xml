@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+                        http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd" version="1.5">
+    <display-name>PXE Resource Adapter</display-name>
+    <vendor-name>FiveSight Technolgoies, Inc</vendor-name>
+    <eis-type>RMI</eis-type>
+    <resourceadapter-version>1.0</resourceadapter-version>
+    <license>
+        <description>CPL</description>
+        <license-required>false</license-required>
+    </license>
+    <resourceadapter>
+        <outbound-resourceadapter>
+            <connection-definition>
+                <managedconnectionfactory-class>
+                    com.fs.pxe.ra.PxeManagedConnectionFactory
+                </managedconnectionfactory-class>
+                <config-property>
+                    <config-property-name>URL</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                    <config-property-value>rmi://localhost:2099/MyDomain</config-property-value>
+                </config-property>
+                <connectionfactory-interface>
+                    com.fs.pxe.ra.PxeConnectionFactory</connectionfactory-interface>
+                <connectionfactory-impl-class>
+					com.fs.pxe.ra.PxeConnectionFactoryImpl </connectionfactory-impl-class>
+                <connection-interface> com.fs.pxe.ra.PxeConnection </connection-interface>
+                <connection-impl-class> com.fs.pxe.ra.PxeConnectionImpl </connection-impl-class>
+            </connection-definition>
+            <transaction-support>NoTransaction</transaction-support>
+        </outbound-resourceadapter>
+    </resourceadapter>
+</connector>

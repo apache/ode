@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <!--Do not use Project Properties customizer when editing this file manually.-->
+            <name>PXE-bpel-el-xpath20</name>
+            <properties>
+                <property-file>../build/netbeans-build.properties</property-file>
+                <property-file>../buildlib/netbeans-libs.properties</property-file>
+                <property-file>nbproject/classpath.properties</property-file>
+            </properties>
+            <folders>
+                <source-folder>
+                    <label>src\java</label>
+                    <type>java</type>
+                    <location>src/java</location>
+                </source-folder>
+                <build-folder>
+                    <location>C:\Data\fivesight\cvs\pxe\install~\int</location>
+                </build-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>dist</target>
+                </action>
+                <action name="clean">
+                    <target>clean</target>
+                </action>
+                <action name="rebuild">
+                    <target>clean</target>
+                    <target>dist</target>
+                </action>
+            </ide-actions>
+            <export>
+                <type>jar</type>
+                <location>../install~/int/bpel-el-xpath20.jar</location>
+                <build-target>build</build-target>
+            </export>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>src\java</label>
+                        <location>src/java</location>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="rebuild"/>
+                </context-menu>
+            </view>
+            <subprojects>
+                <project>C:\Data\fivesight\cvs\pxe\bpel-el-xpath10</project>
+            </subprojects>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
+            <compilation-unit>
+                <package-root>src/java</package-root>
+                <classpath mode="compile">${flat.deps.cpath.int};${flat.deps.cpath.ext};${flat.deps.srcpath.int}</classpath>
+                <built-to>${stage.dir.int}/bpel-el-xpath20.jar</built-to>
+                <javadoc-built-to>${stage.dir.apidocs}</javadoc-built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>

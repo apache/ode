@@ -1,0 +1,32 @@
+import com.fs.pxe.bpel.pmapi.*;
+import com.fs.pxe.ra.*;
+import com.fs.pxe.bpel.provider.*;
+
+
+/**
+ * Get a connection to the BPEL provider's BPEL Management Interface.
+ */
+getBpelManagementAPI(String pxeURL,String providerURI) {
+   
+   PxeManagedConnectionFactory pmcf = new PxeManagedConnectionFactory();
+   pmcf.setURL(pxeURL);
+   PxeConnectionFactory cf = (PxeConnectionFactory)pmcf.createConnectionFactory();
+   PxeConnection conn = (PxeConnection)cf.getConnection();
+   return (BpelManagementFacade)conn.createServiceProviderSession(
+         providerURI, BpelManagementFacade.class);
+}
+
+/**
+ * Get a connection to the BPEL provider's BPEL Management API using
+ * the default connection parameters.
+ */
+getBpelManagementAPI() {
+   return getBpelManagementAPI(System.getProperty("pxe.url"),  "uri:bpelProvider");
+}
+
+/** For backward compatibility. */
+pxeGetBMF() {
+  return getBpelManagementAPI();
+}
+
+

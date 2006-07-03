@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project name="tools-bin" default="tarball">
+
+  <property name="src" value="src/examples" />
+  
+  <target name="tarball">
+    <mkdir dir="target" />
+    <tar destfile="target/tarball.tar" longfile="gnu" >
+       <tarfileset dir="${src}" prefix="examples/" username="pxe" group="pxe" />
+    </tar>
+  </target>
+
+</project>

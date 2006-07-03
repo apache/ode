@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:deployment-descriptor xmlns:bpel="http://pxe.fivesight.com/schemas/2006/02/14/bpeldd">
+    <bpel:endpoint-refs>
+        <bpel:endpoint-ref partnerLinkName="inboundPartnerLink" partnerLinkRole="myRole">
+            <soap:address location="http://localhost:@PXE_HTTP_PORT@/pxe/soap/geoIp" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+        </bpel:endpoint-ref>
+        <bpel:endpoint-ref partnerLinkName="outboundPartnerLink" partnerLinkRole="partnerRole">
+            <soap:address location="http://www.webservicex.net/geoipservice.asmx" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+        </bpel:endpoint-ref>
+    </bpel:endpoint-refs>
+</bpel:deployment-descriptor>

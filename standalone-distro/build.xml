@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project name="PXE" default="stage">
+
+  <import file="build-jdoc.xml" />
+
+  <property file="../build.properties" />
+
+  <property name="build.dir" value="${basedir}/target/stage" />
+  <property name="build.dir.schemadoc" value="${build.dir}/schemadoc" />
+  <property name="src" value="${basedir}/src/main/dist" />
+  <property name="src.bin" value="${src}/bin" />
+  <property name="stage" location="target/stage" />
+  <property name="stage.bin" location="${stage}/bin" />
+  <property name="stage.lib" location="${stage}/lib" />
+  <property name="stage.logs" location="${stage}/logs" />
+  <property name="stage.docs" location="${stage}/docs" />
+  <property name="stage.examples" location="${stage}/examples" />
+  <property name="stage.src" location="${stage}/src" />
+  <property name="stage.etc" location="${stage}/etc" />
+
+  <target name="init">
+    <mkdir dir="${build.dir}" />
+  </target>
+
+  <target name="docs" depends="apidocs, schemadocs" unless="skip.docs" />
+
+  <target name="apidocs" depends="javadoc-pxe-public" 
+		unless="skip.docs" 
+		description="generate API documentation (Javadoc) and place in the staging area." />
+
+  <target name="stage" depends="init" description="stage a distribution">
+    <mkdir dir="${stage}" />
+
+    <copy flatten="yes" todir="${stage}">
+      <fileset dir="${src}" includes="*.txt" />
+    </copy>
+    <mkdir dir="${stage.bin}" />
+    <mkdir dir="${stage.lib}" />
+    <mkdir dir="${stage.logs}" />
+    <mkdir dir="${stage.docs}" />
+    <mkdir dir="${stage.examples}" />
+
+    <mkdir dir="${stage.src}" />
+
+    <antcall target="_stage_executables" />
+    <antcall target="_stage_etc" />
+    <antcall target="_stage_bshcmds" />
+    <antcall target="_stage_spexerciser" />
+    <antcall target="_stage_documentation" />
+  </target>
+  
+  <target name="_stage_etc">
+    <mkdir dir="${stage.etc}" />
+    <mkdir dir="${stage.etc}/deploy" />
+    <copy todir="${stage.etc}">
+      <filterset>
+        <filter token="PXE_HTTP_PORT" value="${pxe.default.http.port}"/>
+        <filter token="PXE_RMI_PORT" value="${pxe.default.rmi.port}"/>
+        <filter token="PXE_JMX_PORT" value="${pxe.default.jmx.port}"/>
+        <filter token="PXE_JMX_USERNAME" value="${pxe.default.jmx.username}"/>
+        <filter token="PXE_JMX_PASSWORD" value="${pxe.default.jmx.password}"/>
+	<filter token="PXE_DOMAIN" value="${pxe.default.domain}"/>
+      </filterset>
+      <fileset dir="${src}/etc" includes="**/*" />
+    </copy>
+  </target>
+
+  <target name="_stage_info">
+    <copy todir="${stage}">
+      <fileset dir="${src}" includes="**/*.in" />
+    </copy>
+  </target>
+
+  <target name="_stage_extras">
+    <mkdir dir="${stage}/extras" />
+    <copy todir="${stage}/extras">
+      <fileset dir="${src}/extras" includes="**/*" />
+    </copy>
+  </target>
+
+
+  <target name="_stage_bshcmds">
+    <mkdir dir="${stage}/bsh-cmds" />
+    <copy todir="${stage}/bsh-cmds">
+      <fileset dir="${src}/bsh-cmds" includes="**/*" />
+    </copy>
+  </target>
+
+  <target name="_stage_documentation" unless="skip.docs">
+    <description>Place documentation in the staging area.</description>
+    <!-- Copy API documentation -->
+    <mkdir dir="${stage.docs}/apidocs" />
+    <copy failonerror="false" todir="${stage.docs}/apidocs">
+      <fileset dir="${build.dir.javadoc}/pxe-api" includes="**/*" />
+    </copy>
+
+    <mkdir dir="${stage.docs}/schemadocs" />
+    <copy failonerror="false" todir="${stage.docs}/schemadocs">
+      <fileset dir="${build.dir.schemadoc}" includes="**/*.html" />
+    </copy>
+
+    <mkdir dir="${stage.docs}/schemas" />
+    <copy failonerror="false" todir="${stage.docs}/schemas">
+      <fileset dir="../" includes="*/src/**/*.xsd" />
+      <mapper type="flatten" />
+    </copy>
+
+  </target>
+
+  <!-- Make all the UNIX/Windows executables. -->
+  <target name="_stage_executables">
+    <description>Build the various commandline executables and place them in the staging area.</description>
+    <!-- Copy the pxe and pxe.bat into the output directory. -->
+    <copy todir="${stage.bin}" overwrite="true">
+      <fileset dir="${src.bin}">
+        <include name="pxe" />
+        <include name="pxe.bat" />
+        <include name="pxe.cfg" />
+      </fileset>
+    </copy>
+    <chmod perm="755" dir="${stage.bin}" includes="*" excludes="*.bat" />
+  </target>
+
+  <target name="_stage_spexerciser">
+    <mkdir dir="${stage}/examples/spexerciser/1.1" />
+    <mkdir dir="${stage}/examples/spexerciser/2.0" />
+    <copy todir="${stage}/examples/spexerciser/1.1" includeEmptyDirs="false">
+      <fileset dir="../bpel-scripts/src/main/resources/1.1/good" includes="**/*" />
+    </copy>
+    <copy todir="${stage}/examples/spexerciser/2.0" includeEmptyDirs="false">
+      <fileset dir="../bpel-scripts/src/main/resources/2.0/good" includes="**/*" />
+    </copy>
+  </target>
+
+</project>

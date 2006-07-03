@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:wsdlns1="http://www.intalio.com/pxeSamples/HelloWorld/HelloWorld"
+    xmlns:tns="http://www.intalio.com/pxeSamples/HelloWorld/HelloWorld"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:wsdlns0="http://www.intalio.com/pxeSamples/HelloWorld/Client_And_HelloWorld_PLT"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" name="HelloWorld"
+    targetNamespace="http://www.intalio.com/pxeSamples/HelloWorld/HelloWorld"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"
+    suppressJoinFailure="yes" abstractProcess="no" exitOnStandardFault="no">
+    <rdfs:label xml:space="preserve">HelloWorld</rdfs:label>
+    <import
+        namespace="http://www.intalio.com/pxeSamples/HelloWorld/HelloWorld"
+        location="urn:/HelloWorld.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="Client_And_HelloWorld_PLink"
+            partnerLinkType="wsdlns0:Client_And_HelloWorld_PLT"
+            myRole="HelloWorld_Role" initializePartnerRole="yes"/>
+    </partnerLinks>
+    <variables>
+        <variable name="pid" type="xsd:string"/>
+        <variable name="req_msg" messageType="wsdlns1:req_msg"/>
+        <variable name="retVal" type="xsd:string"/>
+        <variable name="res_msg" messageType="wsdlns1:res_msg"/>
+    </variables>
+    <sequence name="HelloWorld-Sequence">
+        <receive name="HelloWorldOp-Receive"
+            partnerLink="Client_And_HelloWorld_PLink"
+            portType="wsdlns1:Client_To_HelloWorld_PortType"
+            operation="HelloWorldOp" variable="req_msg" createInstance="yes">
+            <rdfs:label xml:space="preserve">HelloWorldOp</rdfs:label>
+        </receive>
+        <assign name="HelloWorldOp-Assign" validate="no">
+            <copy>
+                <from>concat('Hello, ', $req_msg/name)</from>
+                <to variable="retVal"/>
+            </copy>
+        </assign>
+        <reply name="Reply-Reply"
+            partnerLink="Client_And_HelloWorld_PLink"
+            portType="wsdlns1:Client_To_HelloWorld_PortType"
+            operation="HelloWorldOp" variable="res_msg">
+            <rdfs:label xml:space="preserve">Reply</rdfs:label>
+        </reply>
+    </sequence>
+</process>

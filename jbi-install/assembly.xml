@@ -1,0 +1,29 @@
+<assembly>
+    <id></id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>src/etc</directory>
+            <outputDirectory></outputDirectory>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
+        </dependencySet>
+        <dependencySet>
+            <scope>compile</scope>
+            <outputDirectory/>
+            <includes>
+                <include>pxe:pxe-dao-hibernate-db-derby</include>
+            </includes>
+            <unpack>true</unpack>
+        </dependencySet>
+
+    </dependencySets>
+</assembly>

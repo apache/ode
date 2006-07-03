@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ant-library">
+  
+  <target name="all" depends="init,dist,test-report"
+    description="Execute all required targets."/>
+  
+  <!-- dist  ========================== -->
+  
+  <target name="dist" depends="build" description="Build and deploy module.">
+    <antcall target="dist.jar"/>
+    <antcall target="dist.libs"/>
+    <!--  <antcall target="xdoclet.deploy" /> -->
+  </target>
+  
+  <target name="clean" description="Remove intermediate files">
+    <antcall target="__clean_temp"/>
+  </target>
+  
+  <!-- test-report =======================  -->
+  
+  <target name="test-report" depends="init" if="any.test.exists"
+    description="Run the JUnit tests and generate HTML report.">
+    
+    <echo>test-report</echo>
+    
+    <antcall target="test">
+      <param name="test.format" value="xml"/>
+    </antcall>
+    
+    <junitreport todir="${test.report.dir}">
+      <fileset dir="${test.report.dir}" includes="TEST-*.xml"/>
+      <report todir="${test.report.dir}" format="${test.report.format}"/>
+    </junitreport>
+    
+  </target>
+  
+</project>

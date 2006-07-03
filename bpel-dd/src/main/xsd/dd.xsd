@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://pxe.fivesight.com/schemas/2006/06/27/dd"
+           xmlns:dd="http://pxe.fivesight.com/schemas/2006/06/27/dd"
+           elementFormDefault="qualified">
+
+  <xs:element name="deploy" id="deploy" type="dd:tDeployment"/>
+
+  <xs:complexType name="tDeployment">
+    <xs:sequence>
+
+      <xs:element name="process"  minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+
+            <xs:element name="active" minOccurs="0" maxOccurs="1" type="xs:boolean"
+                        default="true">
+              <xs:annotation>
+                <xs:documentation> Active flag, if set process will be activated once
+                  deployed. </xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="retired" minOccurs="0" maxOccurs="1" type="xs:boolean"
+                        default="false">
+              <xs:annotation>
+                <xs:documentation> Retired flag, if set process will be retired once
+                  deployed. </xs:documentation>
+              </xs:annotation>
+            </xs:element>
+
+            <xs:element name="property"  minOccurs="1" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  A user-defined property that will be attached to a process upon
+                  deployment.
+                </xs:documentation>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" use="required"/>
+                <xs:attribute name="namespace" type="xs:anyURI" use="required"/>
+              </xs:complexType>
+            </xs:element>
+
+            <xs:element name="provide"  minOccurs="0" maxOccurs="unbounded" type="dd:tProvide"/>
+            <xs:element name="invoke"  minOccurs="0" maxOccurs="unbounded" type="dd:tInvoke"/>
+
+          </xs:sequence>
+          <xs:attribute name="name" type="xs:QName" use="required"/>
+        </xs:complexType>
+      </xs:element>
+
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="tProvide">
+    <xs:sequence>
+      <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
+    </xs:sequence>
+    <xs:attribute name="partnerLink" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="tInvoke">
+    <xs:choice>
+      <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
+      <xs:element name="binding" minOccurs="1" maxOccurs="1">
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:QName" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+    <xs:attribute name="partnerLink" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="tService">
+    <xs:sequence>
+      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:QName" use="required"/>
+    <xs:attribute name="port" type="xs:NCName" use="required"/>
+  </xs:complexType>
+
+</xs:schema>

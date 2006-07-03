@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<project name="mvn-hibernate" default="hibernate">
+    <import file="../build/ant-common.xml" />
+    <import file="../build/ant-library.xml" />
+    <import file="../build/ant-xdoclet.xml" />
+
+    <!-- This is required since basedir may get changed during an earlier build cycle. Not sure why. -->
+    <property name="src.databases" value="${basedir}/src/hibernate"/>
+    <property name="build.classes" value="${basedir}/target/classes"/>
+    <property name="build.ddl" value="${build.classes}/ddl"/>
+    <property name="hibernate.dir" value="${basedir}/../buildlib/hibernate-2.1"/>
+
+    <target name="hibernate">
+        <taskdef name="hibernatedoclet" classname="xdoclet.modules.hibernate.HibernateDocletTask" classpathref="xdoclet-cpath"/>
+        <hibernatedoclet destdir="${build.classes}" excludedtags="@version,@author,@todo" force="false" mergedir="${build.classes}" verbose="false">
+        <hibernate version="2.0"/>
+            <fileset dir="${src.java}" includes="${src.hibernate.mask}"/>
+        </hibernatedoclet>
+
+        <taskdef name="schemaexport" classname="net.sf.hibernate.tool.hbm2ddl.SchemaExportTask">
+            <classpath>
+                <fileset dir="${hibernate.dir}" includes="hibernate2.jar"/>
+                <fileset dir="${hibernate.dir}/lib" includes="*.jar"/>
+                <path refid="cpath"/>
+                <fileset dir="../buildlib/commons-logging-1.0.5" includes="commons-logging-1.0.5.jar"/>
+                <fileset dir="../buildlib/commons-collections-3.1" includes="*.jar"/>
+                <pathelement location="${lib.log4j}"/>
+                <pathelement location="${build.classes}"/>
+            </classpath>
+        </taskdef>
+        <mkdir dir="${build.ddl}"/>
+        <foreach list="${databases}" delimiter="," trim="true" param="db" target="export" inheritAll="yes"/>
+    </target>
+
+    <target name="export">
+        <schemaexport properties="${src.databases}/${db}.properties" quiet="yes" text="yes" delimiter=";" output="${build.ddl}/${db}.sql">
+            <fileset dir="${build.classes}"><include name="**/*.hbm.xml"/></fileset>
+        </schemaexport>
+    </target>
+</project>
