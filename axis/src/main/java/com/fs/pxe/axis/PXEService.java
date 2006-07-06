@@ -2,11 +2,9 @@ package com.fs.pxe.axis;
 
 import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.iapi.Message;
-import com.fs.pxe.bpel.iapi.MessageExchange;
 import com.fs.pxe.bpel.iapi.MyRoleMessageExchange;
 import com.fs.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -21,11 +19,10 @@ import org.w3c.dom.NodeList;
 import javax.transaction.TransactionManager;
 import javax.wsdl.Part;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and
@@ -34,15 +31,18 @@ import java.util.List;
 public class PXEService {
 
   private static final Log __log = LogFactory.getLog(PXEService.class);
+  private static final int TIMEOUT = 2 * 60 * 1000;
 
   private AxisService _axisService;
   private BpelServerImpl _server;
   private TransactionManager _txManager;
+  private Map<String,ResponseCallback> _waitingCallbacks;
 
   public PXEService(AxisService axisService, BpelServerImpl server, TransactionManager txManager) {
     _axisService = axisService;
     _server = server;
     _txManager = txManager;
+    _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
   }
 
   public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext,
@@ -62,20 +62,29 @@ public class PXEService {
         Message pxeRequest = pxeMex.createMessage(pxeMex.getOperation().getInput().getMessage().getQName());
         convertMessage(msgdef, pxeRequest, msgContext.getEnvelope().getBody().getFirstElement());
 
+        ResponseCallback callback = null;
+        if (pxeMex.getOperation().getOutput() != null) {
+          callback = new ResponseCallback();
+          _waitingCallbacks.put(pxeMex.getMessageExchangeId(), callback);
+        }
+
         pxeMex.invoke(pxeRequest);
 
-        // Handle the response if it is immediately available.
-        if (pxeMex.getStatus() != MessageExchange.Status.ASYNC && outMsgContext != null) {
+        // Handle the response if necessary.
+        if (pxeMex.getOperation().getOutput() != null) {
           __log.debug("PXE MEX "  + pxeMex  + " completed SYNCHRONOUSLY.");
           SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
           outMsgContext.setEnvelope(envelope);
+          // Waiting for a callback
+          pxeMex = callback.getResponse(TIMEOUT);
+          // Hopefully we have a response
           onResponse(pxeMex, envelope);
         } else {
           __log.debug("PXE MEX " + pxeMex + " completed ASYNCHRONOUSLY.");
         }
         success = true;
       } else {
-        __log.error("PXE MEX "  +pxeMex + " was unroutable.");
+        __log.error("PXE MEX " + pxeMex + " was unroutable.");
       }
     } catch(Exception e) {
       throw new AxisFault("An exception occured when invoking PXE.", e);
@@ -99,10 +108,20 @@ public class PXEService {
     if (!success) throw new AxisFault("Message was unroutable!");
   }
 
+  public void notifyResponse(MyRoleMessageExchange mex) {
+    ResponseCallback callback = _waitingCallbacks.get(mex.getMessageExchangeId());
+    if (callback == null) {
+      __log.error("No active service for message exchange: "  + mex);
+    } else {
+      callback.onResponse(mex);
+      _waitingCallbacks.remove(mex.getMessageExchangeId());
+    }
+  }
+
   private void onResponse(MyRoleMessageExchange mex, SOAPEnvelope envelope) throws AxisFault {
     switch (mex.getStatus()) {
       case FAULT:
-        throw new AxisFault(null, mex.getFault(), null, null, toOM(mex.getFaultResponse().getMessage()));
+        throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
       case RESPONSE:
         fillEnvelope(mex.getResponse(), envelope);
         break;
@@ -115,7 +134,7 @@ public class PXEService {
   }
 
   private void convertMessage(javax.wsdl.Message msgdef, Message dest, OMElement body) throws AxisFault {
-    Element srcel = toDOM(body);
+    Element srcel = OMUtils.toDOM(body);
 
     Document pxemsgdoc = DOMUtils.newDocument();
     Element pxemsg = pxemsgdoc.createElement("message");
@@ -143,32 +162,37 @@ public class PXEService {
   private void fillEnvelope(Message resp, SOAPEnvelope envelope) throws AxisFault {
     Element srcPartEl = DOMUtils.getFirstChildElement(resp.getMessage());
     while (srcPartEl != null) {
-      envelope.getBody().addChild(toOM(srcPartEl));
+      envelope.getBody().addChild(OMUtils.toOM(srcPartEl));
       srcPartEl = DOMUtils.getNextSiblingElement(srcPartEl);
     }
   }
 
-  private Element toDOM(OMElement element) throws AxisFault {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      element.serialize(baos);
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      return DOMUtils.parse(bais).getDocumentElement();
-    } catch (Exception e) {
-      throw new AxisFault("Unable to read Axis input messag.e", e);
-    }
-  }
+  class ResponseCallback {
+    private MyRoleMessageExchange _mmex;
+    private boolean _timedout;
 
-  private OMElement toOM(Element element) throws AxisFault {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      DOMUtils.serialize(element, baos);
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(bais);
-      StAXOMBuilder builder = new StAXOMBuilder(parser);
-      return builder.getDocumentElement();
-    } catch (Exception e) {
-      throw new AxisFault("Unable to read Axis input messag.e", e);
+    synchronized boolean onResponse(MyRoleMessageExchange mmex) {
+      if (_timedout) {
+        return false;
+      }
+      _mmex = mmex;
+      this.notify();
+      return true;
+    }
+
+    synchronized MyRoleMessageExchange getResponse(long timeout) {
+      long etime = timeout == 0 ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
+      long ctime;
+      try {
+        while (_mmex == null && (ctime = System.currentTimeMillis()) < etime) {
+          this.wait(etime - ctime);
+        }
+      }
+      catch (InterruptedException ie) {
+        // ignore
+      }
+      _timedout = _mmex == null;
+      return _mmex;
     }
   }
 

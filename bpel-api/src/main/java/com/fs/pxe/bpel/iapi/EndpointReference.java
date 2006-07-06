@@ -22,7 +22,7 @@ public interface EndpointReference {
    * used by the BPEL engine to persist EPR references in the 
    * database. 
    * TODO: avoid using DOM
-   * @param result destination for the generated XML
+   * @return destination for the generated XML
    */
   Document toXML(); 
 }

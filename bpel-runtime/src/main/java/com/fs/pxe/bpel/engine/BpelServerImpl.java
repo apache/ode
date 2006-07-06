@@ -608,8 +608,7 @@ public class BpelServerImpl implements BpelServer {
       throw new BpelEngineException("", dce);
     }
 
-    if (processDD.getActive())
-      doActivateProcess(processId);
+    doActivateProcess(processId);
   }
 
   private com.fs.pxe.bpel.dd.TDeploymentDescriptor readDeploymentDescriptor(
