@@ -55,8 +55,6 @@ public class PXEServer {
   private static final Log __log = LogFactory.getLog(PXEServer.class);
   private static final Messages __msgs = Messages.getMessages(Messages.class);
 
-  private boolean _init = false;
-  private boolean _started = false;
   private File _appRoot;
 
   private BpelServerImpl _server;
@@ -106,7 +104,6 @@ public class PXEServer {
     _poller.start();
     __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
 
-    _started = true;
     __log.info(__msgs.msgPxeStarted());
   }
 
@@ -185,6 +182,15 @@ public class PXEServer {
       axisFault.printStackTrace();
     }
     _services.remove(serviceName);
+  }
+
+  public PXEService getService(QName serviceName) {
+    return _services.get(serviceName);
+  }
+
+  public AxisInvoker createInvoker() {
+    AxisInvoker invoker = new AxisInvoker(_scheduler);
+    return invoker;
   }
 
   private void initTxMgr() throws ServletException {
@@ -340,9 +346,6 @@ public class PXEServer {
     // we'll do that explcitly
     _server.setAutoActivate(false);
 
-    // TODO Provide implementation for these
-//    _mexContext = new MessageExchangeContextImpl(_pxe);
-
     _executorService = Executors.newCachedThreadPool();
     _scheduler = new QuartzSchedulerImpl();
     _scheduler.setBpelServer(_server);
@@ -353,8 +356,7 @@ public class PXEServer {
 
     _server.setDaoConnectionFactory(_daoCF);
     _server.setEndpointReferenceContext(new EndpointReferenceContextImpl());
-    // TODO Set these
-//    _server.setMessageExchangeContext(_pxe._mexContext);
+    _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
     _server.setScheduler(_scheduler);
     _server.init();
   }

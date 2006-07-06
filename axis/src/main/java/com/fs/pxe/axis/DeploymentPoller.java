@@ -69,9 +69,13 @@ public class DeploymentPoller {
     // Checking for new deployment directories
     for (File file : files) {
       if (checkIsNew(new File(file, "deploy.xml"))) {
-        DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
-        _inspectedFiles.add(du);
-        du.deploy(!_initDone);
+        try {
+          DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
+          _inspectedFiles.add(du);
+          du.deploy(!_initDone);
+        } catch (Exception e) {
+          __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+        }
       }
     }
 
@@ -125,16 +129,16 @@ public class DeploymentPoller {
     }
 
     public void run(){
-      try{
-        while(_active){
+      try {
+        while(_active) {
           check();
           synchronized(this){
             try{
               this.wait(POLL_TIME);
-            }catch(InterruptedException e){}
+            } catch(InterruptedException e){}
           }
         }
-      }catch(Throwable t){
+      } catch(Throwable t){
         __log.fatal("Encountered an unexpected error.  Exiting poller...", t);
       }
     }

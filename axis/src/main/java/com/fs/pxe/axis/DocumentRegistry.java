@@ -5,7 +5,11 @@
  */
 package com.fs.pxe.axis;
 
-import com.fs.pxe.bom.wsdl.*;
+import com.fs.pxe.bom.wsdl.Definition4BPEL;
+import com.fs.pxe.bom.wsdl.PartnerLinkType;
+import com.fs.pxe.bom.wsdl.Property;
+import com.fs.pxe.bom.wsdl.PropertyAlias;
+import com.fs.pxe.bom.wsdl.XMLSchemaType;
 import com.fs.pxe.bpel.capi.CompilationException;
 import com.fs.utils.xsd.SchemaModel;
 import com.fs.utils.xsd.SchemaModelImpl;
@@ -23,7 +27,11 @@ import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 /**
