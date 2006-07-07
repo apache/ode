@@ -21,7 +21,6 @@ public class WSDL11Endpoint implements MutableEndpoint {
   }
 
   public String getUrl() {
-    System.out.println("### Getting endpoint " + DOMUtils.domToString(_serviceElmt));
     Element port = (Element) _serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_11, "port").item(0);
     Element address = (Element) port.getElementsByTagNameNS(Namespaces.SOAP_NS, "address").item(0);
     return address.getAttribute("location");

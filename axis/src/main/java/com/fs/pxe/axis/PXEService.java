@@ -63,6 +63,7 @@ public class PXEService {
         Message pxeRequest = pxeMex.createMessage(pxeMex.getOperation().getInput().getMessage().getQName());
         convertMessage(msgdef, pxeRequest, msgContext.getEnvelope().getBody().getFirstElement());
 
+        // Preparing a callback just in case we would need one.
         ResponseCallback callback = null;
         if (pxeMex.getOperation().getOutput() != null) {
           callback = new ResponseCallback();
@@ -70,25 +71,24 @@ public class PXEService {
         }
 
         if (__log.isDebugEnabled())
-          __log.debug("Invoking PXE.");
+          __log.debug("Invoking PXE using MEX " + pxeMex);
         pxeMex.invoke(pxeRequest);
 
-        // Handle the response if necessary.
-        if (pxeMex.getOperation().getOutput() != null) {
-          __log.debug("PXE MEX "  + pxeMex  + " completed SYNCHRONOUSLY.");
-          SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-          outMsgContext.setEnvelope(envelope);
-          // Waiting for a callback
-          if (_waitingCallbacks.get(pxeMex.getMessageExchangeId()) != null
-                  && pxeMex.getStatus() == MessageExchange.Status.ASYNC)
-            pxeMex = callback.getResponse(TIMEOUT);
-          
-          // Hopefully we have a response
-          __log.debug("Handling response for MEX " + pxeMex);
-          onResponse(pxeMex, envelope);
+        // Invocation response could be delayed, if so we have to wait for it.
+        if (pxeMex.getStatus() == MessageExchange.Status.ASYNC) {
+          pxeMex = callback.getResponse(TIMEOUT);
         } else {
-          __log.debug("PXE MEX " + pxeMex + " completed ASYNCHRONOUSLY.");
+          // Callback wasn't necessary, cleaning up
+          _waitingCallbacks.remove(pxeMex.getMessageExchangeId());
         }
+
+        SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+        outMsgContext.setEnvelope(envelope);
+
+        // Hopefully we have a response
+        __log.debug("Handling response for MEX " + pxeMex);
+        onResponse(pxeMex, envelope);
+
         success = true;
       } else {
         __log.error("PXE MEX " + pxeMex + " was unroutable.");
