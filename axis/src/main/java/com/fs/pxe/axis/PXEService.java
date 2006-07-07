@@ -3,6 +3,7 @@ package com.fs.pxe.axis;
 import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.iapi.Message;
 import com.fs.pxe.bpel.iapi.MyRoleMessageExchange;
+import com.fs.pxe.bpel.iapi.MessageExchange;
 import com.fs.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -68,6 +69,8 @@ public class PXEService {
           _waitingCallbacks.put(pxeMex.getMessageExchangeId(), callback);
         }
 
+        if (__log.isDebugEnabled())
+          __log.debug("Invoking PXE.");
         pxeMex.invoke(pxeRequest);
 
         // Handle the response if necessary.
@@ -76,8 +79,12 @@ public class PXEService {
           SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
           outMsgContext.setEnvelope(envelope);
           // Waiting for a callback
-          pxeMex = callback.getResponse(TIMEOUT);
+          if (_waitingCallbacks.get(pxeMex.getMessageExchangeId()) != null
+                  && pxeMex.getStatus() == MessageExchange.Status.ASYNC)
+            pxeMex = callback.getResponse(TIMEOUT);
+          
           // Hopefully we have a response
+          __log.debug("Handling response for MEX " + pxeMex);
           onResponse(pxeMex, envelope);
         } else {
           __log.debug("PXE MEX " + pxeMex + " completed ASYNCHRONOUSLY.");

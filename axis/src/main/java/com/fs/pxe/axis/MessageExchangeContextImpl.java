@@ -26,10 +26,14 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
   }
 
   public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
+    if (__log.isDebugEnabled())
+      __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
     _invoker.invokePartner(partnerRoleMessageExchange);
   }
 
   public void onAsyncReply(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
+    if (__log.isDebugEnabled())
+      __log.debug("Processing an async reply from service " + myRoleMessageExchange.getServiceName());
     PXEService service = _server.getService(myRoleMessageExchange.getServiceName());
     service.notifyResponse(myRoleMessageExchange);
   }
