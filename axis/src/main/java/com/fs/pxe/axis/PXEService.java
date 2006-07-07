@@ -74,9 +74,11 @@ public class PXEService {
           __log.debug("Invoking PXE using MEX " + pxeMex);
         pxeMex.invoke(pxeRequest);
 
+        boolean timeout = false;
         // Invocation response could be delayed, if so we have to wait for it.
         if (pxeMex.getStatus() == MessageExchange.Status.ASYNC) {
-          pxeMex = callback.getResponse(TIMEOUT);
+          MyRoleMessageExchange tmpMex = callback.getResponse(TIMEOUT);
+          if (tmpMex == null) timeout = true;
         } else {
           // Callback wasn't necessary, cleaning up
           _waitingCallbacks.remove(pxeMex.getMessageExchangeId());
@@ -87,9 +89,12 @@ public class PXEService {
 
         // Hopefully we have a response
         __log.debug("Handling response for MEX " + pxeMex);
-        onResponse(pxeMex, envelope);
-
-        success = true;
+        if (timeout) {
+          __log.error("Timeout when waiting for response to MEX " + pxeMex);
+        } else {
+          onResponse(pxeMex, envelope);
+          success = true;
+        }
       } else {
         __log.error("PXE MEX " + pxeMex + " was unroutable.");
       }
@@ -104,7 +109,7 @@ public class PXEService {
           throw new AxisFault("Commit failed!", e);
         }
       } else {
-        __log.debug("Rolling back PXE MEX "  + pxeMex );
+        __log.error("Rolling back PXE MEX "  + pxeMex );
         try {
           _txManager.rollback();
         } catch (Exception e) {
@@ -130,7 +135,7 @@ public class PXEService {
       case FAULT:
         throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
       case RESPONSE:
-        fillEnvelope(mex.getResponse(), envelope);
+        fillEnvelope(mex, envelope);
         break;
       case FAILURE:
         // TODO: get failure codes out of the message.
@@ -166,10 +171,16 @@ public class PXEService {
     dest.setMessage(pxemsg);
   }
 
-  private void fillEnvelope(Message resp, SOAPEnvelope envelope) throws AxisFault {
+  private void fillEnvelope(MyRoleMessageExchange mex, SOAPEnvelope envelope) throws AxisFault {
+    Message resp = mex.getResponse();
+    // TODO Handle messages style
+    OMElement responseRoot =
+            envelope.getOMFactory().createOMElement(mex.getOperation().getName() + "Response", null);
+    envelope.getBody().addChild(responseRoot);
+
     Element srcPartEl = DOMUtils.getFirstChildElement(resp.getMessage());
     while (srcPartEl != null) {
-      envelope.getBody().addChild(OMUtils.toOM(srcPartEl));
+      responseRoot.addChild(OMUtils.toOM(srcPartEl));
       srcPartEl = DOMUtils.getNextSiblingElement(srcPartEl);
     }
   }

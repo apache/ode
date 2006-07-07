@@ -1,4 +1,4 @@
-package com.fs.pxe.axis.epr;
+package com.fs.pxe.bpel.epr;
 
 import com.fs.utils.DOMUtils;
 import com.fs.utils.Namespaces;
@@ -16,21 +16,6 @@ import java.util.Map;
 public class WSAEndpoint implements MutableEndpoint {
 
   private Element _eprElmt;
-
-  public WSAEndpoint() {
-  }
-
-  public WSAEndpoint(String url, String sessionId) {
-    Document doc = DOMUtils.newDocument();
-    _eprElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
-    Element addrElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "Address");
-    addrElmt.setTextContent(url);
-    Element sessElmt = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "identifier");
-    sessElmt.setTextContent(sessionId);
-    _eprElmt.appendChild(addrElmt);
-    _eprElmt.appendChild(sessElmt);
-    doc.appendChild(_eprElmt);
-  }
 
   public String getSessionId() {
     NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "identifier");
@@ -65,6 +50,8 @@ public class WSAEndpoint implements MutableEndpoint {
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element)node;
+      if (elmt.getLocalName().equals("service-ref") && elmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS))
+        elmt= DOMUtils.getFirstChildElement(elmt);
       if (elmt.getLocalName().equals("EndpointReference") && elmt.getNamespaceURI().equals(Namespaces.WS_ADDRESSING_NS))
         return true;
     }
@@ -79,6 +66,11 @@ public class WSAEndpoint implements MutableEndpoint {
   }
 
   public Document toXML() {
+    // Wrapping
+    Document doc = DOMUtils.newDocument();
+    Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+    doc.appendChild(serviceRef);
+    serviceRef.appendChild(doc.importNode(_eprElmt, true));
     return _eprElmt.getOwnerDocument();
   }
 
@@ -93,6 +85,7 @@ public class WSAEndpoint implements MutableEndpoint {
   public void fromMap(Map eprMap) {
     Document doc = DOMUtils.newDocument();
     Element serviceRef = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
+    doc.appendChild(serviceRef);
     _eprElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
     serviceRef.appendChild(_eprElmt);
     Element addrElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "Address");
@@ -103,6 +96,5 @@ public class WSAEndpoint implements MutableEndpoint {
       _eprElmt.appendChild(sessElmt);
     }
     _eprElmt.appendChild(addrElmt);
-    doc.appendChild(_eprElmt);
   }
 }

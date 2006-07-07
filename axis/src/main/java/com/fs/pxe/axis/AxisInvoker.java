@@ -1,9 +1,9 @@
 package com.fs.pxe.axis;
 
-import com.fs.pxe.axis.epr.MutableEndpoint;
 import com.fs.pxe.bpel.iapi.Message;
 import com.fs.pxe.bpel.iapi.MessageExchange;
 import com.fs.pxe.bpel.iapi.PartnerRoleMessageExchange;
+import com.fs.pxe.bpel.epr.MutableEndpoint;
 import com.fs.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -67,6 +67,9 @@ public class AxisInvoker {
           reply = freply.get();
         } catch (Exception e) {
           __log.error("We've been interrupted while waiting for reply to MEX " + pxeMex + "!!!");
+          String errmsg = "Error sending message to Axis2 for PXE mex " + pxeMex;
+          __log.error(errmsg, e);
+          pxeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
 
         final Message response = pxeMex.createMessage(pxeMex.getOperation().getOutput().getMessage().getQName());

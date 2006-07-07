@@ -13,6 +13,7 @@ import org.w3c.dom.NodeList;
 import com.fs.pxe.bpel.iapi.ContextException;
 import com.fs.pxe.bpel.iapi.EndpointReference;
 import com.fs.pxe.bpel.iapi.EndpointReferenceContext;
+import com.fs.pxe.bpel.epr.EndpointFactory;
 import com.fs.utils.DOMUtils;
 
 /**
@@ -79,5 +80,9 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     }
   }
 
-  
+  public EndpointReference convertEndpoint(QName qName, Element element) {
+    EndpointReference endpoint = EndpointFactory.convert(qName, element);
+    // Forcing JBI lookup
+    return resolveEndpointReference(endpoint.toXML().getDocumentElement());
+  }
 }

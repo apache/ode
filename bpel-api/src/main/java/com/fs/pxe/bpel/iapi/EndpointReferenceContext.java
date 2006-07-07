@@ -41,5 +41,13 @@ public interface EndpointReferenceContext {
    * @param epr EPR returned from {@link #activateEndpoint(QName, QName, Element)}
    */
   void deactivateEndpoint(EndpointReference epr);
-  
+
+  /**
+   * Converts an endpoint reference from its XML representation to another
+   * type of endpoint reference.
+   * @param targetType
+   * @param sourceEndpoint
+   * @return converted EndpointReference, being of targetType
+   */
+  EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint);
 }
