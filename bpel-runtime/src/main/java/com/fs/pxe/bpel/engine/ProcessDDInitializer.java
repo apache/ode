@@ -5,8 +5,6 @@ import com.fs.utils.Namespaces;
 import com.fs.utils.DOMUtils;
 import com.fs.pxe.bpel.o.OProcess;
 import com.fs.pxe.bpel.o.OPartnerLink;
-import com.fs.pxe.bpel.dd.TDeploymentDescriptor;
-import com.fs.pxe.bpel.dd.TRoles;
 import com.fs.pxe.bpel.dao.ProcessDAO;
 import com.fs.pxe.bpel.dao.PartnerLinkDAO;
 import com.fs.pxe.bpel.iapi.BpelEngineException;
@@ -19,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
-import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
 import javax.wsdl.Service;
@@ -82,7 +79,7 @@ class ProcessDDInitializer {
           ProcessDDInitializer.__log.error(msg);
           throw new BpelEngineException(msg);
         }
-        eprdao.setMyEPR(epr);
+        eprdao.setMyEPR(createServiceRef(epr));
       }
     }
     if (_dd.getInvokeList().size() > 0) {
@@ -115,7 +112,7 @@ class ProcessDDInitializer {
           ProcessDDInitializer.__log.error(msg);
           throw new BpelEngineException(msg);
         }
-        eprdao.setPartnerEPR(epr);
+        eprdao.setPartnerEPR(createServiceRef(epr));
       }
     }
   }
@@ -180,4 +177,26 @@ class ProcessDDInitializer {
       newDao.addCorrelator(correlator);
     }
   }
+
+  /**
+   * Create-and-copy a service-ref element.
+   * @param elmt
+   * @return wrapped element
+   */
+  private Element createServiceRef(Element elmt) {
+    Document doc = DOMUtils.newDocument();
+    QName elQName = new QName(elmt.getNamespaceURI(),elmt.getLocalName());
+    // If we get a service-ref, just copy it, otherwise make a service-ref wrapper
+    if (!EndpointReference.SERVICE_REF_QNAME.equals(elQName)) {
+      Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
+          EndpointReference.SERVICE_REF_QNAME.getLocalPart());
+      serviceref.appendChild(doc.importNode(elmt,true));
+      doc.appendChild(serviceref);
+    } else {
+      doc.appendChild(doc.importNode(elmt, true));
+    }
+
+    return doc.getDocumentElement();
+  }
+
 }

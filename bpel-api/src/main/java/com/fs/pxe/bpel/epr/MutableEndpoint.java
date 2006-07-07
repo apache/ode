@@ -1,4 +1,4 @@
-package com.fs.pxe.axis.epr;
+package com.fs.pxe.bpel.epr;
 
 import com.fs.pxe.bpel.iapi.EndpointReference;
 import org.w3c.dom.Node;

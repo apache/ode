@@ -90,11 +90,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   private BpelProcess _bpelProcess;
 
   /** Five second maximum for continous execution. */
-  private long _maxReductionTimeMs = 5000;
+  private long _maxReductionTimeMs = 20000;
 
   public BpelRuntimeContextImpl(BpelProcess bpelProcess,
-      ProcessInstanceDAO dao, PROCESS PROCESS,
-      MyRoleMessageExchangeImpl instantiatingMessageExchange) {
+                                ProcessInstanceDAO dao, PROCESS PROCESS,
+                                MyRoleMessageExchangeImpl instantiatingMessageExchange) {
     _bpelProcess = bpelProcess;
     _dao = dao;
     _iid = dao.getInstanceId();
@@ -146,7 +146,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public boolean isEndpointReferenceInitialized(PartnerLinkInstance pLink,
-      boolean isMyEpr) {
+                                                boolean isMyEpr) {
     ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
     PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
     PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
@@ -225,7 +225,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public void initializePartnerLinks(Long parentScopeId,
-      Collection<OPartnerLink> partnerLinks) {
+                                     Collection<OPartnerLink> partnerLinks) {
 
     if (BpelProcess.__log.isTraceEnabled()) {
       BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter(
@@ -240,7 +240,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public void select(PickResponseChannel pickResponseChannel, Date timeout,
-      boolean createInstance, Selector[] selectors) throws FaultException {
+                     boolean createInstance, Selector[] selectors) throws FaultException {
     if (BpelProcess.__log.isTraceEnabled())
       BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select",
           new Object[] { "pickResponseChannel", pickResponseChannel, "timeout",
@@ -385,7 +385,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Node fetchVariableData(VariableInstance var,
-      OMessageVarType.Part part, boolean forWriting) throws FaultException {
+                                OMessageVarType.Part part, boolean forWriting) throws FaultException {
     Node container = fetchVariableData(var, forWriting);
     OVarType varType = var.declaration.type;
 
@@ -399,7 +399,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Element fetchEndpointReferenceData(PartnerLinkInstance pLink,
-      boolean isMyEPR) throws FaultException {
+                                            boolean isMyEPR) throws FaultException {
     ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
     PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
     PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
@@ -432,7 +432,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
    *           in case of selection or other fault
    */
   public String readProperty(VariableInstance variable,
-      OProcess.OProperty property) throws FaultException {
+                             OProcess.OProperty property) throws FaultException {
     Node varData = fetchVariableData(variable, false);
 
     OProcess.OPropertyAlias alias = property
@@ -459,7 +459,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Element writeEndpointReference(PartnerLinkInstance variable,
-      Element data) throws FaultException {
+                                        Element data) throws FaultException {
+    if (__log.isDebugEnabled())
+      __log.debug("Writing endpoint reference " + variable.partnerLink.getName() +
+              " with value " + DOMUtils.domToString(data));
     ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
     PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink
         .getId());
@@ -468,7 +471,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public String fetchEndpointSessionId(PartnerLinkInstance pLink,
-      boolean isMyEPR) throws FaultException {
+                                       boolean isMyEPR) throws FaultException {
     Element eprElmt = (Element) fetchEndpointReferenceData(pLink, isMyEPR);
     // This is rather ugly as we're assuming that the session identifier is
     // always a direct
@@ -503,7 +506,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Element updatePartnerEndpointReference(PartnerLinkInstance variable,
-      Element data) throws FaultException {
+                                                Element data) throws FaultException {
     ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
     PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink
         .getId());
@@ -512,15 +515,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Node convertEndpointReference(Element sourceNode, Node targetNode) {
-    return sourceNode;
-    // TODO: replace the conversion logic.. where to locate??
-    // if (targetNode.getNodeType() == Node.TEXT_NODE)
-    // return _bpelProcess._context.convertEndpoint(sourceNode, null);
-    // else {
-    // QName nodeQName = new QName(targetNode.getNamespaceURI(), targetNode
-    // .getLocalName());
-    // return _bpelProcess._context.convertEndpoint(sourceNode, nodeQName);
-    // }
+     QName nodeQName;
+     if (targetNode.getNodeType() == Node.TEXT_NODE) {
+       nodeQName = new QName(Namespaces.XML_SCHEMA, "string");
+     } else {
+       // We have an element
+        nodeQName = new QName(targetNode.getNamespaceURI(), targetNode.getLocalName());
+     }
+     return _bpelProcess._engine._contexts.eprContext
+             .convertEndpoint(nodeQName, sourceNode).toXML();
   }
 
   public void commitChanges(VariableInstance variable, Node changes) {
@@ -532,7 +535,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public void reply(final PartnerLinkInstance plinkInstnace,
-      final String opName, final String mexId, Element msg, String fault)
+                    final String opName, final String mexId, Element msg, String fault)
       throws FaultException {
     String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
 
@@ -581,7 +584,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
    *      com.fs.pxe.bpel.common.CorrelationKey)
    */
   public void writeCorrelation(CorrelationSetInstance cset,
-      CorrelationKey correlation) {
+                               CorrelationKey correlation) {
     ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
     CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
     OScope.CorrelationSet csetdef = (OScope.CorrelationSet) _bpelProcess._oprocess
@@ -613,7 +616,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
    *           DOCUMENTME
    */
   public void initializeCorrelation(CorrelationSetInstance cset,
-      VariableInstance variable) throws FaultException {
+                                    VariableInstance variable) throws FaultException {
     if (BpelProcess.__log.isDebugEnabled()) {
       BpelProcess.__log.debug("Initializing correlation set "
           + cset.declaration.name);
@@ -671,7 +674,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public String invoke(PartnerLinkInstance partnerLink, Operation operation,
-      Element outgoingMessage, InvokeResponseChannel channel)
+                       Element outgoingMessage, InvokeResponseChannel channel)
       throws FaultException {
     if (BpelProcess.__log.isDebugEnabled()) {
       BpelProcess.__log.debug("invoke activity: partnerLink=" + partnerLink
@@ -721,6 +724,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
       mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
       _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
     } else {
+      __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
       mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint",
           partnerEPR);
     }
@@ -753,7 +757,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   }
 
-  
+
   void execute() {
     long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
     boolean canReduce = true;
@@ -792,7 +796,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   void inputMsgMatch(final String responsechannel, final int idx,
-      MyRoleMessageExchangeImpl mex) {
+                     MyRoleMessageExchangeImpl mex) {
     // if we have a message match, this instance should be marked
     // active if it isn't already
     if (_dao.getState() == ProcessState.STATE_READY) {
@@ -940,7 +944,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
    * efficient lookup.
    */
   private void writeProperties(VariableInstance variable, Node value,
-      XmlDataDAO dao) {
+                               XmlDataDAO dao) {
     if (variable.declaration.type instanceof OMessageVarType) {
       for (Iterator<OProcess.OProperty> iter = variable.declaration.getOwner().properties
           .iterator(); iter.hasNext();) {

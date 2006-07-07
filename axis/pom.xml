@@ -36,6 +36,10 @@
       <groupId>pxe</groupId>
       <artifactId>pxe-naming</artifactId>
     </dependency>
+    <dependency>
+      <groupId>pxe</groupId>
+      <artifactId>pxe-bpel-api</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>axis2</groupId>

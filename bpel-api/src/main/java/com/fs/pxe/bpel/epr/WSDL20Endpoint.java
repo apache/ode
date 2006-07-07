@@ -1,4 +1,4 @@
-package com.fs.pxe.axis.epr;
+package com.fs.pxe.bpel.epr;
 
 import com.fs.utils.DOMUtils;
 import com.fs.utils.Namespaces;
@@ -56,9 +56,10 @@ public class WSDL20Endpoint implements MutableEndpoint {
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element) node;
+      if (elmt.getLocalName().equals("service-ref") && elmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS))
+        elmt= DOMUtils.getFirstChildElement(elmt);
       if (elmt.getLocalName().equals("service") && elmt.getNamespaceURI().equals(Namespaces.WSDL_20))
-        if (_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").getLength() > 0)
-          return true;
+        return true;
     }
     return false;
   }
@@ -71,7 +72,12 @@ public class WSDL20Endpoint implements MutableEndpoint {
   }
 
   public Document toXML() {
-    return _serviceElmt.getOwnerDocument();
+    // Wrapping
+    Document doc = DOMUtils.newDocument();
+    Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+    doc.appendChild(serviceRef);
+    serviceRef.appendChild(doc.importNode(_serviceElmt, true));
+    return doc;
   }
 
   public Map toMap() {
@@ -85,6 +91,7 @@ public class WSDL20Endpoint implements MutableEndpoint {
   public void fromMap(Map eprMap) {
     Document doc = DOMUtils.newDocument();
     Element serviceRef = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
+    doc.appendChild(serviceRef);
     _serviceElmt = doc.createElementNS(Namespaces.WSDL_20, "service");
     _serviceElmt.setAttribute("name", "");
     _serviceElmt.setAttribute("interface", "");

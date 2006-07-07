@@ -73,6 +73,7 @@ public class DeploymentPoller {
           DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
           _inspectedFiles.add(du);
           du.deploy(!_initDone);
+          __log.info("Deployment of artifact " + file.getName() + " successful.");
         } catch (Exception e) {
           __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
         }

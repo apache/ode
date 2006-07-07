@@ -31,6 +31,11 @@ public class PXEMessageReceiver extends AbstractMessageReceiver {
       MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
       outMsgContext.getOperationContext().addMessageContext(outMsgContext);
       invokeBusinessLogic(msgContext, outMsgContext);
+      if (__log.isDebugEnabled()) {
+        __log.debug("Reply for " + msgContext.getAxisService().getName() +
+              "." + msgContext.getAxisOperation().getName());
+        __log.debug("Reply message " + outMsgContext.getEnvelope());
+      }
       AxisEngine engine = new AxisEngine(
               msgContext.getOperationContext().getServiceContext().getConfigurationContext());
       engine.send(outMsgContext);

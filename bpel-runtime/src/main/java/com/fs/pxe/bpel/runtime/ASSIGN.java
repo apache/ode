@@ -139,7 +139,7 @@ class ASSIGN extends ACTIVITY {
 			OAssign.VariableRef varRef = (OAssign.VariableRef) from;
 			Node data = getBpelRuntimeContext().fetchVariableData(
 					_scopeFrame.resolve(varRef.variable), false);
-			retVal = evalQuery(data, varRef.part, varRef.location,
+      retVal = evalQuery(data, varRef.part, varRef.location,
 					getEvaluationContext());
 		} else if (from instanceof OAssign.PropertyRef) {
 			OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
@@ -361,6 +361,8 @@ class ASSIGN extends ACTIVITY {
         // Sneakily converting the EPR if it's not the format expected by the lvalue
         if (ocopy.from instanceof OAssign.PartnerLinkRef) {
           rvalue = getBpelRuntimeContext().convertEndpointReference((Element)rvalue, lvaluePtr);
+          if (rvalue.getNodeType() == Node.DOCUMENT_NODE)
+            rvalue = ((Document)rvalue).getDocumentElement();
         }
 
         if (rvalue.getNodeType() == Node.ELEMENT_NODE
@@ -373,6 +375,9 @@ class ASSIGN extends ACTIVITY {
 				}
         final VariableInstance lval = _scopeFrame.resolve(ocopy.to
             .getVariable());
+        if (__log.isDebugEnabled())
+          __log.debug("ASSIGN Writing variable" + lval.declaration.name +
+                  " value " + DOMUtils.domToString(lvalue));
         napi.commitChanges(lval, lvalue);
 			}
 		}
@@ -393,7 +398,7 @@ class ASSIGN extends ACTIVITY {
 	}
 
   private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
-    // If variable is a simple type, we can get a type wrapper here (like xs:string
+    // If variable is a simple type, we will get a type wrapper here (like xs:string
     // or xs:uri), it's eliminated here.
     if (rvalue.getNamespaceURI() != null && rvalue.getNamespaceURI().equals(Namespaces.XML_SCHEMA)) {
       // Getting a non-empty text node
@@ -405,17 +410,15 @@ class ASSIGN extends ACTIVITY {
       }
     }
 
-    // Eventually eliminating the unnecessary service-ref wrapper
-    if (rvalue.getNodeType() == Node.ELEMENT_NODE) {
-      Element relmt = (Element) rvalue;
-      if (relmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS) && relmt.getLocalName().equals("service-ref"))
-        rvalue = DOMUtils.getFirstChildElement(relmt);
+    // Eventually wrapping with service-ref element if we've been directly assigned some
+    // value that isn't wrapped.
+    if (rvalue.getNodeType() == Node.TEXT_NODE ||
+            (rvalue.getNodeType() == Node.ELEMENT_NODE && !rvalue.getLocalName().equals("service-ref"))) {
+      Document doc = DOMUtils.newDocument();
+      Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+      serviceRef.appendChild(doc.importNode(rvalue, true));
+      rvalue = serviceRef;
     }
-
-    // TODO: replace
-//    if (!getBpelRuntimeContext().isEndpointValid(rvalue))
-//      throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure,
-//          "The assigned node doesn't look like a correct endpoint reference supported for partnerLink assignment.");
 
     getBpelRuntimeContext().writeEndpointReference(plval, (Element)rvalue);
 	}

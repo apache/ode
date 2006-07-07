@@ -42,6 +42,7 @@ public class URLEndpointReferenceImpl implements EndpointReference {
     Document doc = DOMUtils.newDocument();
     Element serviceRef =
             doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
+    doc.appendChild(serviceRef);
     Element soapAddress = doc.createElementNS(SOAP_ADDR_EL.getNamespaceURI(), SOAP_ADDR_EL.getLocalPart());
     soapAddress.setAttribute("location", _url.toExternalForm());
     doc.appendChild(serviceRef);
