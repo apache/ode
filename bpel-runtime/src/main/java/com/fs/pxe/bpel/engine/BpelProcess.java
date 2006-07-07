@@ -33,6 +33,7 @@ import com.fs.pxe.bpel.runtime.PropertyAliasEvaluationContext;
 import com.fs.pxe.bpel.runtime.msgs.Messages;
 import com.fs.utils.ArrayUtils;
 import com.fs.utils.ObjectPrinter;
+import com.fs.utils.DOMUtils;
 import com.fs.utils.msg.MessageBundle;
 
 import java.io.*;

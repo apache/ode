@@ -23,6 +23,9 @@ public class PXEMessageReceiver extends AbstractMessageReceiver {
   private ExecutorService _executorService;
 
   public final void receive(final MessageContext msgContext) throws AxisFault {
+    if (__log.isDebugEnabled())
+      __log.debug("Received message for " + msgContext.getAxisService().getName() +
+              "." + msgContext.getAxisOperation().getName());
     if (hasResponse(msgContext.getAxisOperation())) {
       // Expecting a response, running in the same thread
       MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);

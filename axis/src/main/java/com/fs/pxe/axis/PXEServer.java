@@ -189,7 +189,7 @@ public class PXEServer {
   }
 
   public AxisInvoker createInvoker() {
-    AxisInvoker invoker = new AxisInvoker(_scheduler);
+    AxisInvoker invoker = new AxisInvoker(_executorService);
     return invoker;
   }
 
