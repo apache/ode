@@ -39,5 +39,8 @@ public class EndpointReferenceContextImpl  implements EndpointReferenceContext {
     
   }
 
+  public EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint) {
+    return null;
+  }
 
 }
