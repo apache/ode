@@ -42,6 +42,8 @@ import com.fs.pxe.bpel.runtime.channels.FaultData;
 import com.fs.pxe.bpel.runtime.channels.InvokeResponseChannel;
 import com.fs.pxe.bpel.runtime.channels.PickResponseChannel;
 import com.fs.pxe.bpel.runtime.channels.TimerResponseChannel;
+import com.fs.pxe.bpel.epr.MutableEndpoint;
+import com.fs.pxe.bpel.epr.WSDL11Endpoint;
 import com.fs.utils.DOMUtils;
 import com.fs.utils.ObjectPrinter;
 import com.fs.utils.Namespaces;
@@ -53,6 +55,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -400,23 +404,30 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public Element fetchEndpointReferenceData(PartnerLinkInstance pLink,
                                             boolean isMyEPR) throws FaultException {
-    ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
-    PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
-    PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
-        .getDeployedEndpointReference(pLink.partnerLink.getId());
-
-    Element epr;
-    if (isMyEPR)
-      epr = spl.getMyEPR() != null ? spl.getMyEPR() : ppl.getMyEPR();
-    else
-      epr = spl.getPartnerEPR() != null ? spl.getPartnerEPR() : ppl
-          .getPartnerEPR();
+    PartnerLinkDAO pl = fetchEndpointReference(pLink, isMyEPR);
+    Element epr = (isMyEPR ? pl.getMyEPR() : pl.getPartnerEPR());
 
     if (epr == null) {
       throw new FaultException(
           _bpelProcess._oprocess.constants.qnUninitializedPartnerRole);
     } else
       return epr;
+  }
+
+  private PartnerLinkDAO fetchEndpointReference(PartnerLinkInstance pLink,
+                                            boolean isMyEPR) throws FaultException {
+    ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
+    PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
+    PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
+        .getDeployedEndpointReference(pLink.partnerLink.getId());
+
+    PartnerLinkDAO rightpl;
+    if (isMyEPR)
+      rightpl = spl.getMyEPR() != null ? spl : ppl;
+    else
+      rightpl = spl.getPartnerEPR() != null ? spl : ppl;
+
+    return rightpl;
   }
 
   /**
@@ -460,19 +471,36 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public Element writeEndpointReference(PartnerLinkInstance variable,
                                         Element data) throws FaultException {
-    if (__log.isDebugEnabled())
+    fetchEndpointReferenceData(variable, false);
+    PartnerLinkDAO eprDAO = fetchEndpointReference(variable, false);
+    Element originalEprElmt = eprDAO.getPartnerEPR();
+
+    if (__log.isDebugEnabled()) {
       __log.debug("Writing endpoint reference " + variable.partnerLink.getName() +
               " with value " + DOMUtils.domToString(data));
-    ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
-    PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink
-        .getId());
-    eprDAO.setPartnerEPR(data);
+    }
+
+    // Merging target endpoint with original endpoint and converting everything to
+    // a WSDL 1.1 service.
+    Map conversionMap = new HashMap();
+    if (originalEprElmt != null) {
+      MutableEndpoint originalEpr =
+              (MutableEndpoint) _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(originalEprElmt);
+      conversionMap = originalEpr.toMap();
+    }
+    MutableEndpoint targetEpr =
+            (MutableEndpoint) _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(data);
+    conversionMap.putAll(targetEpr.toMap());
+    WSDL11Endpoint mergedEpr = new WSDL11Endpoint();
+    mergedEpr.fromMap(conversionMap);
+
+    eprDAO.setPartnerEPR(mergedEpr.toXML().getDocumentElement());
     return data;
   }
 
   public String fetchEndpointSessionId(PartnerLinkInstance pLink,
                                        boolean isMyEPR) throws FaultException {
-    Element eprElmt = (Element) fetchEndpointReferenceData(pLink, isMyEPR);
+    Element eprElmt = fetchEndpointReferenceData(pLink, isMyEPR);
     // This is rather ugly as we're assuming that the session identifier is
     // always a direct
     // child of the epr element. However I rather that than adding a specific

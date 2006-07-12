@@ -26,6 +26,10 @@ public class WSDL11Endpoint implements MutableEndpoint {
     return address.getAttribute("location");
   }
 
+  public QName getServiceName() {
+    return new QName(_serviceElmt.getAttribute("targetNamespace"), _serviceElmt.getAttribute("name"));
+  }
+
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element) node;
@@ -56,7 +60,7 @@ public class WSDL11Endpoint implements MutableEndpoint {
   public Map toMap() {
     HashMap<String,Object> result = new HashMap<String,Object>(1);
     result.put(ADDRESS, getUrl());
-    result.put(SERVICE_QNAME, new QName(_serviceElmt.getNamespaceURI(), _serviceElmt.getAttribute("name")));
+    result.put(SERVICE_QNAME, new QName(_serviceElmt.getAttribute("targetNamespace"), _serviceElmt.getAttribute("name")));
     Element port = DOMUtils.getFirstChildElement(_serviceElmt);
     result.put(PORT_NAME, port.getAttribute("name"));
     // TODO binding
@@ -72,7 +76,7 @@ public class WSDL11Endpoint implements MutableEndpoint {
     if (eprMap.get(SERVICE_QNAME) != null) {
       QName serviceQName = ((QName) eprMap.get(SERVICE_QNAME));
       _serviceElmt.setAttribute("name", serviceQName.getLocalPart());
-      _serviceElmt.setAttribute("xmlns", serviceQName.getNamespaceURI());
+      _serviceElmt.setAttribute("targetNamespace", serviceQName.getNamespaceURI());
     }
     Element port = doc.createElementNS(Namespaces.WSDL_11, "port");
     if (eprMap.get(PORT_NAME) != null) {
@@ -83,8 +87,7 @@ public class WSDL11Endpoint implements MutableEndpoint {
     if (eprMap.get(ADDRESS) != null) address.setAttribute("location", (String) eprMap.get(ADDRESS));
 
     _serviceElmt.appendChild(port);
-    _serviceElmt.appendChild(address);
-    doc.appendChild(_serviceElmt);
+    port.appendChild(address);
   }
 
 }
