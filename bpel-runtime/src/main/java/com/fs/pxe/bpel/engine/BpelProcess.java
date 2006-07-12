@@ -176,6 +176,9 @@ public class BpelProcess {
         msgData, alias);
     Node lValue = ectx.getRootNode();
 
+
+    System.out.println("####### Evaluating property alias " + alias + " on " + DOMUtils.domToString(msgData));
+
     if (alias.location != null)
       try {
         lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);

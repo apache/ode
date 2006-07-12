@@ -138,7 +138,7 @@ class DocumentRegistry {
         // If there are several imports in the same WSDL all importing the same namespace
         // that is a sure sign of programmer error.
         if (imported.contains(im.getNamespaceURI())) {
-          throw new DeploymentException(__msgs.errDuplicateWSDLImport(im.getNamespaceURI(), im.getLocationURI()));
+          throw new DeploymentException(__msgs.msgDuplicateWSDLImport(im.getNamespaceURI(), im.getLocationURI()));
 
         }
 
@@ -150,7 +150,7 @@ class DocumentRegistry {
         // error.
         if (importDef == null) {
           throw new DeploymentException(
-                  __msgs.errWsdlImportNotFound(im.getNamespaceURI(), im.getLocationURI()));
+                  __msgs.msgWsdlImportNotFound(im.getNamespaceURI(), im.getLocationURI()));
         }
 
         imported.add(im.getNamespaceURI());

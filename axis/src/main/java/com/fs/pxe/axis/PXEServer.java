@@ -68,6 +68,7 @@ public class PXEServer {
   private DeploymentPoller _poller;
 
   private HashMap<QName,PXEService> _services = new HashMap<QName,PXEService>();
+  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
 
   public void init(ServletConfig config, AxisConfiguration axisConf)  throws ServletException {
     _axisConfig = axisConf;
@@ -153,11 +154,13 @@ public class PXEServer {
       if (_axisConfig.getService(serviceName.getLocalPart()) != null) return;
     } catch (AxisFault axisFault) {
       // For some reason Axis throws an exception if we're requesting an inactive service
+      return;
     }
     try {
       AxisService axisService = PXEAxisService.createService(_axisConfig,
               def, serviceName, portName);
-      PXEService pxeService = new PXEService(axisService, _server, _jotm.getTransactionManager());
+      PXEService pxeService = new PXEService(axisService, def, serviceName,
+              _server, _jotm.getTransactionManager());
       _services.put(serviceName, pxeService);
 
       // Setting our new service on the receiver, the same receiver handles all
@@ -174,6 +177,13 @@ public class PXEServer {
     }
   }
 
+  public void createExternalService(Definition4BPEL def, QName serviceName, String portName) {
+    if (_externalServices.get(serviceName) != null) return;
+
+    ExternalService extService = new ExternalService(def, serviceName, portName, _executorService);
+    _externalServices.put(serviceName, extService);
+  }
+
   public void destroyService(QName serviceName) {
     try {
       _axisConfig.removeService(serviceName.getLocalPart());
@@ -186,6 +196,10 @@ public class PXEServer {
 
   public PXEService getService(QName serviceName) {
     return _services.get(serviceName);
+  }
+
+  public ExternalService getExternalService(QName serviceName) {
+    return _externalServices.get(serviceName);
   }
 
   public AxisInvoker createInvoker() {

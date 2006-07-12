@@ -8,14 +8,12 @@ import java.io.File;
 public class Messages extends MessageBundle {
 
   public String msgPxeInstallErrorCfgNotFound(File configFile) {
-    return format("Error installing PXE component: config file {0} not found!",
-        configFile);
+    return format("Error installing PXE component: config file {0} not found!", configFile);
   }
 
   public String msgPxeInstallErrorCfgReadError(File configFile) {
     return format(
-        "Error installing PXE component: config file {0} could not be read!",
-        configFile);
+        "Error installing PXE component: config file {0} could not be read!", configFile);
   }
 
   public String msgPxeInstalled(String dir) {
@@ -31,14 +29,12 @@ public class Messages extends MessageBundle {
   }
 
   public String msgPxeInitExternalDbFailed(String dbDataSource) {
-    return format("Failed to resolved external DataSource at \"{0}\".",
-        dbDataSource);
+    return format("Failed to resolved external DataSource at \"{0}\".", dbDataSource);
   }
 
   public String msgPxeInitHibernateErrorReadingHibernateProperties(
       File hibernatePropFile) {
-    return format("Error reading Hibernate properties file \"{0}\".",
-        hibernatePropFile);
+    return format("Error reading Hibernate properties file \"{0}\".", hibernatePropFile);
   }
 
   public String msgPxeStarting() {
@@ -76,8 +72,7 @@ public class Messages extends MessageBundle {
   }
 
   public String msgPxeProcessUndeploymentFailed(QName pid) {
-    return format(
-        "Error undeploying process \"{0}\".",pid);
+    return format("Error undeploying process \"{0}\".",pid);
   }
 
   public String msgServiceUnitDeployFailed(String serviceUnitID) {
@@ -85,17 +80,14 @@ public class Messages extends MessageBundle {
   }
 
   public String msgServiceUnitInitFailed(String serviceUnitID) {
-
     return format("Error initializing service unit \"{0}\".", serviceUnitID);
   }
 
   public String msgServiceUnitStartFailed(String serviceUnitID) {
-
     return format("Error starting service unit \"{0}\".", serviceUnitID);
   }
 
   public String msgServiceUnitStopFailed(String serviceUnitID) {
-
     return format("Error stopping service unit \"{0}\".", serviceUnitID);
   }
 
@@ -103,23 +95,31 @@ public class Messages extends MessageBundle {
     return format("Error shutting down service unit \"{0}\".", serviceUnitID);
   }
 
+  /** Port {0} is missing <wsdl:binding> or <soapbind:binding> */
+  public String msgNoBindingForService(QName sericeName) {
+    return format("Couldn't find any port in service {0} having <wsdl:binding> and <soapbind:binding>", sericeName);
+  }
+
+  /** Port {0} has multiple <soapbind:binding> elements! */
+  public String msgMultipleSoapBindingsForPort(String portName) {
+    return format("Port {0} has multiple <soapbind:binding> elements!", portName);
+  }
+
   /**
    * Attempted to import WSDL for namespace {0} from multiple locations:
    * definitions from {1} will be ignored!
    */
-  public String errDuplicateWSDLImport(String tns, String location) {
+  public String msgDuplicateWSDLImport(String tns, String location) {
     return format("Attempted to import WSDL for namespace {0} from"
         + " multiple locations: definitions from {1} will be ignored!", tns, location);
   }
 
   /** The WSDL for namespace "{0}" could not be found in "{1}". */
-  public String errWsdlImportNotFound(String wsdlUri, String location) {
+  public String msgWsdlImportNotFound(String wsdlUri, String location) {
     return format("The WSDL for namespace \"{0}\" could not be found in \"{1}\".", wsdlUri, location);
   }
 
-  /**
-   * Error in schema processing: {0}
-   */
+  /** Error in schema processing: {0} **/
   public String errSchemaError(String detailMessage) {
     return format("Error in schema processing: {0}", detailMessage);
   }

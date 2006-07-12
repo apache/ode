@@ -4,6 +4,7 @@ import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.iapi.Message;
 import com.fs.pxe.bpel.iapi.MyRoleMessageExchange;
 import com.fs.pxe.bpel.iapi.MessageExchange;
+import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -19,6 +20,7 @@ import org.w3c.dom.NodeList;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Part;
+import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,12 +39,17 @@ public class PXEService {
   private AxisService _axisService;
   private BpelServerImpl _server;
   private TransactionManager _txManager;
+  private Definition _wsdlDef;
+  private QName _serviceName;
   private Map<String,ResponseCallback> _waitingCallbacks;
 
-  public PXEService(AxisService axisService, BpelServerImpl server, TransactionManager txManager) {
+  public PXEService(AxisService axisService, Definition4BPEL def, QName serviceName,
+                    BpelServerImpl server, TransactionManager txManager) {
     _axisService = axisService;
     _server = server;
     _txManager = txManager;
+    _wsdlDef = def;
+    _serviceName = serviceName;
     _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
   }
 
@@ -55,13 +62,14 @@ public class PXEService {
 
       pxeMex = _server.getEngine().createMessageExchange(
               msgContext.getMessageID(),
-              new QName(msgContext.getAxisService().getTargetNamespace(), msgContext.getAxisService().getName()),
-              null,
+              new QName(msgContext.getAxisService().getTargetNamespace(),
+              msgContext.getAxisService().getName()), null,
               msgContext.getAxisOperation().getName().getLocalPart());
       if (pxeMex.getOperation() != null) {
-        javax.wsdl.Message msgdef = pxeMex.getOperation().getInput().getMessage();
         Message pxeRequest = pxeMex.createMessage(pxeMex.getOperation().getInput().getMessage().getQName());
-        convertMessage(msgdef, pxeRequest, msgContext.getEnvelope().getBody().getFirstElement());
+        Element msgContent = SOAPUtils.unwrap(OMUtils.toDOM(msgContext.getEnvelope().getBody().getFirstElement()),
+                _wsdlDef, pxeMex.getOperation().getInput().getMessage(), _serviceName);
+        pxeRequest.setMessage(msgContent);
 
         // Preparing a callback just in case we would need one.
         ResponseCallback callback = null;
@@ -70,8 +78,10 @@ public class PXEService {
           _waitingCallbacks.put(pxeMex.getMessageExchangeId(), callback);
         }
 
-        if (__log.isDebugEnabled())
+        if (__log.isDebugEnabled()) {
           __log.debug("Invoking PXE using MEX " + pxeMex);
+          __log.debug("Message content:  " + DOMUtils.domToString(pxeRequest.getMessage()));
+        }
         pxeMex.invoke(pxeRequest);
 
         boolean timeout = false;
@@ -135,7 +145,9 @@ public class PXEService {
       case FAULT:
         throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
       case RESPONSE:
-        fillEnvelope(mex, envelope);
+        Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName,
+                mex.getOperation(), mex.getOperation().getOutput().getMessage());
+        envelope.getBody().addChild(OMUtils.toOM(response));
         break;
       case FAILURE:
         // TODO: get failure codes out of the message.
@@ -145,6 +157,7 @@ public class PXEService {
     }
   }
 
+  // TODO Handle messages style
   private void convertMessage(javax.wsdl.Message msgdef, Message dest, OMElement body) throws AxisFault {
     Element srcel = OMUtils.toDOM(body);
 

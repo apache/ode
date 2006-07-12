@@ -27,7 +27,7 @@ public class PXEMessageReceiver extends AbstractMessageReceiver {
       __log.debug("Received message for " + msgContext.getAxisService().getName() +
               "." + msgContext.getAxisOperation().getName());
     if (hasResponse(msgContext.getAxisOperation())) {
-      // Expecting a response, running in the same thread
+      // Client is expecting a response, running in the same thread
       MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
       outMsgContext.getOperationContext().addMessageContext(outMsgContext);
       invokeBusinessLogic(msgContext, outMsgContext);

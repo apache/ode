@@ -3,6 +3,7 @@ package com.fs.pxe.axis;
 import com.fs.pxe.axis.dd.DeployDocument;
 import com.fs.pxe.axis.dd.TDeployment;
 import com.fs.pxe.axis.dd.TProvide;
+import com.fs.pxe.axis.dd.TInvoke;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bom.wsdl.WSDLFactory4BPEL;
 import com.fs.pxe.bom.wsdl.WSDLFactoryBPEL20;
@@ -96,6 +97,11 @@ public class DeploymentUnit {
                   provide.getService().getName().getNamespaceURI());
           _pxeServer.createService(def, provide.getService().getName(), provide.getService().getPort());
         }
+        for (TInvoke invoke : processDD.getInvokeList()) {
+          Definition4BPEL def = _docRegistry.getDefinition(
+                  invoke.getService().getName().getNamespaceURI());
+          _pxeServer.createExternalService(def, invoke.getService().getName(), invoke.getService().getPort());
+        }
       } catch (AxisFault axisFault) {
         throw new DeploymentException("Service deployment in Axis2 failed!", axisFault);
       } catch (IOException e) {
@@ -117,7 +123,6 @@ public class DeploymentUnit {
       _pxeServer.getBpelServer().undeploy(processDD.getName());
     }
   }
-
 
   /**
    * Load the parsed and compiled BPEL process definition.
