@@ -154,6 +154,18 @@ public class DeploymentUnit {
     return (int) (_name.hashCode() + _lastModified);
   }
 
+  public File getDuDirectory() {
+    return _duDirectory;
+  }
+
+  public void setLastModified(long lastModified) {
+    _lastModified = lastModified;
+  }
+
+  public long getLastModified() {
+    return _lastModified;
+  }
+
   public String toString() {
     return "{DeploymentUnit " + _name + "}";
   }
