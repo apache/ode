@@ -8,7 +8,7 @@ import java.io.File;
 public class Messages extends MessageBundle {
 
   public String msgPxeInstallErrorCfgNotFound(File configFile) {
-    return format("Error installing PXE component: config file {0} not found!", configFile);
+    return format("Config file {0} not found, default values will be used.", configFile);
   }
 
   public String msgPxeInstallErrorCfgReadError(File configFile) {
