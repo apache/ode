@@ -3,7 +3,7 @@
  * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
  */
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bom.wsdl.PartnerLinkType;
