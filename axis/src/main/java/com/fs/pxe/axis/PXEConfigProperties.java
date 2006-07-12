@@ -32,24 +32,22 @@ public class PXEConfigProperties extends Properties {
     File configFile = new File(_installDir, PXEConfigProperties.CONFIG_FILE_NAME);
     if (!configFile.exists()) {
       String errmsg = PXEConfigProperties.__msgs.msgPxeInstallErrorCfgNotFound(configFile);
-      PXEConfigProperties.__log.error(errmsg);
-      throw new ServletException(errmsg);
+      PXEConfigProperties.__log.warn(errmsg);
+    } else {
+      FileInputStream fis = null;
+      try {
+        fis = new FileInputStream(configFile);
+        load(fis);
+      } catch (Exception ex) {
+        String errmsg = PXEConfigProperties.__msgs.msgPxeInstallErrorCfgReadError(configFile);
+        PXEConfigProperties.__log.warn(errmsg,ex);
+      } finally {
+        if (fis != null)
+          try {
+            fis.close();
+          } catch (Exception ex) { ex.printStackTrace(); }
+      }
     }
-    FileInputStream fis = null;
-    try {
-      fis = new FileInputStream(configFile);
-      load(fis);
-    } catch (Exception ex) {
-      String errmsg = PXEConfigProperties.__msgs.msgPxeInstallErrorCfgReadError(configFile);
-      PXEConfigProperties.__log.error(errmsg,ex);
-      throw new ServletException(errmsg);
-    } finally {
-      if (fis != null)
-        try {
-          fis.close();
-        } catch (Exception ex) { ex.printStackTrace(); }
-    }
-
   }
 
   /**
