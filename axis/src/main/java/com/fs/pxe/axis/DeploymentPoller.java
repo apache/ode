@@ -6,6 +6,11 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.util.HashSet;
 
 /**
@@ -21,7 +26,6 @@ public class DeploymentPoller {
   private File _deployDir;
   private PollingThread _poller;
   private PXEServer _pxeServer;
-  private boolean _initDone = false;
 
   /**
    * Set of {@link DeploymentUnit} objects regarding all deployment units that have been inspected.
@@ -50,12 +54,14 @@ public class DeploymentPoller {
 
   public void start() {
     _poller = new PollingThread();
+    readState();
     _poller.start();
     __log.info("Poller started.");
   }
 
   public void stop() {
     _poller.kill();
+    writeState();
     _poller = null;
   }
 
@@ -72,7 +78,7 @@ public class DeploymentPoller {
         try {
           DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
           _inspectedFiles.add(du);
-          du.deploy(!_initDone);
+          du.deploy(false);
           __log.info("Deployment of artifact " + file.getName() + " successful.");
         } catch (Exception e) {
           __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
@@ -93,8 +99,6 @@ public class DeploymentPoller {
         _inspectedFiles.remove(du);
       }
     }
-
-    _initDone = true;
   }
 
   /**
@@ -145,4 +149,48 @@ public class DeploymentPoller {
     }
   }
 
+  private void readState() {
+    File duState = new File(_deployDir, ".state");
+    if (duState.exists()) {
+      try {
+        BufferedReader duStateReader = new BufferedReader(new FileReader(duState));
+        String line;
+        while ((line = duStateReader.readLine()) != null) {
+          String filename = line.substring(0, line.indexOf("|"));
+          String timestamp = line.substring(line.indexOf("|") + 1 , line.length());
+          DeploymentUnit du = new DeploymentUnit(new File(_deployDir, filename), _pxeServer);
+          du.setLastModified(Long.valueOf(timestamp));
+          _inspectedFiles.add(du);
+          du.deploy(true);
+        }
+      } catch (FileNotFoundException e) {
+        // Shouldn't happen
+      } catch (IOException e) {
+        __log.error("An error occured while reading past deployments states, some " +
+                "processes will be redeployed.", e);
+      }
+    } else {
+      __log.info("Couldn't find any deployment history, all processes will " +
+              "be redeployed.");
+    }
+  }
+
+  private void writeState() {
+    try {
+      __log.debug("Writing current deployment state.");
+      FileWriter duStateWriter = new FileWriter(new File(_deployDir, ".state"), false);
+      for (DeploymentUnit deploymentUnit : _inspectedFiles) {
+        // Somebody using pipe in their directory names don't deserve to deploy anything
+        duStateWriter.write(deploymentUnit.getDuDirectory().getName());
+        duStateWriter.write("|");
+        duStateWriter.write(""+deploymentUnit.getLastModified());
+        duStateWriter.write("\n");
+      }
+      duStateWriter.flush();
+      duStateWriter.close();
+    } catch (IOException e) {
+      __log.error("Couldn't write deployment state! Processes could be redeployed (or not) " +
+              "even they don't (or do) need to.", e);
+    }
+  }
 }
