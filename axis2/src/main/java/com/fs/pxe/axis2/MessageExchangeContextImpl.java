@@ -1,4 +1,4 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import com.fs.pxe.bpel.iapi.BpelEngineException;
 import com.fs.pxe.bpel.iapi.ContextException;

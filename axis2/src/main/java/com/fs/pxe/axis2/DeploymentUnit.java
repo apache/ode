@@ -1,9 +1,9 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
-import com.fs.pxe.axis.dd.DeployDocument;
-import com.fs.pxe.axis.dd.TDeployment;
-import com.fs.pxe.axis.dd.TProvide;
-import com.fs.pxe.axis.dd.TInvoke;
+import com.fs.pxe.axis2.dd.DeployDocument;
+import com.fs.pxe.axis2.dd.TDeployment;
+import com.fs.pxe.axis2.dd.TProvide;
+import com.fs.pxe.axis2.dd.TInvoke;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bom.wsdl.WSDLFactory4BPEL;
 import com.fs.pxe.bom.wsdl.WSDLFactoryBPEL20;

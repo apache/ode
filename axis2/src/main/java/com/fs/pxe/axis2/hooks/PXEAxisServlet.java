@@ -1,6 +1,6 @@
-package com.fs.pxe.axis.hooks;
+package com.fs.pxe.axis2.hooks;
 
-import com.fs.pxe.axis.PXEServer;
+import com.fs.pxe.axis2.PXEServer;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.axis2.AxisFault;
 

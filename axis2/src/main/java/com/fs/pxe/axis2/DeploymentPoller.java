@@ -1,4 +1,4 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -1,4 +1,4 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import com.fs.utils.stl.CollectionsX;
 import com.fs.utils.DOMUtils;

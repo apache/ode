@@ -1,4 +1,4 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,14 +13,14 @@ public class PXEConfigProperties extends Properties {
   private static final long serialVersionUID = 1L;
   private static final Log __log = LogFactory.getLog(PXEConfigProperties.class);
   private static final Messages __msgs = Messages.getMessages(Messages.class);
-  private static final String CONFIG_FILE_NAME = "pxe-axis.properties";
-  private static final String PROP_NAMESPACE = "pxe-axis.pidNamespace";
-  private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "pxe-axis.allowIncompleteDeployment";
-  private static final String PROP_DB_MODE = "pxe-axis.db.mode";
-  private static final String PROP_DB_EXTERNAL_DS = "pxe-axis.db.ext.dataSource";
-  private static final String PROP_DB_EMBEDDED_NAME = "pxe-axis.db.emb.name";
-  private static final String PROP_POOL_MAX = "pxe-axis.db.pool.max";
-  private static final String PROP_POOL_MIN = "pxe-axis.db.pool.min";
+  private static final String CONFIG_FILE_NAME = "pxe-axis2.properties";
+  private static final String PROP_NAMESPACE = "pxe-axis2.pidNamespace";
+  private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "pxe-axis2.allowIncompleteDeployment";
+  private static final String PROP_DB_MODE = "pxe-axis2.db.mode";
+  private static final String PROP_DB_EXTERNAL_DS = "pxe-axis2.db.ext.dataSource";
+  private static final String PROP_DB_EMBEDDED_NAME = "pxe-axis2.db.emb.name";
+  private static final String PROP_POOL_MAX = "pxe-axis2.db.pool.max";
+  private static final String PROP_POOL_MIN = "pxe-axis2.db.pool.min";
 
   private File _installDir;
 

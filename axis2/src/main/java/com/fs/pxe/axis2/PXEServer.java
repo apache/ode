@@ -1,8 +1,8 @@
-package com.fs.pxe.axis;
+package com.fs.pxe.axis2;
 
 import com.fs.naming.mem.InMemoryContextFactory;
-import com.fs.pxe.axis.hooks.PXEAxisService;
-import com.fs.pxe.axis.hooks.PXEMessageReceiver;
+import com.fs.pxe.axis2.hooks.PXEAxisService;
+import com.fs.pxe.axis2.hooks.PXEMessageReceiver;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bpel.dao.BpelDAOConnectionFactory;
 import com.fs.pxe.bpel.engine.BpelServerImpl;

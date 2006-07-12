@@ -24,7 +24,7 @@ import com.fs.pxe.bpel.o.Serializer;
 import com.fs.pxe.bpel.pmapi.BpelManagementFacade;
 import com.fs.pxe.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
-import com.fs.pxe.axis.dd.TDeployment;
+import com.fs.pxe.axis2.dd.TDeployment;
 import com.fs.utils.msg.MessageBundle;
 
 import java.io.*;

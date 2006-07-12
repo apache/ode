@@ -1,4 +1,4 @@
-package com.fs.pxe.axis.hooks;
+package com.fs.pxe.axis2.hooks;
 
 
 import org.apache.axiom.om.OMElement;
