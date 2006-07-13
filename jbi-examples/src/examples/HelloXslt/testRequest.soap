@@ -1,8 +1,0 @@
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
-  <!-- test soap message -->
-  <SOAP-ENV:Body>
-    <ns1:helloXsl xmlns:ns1="http://pxe/bpel/unit-test.wsdl">
-        <TestPart xmlns=""><content>HelloXsl</content></TestPart>
-    </ns1:helloXsl>
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
