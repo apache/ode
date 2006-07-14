@@ -18,6 +18,7 @@ public class CorrelationKeySerializer {
   }
 
   static void escapeTilde(StringBuffer buf, String str) {
+    if ( str == null ) return;
     char[] chars = str.toCharArray();
     for (char achar : chars) {
       if (achar == '~') {
