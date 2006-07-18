@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<definitions name="Ping"
+        targetNamespace="urn:/Ping.wsdl"
+        xmlns:tns="urn:/Ping.wsdl"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns:smix="http://servicemix.org/wsdl/jbi/"
+        xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema targetNamespace="urn:/Ping.wsdl"
+                xmlns="http://www.w3.org/2000/10/XMLSchema">
+            <element name="PingRequest">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+            <element name="PingResponse">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+        </schema>
+    </types>
+
+    <message name="PingRequest">
+        <part name="body" element="tns:PingRequest"/>
+    </message>
+
+    <message name="PingResponse">
+        <part name="body" element="tns:PingResponse"/>
+    </message>
+
+    <portType name="PingPortType">
+        <operation name="Ping">
+            <input message="tns:PingRequest"/>
+            <output message="tns:PingResponse"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="PingPartnerLinkType">
+        <plnk:role name="Provider" portType="tns:PingPortType"/>
+    </plnk:partnerLinkType>
+
+    <binding name="PingSoapBinding" type="tns:PingPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="Ping">
+            <!--soap:operation soapAction="urn:Ping"/-->
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="PingService">
+        <port name="PingPort" binding="tns:PingSoapBinding">
+            <soap:address location="http://localhost:8080/ping"/>
+
+            <!-- Connect this external HTTP endpoint to the process internal 
+                 JBI endpoint defined in ping/Ping.dd -->
+            <smix:endpoint xmlns:ping="urn:/Ping.wsdl"
+                    role="consumer"
+                    defaultMep="in-out"
+                    targetEndpoint="ping:PingService"/>
+
+        </port>
+    </service>
+
+</definitions>

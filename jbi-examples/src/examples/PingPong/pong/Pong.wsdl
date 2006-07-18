@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<definitions name="Pong"
+        targetNamespace="urn:/Pong.wsdl"
+        xmlns:tns="urn:/Pong.wsdl"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema targetNamespace="urn:/Pong.wsdl"
+                xmlns="http://www.w3.org/2000/10/XMLSchema">
+            <element name="PongRequest">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+            <element name="PongResponse">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+        </schema>
+    </types>
+
+    <message name="PongRequest">
+        <part name="body" element="tns:PongRequest"/>
+    </message>
+
+    <message name="PongResponse">
+        <part name="body" element="tns:PongResponse"/>
+    </message>
+
+    <portType name="PongPortType">
+        <operation name="Pong">
+            <input message="tns:PongRequest"/>
+            <output message="tns:PongResponse"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="PongPartnerLinkType">
+        <plnk:role name="Provider" portType="tns:PongPortType"/>
+    </plnk:partnerLinkType>
+    
+    <!--
+    
+    This is an abstract interface/portType definition.  Note the lack of 
+    binding and service.  Since Pong is only exposed on the JBI bus, the
+    JBI endpoint is defined in Pong.dd.
+
+    -->
+
+</definitions>

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<definitions name="Ping"
+        targetNamespace="urn:/Ping.wsdl"
+        xmlns:tns="urn:/Ping.wsdl"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema targetNamespace="urn:/Ping.wsdl"
+                xmlns="http://www.w3.org/2000/10/XMLSchema">
+            <element name="PingRequest">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+            <element name="PingResponse">
+                <complexType>
+                    <all>
+                        <element name="text" type="string"/>
+                    </all>
+                </complexType>
+            </element>
+        </schema>
+    </types>
+
+    <message name="PingRequest">
+        <part name="body" element="tns:PingRequest"/>
+    </message>
+
+    <message name="PingResponse">
+        <part name="body" element="tns:PingResponse"/>
+    </message>
+
+    <portType name="PingPortType">
+        <operation name="Ping">
+            <input message="tns:PingRequest"/>
+            <output message="tns:PingResponse"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="PingPartnerLinkType">
+        <plnk:role name="Provider" portType="tns:PingPortType"/>
+    </plnk:partnerLinkType>
+    
+    <!--
+    
+    This is an abstract interface/portType definition.  Note the lack of 
+    binding and service: these are defined by the HTTP binding component.
+    See ping-http/Ping.wsdl for details.
+    
+    -->
+
+</definitions>

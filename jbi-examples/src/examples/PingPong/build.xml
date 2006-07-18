@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="PingPong" default="assembly">
+
+    <import file="../example-build.xml" />
+
+    <target name="test" depends="init">
+        <antcall target="_sendsoap">
+            <param name="pxe.sendsoap.url" value="http://localhost:${pxe.http.port}/ping/"/>
+            <param name="pxe.sendsoap.filename" location="message.soap"/>
+        </antcall>
+    </target>
+
+    <target name="_clean">
+        <delete dir="build" />
+    </target>
+
+    <target name="clean" depends="_clean">
+        <subant target="clean">
+            <fileset dir="." includes="*/build.xml"/>
+        </subant>
+    </target>
+
+
+    <target name="build-ping">
+        <subant target="">
+            <fileset dir="." includes="ping/build.xml"/>
+        </subant>
+    </target>
+
+    <target name="build-pong">
+        <subant target="">
+            <fileset dir="." includes="pong/build.xml"/>
+        </subant>
+    </target>
+
+    <target name="build-ping-http">
+        <subant target="">
+            <fileset dir="." includes="ping-http/build.xml"/>
+        </subant>
+    </target>
+
+    <target name="assembly" depends="_clean,build-ping,build-pong,build-ping-http">
+        <mkdir dir="build" />
+        <zip destfile="build/PingPong-Assembly.zip">
+            <fileset dir="ping/build" includes="Ping-Process.zip"/>
+            <fileset dir="ping-http/build" includes="Ping-HTTP.zip"/>
+            <fileset dir="pong/build" includes="Pong-Process.zip"/>
+            <fileset dir="assembly" includes="META-INF/*"/>
+        </zip>
+    </target>
+    
+</project>
