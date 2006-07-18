@@ -8,7 +8,6 @@ package com.fs.pxe.bpel.common;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import com.fs.utils.ArrayUtils;

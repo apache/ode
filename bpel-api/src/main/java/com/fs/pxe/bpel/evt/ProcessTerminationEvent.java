@@ -12,6 +12,8 @@ package com.fs.pxe.bpel.evt;
  */
 public class ProcessTerminationEvent extends ProcessInstanceEvent {
 
+  private static final long serialVersionUID = -5197228186952515826L;
+
   public ProcessTerminationEvent() {
     super();
   }

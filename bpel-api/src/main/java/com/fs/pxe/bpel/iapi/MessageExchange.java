@@ -8,7 +8,6 @@ package com.fs.pxe.bpel.iapi;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
 
 /**
  * A representation of a communication (message-exchange) between the BPEL 
