@@ -5,7 +5,6 @@
  */
 package com.fs.pxe.bpel.elang.xpath10.runtime;
 
-import org.jaxen.Navigator;
 import org.jaxen.dom.DocumentNavigator;
 import org.w3c.dom.Node;
 
