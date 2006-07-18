@@ -13,7 +13,6 @@ import com.fs.pxe.daohib.bpel.hobj.HCorrelationSet;
 import com.fs.pxe.daohib.bpel.hobj.HCorrelationProperty;
 
 import javax.xml.namespace.QName;
-import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 

@@ -5,7 +5,6 @@
  */
 package com.fs.pxe.daohib.sfwk.hobj;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

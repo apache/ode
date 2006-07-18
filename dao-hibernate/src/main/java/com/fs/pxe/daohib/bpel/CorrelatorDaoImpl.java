@@ -22,7 +22,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
-import org.hibernate.LockMode;
 import org.hibernate.Query;
 
 /**
