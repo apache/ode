@@ -10,7 +10,6 @@ import com.fs.pxe.bpel.test.BpelTestParser;
 import com.fs.pxe.ra.PxeConnection;
 import com.fs.pxe.ra.PxeConnectionFactory;
 import com.fs.pxe.ra.PxeManagedConnectionFactory;
-import com.fs.pxe.sfwk.mngmt.SystemAdminMBean;
 import com.fs.pxe.tools.CommandContext;
 import com.fs.pxe.tools.ExecutionException;
 import com.fs.pxe.tools.mngmt.JmxCommand;
