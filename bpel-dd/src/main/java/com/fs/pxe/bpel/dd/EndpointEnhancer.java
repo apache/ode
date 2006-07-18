@@ -66,9 +66,9 @@ public class EndpointEnhancer implements DDEnhancer {
       }
     }
     if (wsdlBinding == null) {
-      throw new DDException(
-              "Couldn't find binding for portType with namespace " + portTypeQName.getNamespaceURI() +
-              " and name " + portTypeQName.getLocalPart() + " in WSDL definition.");
+      __log.warn("No binding for portType with namespace " + portTypeQName.getNamespaceURI() +
+                 " and name " + portTypeQName.getLocalPart() + " in WSDL definition.");
+      return null;
     }
     Port wsdlPort = null;
     for (Definition def : wsdlDefs) {
@@ -83,9 +83,9 @@ public class EndpointEnhancer implements DDEnhancer {
       }
     }
     if (wsdlPort == null) {
-      throw new DDException(
-              "Couldn't find port for binding with namespace " + wsdlBinding.getQName().getNamespaceURI() +
-              " and name " + wsdlBinding.getQName().getLocalPart() + " in WSDL definition.");
+      __log.warn("No port for binding with namespace " + wsdlBinding.getQName().getNamespaceURI() +
+                " and name " + wsdlBinding.getQName().getLocalPart() + " in WSDL definition.");
+      return null;
     }
     String soapURIStr = null;
     SOAPAddress wsdlSoapAddress = null;
@@ -97,22 +97,23 @@ public class EndpointEnhancer implements DDEnhancer {
       if (extElmt instanceof SOAPAddress) wsdlSoapAddress = (SOAPAddress)extElmt;
     }
     if (wsdlSoapAddress == null && soapURIStr == null) {
-      throw new DDException(
-              "Couldn't find port for binding with namespace " + wsdlBinding.getQName().getNamespaceURI() +
+      __log.warn("No port for binding with namespace " + wsdlBinding.getQName().getNamespaceURI() +
               " and name " + wsdlBinding.getQName().getLocalPart() + " in WSDL definition.");
+      return null;
     }
 
     if (soapURIStr == null) soapURIStr = wsdlSoapAddress.getLocationURI();
     if (soapURIStr == null || "".equals(soapURIStr)) {
-      throw new DDException(
-              "Couldn't find SOAP address for port " + wsdlPort.getName() + "  in WSDL definition.");
+      __log.warn("No SOAP address for port " + wsdlPort.getName() + "  in WSDL definition.");
+      return null;
     }
 
     URL portURL;
     try {
       portURL = new URL(soapURIStr);
     } catch (MalformedURLException e) {
-      throw new DDException("SOAP address URL " + soapURIStr + " is invalid (not a valid URL).");
+      __log.warn("SOAP address URL " + soapURIStr + " is invalid (not a valid URL).");
+      return null;
     }
     return portURL;
   }
