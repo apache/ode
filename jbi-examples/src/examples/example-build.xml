@@ -1,205 +1,167 @@
 
-<!-- ANT Build File used for building the examples. This file
-     is imported from each example directory, and shoul dnot
+<!-- ANT Build File used for building JBI examples. This file
+     is imported from each example directory, and should not
      be used directly. -->
 
-<project name="example-build" default="sar"  >
-  <property file="${basedir}/../example.properties"/>
+<project name="example-build" default="bpelc">
+    <property environment="env"/>
+    <echo message="PXE_HOME = ${env.PXE_HOME}"/>
+    <property name="pxe.home" value="${env.PXE_HOME}" />
+
+    <!--
+    <property file="${basedir}/../example.properties"/>
+    -->
   
-  <!-- pick up environmental pxe.xxx properties -->
-  <property file="${pxe.home}/etc/pxe.properties"/>
-  
-  <property name="resources" value="-" />
-  <property name="cbpfilename" value="${ant.project.name}.cbp" />
-  <property name="sarfilename" value="${ant.project.name}.sar" />
-  <property name="rrfilename" value="${ant.project.name}.rr" />
-  <property name="wsdlfilename" value="${ant.project.name}.wsdl" />
+    <!-- pick up environmental pxe.xxx properties -->
+    <property file="${pxe.home}/etc/pxe.properties"/>
 
-  <property name="uri.wsdl" value="urn:/${ant.project.name}.wsdl" />
-  <property name="url.bpel" value="file:${basedir}/${ant.project.name}.bpel" />
+    <property name="resources" value="-" />
+    <property name="cbpfilename" value="${ant.project.name}.cbp" />
+    <property name="rrfilename" value="${ant.project.name}.rr" />
+    <property name="wsdlfilename" value="${ant.project.name}.wsdl" />
+    <property name="sufilename" value="${ant.project.name}-Process.zip" />
+    
+    <property name="uri.wsdl" value="urn:/${ant.project.name}.wsdl" />
+    <property name="url.bpel" value="file:${basedir}/${ant.project.name}.bpel" />
 
-  <property name="lib.dir" location="${pxe.home}/lib"/>
-  <property name="etc.dir" location="${pxe.home}/etc" />
+    <property name="lib.dir" location="${pxe.home}/lib"/>
+    <property name="etc.dir" location="${pxe.home}/etc" />
 
-  <property name="build.dir" location="build" />
+    <property name="build.dir" location="build" />
 
-  <property name="sarfile" location="${build.dir}/${sarfilename}" />
-  <property name="cbpfile" location="${build.dir}/${cbpfilename}" />
-  <property name="rrfile" location="${build.dir}/${rrfilename}" />
+    <property name="cbpfile" location="${build.dir}/${cbpfilename}" />
+    <property name="rrfile" location="${build.dir}/${rrfilename}" />
+    <property name="sufile" location="${build.dir}/${sufilename}" />
 
-  <property name="pxesystemfile" location="pxe-system.xml" />
-
-
-  <target name="clean" description="Clean intermediate artifacts." >
-    <delete dir="${build.dir}"/>
-  </target>
+    <target name="clean" description="Clean intermediate artifacts.">
+        <delete dir="${build.dir}"/>
+    </target>
 
 
-  <target name="sar" description="Generate PXE system archive." depends="bpelc" >
-    <antcall target="_sar" />
-  </target>
+    <target name="jbi-sa" description="Generate JBI system assembly." depends="bpelc">
+        <!-- TODO
+        <antcall target="_sar" />
+        -->
+    </target>
 
-  <target name="bpelc" description="Compile BPEL process." depends="rr">
-    <antcall target="_bpelc" />
-  </target>
+    <target name="bpelc" description="Compile BPEL process." depends="rr">
+        <antcall target="_bpelc" />
+    </target>
 
-  <target name="rr" description="Generate PXE resource repository">
-    <antcall target="_rr" />
-  </target>
+    <target name="rr" description="Generate PXE resource repository">
+        <antcall target="_rr" />
+    </target>
 
-  <target name="_rr" depends="init">
-  	<delete dir="${rrfile}" />
-    <mkdir dir="${rrfile}" />
-    <pxe-rr rrdir="${rrfile}">
-      <rrfileset dir="." includes="${wsdlfilename}" desturi="urn:/" recursive="yes" />
-    </pxe-rr>
-  </target>
+    <target name="_rr" depends="init">
+        <delete dir="${rrfile}" />
+        <mkdir dir="${rrfile}" />
+        <pxe-rr rrdir="${rrfile}">
+            <!--rrfileset dir="." includes="${wsdlfilename}" desturi="urn:/" recursive="yes" /-->
+            <rrfileset dir="." includes="*.wsdl" desturi="urn:/" recursive="yes" />
+            <rrfileset dir="." includes="*.xsd" desturi="urn:/" recursive="yes" />
+        </pxe-rr>
+    </target>
 
-  <target name="_bpelc" depends="init" >
-    <bpelc targetdir="${build.dir}" rr="${rrfile}" wsdl="${uri.wsdl}">
-      <bpel url="${url.bpel}" />
-    </bpelc>
-  </target>
+    <target name="_bpelc" depends="init">
+        <bpelc targetdir="${build.dir}" rr="${rrfile}" wsdl="${uri.wsdl}">
+            <bpel url="${url.bpel}" />
+        </bpelc>
+    </target>
 
-  <target name="_sar" depends="init">
-    <pxe-sar destfile="${sarfile}"
-    	systemrr="${rrfile}"
-    	descriptor="${pxesystemfile}">
-      <zipfileset file="${cbpfile}" fullpath="${cbpfilename}" />
-      <zipfileset dir="." includes="${resources}" />
-      <zipfileset dir="${build.dir}" includes="*.dd" />
-    </pxe-sar>
-  </target>
-  <target name="init-extensions">
-    <condition property="pxe.script.extension" value=".bat">
-      <os family="windows"/>
-    </condition>
-    <condition property="pxe.script.extension" value="">
-      <os family="unix"/>
-    </condition>
-    <condition property="pxe.exe.extension" value=".exe">
-      <os family="windows"/>
-    </condition>
-    <condition property="pxe.exe.extension" value="">
-      <os family="unix"/>
-    </condition>
-  </target>
+    <target name="service-unit" depends="init,clean,bpelc">
+        <zip destfile="${sufile}">
+            <fileset dir="${build.dir}" includes="**/*"/>
+        </zip>
+    </target>
+    
+
+    <target name="init-extensions">
+        <condition property="pxe.script.extension" value=".bat">
+            <os family="windows"/>
+        </condition>
+        <condition property="pxe.script.extension" value="">
+            <os family="unix"/>
+        </condition>
+        <condition property="pxe.exe.extension" value=".exe">
+            <os family="windows"/>
+        </condition>
+        <condition property="pxe.exe.extension" value="">
+            <os family="unix"/>
+        </condition>
+    </target>
   
   <!-- if example.properties has pxe.java.home assigned it has highest priority
        and overrides the system environment JAVA_HOME 
 
        if pxe.java.home not set in example.properties and system environment
        JAVA_HOME is set then pxe.java.home becomes JAVA_HOME -->
-       
-  <target name="try-ENV-java-underscore-home" if="Env-JAVA_HOME" unless="pxe.java.home">
-    <echo message="'pxe.java.home' not set trying 'Env-JAVA_HOME'"/>
-    <property name="pxe.java.home" value="${Env-JAVA_HOME}"/>
-  </target>
-  
-  <target name="try-jdk-dot-home" if="jdk.home" unless="pxe.java.home">
-    <echo message="'pxe.java.home' not set trying 'jdk.home'"/>
-    <property name="pxe.java.home" value="${jdk.home}"/>
-  </target>
 
-  <target name="try-java-dot-home" if="java.home" unless="pxe.java.home">
-    <echo message="'pxe.java.home' not set trying 'java.home'"/>
-    <property name="pxe.java.home" value="${java.home}"/>
-  </target>
-  
-  <target name="fail-no-pxe-java-home" depends="try-ENV-java-underscore-home,try-jdk-dot-home,try-java-dot-home" unless="pxe.java.home">
-    <fail message="property 'pxe.java.home' is not set (try sys env JAVA_HOME or setting pxe.java.home in example.properties)"/>
-  </target>
-  
-  <target name="validate-pxe-java-home" depends="init-extensions,fail-no-pxe-java-home" if="pxe.java.home">
-    <available file="${pxe.java.home}/bin/java${pxe.exe.extension}" property="pxe.java.home.good"/>
-  </target>
-  
-  <target name="fail-invalid-pxe-java-home" depends="validate-pxe-java-home" unless="pxe.java.home.good">
-    <fail message="Java Home invalid: 'pxe.java.home'=${pxe.java.home}"/>
-  </target>
-  
-  <target name="validate-pxe-home">
-    <available file="${lib.dir}/pxe-bootstrap.jar" property="pxe.home.good"/>
-  </target>
-		
-  <target name="fail-invalid-pxe-home" depends="validate-pxe-home" unless="pxe.home.good">
-    <fail message="Invalid property 'pxe.home'=${pxe.home}"/>
-  </target>
+    <target name="try-ENV-java-underscore-home" if="Env-JAVA_HOME" unless="pxe.java.home">
+        <echo message="'pxe.java.home' not set trying 'Env-JAVA_HOME'"/>
+        <property name="pxe.java.home" value="${Env-JAVA_HOME}"/>
+    </target>
 
-  <target name="init" depends="init-extensions,fail-invalid-pxe-home,fail-invalid-pxe-java-home">
-    <echo message="pxe.home = ${pxe.home}"/>
-    <echo message="pxe.java.home = ${pxe.java.home}"/>
-    
-    <!-- Ant Env Takes gets first crack at basic pxe properties override -->
-    <!-- example.properties gets second crack at basic pxe properties override -->
-    <!-- pxe.properties is default authority  -->
-    <property file="${pxe.home}/etc/pxe.properties"/>
-    
-    <!-- pxe.jmxurl will defer to pxe-management.properties as last resort -->
-    <property file="${pxe.home}/etc/pxe-management.properties"/>
-    <property name="pxe.jmxurl" value="service:jmx:rmi://localhost:${com.sun.management.jmxremote.port}/jndi/rmi://localhost:${com.sun.management.jmxremote.port}/jmxrmi"/>
-    
-    <echo message="pxe.jmxurl=${pxe.jmxurl}"/>
-    <echo message="pxe.url=${pxe.url}"/>
-    
-    <property name="pxe.jmxusername" value=""/> <!-- better defaults than BLANK here? -->
-    <property name="pxe.jmxpassword" value=""/>
-    
-    <echo message="pxe.jmxusername=${pxe.jmxusername}"/>
-  
-    <property name="pxe.default.javaopts"
-      value="-Dpxe.jmxurl=${pxe.jmxurl} -Dpxe.jmxusername=${pxe.jmxusername} -Dpxe.jmxpassword=${pxe.jmxpassword} -Dpxe.url=${pxe.url} "/>
-      
-    <path id="cpath.pxe">
-      <fileset dir="${lib.dir}" includes="**/*.jar" />
-      <pathelement location="${pxe.home}/etc" />
-    </path>
+    <target name="try-jdk-dot-home" if="jdk.home" unless="pxe.java.home">
+        <echo message="'pxe.java.home' not set trying 'jdk.home'"/>
+        <property name="pxe.java.home" value="${jdk.home}"/>
+    </target>
 
-    <taskdef classpathref="cpath.pxe" resource="com/fs/pxe/tools/anttasks.properties"
-      onerror="ignore"  />
+    <target name="try-java-dot-home" if="java.home" unless="pxe.java.home">
+        <echo message="'pxe.java.home' not set trying 'java.home'"/>
+        <property name="pxe.java.home" value="${java.home}"/>
+    </target>
 
-    <mkdir dir="${build.dir}"/>
-  </target>
-		
-  <target name="domain-inventory" depends="init">
-    <pxe-ls jmxurl="${pxe.jmxurl}" jmxusername="${pxe.jmxusername}" jmxpassword="${pxe.jmxpassword}" domain="${pxe.domain}"/>
-  </target>
-		
-  <target name="deploy" depends="init,sar">
-    <pxe-deploy jmxurl="${pxe.jmxurl}" jmxusername="${pxe.jmxusername}" jmxpassword="${pxe.jmxpassword}" domain="${pxe.domain}"
-      sarurl="file:${sarfile}"/>
-    <antcall target="domain-inventory"/>
-  </target>
-		
-  <target name="undeploy" depends="init">
-    <pxe-undeploy jmxurl="${pxe.jmxurl}" jmxusername="${pxe.jmxusername}" jmxpassword="${pxe.jmxpassword}" domain="${pxe.domain}" systemname="${ant.project.name}"/>
-    <antcall target="domain-inventory"/>
-  </target>
+    <target name="fail-no-pxe-java-home" depends="try-ENV-java-underscore-home,try-jdk-dot-home,try-java-dot-home" unless="pxe.java.home">
+        <fail message="property 'pxe.java.home' is not set (try sys env JAVA_HOME or setting pxe.java.home in example.properties)"/>
+    </target>
 
-  <target name="_sendsoap" depends="init">
-    <echo message="pxe.sendsoap.url=${pxe.sendsoap.url}"/>
-    <echo message="pxe.sendsoap.filename=${pxe.sendsoap.filename}"/>
-    <exec executable="${pxe.home}/bin/sendsoap${pxe.script.extension}" dir="${pxe.home}">
-      <env key="JAVA_HOME" value="${pxe.java.home}"/>
-      <arg value="${pxe.sendsoap.url}"/>
-      <arg value="${pxe.sendsoap.filename}"/>
-    </exec>
-  </target>
-  
-  <target name="start" depends="init">
-    <property name="pxe.javaopts.env" value=""/>
-    <exec executable="${pxe.home}/bin/pxe${pxe.script.extension}" dir="${pxe.home}/bin">
-      <env key="JAVA_HOME" value="${pxe.java.home}"/>
-      <env key="PXE_JAVAOPTS" value="${pxe.default.javaopts}"/>
-      <arg line="${pxe.start.args}"/>
-    </exec>
-  </target>
+    <target name="validate-pxe-java-home" depends="init-extensions,fail-no-pxe-java-home" if="pxe.java.home">
+        <available file="${pxe.java.home}/bin/java${pxe.exe.extension}" property="pxe.java.home.good"/>
+    </target>
+
+    <target name="fail-invalid-pxe-java-home" depends="validate-pxe-java-home" unless="pxe.java.home.good">
+        <fail message="Java Home invalid: 'pxe.java.home'=${pxe.java.home}"/>
+    </target>
+
+    <target name="validate-pxe-home">
+        <available file="${lib.dir}/pxe-bootstrap.jar" property="pxe.home.good"/>
+    </target>
+
+    <target name="fail-invalid-pxe-home" depends="validate-pxe-home" unless="pxe.home.good">
+        <fail message="Invalid property 'pxe.home'=${pxe.home}"/>
+    </target>
+
+    <target name="init" depends="init-extensions,fail-invalid-pxe-home,fail-invalid-pxe-java-home">
+        <echo message="pxe.home = ${pxe.home}"/>
+        <echo message="pxe.java.home = ${pxe.java.home}"/>
     
-  <target name="stop" depends="init">
-    <exec executable="${pxe.home}/bin/pxe-shutdown${pxe.script.extension}" dir="${pxe.home}/bin">
-      <env key="JAVA_HOME" value="${pxe.java.home}"/>
-      <env key="PXE_JAVAOPTS" value="${pxe.default.javaopts}"/>
-    </exec>
-  </target>      
+        <!-- Ant Env Takes gets first crack at basic pxe properties override -->
+        <!-- example.properties gets second crack at basic pxe properties override -->
+        <!-- pxe.properties is default authority  -->
+        <property file="${pxe.home}/etc/pxe.properties"/>
+    
+        <property name="pxe.default.javaopts"
+                value=""/>
+
+        <path id="cpath.pxe">
+            <fileset dir="${lib.dir}" includes="**/*.jar" />
+            <pathelement location="${pxe.home}/etc" />
+        </path>
+
+        <taskdef classpathref="cpath.pxe" resource="com/fs/pxe/tools/anttasks.properties"
+                onerror="ignore" />
+
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="_sendsoap" depends="init">
+        <echo message="pxe.sendsoap.url=${pxe.sendsoap.url}"/>
+        <echo message="pxe.sendsoap.filename=${pxe.sendsoap.filename}"/>
+        <exec executable="${pxe.home}/bin/sendsoap${pxe.script.extension}" dir="${pxe.home}">
+            <env key="JAVA_HOME" value="${pxe.java.home}"/>
+            <arg value="${pxe.sendsoap.url}"/>
+            <arg value="${pxe.sendsoap.filename}"/>
+        </exec>
+    </target>
 
 </project>
