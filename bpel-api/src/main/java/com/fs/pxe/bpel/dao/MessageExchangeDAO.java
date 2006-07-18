@@ -8,10 +8,8 @@ package com.fs.pxe.bpel.dao;
 import java.util.Date;
 
 import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * Data access object for a message exchange.

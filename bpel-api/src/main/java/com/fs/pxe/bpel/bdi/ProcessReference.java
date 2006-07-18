@@ -5,8 +5,6 @@
  */
 package com.fs.pxe.bpel.bdi;
 
-import java.util.Collection;
-
 import com.fs.pxe.bpel.common.CorrelationKey;
 import com.fs.pxe.bpel.o.OProcess;
 
