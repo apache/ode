@@ -7,8 +7,6 @@ package com.fs.pxe.daohib.hobj;
 
 import java.util.Date;
 
-import javax.xml.namespace.QName;
-
 /**
  * Base class for Hibernate objects providing auto-generated key and
  * create timestamp.

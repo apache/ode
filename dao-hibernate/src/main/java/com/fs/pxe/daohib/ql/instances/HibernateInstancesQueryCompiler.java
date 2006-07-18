@@ -18,8 +18,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.loader.OuterJoinableAssociation;
-
 import com.fs.pxe.bpel.common.ProcessState;
 import com.fs.pxe.daohib.bpel.hobj.HProcessInstance;
 import com.fs.pxe.ql.Compiler;

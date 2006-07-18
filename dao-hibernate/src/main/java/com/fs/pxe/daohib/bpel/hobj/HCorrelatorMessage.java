@@ -6,8 +6,6 @@
 package com.fs.pxe.daohib.bpel.hobj;
 
 import com.fs.pxe.daohib.hobj.HObject;
-import com.fs.pxe.daohib.hobj.HLargeData;
-
 import java.util.HashSet;
 import java.util.Set;
 

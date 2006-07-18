@@ -8,9 +8,6 @@ package com.fs.pxe.daohib.bpel.hobj;
 import com.fs.pxe.daohib.hobj.HLargeData;
 import com.fs.pxe.daohib.hobj.HObject;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 /**
  * Hibernate-managed table for keeping track of messages.
  *
