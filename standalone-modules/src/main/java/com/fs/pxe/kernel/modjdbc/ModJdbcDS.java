@@ -16,12 +16,10 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.Reference;
-import javax.naming.StringRefAddr;
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opentools.minerva.MinervaJDBCDataSourceFactory;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
 
