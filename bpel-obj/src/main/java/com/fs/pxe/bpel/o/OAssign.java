@@ -5,7 +5,6 @@
  */
 package com.fs.pxe.bpel.o;
 
-import com.fs.pxe.bpel.o.OMessageVarType.Part;
 import com.fs.pxe.bpel.o.OScope.Variable;
 import com.fs.utils.DOMUtils;
 import org.w3c.dom.Document;

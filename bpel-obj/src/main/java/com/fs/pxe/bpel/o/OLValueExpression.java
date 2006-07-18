@@ -5,8 +5,6 @@
  */
 package com.fs.pxe.bpel.o;
 
-import com.fs.pxe.bpel.o.OMessageVarType.Part;
-
 public abstract class OLValueExpression extends OExpression {
 	
 	private static final long serialVersionUID = 1L;
