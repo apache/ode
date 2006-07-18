@@ -26,10 +26,7 @@ import org.quartz.impl.StdScheduler;
 import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.ThreadPool;
-import org.quartz.utils.ConnectionProvider;
 import org.quartz.utils.DBConnectionManager;
-import org.quartz.utils.JNDIConnectionProvider;
-
 import com.fs.pxe.bpel.iapi.BpelServer;
 import com.fs.pxe.bpel.iapi.ContextException;
 import com.fs.pxe.bpel.iapi.Scheduler;
