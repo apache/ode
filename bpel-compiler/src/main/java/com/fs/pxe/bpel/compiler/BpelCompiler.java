@@ -17,8 +17,6 @@ import com.fs.utils.stl.MemberOfFunction;
 import com.fs.utils.stl.UnaryFunction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Text;
-
 import javax.wsdl.*;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;

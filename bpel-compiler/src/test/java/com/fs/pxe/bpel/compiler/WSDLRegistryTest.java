@@ -10,7 +10,6 @@ import com.fs.pxe.bom.wsdl.WSDLFactory4BPEL;
 import com.fs.pxe.bom.wsdl.WSDLFactoryBPEL11;
 import com.fs.utils.xsd.SchemaModel;
 
-import java.net.URI;
 import java.net.URL;
 
 import javax.wsdl.xml.WSDLReader;

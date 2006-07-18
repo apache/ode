@@ -6,7 +6,6 @@
 package com.fs.pxe.bpel.compiler;
 
 import com.fs.pxe.bom.api.Activity;
-import com.fs.pxe.bom.api.Correlation;
 import com.fs.pxe.bom.api.ReceiveActivity;
 import com.fs.pxe.bpel.o.OActivity;
 import com.fs.pxe.bpel.o.OEmpty;
