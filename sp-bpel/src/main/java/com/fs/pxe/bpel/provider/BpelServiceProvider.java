@@ -12,13 +12,9 @@ import com.fs.pxe.bpel.iapi.MyRoleMessageExchange;
 import com.fs.pxe.bpel.pmapi.BpelManagementFacade;
 import com.fs.pxe.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import com.fs.pxe.sfwk.spi.*;
-import com.fs.utils.SerializableUtils;
 import com.fs.utils.msg.MessageBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
