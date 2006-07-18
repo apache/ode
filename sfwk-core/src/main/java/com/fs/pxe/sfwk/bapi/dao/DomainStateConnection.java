@@ -5,10 +5,7 @@
  */
 package com.fs.pxe.sfwk.bapi.dao;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
 
 
 /**
