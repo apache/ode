@@ -5,8 +5,6 @@
  */
 package com.fs.pxe.sfwk.impl;
 
-import com.fs.pxe.sfwk.bapi.dao.MessageExchangeDAO;
-import com.fs.pxe.sfwk.bapi.dao.SystemDAO;
 import com.fs.pxe.sfwk.core.PxeSystemException;
 import com.fs.pxe.sfwk.deployment.ExpandedSAR;
 import com.fs.pxe.sfwk.deployment.som.Channel;

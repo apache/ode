@@ -21,13 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 
 import javax.management.ObjectName;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
