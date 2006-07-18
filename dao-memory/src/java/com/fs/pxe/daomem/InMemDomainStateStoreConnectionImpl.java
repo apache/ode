@@ -8,11 +8,7 @@ package com.fs.pxe.daomem;
 import com.fs.pxe.sfwk.bapi.dao.DomainStateConnection;
 import com.fs.pxe.sfwk.bapi.dao.SystemDAO;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
