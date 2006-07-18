@@ -2,7 +2,6 @@ package com.fs.pxe.jbi;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import javax.jbi.management.DeploymentException;
@@ -118,6 +117,7 @@ class PxeServiceUnit {
     for (QName pid : _pids) {
       try {
         _pxe._server.activate(pid,false);
+        activated.add( pid );
       } catch (Exception ex) {
         e = ex;
         __log.error("Unable to activate " + pid,ex);
