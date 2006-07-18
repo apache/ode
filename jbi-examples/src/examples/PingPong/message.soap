@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
   <SOAP-ENV:Body>
-	<PingRequest xmlns="uri:/Ping.wsdl">
+	<PingRequest xmlns="urn:/Ping.wsdl">
         <text>hello</text>
     </PingRequest>
   </SOAP-ENV:Body>
