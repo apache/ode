@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jaxen.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
