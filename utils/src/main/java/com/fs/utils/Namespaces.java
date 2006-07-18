@@ -18,5 +18,7 @@ public class Namespaces {
   public static final String WSDL_20 = "http://www.w3.org/2006/01/wsdl";
 
   public static final String XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+  
+  public static final String JBI_END_POINT_REFERENCE = "http://java.sun.com/jbi/end-point-reference";  
 
 }
