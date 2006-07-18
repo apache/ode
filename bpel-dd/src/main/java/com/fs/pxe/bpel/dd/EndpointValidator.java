@@ -62,13 +62,19 @@ public class EndpointValidator implements DDValidator {
           if (txt.trim().length() > 0) url = url + txt;
         }
       }
+    } else if (root.getLocalName().equals("end-point-reference")
+            && root.getNamespaceURI().equals( Namespaces.JBI_END_POINT_REFERENCE)) {
+      String serviceName = root.getAttribute("service-name");
+      String endpointName = root.getAttribute("end-point-name");
     }
 
-    try {
-      new URL(url);
-    } catch (MalformedURLException e) {
-      throw new DDValidationException("URL " + root.getAttribute("location") + " declared as endpoint reference " +
-              "in deployment descriptor isn't a valid URL.");
+    if ( url != null ) {
+        try {
+          new URL(url);
+        } catch (MalformedURLException e) {
+          throw new DDValidationException("URL " + root.getAttribute("location") + " declared as endpoint reference " +
+                  "in deployment descriptor isn't a valid URL.");
+        }
     }
   }
 
