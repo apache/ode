@@ -749,7 +749,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     // If we couldn't find the endpoint, then there is no sense
     // in asking the IL to invoke.
     if (partnerEndpoint != null) {
-      mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
+      mex.setStatus(MessageExchange.Status.REQUEST);
       _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
     } else {
       __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
