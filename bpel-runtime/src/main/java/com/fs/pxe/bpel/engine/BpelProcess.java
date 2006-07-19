@@ -84,17 +84,22 @@ public class BpelProcess {
   private Map<QName, PartnerLinkMyRoleImpl> _serviceMap  = 
     new HashMap<QName,PartnerLinkMyRoleImpl>();
 
+  private Map<Integer,Element> _myEprs;
+    
+    
   private Set<EndpointReference> _myEndpoints = new HashSet<EndpointReference>();
 
   public BpelProcess(BpelEngineImpl engine, QName pid, 
       OProcess oprocess,
       Map<Integer,QName> serviceNames,
+      Map<Integer,Element> myEprs,
       BpelEventListener debugger,
       ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry) {
     _pid = pid;
     _engine = engine;
     _replacementMap = new ReplacementMapImpl(oprocess);
     _oprocess = oprocess;
+    _myEprs = myEprs;
     _expLangRuntimeRegistry = expLangRuntimeRegistry;
 
     for (OPartnerLink pl : _oprocess.getAllPartnerLinks()) {
@@ -157,6 +162,7 @@ public class BpelProcess {
       mex.setPortOp(target._plinkDef.myRolePortType,target._plinkDef.getMyRoleOperation(mex.getOperationName()));
     }
   }
+  
   /**
    * Extract the value of a BPEL property from a BPEL messsage variable.
    * 
@@ -508,7 +514,8 @@ public class BpelProcess {
 
     @SuppressWarnings("unchecked")
     private Operation getMyRoleOperation(String operationName) {
-      return _plinkDef.getMyRoleOperation(operationName);
+      Operation op = _plinkDef.getMyRoleOperation(operationName);
+      return op;
     }
 
     private CorrelationKey[] computeCorrelationKeys(
@@ -652,9 +659,10 @@ public class BpelProcess {
   }
 
   void activate() {
-    for (QName svc : _serviceMap.keySet()) 
-      _myEndpoints.add(_engine._contexts.eprContext.activateEndpoint(_pid,svc,null));
-    
+    for (QName svc : _serviceMap.keySet()) {
+      PartnerLinkMyRoleImpl pm = _serviceMap.get(svc);
+      _myEndpoints.add(_engine._contexts.eprContext.activateEndpoint(_pid,svc,_myEprs.get(pm._plinkDef.getId())));
+    }
   }
   
   void deactivate() {
