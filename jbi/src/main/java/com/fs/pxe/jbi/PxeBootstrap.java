@@ -13,6 +13,7 @@ import javax.management.ObjectName;
  */
 public class PxeBootstrap implements Bootstrap {
   
+  @SuppressWarnings("unused")
   private InstallationContext _installContext;
 
 	/**

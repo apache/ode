@@ -19,7 +19,7 @@ class JbiMessageExchangeEventRouter implements JbiMessageExchangeProcessor {
     if (mex.getRole().equals(javax.jbi.messaging.MessageExchange.Role.CONSUMER)) {
       _pxe._consumer.onJbiMessageExchange(mex);
     } else if (mex.getRole().equals(javax.jbi.messaging.MessageExchange.Role.PROVIDER)) {
-      PxeService svc = _pxe.getService(mex.getEndpoint().getServiceName());
+      PxeService svc = _pxe.getServiceByServiceName(mex.getEndpoint().getServiceName());
       if (svc == null)  {
         __log.error("Received message exchange for unknown service: " + mex.getEndpoint().getServiceName());
         return;

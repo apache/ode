@@ -1,8 +1,6 @@
 package com.fs.pxe.jbi;
 
 import javax.jbi.servicedesc.ServiceEndpoint;
-import javax.xml.namespace.QName;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;

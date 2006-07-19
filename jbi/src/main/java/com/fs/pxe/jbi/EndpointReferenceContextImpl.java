@@ -5,11 +5,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import com.fs.pxe.bpel.iapi.ContextException;
 import com.fs.pxe.bpel.iapi.EndpointReference;
 import com.fs.pxe.bpel.iapi.EndpointReferenceContext;
@@ -32,6 +28,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   private static final Log __log = LogFactory.getLog(EndpointReferenceContextImpl.class);
 
   private final PxeContext _pxe;
+
+  static final QName JBI_EPR = new QName("http://java.sun.com/jbi/end-point-reference", "end-point-reference");
   
   public EndpointReferenceContextImpl(PxeContext pxe) {
     _pxe = pxe;
@@ -40,7 +38,31 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   public EndpointReference resolveEndpointReference(Element epr) {
     QName elname = new QName(epr.getNamespaceURI(),epr.getLocalName());
     
-    // We always expect the EPR to be wrapped in a BPEL service-ref element.
+    if (__log.isDebugEnabled()) {
+      __log.debug( "resolveEndpointReference:\n" + prettyPrint( epr ) );
+    }
+    if (elname.equals(EndpointReference.SERVICE_REF_QNAME)) {
+        epr = DOMUtils.getFirstChildElement(epr);
+        elname = new QName(epr.getNamespaceURI(),epr.getLocalName());
+    }
+    // resolve JBI end-point-references directly
+    if (epr != null && elname.equals(JBI_EPR)) {
+      String serviceName = epr.getAttribute("service-name");
+      QName serviceQName = convertClarkQName( serviceName );
+      String endpointName = epr.getAttribute("end-point-name");
+      ServiceEndpoint se = _pxe.getContext().getEndpoint(serviceQName, endpointName);
+      if (se == null) {
+        __log.warn( "Unable to resolve JBI endpoint reference:\n" + prettyPrint( epr ) );
+        return null;
+      }
+      if (__log.isDebugEnabled()) {
+        __log.debug( "Resolved JBI endpoint reference: " + se );
+      }
+      return new JbiEndpointReference(se);
+    }
+    
+    // Otherwise, we expect the EPR to be wrapped in a BPEL service-ref element.
+    /*
     if (!elname.equals(EndpointReference.SERVICE_REF_QNAME))
       throw new IllegalArgumentException("EPR root element "
           + elname + " should be " + EndpointReference.SERVICE_REF_QNAME);
@@ -54,8 +76,11 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     if (se == null)
       return null;
     return new JbiEndpointReference(se);
+    */
+  __log.warn( "Unsupported endpoint reference:\n" + prettyPrint( epr ) );
+    return null;
   }
-
+  
   public EndpointReference activateEndpoint(QName pid, QName serviceId, Element externalEpr) {
     try {
       return _pxe.activateEndpoint(pid,serviceId,externalEpr);
@@ -80,9 +105,30 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     }
   }
 
-  public EndpointReference convertEndpoint(QName qName, Element element) {
-    EndpointReference endpoint = EndpointFactory.convert(qName, element);
+  public EndpointReference convertEndpoint(QName eprType, Element element) {
+    EndpointReference endpoint = EndpointFactory.convert(eprType, element);
+ 
+    __log.warn( "ALEX convertEndpoint: " + eprType + " " + prettyPrint( element ) );
+    
     // Forcing JBI lookup
     return resolveEndpointReference(endpoint.toXML().getDocumentElement());
+  }
+  
+  public static QName convertClarkQName(String name) {
+    int pos = name.indexOf('}');
+    if ( name.startsWith("{") && pos > 0 ) {
+      String ns = name.substring(1,pos);
+      String lname = name.substring(pos+1, name.length());
+      return new QName( ns, lname );
+    }
+    return new QName( name );
+  }
+ 
+  private String prettyPrint( Element el ) {
+      try {
+          return DOMUtils.prettyPrint( el );
+      } catch ( java.io.IOException ioe ) {
+          return ioe.getMessage();
+      }
   }
 }
