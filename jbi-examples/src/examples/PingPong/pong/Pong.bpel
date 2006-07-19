@@ -40,22 +40,24 @@
         <assign name="assignPongRequest">
             <!-- add "ping" text to the input text -->
             <copy>
-                <from>concat($pongRequest.body/text, ' pong ')</from>
-                <to variable="text"/>
+                <from>concat($pongRequest.body/pong:text, ' pong')</from>
+                <to>$text</to>
             </copy>
             <!-- initialize pongResponse -->
             <copy>
                 <from>
                     <literal>
-                        <pong:text/>
+                        <pong:PongRequest>
+                            <pong:text/>
+                        </pong:PongRequest>
                     </literal>
                 </from>
-                <to variable="pongResponse" part="body"/>
+                <to>$pongResponse.body</to>
             </copy>
             <!-- copy new text into pongResponse -->
             <copy>
                 <from>$text</from>
-                <to>$pongResponse.body/text</to>
+                <to>$pongResponse.body/pong:text</to>
             </copy>
         </assign>
         

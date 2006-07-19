@@ -47,22 +47,24 @@
         <assign name="assignPongRequest">
             <!-- add "ping" text to the input text -->
             <copy>
-                <from>concat($pingRequest.body/text, ' ping ')</from>
+                <from>concat($pingRequest.body/ping:text, ' ping')</from>
                 <to variable="text"/>
             </copy>
             <!-- initialize pongRequest -->
             <copy>
                 <from>
                     <literal>
-                        <pong:text/>
+                        <pong:PongRequest>
+                            <pong:text/>
+                        </pong:PongRequest>
                     </literal>
                 </from>
-                <to variable="pongRequest" part="body"/>
+                <to>$pongRequest.body</to>
             </copy>
             <!-- copy new text into pongRequest -->
             <copy>
                 <from>$text</from>
-                <to>$pongRequest.body/text</to>
+                <to>$pongRequest.body/pong:text</to>
             </copy>
         </assign>
         
@@ -75,22 +77,24 @@
         
         <assign name="assignPingResponse">
             <copy>
-                <from>$pongResponse.body/text</from>
-                <to variable="text"/>
+                <from>$pongResponse.body/pong:text</from>
+                <to>$text</to>
             </copy>
             <!-- initialize pingResponse -->
             <copy>
                 <from>
                     <literal>
-                        <ping:text/>
+                        <ping:PingResponse>
+                            <ping:text/>
+                        </ping:PingResponse>
                     </literal>
                 </from>
-                <to variable="pingResponse" part="body"/>
+                <to>$pingResponse.body</to>
             </copy>
             <!-- copy new text into pingResponse -->
             <copy>
                 <from>$text</from>
-                <to>$pingResponse.body/text</to>
+                <to>$pingResponse.body/ping:text</to>
             </copy>
         </assign>
 
