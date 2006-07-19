@@ -19,8 +19,6 @@ import javax.jbi.JBIException;
 import javax.jbi.messaging.*;
 import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.xml.namespace.QName;
-import javax.xml.transform.dom.DOMSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
@@ -43,18 +41,21 @@ public class PxeService implements JbiMessageExchangeProcessor {
 
   private PxeContext  _pxe;
 
-  private QName _serviceName;
+  private QName _pxeServiceId;
 
-  private String _portName;
+  private QName _jbiServiceName;
+
+  private String _jbiPortName;
 
   private Element _serviceref;
   
   
-  public PxeService(PxeContext pxeContext, QName serviceName, String portName)
+  public PxeService(PxeContext pxeContext, QName pxeServiceId, QName jbiServiceName, String jbiPortName)
       throws Exception {
     _pxe = pxeContext;
-    _serviceName = serviceName;
-    _portName = portName;
+    _pxeServiceId = pxeServiceId;
+    _jbiServiceName = jbiServiceName;
+    _jbiPortName = jbiPortName;
   }
 
   /**
@@ -64,16 +65,16 @@ public class PxeService implements JbiMessageExchangeProcessor {
    */
   public void activate() throws JBIException {
     if (_serviceref ==  null) {
-      ServiceEndpoint[] candidates = _pxe.getContext().getExternalEndpointsForService(_serviceName);
+      ServiceEndpoint[] candidates = _pxe.getContext().getExternalEndpointsForService(_jbiServiceName);
       if (candidates.length != 0) {
         _external = candidates[0];
       }
     }
-    
-    _internal = _pxe.getContext().activateEndpoint(_serviceName, _portName);
+    _internal = _pxe.getContext().activateEndpoint(_jbiServiceName, _jbiPortName);
+    if (__log.isDebugEnabled()) {
+      __log.debug("Activated service " + _jbiServiceName + " on port " +  _jbiPortName);
+    }
     // TODO: Is there a race situation here?
-    
-    __log.debug("Activated service " + _serviceName + " with port " +  _portName);
   }
 
   /**
@@ -81,7 +82,7 @@ public class PxeService implements JbiMessageExchangeProcessor {
    */
   public void deactivate() throws JBIException {
     _pxe.getContext().deactivateEndpoint(_internal);
-    __log.debug("Dectivated service " + _serviceName + " with port " +  _portName);
+    __log.debug("Dectivated service " + _jbiServiceName + " with port " +  _jbiPortName);
   }
 
   public ServiceEndpoint getInternalServiceEndpoint() {
@@ -194,11 +195,15 @@ public class PxeService implements JbiMessageExchangeProcessor {
     boolean success = false;
     MyRoleMessageExchange pxeMex = null;
     try {
-       pxeMex = _pxe._server.getEngine().createMessageExchange(
-          jbiMex.getExchangeId(),
-          serviceName,
-          null,
-          jbiMex.getOperation().getLocalPart());
+      if (__log.isDebugEnabled()) {
+      __log.debug("invokePxe() JBI exchangeId=" + jbiMex.getExchangeId() + " serviceName=" + serviceName + " operation=" + jbiMex.getOperation().getLocalPart() );
+      __log.debug("invokePxe() PXE servideId=" + _pxeServiceId + " serviceName=" + _jbiServiceName + " port=" + _jbiPortName + " internal=" + _internal );
+      }
+      pxeMex = _pxe._server.getEngine().createMessageExchange(
+        jbiMex.getExchangeId(),
+        _pxeServiceId,
+        null,
+        jbiMex.getOperation().getLocalPart());
 
       if (pxeMex.getOperation() != null) {
         javax.wsdl.Message msgdef = pxeMex.getOperation().getInput().getMessage();
@@ -316,8 +321,13 @@ public class PxeService implements JbiMessageExchangeProcessor {
     }
   }
 
-  public QName getServiceName() {
-    return _serviceName;
+  public QName getJbiServiceName() {
+    return _jbiServiceName;
+  }
+
+  
+  public QName getPxeServiceId() {
+    return _jbiServiceName;
   }
 
   

@@ -10,6 +10,15 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
+import javax.jbi.JBIException;
+import javax.jbi.component.ComponentContext;
+import javax.jbi.component.ComponentLifeCycle;
+import javax.jbi.component.ServiceUnitManager;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -19,24 +28,13 @@ import org.hibernate.dialect.DialectFactory;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
 
-import javax.jbi.JBIException;
-import javax.jbi.component.ComponentContext;
-import javax.jbi.component.ComponentLifeCycle;
-import javax.jbi.component.ServiceUnitManager;
-import javax.management.*;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
 import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import com.fs.pxe.daohib.DataSourceConnectionProvider;
 import com.fs.pxe.daohib.HibernateTransactionManagerLookup;
 import com.fs.pxe.daohib.SessionManager;
 import com.fs.pxe.daohib.bpel.BpelDAOConnectionFactoryImpl;
-import com.fs.pxe.jbi.msgmap.JbiWsdl11WrapperMapper;
 import com.fs.pxe.jbi.msgmap.Mapper;
-
 import com.fs.utils.fs.TempFileManager;
 
 /**
@@ -445,7 +443,7 @@ public class PxeLifeCycle implements ComponentLifeCycle {
         if (mapper != null) {
           dialect = mapper.getDialectClass(dbMajorVer);
         } else {
-          Dialect hbDialect = hbDialect = DialectFactory.determineDialect(
+          Dialect hbDialect = DialectFactory.determineDialect(
               dbProductName, dbMajorVer);
           if (hbDialect != null)
             dialect = hbDialect.getClass().getName();

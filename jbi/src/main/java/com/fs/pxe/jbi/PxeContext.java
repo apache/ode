@@ -27,12 +27,9 @@ import org.w3c.dom.Element;
 import com.fs.pxe.bpel.dao.BpelDAOConnectionFactory;
 import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.iapi.EndpointReference;
-import com.fs.pxe.bpel.iapi.MyRoleMessageExchange;
 import com.fs.pxe.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import com.fs.pxe.jbi.msgmap.DocLitMapper;
-import com.fs.pxe.jbi.msgmap.JbiWsdl11WrapperMapper;
 import com.fs.pxe.jbi.msgmap.Mapper;
-import com.fs.pxe.jbi.msgmap.ServiceMixMapper;
+import com.fs.utils.DOMUtils;
 
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
@@ -76,7 +73,11 @@ public final class PxeContext {
 
   public DataSource _dataSource;
 
-  private Map<QName, PxeService> _activeServices = new ConcurrentHashMap<QName, PxeService>();
+  /** Mapping of PxeServiceId to PxeService */
+  private Map<QName, PxeService> _activePxeServices = new ConcurrentHashMap<QName, PxeService>();
+
+  /** Mapping of JbiServiceName to PxeService */
+  private Map<QName, PxeService> _activeJbiServices = new ConcurrentHashMap<QName, PxeService>();
 
 
   public PxeContext() {
@@ -150,25 +151,57 @@ public final class PxeContext {
     return (TransactionManager) getContext().getTransactionManager();
   }
 
-  public MyEndpointReference activateEndpoint(QName pid, QName serviceId,
+  public MyEndpointReference activateEndpoint(QName pid, QName pxeServiceId,
       Element externalEpr) throws Exception {
-    PxeService service = new PxeService(this, serviceId, "pxe");
+    QName jbiServiceName;
+    String jbiEndpointName;
+
+    if ( __log.isDebugEnabled() ) {
+      __log.debug( "Activate endpoint: " + prettyPrint( externalEpr ) );
+    }
+
+    QName elname = new QName(externalEpr.getNamespaceURI(),externalEpr.getLocalName());
+    if (elname.equals(EndpointReference.SERVICE_REF_QNAME)) {
+        externalEpr = DOMUtils.getFirstChildElement(externalEpr);
+        if ( externalEpr == null ) {
+            throw new IllegalArgumentException( "Unsupported EPR: " + prettyPrint(externalEpr) );
+        }
+        elname = new QName(externalEpr.getNamespaceURI(),externalEpr.getLocalName());
+    }
+    
+    // extract serviceName and endpointName from JBI EPR 
+    if (elname.equals(EndpointReferenceContextImpl.JBI_EPR)) {
+      String serviceName = externalEpr.getAttribute("service-name");
+      jbiServiceName = EndpointReferenceContextImpl.convertClarkQName( serviceName );
+      jbiEndpointName = externalEpr.getAttribute("end-point-name");
+    } else {
+      throw new IllegalArgumentException( "Unsupported EPR: " + prettyPrint(externalEpr) );
+    }
+    
+    PxeService service = new PxeService(this, pxeServiceId, jbiServiceName, jbiEndpointName);
     MyEndpointReference myepr = new MyEndpointReference(service);
     service.activate();
-    _activeServices.put(serviceId, service);
+    _activePxeServices.put(pxeServiceId, service);
+    _activeJbiServices.put(jbiServiceName, service);
     return myepr;
 
   }
 
   public void deactivateEndpoint(MyEndpointReference epr) throws Exception {
-    PxeService svc = _activeServices.remove(epr.getService().getServiceName());
-    if (svc != null)
+    PxeService svc = _activePxeServices.remove(epr.getService().getPxeServiceId());
+    _activeJbiServices.remove(epr.getService().getJbiServiceName());
+    if (svc != null) {
       svc.deactivate();
+    }
   }
 
-  public PxeService getService(QName serviceName) {
-    return _activeServices.get(serviceName);
-  }
+  public PxeService getService(QName pxeServiceId) {
+	    return _activePxeServices.get(pxeServiceId);
+	  }
+
+  public PxeService getServiceByServiceName(QName jbiServiceName) {
+	    return _activeJbiServices.get(jbiServiceName);
+	  }
 
   public Mapper findMapper(NormalizedMessage nmsMsg, Operation op) {
     ArrayList<Mapper> maybe = new ArrayList<Mapper>();
@@ -208,4 +241,13 @@ public final class PxeContext {
   public Mapper getDefaultMapper() {
     return _mappers.get(0);
   }
+
+  private String prettyPrint( Element el ) {
+      try {
+          return DOMUtils.prettyPrint( el );
+      } catch ( java.io.IOException ioe ) {
+          return ioe.getMessage();
+      }
+  }
+  
 }

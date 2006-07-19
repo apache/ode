@@ -19,8 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jbi.messaging.*;
 import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.xml.namespace.QName;
-import javax.xml.transform.dom.DOMSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -90,6 +88,7 @@ class PxeConsumer implements JbiMessageExchangeProcessor {
         mapper.toNMS(nmsg,pxeMex.getRequest(), pxeMex.getOperation().getInput().getMessage());
         inonly.setInMessage(nmsg);
         _pxe.getChannel().send(inonly);
+        pxeMex.replyOneWayOk();
       } else {
         InOut inout = (InOut) jbiMex;
         NormalizedMessage nmsg = inout.createMessage();
@@ -98,6 +97,7 @@ class PxeConsumer implements JbiMessageExchangeProcessor {
         _pxe.getChannel().send(inout);
         _outstandingExchanges.put(inout.getExchangeId(), pxeMex
             .getMessageExchangeId());
+        pxeMex.replyAsync();
       }
     } catch (MessagingException me) {
       String errmsg = "Error sending message to JBI for PXE mex " + pxeMex;
