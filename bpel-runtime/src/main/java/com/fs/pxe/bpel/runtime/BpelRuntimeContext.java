@@ -8,7 +8,6 @@ package com.fs.pxe.bpel.runtime;
 import com.fs.pxe.bpel.common.CorrelationKey;
 import com.fs.pxe.bpel.common.FaultException;
 import com.fs.pxe.bpel.evt.ProcessInstanceEvent;
-import com.fs.pxe.bpel.iapi.EndpointReference;
 import com.fs.pxe.bpel.o.OMessageVarType;
 import com.fs.pxe.bpel.o.OMessageVarType.Part;
 import com.fs.pxe.bpel.o.OPartnerLink;

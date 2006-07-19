@@ -9,8 +9,6 @@ package com.fs.pxe.bpel.engine;
 import com.fs.pxe.bpel.common.*;
 import com.fs.pxe.bpel.dao.*;
 import com.fs.pxe.bpel.evt.BpelEvent;
-import com.fs.pxe.bpel.evt.ProcessInstanceStateChangeEvent;
-import com.fs.pxe.bpel.evt.ProcessTerminationEvent;
 import com.fs.pxe.bpel.evtproc.ActivityStateDocumentBuilder;
 import com.fs.pxe.bpel.o.OPartnerLink;
 import com.fs.pxe.bpel.o.OProcess;
