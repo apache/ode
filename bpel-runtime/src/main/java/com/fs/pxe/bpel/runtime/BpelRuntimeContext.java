@@ -114,10 +114,8 @@ public interface BpelRuntimeContext {
 
   Node initializeVariable(VariableInstance var, Node initData);
 
-  Element writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
-
   /**
-   * Update (potentially partially) a partner EPR by consolidating the data received
+   * Writes (potentially partially) a partner EPR by consolidating the data received
    * during a session-based interaction (message exchanges with session information)
    * with the data we already have.
    * @param variable
@@ -125,7 +123,7 @@ public interface BpelRuntimeContext {
    * @return the updated endpoint
    * @throws FaultException
    */
-  Element updatePartnerEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
+  Element writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
 
   Node convertEndpointReference(Element epr, Node targetNode);
 

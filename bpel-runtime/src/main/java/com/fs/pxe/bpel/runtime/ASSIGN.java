@@ -416,6 +416,7 @@ class ASSIGN extends ACTIVITY {
             (rvalue.getNodeType() == Node.ELEMENT_NODE && !rvalue.getLocalName().equals("service-ref"))) {
       Document doc = DOMUtils.newDocument();
       Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+      doc.appendChild(serviceRef);
       serviceRef.appendChild(doc.importNode(rvalue, true));
       rvalue = serviceRef;
     }

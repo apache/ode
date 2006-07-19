@@ -31,6 +31,8 @@ public class HMessageExchange extends HObject {
 
   private HLargeData _endpoint;
 
+  private HLargeData _callbackEndpoint;
+
   private HMessage _request;
 
   private HMessage _response;
@@ -104,6 +106,17 @@ public class HMessageExchange extends HObject {
 
   public void setEndpoint(HLargeData endpoint) {
     _endpoint = endpoint;
+  }
+
+  /**
+   * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete"
+   */
+  public HLargeData getCallbackEndpoint() {
+    return _callbackEndpoint;
+  }
+
+  public void setCallbackEndpoint(HLargeData endpoint) {
+    _callbackEndpoint = endpoint;
   }
 
   /**

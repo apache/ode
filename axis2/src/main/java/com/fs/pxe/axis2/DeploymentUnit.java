@@ -104,9 +104,8 @@ public class DeploymentUnit {
         }
       } catch (AxisFault axisFault) {
         throw new DeploymentException("Service deployment in Axis2 failed!", axisFault);
-      } catch (IOException e) {
-        // Highly unexpected
-        e.printStackTrace();
+      } catch (Throwable e) {
+
       }
     }
     _lastModified = new File(_duDirectory, "deploy.xml").lastModified();

@@ -41,15 +41,15 @@ public class PXEMessageReceiver extends AbstractMessageReceiver {
       engine.send(outMsgContext);
     } else {
       // No response expected, this thread doesn't need us
-      _executorService.submit(new Runnable() {
-        public void run() {
-          try {
+//      _executorService.submit(new Runnable() {
+//        public void run() {
+//          try {
             invokeBusinessLogic(msgContext, null);
-          } catch (AxisFault axisFault) {
-            __log.error("Error process in-only message.", axisFault);
-          }
-        }
-      });
+//          } catch (AxisFault axisFault) {
+//            __log.error("Error processing in-only message.", axisFault);
+//          }
+//        }
+//      });
     }
   }
 

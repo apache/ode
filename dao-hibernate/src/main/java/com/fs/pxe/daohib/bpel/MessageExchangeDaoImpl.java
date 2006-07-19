@@ -137,7 +137,31 @@ public class MessageExchangeDaoImpl extends HibernateDao
     if (ld == null)
       return null;
     try {
-      return (Element)DOMUtils.stringToDOM(ld.getText());
+      return DOMUtils.stringToDOM(ld.getText());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void setCallbackEPR(Element source) {
+    if (source == null)
+      _hself.setCallbackEndpoint(null);
+    else {
+      HLargeData ld = new HLargeData(DOMUtils.domToString(source));
+      getSession().save(ld);
+      _hself.setCallbackEndpoint(ld);
+    }
+
+    getSession().saveOrUpdate(_hself);
+
+  }
+
+  public Element getCallbackEPR() {
+    HLargeData ld = _hself.getCallbackEndpoint();
+    if (ld == null)
+      return null;
+    try {
+      return DOMUtils.stringToDOM(ld.getText());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -33,11 +33,12 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
   protected EndpointReference _epr;
 
+  protected EndpointReference _callbackEpr;
+
   protected final MessageExchangeDAO _dao;
   
   /**
    * Constructor: requires the minimal information for a message exchange.
-   * @param id
    * @param pattern
    * @param opname
    * @param epr
@@ -189,6 +190,34 @@ abstract class MessageExchangeImpl implements MessageExchange {
   public Message createMessage(javax.xml.namespace.QName msgType) {
     MessageDAO mdao = getDAO().createMessage(msgType);
     return new MessageImpl(mdao);
+  }
+
+  public void setEndpointReference(EndpointReference ref) {
+    _epr = ref;
+    if (ref != null)
+      getDAO().setEPR(ref.toXML().getDocumentElement());
+  }
+
+  public EndpointReference getEndpointReference() throws BpelEngineException {
+    if (_epr != null) return _epr;
+    if (getDAO().getEPR() == null)
+      return null;
+
+    return _epr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getEPR());
+  }
+
+  public void setCallbackEndpointReference(EndpointReference ref) {
+    _callbackEpr = ref;
+    if (ref != null)
+      getDAO().setCallbackEPR(ref.toXML().getDocumentElement());
+  }
+
+  public EndpointReference getCallbackEndpointReference() throws BpelEngineException {
+    if (_callbackEpr != null) return _callbackEpr;
+    if (getDAO().getCallbackEPR() == null)
+      return null;
+
+    return _callbackEpr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getCallbackEPR());
   }
 
   QName getServiceName() {

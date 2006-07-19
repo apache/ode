@@ -35,14 +35,14 @@ public interface Message {
    * @param partName name of the part
    * @return named {@l
    */
-  Content getPart(String partName);
+  Element getPart(String partName);
    
   /**
    * Set the message part.
    * @param partName name of part
    * @param content part content
    */
-  void setMessagePart(String partName, Content content);
+  void setMessagePart(String partName, Element content);
 
   /**
    * Set the message as an element. The name of the element is irrelevant,

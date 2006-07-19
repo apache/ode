@@ -54,8 +54,10 @@ public class PXEAxisDispatcher extends AbstractDispatcher {
             log.debug("Checking for Operation using SOAP message body's first child's local name : "
                             + localName);
             operation = service.getOperation(new QName(localName));
-            if (operation != null)
+            if (operation != null) {
+                log.debug("Found operation " + operation);
                 return operation;
+            }
 
             // Of course, the element name most likely uses the suffix
             // Request or Response, so look for those and strip them.
@@ -68,7 +70,7 @@ public class PXEAxisDispatcher extends AbstractDispatcher {
                 return service.getOperation(new QName(localName.substring(0, index)));
             }
         }
-
+        log.warn("No operation has been found!");
         return null;
     }
 
@@ -88,10 +90,12 @@ public class PXEAxisDispatcher extends AbstractDispatcher {
             if (path != null) {
                 AxisConfiguration registry =
                         messageContext.getConfigurationContext().getAxisConfiguration();
-                return registry.getService(path);
+                AxisService service = registry.getService(path);
+                log.debug("Found service in registry from name " + path + ": " + service);
+                return service;
             }
         }
-
+        log.warn("No service has been found!");
         return null;
     }
     

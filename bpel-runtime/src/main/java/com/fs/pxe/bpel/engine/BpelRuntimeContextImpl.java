@@ -44,9 +44,11 @@ import com.fs.pxe.bpel.runtime.channels.PickResponseChannel;
 import com.fs.pxe.bpel.runtime.channels.TimerResponseChannel;
 import com.fs.pxe.bpel.epr.MutableEndpoint;
 import com.fs.pxe.bpel.epr.WSDL11Endpoint;
+import com.fs.pxe.bpel.epr.WSAEndpoint;
 import com.fs.utils.DOMUtils;
 import com.fs.utils.ObjectPrinter;
 import com.fs.utils.Namespaces;
+import com.fs.utils.GUID;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import sun.rmi.transport.Endpoint;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -205,7 +208,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     sendEvent(new ProcessCompletionEvent(null));
     _dao.finishCompletion();
 
-    failOutstandingMessageExchanges();
+    completeOutstandingMessageExchanges();
   }
 
   /**
@@ -415,7 +418,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   private PartnerLinkDAO fetchEndpointReference(PartnerLinkInstance pLink,
-                                            boolean isMyEPR) throws FaultException {
+                                                boolean isMyEPR) throws FaultException {
     ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
     PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
     PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
@@ -471,7 +474,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public Element writeEndpointReference(PartnerLinkInstance variable,
                                         Element data) throws FaultException {
-    fetchEndpointReferenceData(variable, false);
     PartnerLinkDAO eprDAO = fetchEndpointReference(variable, false);
     Element originalEprElmt = eprDAO.getPartnerEPR();
 
@@ -481,7 +483,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     // Merging target endpoint with original endpoint and converting everything to
-    // a WSDL 1.1 service.
+    // a WSA endpoint reference.
     Map conversionMap = new HashMap();
     if (originalEprElmt != null) {
       MutableEndpoint originalEpr =
@@ -491,7 +493,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     MutableEndpoint targetEpr =
             (MutableEndpoint) _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(data);
     conversionMap.putAll(targetEpr.toMap());
-    WSDL11Endpoint mergedEpr = new WSDL11Endpoint();
+    WSAEndpoint mergedEpr = new WSAEndpoint();
     mergedEpr.fromMap(conversionMap);
 
     eprDAO.setPartnerEPR(mergedEpr.toXML().getDocumentElement());
@@ -501,46 +503,48 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   public String fetchEndpointSessionId(PartnerLinkInstance pLink,
                                        boolean isMyEPR) throws FaultException {
     Element eprElmt = fetchEndpointReferenceData(pLink, isMyEPR);
-    // This is rather ugly as we're assuming that the session identifier is
-    // always a direct
-    // child of the epr element. However I rather that than adding a specific
-    // session id
-    // field in the DAO.
-    NodeList ids = eprElmt.getElementsByTagNameNS(
-        Namespaces.INTALIO_SESSION_NS, "identifier");
-    if (ids.getLength() > 0)
-      return ids.item(0).getTextContent();
-    else
-      return null;
+    // Internally our EPR are always WSA
+    WSAEndpoint wsaEndpoint = new WSAEndpoint();
+    wsaEndpoint.set(eprElmt);
+    return wsaEndpoint.getSessionId();
   }
 
-  private Element fetchMyRoleSessionEndpoint(PartnerLinkInstance pLink)
+  private EndpointReference fetchMyRoleSessionEndpoint(PartnerLinkInstance pLink)
       throws FaultException {
-    // TODO: Rework this: perhaps the EPR should not be set in the
-    // TODO: database until this point?
-    // Element myRoleEpr = eprDao.getEPR();
-    // if (myRoleEpr == null)
-    // throw new FaultException(
-    // _bpelProcess._oprocess.constants.qnUninitializedPartnerRole,
-    // "Endpoint reference for myRole on partner link "
-    // + pLink.partnerLink.getName() + " isn't initialized!");
-    // Element result = null; // TODO:
-    // _bpelProcess._context.checkMyEndpoint(myRoleEpr);
-    // // The endpoint has been modified to include a session id
-    // if (myRoleEpr != result) {
-    // eprDao.setEPR(result);
-    // }
-    return null;
+    PartnerLinkDAO pl = fetchEndpointReference(pLink, true);
+    Element myRoleEpr = pl.getMyEPR();
+    if (myRoleEpr == null) throw new FaultException(
+            _bpelProcess._oprocess.constants.qnUninitializedPartnerRole,
+            "Endpoint reference for myRole on partner link " + pLink.partnerLink.getName() + " isn't initialized!");
+
+    EndpointReference resolvedEpr = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(myRoleEpr);
+    WSAEndpoint wsaEpr;
+    // We're usually careful to only deal with WSA endpoints internally, because
+    // it's much more convenient, but another endpoint could slip through (for
+    // example if it's set in the PM API).
+    if (resolvedEpr instanceof WSAEndpoint) {
+      wsaEpr = (WSAEndpoint) resolvedEpr;
+    } else {
+      wsaEpr = (WSAEndpoint) _bpelProcess._engine._contexts.eprContext
+              .convertEndpoint(Namespaces.WS_ADDRESSING_ENDPOINT, myRoleEpr);
+    }
+
+    // Including a session id in our EPR as it could be needed
+    if (wsaEpr.getSessionId() == null) {
+      wsaEpr.setSessionId(new GUID().toString());
+      myRoleEpr = wsaEpr.toXML().getDocumentElement();
+      pl.setMyEPR(myRoleEpr);
+    }
+    return wsaEpr;
   }
 
-  public Element updatePartnerEndpointReference(PartnerLinkInstance variable,
-                                                Element data) throws FaultException {
-    ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
-    PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink
-        .getId());
-    eprDAO.setPartnerEPR(data);
-    return data;
-  }
+//  public Element updatePartnerEndpointReference(PartnerLinkInstance variable,
+//                                                Element data) throws FaultException {
+//    ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
+//    PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink.getId());
+//    eprDAO.setPartnerEPR(data);
+//    return data;
+//  }
 
   public Node convertEndpointReference(Element sourceNode, Node targetNode) {
      QName nodeQName;
@@ -698,7 +702,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     we.setType(WorkEvent.Type.TIMER);
     _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we
         .getDetail(), timeToFire);
-
   }
 
   public String invoke(PartnerLinkInstance partnerLink, Operation operation,
@@ -716,9 +719,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
 
     // Getting my endpoint (if initialized and needed)
-    Node myEPR = null;
+    EndpointReference myEPR = null;
     if (partnerLink.partnerLink.hasMyRole())
       myEPR = fetchMyRoleSessionEndpoint(partnerLink);
+
     Element partnerEPR = fetchEndpointReferenceData(partnerLink, false);
 
     MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(
@@ -730,13 +734,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     mexDao.setPartnerLinkModelId(partnerLink.partnerLink.getId());
     mexDao.setProcess(_dao.getProcess());
     mexDao.setInstance(_dao);
-    mexDao
-        .setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE
+    mexDao.setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE
             : MessageExchangePattern.REQUEST_ONLY).toString());
     mexDao.setEPR(partnerEPR);
     mexDao.setChannel(channel == null ? null : channel.export());
-    MessageDAO message = mexDao.createMessage(operation.getInput().getMessage()
-        .getQName());
+    MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
     mexDao.setRequest(message);
     message.setData(outgoingMessage);
     message.setType(operation.getInput().getMessage().getQName());
@@ -745,6 +747,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(
         _bpelProcess._engine, mexDao,
         partnerLink.partnerLink.partnerRolePortType, operation, partnerEndpoint);
+    if (myEPR != null) mex.setCallbackEndpointReference(myEPR);
 
     // If we couldn't find the endpoint, then there is no sense
     // in asking the IL to invoke.
@@ -756,9 +759,13 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
       mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint",
           partnerEPR);
     }
-
     evt.setMexId(mexDao.getMessageExchangeId());
     sendEvent(evt);
+
+    // MEX pattern is request only, at this point the status can only be a one way
+    if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
+      mexDao.setStatus(MessageExchange.Status.ONE_WAY.toString());
+    }
 
     // Check if there is a synchronous response, if so, we need to inject the
     // message on the response channel.
@@ -996,6 +1003,31 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
   }
 
+  private void completeOutstandingMessageExchanges() {
+    String[] mexRefs = _outstandingRequests.releaseAll();
+    for (String mexId : mexRefs) {
+      MessageExchangeDAO mexDao = _dao.getConnection()
+          .getMessageExchange(mexId);
+      MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
+          _bpelProcess._engine, mexDao);
+      switch(mex.getStatus()) {
+        case ASYNC:
+        case ONE_WAY:
+        case RESPONSE:
+          mex.setStatus(MessageExchange.Status.COMPLETED_OK);
+          break;
+        case REQUEST:
+          if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+            mex.setStatus(MessageExchange.Status.COMPLETED_OK);
+            break;
+          }
+        default:
+          mex.setFailure(FailureType.OTHER, "No response.", null);
+          _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+      }
+    }
+  }
+
   private void failOutstandingMessageExchanges() {
     String[] mexRefs = _outstandingRequests.releaseAll();
     for (String mexId : mexRefs) {
@@ -1116,8 +1148,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   }
 
   public Element getSourceEPR(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
+    MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+    return dao.getCallbackEPR();
   }
 
 }

@@ -31,9 +31,9 @@ import com.fs.pxe.bpel.runtime.InvalidProcessException;
 import com.fs.pxe.bpel.runtime.PROCESS;
 import com.fs.pxe.bpel.runtime.PropertyAliasEvaluationContext;
 import com.fs.pxe.bpel.runtime.msgs.Messages;
+import com.fs.pxe.bpel.epr.WSAEndpoint;
 import com.fs.utils.ArrayUtils;
 import com.fs.utils.ObjectPrinter;
-import com.fs.utils.DOMUtils;
 import com.fs.utils.msg.MessageBundle;
 
 import java.io.*;
@@ -182,9 +182,6 @@ public class BpelProcess {
         msgData, alias);
     Node lValue = ectx.getRootNode();
 
-
-    System.out.println("####### Evaluating property alias " + alias + " on " + DOMUtils.domToString(msgData));
-
     if (alias.location != null)
       try {
         lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
@@ -202,21 +199,12 @@ public class BpelProcess {
       throw new FaultException(_oprocess.constants.qnSelectionFailure, errmsg);
     }
 
-    if (!(lValue instanceof Node)) {
-      String errmsg = __msgs.msgPropertyAliasReturnedRValue(alias
-          .getDescription(), target);
-      if (__log.isErrorEnabled()) {
-        __log.error(errmsg);
-      }
-      throw new FaultException(_oprocess.constants.qnSelectionFailure, errmsg);
-    }
-
     if (lValue.getNodeType() == Node.ELEMENT_NODE) {
       // This is a bit hokey, we concatenate all the children's values; we
       // really should be checking to make sure that we are only dealing with
       // text and attribute nodes.
       StringBuffer val = new StringBuffer();
-      NodeList nl = ((Element) lValue).getChildNodes();
+      NodeList nl = lValue.getChildNodes();
       for (int i = 0; i < nl.getLength(); ++i) {
         Node n = nl.item(i);
         val.append(n.getNodeValue());
@@ -373,9 +361,10 @@ public class BpelProcess {
       // Handling the "opaque correlation case": correlation is done on a
       // session identifier  associated with my epr
       if (messageRoute == null) {
-        // TODO: get the session id (from message exchnage?)
-        String sessionId = null; //messageExchange.getSessionId();
-        if (sessionId != null) {
+        EndpointReference ref = mex.getEndpointReference();
+        // Stateful interactions are only supported with WSA endpoints
+        if (ref != null && ref instanceof WSAEndpoint) {
+          String sessionId = ((WSAEndpoint)ref).getSessionId();
           CorrelationKey key = new CorrelationKey(-1,
               new String[] { sessionId });
           messageRoute = correlator.findRoute(key);
