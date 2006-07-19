@@ -32,8 +32,7 @@ public class INVOKE extends ACTIVITY {
   }
 
   public final void self() {
-    Element outboundMsg = null;
-
+    Element outboundMsg;
     try {
       outboundMsg = setupOutbound(_oinvoke, _oinvoke.initCorrelationsInput);
     } catch (FaultException e) {
@@ -75,8 +74,7 @@ public class INVOKE extends ACTIVITY {
             FaultData fault = null;
 
             try {
-              Element response = getBpelRuntimeContext().getPartnerResponse(
-                  mexId);
+              Element response = getBpelRuntimeContext().getPartnerResponse(mexId);
               getBpelRuntimeContext().initializeVariable(outputVar, response);
             } catch (Exception ex) {
               // TODO: Better error handling
@@ -84,11 +82,16 @@ public class INVOKE extends ACTIVITY {
             }
 
             try {
-              for (Iterator iter = _oinvoke.initCorrelationsOutput.iterator(); iter
-                  .hasNext();) {
-                OScope.CorrelationSet c = (OScope.CorrelationSet) iter.next();
-
-                initializeCorrelation(_scopeFrame.resolve(c), outputVar);
+              for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.initCorrelationsOutput) {
+                initializeCorrelation(_scopeFrame.resolve(anInitCorrelationsOutput), outputVar);
+              }
+              if (_oinvoke.partnerLink.hasPartnerRole()) {
+                // Trying to initialize partner epr based on a message-provided epr/session.
+                Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
+                if (fromEpr != null) {
+                  getBpelRuntimeContext().writeEndpointReference(
+                          _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
+                }
               }
             } catch (FaultException e) {
               fault = createFault(e.getQName(), _oinvoke);
@@ -130,11 +133,8 @@ public class INVOKE extends ACTIVITY {
       Collection<OScope.CorrelationSet> outboundInitiations)
       throws FaultException {
     if (outboundInitiations.size() > 0) {
-      for (Iterator<OScope.CorrelationSet> iter = outboundInitiations
-          .iterator(); iter.hasNext();) {
-        OScope.CorrelationSet c = iter.next();
-        initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame
-            .resolve(oinvoke.inputVar));
+      for (OScope.CorrelationSet c : outboundInitiations) {
+        initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
       }
     }
 

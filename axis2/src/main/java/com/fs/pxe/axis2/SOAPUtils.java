@@ -46,11 +46,9 @@ public class SOAPUtils {
         srcPartEl = DOMUtils.getNextSiblingElement(srcPartEl);
       }
     } else {
-      // Extracting element name: parts can't be a type as per WS-BP
-      QName elmtName = ((Part)msgDef.getParts().get(0)).getElementName();
-      Element responseRoot = doc.createElementNS(elmtName.getNamespaceURI(), elmtName.getLocalPart());
-      // Message style has only one part, directly included in the body.
-      doc.appendChild(responseRoot);
+      // Removing message element and part, message services have only one part which is
+      // the root element of the message.
+      doc.appendChild(doc.importNode(DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(message)), true));
     }
     return doc.getDocumentElement();
   }
@@ -72,9 +70,9 @@ public class SOAPUtils {
       Element msgElmt = doc.createElement("message");
       doc.appendChild(msgElmt);
       // Just making sure the part has no namespace
-      Element destPart = doc.createElement(bodyElmt.getLocalName());
+      Element destPart = doc.createElement((String) msgDef.getParts().keySet().iterator().next());
       msgElmt.appendChild(destPart);
-      destPart.appendChild(doc.importNode(DOMUtils.getFirstChildElement(bodyElmt), true));
+      destPart.appendChild(doc.importNode(bodyElmt, true));
       return msgElmt;
     }
   }

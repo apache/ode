@@ -97,6 +97,17 @@ public interface MessageExchange {
   EndpointReference getEndpointReference()
     throws BpelEngineException;
 
+  void setEndpointReference(EndpointReference ref);
+
+  /**
+   * Get a reference to the end-point that originated this message exchange and
+   * will be use for an eventual invocation later.
+   * @return end-point reference for this message exchange
+   */
+  EndpointReference getCallbackEndpointReference()
+    throws BpelEngineException;
+
+  void setCallbackEndpointReference(EndpointReference ref);
   
   /**
    * Return the type of message-exchange that resulted form this invocation 

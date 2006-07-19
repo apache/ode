@@ -143,6 +143,10 @@ public interface MessageExchangeDAO {
 
   Element getEPR();
 
+  void setCallbackEPR(Element epr);
+
+  Element getCallbackEPR();
+
   String getPattern();
 
   /**

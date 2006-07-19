@@ -66,20 +66,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
     
   }
 
-
   public void complete() {
-    
   }
 
-
-  public EndpointReference getEndpointReference() throws BpelEngineException {
-    return null;
-  }
-  
   public QName getServiceName() {
     return getDAO().getCallee();
   }
-
 
   public void setClientId(String clientKey) {
     getDAO().setCorrelationId(clientKey);

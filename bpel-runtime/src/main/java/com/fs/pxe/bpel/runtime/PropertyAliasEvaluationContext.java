@@ -30,11 +30,8 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
     	_root  = msgData;
 	  } else {
     	Element part = DOMUtils.findChildByName(msgData,new QName(null, alias.part.name),false);
-      System.out.println("Applying alias evaluation on " +DOMUtils.domToString(msgData));
-      System.out.println("Check child " + alias.part.name + " => " + part);
       if (part != null && alias.part.type instanceof OElementVarType) {
     		_root = DOMUtils.findChildByName(part, ((OElementVarType)alias.part.type).elementType);
-        System.out.println("Check child " + ((OElementVarType)alias.part.type).elementType + " => " + part);
       } else
     		_root = part;
 	  }

@@ -9,6 +9,7 @@ import com.fs.pxe.bpel.dao.ProcessDAO;
 import com.fs.pxe.bpel.dao.PartnerLinkDAO;
 import com.fs.pxe.bpel.iapi.BpelEngineException;
 import com.fs.pxe.bpel.iapi.EndpointReference;
+import com.fs.pxe.bpel.iapi.EndpointReferenceContext;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.axis2.dd.TDeployment;
 import com.fs.pxe.axis2.dd.TInvoke;
@@ -39,11 +40,14 @@ class ProcessDDInitializer {
   private OProcess _oprocess;
   private TDeployment.Process _dd;
   private Definition4BPEL[] _defs;
+  private EndpointReferenceContext _eprContext;
 
-  public ProcessDDInitializer(OProcess oprocess, Definition4BPEL[] defs, TDeployment.Process dd) {
+  public ProcessDDInitializer(OProcess oprocess, Definition4BPEL[] defs,
+                              TDeployment.Process dd, EndpointReferenceContext eprContext) {
     _oprocess = oprocess;
     _dd = dd;
     _defs = defs;
+    _eprContext = eprContext;
   }
 
   public void update(ProcessDAO processDAO) {
@@ -79,7 +83,11 @@ class ProcessDDInitializer {
           ProcessDDInitializer.__log.error(msg);
           throw new BpelEngineException(msg);
         }
-        eprdao.setMyEPR(createServiceRef(epr));
+        // Making sure we're dealing only with WSA endpoints internally.
+        // These are much easier to deal with.
+        EndpointReference endpointRef = _eprContext.convertEndpoint(Namespaces.WS_ADDRESSING_ENDPOINT,
+                createServiceRef(epr));
+        eprdao.setMyEPR(endpointRef.toXML().getDocumentElement());
       }
     }
     if (_dd.getInvokeList().size() > 0) {
@@ -112,7 +120,11 @@ class ProcessDDInitializer {
           ProcessDDInitializer.__log.error(msg);
           throw new BpelEngineException(msg);
         }
-        eprdao.setPartnerEPR(createServiceRef(epr));
+        // Making sure we're dealing only with WSA endpoints internally.
+        // These are much easier to deal with.
+        EndpointReference endpointRef = _eprContext.convertEndpoint(Namespaces.WS_ADDRESSING_ENDPOINT,
+                createServiceRef(epr));
+        eprdao.setPartnerEPR(endpointRef.toXML().getDocumentElement());
       }
     }
   }

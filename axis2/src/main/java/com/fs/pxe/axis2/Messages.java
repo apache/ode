@@ -21,7 +21,7 @@ public class Messages extends MessageBundle {
   }
 
   public String msgPxeInitHibernatePropertiesNotFound(File expected) {
-    return format("Hibernate configuration file \"{0}\" not found!", expected);
+    return format("Hibernate configuration file \"{0}\" not foun, defaults will be used.!", expected);
   }
 
   public String msgPxeUsingExternalDb(String dbDataSource) {

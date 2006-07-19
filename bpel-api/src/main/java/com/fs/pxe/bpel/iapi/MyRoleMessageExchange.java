@@ -74,4 +74,6 @@ public interface MyRoleMessageExchange extends MessageExchange {
    * @return service name
    */
   public QName getServiceName();
+
+  public void setEndpointReference(EndpointReference ref);
 }

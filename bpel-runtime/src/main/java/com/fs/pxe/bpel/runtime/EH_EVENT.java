@@ -212,10 +212,8 @@ class EH_EVENT extends BpelAbstraction {
                   // Trying to initialize partner epr based on a message-provided epr/session.
                   Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                   if (fromEpr != null) {
-                    // TODO: EPR fixme 
-                    throw new AssertionError("todo");
-//                    getBpelRuntimeContext().updatePartnerEndpointReference(
-//                            _scopeFrame.resolve(_oevent.partnerLink), fromEpr);
+                    getBpelRuntimeContext().writeEndpointReference(
+                            _scopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
                   }
                 }
               } catch (FaultException e) {

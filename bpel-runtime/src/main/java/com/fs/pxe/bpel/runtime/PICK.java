@@ -15,6 +15,7 @@ import com.fs.pxe.bpel.runtime.channels.PickResponseChannel;
 import com.fs.pxe.bpel.runtime.channels.PickResponseML;
 import com.fs.pxe.bpel.runtime.channels.TerminationML;
 import com.fs.utils.xsd.Duration;
+import com.fs.utils.DOMUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
@@ -56,9 +57,7 @@ class PICK extends ACTIVITY {
     try {
       selectors = new Selector[_opick.onMessages.size()];
       int idx = 0;
-      for (Iterator<OPickReceive.OnMessage> i = _opick.onMessages.iterator(); i.hasNext(); ) {
-        OPickReceive.OnMessage onMessage = i.next();
-
+      for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
         CorrelationKey key = null;
         PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
         if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
@@ -67,29 +66,28 @@ class PICK extends ACTIVITY {
           if (!getBpelRuntimeContext().isEndpointReferenceInitialized(pLinkInstance, true))
             throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
                     "Endpoint reference for myRole on partner link " + onMessage.partnerLink + " has never been" +
-                    "initialized even though it's necessary for opaque correlations to work.");
+                            "initialized even though it's necessary for opaque correlations to work.");
           String sessionId = getBpelRuntimeContext().fetchEndpointSessionId(pLinkInstance, true);
-          key = new CorrelationKey(-1, new String[] {sessionId});
+          key = new CorrelationKey(-1, new String[]{sessionId});
         } else if (onMessage.matchCorrelation != null) {
           if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(onMessage.matchCorrelation)))
-            throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+            throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation, "Correlation not initialized.");
 
           key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
 
           assert key != null;
         }
 
-        selectors[idx] = new Selector(idx,pLinkInstance,onMessage.operation.getName(), onMessage.operation.getOutput() == null, onMessage.messageExchangeId, key);
+        selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation.getOutput() == null, onMessage.messageExchangeId, key);
         idx++;
       }
 
       timeout = null;
-      for(Iterator<OPickReceive.OnAlarm> i = _opick.onAlarms.iterator(); i.hasNext(); ){
-        OPickReceive.OnAlarm onAlarm = i.next();
+      for (OPickReceive.OnAlarm onAlarm : _opick.onAlarms) {
         Date dt = onAlarm.forExpr != null
-                ? offsetFromNow(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(onAlarm.forExpr,getEvaluationContext()))
+                ? offsetFromNow(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(onAlarm.forExpr, getEvaluationContext()))
                 : getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(onAlarm.untilExpr, getEvaluationContext()).getTime();
-        if(timeout == null || timeout.compareTo(dt) > 0){
+        if (timeout == null || timeout.compareTo(dt) > 0) {
           timeout = dt;
           _alarm = onAlarm;
         }
@@ -107,8 +105,7 @@ class PICK extends ACTIVITY {
     }
 
     // Dead path all the alarms that have no chace of coming first.
-    for (Iterator<OPickReceive.OnAlarm> i = _opick.onAlarms.iterator(); i.hasNext(); ) {
-      OPickReceive.OnAlarm oa = i.next();
+    for (OPickReceive.OnAlarm oa : _opick.onAlarms) {
       if (!oa.equals(_alarm)) {
         dpe(oa.activity);
       }
@@ -147,8 +144,7 @@ class PICK extends ACTIVITY {
           OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
           // dead path the non-selected onMessage blocks.
-          for (Iterator<OPickReceive.OnMessage> i = _opick.onMessages.iterator();i.hasNext();) {
-            OPickReceive.OnMessage onmsg = i.next();
+          for (OPickReceive.OnMessage onmsg : _opick.onMessages) {
             if (!onmsg.equals(onMessage)) {
               dpe(onmsg.activity);
             }
@@ -159,9 +155,7 @@ class PICK extends ACTIVITY {
             dpe(_alarm.activity);
           }
 
-          FaultData fault = null;
-         
-
+          FaultData fault;
           Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
           try {
             getBpelRuntimeContext().initializeVariable(_scopeFrame.resolve(onMessage.variable),msgEl);
@@ -177,10 +171,11 @@ class PICK extends ACTIVITY {
               // Trying to initialize partner epr based on a message-provided epr/session.
               Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
               if (fromEpr != null) {
-                // TODO: fixme
-                throw new AssertionError("todo");
-//                getBpelRuntimeContext().updatePartnerEndpointReference(
-//                        _scopeFrame.resolve(onMessage.partnerLink), fromEpr);
+                if (__log.isDebugEnabled())
+                  __log.debug("Received callback EPR " + DOMUtils.domToString(fromEpr)
+                          + " saving it on partner link " + onMessage.partnerLink.getName());
+                getBpelRuntimeContext().writeEndpointReference(
+                        _scopeFrame.resolve(onMessage.partnerLink), (Element) fromEpr);
               }
             }
           } catch (FaultException e) {
@@ -199,8 +194,8 @@ class PICK extends ACTIVITY {
 
         public void onTimeout() {
           // Dead path all the onMessage activiites (the other alarms have already been DPE'ed)
-          for (Iterator<OPickReceive.OnMessage> i = _opick.onMessages.iterator(); i.hasNext(); ) {
-            dpe(i.next().activity);
+          for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
+            dpe(onMessage.activity);
           }
 
           // Because we are done with all the DPE, we can simply re-use our control

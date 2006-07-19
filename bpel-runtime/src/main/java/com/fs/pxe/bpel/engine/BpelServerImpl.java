@@ -580,7 +580,7 @@ public class BpelServerImpl implements BpelServer {
       throw new BpelEngineException(errmsg, ex);
     }
 
-    final ProcessDDInitializer pi = new ProcessDDInitializer(oprocess, defs, processDD);
+    final ProcessDDInitializer pi = new ProcessDDInitializer(oprocess, defs, processDD, _contexts.eprContext);
 
     try {
 

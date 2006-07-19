@@ -40,7 +40,7 @@ public class AxisInvoker {
             com.fs.pxe.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
     try {
       Document doc = DOMUtils.newDocument();
-      // TODO handle message style
+
       Element op = doc.createElement(pxeMex.getOperationName());
       op.appendChild(doc.importNode(DOMUtils.getFirstChildElement(pxeMex.getRequest().getMessage()), true));
 

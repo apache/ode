@@ -6,7 +6,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,19 +18,21 @@ import java.util.Map;
  */
 public class WSAEndpoint implements MutableEndpoint {
 
+  private static final Log __log = LogFactory.getLog(WSAEndpoint.class);
+
   private Element _eprElmt;
 
   public String getSessionId() {
-    NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "identifier");
+    NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
     if (idNodes.getLength() > 0) return idNodes.item(0).getTextContent();
     else return null;
   }
 
   public void setSessionId(String sessionId) {
-    NodeList idList = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "identifier");
+    NodeList idList = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
     if (idList.getLength() > 0) idList.item(0).setTextContent(sessionId);
     else {
-      Element sessElmt = _eprElmt.getOwnerDocument().createElementNS(Namespaces.INTALIO_SESSION_NS, "identifier");
+      Element sessElmt = _eprElmt.getOwnerDocument().createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
       sessElmt.setTextContent(sessionId);
       _eprElmt.appendChild(sessElmt);
     }
@@ -47,10 +52,33 @@ public class WSAEndpoint implements MutableEndpoint {
     }
   }
 
+  public QName getServiceName() {
+    NodeList metadataList = _eprElmt.getElementsByTagNameNS(Namespaces.WS_ADDRESSING_NS, "Metadata");
+    if (metadataList.getLength() > 0) {
+      Element metadata = (Element) metadataList.item(0);
+      Element service = DOMUtils.getFirstChildElement(metadata);
+      String serviceTextQName = service.getTextContent();
+      int twoDotsIdx = serviceTextQName.indexOf(":");
+      String prefix = serviceTextQName.substring(0, twoDotsIdx);
+      String serviceNS = _eprElmt.getOwnerDocument().lookupNamespaceURI(prefix);
+      // Lookup failed, checking directly on our element
+      if (serviceNS == null) {
+        serviceNS = service.getAttribute("xmlns:" + prefix);
+      }
+      if (serviceNS == null) __log.warn("Couldn't find an appropriate namespace for service!");
+      QName result = new QName(serviceNS, serviceTextQName.substring(twoDotsIdx + 1, serviceTextQName.length()));
+      if (__log.isDebugEnabled())
+        __log.debug("Got service name from WSAEndpoint: " + result);
+      return result;
+    }
+    return null;
+  }
+
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element)node;
-      if (elmt.getLocalName().equals("service-ref") && elmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS))
+      if (elmt.getLocalName().equals(SERVICE_REF_QNAME.getLocalPart())
+              && elmt.getNamespaceURI().equals(SERVICE_REF_QNAME.getNamespaceURI()))
         elmt= DOMUtils.getFirstChildElement(elmt);
       if (elmt.getLocalName().equals("EndpointReference") && elmt.getNamespaceURI().equals(Namespaces.WS_ADDRESSING_NS))
         return true;
@@ -63,22 +91,49 @@ public class WSAEndpoint implements MutableEndpoint {
       _eprElmt = DOMUtils.getFirstChildElement((Element)node);
     else
       _eprElmt = (Element) node;
+    if (__log.isDebugEnabled())
+      __log.debug("Setting a WSAEndpoint value: " + DOMUtils.domToString(_eprElmt));
   }
 
   public Document toXML() {
     // Wrapping
     Document doc = DOMUtils.newDocument();
-    Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+    Element serviceRef = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
     doc.appendChild(serviceRef);
     serviceRef.appendChild(doc.importNode(_eprElmt, true));
     return _eprElmt.getOwnerDocument();
   }
 
   public Map toMap() {
-    HashMap<String,String> result = new HashMap<String,String>();
+    HashMap<String,Object> result = new HashMap<String,Object>();
     result.put(ADDRESS, getUrl());
     String sid = getSessionId();
     if (sid != null) result.put(SESSION, sid);
+    NodeList metadataList = _eprElmt.getElementsByTagNameNS(Namespaces.WS_ADDRESSING_NS, "Metadata");
+    if (metadataList.getLength() > 0) {
+      Element metadata = (Element) metadataList.item(0);
+      Element service = DOMUtils.getFirstChildElement(metadata);
+      String serviceTextQName = service.getTextContent();
+      int twoDotsIdx = serviceTextQName.indexOf(":");
+      String prefix = serviceTextQName.substring(0, twoDotsIdx);
+      String serviceNS = null;
+      try {
+        serviceNS = _eprElmt.getOwnerDocument().lookupNamespaceURI(prefix);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      // Lookup failed, checking directly on our element
+      if (serviceNS == null) {
+        serviceNS = service.getAttribute("xmlns:" + prefix);
+      }
+      result.put(SERVICE_QNAME, new QName(serviceNS,
+              serviceTextQName.substring(twoDotsIdx + 1, serviceTextQName.length())));
+      result.put(PORT_NAME, service.getAttribute("EndpointName"));
+      if (__log.isDebugEnabled()) {
+        __log.debug("Filled transfo map with service: " + result.get(SERVICE_QNAME));
+        __log.debug("Filled transfo map with port: " + result.get(PORT_NAME));
+      }
+    }
     return result;
   }
 
@@ -91,10 +146,22 @@ public class WSAEndpoint implements MutableEndpoint {
     Element addrElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "Address");
     addrElmt.setTextContent((String) eprMap.get(ADDRESS));
     if (eprMap.get(SESSION) != null) {
-      Element sessElmt = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "identifier");
+      Element sessElmt = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
       sessElmt.setTextContent((String) eprMap.get(SESSION));
       _eprElmt.appendChild(sessElmt);
     }
+    if (eprMap.get(SERVICE_QNAME) != null) {
+      Element metadataElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "Metadata");
+      _eprElmt.appendChild(metadataElmt);
+      Element serviceElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_WSDL_NS, "ServiceName");
+      metadataElmt.appendChild(serviceElmt);
+      QName serviceQName = (QName) eprMap.get(SERVICE_QNAME);
+      serviceElmt.setAttribute("xmlns:servicens", serviceQName.getNamespaceURI());
+      serviceElmt.setTextContent("servicens:" + serviceQName.getLocalPart());
+      serviceElmt.setAttribute("EndpointName", (String) eprMap.get(PORT_NAME));
+    }
     _eprElmt.appendChild(addrElmt);
+    if (__log.isDebugEnabled())
+      __log.debug("Constructed a new WSAEndpoint: " + DOMUtils.domToString(_eprElmt));
   }
 }

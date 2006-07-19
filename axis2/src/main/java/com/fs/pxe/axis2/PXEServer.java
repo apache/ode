@@ -171,6 +171,7 @@ public class PXEServer {
 
       // We're public!
       _axisConfig.addService(axisService);
+      __log.debug("Created Axis2 service " + serviceName);
     } catch (AxisFault axisFault) {
       // TODO do something!
       axisFault.printStackTrace();
@@ -180,8 +181,9 @@ public class PXEServer {
   public void createExternalService(Definition4BPEL def, QName serviceName, String portName) {
     if (_externalServices.get(serviceName) != null) return;
 
-    ExternalService extService = new ExternalService(def, serviceName, portName, _executorService);
+    ExternalService extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
     _externalServices.put(serviceName, extService);
+    __log.debug("Created external service " + serviceName);
   }
 
   public void destroyService(QName serviceName) {

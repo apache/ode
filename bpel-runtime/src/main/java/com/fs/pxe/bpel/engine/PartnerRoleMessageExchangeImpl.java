@@ -30,21 +30,10 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl
   public void replyOneWayOk() {
     setStatus(Status.ONE_WAY);
   }
-  
-
-  public EndpointReference getEndpointReference() throws BpelEngineException {
-    if (_epr != null) return _epr;
-    if (getDAO().getEPR() == null)
-      return null;
-    
-    return _epr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getEPR());
-  }
 
   public void replyAsync() {
     setStatus(Status.ASYNC);
   }
-
-
 
   public void replyWithFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
     boolean isAsync = isAsync();
