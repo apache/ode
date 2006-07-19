@@ -28,6 +28,9 @@ import com.fs.pxe.bpel.o.OProcess;
 import com.fs.pxe.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import com.fs.utils.msg.MessageBundle;
 
+import org.w3c.dom.Element;
+
+
 public class BpelEngineImpl implements BpelEngine {
 
   private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
@@ -153,14 +156,18 @@ public class BpelEngineImpl implements BpelEngine {
   void registerProcess(QName pid,
       OProcess compiledProcess,
       Map<Integer,QName> serviceNames,
+      Map<Integer,Element> myEprs,
       ExpressionLanguageRuntimeRegistry elangRegistry) {
     BpelProcess process = new BpelProcess(this, pid, compiledProcess,
         serviceNames,
+        myEprs,
         null,
         elangRegistry);
     _activeProcesses.put(pid, process);
-    for (QName sn : serviceNames.values())
+    for (QName sn : serviceNames.values()) {
+      __log.info( "Register process: serviceId=" + sn + ", process=" + process );
       _serviceMap.put(sn,process);
+    }
 
     process.activate();
   }
@@ -188,6 +195,9 @@ public class BpelEngineImpl implements BpelEngine {
   BpelProcess route(QName service, EndpointReference epr, Message request) {
     // TODO: use the message to route to the correct service if more than one
     // service is listening on the same endpoint.
+	if ( __log.isDebugEnabled() ) {
+      __log.debug( "Route: service=" + service + ", epr=" + epr + " request=" + request );
+	}
     return _serviceMap.get(service);
   }
   
