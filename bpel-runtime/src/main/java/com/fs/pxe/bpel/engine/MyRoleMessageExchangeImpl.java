@@ -3,7 +3,6 @@ package com.fs.pxe.bpel.engine;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

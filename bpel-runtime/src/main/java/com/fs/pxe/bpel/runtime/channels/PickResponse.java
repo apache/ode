@@ -5,8 +5,6 @@
  */
 package com.fs.pxe.bpel.runtime.channels;
 
-import org.w3c.dom.Element;
-
 /**
  * Response channel for pick requests.
  * @jacob.kind 
