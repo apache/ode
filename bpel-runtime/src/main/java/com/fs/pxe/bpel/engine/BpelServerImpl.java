@@ -45,6 +45,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlException;
 
+import org.w3c.dom.Element;
+
 /**
  * The BPEL server implementation. 
  */
@@ -243,6 +245,7 @@ public class BpelServerImpl implements BpelServer {
 
     final ProcessInfo ret = new ProcessInfo();
     ret.serviceNames = new HashMap<Integer,QName>();
+    ret.myEprs = new HashMap<Integer,Element>();
     try {
       bits = _db.exec(new BpelDatabase.Callable<byte[]>() {
         public byte[] run(BpelDAOConnection daoc) throws Exception {
@@ -251,6 +254,7 @@ public class BpelServerImpl implements BpelServer {
           for (PartnerLinkDAO p : plinks) {
             if (p.getMyRoleName() != null) {
               ret.serviceNames.put(p.getPartnerLinkModelId(), p.getMyRoleServiceName());
+              ret.myEprs.put(p.getPartnerLinkModelId(), p.getMyEPR());
             }
           }
           return procdao.getCompiledProcess();
@@ -426,7 +430,7 @@ public class BpelServerImpl implements BpelServer {
         }
       }
 
-      _engine.registerProcess(pid, pinfo.compiledProcess,pinfo.serviceNames, elangRegistry);
+      _engine.registerProcess(pid, pinfo.compiledProcess, pinfo.serviceNames, pinfo.myEprs, elangRegistry);
 
       __log.info(__msgs.msgProcessActivated(pid));
     } finally {
@@ -653,5 +657,6 @@ public class BpelServerImpl implements BpelServer {
   class ProcessInfo {
     OProcess compiledProcess;
     Map<Integer, QName> serviceNames;
+    Map<Integer, Element> myEprs;
   }
 }
