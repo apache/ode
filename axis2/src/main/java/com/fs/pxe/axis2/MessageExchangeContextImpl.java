@@ -25,11 +25,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
   private static final Log __log = LogFactory.getLog(MessageExchangeContextImpl.class);
 
   private PXEServer _server;
-  private AxisInvoker _invoker;
 
   public MessageExchangeContextImpl(PXEServer server) {
     _server = server;
-    _invoker = _server.createInvoker();
   }
 
   public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
@@ -43,16 +41,22 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
               epr.toXML().getDocumentElement());
     // It's now safe to cast
     QName serviceName = ((WSAEndpoint)epr).getServiceName();
+    String portName = ((WSAEndpoint)epr).getPortName();
     if (__log.isDebugEnabled())
       __log.debug("The service to invoke is the external service " + serviceName);
-    ExternalService service = _server.getExternalService(serviceName);
+    ExternalService service = _server.getExternalService(serviceName, portName);
     service.invoke(partnerRoleMessageExchange);
   }
 
   public void onAsyncReply(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
     if (__log.isDebugEnabled())
       __log.debug("Processing an async reply from service " + myRoleMessageExchange.getServiceName());
-    PXEService service = _server.getService(myRoleMessageExchange.getServiceName());
+
+    // TODO Add a port in MessageExchange (for now there's only service) to be able to find the
+    // TODO right service. For now we'll just lookup by service+portType but if we have severalt ports
+    // TODO for the same portType that will not work.
+    PXEService service = _server.getService(myRoleMessageExchange.getServiceName(),
+            myRoleMessageExchange.getPortType().getQName());
     service.notifyResponse(myRoleMessageExchange);
   }
 }

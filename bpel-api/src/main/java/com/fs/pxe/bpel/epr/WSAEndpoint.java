@@ -74,6 +74,16 @@ public class WSAEndpoint implements MutableEndpoint {
     return null;
   }
 
+  public String getPortName() {
+    NodeList metadataList = _eprElmt.getElementsByTagNameNS(Namespaces.WS_ADDRESSING_NS, "Metadata");
+    if (metadataList.getLength() > 0) {
+      Element metadata = (Element) metadataList.item(0);
+      Element service = DOMUtils.getFirstChildElement(metadata);      
+      return service.getAttribute("EndpointName");
+    }
+    return null;
+  }
+
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element)node;

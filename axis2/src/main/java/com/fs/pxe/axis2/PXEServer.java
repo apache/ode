@@ -18,6 +18,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.collections.map.MultiKeyMap;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
@@ -43,6 +44,7 @@ import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -67,8 +69,11 @@ public class PXEServer {
   private QuartzSchedulerImpl _scheduler;
   private DeploymentPoller _poller;
 
-  private HashMap<QName,PXEService> _services = new HashMap<QName,PXEService>();
-  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
+  private MultiKeyMap _services = new MultiKeyMap();
+  private MultiKeyMap _externalServices = new MultiKeyMap();
+
+//  private HashMap<QName,PXEService> _services = new HashMap<QName,PXEService>();
+//  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
 
   public void init(ServletConfig config, AxisConfiguration axisConf)  throws ServletException {
     _axisConfig = axisConf;
@@ -159,9 +164,9 @@ public class PXEServer {
     try {
       AxisService axisService = PXEAxisService.createService(_axisConfig,
               def, serviceName, portName);
-      PXEService pxeService = new PXEService(axisService, def, serviceName,
+      PXEService pxeService = new PXEService(axisService, def, serviceName, portName,
               _server, _jotm.getTransactionManager());
-      _services.put(serviceName, pxeService);
+      _services.put(serviceName, portName, pxeService);
 
       // Setting our new service on the receiver, the same receiver handles all
       // operations so the first one should fit them all
@@ -182,7 +187,7 @@ public class PXEServer {
     if (_externalServices.get(serviceName) != null) return;
 
     ExternalService extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
-    _externalServices.put(serviceName, extService);
+    _externalServices.put(serviceName, portName, extService);
     __log.debug("Created external service " + serviceName);
   }
 
@@ -196,12 +201,22 @@ public class PXEServer {
     _services.remove(serviceName);
   }
 
-  public PXEService getService(QName serviceName) {
-    return _services.get(serviceName);
+  public PXEService getService(QName serviceName, String portName) {
+    return (PXEService) _services.get(serviceName, portName);
   }
 
-  public ExternalService getExternalService(QName serviceName) {
-    return _externalServices.get(serviceName);
+  public PXEService getService(QName serviceName, QName portTypeName) {
+    // TODO Normally this lookup should't exist as there could be more one than port
+    // TODO for a portType. See MessageExchnageContextImpl.
+    for (Iterator iterator = _services.values().iterator(); iterator.hasNext();) {
+      PXEService service = (PXEService) iterator.next();
+      if (service.respondsTo(serviceName, portTypeName)) return service;
+    }
+    return null;
+  }
+
+  public ExternalService getExternalService(QName serviceName, String portName) {
+    return (ExternalService) _externalServices.get(serviceName, portName);
   }
 
   public AxisInvoker createInvoker() {

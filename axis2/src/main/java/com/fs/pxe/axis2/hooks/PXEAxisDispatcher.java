@@ -62,11 +62,11 @@ public class PXEAxisDispatcher extends AbstractDispatcher {
             // Of course, the element name most likely uses the suffix
             // Request or Response, so look for those and strip them.
             int index = localName.lastIndexOf("Request");
-            if (index + "Request".length() == localName.length()) {
+            if (index >=0 && index + "Request".length() == localName.length()) {
                 return service.getOperation(new QName(localName.substring(0, index)));
             }
             index = localName.lastIndexOf("Response");
-            if (index + "Response".length() == localName.length()) {
+            if (index >=0 && index + "Response".length() == localName.length()) {
                 return service.getOperation(new QName(localName.substring(0, index)));
             }
         }
@@ -103,7 +103,6 @@ public class PXEAxisDispatcher extends AbstractDispatcher {
     public void initDispatcher() {
         init(new HandlerDescription(NAME));
     }
-
 
     /**
      * Obtain the service name from the request URL. The request URL is

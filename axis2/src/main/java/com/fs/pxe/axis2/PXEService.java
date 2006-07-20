@@ -10,14 +10,12 @@ import com.fs.utils.DOMUtils;
 import com.fs.utils.GUID;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -40,15 +38,17 @@ public class PXEService {
   private TransactionManager _txManager;
   private Definition _wsdlDef;
   private QName _serviceName;
+  private String _portName;
   private Map<String,ResponseCallback> _waitingCallbacks;
 
-  public PXEService(AxisService axisService, Definition4BPEL def, QName serviceName,
+  public PXEService(AxisService axisService, Definition4BPEL def, QName serviceName, String portName,
                     BpelServerImpl server, TransactionManager txManager) {
     _axisService = axisService;
     _server = server;
     _txManager = txManager;
     _wsdlDef = def;
     _serviceName = serviceName;
+    _portName = portName;
     _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
   }
 
@@ -62,10 +62,9 @@ public class PXEService {
 
       // Creating mesage exchange
       String messageId = new GUID().toString();
-      pxeMex = _server.getEngine().createMessageExchange(""+messageId,
-              new QName(msgContext.getAxisService().getTargetNamespace(),
-                      msgContext.getAxisService().getName()), null,
+      pxeMex = _server.getEngine().createMessageExchange(""+messageId, _serviceName, null,
               msgContext.getAxisOperation().getName().getLocalPart());
+      __log.debug("PXE routed to operation " + pxeMex.getOperation() + " from service " + _serviceName);
 
       if (pxeMex.getOperation() != null) {
         // Preparing message to send to PXE
@@ -87,6 +86,8 @@ public class PXEService {
         }
         // Invoking PXE
         pxeMex.invoke(pxeRequest);
+      } else {
+        success = false;
       }
     } catch(Exception e) {
       e.printStackTrace();
@@ -162,6 +163,13 @@ public class PXEService {
       callback.onResponse(mex);
       _waitingCallbacks.remove(mex.getClientId());
     }
+  }
+
+  public boolean respondsTo(QName serviceName, QName portTypeName) {
+    boolean result = _serviceName.equals(serviceName);
+    result = result && _wsdlDef.getService(_serviceName).getPort(_portName)
+            .getBinding().getPortType().getQName().equals(portTypeName);
+    return result;
   }
 
   private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
