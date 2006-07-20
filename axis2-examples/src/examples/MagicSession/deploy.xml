@@ -1,0 +1,23 @@
+<deploy xmlns="http://pxe.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:main="http://pxe/bpel/unit-test" 
+	xmlns:mws="http://pxe/bpel/unit-test.wsdl"
+	xmlns:resp="http://pxe/bpel/responder">
+
+
+	<process name="main:MagicSessionMain">
+		<provide partnerLink="responderPartnerLink">
+			<service name="mws:MSMainService" port="MSMainPort"/>
+		</provide>
+		<invoke partnerLink="responderPartnerLink">
+			<service name="mws:MSResponderService" port="MSResponderPort"/>
+		</invoke>
+	</process>
+	<process name="resp:MagicSessionResponder">
+		<provide partnerLink="mainPartnerLink">
+			<service name="mws:MSResponderService" port="MSResponderPort"/>
+		</provide>
+		<invoke partnerLink="mainPartnerLink">
+			<service name="mws:MSMainService" port="MSMainPort"/>
+		</invoke>
+	</process>
+</deploy>
