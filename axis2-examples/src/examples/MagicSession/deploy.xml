@@ -5,6 +5,9 @@
 
 
 	<process name="main:MagicSessionMain">
+		<provide partnerLink="executePartnerLink">
+			<service name="mws:MSMainExecuteService" port="MSExecutePort"/>
+		</provide>
 		<provide partnerLink="responderPartnerLink">
 			<service name="mws:MSMainService" port="MSMainPort"/>
 		</provide>

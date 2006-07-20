@@ -15,6 +15,8 @@
   <partnerLinks>
     <partnerLink name="responderPartnerLink" partnerLinkType="test:ResponderPartnerLinkType"
                  myRole="main" partnerRole="responder" initializePartnerRole="yes"/>
+    <partnerLink name="executePartnerLink" partnerLinkType="test:ExecutePartnerLinkType"
+                 myRole="executor"/>
   </partnerLinks>
 
   <variables>
@@ -30,8 +32,8 @@
 
   <sequence>
     <!-- Start message -->
-    <receive name="start" partnerLink="responderPartnerLink"
-             portType="test:MSMainPortType" operation="execute" createInstance="yes" variable="dummy"/>
+    <receive name="start" partnerLink="executePartnerLink"
+             portType="test:MSExecutePortType" operation="execute" createInstance="yes" variable="dummy"/>
 
     <!-- Initializing message, starting the responder process with the magic session
          and expecting a callback -->
@@ -81,8 +83,8 @@
         <to variable="result" part="ack"/>
       </copy>
     </assign>
-    <reply name="end" partnerLink="responderPartnerLink"
-           portType="test:MSMainPortType" operation="execute" variable="result"/>
+    <reply name="end" partnerLink="executePartnerLink"
+           portType="test:MSExecutePortType" operation="execute" variable="result"/>
 
   </sequence>
 </process>

@@ -54,11 +54,13 @@
     <wsdl:part name="payload" element="wsa:EndpointReference"/>
   </wsdl:message>
 
-  <wsdl:portType name="MSMainPortType">
+  <wsdl:portType name="MSExecutePortType">
     <wsdl:operation name="execute">
       <wsdl:input message="tns:ExecuteMessage" name="Execute"/>
       <wsdl:output message="tns:ResultMessage" name="Result"/>
     </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="MSMainPortType">
     <wsdl:operation name="callback">
       <wsdl:input message="tns:CallbackMessage" name="Callback"/>
     </wsdl:operation>
@@ -82,7 +84,7 @@
     </wsdl:operation>
   </wsdl:portType>
 
-  <wsdl:binding name="MSMainBinding" type="tns:MSMainPortType">
+  <wsdl:binding name="MSExecuteBinding" type="tns:MSExecutePortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="execute">
       <soap:operation soapAction="" style="document"/>
@@ -93,6 +95,9 @@
         <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="MSMainBinding" type="tns:MSMainPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="callback">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
@@ -141,6 +146,12 @@
     </wsdl:port>
   </wsdl:service>
 
+  <wsdl:service name="MSMainExecuteService">
+    <wsdl:port name="MSExecutePort" binding="tns:MSExecuteBinding">
+      <soap:address location="http://localhost:8080/axis2/processes/MSMainExecuteService"/>
+    </wsdl:port>
+  </wsdl:service>
+
   <wsdl:service name="MSResponderService">
     <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
       <soap:address location="http://localhost:8080/axis2/processes/MSResponderService"/>
@@ -150,6 +161,10 @@
   <plnk:partnerLinkType name="ResponderPartnerLinkType">
       <plnk:role name="responder" portType="tns:MSResponderPortType"/>
       <plnk:role name="main" portType="tns:MSMainPortType"/>
+  </plnk:partnerLinkType>
+
+  <plnk:partnerLinkType name="ExecutePartnerLinkType">
+      <plnk:role name="executor" portType="tns:MSExecutePortType"/>
   </plnk:partnerLinkType>
 
 </wsdl:definitions>
