@@ -10,6 +10,8 @@ import com.fs.pxe.bom.wsdl.WSDLFactoryBPEL20;
 import com.fs.pxe.bpel.o.OProcess;
 import com.fs.pxe.bpel.o.Serializer;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
@@ -17,7 +19,6 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -26,6 +27,8 @@ import java.util.HashMap;
  * contain more than one process.
  */
 public class DeploymentUnit {
+
+  private static Log __log = LogFactory.getLog(DeploymentUnit.class);
 
   private long _lastModified;
   private String _name;
@@ -103,9 +106,9 @@ public class DeploymentUnit {
           _pxeServer.createExternalService(def, invoke.getService().getName(), invoke.getService().getPort());
         }
       } catch (AxisFault axisFault) {
-        throw new DeploymentException("Service deployment in Axis2 failed!", axisFault);
+        __log.error("Service deployment in Axis2 failed!", axisFault);
       } catch (Throwable e) {
-
+        __log.error("Service deployment failed!", e);
       }
     }
     _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
