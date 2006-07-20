@@ -1,0 +1,21 @@
+<deploy xmlns="http://pxe.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:main="http://pxe/bpel/unit-test" 
+	xmlns:mws="http://pxe/bpel/unit-test.wsdl"
+	xmlns:resp="http://pxe/bpel/responder"
+	xmlns:rws="http://pxe/bpel/responder.wsdl">
+
+
+	<process name="main:DynPartnerMain">
+		<provide partnerLink="initiatorPartnerLink">
+			<service name="mws:DynMainService" port="DynMainPort"/>
+		</provide>
+		<invoke partnerLink="responderPartnerLink">
+			<service name="rws:DynResponderService" port="DynResponderPort"/>
+		</invoke>
+	</process>
+	<process name="resp:DynPartnerResponder">
+		<provide partnerLink="mainPartnerLink">
+			<service name="rws:DynResponderService" port="DynResponderPort"/>
+		</provide>
+	</process>
+</deploy>
