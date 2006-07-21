@@ -108,7 +108,7 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   public EndpointReference convertEndpoint(QName eprType, Element element) {
     EndpointReference endpoint = EndpointFactory.convert(eprType, element);
  
-    __log.warn( "ALEX convertEndpoint: " + eprType + " " + prettyPrint( element ) );
+    __log.warn( "convertEndpoint: " + eprType + " " + prettyPrint( element ) );
     
     // Forcing JBI lookup
     return resolveEndpointReference(endpoint.toXML().getDocumentElement());
