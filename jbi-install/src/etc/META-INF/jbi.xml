@@ -21,23 +21,6 @@
 
     <component-class-name description="Component Implementation" >com.fs.pxe.jbi.PxeComponent</component-class-name>
     <component-class-path>
-        <path-element>lib/commons-pool.jar</path-element>
-        <path-element>lib/ehcache.jar</path-element>
-        <path-element>lib/jaxen.jar</path-element>
-        <!--  <path-element>lib/saxon.jar</path-element> -->
-        <path-element>lib/dom4j.jar</path-element>
-        <path-element>lib/hibernate.jar</path-element>
-        <path-element>lib/commons-collections.jar</path-element>
-        <!-- <path-element>lib/commons-logging.jar</path-element> -->
-        <!-- <path-element>lib/derby.jar</path-element> -->
-        <path-element>lib/commons-lang.jar</path-element>
-        <path-element>lib/wsdl4j.jar</path-element>
-        <path-element>lib/stax-api.jar</path-element>
-        <path-element>lib/xbean.jar</path-element>
-        <path-element>lib/cglib.jar</path-element>
-        <path-element>lib/asm.jar</path-element>
-        <path-element>lib/antlr.jar</path-element>
-
         <path-element>lib/pxe-utils.jar</path-element>
         <path-element>lib/pxe-bpel-bom.jar</path-element>
         <path-element>lib/pxe-bpel-api.jar</path-element>
@@ -53,6 +36,25 @@
         <path-element>lib/pxe-jacob.jar</path-element>
         <path-element>lib/pxe-jbi.jar</path-element>
         <path-element>lib/pxe-minerva.jar</path-element>
+
+        <path-element>lib/commons-pool.jar</path-element>
+        <path-element>lib/ehcache.jar</path-element>
+        <path-element>lib/jaxen.jar</path-element>
+        <path-element>lib/saxon.jar</path-element> 
+        <path-element>lib/saxon-dom.jar</path-element> 
+        <path-element>lib/dom4j.jar</path-element>
+        <path-element>lib/hibernate.jar</path-element>
+        <path-element>lib/commons-collections.jar</path-element>
+        <!-- <path-element>lib/commons-logging.jar</path-element> -->
+        <!-- <path-element>lib/derby.jar</path-element> -->
+        <path-element>lib/commons-lang.jar</path-element>
+        <path-element>lib/wsdl4j.jar</path-element>
+        <path-element>lib/stax-api.jar</path-element>
+        <path-element>lib/xbean.jar</path-element>
+        <path-element>lib/cglib.jar</path-element>
+        <path-element>lib/asm.jar</path-element>
+        <path-element>lib/antlr.jar</path-element>
+
     </component-class-path>
     <bootstrap-class-name>com.fs.pxe.jbi.PxeBootstrap</bootstrap-class-name>
     <bootstrap-class-path>
