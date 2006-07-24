@@ -154,33 +154,26 @@ public class PXEServer {
     }
   }
 
-  public void createService(Definition4BPEL def, QName serviceName, String portName) {
-    try {
-      if (_axisConfig.getService(serviceName.getLocalPart()) != null) return;
-    } catch (AxisFault axisFault) {
-      // For some reason Axis throws an exception if we're requesting an inactive service
-      return;
+  public void createService(Definition4BPEL def, QName serviceName, String portName) throws AxisFault {
+    if (_services.get(serviceName, portName) != null){
+      AxisService service = ((PXEService)_services.get(serviceName, portName)).getAxisService();
+      _axisConfig.removeService(service.getName());
     }
-    try {
-      AxisService axisService = PXEAxisService.createService(_axisConfig,
-              def, serviceName, portName);
-      PXEService pxeService = new PXEService(axisService, def, serviceName, portName,
-              _server, _jotm.getTransactionManager());
-      _services.put(serviceName, portName, pxeService);
+    AxisService axisService = PXEAxisService.createService(_axisConfig,
+            def, serviceName, portName);
+    PXEService pxeService = new PXEService(axisService, def, serviceName, portName,
+            _server, _jotm.getTransactionManager());
+    _services.put(serviceName, portName, pxeService);
 
-      // Setting our new service on the receiver, the same receiver handles all
-      // operations so the first one should fit them all
-      AxisOperation firstOp = (AxisOperation)axisService.getOperations().next();
-      ((PXEMessageReceiver)firstOp.getMessageReceiver()).setService(pxeService);
-      ((PXEMessageReceiver)firstOp.getMessageReceiver()).setExecutorService(_executorService);
+    // Setting our new service on the receiver, the same receiver handles all
+    // operations so the first one should fit them all
+    AxisOperation firstOp = (AxisOperation)axisService.getOperations().next();
+    ((PXEMessageReceiver)firstOp.getMessageReceiver()).setService(pxeService);
+    ((PXEMessageReceiver)firstOp.getMessageReceiver()).setExecutorService(_executorService);
 
-      // We're public!
-      _axisConfig.addService(axisService);
-      __log.debug("Created Axis2 service " + serviceName);
-    } catch (AxisFault axisFault) {
-      // TODO do something!
-      axisFault.printStackTrace();
-    }
+    // We're public!
+    _axisConfig.addService(axisService);
+    __log.debug("Created Axis2 service " + serviceName);
   }
 
   public void createExternalService(Definition4BPEL def, QName serviceName, String portName) {
