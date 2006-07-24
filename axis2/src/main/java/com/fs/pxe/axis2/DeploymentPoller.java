@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
 import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -30,7 +31,7 @@ public class DeploymentPoller {
   /**
    * Set of {@link DeploymentUnit} objects regarding all deployment units that have been inspected.
    */
-  private final HashSet<DeploymentUnit> _inspectedFiles = new HashSet<DeploymentUnit>();
+  private final HashMap<String,DeploymentUnit> _inspectedFiles = new HashMap<String,DeploymentUnit>();
 
   /** Filter accepting directories containing a .pxedd file. */
   private static final FileFilter _fileFilter = new FileFilter(){
@@ -77,7 +78,7 @@ public class DeploymentPoller {
       if (checkIsNew(new File(file, "deploy.xml"))) {
         try {
           DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
-          _inspectedFiles.add(du);
+          _inspectedFiles.put(file.getName(), du);
           du.deploy(false);
           __log.info("Deployment of artifact " + file.getName() + " successful.");
         } catch (Exception e) {
@@ -87,16 +88,17 @@ public class DeploymentPoller {
     }
 
     // Removing deployments that disappeared
-    HashSet<DeploymentUnit> removed = new HashSet<DeploymentUnit>(2);
-    for (DeploymentUnit du : _inspectedFiles) {
+    HashSet<String> removed = new HashSet<String>();
+    for (String duName : _inspectedFiles.keySet()) {
+      DeploymentUnit du = _inspectedFiles.get(duName);
       if (!du.exists()) {
         du.undeploy();
-        removed.add(du);
+        removed.add(duName);
       }
     }
     if (removed.size() > 0) {
-      for (DeploymentUnit du : removed) {
-        _inspectedFiles.remove(du);
+      for (String duName : removed) {
+        _inspectedFiles.remove(duName);
       }
     }
   }
@@ -107,7 +109,7 @@ public class DeploymentPoller {
    * @return <code>true</code> if new
    */
   private boolean checkIsNew(File f){
-    for (DeploymentUnit deployed : _inspectedFiles) {
+    for (DeploymentUnit deployed : _inspectedFiles.values()) {
       if (deployed.matches(f))
         return false;
     }
@@ -158,10 +160,13 @@ public class DeploymentPoller {
         while ((line = duStateReader.readLine()) != null) {
           String filename = line.substring(0, line.indexOf("|"));
           String timestamp = line.substring(line.indexOf("|") + 1 , line.length());
-          DeploymentUnit du = new DeploymentUnit(new File(_deployDir, filename), _pxeServer);
-          du.setLastModified(Long.valueOf(timestamp));
-          _inspectedFiles.add(du);
-          du.deploy(true);
+          File duFile = new File(_deployDir, filename);
+          if (duFile.exists()) {
+            DeploymentUnit du = new DeploymentUnit(duFile, _pxeServer);
+            du.setLastModified(Long.valueOf(timestamp));
+            _inspectedFiles.put(duFile.getName(), du);
+            du.deploy(true);
+          }
         }
       } catch (FileNotFoundException e) {
         // Shouldn't happen
@@ -179,7 +184,7 @@ public class DeploymentPoller {
     try {
       __log.debug("Writing current deployment state.");
       FileWriter duStateWriter = new FileWriter(new File(_deployDir, ".state"), false);
-      for (DeploymentUnit deploymentUnit : _inspectedFiles) {
+      for (DeploymentUnit deploymentUnit : _inspectedFiles.values()) {
         // Somebody using pipe in their directory names don't deserve to deploy anything
         duStateWriter.write(deploymentUnit.getDuDirectory().getName());
         duStateWriter.write("|");

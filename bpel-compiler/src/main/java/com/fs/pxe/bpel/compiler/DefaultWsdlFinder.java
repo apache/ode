@@ -9,6 +9,7 @@ import com.fs.pxe.bom.wsdl.Definition4BPEL;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -25,11 +26,16 @@ class DefaultWsdlFinder implements WsdlFinder {
   }
   
   public DefaultWsdlFinder(URI u) {
-    _base = u;
+    setBaseURI(u);
   }
   
   public void setBaseURI(URI u) {
-    _base = u;
+    File f = new File(u);
+    if (f.exists() && f.isFile()) {
+      _base = f.getParentFile().toURI();
+    } else {
+      _base = u;
+    }
   }
  
   public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {

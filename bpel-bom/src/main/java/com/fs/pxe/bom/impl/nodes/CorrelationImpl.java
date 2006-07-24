@@ -16,7 +16,7 @@ public class CorrelationImpl extends BpelObjectImpl implements Correlation {
 
   private String _correlationSetName;
   private short _initiate;
-  private short _pattern;
+  private short _pattern = Correlation.CORRPATTERN_IN;
   
   public CorrelationImpl() {
   }

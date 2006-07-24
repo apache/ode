@@ -225,6 +225,10 @@ public class PXEService {
     }
   }
 
+  public AxisService getAxisService() {
+    return _axisService;
+  }
+
   class ResponseCallback {
     private MyRoleMessageExchange _mmex;
     private boolean _timedout;

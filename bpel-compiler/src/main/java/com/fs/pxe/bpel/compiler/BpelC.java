@@ -43,7 +43,7 @@ import java.net.URL;
 public class BpelC {
   private static final Log __log = LogFactory.getLog(BpelC.class);
   private static final CommonCompilationMessages __cmsgs =
-    MessageBundle.getMessages(CommonCompilationMessages.class);
+          MessageBundle.getMessages(CommonCompilationMessages.class);
 
   private BpelProcessBuilderFactory _bpelProcessBuilderFactory;
   private CompileListener _compileListener;
@@ -230,7 +230,7 @@ public class BpelC {
         logCompilationMessage(compilationMessage);
       }
     };
-    
+
     switch (process.getBpelVersion()) {
       case Process.BPEL_V200:
         compiler = new BpelCompiler20();
@@ -291,27 +291,27 @@ public class BpelC {
       fileHeader.write(_outputStream);
       fileHeader.writeOProcess(oprocess, _outputStream);
 
-    if (_bpelUrl.toString().startsWith("file:") && _outputDir != null) {
-      String filePath = _bpelUrl.getFile();
-      filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".dd";
-
-      DDHandler ddHandler;
-      try {
-        ddHandler = new DDHandler(new File(filePath));
-        if (!ddHandler.exists()) __log.info("No deployment descriptor found, one will be generated if needed.");
-        boolean modified = ddHandler.validateAndEnhance(oprocess, compiler.getWsdlDefinitions());
-        if (ddHandler.exists() || modified)
-          ddHandler.write(new File(_outputDir, oprocess.getName() + ".dd"));
-      } catch (DDValidationException e) {
-        CompilationMessage cm = __cmsgs.errInvalidDeploymentDescriptor(e.getMessage());
-        logCompilationMessage(cm);
-        throw new CompilationException(cm);
-      } catch (DDException e) {
-        logCompilationMessage(__cmsgs.errInvalidDeploymentDescriptor(e.getMessage()));
-      }
-    } else {
-      __log.warn("Post-compilation using deployment descriptor deactivated (compilation from url or stream).");
-    }
+//      if (_bpelUrl.toString().startsWith("file:") && _outputDir != null) {
+//        String filePath = _bpelUrl.getFile();
+//        filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".dd";
+//
+//        DDHandler ddHandler;
+//        try {
+//          ddHandler = new DDHandler(new File(filePath));
+//          if (!ddHandler.exists()) __log.info("No deployment descriptor found, one will be generated if needed.");
+//          boolean modified = ddHandler.validateAndEnhance(oprocess, compiler.getWsdlDefinitions());
+//          if (ddHandler.exists() || modified)
+//            ddHandler.write(new File(_outputDir, oprocess.getName() + ".dd"));
+//        } catch (DDValidationException e) {
+//          CompilationMessage cm = __cmsgs.errInvalidDeploymentDescriptor(e.getMessage());
+//          logCompilationMessage(cm);
+//          throw new CompilationException(cm);
+//        } catch (DDException e) {
+//          logCompilationMessage(__cmsgs.errInvalidDeploymentDescriptor(e.getMessage()));
+//        }
+//      } else {
+//        __log.warn("Post-compilation using deployment descriptor deactivated (compilation from url or stream).");
+//      }
     } finally {
       // close & mark myself invalid
       this.invalidate();
