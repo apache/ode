@@ -54,6 +54,7 @@
         <path-element>lib/cglib.jar</path-element>
         <path-element>lib/asm.jar</path-element>
         <path-element>lib/antlr.jar</path-element>
+        <path-element>lib/quartz.jar</path-element>
 
     </component-class-path>
     <bootstrap-class-name>com.fs.pxe.jbi.PxeBootstrap</bootstrap-class-name>
