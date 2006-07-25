@@ -3,7 +3,6 @@
 	xmlns:mws="http://pxe/bpel/unit-test.wsdl"
 	xmlns:resp="http://pxe/bpel/responder">
 
-
 	<process name="main:MagicSessionMain">
 		<provide partnerLink="executePartnerLink">
 			<service name="mws:MSMainExecuteService" port="MSExecutePort"/>

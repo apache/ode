@@ -68,7 +68,7 @@
         <hibernateVersion>3.1.2</hibernateVersion>
         <hsqldbVersion>1.8.0.1</hsqldbVersion>
         <geronimoSpecsVersion>1.0</geronimoSpecsVersion>
-        <jaxenVersion>1.1-beta-2</jaxenVersion>
+        <jaxenVersion>1.1-beta-8</jaxenVersion>
         <jettyVersion>5.1.9</jettyVersion>
         <jasperVersion>4.2.20RC0</jasperVersion>
         <jotmVersion>2.0.10</jotmVersion>
@@ -103,9 +103,12 @@
         <module>examples</module>
         <module>tools-bin</module>
 
-    <module>bootstrap</module>
-    <module>utils</module>
-	<module>minerva</module>
+        <module>axis2</module>
+        <module>axis2-war</module>
+
+        <module>bootstrap</module>
+        <module>utils</module>
+        <module>minerva</module>
         <module>sfwk-core</module>
         <module>sfwk-impl</module>
 
@@ -256,6 +259,18 @@
             <url>http://cvs.apache.org/repository</url>
             <layout>legacy</layout>
         </repository>
+        <repository>
+            <id>ode</id>
+            <name>Apache Ode Repository</name>
+            <url>http://incubator.apache.org/ode/m2</url>
+          <layout>legacy</layout>
+        </repository>
+        <repository>
+            <id>jibx</id>
+            <name>Jibx Repository</name>
+            <url>http://jibx.sourceforge.net/maven/ </url>
+            <layout>legacy</layout>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -377,7 +392,6 @@
                 <artifactId>pxe-dao-hibernate-db-derby</artifactId>
                 <version>${project.version}</version>
                 <type>tar</type>
-                <classifier>schema</classifier>
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
