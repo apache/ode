@@ -4,7 +4,6 @@
 	xmlns:resp="http://pxe/bpel/responder"
 	xmlns:rws="http://pxe/bpel/responder.wsdl">
 
-
 	<process name="main:DynPartnerMain">
 		<provide partnerLink="initiatorPartnerLink">
 			<service name="mws:DynMainService" port="DynMainPort"/>
