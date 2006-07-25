@@ -43,6 +43,12 @@ public class SessionOutHandler extends AbstractHandler {
         OMElement to = factory.createOMElement("To", wsAddrNS);
         header.addChild(to);
         to.setText(targetEpr.getUrl());
+
+//        String soapAction = (String) messageContext.getProperty("soapAction");
+//        OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
+//        header.addChild(wsaAction);
+//        wsaAction.setText(soapAction);
+
         if (targetEpr.getSessionId() != null) {
           OMElement session = factory.createOMElement("session", intalioSessNS);
           header.addChild(session);

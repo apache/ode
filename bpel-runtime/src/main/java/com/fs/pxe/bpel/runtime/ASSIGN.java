@@ -398,18 +398,6 @@ class ASSIGN extends ACTIVITY {
 	}
 
   private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
-    // If variable is a simple type, we will get a type wrapper here (like xs:string
-    // or xs:uri), it's eliminated here.
-    if (rvalue.getNamespaceURI() != null && rvalue.getNamespaceURI().equals(Namespaces.XML_SCHEMA)) {
-      // Getting a non-empty text node
-      NodeList children = rvalue.getChildNodes();
-      for (int m = 0; m < children.getLength(); m++) {
-        Node child = children.item(m);
-        if (child.getNodeType() == Node.TEXT_NODE && ((Text)child).getWholeText().trim().length() > 0)
-          rvalue = child;
-      }
-    }
-
     // Eventually wrapping with service-ref element if we've been directly assigned some
     // value that isn't wrapped.
     if (rvalue.getNodeType() == Node.TEXT_NODE ||
@@ -417,7 +405,11 @@ class ASSIGN extends ACTIVITY {
       Document doc = DOMUtils.newDocument();
       Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
       doc.appendChild(serviceRef);
-      serviceRef.appendChild(doc.importNode(rvalue, true));
+      NodeList children = rvalue.getChildNodes();
+      for (int m = 0; m < children.getLength(); m++) {
+        Node child = children.item(m);
+        serviceRef.appendChild(doc.importNode(child, true));
+      }
       rvalue = serviceRef;
     }
 

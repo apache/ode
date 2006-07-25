@@ -10,7 +10,10 @@ import javax.wsdl.Service;
 import javax.wsdl.Part;
 import javax.wsdl.Operation;
 import javax.wsdl.Message;
+import javax.wsdl.BindingOperation;
 import javax.wsdl.extensions.soap.SOAPBinding;
+import javax.wsdl.extensions.soap.SOAPOperation;
+import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;
@@ -77,6 +80,31 @@ public class SOAPUtils {
     }
   }
 
+  /**
+   * Attempts to extract the SOAP Action is defined in the WSDL document.
+   * @param def
+   * @param service
+   * @param port
+   * @param operation
+   * @return
+   */
+  public static String getSoapAction(Definition def, QName service, String port,  String operation) {
+    Service serviceDef = def.getService(service);
+    Port wsdlPort = serviceDef.getPort(port);
+    Binding binding = wsdlPort.getBinding();
+    for (int m = 0; m < binding.getBindingOperations().size(); m++) {
+      BindingOperation bindingOperation = (BindingOperation) binding.getBindingOperations().get(m);
+      if (bindingOperation.getName().equals(operation)) {
+        for (int n = 0; n < bindingOperation.getExtensibilityElements().size(); n++) {
+          ExtensibilityElement extElmt = (ExtensibilityElement) bindingOperation.getExtensibilityElements().get(n);
+          if (extElmt instanceof SOAPOperation)
+            return ((SOAPOperation)extElmt).getSoapActionURI();
+        }
+      }
+    }
+    return "";
+  }
+
   private static void copyParts(Element source, Element target, javax.wsdl.Message msgdef) {
     List<Part> expectedParts = msgdef.getOrderedParts(null);
 
@@ -93,7 +121,6 @@ public class SOAPUtils {
         __log.error("Improperly formatted message, missing part: " + pdef.getName());
       }
     }
-
   }
 
   private static boolean isRPC(Service serviceDef) throws AxisFault {
@@ -115,4 +142,5 @@ public class SOAPUtils {
     }
     throw new AxisFault(__msgs.msgNoBindingForService(serviceDef.getQName()));
   }
+
 }

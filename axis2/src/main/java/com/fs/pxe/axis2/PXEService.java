@@ -99,14 +99,16 @@ public class PXEService {
         try {
           _txManager.commit();
         } catch (Exception e) {
-          throw new AxisFault("Commit failed!", e);
+          __log.error("COMMIT FAILED!", e);
+          success = false;
         }
-      } else {
+      }
+      if (!success) {
         __log.error("Rolling back PXE MEX "  + pxeMex );
         try {
           _txManager.rollback();
         } catch (Exception e) {
-          throw new AxisFault("Rollback failed!", e);
+          throw new AxisFault("ROLLBACK FAILED!", e);
         }
       }
 
@@ -219,6 +221,8 @@ public class PXEService {
   private void writeHeader(MessageContext msgContext, MyRoleMessageExchange pxeMex) {
     if (pxeMex.getEndpointReference() != null) {
       msgContext.setProperty("targetSessionEndpoint", pxeMex.getEndpointReference());
+      msgContext.setProperty("soapAction",
+              SOAPUtils.getSoapAction(_wsdlDef, _serviceName, _portName, pxeMex.getOperationName()));
     }
     if (pxeMex.getCallbackEndpointReference() != null) {
       msgContext.setProperty("callbackSessionEndpoint", pxeMex.getCallbackEndpointReference());
