@@ -26,12 +26,14 @@
   </wsdl:message>
 
   <wsdl:message name="EndpointMessage">
-    <wsdl:part name="payload" element="xsd:string"/>
+    <wsdl:part name="payload" type="xsd:string"/>
   </wsdl:message>
 
+<!--
   <wsdl:message name="WSAEndpointMessage">
     <wsdl:part name="payload" element="wsa:EndpointReference"/>
   </wsdl:message>
+-->
 
   <wsdl:message name="AcknowledgementMessage">
     <wsdl:part name="payload" element="tns:acknowledgement"/>

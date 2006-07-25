@@ -109,7 +109,6 @@
       <groupId>pxe</groupId>
       <artifactId>pxe-dao-hibernate-db-derby</artifactId>
       <type>tar</type>
-      <classifier>schema</classifier>
       <scope>compile</scope>
     </dependency>
 

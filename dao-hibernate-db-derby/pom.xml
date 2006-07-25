@@ -90,7 +90,6 @@
                     <artifact>
                       <file>target/tarball.tar</file>
                       <type>tar</type>
-                      <classifier>schema</classifier>
                     </artifact>
                   </artifacts>
               </configuration>

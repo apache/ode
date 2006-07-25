@@ -28,9 +28,7 @@
           portType="test:HelloPortType"
           operation="hello"
           variable="myVar"
-          createInstance="yes">
-          <documentation xml:lang="English">Output</documentation>
-      </receive>
+          createInstance="yes"/>
 
       <assign name="assign1">
          <copy>
