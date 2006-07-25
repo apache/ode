@@ -20,6 +20,7 @@
     <property name="rrfilename" value="${ant.project.name}.rr" />
     <property name="wsdlfilename" value="${ant.project.name}.wsdl" />
     <property name="sufilename" value="${ant.project.name}-Process.zip" />
+    <property name="safilename" value="${ant.project.name}-sa.zip" />
     
     <property name="uri.wsdl" value="urn:/${ant.project.name}.wsdl" />
     <property name="url.bpel" value="file:${basedir}/${ant.project.name}.bpel" />
@@ -32,16 +33,18 @@
     <property name="cbpfile" location="${build.dir}/${cbpfilename}" />
     <property name="rrfile" location="${build.dir}/${rrfilename}" />
     <property name="sufile" location="${build.dir}/${sufilename}" />
+    <property name="safile" location="${build.dir}/${safilename}" />
 
     <target name="clean" description="Clean intermediate artifacts.">
         <delete dir="${build.dir}"/>
     </target>
 
 
-    <target name="jbi-sa" description="Generate JBI system assembly." depends="bpelc">
-        <!-- TODO
-        <antcall target="_sar" />
-        -->
+    <target name="jbi-sa" description="Generate JBI system assembly." depends="service-unit">
+        <zip destfile="${safile}">
+            <zipfileset file="${sufile}"/>
+            <zipfileset file="jbi.xml" prefix="META-INF"/>
+        </zip>
     </target>
 
     <target name="bpelc" description="Compile BPEL process." depends="rr">
