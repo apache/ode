@@ -29,7 +29,7 @@
             <artifactId>pxe-minerva</artifactId>
         </dependency>
         <dependency>
-            <groupId>incubator-servicemix</groupId>
+            <groupId>org.apache.servicemix</groupId>
             <artifactId>servicemix-jbi</artifactId>
         </dependency>
         <dependency>

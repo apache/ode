@@ -1,4 +1,4 @@
-<project name="AsyncProcess2" default="sar"  >
+<project name="AsyncProcess2" default="jbi-sa"  >
 
   <import file="../example-build.xml" />
 
