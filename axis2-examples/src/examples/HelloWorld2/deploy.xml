@@ -2,6 +2,7 @@
 	xmlns:pns="http://pxe/bpel/unit-test" 
 	xmlns:wns="http://pxe/bpel/unit-test.wsdl">
 
+
 	<process name="pns:HelloWorld2">
 		<active>true</active>
 		<provide partnerLink="helloPartnerLink">
