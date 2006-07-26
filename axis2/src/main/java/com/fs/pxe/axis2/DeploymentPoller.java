@@ -78,8 +78,8 @@ public class DeploymentPoller {
       if (checkIsNew(new File(file, "deploy.xml"))) {
         try {
           DeploymentUnit du = new DeploymentUnit(file, _pxeServer);
-          _inspectedFiles.put(file.getName(), du);
           du.deploy(false);
+          _inspectedFiles.put(file.getName(), du);
           __log.info("Deployment of artifact " + file.getName() + " successful.");
         } catch (Exception e) {
           __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);

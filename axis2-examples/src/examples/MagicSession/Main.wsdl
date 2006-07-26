@@ -142,19 +142,19 @@
 
   <wsdl:service name="MSMainService">
     <wsdl:port name="MSMainPort" binding="tns:MSMainBinding">
-      <soap:address location="http://localhost:8080/axis2/processes/MSMainService"/>
+      <soap:address location="http://localhost:8080/pxe/processes/MSMainService"/>
     </wsdl:port>
   </wsdl:service>
 
   <wsdl:service name="MSMainExecuteService">
     <wsdl:port name="MSExecutePort" binding="tns:MSExecuteBinding">
-      <soap:address location="http://localhost:8080/axis2/processes/MSMainExecuteService"/>
+      <soap:address location="http://localhost:8080/pxe/processes/MSMainExecuteService"/>
     </wsdl:port>
   </wsdl:service>
 
   <wsdl:service name="MSResponderService">
     <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
-      <soap:address location="http://localhost:8080/axis2/processes/MSResponderService"/>
+      <soap:address location="http://localhost:8080/pxe/processes/MSResponderService"/>
     </wsdl:port>
   </wsdl:service>
 
