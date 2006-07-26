@@ -144,9 +144,9 @@
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
         <module>sp-bpel</module>
-        <module>sp-httpsoap</module>
-        <module>sp-httpsoap-servlet</module>
-        <module>xcontrib-sp-misc</module>
+<!--        <module>sp-httpsoap</module> -->
+<!--        <module>sp-httpsoap-servlet</module> -->
+<!--        <module>xcontrib-sp-misc</module> -->
 
         <!--module>standalone-distro</module--> 
         <!--module>integration</module-->
