@@ -138,7 +138,7 @@
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
 	    <handler name="PXEAxisDispatcher"
-		     class="com.fs.pxe.axis.hooks.PXEAxisDispatcher">
+		     class="com.fs.pxe.axis2.hooks.PXEAxisDispatcher">
                 <order phase="Dispatch"/>
             </handler>
             <handler name="InstanceDispatcher"
