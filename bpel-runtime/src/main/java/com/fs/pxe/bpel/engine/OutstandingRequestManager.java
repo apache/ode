@@ -130,8 +130,8 @@ class OutstandingRequestManager implements Serializable {
       }
       return null;
     }
-    _byChannel.values().remove(entry);
-    _byRid.values().remove(entry);
+    while(_byChannel.values().remove(entry));
+    while(_byRid.values().remove(entry));
     return entry.mexRef;
   }
 

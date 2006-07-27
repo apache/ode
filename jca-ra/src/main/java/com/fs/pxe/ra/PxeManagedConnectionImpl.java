@@ -8,6 +8,8 @@ package com.fs.pxe.ra;
 import com.fs.pxe.ra.transports.PxeTransportPipe;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Proxy;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,7 @@ import javax.transaction.xa.XAResource;
  * JCA {@link ManagedConnection} implementation.
  */
 class PxeManagedConnectionImpl implements ManagedConnection {
-  private final List<PxeConnection> _connections = new ArrayList<PxeConnection>();
+  private final List<PxeConnectionImpl> _connections = new ArrayList<PxeConnectionImpl>();
   private final ConnectionEventListenerSupport _eventListenerSupport = new ConnectionEventListenerSupport();
 
   private PxeConnectionImpl _activeConnection;
@@ -30,14 +32,28 @@ class PxeManagedConnectionImpl implements ManagedConnection {
 
   /** Physical communication pipe. */
   private PxeTransportPipe _transportPipe;
+  private Class<?> _connectionClasses[];
 
   PxeManagedConnectionImpl() {}
 
-  public PxeManagedConnectionImpl(PxeTransportPipe pipe, Subject subject, ConnectionRequestInfo connectionRequestInfo) {
+  public PxeManagedConnectionImpl(PxeTransportPipe pipe, Subject subject, ConnectionRequestInfo connectionRequestInfo) 
+  throws ResourceException {
     _transportPipe = pipe;
     _subject = subject;
     _cri = connectionRequestInfo;
-
+    String[] classNames;
+    try {
+      classNames = _transportPipe.getConnectionClassNames();
+    } catch (RemoteException e1) {
+      throw new ResourceException("Unable to obtain interface names from server.", e1);
+    }
+    _connectionClasses = new Class[classNames.length];
+    for (int i= 0; i < classNames.length; ++i)
+      try {
+        _connectionClasses[i] = Class.forName(classNames[i]);
+      } catch (ClassNotFoundException e) {
+        throw new ResourceException("Connection class " + classNames[i]  + " could not be found in classpath.");
+      }
   }
 
   public void associateConnection(Object o) throws ResourceException {
@@ -65,8 +81,9 @@ class PxeManagedConnectionImpl implements ManagedConnection {
     throws ResourceException {
     PxeConnectionImpl conn = new PxeConnectionImpl(subject, connectionRequestInfo);
     _connections.add(conn);
+    _activeConnection = conn;
     conn.associate(this);
-    return conn;
+    return Proxy.newProxyInstance(getClass().getClassLoader(),_connectionClasses,conn);
   }
 
   public LocalTransaction getLocalTransaction() throws ResourceException {
@@ -102,12 +119,10 @@ class PxeManagedConnectionImpl implements ManagedConnection {
    * @param pxeConnection
    */
   void connectionClosed(PxeConnectionImpl pxeConnection) {
-    assert _activeConnection == pxeConnection;
     _eventListenerSupport.connectionClosed(new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED));
   }
 
   PxeTransportPipe getTransport() {
     return _transportPipe;
   }
-
 }

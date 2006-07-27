@@ -173,8 +173,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
           + faultData.getFaultName() + "'");
     }
 
-    _dao.setFault(faultData.getFaultName());
-    _dao.setFaultData(faultData.getFaultMessage());
+    _dao.setFault(faultData.getFaultName(),faultData.getExplanation(),
+        faultData.getFaultLineNo(),
+        faultData.getActivityId(),
+        faultData.getFaultMessage());
 
     // send event
     ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
@@ -960,7 +962,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   public void sendEvent(ProcessInstanceEvent event) {
     // fill in missing pieces
     event.setProcessId(_dao.getProcess().getProcessId());
-    event.setProcessName(_dao.getProcess().getDefinitionName());
+    event.setProcessName(_dao.getProcess().getType());
     event.setProcessInstanceId(_dao.getInstanceId());
     _bpelProcess._debugger.onEvent(event);
     _dao.insertBpelEvent(event);

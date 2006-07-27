@@ -34,8 +34,7 @@ public abstract class ActivityEvent extends ScopeEvent {
 
   /**
    * Activity type e.g. switch, terminate, invoke
-   * 
-   * @return
+   * @return type of activity
    */
   public String getActivityType() {
     return _activityType;
@@ -63,6 +62,10 @@ public abstract class ActivityEvent extends ScopeEvent {
   
   public long getActivityId() {
     return _aid;
+  }
+
+  public TYPE getType() {
+    return TYPE.activityLifecycle;
   }
 
 }

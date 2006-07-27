@@ -90,7 +90,7 @@
     <!--
 	| Build number used by the intalio:release plugin
     -->
-<release.buildnumber>1</release.buildnumber>
+    <release.buildnumber>1000</release.buildnumber>
 
     </properties>
 
@@ -109,8 +109,6 @@
         <module>bootstrap</module>
         <module>utils</module>
         <module>minerva</module>
-        <module>sfwk-core</module>
-        <module>sfwk-impl</module>
 
         <module>jacob</module>
 
@@ -121,32 +119,29 @@
         <module>bpel-dd</module>
         <module>bpel-parser</module>
         <module>bpel-api</module>
+        <module>bpel-api-jca</module>
         <module>bpel-el-xpath10</module>
         <module>bpel-el-xpath20</module>
         <module>bpel-compiler</module>
         <module>bpel-runtime</module>
         <module>bpel-ql</module>
-        <module>bpel-test</module>
+        <module>bpel-connector</module>
 
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
-        <module>dao-memory</module>
+        <!-- <module>dao-memory</module> -->
 
         <module>jbi</module>
         <module>jbi-install</module>
 
         <module>jca-ra</module>
         <module>jca-rar</module>
-        <module>standalone-kernel</module>
-        <module>standalone-modules</module>
+        <module>jca-server</module>
+
         <module>naming</module>
         <module>tools</module>
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
-        <module>sp-bpel</module>
-<!--        <module>sp-httpsoap</module> -->
-<!--        <module>sp-httpsoap-servlet</module> -->
-<!--        <module>xcontrib-sp-misc</module> -->
 
         <!--module>standalone-distro</module--> 
         <!--module>integration</module-->
@@ -344,6 +339,11 @@
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
+                <artifactId>pxe-bpel-api-jca</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
                 <artifactId>pxe-bpel-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -379,7 +379,7 @@
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-test</artifactId>
+                <artifactId>pxe-bpel-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -420,19 +420,14 @@
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
+                <artifactId>pxe-jca-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pxe</groupId>
                 <artifactId>pxe-jca-rar</artifactId>
                 <version>${project.version}</version>
                 <type>rar</type>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-standalone-kernel</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-standalone-modules</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
@@ -451,16 +446,6 @@
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
-                <artifactId>pxe-sfwk-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-sfwk-impl</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
                 <artifactId>pxe-soap</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -471,22 +456,7 @@
             </dependency>
             <dependency>
                 <groupId>pxe</groupId>
-                <artifactId>pxe-sp-bpel</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-sp-httpsoap</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
                 <artifactId>pxe-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-xcontrib-sp-misc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

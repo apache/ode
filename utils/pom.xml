@@ -33,5 +33,11 @@
 	<groupId>commons-lang</groupId>
 	<artifactId>commons-lang</artifactId>
       </dependency>
+
+      <dependency>
+         <groupId>wsdl4j</groupId>
+         <artifactId>wsdl4j</artifactId>
+       </dependency>
+
     </dependencies>
 </project>

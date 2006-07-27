@@ -14,16 +14,14 @@
     <dependencies>
         <dependency>
             <groupId>pxe</groupId>
-            <artifactId>pxe-sfwk-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-sfwk-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
             <artifactId>pxe-utils</artifactId>
         </dependency>
+
+        <dependency>
+          <groupId>wsdl4j</groupId>
+          <artifactId>wsdl4j</artifactId>
+        </dependency>
+
     </dependencies>
     <build>
         <sourceDirectory>src/java</sourceDirectory>

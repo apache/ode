@@ -14,6 +14,8 @@ import javax.resource.spi.ManagedConnectionFactory;
  * Default {@link ConnectionManager} for use in non-managed environments.
  */
 class PxeConnectionManager implements ConnectionManager {
+  private static final long serialVersionUID = 1L;
+
   public Object allocateConnection(ManagedConnectionFactory managedConnectionFactory, ConnectionRequestInfo connectionRequestInfo)
           throws ResourceException {
     PxeManagedConnectionImpl managedConnection = (PxeManagedConnectionImpl) managedConnectionFactory.createManagedConnection(null, connectionRequestInfo);

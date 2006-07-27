@@ -13,12 +13,11 @@ import com.fs.pxe.bpel.o.OBase;
 import com.fs.pxe.bpel.o.OProcess;
 import com.fs.pxe.bpel.o.OVarType;
 import com.fs.pxe.bpel.runtime.channels.FaultData;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
 
 /**
  * Base class extended by all BPEL-related abstractions. Provides methods for
@@ -42,25 +41,11 @@ public abstract class BpelAbstraction extends Abstraction {
   }
   
   protected final FaultData createFault(QName fault, Element faultMsg, OVarType faultType, OBase location){
-  	return new FaultData(fault, faultMsg, faultType, findLineNo(location));
+  	return new FaultData(fault, faultMsg, faultType, location);
   }
   
-  /**
-   * Find the best line number for the given location.
-   * @param location
-   * @return line number
-   */
-  protected int findLineNo(OBase location) {
-  	if (location == null)
-  		return -1;
-  	if (location.debugInfo == null)
-  		return -1;
-  	return location.debugInfo.startLine;
-  }
-
 	protected final FaultData createFault(QName fault, OBase location, String faultExplanation) {
-    return new FaultData(fault, findLineNo(location),faultExplanation);
-  	
+    return new FaultData(fault, location,faultExplanation);
   }
 
   protected final FaultData createFault(QName fault, OBase location){

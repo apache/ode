@@ -15,7 +15,6 @@ import com.fs.pxe.bpel.pmapi.BpelManagementFacade;
 import com.fs.pxe.bpel.pmapi.InstanceNotFoundException;
 import com.fs.pxe.bpel.pmapi.ManagementException;
 import com.fs.pxe.bpel.pmapi.ProcessingException;
-import com.fs.pxe.bpel.runtime.BpelEventListener;
 import com.fs.pxe.bpel.runtime.breaks.BreakpointImpl;
 import com.fs.utils.ArrayUtils;
 import com.fs.utils.msg.MessageBundle;
@@ -36,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @todo Need to revisit the whole stepping/suspend/resume mechanism.
  */
-class DebuggerSupport implements BpelEventListener {
+class DebuggerSupport {
 
   private static final Log __log = LogFactory.getLog(DebuggerSupport.class);
   private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -141,7 +140,7 @@ class DebuggerSupport implements BpelEventListener {
             
             evt.setNewState(previousState);
             evt.setProcessInstanceId(iid);
-            evt.setProcessName(instance.getProcess().getDefinitionName());
+            evt.setProcessName(instance.getProcess().getType());
             evt.setProcessId(_db.getProcessId());
               
             instance.insertBpelEvent(evt);
@@ -222,7 +221,7 @@ class DebuggerSupport implements BpelEventListener {
             changeEvent.setNewState(ProcessState.STATE_SUSPENDED);
             changeEvent.setProcessInstanceId(instance.getInstanceId());
             
-            changeEvent.setProcessName(process.getDefinitionName());
+            changeEvent.setProcessName(process.getType());
             changeEvent.setProcessId(_db.getProcessId());
             
             instance.insertBpelEvent(changeEvent);
@@ -276,7 +275,7 @@ class DebuggerSupport implements BpelEventListener {
             
             evt.setNewState(previousState);
             evt.setProcessInstanceId(iid);
-            evt.setProcessName(instance.getProcess().getDefinitionName());
+            evt.setProcessName(instance.getProcess().getType());
             evt.setProcessId(_db.getProcessId());
             instance.insertBpelEvent(evt);
             onEvent(evt);
@@ -320,7 +319,7 @@ class DebuggerSupport implements BpelEventListener {
             evt.setNewState(ProcessState.STATE_SUSPENDED);
             evt.setProcessInstanceId(iid);
             ProcessDAO process = instance.getProcess();
-            evt.setProcessName(process.getDefinitionName());
+            evt.setProcessName(process.getType());
             evt.setProcessId(process.getProcessId());
             instance.insertBpelEvent(evt);
             onEvent(evt);
@@ -351,7 +350,7 @@ class DebuggerSupport implements BpelEventListener {
           evt.setNewState(ProcessState.STATE_TERMINATED);
           evt.setProcessInstanceId(iid);
           ProcessDAO process = instance.getProcess();
-          QName processName = process.getDefinitionName();
+          QName processName = process.getType();
           evt.setProcessName(processName);
           QName processId = process.getProcessId();
           evt.setProcessId(processId);

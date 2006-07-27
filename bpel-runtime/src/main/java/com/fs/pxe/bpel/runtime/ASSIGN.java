@@ -382,20 +382,20 @@ class ASSIGN extends ACTIVITY {
 			}
 		}
 
-		ScopeEvent se;
-		if (ocopy.to instanceof OAssign.PartnerLinkRef) {
-			// myRole can't be updated, only a partnerRole is updated.
-			se = new PartnerLinkModificationEvent(
-					((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
-		} else {
-			final VariableInstance lval = _scopeFrame.resolve(ocopy.to
-					.getVariable());
-			se = new VariableModificationEvent(lval.declaration.name);
-		}
-		if (ocopy.debugInfo != null)
-			se.setLineNo(ocopy.debugInfo.startLine);
-		sendEvent(se);
-	}
+    ScopeEvent se;
+    if (ocopy.to instanceof OAssign.PartnerLinkRef) {
+      // myRole can't be updated, only a partnerRole is updated.
+      se = new PartnerLinkModificationEvent(
+              ((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
+    } else {
+      final VariableInstance lval = _scopeFrame.resolve(ocopy.to
+              .getVariable());
+      se = new VariableModificationEvent(lval.declaration.name);
+    }
+    if (ocopy.debugInfo != null)
+      se.setLineNo(ocopy.debugInfo.startLine);
+    sendEvent(se);
+  }
 
   private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
     // Eventually wrapping with service-ref element if we've been directly assigned some
@@ -578,6 +578,10 @@ public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) th
 		public Node getPartData(Element message, Part part) throws FaultException {
 			return _ctx.getPartData(message,part);
 		}
+
+    public Long getProcessId() {
+      return _ctx.getProcessId();
+    }
 	}
 
 }

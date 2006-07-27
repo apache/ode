@@ -7,7 +7,6 @@ package com.fs.pxe.bpel.explang;
 
 import com.fs.pxe.bpel.common.FaultException;
 import com.fs.pxe.bpel.o.*;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -55,7 +54,7 @@ public interface EvaluationContext {
   /**
    * Obtain the root node.
    * 
-   * @return
+   * @return root node
    */
   Node getRootNode();
 
@@ -70,4 +69,9 @@ public interface EvaluationContext {
    */
   Node evaluateQuery(Node root, OExpression expr) throws FaultException;
 
+  /**
+   * Reads the current process instance id.
+   * @return instance id
+   */
+  Long getProcessId();
 }

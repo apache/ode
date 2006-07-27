@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<foo bar="baz">
-  <qux>
-    <fneh xmlns:gold="e://locks" gold:bar="heavy" />
-  </qux>
-</foo>
