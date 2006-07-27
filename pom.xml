@@ -234,7 +234,7 @@
     -->
     <repositories>
         <repository>
-            <id>ode</id>
+            <id>pxe</id>
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </repository>
