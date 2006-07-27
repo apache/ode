@@ -42,4 +42,8 @@ public class NewProcessInstanceEvent extends ProcessMessageExchangeEvent {
     _scopeDeclarationId = scopeDeclarationId;
   }
 
+  public TYPE getType() {
+    return TYPE.instanceLifecycle;
+  }
+  
 }

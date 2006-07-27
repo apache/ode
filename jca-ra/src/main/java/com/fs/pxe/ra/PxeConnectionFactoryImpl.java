@@ -18,6 +18,8 @@ import javax.resource.spi.ManagedConnectionFactory;
 /**
  */
 class PxeConnectionFactoryImpl implements PxeConnectionFactory {
+  private static final long serialVersionUID = 1L;
+  
   private Reference _reference;
   private ConnectionManager _manager;
   private ManagedConnectionFactory _managedConnectionFactory;
@@ -28,11 +30,11 @@ class PxeConnectionFactoryImpl implements PxeConnectionFactory {
   }
 
   public Connection getConnection() throws ResourceException {
-    return (PxeConnection) _manager.allocateConnection(_managedConnectionFactory,  null);
+    return (Connection) _manager.allocateConnection(_managedConnectionFactory,  null);
   }
 
   public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
-    return (PxeConnection) _manager.allocateConnection(_managedConnectionFactory, null);
+    return (Connection) _manager.allocateConnection(_managedConnectionFactory, null);
   }
 
   public ResourceAdapterMetaData getMetaData() throws ResourceException {

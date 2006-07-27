@@ -32,7 +32,7 @@ public interface ProcessDAO {
    * Get the BPEL process name.
    * @return qualified BPEL process name.
    */
-  QName getDefinitionName();
+  QName getType();
 
   
   /**

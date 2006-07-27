@@ -24,4 +24,8 @@ public abstract class VariableEvent extends ScopeEvent {
   public void setVarName(String varName) {
     _varName = varName;
   }
+
+  public TYPE getType() {
+    return TYPE.dataHandling;
+  }
 }

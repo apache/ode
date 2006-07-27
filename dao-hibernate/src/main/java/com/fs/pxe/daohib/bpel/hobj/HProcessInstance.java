@@ -33,7 +33,7 @@ public class HProcessInstance extends HObject{
   private Collection<HBpelEvent> _events = new HashSet<HBpelEvent>();
   private Set<HCorrelatorSelector> _correlatorSelectors = new HashSet<HCorrelatorSelector>();
   
-  private String _fault;
+  private HFaultData _fault;
   private HLargeData _jacobState;
   private short _previousState;
   private short _state;
@@ -61,19 +61,19 @@ public class HProcessInstance extends HObject{
 	}
 
   /**
-   * @hibernate.property
+   * @hibernate.many-to-one column="FAULT" cascade="delete"
    *  column="FAULT"
    */
-	public String getFault() {
+	public HFaultData getFault() {
 		return _fault;
 	}
 
-  public void setFault(String fault) {
+  public void setFault(HFaultData fault) {
 		_fault = fault;
 	}
 
   /**
-   * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
+   * @hibernate.many-to-one column="JACOB_STATE" cascade="delete"
    */
 	public HLargeData getJacobState() {
 		return _jacobState;

@@ -2,7 +2,7 @@
 <project>
     <groupId>pxe</groupId>
     <artifactId>pxe-jca-ra</artifactId>
-    <name>PXE :: JCA Resource Adapter Library</name>
+    <name>PXE :: Universal JCA Resource Adapter (Client-Side) Library</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>

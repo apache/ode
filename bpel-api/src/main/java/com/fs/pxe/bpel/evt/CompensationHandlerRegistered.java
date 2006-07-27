@@ -8,4 +8,7 @@ package com.fs.pxe.bpel.evt;
 public class CompensationHandlerRegistered extends ScopeEvent {
 	private static final long serialVersionUID = 1L;
 
+  public TYPE getType() {
+    return TYPE.scopeHandling;
+  }
 }

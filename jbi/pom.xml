@@ -28,6 +28,10 @@
             <groupId>pxe</groupId>
             <artifactId>pxe-minerva</artifactId>
         </dependency>
+         <dependency>
+            <groupId>pxe</groupId>
+            <artifactId>pxe-bpel-connector</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.servicemix</groupId>
             <artifactId>servicemix-jbi</artifactId>

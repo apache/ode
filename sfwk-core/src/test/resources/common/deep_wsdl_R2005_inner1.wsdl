@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<wsdl:definitions targetNamespace="foo://bar/baz" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <wsdl:import namespace="bar://baz/qux" location="deep_wsdl_R2005_inner2.wsdl" />
-</wsdl:definitions>

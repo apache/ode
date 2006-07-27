@@ -5,9 +5,9 @@
  */
 package com.fs.pxe.bpel.evt;
 
-import javax.xml.namespace.QName;
-
 import com.fs.pxe.bpel.common.CorrelationKey;
+
+import javax.xml.namespace.QName;
 
 /**
  * Correlation matched a process instance on inbound message.
@@ -29,5 +29,9 @@ public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
   public void setCorrelationKey(CorrelationKey correlationKey) {
     _correlationKey = correlationKey;
   }
-  
+
+  public TYPE getType() {
+    return TYPE.correlation;
+  }
+
 }

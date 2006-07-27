@@ -11,6 +11,7 @@ import com.fs.pxe.bpel.o.OScope;
 import com.fs.pxe.bpel.runtime.channels.FaultData;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Set;
 
 
@@ -18,9 +19,9 @@ import java.util.Set;
  * N-tuple representing a scope "frame" (as in stack frame).
  */
 class ScopeFrame implements Serializable {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	/** The compiled scope representation. */
+  /** The compiled scope representation. */
   final OScope oscope;
 
   /** The parent scope frame. */
@@ -36,10 +37,10 @@ class ScopeFrame implements Serializable {
 
   /** Constructor used to create "fault" scopes. */
   ScopeFrame( OScope scopeDef,
-                     Long scopeInstanceId,
-                     ScopeFrame parent,
-                     Set<CompensationHandler> visibleCompensationHandlers,
-                     FaultData fault) {
+              Long scopeInstanceId,
+              ScopeFrame parent,
+              Set<CompensationHandler> visibleCompensationHandlers,
+              FaultData fault) {
     this(scopeDef,scopeInstanceId,parent,visibleCompensationHandlers);
     _faultData = fault;
 
@@ -104,6 +105,13 @@ class ScopeFrame implements Serializable {
   }
 
   public void fillEventInfo(ScopeEvent event) {
+    ScopeFrame currentScope = this;
+    ArrayList<String> parentNames = new ArrayList<String>();
+    while (currentScope != null) {
+      parentNames.add(currentScope.oscope.name);
+      currentScope = currentScope.parent;
+    }
+    event.setParentScopesNames(parentNames);
     if (parent != null)
       event.setParentScopeId(parent.scopeInstanceId);
     event.setScopeId(scopeInstanceId);

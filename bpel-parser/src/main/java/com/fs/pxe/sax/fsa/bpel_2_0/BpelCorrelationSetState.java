@@ -15,10 +15,9 @@ import com.fs.sax.evt.StartElement;
 import com.fs.sax.evt.XmlAttributes;
 import com.fs.utils.NSContext;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-
-import javax.xml.namespace.QName;
 
 class BpelCorrelationSetState extends BaseBpelState {
 
@@ -37,7 +36,14 @@ class BpelCorrelationSetState extends BaseBpelState {
       ArrayList<QName> al = new ArrayList<QName>();
       NSContext nsc = se.getNamespaceContext();
       for (;st.hasMoreTokens();) {
-        al.add(nsc.derefQName(st.nextToken()));
+        String token = st.nextToken();
+        if (token.startsWith("{")) {
+          String namespace = token.substring(1, token.indexOf("}"));
+          String localname = token.substring(token.indexOf("}") + 1, token.length());
+          al.add(new QName(namespace, localname));
+        } else {
+          al.add(nsc.derefQName(token));
+        }
       }
       _s.setProperties(al.toArray(new QName[] {}));
     }
@@ -68,4 +74,5 @@ class BpelCorrelationSetState extends BaseBpelState {
       return new BpelCorrelationSetState(se,pc);
     }
   }
+
 }

@@ -19,4 +19,8 @@ public abstract class PartnerLinkEvent extends ScopeEvent {
   public void setpLinkName(String pLinkName) {
     _pLinkName = pLinkName;
   }
+
+  public TYPE getType() {
+    return TYPE.dataHandling;
+  }
 }

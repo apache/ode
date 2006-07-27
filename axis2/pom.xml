@@ -2,8 +2,7 @@
 <project>
   <groupId>pxe</groupId>
   <artifactId>pxe-axis2</artifactId>
-  <name>PXE :: JBI Component for Process Engine</name>
-
+  <name>PXE :: AXIS2 Integration Layer</name>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>pxe</groupId>

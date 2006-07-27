@@ -94,6 +94,8 @@ public class FSA {
       break;
     case SaxEvent.START_ELEMENT:
       StartElement ste = (StartElement) se;
+      // TODO Add ignore elements in graph provider
+      if (ste.getName().getLocalPart().equals("documentation")) break;
       String target = _graphProvider.getQNameEdge(current().stateName,ste.getName());
       if (target == null) {
         target = _graphProvider.getOtherEdge(current().stateName, ste.getName().getNamespaceURI());
@@ -112,6 +114,8 @@ public class FSA {
       break;
     case SaxEvent.END_ELEMENT:
       EndElement ee = (EndElement)se;
+      // TODO Add ignore elements in graph provider
+      if (ee.getName().getLocalPart().equals("documentation")) break;
       if (current().isDone()) {
         State pn =  current().state;   
         pn.done();

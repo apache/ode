@@ -8,11 +8,11 @@ package com.fs.pxe.bpel.dao;
 import com.fs.pxe.bpel.evt.ProcessInstanceEvent;
 import org.w3c.dom.Element;
 
-import javax.xml.namespace.QName;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 
 /**
@@ -47,7 +47,9 @@ public interface ProcessInstanceDAO {
    * processed.
    * @param fault the fault
    */
-  void setFault(QName fault);
+  void setFault(FaultDAO fault);
+  
+  void setFault(QName faultName, String explanation, int faultLineNo, int activityId, Element faultMessage);
 
   /**
    * The un-caught fault associated with the process. This will be
@@ -56,24 +58,7 @@ public interface ProcessInstanceDAO {
    *
    * @return the fault
    */
-  QName getFault();
-
-  /**
-   * Sets any data associated with an un-caught fault. This will be
-   * <code>null</code> if there was no fault, or if all faults are caught and
-   * processed.
-   * @param faultData data associated with an un-caught fault
-   */
-  void setFaultData(Element faultData);
-
-  /**
-   * Return any data associated with an un-caught fault. This will be
-   * <code>null</code> if there was no fault, or if all faults are caught and
-   * processed.
-   *
-   * @return data associated with an un-caught fault
-   */
-  Element getFaultData();
+  FaultDAO getFault();
 
   /**
    * Get the (opaque) instance execution state.
@@ -227,6 +212,7 @@ public interface ProcessInstanceDAO {
     public Date last;
     public int count;
   }
+
 
 
   

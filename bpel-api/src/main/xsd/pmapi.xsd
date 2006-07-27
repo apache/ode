@@ -357,7 +357,12 @@
 					</sequence>
 				</complexType>
 			</element>
-		</sequence>
+      <element name="endpoints" type="pmapi:tEndpointReferences">
+        <annotation>
+          <documentation>Endpoint references.</documentation>
+        </annotation>
+      </element>      
+    </sequence>
 	</complexType>
 	<complexType name="tActivityInfo">
 		<annotation>
@@ -525,8 +530,11 @@
 			<documentation> Type used for reporting faults. </documentation>
 		</annotation>
 		<sequence>
-			<element name="fault-name" type="xs:QName"/>
-			<element name="fault-data" minOccurs="0">
+			<element name="name" type="xs:QName"/>
+			<element name="explanation" type="xs:string"/>
+			<element name="line-number" type="xs:int"/>
+			<element name="aiid" type="xs:int"/>
+			<element name="data" minOccurs="0">
 				<complexType>
 					<sequence>
 						<any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>

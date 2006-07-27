@@ -7,8 +7,8 @@ package com.fs.pxe.tools.bpelc;
 
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bpel.compiler.WsdlFinder;
-import com.fs.pxe.sfwk.rr.RepositoryWsdlLocator;
-import com.fs.pxe.sfwk.rr.ResourceRepository;
+import com.fs.utils.rr.RepositoryWsdlLocator;
+import com.fs.utils.rr.ResourceRepository;
 
 import java.io.IOException;
 import java.io.InputStream;

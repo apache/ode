@@ -111,6 +111,12 @@ class JaxenContexts implements FunctionContext, VariableContext {
       throw new IllegalStateException("XPath variables not supported for bpel 1.1");
     }
 
+    // Custom variables
+    if ("pxe".equals(prefix)) {
+      if ("pid".equals(localName)) {
+        return _xpathEvalCtx.getProcessId();
+      }
+    }
   
     OXPath10ExpressionBPEL20 expr = (OXPath10ExpressionBPEL20)_oxpath;
     if(expr.isJoinExpression){

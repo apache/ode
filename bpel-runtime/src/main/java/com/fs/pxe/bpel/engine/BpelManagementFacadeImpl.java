@@ -5,24 +5,37 @@
  */
 package com.fs.pxe.bpel.engine;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
+import org.w3c.dom.Node;
+
 import com.fs.pxe.bpel.bdi.breaks.ActivityBreakpoint;
 import com.fs.pxe.bpel.bdi.breaks.Breakpoint;
 import com.fs.pxe.bpel.bdi.breaks.VariableModificationBreakpoint;
-import com.fs.pxe.bpel.common.*;
-import com.fs.pxe.bpel.dao.*;
+import com.fs.pxe.bpel.common.CorrelationKey;
+import com.fs.pxe.bpel.dao.BpelDAOConnection;
+import com.fs.pxe.bpel.dao.CorrelationSetDAO;
+import com.fs.pxe.bpel.dao.ProcessInstanceDAO;
+import com.fs.pxe.bpel.dao.ScopeDAO;
+import com.fs.pxe.bpel.dao.XmlDataDAO;
 import com.fs.pxe.bpel.evt.BpelEvent;
 import com.fs.pxe.bpel.o.OProcess;
-import com.fs.pxe.bpel.pmapi.*;
+import com.fs.pxe.bpel.pmapi.BpelManagementFacade;
+import com.fs.pxe.bpel.pmapi.InstanceNotFoundException;
+import com.fs.pxe.bpel.pmapi.InvalidRequestException;
+import com.fs.pxe.bpel.pmapi.ManagementException;
+import com.fs.pxe.bpel.pmapi.ProcessingException;
 import com.fs.pxe.bpel.pmapi.TInstanceInfo.EventInfo;
 import com.fs.pxe.bpel.runtime.breaks.ActivityBreakpointImpl;
 import com.fs.utils.DOMUtils;
 import com.fs.utils.uuid.UUIDGen;
-
-import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-
-import java.util.*;
 
 /**
  * Implementation of the instance/process management interaction. This class implements
@@ -197,7 +210,7 @@ class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         ProcessInstanceDAO instance = session.getInstance(iid);
         if (instance == null)
           throw new ManagementException("InstanceNotFound:" + iid);
-        return instance.getFault();
+        return instance.getFault().getName();
       }
     });
 	}
