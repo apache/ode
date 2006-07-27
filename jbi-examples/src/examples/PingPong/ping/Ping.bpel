@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+        name="Ping"
+        xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+        targetNamespace="urn:/Ping.bpel"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="urn:/Ping.bpel"
+        xmlns:ping="urn:/Ping.wsdl"
+        xmlns:pong="urn:/Pong.wsdl"
+        xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+        expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+
+    <import location="urn:/Ping.wsdl"
+            namespace="urn:/Ping.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <import location="urn:/Pong.wsdl"
+            namespace="urn:/Pong.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="PingPartnerLink"
+                partnerLinkType="ping:PingPartnerLinkType"
+                myRole="Provider" />
+        <partnerLink name="PongPartnerLink"
+                partnerLinkType="pong:PongPartnerLinkType"
+                partnerRole="Provider"
+                initializePartnerRole="yes" />
+    </partnerLinks>
+
+    <variables>
+        <variable messageType="ping:PingRequest" name="pingRequest"/>
+        <variable messageType="ping:PingResponse" name="pingResponse"/>
+        <variable messageType="pong:PongRequest" name="pongRequest"/>
+        <variable messageType="pong:PongResponse" name="pongResponse"/>
+        <variable type="xsd:string" name="text" />
+    </variables>
+
+    <sequence name="Main">
+        <receive name="pingReceive"
+                createInstance="yes"
+                operation="Ping"
+                partnerLink="PingPartnerLink"
+                portType="ping:PingPortType"
+                variable="pingRequest"/>
+
+        <assign name="assignPongRequest">
+            <!-- add "ping" text to the input text -->
+            <copy>
+                <from>concat($pingRequest.body/ping:text, ' ping')</from>
+                <to variable="text"/>
+            </copy>
+            <!-- initialize pongRequest -->
+            <copy>
+                <from>
+                    <literal>
+                        <pong:PongRequest>
+                            <pong:text/>
+                        </pong:PongRequest>
+                    </literal>
+                </from>
+                <to>$pongRequest.body</to>
+            </copy>
+            <!-- copy new text into pongRequest -->
+            <copy>
+                <from>$text</from>
+                <to>$pongRequest.body/pong:text</to>
+            </copy>
+        </assign>
+        
+        <invoke name="invokePong"
+                operation="Pong"
+                inputVariable="pongRequest"
+                outputVariable="pongResponse"
+                partnerLink="PongPartnerLink"
+                portType="pong:PongPortType"/>
+        
+        <assign name="assignPingResponse">
+            <copy>
+                <from>$pongResponse.body/pong:text</from>
+                <to>$text</to>
+            </copy>
+            <!-- initialize pingResponse -->
+            <copy>
+                <from>
+                    <literal>
+                        <ping:PingResponse>
+                            <ping:text/>
+                        </ping:PingResponse>
+                    </literal>
+                </from>
+                <to>$pingResponse.body</to>
+            </copy>
+            <!-- copy new text into pingResponse -->
+            <copy>
+                <from>$text</from>
+                <to>$pingResponse.body/ping:text</to>
+            </copy>
+        </assign>
+
+        <reply name="pingReply"
+                partnerLink="PingPartnerLink"
+                portType="ping:PingPortType"
+                operation="Ping"
+                variable="pingResponse"/>
+    </sequence>
+</process>

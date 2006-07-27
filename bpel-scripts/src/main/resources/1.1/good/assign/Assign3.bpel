@@ -1,0 +1,71 @@
+<!--
+<assign> Test Case
+- FROM: invalid location in complex element part
+- FAULT: SelectionFailure
+-->
+<process name="assign3"
+  targetNamespace="http://ode/bpel/unit-test"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns:tns="http://ode/bpel/unit-test"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:test="uri:testing">
+
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+      partnerLinkType="test:PartnerLinkType1"
+      myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+    <variable name="var2" type="xsd:string"/>
+  </variables>
+
+  <sequence name="sequenceA">
+    <receive
+      createInstance="yes"
+      name="startReceive"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      operation="opTwoWay"
+      variable="var1"/>
+
+    <scope name="scopeA">
+      <faultHandlers>
+        <catch faultName="bpws:selectionFailure">
+          <assign name="assignF">
+            <copy>
+              <from expression="'success'"/>
+              <to variable="var1" part="StringPart1"/>
+            </copy>
+          </assign>
+        </catch>
+      </faultHandlers>
+
+      <assign name="assignA">
+
+        <!-- Should get selectionFailure from the following: -->
+        <copy>
+          <from variable="var1" part="Complex1Part1" query="/test:a/test:bad/test:query" />
+          <to variable="var2"/>
+        </copy>
+
+        <!-- Should not reach this point. -->
+        <copy>
+          <from expression="'failure'" />
+          <to variable="var1" part="StringPart1"/>
+        </copy>
+
+      </assign>
+    </scope>
+
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+
+  </sequence>
+
+</process>

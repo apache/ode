@@ -1,32 +1,21 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.bpel.parser;
 
-import java.io.IOException;
-import java.net.URL;
-
+import org.apache.ode.bom.api.Process;
+import org.apache.ode.sax.fsa.FsaHandler;
+import org.apache.ode.utils.XMLParserUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import org.apache.ode.bom.api.Process;
-import org.apache.ode.sax.fsa.FsaHandler;
-import org.apache.ode.utils.XMLParserUtils;
+import java.io.IOException;
+import java.net.URL;
 
 class BpelParser {
   
@@ -46,22 +35,13 @@ class BpelParser {
   public BpelParser() {
     _b = new RootFSA();
     _xr = XMLParserUtils.getXMLReader();
-    try {
-      XMLParserUtils.addExternalSchemaURL(_xr,BpelProcessBuilder.BPEL4WS_NS,
-          getResource("/bpel4ws_1_1-fivesight.xsd").toExternalForm());
-      XMLParserUtils.addExternalSchemaURL(_xr,BpelProcessBuilder.WSBPEL2_0_NS,
-          getResource("/wsbpel_main-draft-Sep-06-2005.xsd").toExternalForm());
-      XMLParserUtils.addExternalSchemaURL(_xr,XML,
-          getResource("/xml.xsd").toExternalForm());
-      XMLParserUtils.addExternalSchemaURL(_xr,WSDL,
-          getResource("/wsdl.xsd").toExternalForm());
-      XMLParserUtils.addExternalSchemaURL(_xr,WSBPEL2_PLINK,
-          getResource("/wsbpel_plinkType-draft-Sep-06-2005.xsd").toExternalForm());
-    } catch (SAXException se) {
-      // complain but let it slide; who knows -- we might not be using Xerces...
-      __log.error("Unable to configure XMLReader ("  + _xr.getClass().getName() +
-          ") for schema validation.", se);
-    }
+    LocalEntityResolver resolver = new LocalEntityResolver();
+    resolver.register(BpelProcessBuilder.BPEL4WS_NS, getResource("/bpel4ws_1_1-fivesight.xsd"));
+    resolver.register(BpelProcessBuilder.WSBPEL2_0_NS, getResource("/wsbpel_main-draft-Apr-29-2006.xsd"));
+    resolver.register(XML, getResource("/xml.xsd"));
+    resolver.register(WSDL,getResource("/wsdl.xsd"));
+    resolver.register(WSBPEL2_PLINK, getResource("/wsbpel_plinkType-draft-Apr-29-2006.xsd"));
+    _xr.setEntityResolver(resolver);
     _xr.setContentHandler(new FsaHandler(_b));
   }
   

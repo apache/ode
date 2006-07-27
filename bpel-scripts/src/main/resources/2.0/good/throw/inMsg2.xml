@@ -1,0 +1,3 @@
+<message xmlns:tst="http://ode/bpel/unit-test.wsdl">
+    <ElementPart><tst:TestElement>abc</tst:TestElement></ElementPart>
+</message>

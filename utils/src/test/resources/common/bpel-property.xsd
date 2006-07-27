@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+xmlns:wsbp="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+elementFormDefault="qualified">
+<element name="property">
+<complexType>
+<attribute name="name" type="NCName" use="required"/>
+<attribute name="type" type="QName" use="required"/>
+</complexType>
+</element>
+<element name="propertyAlias">
+<complexType>
+<attribute name="propertyName" type="QName" use="required"/>
+<attribute name="messageType" type="QName" use="required"/>
+<attribute name="part" type="NCName"/>
+<attribute name="query" type="string"/>
+</complexType>
+</element>
+</schema>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+ xmlns:hw="http://ode/bpel/responder.wsdl"
+ xmlns="http://www.fivesight.com/ode/system-descriptor/"
+ name="DynResponder"
+ wsdlUri="urn:/Responder.wsdl">
+    <channels>
+    <channel name="channel1" />
+  </channels>
+  <services>
+        <service name="DynResponderService"
+            provider="uri:protocoladapter.soap">
+            <imports>
+                <port name="DynResponderPort" type="hw:DynResponderPortType" channel-ref="channel1" />
+            </imports>
+        </service>
+        <service name="dynResponder.BpelService" provider="uri:bpelProvider">
+          <properties>
+             <property name="compiledProcess" value="DynPartnerResponder.cbp"/>
+           </properties>
+            <exports>
+                <port name="mainPartnerLink.responder" type="hw:DynResponderPortType" channel-ref="channel1" />
+            </exports>
+        </service>
+  </services>
+</system-descriptor>

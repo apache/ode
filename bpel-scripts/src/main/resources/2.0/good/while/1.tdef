@@ -1,0 +1,5 @@
+bpel=While1-2.0.bpel
+request.1.partnerlink=testPartnerLink
+request.1.operation=testOperation
+request.1.msg=inMsg.xml
+postCondition=/message/TestPart/text()='10.0'

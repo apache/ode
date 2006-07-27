@@ -1,17 +1,7 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.bom.api;
 
@@ -40,6 +30,8 @@ public final class Constants {
   public static final String NS_BPEL4WS_PARTNERLINK_2003_05 = "http://schemas.xmlsoap.org/ws/2003/05/partner-link/";
   
   public static final String NS_WSBPEL_PARTNERLINK_2004_03 = "http://schemas.xmlsoap.org/ws/2004/03/partner-link/";
+
+  public static final String NS_XML_SCHEMA_2001 = "http://www.w3.org/2001/XMLSchema";
 
   private Constants() {
   }

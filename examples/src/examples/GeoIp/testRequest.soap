@@ -1,0 +1,8 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <!-- test soap message -->
+  <SOAP-ENV:Body>
+    <ns1:GetGeoIP xmlns:ns1="http://www.webservicex.net">
+        <ns1:IPAddress>216.239.37.99</ns1:IPAddress>
+    </ns1:GetGeoIP>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

@@ -1,17 +1,7 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.bom.impl.nodes;
 
@@ -19,8 +9,9 @@ import org.apache.ode.bom.api.Correlation;
 import org.apache.ode.bom.api.InvokeActivity;
 import org.apache.ode.utils.NSContext;
 
-import javax.xml.namespace.QName;
 import java.util.List;
+
+import javax.xml.namespace.QName;
 
 
 /**
@@ -101,6 +92,7 @@ public class InvokeActivityImpl extends ScopeImpl implements InvokeActivity {
     return _correlations.getCorrelations(patternMask);
   }
 
+  
   public void addCorrelation(Correlation correlation) {
     _correlations.addCorrelation(correlation);
   }
@@ -108,5 +100,9 @@ public class InvokeActivityImpl extends ScopeImpl implements InvokeActivity {
 
   public void setNamespaceContext(NSContext ctx) {
     super.setNamespaceContext(ctx);
+  }
+
+  public List<Correlation> getCorrelations() {
+    return _correlations.getCorrelations();
   }
 }

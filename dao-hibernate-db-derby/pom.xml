@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<project>
+    <groupId>ode</groupId>
+    <artifactId>ode-dao-hibernate-db-derby</artifactId>
+    <name>ODE :: Hibernate DAO Derby Database</name>
+    <packaging>pom</packaging>
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <version>2.0-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-dao-hibernate</artifactId>
+        </dependency>
+        <dependency>
+           <groupId>org.apache.derby</groupId>
+           <artifactId>derbytools</artifactId>
+           <version>${derbyVersion}</version>
+           <scope>compile</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.apache.derby</groupId>
+           <artifactId>derby</artifactId>
+           <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <id>db</id>
+              <phase>compile</phase>
+              <configuration>
+                <tasks>
+                  <ant antfile="build.xml" target="db" inheritRefs="true"/>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+
+            <execution>
+              <id>schemagen</id>
+              <phase>generate-sources</phase>
+              <configuration>
+                <tasks>
+                  <ant antfile="build.xml" target="schemagen" inheritRefs="true"/>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+
+          <dependencies>
+            <dependency>
+              <groupId>ode</groupId>
+              <artifactId>ode-dao-hibernate</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+    
+          </dependencies>
+        </plugin>
+
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+            <execution>
+              <id>attach-artifacts</id>
+              <phase>package</phase>
+              <goals>
+                <goal>attach-artifact</goal>
+              </goals>
+              <configuration>
+                  <artifacts>
+                    <artifact>
+                      <file>target/tarball.tar</file>
+                      <type>tar</type>
+                    </artifact>
+                  </artifacts>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        </plugins>
+      </build>
+</project>

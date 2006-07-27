@@ -1,0 +1,49 @@
+<!--
+<assign> Test Case
+DESCRIPTION
+-->
+
+<process name="assign2"
+	 xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+	 xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+	 targetNamespace="http://ode/bpel/unit-test"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	 xmlns:test="uri:testing"
+	 xmlns:t="uri:testing">
+
+  <import location="../test.wsdl"
+	  importType="http://schemas.xmlsoap.org/wsdl/"
+	  namespace="uri:testing" />
+
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+		 partnerLinkType="test:PartnerLinkType1"
+		 myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+    <variable name="var2" type="xsd:string"/>
+  </variables>
+
+  <sequence>
+    <receive name="startReceive"     
+	     createInstance="yes"
+	     partnerLink="testPartnerLink"
+	     portType="test:PortType1"
+	     operation="opTwoWay"
+	     variable="var1"/>
+
+    <assign name="assign1">
+      <!-- COPIES GO HERE -->
+    </assign>
+
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+
+  </sequence>
+
+</process>
