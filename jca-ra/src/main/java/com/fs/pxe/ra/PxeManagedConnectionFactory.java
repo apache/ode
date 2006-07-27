@@ -6,6 +6,7 @@
 package com.fs.pxe.ra;
 
 import com.fs.pxe.ra.transports.PxeTransport;
+import com.fs.pxe.ra.transports.rmi.RMITransport;
 
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
@@ -22,7 +23,7 @@ import javax.security.auth.Subject;
  * JCA {@link ManagedConnectionFactory} implementation.
  */
 public class PxeManagedConnectionFactory implements ManagedConnectionFactory {
-  private static final String SYSPROP_DEFAULT_TRANSPORT = PxeManagedConnectionFactory.class.getName() + ".DefaultTransportClass";
+  private static final long serialVersionUID = 1L;
   private PrintWriter _logWriter;
 
   /** Default connection request information. */
@@ -30,7 +31,7 @@ public class PxeManagedConnectionFactory implements ManagedConnectionFactory {
 
   public PxeManagedConnectionFactory() {
     try {
-      setTransport(getDefaultTransport());
+      setTransport(RMITransport.class.getName());
     } catch (ResourceException re) {
       //ignore (perhaps we should log)
     }
@@ -42,15 +43,12 @@ public class PxeManagedConnectionFactory implements ManagedConnectionFactory {
       _defaultCRI.transport = (PxeTransport) tclass.newInstance();
     } catch (IllegalAccessException e) {
       ResourceException re = new ResourceException("Class-access error for transport class \"" + transportClassName + "\". ", e);
-      re.initCause(e);
       throw re;
     } catch (InstantiationException e) {
       ResourceException re = new ResourceException("Error instantiating transport class \"" + transportClassName + "\". ", e );
-      re.initCause(e);
       throw re;
     } catch (ClassNotFoundException e) {
       ResourceException re = new ResourceException("Transport class \"" + transportClassName + "\" not found in class path. ", e);
-      re.initCause(e);
       throw re;
 
     }
@@ -105,11 +103,5 @@ public class PxeManagedConnectionFactory implements ManagedConnectionFactory {
     _logWriter = printWriter;
   }
 
-  private static String getDefaultTransport() {
-    String clsName = System.getProperty(SYSPROP_DEFAULT_TRANSPORT);
-    if (clsName == null)
-      clsName = "com.fs.pxe.sfwk.transports.rmi.RMITransport";
-    return clsName;
-  }
 
 }

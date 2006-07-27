@@ -11,6 +11,7 @@ import com.fs.pxe.bpel.evt.ProcessInstanceEvent;
 import com.fs.pxe.daohib.SessionManager;
 import com.fs.pxe.daohib.hobj.HLargeData;
 import com.fs.pxe.daohib.bpel.hobj.*;
+import com.fs.utils.DOMUtils;
 import com.fs.utils.QNameUtils;
 import com.fs.utils.stl.CollectionsX;
 import com.fs.utils.stl.UnaryFunction;
@@ -52,37 +53,44 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
 	public Date getCreateTime() {
 		return _instance.getCreated();
 	}
-	/**
-	 * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#setFault(javax.xml.namespace.QName)
-	 */
-	public void setFault(QName fault) {
-		_instance.setFault(QNameUtils.fromQName(fault));
+  
+  public void setFault(FaultDAO fault) {
+    _instance.setFault(((FaultDAOImpl)fault)._self);
     getSession().update(_instance);
-	}
-	/**
-	 * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#getFault()
-	 */
-	public QName getFault() {
-		String fault = _instance.getFault();
-    return fault == null
-      ? null
-      : QNameUtils.toQName(fault);
-	}
-	/**
-	 * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#setFaultData(org.w3c.dom.Element)
-	 */
-	public void setFaultData(Element faultData) {
-		// TODO
-	}
-	/**
-	 * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#getFaultData()
-	 */
-	public Element getFaultData() {
-		// TODO
-    return null;
-	}
-  
-  
+    
+  }
+
+
+   /**
+   * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#setFault(javax.xml.namespace.QName, String, int, int, org.w3c.dom.Element)
+   */
+  public void setFault(QName name, String explanation, int lineNo, int activityId, Element faultData) {
+    if (_instance.getFault() != null)
+      getSession().delete(_instance.getFault());
+
+    HFaultData fault = new HFaultData();
+    fault.setName(QNameUtils.fromQName(name));
+    fault.setExplanation(explanation);
+    fault.setLineNo(lineNo);
+    fault.setActivityId(activityId);
+    if (faultData != null) {
+      HLargeData ld = new HLargeData(DOMUtils.domToString(faultData));
+      fault.setData(ld);
+      getSession().save(ld);
+    }
+
+    _instance.setFault(fault);
+    getSession().save(fault);
+    getSession().update(_instance);
+  }
+  /**
+   * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#getFault()
+   */
+  public FaultDAO getFault() {
+    if (_instance.getFault() == null) return null;
+    else return new FaultDAOImpl(_sm, _instance.getFault());
+  }
+
 	/**
 	 * @see com.fs.pxe.bpel.dao.ProcessInstanceDAO#getExecutionState()
 	 */
@@ -315,7 +323,6 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
   public BpelDAOConnection getConnection() {
     return new BpelDAOConnectionImpl(_sm);
   }
-
 
 
 }

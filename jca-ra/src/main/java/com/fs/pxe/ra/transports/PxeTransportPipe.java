@@ -16,28 +16,20 @@ import java.rmi.RemoteException;
 public interface PxeTransportPipe extends Remote {
 
   /**
-   * Get the domain identifier for the remote domain.
-   * @return domain id
-   *
-   * @throws java.rmi.RemoteException DOCUMENTME
+   * Get the names of the client-side connection interfaces. 
+   * @return
    */
-  public String getDomainId()
-          throws RemoteException;
-
+  String[] getConnectionClassNames() throws RemoteException;
+  
   /**
    * Invoke a method on a service provier session.
    * @return DOCUMENTME
    *
    * @throws RemoteException RMI errors
    */
-  Object invokeServiceProviderAPI(String spURI, Object sessionId, String name, Object[] args)
-                                  throws RemoteException, InvocationTargetException;
+  Object invokeConnectionMethod(String name, Object[] args)
+    throws RemoteException, InvocationTargetException;
 
-  void closeServiceProviderSession(String spURI, Object sessionId)
-          throws RemoteException;
-
-  Object createServiceProviderSession(String serviceProviderUri, String className)
-          throws RemoteException, ClassNotFoundException;
 
   void close() throws RemoteException;
 

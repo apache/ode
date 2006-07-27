@@ -16,7 +16,8 @@ public class DDHandler {
 
   private static final Log __log = LogFactory.getLog(DDHandler.class);
 
-  private static final DDValidator[] VALIDATORS = new DDValidator[] { new EndpointValidator() };
+  private static final DDValidator[] VALIDATORS =
+          new DDValidator[] { new EndpointValidator(), new EventFilterValidator() };
   private static final DDEnhancer[] ENHANCERS = new DDEnhancer[] { new EndpointEnhancer() };
 
   private File _ddFile;

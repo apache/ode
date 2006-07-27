@@ -85,27 +85,27 @@ class ProcessAndInstanceManagementImpl
     return listProcesses(null, null, ProcessInfoCustomizer.ALL);
   }
 
-  public ProcessInfoDocument getProcessInfo(String pid, ProcessInfoCustomizer custom) {
+  public ProcessInfoDocument getProcessInfo(QName pid, ProcessInfoCustomizer custom) {
     return genProcessInfoDocument(pid, custom);
   }
 
 
-  public ProcessInfoDocument getProcessInfo(String pid) {
+  public ProcessInfoDocument getProcessInfo(QName pid) {
     return getProcessInfo(pid, ProcessInfoCustomizer.ALL);
   }
 
-  public ProcessInfoDocument activate(String pid) {
+  public ProcessInfoDocument activate(QName pid) {
     // TODO: Figure out how to deal with activation/retirement.
     return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
   }
 
 
-  public ProcessInfoDocument setRetired(final String pid, final boolean retired)
+  public ProcessInfoDocument setRetired(final QName pid, final boolean retired)
           throws ManagementException {
     try {
       _db.exec(new BpelDatabase.Callable<Object>() {
         public Object run(BpelDAOConnection conn) throws Exception {
-          ProcessDAO proc = conn.getProcess(QName.valueOf(pid));
+          ProcessDAO proc = conn.getProcess(pid);
           if (proc == null)
             throw new InvalidRequestException("ProcessNotFound:" + pid);
           proc.setRetired(retired);
@@ -123,18 +123,18 @@ class ProcessAndInstanceManagementImpl
     return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
   }
 
-  public ProcessInfoDocument setProcessProperty(final String pid, final QName propertyName, final Node value)
+  public ProcessInfoDocument setProcessProperty(final QName pid, final QName propertyName, final Node value)
           throws ManagementException {
     ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
     final TProcessInfo pi = ret.addNewProcessInfo();
     try {
       _db.exec(new BpelDatabase.Callable<Object>() {
         public Object run(BpelDAOConnection conn) throws Exception {
-          ProcessDAO proc = conn.getProcess(QName.valueOf(pid));
+          ProcessDAO proc = conn.getProcess(pid);
           if (proc == null)
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
           proc.setProperty(propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
-          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(false, true, false));
+          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
           return null;
         }
       });
@@ -148,18 +148,18 @@ class ProcessAndInstanceManagementImpl
     return ret;
   }
 
-  public ProcessInfoDocument setProcessProperty(final String pid, final QName propertyName, final String value)
+  public ProcessInfoDocument setProcessProperty(final QName pid, final QName propertyName, final String value)
           throws ManagementException {
     ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
     final TProcessInfo pi = ret.addNewProcessInfo();
     try {
       _db.exec(new BpelDatabase.Callable<Object>() {
         public Object run(BpelDAOConnection conn) throws Exception {
-          ProcessDAO proc = conn.getProcess(QName.valueOf(pid));
+          ProcessDAO proc = conn.getProcess(pid);
           if (proc == null)
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
           proc.setProperty(propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
-          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(false, true, false));
+          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
           return null;
         }
       });
@@ -173,7 +173,7 @@ class ProcessAndInstanceManagementImpl
     return ret;
   }
 
-  public ProcessInfoDocument setEndpointReference(final String pid, final String partnerLink,
+  public ProcessInfoDocument setEndpointReference(final QName pid, final String partnerLink,
                                                   final String roleName, final Element endpointRef)
           throws ManagementException {
     ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
@@ -181,11 +181,11 @@ class ProcessAndInstanceManagementImpl
     try {
       _db.exec(new BpelDatabase.Callable<Object>() {
         public Object run(BpelDAOConnection conn) throws Exception {
-          ProcessDAO proc = conn.getProcess(QName.valueOf(pid));
+          ProcessDAO proc = conn.getProcess(pid);
           if (proc == null)
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
-          OProcess oprocess = _engine.getOProcess(QName.valueOf(pid));
+          OProcess oprocess = _engine.getOProcess(pid);
           if (oprocess == null)
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
@@ -206,7 +206,7 @@ class ProcessAndInstanceManagementImpl
             
           }
           
-          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(false, false, true));
+          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.ENDPOINTS));
           return null;
         }
       });
@@ -472,14 +472,14 @@ class ProcessAndInstanceManagementImpl
     }
   }
 
-  private ProcessInfoDocument genProcessInfoDocument(final String procid, final ProcessInfoCustomizer custom)
+  private ProcessInfoDocument genProcessInfoDocument(final QName procid, final ProcessInfoCustomizer custom)
           throws ManagementException {
     ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
     final TProcessInfo pi = ret.addNewProcessInfo();
     try {
       _db.exec(new BpelDatabase.Callable<Object>() {
         public Object run(BpelDAOConnection conn) {
-          ProcessDAO proc = conn.getProcess(QName.valueOf(procid));
+          ProcessDAO proc = conn.getProcess(procid);
           if (proc == null)
             throw new InvalidRequestException("ProcessNotFound:" + procid);
           fillProcessInfo(pi, proc, custom);
@@ -582,7 +582,7 @@ class ProcessAndInstanceManagementImpl
     }
 
     TDefinitionInfo definfo = info.addNewDefinitionInfo();
-    definfo.setProcessName(proc.getDefinitionName());
+    definfo.setProcessName(proc.getType());
 
     TDeploymentInfo depinfo = info.addNewDeploymentInfo();
     depinfo.setDeployDate(toCalendar(proc.getDeployDate()));
@@ -725,7 +725,7 @@ class ProcessAndInstanceManagementImpl
     // TODO: add process QName to instance-info schema
     ProcessDAO processDAO = instance.getProcess();
     info.setPid(processDAO.getProcessId().toString());
-    info.setProcessName(processDAO.getDefinitionName());
+    info.setProcessName(processDAO.getType());
     if (instance.getRootScope() != null)
       info.setRootScope(genScopeRef(instance.getRootScope()));
     info.setDtStarted(toCalendar(instance.getCreateTime()));
@@ -733,8 +733,10 @@ class ProcessAndInstanceManagementImpl
     info.setStatus(__psc.cvtInstanceStatus(instance.getState()));
     if (instance.getFault() != null) {
       TFaultInfo faultInfo = info.addNewFaultInfo();
-      faultInfo.setFaultName(instance.getFault());
-      // TODO: Put the fault data in if it is present.
+      faultInfo.setName(instance.getFault().getName());
+      faultInfo.setExplanation(instance.getFault().getExplanation());
+      faultInfo.setAiid(instance.getFault().getActivityId());
+      faultInfo.setLineNumber(instance.getFault().getLineNo());
     }
 
     ProcessInstanceDAO.EventsFirstLastCountTuple flc = instance.getEventsFirstLastCount();

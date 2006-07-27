@@ -21,10 +21,6 @@
             <artifactId>pxe-bpel-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-sfwk-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate</artifactId>
         </dependency>

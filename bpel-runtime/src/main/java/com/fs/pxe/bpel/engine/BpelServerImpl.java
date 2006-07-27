@@ -5,12 +5,37 @@
  */
 package com.fs.pxe.bpel.engine;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xmlbeans.XmlException;
+
+import com.fs.pxe.bom.wsdl.Definition4BPEL;
 import com.fs.pxe.bpel.dao.BpelDAOConnection;
 import com.fs.pxe.bpel.dao.BpelDAOConnectionFactory;
 import com.fs.pxe.bpel.dao.PartnerLinkDAO;
 import com.fs.pxe.bpel.dao.ProcessDAO;
 import com.fs.pxe.bpel.dd.DeploymentDescriptorDocument;
 import com.fs.pxe.bpel.dd.TDeploymentDescriptor;
+import com.fs.pxe.bpel.dd2.TDeployment;
+import com.fs.pxe.bpel.evt.BpelEvent;
 import com.fs.pxe.bpel.explang.ConfigurationException;
 import com.fs.pxe.bpel.iapi.BpelEngine;
 import com.fs.pxe.bpel.iapi.BpelEngineException;
@@ -24,7 +49,7 @@ import com.fs.pxe.bpel.o.Serializer;
 import com.fs.pxe.bpel.pmapi.BpelManagementFacade;
 import com.fs.pxe.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import com.fs.pxe.bom.wsdl.Definition4BPEL;
-import com.fs.pxe.axis2.dd.TDeployment;
+import com.fs.pxe.bpel.dd2.TDeployment;
 import com.fs.utils.msg.MessageBundle;
 
 import java.io.*;
@@ -72,6 +97,9 @@ public class BpelServerImpl implements BpelServer {
   /** Should processes marked "active" in the DB be activated on server start? */
   private boolean _autoActivate = false;
 
+  private List<BpelEventListener> _listeners = 
+    new CopyOnWriteArrayList<BpelEventListener>();
+
   public BpelServerImpl() {
 
   }
@@ -117,6 +145,20 @@ public class BpelServerImpl implements BpelServer {
 
   }
 
+  
+  public void registerBpelEventListener(BpelEventListener listener) {
+    _listeners.add(listener);
+  }
+  
+  public void unregisterBpelEventListener(BpelEventListener listener) {
+    _listeners.remove(listener);
+  }
+  
+  void fireEvent(BpelEvent event) {
+    for (BpelEventListener l : _listeners) {
+      l.onEvent(event);
+    }
+  }
   
   /**
    * Find the active processes in the database.
@@ -531,8 +573,8 @@ public class BpelServerImpl implements BpelServer {
             __log.error(errmsg);
             throw new BpelEngineException(errmsg);
           }
-          ProcessDAO newDao = conn.createProcess(processId, compiledBpelProcess
-              .getQName());
+          
+          ProcessDAO newDao = conn.createProcess(processId,compiledBpelProcess.getQName());
           newDao.setDeployURI(dduri);
           newDao.setCompiledProcess(bits);
           pi.init(newDao);
@@ -595,7 +637,8 @@ public class BpelServerImpl implements BpelServer {
             __log.error(errmsg);
             throw new BpelEngineException(errmsg);
           }
-          ProcessDAO newDao = conn.createProcess(processId, oprocess.getQName());
+          
+          ProcessDAO newDao = conn.createProcess(processId,oprocess.getQName());
           newDao.setDeployURI(deployedURI);
           newDao.setCompiledProcess(bits);
           pi.init(newDao);

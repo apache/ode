@@ -28,4 +28,8 @@ public abstract class CorrelationSetEvent extends ScopeEvent {
     _correlationSetName = correlationSetName;
   }
 
+  public TYPE getType() {
+    return TYPE.dataHandling;
+  }
+  
 }

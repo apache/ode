@@ -5,6 +5,29 @@
  */
 package com.fs.pxe.bpel.engine;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 import com.fs.jacob.soup.ReplacementMap;
 import com.fs.pxe.bpel.common.CorrelationKey;
 import com.fs.pxe.bpel.common.FaultException;
@@ -24,8 +47,12 @@ import com.fs.pxe.bpel.iapi.MessageExchange.FailureType;
 import com.fs.pxe.bpel.iapi.MessageExchange.MessageExchangePattern;
 import com.fs.pxe.bpel.iapi.MessageExchange.Status;
 import com.fs.pxe.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import com.fs.pxe.bpel.o.*;
-import com.fs.pxe.bpel.runtime.BpelEventListener;
+import com.fs.pxe.bpel.o.OBase;
+import com.fs.pxe.bpel.o.OElementVarType;
+import com.fs.pxe.bpel.o.OMessageVarType;
+import com.fs.pxe.bpel.o.OPartnerLink;
+import com.fs.pxe.bpel.o.OProcess;
+import com.fs.pxe.bpel.o.OScope;
 import com.fs.pxe.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import com.fs.pxe.bpel.runtime.InvalidProcessException;
 import com.fs.pxe.bpel.runtime.PROCESS;
@@ -35,20 +62,6 @@ import com.fs.pxe.bpel.epr.WSAEndpoint;
 import com.fs.utils.ArrayUtils;
 import com.fs.utils.ObjectPrinter;
 import com.fs.utils.msg.MessageBundle;
-
-import java.io.*;
-import java.util.*;
-
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 /**
  * Implementation of a BPEL process.
@@ -68,7 +81,7 @@ public class BpelProcess {
    */
   private final Map<EndpointReference, PartnerLinkMyRoleImpl> _eprToMyRole = new HashMap<EndpointReference, PartnerLinkMyRoleImpl>();
 
-  final BpelEventListener _debugger;
+  final DebuggerSupport _debugger;
 
   final OProcess _oprocess;
 

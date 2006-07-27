@@ -259,11 +259,6 @@
     </dependency>
     <dependency>
       <groupId>pxe</groupId>
-      <artifactId>pxe-sfwk-core</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>pxe</groupId>
       <artifactId>pxe-utils</artifactId>
       <scope>runtime</scope>
     </dependency>

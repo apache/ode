@@ -32,6 +32,8 @@
         <path-element>lib/pxe-bpel-parser.jar</path-element>
         <path-element>lib/pxe-bpel-runtime.jar</path-element>
         <path-element>lib/pxe-bpel-scheduler-quartz.jar</path-element>
+        <path-element>lib/pxe-jca-server.jar</path-element>
+        <path-element>lib/pxe-jca-ra.jar</path-element>
         <path-element>lib/pxe-dao-hibernate.jar</path-element>
         <path-element>lib/pxe-jacob.jar</path-element>
         <path-element>lib/pxe-jbi.jar</path-element>
@@ -55,6 +57,7 @@
         <path-element>lib/asm.jar</path-element>
         <path-element>lib/antlr.jar</path-element>
         <path-element>lib/quartz.jar</path-element>
+        <path-element>lib/geronimo-j2ee-connector_1.5_spec.jar</path-element>
 
     </component-class-path>
     <bootstrap-class-name>com.fs.pxe.jbi.PxeBootstrap</bootstrap-class-name>

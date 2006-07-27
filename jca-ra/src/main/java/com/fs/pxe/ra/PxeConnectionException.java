@@ -11,6 +11,8 @@ import javax.resource.ResourceException;
  * Exception thrown in case of PXE communication failures.
  */
 public class PxeConnectionException extends ResourceException {
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructor.
    * @param message the message

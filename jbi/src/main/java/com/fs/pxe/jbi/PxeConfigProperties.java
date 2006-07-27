@@ -24,6 +24,9 @@ public class PxeConfigProperties extends Properties {
   private static final String PROP_POOL_MAX = "pxe-jbi.db.pool.max";
   private static final String PROP_POOL_MIN = "pxe-jbi.db.pool.min";
   private static final String PROP_MSGMAPPER = "pxe-jbi.messageMapper";
+  private static final String PROP_CONNECTOR_PORT = "pxe-jbi.connector.registryPort";
+  private static final String PROP_CONNECTOR_NAME = "pxe-jbi.connector.registryName";
+  
   
   private String _installDir;
   
@@ -113,4 +116,11 @@ public class PxeConfigProperties extends Properties {
     return Integer.valueOf(getProperty(PROP_POOL_MIN, "1"));
   }
 
+  public int getConnectorPort() {
+    return Integer.valueOf(getProperty(PROP_CONNECTOR_PORT, "1099"));
+  }
+
+  public String getConnectorName() {
+    return getProperty(PROP_CONNECTOR_NAME,"pxe");
+  }
 }

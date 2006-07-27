@@ -9,13 +9,12 @@ import com.fs.pxe.bpel.common.FaultException;
 import com.fs.pxe.bpel.explang.EvaluationContext;
 import com.fs.pxe.bpel.o.*;
 import com.fs.pxe.bpel.o.OMessageVarType.Part;
-
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.util.Map;
 
 /**
  * The context in which BPEL expressions are evaluated. This class is handed of
@@ -82,7 +81,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
   }
 
   public boolean isLinkActive(OLink olink) throws FaultException {
-    return _linkVals.get(olink).booleanValue();
+    return _linkVals.get(olink);
   }
 
   public String toString() {
@@ -96,6 +95,10 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
   public Node getPartData(Element message, Part part) throws FaultException {
     return _native.getPartData(message, part);
+  }
+
+  public Long getProcessId() {
+    return _native.getPid();
   }
 
 }

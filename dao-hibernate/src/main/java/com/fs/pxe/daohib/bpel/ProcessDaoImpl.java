@@ -187,7 +187,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 		return _process.getDeployDate();
 	}
 
-	public QName getDefinitionName() {
+	public QName getType() {
 		return QName.valueOf(_process.getType());
 	}
 

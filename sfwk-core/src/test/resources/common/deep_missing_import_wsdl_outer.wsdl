@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<!-- deep_missing_import_outer.wsdl -->
-<wsdl:definitions targetNamespace="foo://fneh" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <wsdl:import namespace="foo://bar/baz" location="deep_missing_import_wsdl_inner1.wsdl" />
-</wsdl:definitions>

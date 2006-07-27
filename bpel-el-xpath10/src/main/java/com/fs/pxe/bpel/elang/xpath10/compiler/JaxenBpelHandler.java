@@ -50,7 +50,13 @@ class JaxenBpelHandler extends JaxenHandler {
 	public void variableReference(String prefix, String variableName)
 			throws JaxenException {
 		super.variableReference(prefix, variableName);
-		if(_out instanceof OXPath10ExpressionBPEL20){
+
+    // Custom variables
+    if ("pxe".equals(prefix)) {
+      if ("pid".equals(variableName)) return;
+    }
+
+    if(_out instanceof OXPath10ExpressionBPEL20){
 			OXPath10ExpressionBPEL20 out = (OXPath10ExpressionBPEL20)_out;
 			try{
 				if(out.isJoinExpression){

@@ -35,4 +35,8 @@ public abstract class ProcessInstanceEvent extends ProcessEvent {
     _pid = pid;
   }
 
+  public TYPE getType() {
+    return TYPE.instanceLifecycle;
+  }
+
 }

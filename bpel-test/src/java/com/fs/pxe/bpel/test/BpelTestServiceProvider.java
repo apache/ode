@@ -9,6 +9,11 @@ import com.fs.pxe.sfwk.spi.*;
 import com.fs.utils.DOMUtils;
 import org.w3c.dom.Element;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.ConnectionMetaData;
+import javax.resource.cci.Interaction;
+import javax.resource.cci.LocalTransaction;
+import javax.resource.cci.ResultSetInfo;
 import javax.transaction.TransactionManager;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -44,10 +49,7 @@ public class BpelTestServiceProvider implements ProtocolAdapter {
     _callback = null;
    }
 
-  public InteractionHandler createInteractionHandler(Class interactionClass) throws ServiceProviderException {
-    return new InteractionHandlerImpl();
-  }
-
+  
   /**
    * @see com.fs.pxe.sfwk.spi.ServiceProvider#deactivateService(com.fs.pxe.sfwk.spi.ServiceContext)
    */
@@ -142,10 +144,10 @@ public class BpelTestServiceProvider implements ProtocolAdapter {
     }
   }
 
-  public class InteractionHandlerImpl implements IBpelInvoker, InteractionHandler {
+  public class ConnectionImpl implements BpelTestConnection{
     TransactionManager _tx;
 
-    InteractionHandlerImpl() {
+    ConnectionImpl() {
       _tx = _context.getTransactionManager();
     }
 
@@ -191,6 +193,26 @@ public class BpelTestServiceProvider implements ProtocolAdapter {
     }
 
     public void close() {}
+
+    public Interaction createInteraction() throws ResourceException {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    public LocalTransaction getLocalTransaction() throws ResourceException {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    public ConnectionMetaData getMetaData() throws ResourceException {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    public ResultSetInfo getResultSetInfo() throws ResourceException {
+      // TODO Auto-generated method stub
+      return null;
+    }
   }
 
   /**

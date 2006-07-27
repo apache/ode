@@ -105,12 +105,7 @@
 	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:xsltServiceProvider</attribute>
   </kmodule>
-  
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Native" class="ModSvcProvider">
-	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.rpc.RpcAdapter</attribute>
-	<attribute name="ProviderURI">uri:protocoladapter.native.inbound</attribute>
-  </kmodule>
-  
+    
   <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
 	<attribute name="ProviderClass">com.fs.pxe.bpel.test.BpelTestServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
@@ -120,7 +115,6 @@
   
   <kmodule name="com.fivesight.pxe:mod=PXE" class="ModSfwk">
     <attribute name="domainId"><getProperty name="pxe.domain" default="@PXE_DOMAIN@"/></attribute>
-    <attribute name="registryPort"><getProperty name="pxe.registry.port" default="@PXE_RMI_PORT@"/></attribute>
     <attribute name="transactionManager">TransactionManager</attribute>
     <attribute name="DAOConnectionFactory">sscf</attribute>
   </kmodule>

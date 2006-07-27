@@ -18,7 +18,6 @@ import com.fs.pxe.bpel.o.OScope;
 import com.fs.utils.msg.MessageBundle;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -28,6 +27,7 @@ import java.util.List;
 class InvokeGenerator extends DefaultActivityGenerator {
 
   private static final CommonCompilationMessages __cmsgs = MessageBundle.getMessages(CommonCompilationMessages.class);
+  private static final InvokeGeneratorMessages __imsgs = MessageBundle.getMessages(InvokeGeneratorMessages.class);
 
   public OActivity newInstance(Activity src) {
     return new OInvoke(_context.getOProcess());
@@ -45,10 +45,15 @@ class InvokeGenerator extends DefaultActivityGenerator {
 //    if (portType != null && !portType.equals(onMessage.partnerLink.myRolePortType.getQName()))
 //      throw new CompilationException(CMSGSG.errPortTypeMismatch(portType, onMessage.partnerLink.myRolePortType.getQName()));
 
-    if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null)
+    if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null) {
+      if (src.getInputVar() == null)
+        throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
       oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput().getMessage().getQName());
-
+    }
+    
     if (oinvoke.operation.getOutput() != null && oinvoke.operation.getOutput().getMessage() != null) {
+      if (src.getOutputVar() == null)
+        throw new CompilationException(__imsgs.errInvokeNoOutputMessageForOutputOp(oinvoke.operation.getName()));
       oinvoke.outputVar = _context.resolveMessageVariable(src.getOutputVar(), oinvoke.operation.getOutput().getMessage().getQName());
     }
 
@@ -67,8 +72,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
   }
 
   private void doCorrelations(List<Correlation> correlations, OScope.Variable var, Collection<OScope.CorrelationSet> assertCorrelations, Collection<OScope.CorrelationSet> initCorrelations) {
-    for (Iterator<Correlation> i = correlations.iterator(); i.hasNext(); ) {
-      Correlation correlation =  i.next();
+    for (Correlation correlation : correlations) {
       OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
       switch (correlation.getInitiate()) {
@@ -83,8 +87,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
           throw new UnsupportedOperationException();
       }
 
-      for (Iterator<OProcess.OProperty> j = cset.properties.iterator(); j.hasNext(); ) {
-        OProcess.OProperty property = j.next();
+      for (OProcess.OProperty property : cset.properties) {
         // Force resolution of alias, to make sure that we have one for this variable-property pair.
         try {
           _context.resolvePropertyAlias(var, property.name);
@@ -92,6 +95,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
           if (ce.getCompilationMessage().source == null) {
             ce.getCompilationMessage().source = correlation;
           }
+          throw ce;
         }
         //onMessage.
       }

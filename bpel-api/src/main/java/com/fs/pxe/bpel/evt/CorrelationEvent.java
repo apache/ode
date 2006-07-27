@@ -50,4 +50,8 @@ public class CorrelationEvent extends ProcessEvent {
   public void setPortType(QName portType) {
     _portType = portType;
   }
+
+  public TYPE getType() {
+    return TYPE.correlation;
+  }
 }
