@@ -83,7 +83,7 @@
          <to variable="Request" part="payload" query="/typ:AsyncRequest/typ:Order"/>
         </copy>
         <copy>
-         <from expression="'http://localhost:8090/pxe/soap/AsyncProcess/ProcessSVC/CallbackPORT'"/>
+         <from expression="'http://localhost:8090/ode/soap/AsyncProcess/ProcessSVC/CallbackPORT'"/>
          <to variable="Request" part="payload" query="/typ:AsyncRequest/typ:CallbackEndpoint"/>
         </copy>
        </assign>

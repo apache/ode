@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <process name="MagicSessionResponder"
-         targetNamespace="http://pxe/bpel/responder"
+         targetNamespace="http://ode/bpel/responder"
          xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
          xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-         xmlns:tns="http://pxe/bpel/responder"
+         xmlns:tns="http://ode/bpel/responder"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-         xmlns:resp="http://pxe/bpel/unit-test.wsdl">
+         xmlns:resp="http://ode/bpel/unit-test.wsdl">
 
-  <import location="urn:/Main.wsdl" namespace="http://pxe/bpel/unit-test.wsdl"
+  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
   <partnerLinks>

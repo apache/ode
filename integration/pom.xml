@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <project>
   <parent>
-    <artifactId>pxe</artifactId>
-    <groupId>pxe</groupId>
+    <artifactId>ode</artifactId>
+    <groupId>ode</groupId>
     <version>2.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>pxe</groupId>	
-  <artifactId>pxe-integration</artifactId>
+  <groupId>ode</groupId>	
+  <artifactId>ode-integration</artifactId>
   <version>2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
@@ -16,114 +16,114 @@
   </modules>
   <dependencies>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-api</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-api</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-compiler</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-compiler</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-el-xpath10</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-el-xpath10</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-el-xpath20</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-el-xpath20</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-obj</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-obj</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-parser</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-parser</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-scripts</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-scripts</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-test</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-test</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-bpel-ql</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-bpel-ql</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-dao-hibernate</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-dao-hibernate</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-dao-memory</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-dao-memory</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-jacob</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-jacob</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-jbi</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-jbi</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-jca-ra</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-jca-ra</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-jca-rar</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-jca-rar</artifactId>
 	    <type>rar</type>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-standalone-kernel</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-standalone-kernel</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-standalone-modules</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-standalone-modules</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-minerva</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-minerva</artifactId>
 	    <version>1.0.146</version>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-naming</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-naming</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-tools</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-tools</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-sfwk-core</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-sfwk-core</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-sfwk-impl</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-sfwk-impl</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-soap</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-soap</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-sp-bpel</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-sp-bpel</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-sp-httpsoap</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-sp-httpsoap</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-utils</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-utils</artifactId>
 	  </dependency>
 	  <dependency>
-	    <groupId>pxe</groupId>
-	    <artifactId>pxe-xcontrib-sp-misc</artifactId>
+	    <groupId>ode</groupId>
+	    <artifactId>ode-xcontrib-sp-misc</artifactId>
 	  </dependency>
   
   </dependencies>

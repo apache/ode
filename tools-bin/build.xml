@@ -13,8 +13,8 @@
 
   <target name="tarball" depends="stage">
     <tar destfile="target/tarball.tar" longfile="gnu" >
-       <tarfileset dir="${stage}" username="pxe" group="pxe" />
-       <tarfileset dir="${stage.bin}" prefix="bin/" username="pxe" group="pxe" mode="755" />
+       <tarfileset dir="${stage}" username="ode" group="ode" />
+       <tarfileset dir="${stage.bin}" prefix="bin/" username="ode" group="ode" mode="755" />
     </tar>
   </target>
  
@@ -26,12 +26,12 @@
     <mkdir dir="${stage.etc}/deploy" />
     <copy todir="${stage.etc}">
       <filterset>
-        <filter token="PXE_HTTP_PORT" value="${pxe.default.http.port}"/>
-        <filter token="PXE_RMI_PORT" value="${pxe.default.rmi.port}"/>
-        <filter token="PXE_JMX_PORT" value="${pxe.default.jmx.port}"/>
-        <filter token="PXE_JMX_USERNAME" value="${pxe.default.jmx.username}"/>
-        <filter token="PXE_JMX_PASSWORD" value="${pxe.default.jmx.password}"/>
-        <filter token="PXE_DOMAIN" value="${pxe.default.domain}"/>
+        <filter token="ODE_HTTP_PORT" value="${ode.default.http.port}"/>
+        <filter token="ODE_RMI_PORT" value="${ode.default.rmi.port}"/>
+        <filter token="ODE_JMX_PORT" value="${ode.default.jmx.port}"/>
+        <filter token="ODE_JMX_USERNAME" value="${ode.default.jmx.username}"/>
+        <filter token="ODE_JMX_PASSWORD" value="${ode.default.jmx.password}"/>
+        <filter token="ODE_DOMAIN" value="${ode.default.domain}"/>
       </filterset>
       <fileset dir="${src}/dist/etc" includes="**/*" />
     </copy>
@@ -54,31 +54,31 @@
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-bsh"/>
+	<param name="cmd" value="ode-bsh"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-status"/>
+	<param name="cmd" value="ode-status"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-bsh"/>
+	<param name="cmd" value="ode-bsh"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-deploy"/>
+	<param name="cmd" value="ode-deploy"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-undeploy"/>
+	<param name="cmd" value="ode-undeploy"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-activate"/>
+	<param name="cmd" value="ode-activate"/>
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-deactivate"/>
+	<param name="cmd" value="ode-deactivate"/>
     </antcall>
 
     <antcall target="_makecommand">
@@ -110,7 +110,7 @@
     </antcall>
 
     <antcall target="_makecommand">
-	<param name="cmd" value="pxe-shutdown"/>
+	<param name="cmd" value="ode-shutdown"/>
     </antcall>
 
     <antcall target="_makecommand">

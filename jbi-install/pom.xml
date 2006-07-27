@@ -1,38 +1,38 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>pxe</groupId>
-    <artifactId>pxe-jbi-install</artifactId>
-    <name>PXE :: JBI Component Installer</name>
+    <groupId>ode</groupId>
+    <artifactId>ode-jbi-install</artifactId>
+    <name>ODE :: JBI Component Installer</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pxe</groupId>
-        <artifactId>pxe</artifactId>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <version>2.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-dao-hibernate</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-dao-hibernate</artifactId>
         </dependency>
         <dependency>
             <scope>compile</scope>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-dao-hibernate-db-derby</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-dao-hibernate-db-derby</artifactId>
             <type>tar</type>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-jbi</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-jbi</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-runtime</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-scheduler-quartz</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-scheduler-quartz</artifactId>
         </dependency>
     </dependencies>
     <build>

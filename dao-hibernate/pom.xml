@@ -1,24 +1,24 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>pxe</groupId>
-    <artifactId>pxe-dao-hibernate</artifactId>
-    <name>PXE :: Hibernate DAO Implementation</name>
+    <groupId>ode</groupId>
+    <artifactId>ode-dao-hibernate</artifactId>
+    <name>ODE :: Hibernate DAO Implementation</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pxe</groupId>
-        <artifactId>pxe</artifactId>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <version>2.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-ql</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-api</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

@@ -1,111 +1,111 @@
 <?xml version="1.0"?>
  
-<kconfig xmlns="http://www.fivesight.com/pxe/kconfig/">
+<kconfig xmlns="http://www.fivesight.com/ode/kconfig/">
 
   <!-- For setting system properties. -->
-  <!-- If pxe.home is not set explicitly here, it is expected from the launcher.
-       Failure to set pxe.home in some fashion will result in an error. -->
-  <!--setProperty name="pxe.home">c:/path/to/home/dir</setProperty-->
+  <!-- If ode.home is not set explicitly here, it is expected from the launcher.
+       Failure to set ode.home in some fashion will result in an error. -->
+  <!--setProperty name="ode.home">c:/path/to/home/dir</setProperty-->
   
-  <classpath type="url">file:<pxe-home/>/bin/kernel-boot.jar</classpath>  
-  <classpath type="url">file:<pxe-home/>/etc/</classpath>  
-  <classpath type="jarDir"><pxe-home/>/pxe-lib</classpath>
-  <classpath type="jarDir"><pxe-home/>/lib</classpath>
+  <classpath type="url">file:<ode-home/>/bin/kernel-boot.jar</classpath>  
+  <classpath type="url">file:<ode-home/>/etc/</classpath>  
+  <classpath type="jarDir"><ode-home/>/ode-lib</classpath>
+  <classpath type="jarDir"><ode-home/>/lib</classpath>
   
   <!-- Imports are used in turn to try to locate classes given using the "class"
        attribute -->
-  <import package="com.fs.pxe.kernel.modrmi"/>
-  <import package="com.fs.pxe.kernel.modjetty" />
-  <import package="com.fs.pxe.kernel.modjotm" />
-  <import package="com.fs.pxe.kernel.modsfwk" />
-  <import package="com.fs.pxe.kernel.modjmxremote" />
-  <import package="com.fs.pxe.kernel.modmemdao" />
-  <import package="com.fs.pxe.kernel.modfsnaming" />
-  <import package="com.fs.pxe.kernel.moddeployer" />
-  <import package="com.fs.pxe.kernel.modbpellog" />
+  <import package="org.apache.ode.kernel.modrmi"/>
+  <import package="org.apache.ode.kernel.modjetty" />
+  <import package="org.apache.ode.kernel.modjotm" />
+  <import package="org.apache.ode.kernel.modsfwk" />
+  <import package="org.apache.ode.kernel.modjmxremote" />
+  <import package="org.apache.ode.kernel.modmemdao" />
+  <import package="org.apache.ode.kernel.modfsnaming" />
+  <import package="org.apache.ode.kernel.moddeployer" />
+  <import package="org.apache.ode.kernel.modbpellog" />
 
-  <kmodule name="com.fivesight.pxe:mod=RmiRegistry" class="ModRmiRegistry">
-	  <attribute name="port">@PXE_RMI_PORT@</attribute>
+  <kmodule name="com.fivesight.ode:mod=RmiRegistry" class="ModRmiRegistry">
+	  <attribute name="port">@ODE_RMI_PORT@</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=Naming" class="ModFsNaming">
+  <kmodule name="com.fivesight.ode:mod=Naming" class="ModFsNaming">
     <!-- <attribute ...> elements used to set MBean attributes (before start()). -->
-    <attribute name="providerURL">pxe</attribute>
+    <attribute name="providerURL">ode</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=BpelLogger" class="ModBpelEventLogger"/>
+  <kmodule name="com.fivesight.ode:mod=BpelLogger" class="ModBpelEventLogger"/>
 
-  <kmodule name="com.fivesight.pxe:mod=XSLTransformer" class="ModXslt"/>
+  <kmodule name="com.fivesight.ode:mod=XSLTransformer" class="ModXslt"/>
 
-  <kmodule name="com.fivesight.pxe:mod=JOTM" class="ModJOTM">
+  <kmodule name="com.fivesight.ode:mod=JOTM" class="ModJOTM">
     <attribute name="transactionManagerName">TransactionManager</attribute>
     <attribute name="txTimeout">30000</attribute>
   </kmodule>
 
 
-  <kmodule name="com.fivesight.pxe:mod=MemoryDAO" class="ModMemDAO">
+  <kmodule name="com.fivesight.ode:mod=MemoryDAO" class="ModMemDAO">
     <attribute name="bpelStateStoreConnectionFactory">bpel_sscf</attribute>
     <attribute name="stateStoreConnectionFactory">sscf</attribute>
     <attribute name="transactionManager">TransactionManager</attribute>
   </kmodule>
 
-  <kmodule name="com.fivesight.pxe:mod=Jetty" class="ModJetty">
-    <attribute name="config">file:<pxe-home/>/etc/jetty.xml</attribute>
+  <kmodule name="com.fivesight.ode:mod=Jetty" class="ModJetty">
+    <attribute name="config">file:<ode-home/>/etc/jetty.xml</attribute>
   </kmodule>
 
   <!-- Begin definition of service providers 
 	   MUST PROCEED ModSfwk
 	-->  
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=HttpSoap" class="ModSvcProvider">
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=HttpSoap" class="ModSvcProvider">
 	<attribute name="JndiName">HttpSoapSP</attribute>
 	<attribute name="TransactionManagerName">TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.httpsoap.HttpSoapAdapter</attribute>
+	<attribute name="ProviderClass">org.apache.ode.httpsoap.HttpSoapAdapter</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.soap</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Bpel" class="ModSvcProvider">
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Bpel" class="ModSvcProvider">
 	<attribute name="JndiName">BpelSP</attribute>
 	<attribute name="TransactionManagerName">TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.bpel.provider.BpelServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.bpel.provider.BpelServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:bpelProvider</attribute>
 	<attribute name="ProviderProperties">stateStoreConnectionFactory=bpel_sscf</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Transformer" class="ModSvcProvider">
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Transformer" class="ModSvcProvider">
 	<attribute name="JndiName">XsltSP</attribute>
 	<attribute name="TransactionManagerName">TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:xsltServiceProvider</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Native" class="ModSvcProvider">
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Native" class="ModSvcProvider">
 	<attribute name="JndiName">NativeSP</attribute>
 	<attribute name="TransactionManagerName">TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.rpc.RpcAdapter</attribute>
+	<attribute name="ProviderClass">org.apache.ode.xcontrib.sp.rpc.RpcAdapter</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.native.inbound</attribute>
   </kmodule>
   
-  <kmodule name="com.fivesight.pxe:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
 	<attribute name="JndiName">SpexerciserSP</attribute>
 	<attribute name="TransactionManagerName">TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.bpel.test.BpelTestServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.bpel.test.BpelTestServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
   </kmodule>
   
   <!-- End ServiceProvider definition -->
   
-  <kmodule name="com.fivesight.pxe:mod=PXE" class="ModSfwk">
+  <kmodule name="com.fivesight.ode:mod=ODE" class="ModSfwk">
     <attribute name="domainId">MyDomain</attribute>
-    <attribute name="registryPort">@PXE_RMI_PORT@</attribute>
+    <attribute name="registryPort">@ODE_RMI_PORT@</attribute>
     <attribute name="transactionManager">TransactionManager</attribute>
     <attribute name="DAOConnectionFactory">sscf</attribute>
 	<attribute name="SvcProviderJndiBindings">HttpSoapSP,BpelSP,XsltSP,NativeSP,SpexerciserSP</attribute>
   </kmodule>
 
-  <kmodule name="com.fivesight.pxe:mod=Deployer" class="ModDeployer">
-    <attribute name="DeployDir"><pxe-home/>/etc/deploy</attribute>
+  <kmodule name="com.fivesight.ode:mod=Deployer" class="ModDeployer">
+    <attribute name="DeployDir"><ode-home/>/etc/deploy</attribute>
     <attribute name="DomainAdminMBean">
-    	<getAttribute object="com.fivesight.pxe:mod=PXE" name="domainAdminMBean"/>
+    	<getAttribute object="com.fivesight.ode:mod=ODE" name="domainAdminMBean"/>
     </attribute>
   </kmodule>
 </kconfig>

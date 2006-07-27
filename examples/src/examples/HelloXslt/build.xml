@@ -7,10 +7,10 @@
   <target name="_rr" depends="init">
     <delete dir="${rrfile}" />
     <mkdir dir="${rrfile}" />
-    <pxe-rr rrdir="${rrfile}">
+    <ode-rr rrdir="${rrfile}">
       <rrfileset dir="." includes="${wsdlfilename}" desturi="urn:/" recursive="yes" />
       <rrfileset dir="." includes="${xslfilename}" desturi="urn:/" recursive="yes" />
-    </pxe-rr>
+    </ode-rr>
   </target>
 
 </project>

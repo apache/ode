@@ -25,7 +25,7 @@
        </identification>
        <target>
          <artifacts-zip>Ping-Process.zip</artifacts-zip>
-         <component-name>PxeBpelEngine</component-name>
+         <component-name>OdeBpelEngine</component-name>
        </target>
     </service-unit>
 
@@ -36,7 +36,7 @@
        </identification>
        <target>
          <artifacts-zip>Pong-Process.zip</artifacts-zip>
-         <component-name>PxeBpelEngine</component-name>
+         <component-name>OdeBpelEngine</component-name>
        </target>
     </service-unit>
   </service-assembly>

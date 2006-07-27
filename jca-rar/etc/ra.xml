@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
                         http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd" version="1.5">
-    <display-name>PXE Resource Adapter</display-name>
+    <display-name>ODE Resource Adapter</display-name>
     <vendor-name>Intalio, Inc.</vendor-name>
     <eis-type>RMI</eis-type>
     <resourceadapter-version>1.0</resourceadapter-version>
@@ -15,7 +15,7 @@
         <outbound-resourceadapter>
             <connection-definition>
                 <managedconnectionfactory-class>
-                    com.fs.pxe.ra.PxeManagedConnectionFactory
+                    org.apache.ode.ra.OdeManagedConnectionFactory
                 </managedconnectionfactory-class>
                 <config-property>
                     <config-property-name>URL</config-property-name>
@@ -23,11 +23,11 @@
                     <config-property-value>rmi://localhost:2099/MyDomain</config-property-value>
                 </config-property>
                 <connectionfactory-interface>
-                    com.fs.pxe.ra.PxeConnectionFactory</connectionfactory-interface>
+                    org.apache.ode.ra.OdeConnectionFactory</connectionfactory-interface>
                 <connectionfactory-impl-class>
-					com.fs.pxe.ra.PxeConnectionFactoryImpl </connectionfactory-impl-class>
-                <connection-interface> com.fs.pxe.ra.PxeConnection</connection-interface>
-                <connection-impl-class> com.fs.pxe.ra.PxeConnectionImpl</connection-impl-class>
+					org.apache.ode.ra.OdeConnectionFactoryImpl </connectionfactory-impl-class>
+                <connection-interface> org.apache.ode.ra.OdeConnection</connection-interface>
+                <connection-impl-class> org.apache.ode.ra.OdeConnectionImpl</connection-impl-class>
             </connection-definition>
             <transaction-support>NoTransaction</transaction-support>
         </outbound-resourceadapter>

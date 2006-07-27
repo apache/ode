@@ -442,7 +442,7 @@
 							<enumeration value="out"/>
 							<enumeration value="out-in"/>
 
-							<!-- mbs: added the following for PXEI-114 -->
+							<!-- mbs: added the following for ODEI-114 -->
 							<enumeration value="request"/>
 							<enumeration value="response"/>
 							<enumeration value="request-response"/>

@@ -10,5 +10,5 @@ The following "extension" modules are covered by the MIT License (see
 MIT_LICENSE.txt):
 
 adapter-httpsoap, adapter-native, bpel-el-xpath10, bpel-el-xpath20, bpel-test,
-dao-hibernate, fs-naming, minerva, pxe-tools, serviceprovider-xslt, soap, utils
+dao-hibernate, fs-naming, minerva, ode-tools, serviceprovider-xslt, soap, utils
 

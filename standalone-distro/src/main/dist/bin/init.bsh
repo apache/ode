@@ -1,8 +1,8 @@
-pxelib=new java.io.File(System.getProperty(
-	fivesight.bootstrap.BootLoader.PROP_PXEHOME)+"/pxe-lib");
+odelib=new java.io.File(System.getProperty(
+	fivesight.bootstrap.BootLoader.PROP_ODEHOME)+"/ode-lib");
 
 lib=new java.io.File(System.getProperty(
-	fivesight.bootstrap.BootLoader.PROP_PXEHOME)+"/lib");
+	fivesight.bootstrap.BootLoader.PROP_ODEHOME)+"/lib");
 
 addJars(java.io.File dir) {
   files = dir.listFiles();
@@ -10,17 +10,17 @@ addJars(java.io.File dir) {
      addClassPath(files[i].toURL());
 }
 
-pxeGetBMF() {
-   import com.fs.pxe.bpel.pmapi.*;
-   import com.fs.pxe.ra.*;
+odeGetBMF() {
+   import org.apache.ode.bpel.pmapi.*;
+   import org.apache.ode.ra.*;
 
-   PxeManagedConnectionFactory pmcf = new PxeManagedConnectionFactory();
+   OdeManagedConnectionFactory pmcf = new OdeManagedConnectionFactory();
     // the port and domain name should match the rmi port and domain name
-    // defined in pxe-config.properties
+    // defined in ode-config.properties
     pmcf.setURL("rmi://localhost:2099/MyDomain");
 
-    PxeConnectionFactory cf = (PxeConnectionFactory)pmcf.createConnectionFactory();
-    PxeConnection conn = (PxeConnection)cf.getConnection();
+    OdeConnectionFactory cf = (OdeConnectionFactory)pmcf.createConnectionFactory();
+    OdeConnection conn = (OdeConnection)cf.getConnection();
     BpelManagementFacade bmf =
       (BpelManagementFacade)conn.createServiceProviderSession(
           "uri:bpelProvider", BpelManagementFacade.class);
@@ -28,7 +28,7 @@ pxeGetBMF() {
     return bmf;
 }
 
-addJars(pxelib);
+addJars(odelib);
 addJars(lib);
 desktop();
 

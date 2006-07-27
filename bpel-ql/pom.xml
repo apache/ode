@@ -1,36 +1,36 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>pxe</groupId>
-    <artifactId>pxe-bpel-ql</artifactId>
-    <name>PXE :: BPEL Query Language</name>
+    <groupId>ode</groupId>
+    <artifactId>ode-bpel-ql</artifactId>
+    <name>ODE :: BPEL Query Language</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pxe</groupId>
-        <artifactId>pxe</artifactId>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <version>2.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-api</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-compiler</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-compiler</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-obj</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-obj</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-jacob</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-jacob</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-utils</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-utils</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -47,7 +47,7 @@
                         </goals>
                         <configuration>
                             <buildNodeFiles>false</buildNodeFiles>
-                            <outputDirectory>${project.build.directory}/generated-sources/jjtree/com/fs/pxe/ql/jcc</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/jjtree/com/fs/ode/ql/jcc</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.build.directory}/generated-sources/jjtree</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources/javacc/com/fs/pxe/ql/jcc</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/javacc/com/fs/ode/ql/jcc</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

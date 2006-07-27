@@ -9,8 +9,8 @@ import com.fs.jacob.Channel;
 import com.fs.jacob.JavaClosure;
 import com.fs.jacob.ML;
 import com.fs.jacob.soup.*;
-import com.fs.utils.ArrayUtils;
-import com.fs.utils.ObjectPrinter;
+import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.*;
 import java.lang.reflect.Field;

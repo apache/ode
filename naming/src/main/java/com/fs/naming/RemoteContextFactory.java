@@ -5,7 +5,7 @@
  */
 package com.fs.naming;
 
-import com.fs.utils.msg.MessageBundle;
+import org.apache.ode.utils.msg.MessageBundle;
 
 import java.rmi.Naming;
 import java.util.Hashtable;

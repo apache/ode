@@ -58,14 +58,14 @@
 
    <service name="ProcessSVC">
         <port name="CallbackPORT" binding="proc:CallbackBIND">
-            <soap:address location="http://localhost:@PXE_HTTP_PORT@/pxe/soap/asyncNative/callback"/>
+            <soap:address location="http://localhost:@ODE_HTTP_PORT@/ode/soap/asyncNative/callback"/>
         </port>
 
    </service>
 
   <service name="ResponderSVC">
         <port name="ResponderPORT" binding="resp:ResponderBIND">
-            <soap:address location="http://localhost:@PXE_HTTP_PORT@/pxe/soap/asyncNative/callback"/>
+            <soap:address location="http://localhost:@ODE_HTTP_PORT@/ode/soap/asyncNative/callback"/>
         </port>
    </service>
 

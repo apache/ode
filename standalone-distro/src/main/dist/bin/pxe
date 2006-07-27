@@ -4,7 +4,7 @@
 
 
 #
-# Universal PXE program loader.
+# Universal ODE program loader.
 # Based on Apache ANT script.
 #
 
@@ -37,18 +37,18 @@ while [ -h "$command" ] ; do
     fi
 done
 
-PXE_BIN=`dirname "$command"`
-PXE_BIN=`cd "$PXE_BIN" && pwd`
+ODE_BIN=`dirname "$command"`
+ODE_BIN=`cd "$ODE_BIN" && pwd`
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
-    [ -n "$PXE_BIN" ] && PXE_BIN=`cygpath --unix "$PXE_BIN"`
+    [ -n "$ODE_BIN" ] && ODE_BIN=`cygpath --unix "$ODE_BIN"`
     [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
 fi
 
-PXE_HOME=`cd "$PXE_BIN/.." && pwd`
-PXE_LIB="$PXE_HOME/lib"
-PXE_ETC="$PXE_HOME/etc"
+ODE_HOME=`cd "$ODE_BIN/.." && pwd`
+ODE_LIB="$ODE_HOME/lib"
+ODE_ETC="$ODE_HOME/etc"
 
 
 if [ -z "$JAVACMD" ] ; then
@@ -79,23 +79,23 @@ if [ ! -d "$JAVA_HOME" ] ; then
 fi
 
 # Add user-specified classpath. 
-LOCALCLASSPATH="$LOCALCLASSPATH:$PXE_CLASSPATH"
+LOCALCLASSPATH="$LOCALCLASSPATH:$ODE_CLASSPATH"
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
-    PXE_HOME=`cygpath --windows "$PXE_HOME"`
+    ODE_HOME=`cygpath --windows "$ODE_HOME"`
     JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
     LOCALCLASSPATH=`cygpath --path --windows "$LOCALCLASSPATH"`
     CYGHOME=`cygpath --windows "$HOME"`
-    PXE_LIB=`cygpath --windows "$PXE_LIB"`
-    PXE_ETC=`cygpath --windows "$PXE_ETC"`
-    PXE_BIN=`cygpath --windows "$PXE_BIN"`
+    ODE_LIB=`cygpath --windows "$ODE_LIB"`
+    ODE_ETC=`cygpath --windows "$ODE_ETC"`
+    ODE_BIN=`cygpath --windows "$ODE_BIN"`
 fi
 
 if [ "$1" = "--jdb" ] ; then
-   PXE_JAVAOPTS="-ea -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 $PXE_JAVAOPTS"
+   ODE_JAVAOPTS="-ea -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 $ODE_JAVAOPTS"
    shift
 fi
 
-exec  "$JAVACMD" -server $PXE_JAVAOPTS -D"com.sun.management.config.file=${PXE_ETC}/pxe-management.properties" -Djava.system.class.loader=fivesight.bootstrap.BootLoader -D"fivesight.bootstrap.BootLoader.basedir=$PXE_HOME" -D"fivesight.bootstrap.BootLoader.cfg=$PXE_ETC/${progname}.cfg" -D"com.fs.progname=$progname" -cp "$PXE_LIB/pxe-bootstrap.jar" com.fs.utils.cli.Main "$PXE_ETC/${progname}.cfg" "$@" 
+exec  "$JAVACMD" -server $ODE_JAVAOPTS -D"com.sun.management.config.file=${ODE_ETC}/ode-management.properties" -Djava.system.class.loader=fivesight.bootstrap.BootLoader -D"fivesight.bootstrap.BootLoader.basedir=$ODE_HOME" -D"fivesight.bootstrap.BootLoader.cfg=$ODE_ETC/${progname}.cfg" -D"com.fs.progname=$progname" -cp "$ODE_LIB/ode-bootstrap.jar" org.apache.ode.utils.cli.Main "$ODE_ETC/${progname}.cfg" "$@" 
 

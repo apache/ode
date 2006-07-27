@@ -8,7 +8,7 @@ package com.fs.jacob.soup;
 import java.lang.reflect.Method;
 
 import com.fs.jacob.JavaClosure;
-import com.fs.utils.ObjectPrinter;
+import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * DOCUMENTME.

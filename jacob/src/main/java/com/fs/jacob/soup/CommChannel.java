@@ -5,7 +5,7 @@
  */
 package com.fs.jacob.soup;
 
-import com.fs.utils.ObjectPrinter;
+import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * 

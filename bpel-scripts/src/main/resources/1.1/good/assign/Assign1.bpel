@@ -8,7 +8,7 @@
 -->
 
 <process name="assign1"
-  targetNamespace="http://pxe/bpel/unit-test"
+  targetNamespace="http://ode/bpel/unit-test"
   xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
   xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
   xmlns:test="uri:testing"

@@ -14,7 +14,7 @@
     <service name="GeoIpProxy">
         <documentation>A proxy to the GeoIP service</documentation>
         <port name="GeoIpSoap" binding="wsn:GeoIPServiceSoap">
-            <soap:address location="http://localhost:@PXE_HTTP_PORT@/pxe/soap/geoIp"/>
+            <soap:address location="http://localhost:@ODE_HTTP_PORT@/ode/soap/geoIp"/>
         </port>
     </service>
 

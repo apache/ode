@@ -32,7 +32,7 @@ public class BootLoader extends URLClassLoader implements BootLoaderMBean {
   public static final String PROP_CPATH = BootLoader.class.getName() + ".classPath";
   
   /**
-   * Property with the file name (relative to the pxe.home directory) that should
+   * Property with the file name (relative to the ode.home directory) that should
    * be used to initilize system properties. 
    */
   public static final String PROP_SYSTEM_PROPERTY_FILE = 
@@ -42,15 +42,15 @@ public class BootLoader extends URLClassLoader implements BootLoaderMBean {
    * The name of the system property that is expected to contain the "base" directory.
    * The base directory is given relative to the directory in which the property file
    * is found and is used for resolving library paths.  This will be used to set the
-   * value of the <code>pxe.home</code> system property.
+   * value of the <code>ode.home</code> system property.
    */
   public static final String PROP_BASEDIR = BootLoader.class.getName() + ".basedir";
 
-  public static final String PROP_PXEHOME = "pxe.home";
+  public static final String PROP_ODEHOME = "ode.home";
   /**
    * same constant defined in UTILS RMIConstants but we cannot have dependencies on it
    */
-  public static final String PROP_RMIURL = "pxe.rmiurl";
+  public static final String PROP_RMIURL = "ode.rmiurl";
   
   /**
    * Name of the system property containing a comma-delimited list of libraries to include
@@ -111,7 +111,7 @@ public class BootLoader extends URLClassLoader implements BootLoaderMBean {
         baseDir = new File(propertyFile.getCanonicalFile().getParentFile(),"../").getCanonicalFile();
 
       System.setProperty(PROP_BASEDIR,baseDir.getCanonicalPath());
-      System.setProperty(PROP_PXEHOME,baseDir.getCanonicalPath());
+      System.setProperty(PROP_ODEHOME,baseDir.getCanonicalPath());
     } catch (IOException ioex) {
       System.err.println("BOOTSTRAP FAILURE: Could not resolve base directory.");
       throw new RuntimeException(ioex);
