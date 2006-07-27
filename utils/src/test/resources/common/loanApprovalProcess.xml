@@ -1,0 +1,107 @@
+<process name="loanApprovalProcess"
+         targetNamespace="http://acme.com/loanprocessing"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:lns="http://loans.org/wsdl/loan-approval"
+         suppressJoinFailure="yes">
+
+   <partnerLinks>
+      <partnerLink name="customer"
+               partnerLinkType="lns:loanPartnerLinkType"
+               myRole="loanService"/>
+      <partnerLink name="approver"
+               partnerLinkType="lns:loanApprovalLinkType"
+               partnerRole="approver"/>
+      <partnerLink name="assessor"
+               partnerLinkType="lns:riskAssessmentLinkType"
+               partnerRole="assessor"/>
+   </partnerLinks>
+
+   <variables>
+     <variable name="request"
+                messageType="lns:creditInformationMessage"/>
+     <variable name="risk"
+                messageType="lns:riskAssessmentMessage"/>
+     <variable name="approval"
+                messageType="lns:approvalMessage"/>
+   </variables>
+
+   <faultHandlers>
+      <catch faultName="lns:loanProcessFault"
+             faultVariable="error"
+             faultMessageType="lns:errorMessage">
+         <reply   partnerLink="customer"
+                  portType="lns:loanServicePT"
+                  operation="request"
+                  variable="error"
+                  faultName="unableToHandleRequest"/>
+      </catch>
+   </faultHandlers>
+
+
+   <flow>
+
+      <links>
+         <link name="receive-to-assess"/>
+         <link name="receive-to-approval"/>
+         <link name="approval-to-reply"/>
+         <link name="assess-to-setMessage"/>
+         <link name="setMessage-to-reply"/>
+         <link name="assess-to-approval"/>
+      </links>
+
+      <receive partnerLink="customer"
+               portType="lns:loanServicePT"
+               operation="request"
+               variable="request" createInstance="yes">
+         <source linkName="receive-to-assess"
+            transitionCondition=
+              "bpws:getVariableData('request','amount') &lt; 10000"/>
+         <source linkName="receive-to-approval"
+            transitionCondition=
+              "bpws:getVariableData('request','amount')&gt;=10000"/>
+      </receive>
+
+      <invoke  partnerLink="assessor"
+               portType="lns:riskAssessmentPT"
+               operation="check"
+               inputVariable="request"
+               outputVariable="risk">
+         <target linkName="receive-to-assess"/>
+         <source linkName="assess-to-setMessage"
+            transitionCondition=
+              "bpws:getVariableData('risk','level')='low'"/>
+         <source linkName="assess-to-approval"
+            transitionCondition=
+              "bpws:getVariableData('risk','level')!='low'"/>
+      </invoke>
+
+      <assign>
+         <target linkName="assess-to-setMessage"/>
+         <source linkName="setMessage-to-reply"/>
+         <copy>
+            <from expression="'yes'"/>
+            <to variable="approval" part="accept"/>
+         </copy>
+      </assign>
+
+      <invoke  partnerLink="approver"
+               portType="lns:loanApprovalPT"
+               operation="approve"
+               inputVariable="request"
+               outputVariable="approval">
+         <target linkName="receive-to-approval"/>
+         <target linkName="assess-to-approval"/>
+         <source linkName="approval-to-reply" />
+      </invoke>
+
+      <reply   partnerLink="customer"
+               portType="lns:loanServicePT"
+               operation="request"
+               variable="approval">
+         <target linkName="setMessage-to-reply"/>
+         <target linkName="approval-to-reply"/>
+      </reply>
+   </flow>
+
+</process>

@@ -1,0 +1,32 @@
+import org.apache.ode.bpel.pmapi.*;
+import org.apache.ode.ra.*;
+import org.apache.ode.bpel.provider.*;
+
+
+/**
+ * Get a connection to the BPEL provider's BPEL Management Interface.
+ */
+getBpelManagementAPI(String odeURL,String providerURI) {
+   
+   OdeManagedConnectionFactory pmcf = new OdeManagedConnectionFactory();
+   pmcf.setURL(odeURL);
+   OdeConnectionFactory cf = (OdeConnectionFactory)pmcf.createConnectionFactory();
+   OdeConnection conn = (OdeConnection)cf.getConnection();
+   return (BpelManagementFacade)conn.createServiceProviderSession(
+         providerURI, BpelManagementFacade.class);
+}
+
+/**
+ * Get a connection to the BPEL provider's BPEL Management API using
+ * the default connection parameters.
+ */
+getBpelManagementAPI() {
+   return getBpelManagementAPI(System.getProperty("ode.url"),  "uri:bpelProvider");
+}
+
+/** For backward compatibility. */
+odeGetBMF() {
+  return getBpelManagementAPI();
+}
+
+

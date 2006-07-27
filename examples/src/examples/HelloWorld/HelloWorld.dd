@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<deployment-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ode.fivesight.com/schemas/2006/02/14/bpeldd">
+
+  <process-properties>
+    <property name="sample" namespace="http://www.fivesight.com/ode/examples/HelloWorld/dd">someValue</property>
+  </process-properties>
+
+</deployment-descriptor>

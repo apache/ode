@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<project>
+    <groupId>ode</groupId>
+    <artifactId>ode-bpel-compiler</artifactId>
+    <name>ODE :: BPEL Compiler</name>
+    <description>Converts BPEL object model into compiled BPEL representation.</description>
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <version>2.0-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-bom</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-dd</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-el-xpath10</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-el-xpath20</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-obj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-utils</artifactId>
+        </dependency>
+    </dependencies>
+</project>

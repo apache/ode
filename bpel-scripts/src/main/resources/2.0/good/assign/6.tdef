@@ -1,0 +1,8 @@
+
+bpel=Assign6-2.0.bpel
+wsdl=../test.wsdl
+request.1.partnerlink=testPartnerLink
+request.1.operation=opTwoWay
+request.1.msg=../inMsg.xml
+postConditionNamespace=t=uri:testing
+postCondition=2=number(/message/Complex1Part1/t:Complex1/t:IntElement/text())

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+        name="Pong"
+        xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+        targetNamespace="urn:/Pong.bpel"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="urn:/Pong.bpel"
+        xmlns:pong="urn:/Pong.wsdl"
+        xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+        expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+
+    <import location="urn:/Pong.wsdl"
+            namespace="urn:/Pong.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <import location="urn:/Pong.wsdl"
+            namespace="urn:/Pong.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="PongPartnerLink"
+                partnerLinkType="pong:PongPartnerLinkType"
+                myRole="Provider" />
+    </partnerLinks>
+
+    <variables>
+        <variable messageType="pong:PongRequest" name="pongRequest"/>
+        <variable messageType="pong:PongResponse" name="pongResponse"/>
+        <variable type="xsd:string" name="text" />
+    </variables>
+
+    <sequence name="Main">
+        <receive name="pongReceive"
+                createInstance="yes"
+                operation="Pong"
+                partnerLink="PongPartnerLink"
+                portType="pong:PongPortType"
+                variable="pongRequest"/>
+
+        <assign name="assignPongRequest">
+            <!-- add "ping" text to the input text -->
+            <copy>
+                <from>concat($pongRequest.body/pong:text, ' pong')</from>
+                <to>$text</to>
+            </copy>
+            <!-- initialize pongResponse -->
+            <copy>
+                <from>
+                    <literal>
+                        <pong:PongRequest>
+                            <pong:text/>
+                        </pong:PongRequest>
+                    </literal>
+                </from>
+                <to>$pongResponse.body</to>
+            </copy>
+            <!-- copy new text into pongResponse -->
+            <copy>
+                <from>$text</from>
+                <to>$pongResponse.body/pong:text</to>
+            </copy>
+        </assign>
+        
+        <reply name="pongReply"
+                partnerLink="PongPartnerLink"
+                portType="pong:PongPortType"
+                operation="Pong"
+                variable="pongResponse"/>
+    </sequence>
+</process>

@@ -1,0 +1,66 @@
+<project name="DynPartner" default="usage"  >
+
+  <import file="../example-build.xml" />
+
+  <target name="usage">
+    <echo>To build this example run:</echo>
+    <echo>   ant main</echo>
+    <echo>   ant responder</echo>
+    <echo>Then deploy the two generated SAR files using the ode-deploy command and run:</echo>
+    <echo>   ant test</echo>
+    <echo>That's it!</echo>
+  </target>
+
+  <target name="responder" depends="_rr_responder,_bpelc_responder,_sar_responder"/>
+  <target name="main" depends="_rr_main,_bpelc_main,_sar_main"/>
+
+  <target name="_rr_responder" depends="init">
+  	<delete dir="${build.dir}/responder.rr"/>
+    <mkdir dir="${build.dir}/responder.rr"/>
+    <ode-rr rrdir="${build.dir}/responder.rr">
+      <rrfileset dir="." includes="Responder.wsdl" desturi="urn:/" recursive="yes" />
+    </ode-rr>
+  </target>
+
+  <target name="_rr_main" depends="init">
+  	<delete dir="${build.dir}/main.rr"/>
+    <mkdir dir="${build.dir}/main.rr"/>
+    <ode-rr rrdir="${build.dir}/main.rr">
+      <rrfileset dir="." includes="Main.wsdl" desturi="urn:/" recursive="yes" />
+    </ode-rr>
+  </target>
+
+  <target name="_bpelc_responder" depends="init" >
+    <bpelc targetdir="${build.dir}" rr="${build.dir}/responder.rr" wsdl="urn:/Responder.wsdl">
+      <bpel url="file:${basedir}/Responder.bpel" />
+    </bpelc>
+  </target>
+
+  <target name="_bpelc_main" depends="init" >
+    <bpelc targetdir="${build.dir}" rr="${build.dir}/main.rr" wsdl="urn:/Main.wsdl">
+      <bpel url="file:${basedir}/Main.bpel" />
+    </bpelc>
+  </target>
+
+  <target name="_sar_responder" depends="init">
+    <ode-sar destfile="${build.dir}/responder.sar"	systemrr="${build.dir}/responder.rr"	descriptor="ode-responder-system.xml">
+      <zipfileset file="${build.dir}/DynPartnerResponder.cbp" fullpath="DynPartnerResponder.cbp"/>
+      <zipfileset file="${build.dir}/DynPartnerResponder.dd" fullpath="DynPartnerResponder.dd"/>
+    </ode-sar>
+  </target>
+
+  <target name="_sar_main" depends="init">
+    <ode-sar destfile="${build.dir}/main.sar"	systemrr="${build.dir}/main.rr"	descriptor="ode-main-system.xml">
+      <zipfileset file="${build.dir}/DynPartnerMain.cbp" fullpath="DynPartnerMain.cbp"/>
+      <zipfileset file="${build.dir}/DynPartnerMain.dd" fullpath="DynPartnerMain.dd"/>
+    </ode-sar>
+  </target>
+
+  <target name="test" depends="init">
+    <antcall target="_sendsoap">
+      <param name="ode.sendsoap.url" value="http://localhost:${ode.http.port}/ode/soap/dynmain"/>
+      <param name="ode.sendsoap.filename" location="testRequest.soap"/>
+    </antcall>
+  </target>
+  
+</project>

@@ -1,26 +1,16 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.sax.fsa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ode.sax.evt.Characters;
 import org.apache.ode.sax.evt.EndElement;
 import org.apache.ode.sax.evt.SaxEvent;
 import org.apache.ode.sax.evt.StartElement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Stack;
 
@@ -104,6 +94,8 @@ public class FSA {
       break;
     case SaxEvent.START_ELEMENT:
       StartElement ste = (StartElement) se;
+      // TODO Add ignore elements in graph provider
+      if (ste.getName().getLocalPart().equals("documentation")) break;
       String target = _graphProvider.getQNameEdge(current().stateName,ste.getName());
       if (target == null) {
         target = _graphProvider.getOtherEdge(current().stateName, ste.getName().getNamespaceURI());
@@ -122,6 +114,8 @@ public class FSA {
       break;
     case SaxEvent.END_ELEMENT:
       EndElement ee = (EndElement)se;
+      // TODO Add ignore elements in graph provider
+      if (ee.getName().getLocalPart().equals("documentation")) break;
       if (current().isDone()) {
         State pn =  current().state;   
         pn.done();

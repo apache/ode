@@ -1,0 +1,3 @@
+<message xmlns:ns1="http://test.ns">
+    <stringPart><ns1:string>abcdefg</ns1:string></stringPart>
+</message>

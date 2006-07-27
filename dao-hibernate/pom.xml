@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<project>
+    <groupId>ode</groupId>
+    <artifactId>ode-dao-hibernate</artifactId>
+    <name>ODE :: Hibernate DAO Implementation</name>
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <version>2.0-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-ql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xdoclet-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>xdoclet</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <hibernatedoclet destdir="${project.build.directory}/generated-resources/xdoclet" excludedtags="@version,@author,@todo" force="false" verbose="false">
+                                    <hibernate version="3.0"/>
+                                    <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
+                                </hibernatedoclet>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+          <resource>
+            <directory>target/generated-resources/xdoclet</directory>
+          </resource>
+        </resources>
+
+    </build>
+</project>

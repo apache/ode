@@ -1,25 +1,27 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.utils;
 
+import org.apache.ode.utils.sax.LoggingErrorHandler;
 import com.sun.org.apache.xerces.internal.dom.DOMOutputImpl;
 import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xml.internal.serialize.DOMSerializerImpl;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
@@ -29,17 +31,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utility class for dealing with the Document Object Model (DOM).
@@ -76,7 +67,7 @@ public class DOMUtils {
         synchronized (__documentBuilderFactory) {
           try {
             db = __documentBuilderFactory.newDocumentBuilder();
-//            db.setErrorHandler(new LoggingErrorHandler());
+            db.setErrorHandler(new LoggingErrorHandler());
           } catch (ParserConfigurationException e) {
             __log.error(e);
             throw new RuntimeException(e);
@@ -457,6 +448,24 @@ public class DOMUtils {
     return value;
   }
 
+  public static void serialize(Element elmt, OutputStream ostr) {
+    String usedEncoding = "UTF-8";
+    Document parent = elmt.getOwnerDocument();
+    if (parent != null) {
+      String parentEncoding = parent.getXmlEncoding();
+      if (parentEncoding != null) {
+        usedEncoding = parentEncoding;
+      }
+    }
+
+    DOMOutputImpl out = new DOMOutputImpl();
+    out.setEncoding(usedEncoding);
+
+    DOMSerializerImpl ser = new DOMSerializerImpl();
+    out.setByteStream(ostr);
+    ser.write(elmt, out);
+  }
+
   /**
    * Convert a DOM node to a stringified XML representation.
    */
@@ -568,11 +577,12 @@ public class DOMUtils {
     Map ns = getParentNamespaces(el);
     Document d = el.getOwnerDocument();
     assert d != null;
-    for (Object o : ns.keySet()) {
-      String key = (String) o;
+    Iterator it = ns.keySet().iterator();
+    while (it.hasNext()) {
+      String key = (String) it.next();
       String uri = (String) ns.get(key);
       Attr a = d.createAttributeNS(NS_URI_XMLNS,
-              (key.length() != 0) ? ("xmlns:" + key) : ("xmlns"));
+          (key.length() != 0)?("xmlns:" + key):("xmlns"));
       a.setValue(uri);
       el.setAttributeNodeNS(a);
     }
@@ -665,6 +675,7 @@ public class DOMUtils {
 
   /**
    * @param el
+   * @return
    */
   public static QName getElementQName(Element el) {
     return new QName(el.getNamespaceURI(),el.getLocalName());

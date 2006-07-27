@@ -1,0 +1,50 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header>
+    <h:Configuration 
+          xmlns:h="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd"
+          SOAP-ENV:mustUnderstand="0" >
+      <h:UserId>griddell@bowstreet.com</h:UserId>
+      <h:ServiceUrl Role="LoggingFacility">http://localhost:8080/wsi-server/scm/logging</h:ServiceUrl>
+      <h:ServiceUrl Role="Retailer">http://localhost:8080/wsi-server/scm/retailer</h:ServiceUrl>
+      <h:ServiceUrl Role="WarehouseA">http://localhost:8080/wsi-server/scm/warehousea</h:ServiceUrl>
+      <h:ServiceUrl Role="WarehouseB">http://localhost:8080/wsi-server/scm/warehouseb</h:ServiceUrl>
+      <h:ServiceUrl Role="WarehouseC">http://localhost:8080/wsi-server/scm/warehousec</h:ServiceUrl>
+      <h:ServiceUrl Role="ManufacturerA">http://localhost:8080/wsi-server/scm/manufacturera</h:ServiceUrl>
+      <h:ServiceUrl Role="ManufacturerB">http://localhost:8080/wsi-server/scm/manufacturerb</h:ServiceUrl>
+      <h:ServiceUrl Role="ManufacturerC">http://localhost:8080/wsi-server/scm/manufacturerc</h:ServiceUrl>
+    </h:Configuration>
+  </SOAP-ENV:Header>
+  <SOAP-ENV:Body>
+    <test:setupSession xmlns:test="http://jlo/bpel/unit-test.wsdl">
+      <CustomerIdPart xmlns:agreq="http://jlo/bpel/AggregatorRequest.xsd">
+	<agreq:customerId>Dude</agreq:customerId>
+      </CustomerIdPart>
+      <PartsOrder xmlns:p="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd">
+	<p:Item>
+	  <p:productNumber>605006</p:productNumber>
+	  <p:quantity>182</p:quantity>
+	  <p:price>3.99</p:price>
+	</p:Item>
+	<p:Item>
+	  <p:productNumber>605002</p:productNumber>
+	  <p:quantity>4</p:quantity>
+	  <p:price>3.99</p:price>
+	</p:Item>
+	<p:Item>
+	  <p:productNumber>605003</p:productNumber>
+	  <p:quantity>82</p:quantity>
+	  <p:price>7.99</p:price>
+	</p:Item>
+      </PartsOrder>
+      <CustomerDetails xmlns:c="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd">
+	<c:custnbr>ABCD999999999EFG</c:custnbr>
+	<c:name>Joe Bloggs</c:name>
+	<c:street1>213 N Morgan, Suite 1A</c:street1>
+	<c:city>Chicago</c:city>
+	<c:state>NH</c:state>
+	<c:zip>03870</c:zip>
+	<c:country>USA</c:country>
+      </CustomerDetails>
+    </test:setupSession>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

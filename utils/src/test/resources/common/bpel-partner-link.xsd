@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+targetNamespace="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+elementFormDefault="qualified">
+<element name="partnerLinkType" type="plnk:tPartnerLinkType"/>
+<complexType name="tPartnerLinkType">
+<sequence>
+<element name="role" type="plnk:tRole" minOccurs="1" maxOccurs="2"/>
+</sequence>
+<attribute name="name" type="NCName" use="required"/>
+</complexType>
+<complexType name="tRole">
+<sequence>
+<element name="portType" minOccurs="1" maxOccurs="1">
+<complexType>
+<attribute name="name" type="QName" use="required"/>
+</complexType>
+</element>
+</sequence>
+<attribute name="name" type="NCName" use="required"/>
+</complexType>
+</schema>

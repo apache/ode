@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<process name="DynPartnerMain"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:resp="http://ode/bpel/responder.wsdl">
+
+  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="initiatorPartnerLink" partnerLinkType="test:InitiatorPartnerLinkType"
+                 myRole="me"/>
+    <partnerLink name="responderPartnerLink" partnerLinkType="resp:ResponderPartnerLinkType"
+                 partnerRole="responder" initializePartnerRole="yes"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy" messageType="resp:DummyMessage"/>
+    <variable name="dummy2" messageType="resp:Dummy2Message"/>
+    <variable name="partnerEndpoint" messageType="resp:EndpointMessage"/>
+    <variable name="partnerAck" messageType="resp:AcknowledgementMessage"/>
+    <variable name="result" messageType="test:ResultMessage"/>
+    <variable name="wsaVar" messageType="resp:WSAEndpointMessage"/>
+  </variables>
+
+  <correlationSets>
+    <correlationSet name="dummyCorr" properties="test:dummyProp" />
+  </correlationSets>
+
+  <sequence>
+    <receive name="start" partnerLink="initiatorPartnerLink"
+             portType="test:DynMainPortType" operation="execute" createInstance="yes" variable="dummy"/>
+
+    <invoke name="get-endpoint" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
+            operation="getDynamicEndpoint" inputVariable="dummy" outputVariable="partnerEndpoint">
+      <correlations>
+        <correlation set="dummyCorr" initiate="yes" pattern="request"/>
+      </correlations>
+    </invoke>
+
+    <assign>
+      <copy>
+        <!-- Partner link assignment using the value returned by previous invoke -->
+        <from variable="partnerEndpoint" part="payload"/>
+        <to partnerLink="responderPartnerLink"/>
+      </copy>
+      <copy>
+        <!-- Just needed for correlation -->
+        <from>$dummy.payload</from>
+        <to>$dummy2.payload</to>
+      </copy>
+    </assign>
+
+    <!-- Invoking the partner link service endpoint that has just been assigned -->
+    <invoke name="dynamic-invoke" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
+            operation="acknowledge" inputVariable="dummy2" outputVariable="partnerAck">
+      <correlations>
+        <correlation set="dummyCorr" initiate="no" pattern="request"/>
+      </correlations>
+    </invoke>
+
+    <!-- Playing around with epr conversion (url to wsa) -->
+    <assign>
+      <copy>
+        <from>
+          <literal>http://localhost:8080/ode/soap/dynresponder</literal>
+        </from>
+        <to partnerLink="responderPartnerLink"/>
+      </copy>
+      <copy>
+        <from>
+          <literal>
+            <service-ref>
+              <soap:address location="http://localhost:8080/ode/soap/dynresponder"/>
+            </service-ref>
+          </literal>
+        </from>
+        <to partnerLink="responderPartnerLink"/>
+      </copy>
+      <copy>
+        <from partnerLink="responderPartnerLink" endpointReference="partnerRole"/>
+        <to variable="wsaVar" part="payload"/>
+      </copy>
+      <copy>
+        <from variable="wsaVar" part="payload"/>
+        <to partnerLink="responderPartnerLink"/>
+      </copy>
+    </assign>
+
+    <!-- Invoking the partner link service endpoint that has just been explicitly assigned -->
+    <invoke name="dynamic-invoke" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
+            operation="acknowledge" inputVariable="dummy2" outputVariable="partnerAck">
+      <correlations>
+        <correlation set="dummyCorr" initiate="no" pattern="request"/>
+      </correlations>
+    </invoke>
+
+    <assign>
+      <copy>
+        <from variable="partnerAck" part="payload"/>
+        <to variable="result" part="ack"/>
+      </copy>
+    </assign>
+
+    <reply name="end" partnerLink="initiatorPartnerLink"
+           portType="test:DynMainPortType" operation="execute" variable="result"/>
+
+  </sequence>
+</process>

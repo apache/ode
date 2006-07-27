@@ -1,0 +1,16 @@
+/*
+ * SOURCE FILE GENERATATED BY JACOB CHANNEL CLASS GENERATOR
+ * !!! DO NOT EDIT !!!!
+ */
+package <XDtPackage:packageOf><XDtClass:fullClassName/></XDtPackage:packageOf>;
+
+public interface <XDtClass:classOf><XDtClass:fullClassName/>Channel</XDtClass:classOf> 
+    extends <XDtClass:ifHasClassTag tagName="jacob.parent">
+        	<XDtClass:classTagValue tagName="jacob.parent"/>,
+    		</XDtClass:ifHasClassTag>
+    		<XDtClass:ifDoesntHaveClassTag tagName="jacob.parent">
+    			com.fs.jacob.Channel,  
+    		</XDtClass:ifDoesntHaveClassTag>
+            <XDtClass:classOf><XDtClass:fullClassName/></XDtClass:classOf> 
+{
+}
