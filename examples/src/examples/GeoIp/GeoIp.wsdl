@@ -1,0 +1,30 @@
+<definitions xmlns:s="http://www.w3.org/2001/XMLSchema" 
+    xmlns:tns="http://GeoIpService.wsdl"
+    targetNamespace="http://GeoIpService.wsdl" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" 
+    xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+    xmlns:wsn="http://www.webservicex.net">
+    
+    <import namespace="http://www.webservicex.net" 
+            location="http://www.webservicex.net/geoipservice.asmx?WSDL"/>
+    
+    
+    <service name="GeoIpProxy">
+        <documentation>A proxy to the GeoIP service</documentation>
+        <port name="GeoIpSoap" binding="wsn:GeoIPServiceSoap">
+            <soap:address location="http://localhost:@ODE_HTTP_PORT@/ode/soap/geoIp"/>
+        </port>
+    </service>
+
+    <plnk:partnerLinkType name="GeoIpServiceLinkType">
+        <plnk:role name="inbound">
+            <plnk:portType name="wsn:GeoIPServiceSoap"/>
+        </plnk:role>
+        <plnk:role name="outbound">
+            <plnk:portType name="wsn:GeoIPServiceSoap"/>
+        </plnk:role>
+    </plnk:partnerLinkType>
+
+</definitions>

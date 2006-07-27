@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri resource="onmessage-1.bpel" uri="../../../../../../../../../../Bucket/bpel_1_1.rnc"/>
+  <uri resource="onalarm-1.bpel" uri="../../../../../../../../../../Bucket/bpel_1_1.rnc"/>
+  <uri resource="onalarm-1.bpel" uri="../../../../../../../../../Bucket/bpel_1_1.rnc"/>
+  <uri resource="onalarm-1.bpel" uri="../../../../../../../../../Bucket/bpel_1_1.rnc"/>
+</locatingRules>

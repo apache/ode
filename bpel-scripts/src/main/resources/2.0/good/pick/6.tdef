@@ -1,0 +1,6 @@
+
+bpel=Pick6-2.0.bpel
+request.1.partnerlink=testPartnerLink
+request.1.operation=pickOp1
+request.1.msg=inMsg3.xml
+postCondition=/message/DataPart/text()='onAlarm'

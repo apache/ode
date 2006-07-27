@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="uri:test1">
+    <xsd:complexType name="TComplex2">
+        <xsd:sequence>
+            <xsd:element name="StringElement" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+            <xsd:element name="IntElement" type="xsd:int" maxOccurs="1" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+</xsd:schema>

@@ -1,0 +1,6 @@
+bpel=GetVariableProperty1-2.0.bpel
+wsdl=../test.wsdl
+request.1.partnerlink=testPartnerLink
+request.1.operation=opTwoWay
+request.1.msg=../inMsg.xml
+postCondition=/message/StringPart1/text()=/message/StringPart2/text()

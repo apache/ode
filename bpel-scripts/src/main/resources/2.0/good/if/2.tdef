@@ -1,0 +1,7 @@
+bpel=If2-2.0.bpel
+wsdl=test.wsdl
+request.1.partnerlink=testPartnerLink
+request.1.operation=testOperation
+request.1.msg=inMsg.xml
+postCondition=/message/TestPart/text()='case2'
+

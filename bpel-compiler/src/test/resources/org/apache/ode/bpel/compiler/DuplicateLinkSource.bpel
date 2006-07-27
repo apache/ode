@@ -1,0 +1,26 @@
+<process name="InvalidBpelFunction" suppressJoinFailure="yes" targetNamespace="http://jlo/test/compile"
+    xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:tns="http://jlo/test/compile"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <variables>
+        <variable name="var1" 
+            type="xsd:string" />
+    </variables>
+    <flow>
+        <links>
+            <link name="test-link"/>
+        </links>
+       <sequence>
+          <empty>
+              <source linkName="test-link"/>
+          </empty>
+          <empty>
+              <target linkName="test-link"/>
+          </empty>
+          <empty>
+              <source linkName="test-link"/>
+          </empty>
+       </sequence>
+    </flow>
+</process>

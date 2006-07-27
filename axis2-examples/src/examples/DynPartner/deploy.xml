@@ -1,0 +1,20 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:main="http://ode/bpel/unit-test" 
+	xmlns:mws="http://ode/bpel/unit-test.wsdl"
+	xmlns:resp="http://ode/bpel/responder"
+	xmlns:rws="http://ode/bpel/responder.wsdl">
+
+	<process name="main:DynPartnerMain">
+		<provide partnerLink="initiatorPartnerLink">
+			<service name="mws:DynMainService" port="DynMainPort"/>
+		</provide>
+		<invoke partnerLink="responderPartnerLink">
+			<service name="rws:DynResponderService" port="DynResponderPort"/>
+		</invoke>
+	</process>
+	<process name="resp:DynPartnerResponder">
+		<provide partnerLink="mainPartnerLink">
+			<service name="rws:DynResponderService" port="DynResponderPort"/>
+		</provide>
+	</process>
+</deploy>

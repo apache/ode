@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<wsdl:definitions targetNamespace="3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:import namespace="4" location="circular4.wsdl" />
+</wsdl:definitions>

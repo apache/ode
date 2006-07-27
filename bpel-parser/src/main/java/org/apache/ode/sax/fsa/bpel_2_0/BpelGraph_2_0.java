@@ -1,29 +1,17 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.parser.BpelProcessBuilder;
 import org.apache.ode.sax.fsa.AbstractGraphProvider;
 import org.apache.ode.sax.fsa.StateFactory;
+
+import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames {
 
@@ -46,6 +34,7 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
     _ACTIVITIES.put(Bpel20QNames.PICK,new BpelPickActivityState.Factory());
     _ACTIVITIES.put(Bpel20QNames.SCOPE,new BpelScopeState.Factory());
     _ACTIVITIES.put(Bpel20QNames.IF, new BpelIfActivityState.Factory());
+    _ACTIVITIES.put(Bpel20QNames.FOREACH, new BpelForEachActivityState.Factory());
   }
   
     private static final HashSet<QName> _20EXTENSIBLE_ELEMENTS = new HashSet<QName>();
@@ -76,6 +65,7 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FAULTHANDLERS);
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FLOW);
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FOR);
+        _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FOREACH);
         // not defined yet
         // _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FOREACH);
 
@@ -130,11 +120,12 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.VARIABLES);
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.WAIT);
         _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.WHILE);
+        _20EXTENSIBLE_ELEMENTS.add(Bpel20QNames.FOREACH);
 
         // Add all activities.
-        for (Iterator<QName> it = _ACTIVITIES.keySet().iterator(); it.hasNext();) {
-            _20EXTENSIBLE_ELEMENTS.add(it.next());
-        }
+      for (QName qName : _ACTIVITIES.keySet()) {
+        _20EXTENSIBLE_ELEMENTS.add(qName);
+      }
     }
 
   public BpelGraph_2_0() {
@@ -163,7 +154,6 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
     addStateFactory("QUERY", new BpelQueryState.Factory());
     
     addQNameEdge("COPY","FROM",Bpel20QNames.FROM);
-    // TODO Add edge to service-ref
     addStateFactory("TO",new BpelToState.Factory());
     addQNameEdge("COPY","TO",Bpel20QNames.TO);
     
@@ -258,6 +248,7 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
     addActivityTransitionsTo("SEQUENCE");
     addActivityTransitionsTo("FLOW");
     addActivityTransitionsTo("WHILE");
+    addActivityTransitionsTo("FOREACH");
     addActivityTransitionsTo("SCOPE");
     addActivityTransitionsTo("ONMESSAGE");
     addActivityTransitionsTo("ONEVENT");
@@ -285,7 +276,18 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
     addStateFactory("LINK",new BpelLinkState.Factory());
     addQNameEdge("FLOW","LINKS",Bpel20QNames.LINKS);
     addQNameEdge("LINKS","LINK",Bpel20QNames.LINK);
-    
+
+    addQNameEdge("FOREACH", "ITERATOR", Bpel20QNames.ITERATOR);
+    addQNameEdge("FOREACH", "STARTCOUNTERVALUE", Bpel20QNames.START_COUNTER_VALUE);
+    addQNameEdge("FOREACH", "FINALCOUNTERVALUE", Bpel20QNames.FINAL_COUNTER_VALUE);
+    addQNameEdge("FOREACH", "COMPLETIONCONDITION", Bpel20QNames.COMPLETION_CONDITION);
+    addQNameEdge("COMPLETIONCONDITION", "BRANCHES", Bpel20QNames.BRANCHES);
+    addStateFactory("ITERATOR", new BpelIteratorState.Factory());
+    addStateFactory("STARTCOUNTERVALUE", new BpelStartCounterValueState.Factory());
+    addStateFactory("FINALCOUNTERVALUE", new BpelFinalCounterValueState.Factory());
+    addStateFactory("COMPLETIONCONDITION", new BpelCompletionConditionState.Factory());
+    addStateFactory("BRANCHES", new BpelBranchesState.Factory());
+
     //addQNameEdge(START,"PROCESS",Bpel20QNames.PROCESS);
     
     addExtensibilityEdges();
@@ -294,11 +296,10 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
   private void addExtensibilityEdges() {
       addStateFactory("EXTENSIBILITY_BUCKET", new ExtensibilityBucketState.Factory());
       addOtherEdge("20PROCESS","EXTENSIBILITY_BUCKET",BpelProcessBuilder.WSBPEL2_0_NS);
-      for(Iterator<QName> it = _20EXTENSIBLE_ELEMENTS.iterator();it.hasNext();) {
-        QName qn = it.next();
-        String nodename = qn.getLocalPart().toUpperCase();
-        addOtherEdge(nodename,"EXTENSIBILITY_BUCKET",BpelProcessBuilder.WSBPEL2_0_NS);
-      }
+    for (QName qn : _20EXTENSIBLE_ELEMENTS) {
+      String nodename = qn.getLocalPart().toUpperCase();
+      addOtherEdge(nodename, "EXTENSIBILITY_BUCKET", BpelProcessBuilder.WSBPEL2_0_NS);
+    }
     }
   
   private void addActivities() {
@@ -312,21 +313,19 @@ public class BpelGraph_2_0 extends AbstractGraphProvider implements Bpel20QNames
     addQNameEdge("TARGETS", "TARGET", Bpel20QNames.TARGET);
     addQNameEdge("SOURCE", "TCONDITION", Bpel20QNames.TRANSITION_CONDITION);
     addQNameEdge("SOURCES", "SOURCE", Bpel20QNames.SOURCE);
-    
-    for (Iterator<QName> it = _ACTIVITIES.keySet().iterator();it.hasNext();) {
-      QName qn = it.next();
+
+    for (QName qn : _ACTIVITIES.keySet()) {
       String nodename = qn.getLocalPart().toUpperCase();
       addStateFactory(nodename, _ACTIVITIES.get(qn));
-      addQNameEdge(nodename,"SOURCES",Bpel20QNames.SOURCES);
-      addQNameEdge(nodename,"TARGETS",Bpel20QNames.TARGETS);
+      addQNameEdge(nodename, "SOURCES", Bpel20QNames.SOURCES);
+      addQNameEdge(nodename, "TARGETS", Bpel20QNames.TARGETS);
     }
   }
   
   private void addActivityTransitionsTo(String source) {
-    for (Iterator<QName> it = _ACTIVITIES.keySet().iterator();it.hasNext();) {
-      QName qn = it.next();
+    for (QName qn : _ACTIVITIES.keySet()) {
       String nodename = qn.getLocalPart().toUpperCase();
-      addQNameEdge(source,nodename,qn);
+      addQNameEdge(source, nodename, qn);
     }
   }
 }

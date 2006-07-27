@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbi xmlns="http://java.sun.com/xml/ns/jbi" version="1.0">
+     
+   <service-assembly>
+     <identification>
+       <name>AsyncProcess2</name>
+       <description>AsyncProcess2 example</description>
+     </identification>
+     <service-unit>
+       <identification>
+         <name>AsyncProcess2</name>
+         <description>AsyncProcess2 Service Unit</description>
+       </identification>
+       <target>
+         <artifacts-zip>AsyncProcess2-Process.zip</artifacts-zip>
+         <component-name>OdeBpelEngine</component-name>
+       </target>
+     </service-unit>
+    </service-assembly>
+    
+</jbi>

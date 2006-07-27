@@ -1,0 +1,147 @@
+<process name="RetailAggregator" targetNamespace="http://jlo/bpel/unit-test"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:tns="http://jlo/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:test="http://jlo/bpel/unit-test.wsdl"
+    xmlns:retail="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl"
+    xmlns:order="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd"
+    xmlns:agreq="http://jlo/bpel/AggregatorRequest.xsd" suppressJoinFailure="yes">
+    <partnerLinks>
+        <partnerLink name="aggregatorPartnerLink" 
+                     partnerLinkType="test:AggregatorPartnerLinkType" 
+                     myRole="me"/>
+        <partnerLink name="retailerPartnerLink" 
+                     partnerLinkType="test:RetailerPortTypeLink" 
+                     partnerRole="RetailerPortTypeProvider"/>
+    </partnerLinks>
+    <variables>
+        <variable name="setupInfo" messageType="test:SetupSessionMessage" />
+        <variable name="customerId" type="xsd:string" />
+        <variable name="retailOrder" messageType="retail:submitOrderRequest"/>
+        <variable name="orderResponse" messageType="retail:submitOrderResponse"/>
+        <variable name="item1unordered" type="xsd:integer"/>
+        <variable name="item2unordered" type="xsd:integer"/>
+        <variable name="item3unordered" type="xsd:integer"/>
+        <variable name="thisRequest" messageType="test:OrderRequest" />
+        <variable name="tmp" type="xsd:integer" />
+    </variables>
+    <correlationSets>
+      <correlationSet name="customerId" properties="test:customerId" />
+    </correlationSets>
+    <sequence>
+        <assign>
+            <copy>
+                <from>0</from>
+                <to variable="item1unordered"/>
+            </copy>
+            <copy>
+                <from>0</from>
+                <to variable="item2unordered"/>
+            </copy>
+            <copy>
+                <from>0</from>
+                <to variable="item3unordered"/>
+            </copy>
+        </assign>
+        <receive name="setupSession" 
+                 partnerLink="aggregatorPartnerLink" 
+                 portType="test:AggregatorPortType"
+                 operation="setupSession" 
+                 variable="setupInfo" 
+                 createInstance="yes">
+          <correlations>
+		        <correlation set="customerId" initiate="yes"/>
+		      </correlations>
+        </receive>
+        
+        <assign>
+            <copy>
+                <from variable="setupInfo" 
+                      part="CustomerIdPart" 
+                      query="/*[1]/*[1]" />
+                <to variable="customerId" />
+            </copy>    
+        </assign>
+        
+        <!-- retailOrder initialized with reasonable data -->
+        <assign>
+            <copy>
+                <from variable="setupInfo" part="PartsOrder" />
+                <to variable="retailOrder" part="PartsOrder"/>
+            </copy>
+            <copy>
+                <from variable="setupInfo" part="CustomerDetails" />
+                <to variable="retailOrder" part="CustomerDetails"/>
+            </copy>
+            <copy>
+                <from variable="setupInfo" part="ConfigurationHeader" />
+                <to variable="retailOrder" part="ConfigurationHeader"/>
+            </copy> 
+        </assign>
+        
+        <while condition="bpws:getVariableData('item1unordered') &lt; 10 and 
+                          bpws:getVariableData('item2unordered') &lt; 10 and
+                          bpws:getVariableData('item3unordered') &lt; 10">
+          <sequence>
+            <receive name="aggregatorRequest" 
+                     partnerLink="aggregatorPartnerLink" 
+                     portType="test:AggregatorPortType"
+                     operation="submitAggregatorRequest" 
+                     variable="thisRequest">
+              <correlations>
+    		        <correlation set="customerId" initiate="no"/>
+    		      </correlations>
+            </receive>
+            
+            <assign>
+              <copy>
+                <from variable="thisRequest" part="LineItemsPart" query="/*[2]/*[1]" />
+                <to variable="tmp" />
+              </copy>
+              <copy>
+                <from expression="bpws:getVariableData('tmp') + bpws:getVariableData('item1unordered')" />
+                <to variable="item1unordered" />
+              </copy>
+              <copy>
+                <from variable="thisRequest" part="LineItemsPart" query="/*[2]/*[2]" />
+                <to variable="tmp" />
+              </copy>
+              <copy>
+                <from expression="bpws:getVariableData('tmp') + bpws:getVariableData('item2unordered')" />
+                <to variable="item2unordered" />
+              </copy>
+              <copy>
+                <from variable="thisRequest" part="LineItemsPart" query="/*[2]/*[3]" />
+                <to variable="tmp" />
+              </copy>
+              <copy>
+                <from expression="bpws:getVariableData('tmp') + bpws:getVariableData('item3unordered')" />
+                <to variable="item3unordered" />
+              </copy>
+            </assign>                    
+    
+          </sequence>
+        </while>     
+        
+        <assign>
+          <copy>
+            <from expression="substring-before(bpws:getVariableData('item1unordered'),'.')"/>
+            <to variable="retailOrder" part="PartsOrder" query="/PartsOrder/order:Item[1]/order:quantity" />
+          </copy>
+          <copy>
+            <from expression="substring-before(bpws:getVariableData('item2unordered'),'.')"/>
+            <to variable="retailOrder" part="PartsOrder" query="/PartsOrder/order:Item[2]/order:quantity" />
+          </copy>
+          <copy>
+            <from expression="substring-before(bpws:getVariableData('item3unordered'),'.')"/>
+            <to variable="retailOrder" part="PartsOrder" query="/PartsOrder/order:Item[3]/order:quantity" />
+          </copy>
+        </assign>        
+
+        <invoke name="invokeRetailOrder" 
+                partnerLink="retailerPartnerLink" 
+                inputVariable="retailOrder"
+                outputVariable="orderResponse" 
+                operation="submitOrder" 
+                portType="retail:RetailerPortType"/>
+    </sequence>
+</process>

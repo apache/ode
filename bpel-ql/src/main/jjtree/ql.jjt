@@ -1,0 +1,224 @@
+options {
+  MULTI=true;
+  NODE_DEFAULT_VOID=true;
+  STATIC=false;
+}
+
+PARSER_BEGIN(QLParser)
+
+package org.apache.ode.ql.jcc;
+
+import java.io.*;
+
+class QLParser {
+}
+
+PARSER_END(QLParser)
+
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+	< LESS: "<" >
+|
+	< GREATER: ">" >
+|
+	< LE: "<=" >
+|
+	< GE: ">=" >
+|
+	< IN: "in" >
+|
+	< LIKE: "like" >
+|
+	< AND: "and" >
+|
+	< OR: "or" >
+|
+	< EQUAL: "=" >
+|
+  < ORDER_BY: "order" (<WHITESPACE>)+ "by" (<WHITESPACE>)+ >
+|
+  < ORDER_TYPE: "asc" | "desc" >
+|  
+  < PARAMETER_CHAR: "?" >
+|  
+  < LIMIT: "limit" (<WHITESPACE>)+ >
+|
+  < NUMBER: (["0"-"9"])+ >
+|
+  < PROPERTY: ("$")("{"<NAMESPACE>"}")?(<QNAME_NAME>) >
+|
+  < #NAMESPACE: <LETTER>(<LETTER> | <DIGIT>)* >
+|  
+  < #QNAME_NAME: <LETTER>(<LETTER> | <DIGIT>)* >
+|  
+  < FIELD: <LETTER>(<LETTER> | <DIGIT>)* >
+|
+  < VALUE: "\"" (~["\""])* "\"" >
+|
+  < #LETTER: ["_","-",".","a"-"z","A"-"Z"] >
+|
+  < #SPEC_CHAR: ["*","&","?",":","%"] >
+|
+  < #DIGIT: ["0","1","2","3","4","5","6","7","8","9"] >
+|
+  < #WHITESPACE: [" ", "\t", "\n", "\r"] >
+
+}
+
+ASTStart start() #Start : {}
+{
+	
+  Query() 
+  { return jjtThis; }
+}
+
+void Query() : {}
+{
+	[LogicExpression()] [OrderByExpression()] [Limit()]<EOF>
+}
+void Limit() #Limit : 
+{
+	Token t;
+}
+{
+	(<LIMIT>)
+	(
+		t=<NUMBER> {
+			jjtn000.setNumber(t.image);
+		}
+	)
+}
+void LogicExpression() : {}
+{
+	ORExpression()
+}
+void OrderByExpression() #OrderBy : {}
+{
+	<ORDER_BY> OrderByField() ("," OrderByField())*
+}
+void OrderByField() #OrderByField : {}
+{
+	Field() (OrderType())?
+}
+void OrderType() #OrderType : {
+	Token t;
+}
+{
+	t=<ORDER_TYPE> {
+		jjtn000.setValue(t.image);
+	}
+}
+void ORExpression() : {}
+{
+	(
+		ANDExpression() (<OR> ANDExpression())*
+	)#Or(>1)
+}
+
+void ANDExpression() : {}
+{
+	(
+	  CompareExpression() (<AND> CompareExpression())*
+	)#And(>1)
+}
+
+void CompareExpression() : {}
+{
+	Identifier() 
+	(
+			Equal()
+		|
+			LessExpression()
+		|
+			GreaterExpression()
+		|
+			LEExpression()
+		|
+			GEExpression()
+		|
+			InExpression()
+		|
+			Like()
+	)
+|
+	"(" LogicExpression() ")"
+}
+
+void Equal() #Equal(2) : {}
+{
+	<EQUAL> Value()
+}
+void Like() #Like(2) : {}
+{
+	<LIKE> Value()
+}
+void LessExpression() #Less(2) : {}
+{
+  <LESS> Value()
+}
+void GreaterExpression() #Greater(2) : {}
+{
+  <GREATER> Value()
+}
+void LEExpression() #LE(2) : {}
+{
+  <LE> Value()
+}
+void GEExpression() #GE(2) : {}
+{
+  <GE> Value()
+}
+void InExpression() #In(2) : {}
+{
+	<IN> InValuesExpression()
+}
+void InValuesExpression() #InValues : {}
+{
+	"(" [(Value() ("," Value())*)] ")"
+}
+void Identifier() : {}
+{
+	Field() | Property()
+}
+
+void Field() #Field : 
+{
+  Token t;
+}
+{
+	t=<FIELD>
+	{
+		jjtn000.setName(t.image);
+	}
+	
+}
+void Property() #Property : 
+{
+  Token t;
+}
+{
+	t=<PROPERTY>{
+			jjtn000.setName(t.image);
+		} 
+}
+void Value() #Value : 
+{
+  Token t;
+}
+{
+	t=<VALUE>
+	{
+		jjtn000.setValue(t.image);
+	}
+|
+	<PARAMETER_CHAR>
+}

@@ -1,17 +1,7 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * File:      $RCSfile$
+ * Copyright: (C) 1999-2005 FiveSight Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
@@ -25,10 +15,9 @@ import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.evt.XmlAttributes;
 import org.apache.ode.utils.NSContext;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-
-import javax.xml.namespace.QName;
 
 class BpelCorrelationSetState extends BaseBpelState {
 
@@ -47,7 +36,14 @@ class BpelCorrelationSetState extends BaseBpelState {
       ArrayList<QName> al = new ArrayList<QName>();
       NSContext nsc = se.getNamespaceContext();
       for (;st.hasMoreTokens();) {
-        al.add(nsc.derefQName(st.nextToken()));
+        String token = st.nextToken();
+        if (token.startsWith("{")) {
+          String namespace = token.substring(1, token.indexOf("}"));
+          String localname = token.substring(token.indexOf("}") + 1, token.length());
+          al.add(new QName(namespace, localname));
+        } else {
+          al.add(nsc.derefQName(token));
+        }
       }
       _s.setProperties(al.toArray(new QName[] {}));
     }
@@ -78,4 +74,5 @@ class BpelCorrelationSetState extends BaseBpelState {
       return new BpelCorrelationSetState(se,pc);
     }
   }
+
 }
