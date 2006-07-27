@@ -7,9 +7,9 @@ package com.fs.jacob.vpu;
 
 import com.fs.jacob.*;
 import com.fs.jacob.soup.*;
-import com.fs.utils.ArrayUtils;
-import com.fs.utils.ObjectPrinter;
-import com.fs.utils.msg.MessageBundle;
+import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.msg.MessageBundle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

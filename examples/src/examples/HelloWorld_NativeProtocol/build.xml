@@ -7,17 +7,17 @@
     <javac srcdir="java"
       destdir="${build.dir}/classes"
       source="1.5"
-      classpathref="cpath.pxe" />
+      classpathref="cpath.ode" />
   </target>
 
   <target name="test" depends="compile" description="Invoke the native invoker." >
-    <echo message="pxe.url=${pxe.url}"/>
+    <echo message="ode.url=${ode.url}"/>
     <java fork="true" classname="HelloWorldNativeClient" >
       <classpath>
         <pathelement location="${build.dir}/classes" />
-        <path refid="cpath.pxe" />
+        <path refid="cpath.ode" />
       </classpath>
-      <jvmarg value="-Dpxe.url=${pxe.url}"/>
+      <jvmarg value="-Dode.url=${ode.url}"/>
     </java>
   </target>
 </project>

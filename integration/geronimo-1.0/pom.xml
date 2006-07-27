@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <project>
   <parent>
-    <artifactId>pxe-integration</artifactId>
-    <groupId>pxe</groupId>
+    <artifactId>ode-integration</artifactId>
+    <groupId>ode</groupId>
     <version>2.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>pxe</groupId>	
-  <artifactId>pxe-integration-geronimo-1.0</artifactId>
+  <groupId>ode</groupId>	
+  <artifactId>ode-integration-geronimo-1.0</artifactId>
   <version>2.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <build>
@@ -25,7 +25,7 @@
           <archive>
             <index>true</index>
             <manifestEntries>
-              <FiveSight-Product>FiveSight PXE</FiveSight-Product>
+              <FiveSight-Product>FiveSight ODE</FiveSight-Product>
               <FiveSight-SubComponent>HTTP Servlet Adapter</FiveSight-SubComponent>
               <FiveSight-Vendor>${vendor.name}</FiveSight-Vendor>
               <FiveSight-Copyright>${vendor.copyright}</FiveSight-Copyright>
@@ -38,8 +38,8 @@
   </build>  
   <dependencies>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-integration-common</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-integration-common</artifactId>
 	    <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -154,7 +154,7 @@
     </dependency>
 	</dependencies>
   <properties>
-    <pxe.rmi.domain>pxe</pxe.rmi.domain>
-    <pxe.rmi.port>2099</pxe.rmi.port>
+    <ode.rmi.domain>ode</ode.rmi.domain>
+    <ode.rmi.port>2099</ode.rmi.port>
   </properties>  
 </project>

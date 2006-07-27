@@ -6,7 +6,7 @@
 package com.fs.naming;
 
 import com.fs.naming.mem.InMemoryBindingMapImpl;
-import com.fs.utils.msg.MessageBundle;
+import org.apache.ode.utils.msg.MessageBundle;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;

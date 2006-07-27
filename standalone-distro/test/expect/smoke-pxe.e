@@ -5,10 +5,10 @@ proc abort { msg } {
   exit -1
 }
 log_user 0
-spawn -noecho pxe -v -console
-expect -re pxe.*\r\n?Copyright.*\r {
+spawn -noecho ode -v -console
+expect -re ode.*\r\n?Copyright.*\r {
   } timeout {
-    abort "PXE took too long to print the copyright header."
+    abort "ODE took too long to print the copyright header."
   }
 expect -timeout 100 -re ^\r { 
     exp_continue
@@ -17,14 +17,14 @@ expect -timeout 100 -re ^\r {
   } -re ^Warning.*XSLT.*\r {
     exp_continue
   } -re ^ERROR.*\r {
-    abort "pxe encountered an internal error: $expect_out(buffer)\n"
+    abort "ode encountered an internal error: $expect_out(buffer)\n"
   } eof {
-    abort "pxe exited suddenly (probably due to error).\n"
+    abort "ode exited suddenly (probably due to error).\n"
   } -re ^INFO\.*\ Startup\ completed\. {
-    send_user "SUCCESS: pxe server started up successfully.\n"
+    send_user "SUCCESS: ode server started up successfully.\n"
     exit 0
   } -re ^INFO.*\r {
     exp_continue    
   } timeout {
-    abort "pxe took too long to start up; aborting.\n"
+    abort "ode took too long to start up; aborting.\n"
   }

@@ -3,10 +3,10 @@
  *
  * $Log$
  * Revision 1.2  2005/09/12 13:47:10  holger
- * finally closing PXE-23
+ * finally closing ODE-23
  *
  * Revision 1.1.1.1  2005/05/20 18:15:38  prb
- * Initial import of PXE source code.
+ * Initial import of ODE source code.
  *
  * Revision 1.1  2004/04/27 18:49:44  jguinney
  * *** empty log message ***
@@ -183,8 +183,8 @@ public class XAManagedConnectionFactory implements ManagedConnectionFactory {
 //                    try {
 //                        name = (String)it.next();
 //                        value = props.getProperty(name);
-//                        com.fs.utils.beans.PropertyHelper ph = 
-//                          new com.fs.utils.beans.PropertyHelper(cls);
+//                        org.apache.ode.utils.beans.PropertyHelper ph = 
+//                          new org.apache.ode.utils.beans.PropertyHelper(cls);
 //                        ph.setProperty(xads, name, value);
 //                        /*Method meth = cls.getMethod("set"+Character.toUpperCase(name.charAt(0))+name.substring(1),
 //                                                    new Class[]{String.class});

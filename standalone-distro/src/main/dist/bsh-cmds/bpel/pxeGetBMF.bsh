@@ -1,17 +1,17 @@
-import com.fs.pxe.bpel.pmapi.*;
-import com.fs.pxe.ra.*;
-import com.fs.pxe.bpel.provider.*;
+import org.apache.ode.bpel.pmapi.*;
+import org.apache.ode.ra.*;
+import org.apache.ode.bpel.provider.*;
 
 
 /**
  * Get a connection to the BPEL provider's BPEL Management Interface.
  */
-getBpelManagementAPI(String pxeURL,String providerURI) {
+getBpelManagementAPI(String odeURL,String providerURI) {
    
-   PxeManagedConnectionFactory pmcf = new PxeManagedConnectionFactory();
-   pmcf.setURL(pxeURL);
-   PxeConnectionFactory cf = (PxeConnectionFactory)pmcf.createConnectionFactory();
-   PxeConnection conn = (PxeConnection)cf.getConnection();
+   OdeManagedConnectionFactory pmcf = new OdeManagedConnectionFactory();
+   pmcf.setURL(odeURL);
+   OdeConnectionFactory cf = (OdeConnectionFactory)pmcf.createConnectionFactory();
+   OdeConnection conn = (OdeConnection)cf.getConnection();
    return (BpelManagementFacade)conn.createServiceProviderSession(
          providerURI, BpelManagementFacade.class);
 }
@@ -21,11 +21,11 @@ getBpelManagementAPI(String pxeURL,String providerURI) {
  * the default connection parameters.
  */
 getBpelManagementAPI() {
-   return getBpelManagementAPI(System.getProperty("pxe.url"),  "uri:bpelProvider");
+   return getBpelManagementAPI(System.getProperty("ode.url"),  "uri:bpelProvider");
 }
 
 /** For backward compatibility. */
-pxeGetBMF() {
+odeGetBMF() {
   return getBpelManagementAPI();
 }
 

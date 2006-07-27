@@ -137,8 +137,8 @@
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
-	    <handler name="PXEAxisDispatcher"
-		     class="com.fs.pxe.axis2.hooks.PXEAxisDispatcher">
+	    <handler name="ODEAxisDispatcher"
+		     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
                 <order phase="Dispatch"/>
             </handler>
             <handler name="InstanceDispatcher"
@@ -150,7 +150,7 @@
         <!--   After Postdispatch phase module author or or service author can add any phase he want      -->
 	<phase name="ProcessHeader">
 		<handler name="SessionInHandler"
-			 class="com.fs.pxe.axis2.hooks.SessionInHandler">
+			 class="org.apache.ode.axis2.hooks.SessionInHandler">
 			<order phase="PostDispatch"/>
 		</handler>
 	</phase>
@@ -160,7 +160,7 @@
         <!--      user can add his own phases to this area  -->
 	<phase name="ProcessHeader">
 		<handler name="SessionOutHandler"
-			 class="com.fs.pxe.axis2.hooks.SessionOutHandler">
+			 class="org.apache.ode.axis2.hooks.SessionOutHandler">
 			<order phase="PreDispatch"/>
 		</handler>
 	</phase>

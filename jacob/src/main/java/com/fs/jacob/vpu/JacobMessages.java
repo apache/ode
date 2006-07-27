@@ -6,7 +6,7 @@
 
 package com.fs.jacob.vpu;
 
-import com.fs.utils.msg.MessageBundle;
+import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * Messages for the Jacob VPU.

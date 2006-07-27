@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <process name="DynPartnerMain"
-         targetNamespace="http://pxe/bpel/unit-test"
+         targetNamespace="http://ode/bpel/unit-test"
          xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
          xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-         xmlns:tns="http://pxe/bpel/unit-test"
+         xmlns:tns="http://ode/bpel/unit-test"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-         xmlns:test="http://pxe/bpel/unit-test.wsdl"
-         xmlns:resp="http://pxe/bpel/responder.wsdl">
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:resp="http://ode/bpel/responder.wsdl">
 
-  <import location="urn:/Main.wsdl" namespace="http://pxe/bpel/unit-test.wsdl"
+  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
   <partnerLinks>
@@ -69,7 +69,7 @@
     <assign>
       <copy>
         <from>
-          <literal>http://localhost:8080/pxe/soap/dynresponder</literal>
+          <literal>http://localhost:8080/ode/soap/dynresponder</literal>
         </from>
         <to partnerLink="responderPartnerLink"/>
       </copy>
@@ -77,7 +77,7 @@
         <from>
           <literal>
             <service-ref>
-              <soap:address location="http://localhost:8080/pxe/soap/dynresponder"/>
+              <soap:address location="http://localhost:8080/ode/soap/dynresponder"/>
             </service-ref>
           </literal>
         </from>

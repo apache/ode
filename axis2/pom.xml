@@ -1,43 +1,43 @@
 <?xml version="1.0"?>
 <project>
-  <groupId>pxe</groupId>
-  <artifactId>pxe-axis2</artifactId>
-  <name>PXE :: AXIS2 Integration Layer</name>
+  <groupId>ode</groupId>
+  <artifactId>ode-axis2</artifactId>
+  <name>ODE :: AXIS2 Integration Layer</name>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>pxe</groupId>
-    <artifactId>pxe</artifactId>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
     <version>2.0-SNAPSHOT</version>
   </parent>
   <version>2.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-dao-hibernate</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-dao-hibernate</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-bpel-runtime</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-runtime</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-bpel-scheduler-quartz</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-scheduler-quartz</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-bpel-dd</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-dd</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-minerva</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-minerva</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-naming</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-naming</artifactId>
     </dependency>
     <dependency>
-      <groupId>pxe</groupId>
-      <artifactId>pxe-bpel-api</artifactId>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-api</artifactId>
     </dependency>
 
     <dependency>

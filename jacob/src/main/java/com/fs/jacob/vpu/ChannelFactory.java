@@ -6,7 +6,7 @@
 package com.fs.jacob.vpu;
 
 import com.fs.jacob.Channel;
-import com.fs.utils.ArrayUtils;
+import org.apache.ode.utils.ArrayUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

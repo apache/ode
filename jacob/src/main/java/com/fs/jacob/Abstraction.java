@@ -6,7 +6,7 @@
 
 package com.fs.jacob;
 
-import com.fs.utils.ArrayUtils;
+import org.apache.ode.utils.ArrayUtils;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

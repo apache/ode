@@ -5,7 +5,7 @@ the following commands:
 ant responder
 ant main
 
-Deploy the two generated sar files using the 'pxe-deploy' command
+Deploy the two generated sar files using the 'ode-deploy' command
 and then run:
 
 ant test
