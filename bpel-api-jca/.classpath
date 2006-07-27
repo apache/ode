@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/geronimo/specs/geronimo-j2ee-connector_1.5_spec/1.0/geronimo-j2ee-connector_1.5_spec-1.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pxe-bpel-api"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
