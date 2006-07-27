@@ -47,7 +47,7 @@
                         </goals>
                         <configuration>
                             <buildNodeFiles>false</buildNodeFiles>
-                            <outputDirectory>${project.build.directory}/generated-sources/jjtree/com/fs/ode/ql/jcc</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/jjtree/org/apache/ode/ql/jcc</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.build.directory}/generated-sources/jjtree</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources/javacc/com/fs/ode/ql/jcc</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/javacc/org/apache/ode/ql/jcc</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
