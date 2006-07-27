@@ -2,7 +2,7 @@
 <project>
     <groupId>pxe</groupId>
     <artifactId>pxe-jca-rar</artifactId>
-    <name>PXE :: JCA Resource Adapter Archive (RAR)</name>
+    <name>PXE :: Universal JCA Resource Adapter Archive (RAR)</name>
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>pxe</groupId>

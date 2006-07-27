@@ -6,8 +6,29 @@
 
 package com.fs.pxe.bpel.compiler;
 
+import com.fs.pxe.bpel.capi.CompilationMessage;
 import com.fs.pxe.bpel.capi.CompilationMessageBundle;
 
 public class InvokeGeneratorMessages extends CompilationMessageBundle {
-  // TODO no messages yet.
+
+  /**
+   * Invoke doesn't define an output variable even though the operation {0}
+   * declares an output message.
+   */
+  public CompilationMessage errInvokeNoOutputMessageForOutputOp(String operation) {
+    return this.formatCompilationMessage(
+        "Invoke doesn't define an output variable even though the operation \"{0}\" "
+            + "declares an output message.", operation);
+  }
+
+  /**
+   * Invoke doesn't define an input variable even though the operation {0}
+   * declares an input message.
+   */
+  public CompilationMessage errInvokeNoInputMessageForInputOp(String operation) {
+    return this.formatCompilationMessage(
+        "Invoke doesn't define an output variable even though the operation \"{0}\" "
+            + "declares an output message.", operation);
+  }
+
 }

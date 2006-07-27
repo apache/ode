@@ -22,8 +22,7 @@ import com.fs.utils.DOMUtils;
  * components such as servicemix-http provide. These messages are not normalized
  * and hence do not conform to the JBI specification. They are in fact whatever
  * the SOAP body element happens to be.  This mapper will make a reasonable
- * attempt to handle these messages, which effectively means that doc-lit
- * RPC SOAP messages will work. 
+ * attempt to handle these messages, which means don't count on it working.
  *
  */
 public class ServiceMixMapper extends BaseXmlMapper implements Mapper {

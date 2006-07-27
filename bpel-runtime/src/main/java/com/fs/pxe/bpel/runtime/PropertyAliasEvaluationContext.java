@@ -5,16 +5,15 @@
  */
 package com.fs.pxe.bpel.runtime;
 
-import javax.xml.namespace.QName;
-
 import com.fs.pxe.bpel.common.FaultException;
 import com.fs.pxe.bpel.explang.EvaluationContext;
 import com.fs.pxe.bpel.o.*;
 import com.fs.pxe.bpel.o.OMessageVarType.Part;
 import com.fs.utils.DOMUtils;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
 
 /**
  * Expression language evaluation context used for evaluating property aliases.
@@ -59,6 +58,9 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
 	    throw new InvalidProcessException("Query language not available in this context.");
   }
 
+  public Long getProcessId() {
+    throw new InvalidProcessException("Process execution information not available in this context.");
+  }
 
   public Node getPartData(Element message, Part part) throws FaultException {
  	// TODO Auto-generated method stub

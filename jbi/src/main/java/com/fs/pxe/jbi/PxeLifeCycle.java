@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import org.hibernate.dialect.DialectFactory;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
 
+import com.fs.pxe.bpel.connector.BpelServerConnector;
 import com.fs.pxe.bpel.engine.BpelServerImpl;
 import com.fs.pxe.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import com.fs.pxe.daohib.DataSourceConnectionProvider;
@@ -62,6 +64,8 @@ public class PxeLifeCycle implements ComponentLifeCycle {
   private boolean _needDerbyShutdown;
 
   private String _derbyUrl;
+
+  private BpelServerConnector _connector;
 
   ServiceUnitManager getSUManager() {
     return _suManager;
@@ -103,6 +107,9 @@ public class PxeLifeCycle implements ComponentLifeCycle {
       __log.debug("Starting BPEL server.");
       initBpelServer();
 
+      __log.debug("Starting JCA connector.");
+      initConnector();
+      
       _suManager = new PxeSUManager(_pxe);
       _initSuccess = true;
       __log.info(__msgs.msgPxeInitialized());
@@ -272,7 +279,9 @@ public class PxeLifeCycle implements ComponentLifeCycle {
       try {
         fis = new FileInputStream(hibernatePropFile);
         properties.load(new BufferedInputStream(fis));
-      } catch (IOException e) {
+      } catch (IOException e) {    // TODO Auto-generated method stub
+        
+
         String errmsg = __msgs
             .msgPxeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
         __log.error(errmsg, e);
@@ -288,6 +297,22 @@ public class PxeLifeCycle implements ComponentLifeCycle {
     _pxe._daocf = new BpelDAOConnectionFactoryImpl(sm);
   }
 
+  private void initConnector() throws JBIException {
+    int port = _pxe._config.getConnectorPort();
+    if (port == 0) {
+      __log.info("Skipping connector initialization.");
+    } else {
+      _connector = new BpelServerConnector();
+      _connector.setPort(_pxe._config.getConnectorPort());
+      _connector.setId(_pxe._config.getConnectorName());
+      try {
+        _connector.start();
+      } catch (Exception e) {
+        throw new JBIException("Failed to initialize JCA connector.",e);
+      }
+    }
+  }
+  
   public synchronized void start() throws JBIException {
     if (_started)
       return;
@@ -371,6 +396,16 @@ public class PxeLifeCycle implements ComponentLifeCycle {
   public void shutDown() throws JBIException {
     ClassLoader old = Thread.currentThread().getContextClassLoader();
     Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+    
+    if (_connector != null) {
+      try {
+        _connector.shutdown();
+      } catch (Exception e) {
+        __log.error("Error shutting down JCA server.",e);
+      }
+      _connector = null;
+    }
+    
     try {
 
       try {

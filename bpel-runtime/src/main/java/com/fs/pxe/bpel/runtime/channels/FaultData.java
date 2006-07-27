@@ -5,16 +5,15 @@
  */
 package com.fs.pxe.bpel.runtime.channels;
 
-import java.io.Serializable;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Element;
-
+import com.fs.pxe.bpel.o.OBase;
 import com.fs.pxe.bpel.o.OElementVarType;
 import com.fs.pxe.bpel.o.OMessageVarType;
 import com.fs.pxe.bpel.o.OVarType;
 import com.fs.utils.SerializableElement;
+import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
+import java.io.Serializable;
 
 
 /**
@@ -31,18 +30,18 @@ public class FaultData implements Serializable {
 
   private SerializableElement _faultMsg;
 
-  private int _lineNo;
+  private OBase _location;
 
 	private final String _explanation;
 
-  public FaultData(QName fault, int lineNo, String explanation) {
+  public FaultData(QName fault, OBase location, String explanation) {
     _faultName = fault;
-    _lineNo = lineNo;
+    _location = location;
     _explanation = explanation;
   }
 
-  public FaultData(QName fault, Element faultMsg, OVarType faultVarType, int lineNo) {
-    this(fault, lineNo, null);
+  public FaultData(QName fault, Element faultMsg, OVarType faultVarType, OBase location) {
+    this(fault, location, null);
     assert faultMsg != null;
     assert faultVarType != null;
     assert faultVarType instanceof OMessageVarType || faultVarType instanceof OElementVarType;
@@ -53,8 +52,7 @@ public class FaultData implements Serializable {
   /**
    * Return potential message associated with fault.
    * Null if no fault data.
-   *
-   * @return
+   * @return fault message Element
    */
   public Element getFaultMessage() {
     return (_faultMsg == null)
@@ -64,7 +62,7 @@ public class FaultData implements Serializable {
   
   /**
    * The message type of the fault message data.  Null if no fault data.
-   * @return
+   * @return fault type
    */
   public OVarType getFaultType(){
   	return _faultVarType;
@@ -80,13 +78,31 @@ public class FaultData implements Serializable {
   }
   
   public int getFaultLineNo(){
-  	return _lineNo;
+  	return findLineNo(_location);
   }
   
   public String getExplanation() {
   	return _explanation;
   }
-  
+
+  public int getActivityId() {
+    return _location.getId();
+  }
+
+  /**
+   * Find the best line number for the given location.
+   * @param location
+   * @return line number
+   */
+  protected int findLineNo(OBase location) {
+  	if (location == null)
+  		return -1;
+  	if (location.debugInfo == null)
+  		return -1;
+  	return location.debugInfo.startLine;
+  }
+
+
   /**
    * @see java.lang.Object#toString()
    */
@@ -102,7 +118,7 @@ public class FaultData implements Serializable {
     }
     
     sb.append("] @");
-    sb.append(_lineNo);
+    sb.append(findLineNo(_location));
     return sb.toString();
   }
 

@@ -6,7 +6,6 @@
 package com.fs.pxe.daohib;
 
 import com.fs.pxe.daohib.bpel.hobj.*;
-import com.fs.pxe.daohib.sfwk.hobj.*;
 import com.fs.pxe.daohib.hobj.HLargeData;
 import com.fs.utils.uuid.UUID;
 
@@ -91,12 +90,8 @@ public class SessionManager {
             .addClass(HCorrelationSet.class)
             .addClass(HXmlData.class)
             .addClass(HVariableProperty.class)
-            .addClass(HDomain.class)
-            .addClass(HSystem.class)
-            .addClass(HSfwkMessageExchange.class)
-            .addClass(HSfwkMessage.class)
-            .addClass(HMessagePart.class)
             .addClass(HBpelEvent.class)
+	    .addClass(HFaultData.class)
             .addClass(HLargeData.class);
   }
 

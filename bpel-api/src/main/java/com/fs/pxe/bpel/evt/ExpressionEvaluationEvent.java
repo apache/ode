@@ -17,4 +17,7 @@ public class ExpressionEvaluationEvent extends ScopeEvent {
     _expression = expression;
   }
 
+  public TYPE getType() {
+    return TYPE.dataHandling;
+  }
 }

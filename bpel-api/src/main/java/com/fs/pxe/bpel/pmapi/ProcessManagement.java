@@ -44,14 +44,14 @@ public interface ProcessManagement {
    * @param custom used to customize the quantity of information returned
    * @return {@link ProcessInfoDocument}
    */
-  ProcessInfoDocument getProcessInfo(String pid, ProcessInfoCustomizer custom) throws ManagementException;
+  ProcessInfoDocument getProcessInfo(QName pid, ProcessInfoCustomizer custom) throws ManagementException;
 
   /**
    * Get the process info for a process (includingthe instance summary). 
    * @param pid name of the process
    * @return {@link ProcessInfoDocument} with all details.
    */
-  ProcessInfoDocument getProcessInfo(String pid)
+  ProcessInfoDocument getProcessInfo(QName pid)
           throws ManagementException;
 
   /**
@@ -61,8 +61,8 @@ public interface ProcessManagement {
    * @param value property value
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
-  ProcessInfoDocument setProcessProperty(String pid, QName propertyName, Node value)
-          throws ManagementException;
+  ProcessInfoDocument setProcessProperty(QName pid, QName propertyName, Node value)
+          throws ManagementException; 
 
   /**
    * Set a process property as a simple type.
@@ -71,7 +71,7 @@ public interface ProcessManagement {
    * @param value property value
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
-  ProcessInfoDocument setProcessProperty(String pid, QName propertyName, String value)
+  ProcessInfoDocument setProcessProperty(QName pid, QName propertyName, String value)
           throws ManagementException;
 
   /**
@@ -84,7 +84,7 @@ public interface ProcessManagement {
    * @return {@link ProcessInfoDocument} reflecting the modification
    * TODO: avoid using Element arguments
    */
-  ProcessInfoDocument setEndpointReference(String pid, String partnerLink, String partnerRole, Element endpointRef)
+  ProcessInfoDocument setEndpointReference(QName pid, String partnerLink, String role, Element endpointRef)
           throws ManagementException;
 
   
@@ -93,7 +93,7 @@ public interface ProcessManagement {
    * @param pid identifier for the process to activate
    * @return {@link ProcessInfoDocument} reflecting the modification
     */
-  ProcessInfoDocument activate(String pid)
+  ProcessInfoDocument activate(QName pid)
           throws ManagementException;
 
   /**
@@ -102,7 +102,7 @@ public interface ProcessManagement {
    * @param retired TODO
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
-  ProcessInfoDocument setRetired(String pid, boolean retired)
+  ProcessInfoDocument setRetired(QName pid, boolean retired)
           throws ManagementException;
 
 }

@@ -34,23 +34,7 @@
         </dependency>
         <dependency>
             <groupId>pxe</groupId>
-            <artifactId>pxe-bpel-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
             <artifactId>pxe-jca-ra</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-standalone-kernel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-standalone-modules</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-sfwk-core</artifactId>
         </dependency>
         <dependency>
             <groupId>pxe</groupId>
