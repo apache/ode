@@ -1,3 +1,3 @@
-<_pxe:message xmlns:_pxe="http://www.fivesight.com/pxe/message">
+<_ode:message xmlns:_ode="http://www.fivesight.com/ode/message">
     <TestPart>blah</TestPart>
-</_pxe:message>
+</_ode:message>

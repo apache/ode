@@ -5,7 +5,7 @@
  */
 package common;
 
-import com.fs.utils.SchemaBucket;
+import org.apache.ode.utils.SchemaBucket;
 
 import java.net.URL;
 

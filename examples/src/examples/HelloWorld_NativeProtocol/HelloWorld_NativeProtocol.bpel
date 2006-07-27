@@ -4,7 +4,7 @@
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:tns="http://jlo/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://pxe/bpel/unit-test.wsdl">
+    xmlns:test="http://ode/bpel/unit-test.wsdl">
    <partnerLinks>
       <partnerLink name="helloPartnerLink"
          partnerLinkType="test:HelloPartnerLinkType"

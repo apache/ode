@@ -3,16 +3,16 @@
 
 <beans>
   
-  <bean id="process1" class="com.fs.pxe.daohib.bpel.hobj.HProcess">
+  <bean id="process1" class="org.apache.ode.daohib.bpel.hobj.HProcess">
     <property name="processId"><value>1</value></property>
     <property name="processName"><value>Process1</value></property>
-    <property name="processNamespace"><value>pxe.test</value></property>
+    <property name="processNamespace"><value>ode.test</value></property>
   </bean>
   
-  <bean id="process2" class="com.fs.pxe.daohib.bpel.hobj.HProcess">
+  <bean id="process2" class="org.apache.ode.daohib.bpel.hobj.HProcess">
     <property name="processId"><value>2</value></property>
     <property name="processName"><value>Process2</value></property>
-    <property name="processNamespace"><value>pxe.test</value></property>
+    <property name="processNamespace"><value>ode.test</value></property>
   </bean>
 
 	<!--
@@ -28,17 +28,17 @@
 		
 	-->
 	
-  <bean id="instance1" class="com.fs.pxe.daohib.bpel.hobj.HProcessInstance">
+  <bean id="instance1" class="org.apache.ode.daohib.bpel.hobj.HProcessInstance">
     <property name="process"><ref local="process1"/></property>
     <property name="state"><value>20</value></property>
   </bean>
   
-  <bean id="instance2" class="com.fs.pxe.daohib.bpel.hobj.HProcessInstance">
+  <bean id="instance2" class="org.apache.ode.daohib.bpel.hobj.HProcessInstance">
     <property name="process"><ref local="process1"/></property>
     <property name="state"><value>60</value></property>
   </bean>
   
-  <bean id="testCase1" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+  <bean id="testCase1" class="org.apache.ode.daohib.ql.InstanceSelectionTest$TestCase">
     <property name="processes">
     	<list>
 	    	<ref local="process1"/>
@@ -55,7 +55,7 @@
     <property name="resultSetSize"><value>0</value></property>
   </bean>
   
-  <bean id="testCase2" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+  <bean id="testCase2" class="org.apache.ode.daohib.ql.InstanceSelectionTest$TestCase">
     <property name="processes">
     	<list>
 	    	<ref local="process1"/>
@@ -72,7 +72,7 @@
     <property name="resultSetSize"><value>1</value></property>
   </bean>
   
-  <bean id="testCase3" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCase">
+  <bean id="testCase3" class="org.apache.ode.daohib.ql.InstanceSelectionTest$TestCase">
     <property name="processes">
     	<list>
 	    	<ref local="process1"/>
@@ -89,7 +89,7 @@
     <property name="resultSetSize"><value>2</value></property>
   </bean>
   
-  <bean id="testCases" class="com.fs.pxe.daohib.ql.InstanceSelectionTest$TestCases">
+  <bean id="testCases" class="org.apache.ode.daohib.ql.InstanceSelectionTest$TestCases">
     <property name="testCases">
 			<list>
 	      <ref local="testCase1"/>

@@ -1,8 +1,8 @@
 <xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
-           xmlns:bpeldd="http://pxe.fivesight.com/schemas/2006/02/14/bpeldd">
+           xmlns:bpeldd="http://ode.fivesight.com/schemas/2006/02/14/bpeldd">
 
-  <xb:namespace uri="http://pxe.fivesight.com/schemas/2006/02/14/bpeldd">
-    <xb:package>com.fs.pxe.bpel.dd</xb:package>
+  <xb:namespace uri="http://ode.fivesight.com/schemas/2006/02/14/bpeldd">
+    <xb:package>org.apache.ode.bpel.dd</xb:package>
   </xb:namespace> 
   
   <xb:namespace uri="##any">

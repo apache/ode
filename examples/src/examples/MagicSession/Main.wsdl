@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <wsdl:definitions
-    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:tns="http://ode/bpel/unit-test.wsdl"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -73,10 +73,10 @@
     <wsdl:operation name="execute">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
       <wsdl:output>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
@@ -86,19 +86,19 @@
     <wsdl:operation name="callback">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="doubleCallback">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="tripleCallback">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
   </wsdl:binding>
@@ -108,35 +108,35 @@
     <wsdl:operation name="initiate">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="doubleCall">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="eprPassing">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
     </wsdl:operation>
   </wsdl:binding>
 
   <wsdl:service name="MSMainService">
     <wsdl:port name="MSMainInitiatePort" binding="tns:MSMainInitiateBinding">
-      <soap:address location="http://localhost:8080/pxe/soap/msmainInitiate"/>
+      <soap:address location="http://localhost:8080/ode/soap/msmainInitiate"/>
     </wsdl:port>
     <wsdl:port name="MSMainPort" binding="tns:MSMainBinding">
-      <soap:address location="http://localhost:8080/pxe/soap/msmain"/>
+      <soap:address location="http://localhost:8080/ode/soap/msmain"/>
     </wsdl:port>
   </wsdl:service>
 
   <wsdl:service name="MSResponderService">
     <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
-      <soap:address location="http://localhost:8080/pxe/soap/msresponder"/>
+      <soap:address location="http://localhost:8080/ode/soap/msresponder"/>
     </wsdl:port>
   </wsdl:service>
 

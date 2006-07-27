@@ -5,9 +5,9 @@
 
       <!-- The jndi name of the DataSource, it is prefixed with java:/ -->
       <!-- Datasources are not available outside the virtual machine -->
-      <jndi-name>pxeDS</jndi-name>
+      <jndi-name>odeDS</jndi-name>
 
-      <connection-url>jdbc:hsqldb:${jboss.server.data.dir}${/}hypersonic${/}pxeDB</connection-url>
+      <connection-url>jdbc:hsqldb:${jboss.server.data.dir}${/}hypersonic${/}odeDB</connection-url>
 
       <!-- The driver class -->
       <driver-class>org.hsqldb.jdbcDriver</driver-class>
@@ -42,13 +42,13 @@
       </metadata-->
 
       <!-- This mbean can be used when using in process persistent hypersonic -->
-      <depends>jboss:service=Hypersonic,database=pxeDb</depends>
+      <depends>jboss:service=Hypersonic,database=odeDb</depends>
    </local-tx-datasource>
 
    <!-- This mbean can be used when using in process persistent db -->
    <mbean code="org.jboss.jdbc.HypersonicDatabase" 
-     name="jboss:service=Hypersonic,database=pxeDb">
-     <attribute name="Database">pxeDb</attribute>
+     name="jboss:service=Hypersonic,database=odeDb">
+     <attribute name="Database">odeDb</attribute>
      <attribute name="InProcessMode">true</attribute>
    </mbean>
 </datasources>

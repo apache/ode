@@ -65,7 +65,7 @@
              classpathref="maven.dependency.classpath"  />
 
     <mkdir dir="${target.dir}" />
-    <schemaexport properties="${src.sql.dir}/pxe.derby.properties" 
+    <schemaexport properties="${src.sql.dir}/ode.derby.properties" 
                   quiet="yes" 
                   text="yes" 
                   delimiter=";" 

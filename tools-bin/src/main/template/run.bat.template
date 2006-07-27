@@ -10,18 +10,18 @@ if not "%OS%"=="Windows_NT" goto wrongOS
 set command=%0
 set progname=%~n0
 
-set PXE_HOME=%~dp0..
-set PXE_BIN=%~dp0..\bin
-set PXE_LIB=%~dp0..\lib
-set PXE_ETC=%~dp0..\etc
+set ODE_HOME=%~dp0..
+set ODE_BIN=%~dp0..\bin
+set ODE_LIB=%~dp0..\lib
+set ODE_ETC=%~dp0..\etc
 
 if "%JAVA_HOME%"=="" goto noJavaHome
 if not exist "%JAVA_HOME%"\bin\java.exe goto noJava
 
 set JAVACMD="%JAVA_HOME%\bin\java.exe"
-set LOCALCLASSPATH=%PXE_CLASSPATH%
+set LOCALCLASSPATH=%ODE_CLASSPATH%
 
-%JAVACMD% %PXE_JAVAOPTS% -Djava.system.class.loader=fivesight.bootstrap.BootLoader "-Dfivesight.bootstrap.BootLoader.basedir=%PXE_HOME%" "-Dfivesight.bootstrap.BootLoader.cfg=%PXE_ETC%\%progname%.cfg" "-Dcom.fs.progname=%progname%" -cp "%PXE_LIB%\pxe-bootstrap.jar" com.fs.utils.cli.Main "%PXE_ETC%\%progname%.cfg" %* 
+%JAVACMD% %ODE_JAVAOPTS% -Djava.system.class.loader=fivesight.bootstrap.BootLoader "-Dfivesight.bootstrap.BootLoader.basedir=%ODE_HOME%" "-Dfivesight.bootstrap.BootLoader.cfg=%ODE_ETC%\%progname%.cfg" "-Dcom.fs.progname=%progname%" -cp "%ODE_LIB%\ode-bootstrap.jar" org.apache.ode.utils.cli.Main "%ODE_ETC%\%progname%.cfg" %* 
 goto end
 
 
@@ -31,7 +31,7 @@ goto end
 
 
 :wrongOS
-echo ERROR: PXE requires WindowsNT/XP. Aborting.
+echo ERROR: ODE requires WindowsNT/XP. Aborting.
 goto end
 
 :noJavaHome

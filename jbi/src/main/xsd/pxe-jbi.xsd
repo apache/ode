@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="http://pxe.intalio.org/schemas/2006/04/01/pxe-jbi"
-           xmlns:dd="http://pxe.intalio.org/schemas/2006/04/01/pxe-jbi"
+           targetNamespace="http://ode.intalio.org/schemas/2006/04/01/ode-jbi"
+           xmlns:dd="http://ode.intalio.org/schemas/2006/04/01/ode-jbi"
            elementFormDefault="qualified">
 
 

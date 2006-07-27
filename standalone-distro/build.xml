@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<project name="PXE" default="stage">
+<project name="ODE" default="stage">
 
   <import file="build-jdoc.xml" />
 
@@ -25,7 +25,7 @@
 
   <target name="docs" depends="apidocs, schemadocs" unless="skip.docs" />
 
-  <target name="apidocs" depends="javadoc-pxe-public" 
+  <target name="apidocs" depends="javadoc-ode-public" 
 		unless="skip.docs" 
 		description="generate API documentation (Javadoc) and place in the staging area." />
 
@@ -55,12 +55,12 @@
     <mkdir dir="${stage.etc}/deploy" />
     <copy todir="${stage.etc}">
       <filterset>
-        <filter token="PXE_HTTP_PORT" value="${pxe.default.http.port}"/>
-        <filter token="PXE_RMI_PORT" value="${pxe.default.rmi.port}"/>
-        <filter token="PXE_JMX_PORT" value="${pxe.default.jmx.port}"/>
-        <filter token="PXE_JMX_USERNAME" value="${pxe.default.jmx.username}"/>
-        <filter token="PXE_JMX_PASSWORD" value="${pxe.default.jmx.password}"/>
-	<filter token="PXE_DOMAIN" value="${pxe.default.domain}"/>
+        <filter token="ODE_HTTP_PORT" value="${ode.default.http.port}"/>
+        <filter token="ODE_RMI_PORT" value="${ode.default.rmi.port}"/>
+        <filter token="ODE_JMX_PORT" value="${ode.default.jmx.port}"/>
+        <filter token="ODE_JMX_USERNAME" value="${ode.default.jmx.username}"/>
+        <filter token="ODE_JMX_PASSWORD" value="${ode.default.jmx.password}"/>
+	<filter token="ODE_DOMAIN" value="${ode.default.domain}"/>
       </filterset>
       <fileset dir="${src}/etc" includes="**/*" />
     </copy>
@@ -92,7 +92,7 @@
     <!-- Copy API documentation -->
     <mkdir dir="${stage.docs}/apidocs" />
     <copy failonerror="false" todir="${stage.docs}/apidocs">
-      <fileset dir="${build.dir.javadoc}/pxe-api" includes="**/*" />
+      <fileset dir="${build.dir.javadoc}/ode-api" includes="**/*" />
     </copy>
 
     <mkdir dir="${stage.docs}/schemadocs" />
@@ -111,12 +111,12 @@
   <!-- Make all the UNIX/Windows executables. -->
   <target name="_stage_executables">
     <description>Build the various commandline executables and place them in the staging area.</description>
-    <!-- Copy the pxe and pxe.bat into the output directory. -->
+    <!-- Copy the ode and ode.bat into the output directory. -->
     <copy todir="${stage.bin}" overwrite="true">
       <fileset dir="${src.bin}">
-        <include name="pxe" />
-        <include name="pxe.bat" />
-        <include name="pxe.cfg" />
+        <include name="ode" />
+        <include name="ode.bat" />
+        <include name="ode.cfg" />
       </fileset>
     </copy>
     <chmod perm="755" dir="${stage.bin}" includes="*" excludes="*.bat" />

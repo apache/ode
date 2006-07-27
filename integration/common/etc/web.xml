@@ -6,22 +6,22 @@
 	
 <web-app>
 
-  <display-name>PXE</display-name>
+  <display-name>ODE</display-name>
 
   <servlet>
-    <servlet-name>PXEInitServlet</servlet-name>
-    <servlet-class>com.fs.pxe.server.PXEInitServlet</servlet-class>
+    <servlet-name>ODEInitServlet</servlet-name>
+    <servlet-class>org.apache.ode.server.ODEInitServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   
-  <display-name>Intalio PXE SOAP Service Provider (HTTP Adapter)</display-name>
+  <display-name>Intalio ODE SOAP Service Provider (HTTP Adapter)</display-name>
   <servlet>
     <servlet-name>SoapHttpAdapter</servlet-name>
-    <display-name>Intalio PXE HTTP-SOAP Servlet</display-name>
-    <servlet-class>com.fs.pxe.httpsoap.HttpSoapServlet</servlet-class>
+    <display-name>Intalio ODE HTTP-SOAP Servlet</display-name>
+    <servlet-class>org.apache.ode.httpsoap.HttpSoapServlet</servlet-class>
     <init-param>
        <param-name>ConnectionProperties</param-name>
-       <param-value>URL=rmi://localhost:${pxe.rmi.port}/${pxe.rmi.domain}</param-value>
+       <param-value>URL=rmi://localhost:${ode.rmi.port}/${ode.rmi.domain}</param-value>
     </init-param>
     <init-param>
        <param-name>ServiceProviderURI</param-name>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <wsdl:definitions 
-    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:tns="http://ode/bpel/unit-test.wsdl"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -27,19 +27,19 @@
             <soap:operation soapAction="" style="rpc"/>
             <wsdl:input>
                 <soap:body
-                    namespace="http://pxe/bpel/unit-test.wsdl"
+                    namespace="http://ode/bpel/unit-test.wsdl"
                     use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body
-                    namespace="http://pxe/bpel/unit-test.wsdl" 
+                    namespace="http://ode/bpel/unit-test.wsdl" 
                     use="literal"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="HelloService">
 		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
-     		<soap:address location="http://localhost:8080/pxe/processes/helloWorld"/>
+     		<soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
 		</wsdl:port>
     </wsdl:service>
     

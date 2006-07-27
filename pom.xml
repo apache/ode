@@ -1,34 +1,34 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>pxe</groupId>
-    <artifactId>pxe</artifactId>
-    <name>PXE</name>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
+    <name>ODE</name>
 
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <version>2.0-SNAPSHOT</version>
-  <url>http://pxe.fivesight.com</url>
+  <url>http://ode.fivesight.com</url>
   <issueManagement>
     <system>jira</system>
-    <url>http://pxe.fivesight.com/jira/</url>
+    <url>http://ode.fivesight.com/jira/</url>
   </issueManagement>
   <licenses>
     <license>
       <name> Common Public License 1.0</name>
-      <url>http://pxe.fivesight.com/confluence/display/PXE/Common+Public+License+1.0</url>
+      <url>http://ode.fivesight.com/confluence/display/ODE/Common+Public+License+1.0</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
     <scm>
-        <connection>scm:svn:svn://svn.intalio.org/pxe</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.intalio.org/usr/local/svn/repos/pxe/trunk/pxe</developerConnection>
-        <url>http://svn.intalio.org/viewrep/PXE-svn</url>
+        <connection>scm:svn:svn://svn.intalio.org/ode</connection>
+        <developerConnection>scm:svn:svn+ssh://svn.intalio.org/usr/local/svn/repos/ode/trunk/ode</developerConnection>
+        <url>http://svn.intalio.org/viewrep/ODE-svn</url>
     </scm>
 
     <organization>
         <name>Intalio</name>
-        <url>http://pxe.intalio.org</url>
+        <url>http://ode.intalio.org</url>
     </organization>
 
 
@@ -40,15 +40,15 @@
         <vendor.copyright>(C)1999-2006 Intalio Inc - ALL RIGHTS RESERVED</vendor.copyright>
 
     <!--
-        Default PXE properties, these properties may be referenced in resources and the
+        Default ODE properties, these properties may be referenced in resources and the
 	like. -->
 
-        <pxe.default.http.port>8080</pxe.default.http.port>
-        <pxe.default.rmi.port>2099</pxe.default.rmi.port>
-        <pxe.default.jmx.port>8686</pxe.default.jmx.port>
-        <pxe.default.jmx.username>admin</pxe.default.jmx.username>
-        <pxe.default.jmx.password>admin</pxe.default.jmx.password>
-        <pxe.default.domain>MyDomain</pxe.default.domain>
+        <ode.default.http.port>8080</ode.default.http.port>
+        <ode.default.rmi.port>2099</ode.default.rmi.port>
+        <ode.default.jmx.port>8686</ode.default.jmx.port>
+        <ode.default.jmx.username>admin</ode.default.jmx.username>
+        <ode.default.jmx.password>admin</ode.default.jmx.password>
+        <ode.default.domain>MyDomain</ode.default.domain>
 
     <!--
 	|
@@ -96,7 +96,7 @@
 
 
   <!--|
-      | List of PXE modules to build
+      | List of ODE modules to build
       |
   -->
     <modules>
@@ -217,8 +217,8 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <remoteRepositoryId>pxe</remoteRepositoryId>
-                        <remoteRepositoryUrl>scpexe://pxe.intalio.org/var/www/public/maven1</remoteRepositoryUrl>
+                        <remoteRepositoryId>ode</remoteRepositoryId>
+                        <remoteRepositoryUrl>scpexe://ode.intalio.org/var/www/public/maven1</remoteRepositoryUrl>
                     </configuration>
                 </plugin>
             </plugins>
@@ -234,9 +234,9 @@
     -->
     <repositories>
         <repository>
-            <id>pxe</id>
-            <name>PXE Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
+            <id>ode</id>
+            <name>ODE Maven2 repository</name>
+            <url>http://ode.intalio.org/public/maven2</url>
         </repository>
         <repository>
             <id>central</id>
@@ -269,9 +269,9 @@
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>pxe</id>
-            <name>PXE Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
+            <id>ode</id>
+            <name>ODE Maven2 repository</name>
+            <url>http://ode.intalio.org/public/maven2</url>
         </pluginRepository>
         <!--pluginRepository>
             <id>codehaus</id>
@@ -292,14 +292,14 @@
     -->
     <distributionManagement>
         <repository>
-            <id>pxe-maven2</id>
-            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+            <id>ode-maven2</id>
+            <url>scpexe://ode.intalio.org/var/www/public/maven2</url>
         </repository>
 
         <snapshotRepository>
-            <id>pxe-maven2-snapshot</id>
-            <name>PXE Development Repository</name>
-            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+            <id>ode-maven2-snapshot</id>
+            <name>ODE Development Repository</name>
+            <url>scpexe://ode.intalio.org/var/www/public/maven2</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -307,168 +307,168 @@
         <dependencies>
 	
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-bom</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-bom</artifactId>
                 <version>${project.version}</version>
             </dependency>
 	
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bootstrap</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bootstrap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-runtime</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-ql</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-ql</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-schemas</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-schemas</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-api</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-api-jca</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-api-jca</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-compiler</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-dd</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-dd</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-el-xpath10</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-el-xpath10</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-el-xpath20</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-el-xpath20</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-obj</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-obj</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-parser</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-parser</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-scripts</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-scripts</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-connector</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-dao-hibernate</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-dao-hibernate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-dao-hibernate-db-derby</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-dao-hibernate-db-derby</artifactId>
                 <version>${project.version}</version>
                 <type>tar</type>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-dao-memory</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-dao-memory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jacob</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jacob</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jbi</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jbi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jbi-install</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jbi-install</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jca-ra</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jca-ra</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jca-server</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jca-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-jca-rar</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-jca-rar</artifactId>
                 <version>${project.version}</version>
                 <type>rar</type>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-minerva</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-minerva</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-naming</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-naming</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-tools</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-soap</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-soap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-bpel-scheduler-quartz</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-scheduler-quartz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-utils</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-tools-bin</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-tools-bin</artifactId>
                 <type>tar</type>
                 <version>${project.version}</version>
                 <classifier>tar</classifier>
             </dependency>
             <dependency>
-                <groupId>pxe</groupId>
-                <artifactId>pxe-examples</artifactId>
+                <groupId>ode</groupId>
+                <artifactId>ode-examples</artifactId>
                 <type>tar</type>
                 <version>${project.version}</version>
                 <classifier>tar</classifier>

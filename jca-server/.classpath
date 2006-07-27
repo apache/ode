@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/pxe-jca-ra"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/pxe-utils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ode-jca-ra"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ode-utils"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

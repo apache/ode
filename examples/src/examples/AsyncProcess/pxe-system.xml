@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <system-descriptor name="AsyncProcess"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.fivesight.com/pxe/system-descriptor/ http://www.fivesight.com/pxe/system-descriptor/"
+  xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
   wsdlUri="urn:/AsyncProcess.wsdl"
-  xmlns="http://www.fivesight.com/pxe/system-descriptor/"
+  xmlns="http://www.fivesight.com/ode/system-descriptor/"
   xmlns:proc="uri:com.bptest.process" 
   xmlns:resp="uri:com.bptest.responder">
   <channels>

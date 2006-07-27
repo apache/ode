@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <wsdl:definitions
-    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
-    xmlns:resp="http://pxe/bpel/responder.wsdl"
+    xmlns:tns="http://ode/bpel/unit-test.wsdl"
+    xmlns:resp="http://ode/bpel/responder.wsdl"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
 
-  <import namespace="http://pxe/bpel/responder.wsdl" location="Responder.wsdl"/>
+  <import namespace="http://ode/bpel/responder.wsdl" location="Responder.wsdl"/>
 
   <types>
     <xsd:element name="result" type="xsd:string"/>
@@ -33,17 +33,17 @@
     <wsdl:operation name="execute">
       <soap:operation soapAction="" style="rpc"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>
       <wsdl:output>
-        <soap:body namespace="http://pxe/bpel/unit-test.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
 
   <wsdl:service name="DynMainService">
     <wsdl:port name="DynMainPort" binding="tns:DynMainBinding">
-      <soap:address location="http://localhost:8080/pxe/processes/DynMainService"/>
+      <soap:address location="http://localhost:8080/ode/processes/DynMainService"/>
     </wsdl:port>
   </wsdl:service>
 

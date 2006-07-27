@@ -102,7 +102,7 @@
                                     <to>$Request/payload/typ:AsyncRequest/typ:Order</to>
                                 </copy>
                                 <copy>
-                                    <from>'http://localhost:8090/pxe/soap/AsyncProcess/ProcessSVC/CallbackPORT'</from>
+                                    <from>'http://localhost:8090/ode/soap/AsyncProcess/ProcessSVC/CallbackPORT'</from>
                                     <to>$Request/payload/typ:AsyncRequest/typ:CallbackEndpoint</to>
                                 </copy>
                             </assign>

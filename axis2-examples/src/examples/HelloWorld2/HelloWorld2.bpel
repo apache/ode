@@ -1,13 +1,13 @@
 <process name="HelloWorld2"
-    targetNamespace="http://pxe/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test" 
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-    xmlns:tns="http://pxe/bpel/unit-test"
+    xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://pxe/bpel/unit-test.wsdl">
+    xmlns:test="http://ode/bpel/unit-test.wsdl">
 
   <import location="urn:/HelloWorld2.wsdl"
-     namespace="http://pxe/bpel/unit-test.wsdl"
+     namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
    <partnerLinks>

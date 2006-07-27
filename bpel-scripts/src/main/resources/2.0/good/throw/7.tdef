@@ -3,5 +3,5 @@ wsdl=test.wsdl
 request.1.partnerlink=testPartnerLink
 request.1.operation=testOperation2
 request.1.msg=inMsg2.xml
-postConditionNamespace=t=http://pxe/bpel/unit-test.wsdl
+postConditionNamespace=t=http://ode/bpel/unit-test.wsdl
 postCondition=/message/ElementPart/t:TestElement/text()='success'

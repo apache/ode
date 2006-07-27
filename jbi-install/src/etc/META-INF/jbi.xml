@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-     jbi.xml for PXE BPEL Engine
+     jbi.xml for ODE BPEL Engine
   -->
 <jbi
   version="1.0"
@@ -14,30 +14,30 @@
     component-class-loader-delegation="self-first">
 
     <identification>
-      <name>PxeBpelEngine</name>
-      <description> This is the PXE BPEL engine, adapter for JBI..
+      <name>OdeBpelEngine</name>
+      <description> This is the ODE BPEL engine, adapter for JBI..
       </description>
     </identification>
 
-    <component-class-name description="Component Implementation" >com.fs.pxe.jbi.PxeComponent</component-class-name>
+    <component-class-name description="Component Implementation" >org.apache.ode.jbi.OdeComponent</component-class-name>
     <component-class-path>
-        <path-element>lib/pxe-utils.jar</path-element>
-        <path-element>lib/pxe-bpel-bom.jar</path-element>
-        <path-element>lib/pxe-bpel-api.jar</path-element>
-        <path-element>lib/pxe-bpel-compiler.jar</path-element>
-        <path-element>lib/pxe-bpel-el-xpath10.jar</path-element>
-        <path-element>lib/pxe-bpel-el-xpath20.jar</path-element>
-        <path-element>lib/pxe-bpel-obj.jar</path-element>
-        <path-element>lib/pxe-bpel-dd.jar</path-element>
-        <path-element>lib/pxe-bpel-parser.jar</path-element>
-        <path-element>lib/pxe-bpel-runtime.jar</path-element>
-        <path-element>lib/pxe-bpel-scheduler-quartz.jar</path-element>
-        <path-element>lib/pxe-jca-server.jar</path-element>
-        <path-element>lib/pxe-jca-ra.jar</path-element>
-        <path-element>lib/pxe-dao-hibernate.jar</path-element>
-        <path-element>lib/pxe-jacob.jar</path-element>
-        <path-element>lib/pxe-jbi.jar</path-element>
-        <path-element>lib/pxe-minerva.jar</path-element>
+        <path-element>lib/ode-utils.jar</path-element>
+        <path-element>lib/ode-bpel-bom.jar</path-element>
+        <path-element>lib/ode-bpel-api.jar</path-element>
+        <path-element>lib/ode-bpel-compiler.jar</path-element>
+        <path-element>lib/ode-bpel-el-xpath10.jar</path-element>
+        <path-element>lib/ode-bpel-el-xpath20.jar</path-element>
+        <path-element>lib/ode-bpel-obj.jar</path-element>
+        <path-element>lib/ode-bpel-dd.jar</path-element>
+        <path-element>lib/ode-bpel-parser.jar</path-element>
+        <path-element>lib/ode-bpel-runtime.jar</path-element>
+        <path-element>lib/ode-bpel-scheduler-quartz.jar</path-element>
+        <path-element>lib/ode-jca-server.jar</path-element>
+        <path-element>lib/ode-jca-ra.jar</path-element>
+        <path-element>lib/ode-dao-hibernate.jar</path-element>
+        <path-element>lib/ode-jacob.jar</path-element>
+        <path-element>lib/ode-jbi.jar</path-element>
+        <path-element>lib/ode-minerva.jar</path-element>
 
         <path-element>lib/commons-pool.jar</path-element>
         <path-element>lib/ehcache.jar</path-element>
@@ -60,9 +60,9 @@
         <path-element>lib/geronimo-j2ee-connector_1.5_spec.jar</path-element>
 
     </component-class-path>
-    <bootstrap-class-name>com.fs.pxe.jbi.PxeBootstrap</bootstrap-class-name>
+    <bootstrap-class-name>org.apache.ode.jbi.OdeBootstrap</bootstrap-class-name>
     <bootstrap-class-path>
-        <path-element>lib/pxe-jbi.jar</path-element>
+        <path-element>lib/ode-jbi.jar</path-element>
     </bootstrap-class-path>
   </component>
 </jbi>
