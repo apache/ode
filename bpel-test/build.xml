@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-
-<project name="bpel-test" default="dist">
-  <import file="../build/ant-common.xml" />
-  <import file="../build/ant-library.xml" />
-
-  <target name="build" depends="jar" />
-
-</project>
