@@ -1,21 +1,21 @@
-Process Execution Engine ("PXE")
+Process Execution Engine ("ODE")
 Copyright (c) 2003-2005 FiveSight Technologies, Inc.
 
-The primary source of documentation for PXE is the on-line wiki at
+The primary source of documentation for ODE is the on-line wiki at
 
-  http://wiki.fivesight.com/pxe
+  http://wiki.fivesight.com/ode
   
 For information about licensing, see LICENSE.txt.  For version information, see
-PXE/buildnumber.properties.
+ODE/buildnumber.properties.
 
-To build PXE:
+To build ODE:
 
 1) Ensure that JAVA_HOME points to a 1.5 JDK.
 2) Unset ANT_HOME, as a specific Ant version is packaged with the distribution.
-3) cd PXE
+3) cd ODE
 4) ../build/ant -Dskip.rinfo=
 
-A ready-to-experiment with build of PXE will be in PXE/build~/stage, and .zip'd and
+A ready-to-experiment with build of ODE will be in ODE/build~/stage, and .zip'd and
 .tgz'd binary distributions will be in install~/installers.
 
 Send questions, bug reports, and comments to support@fivesight.com.

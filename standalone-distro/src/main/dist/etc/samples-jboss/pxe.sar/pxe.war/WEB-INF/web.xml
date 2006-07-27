@@ -5,14 +5,14 @@
    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
    version="2.4"> 
 
-  <display-name>PXE</display-name>
+  <display-name>ODE</display-name>
 
    <servlet>
        <servlet-name>SoapServlet</servlet-name>
        <description>A servlet that provides soap over http access
-       	to the PXE framework.
+       	to the ODE framework.
        </description>
-       <servlet-class>com.fs.pxe.httpsoap.HttpSoapServlet</servlet-class>
+       <servlet-class>org.apache.ode.httpsoap.HttpSoapServlet</servlet-class>
       
       <init-param>
           <param-name>ConnectionProperties</param-name>

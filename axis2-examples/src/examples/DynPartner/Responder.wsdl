@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <wsdl:definitions
-        targetNamespace="http://pxe/bpel/responder.wsdl"
+        targetNamespace="http://ode/bpel/responder.wsdl"
         xmlns="http://schemas.xmlsoap.org/wsdl/"
-        xmlns:tns="http://pxe/bpel/responder.wsdl"
+        xmlns:tns="http://ode/bpel/responder.wsdl"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -55,26 +55,26 @@
     <wsdl:operation name="getDynamicEndpoint">
       <soap:operation soapAction="" style="rpc"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/responder.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:input>
       <wsdl:output>
-        <soap:body namespace="http://pxe/bpel/responder.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="acknowledge">
       <soap:operation soapAction="" style="rpc"/>
       <wsdl:input>
-        <soap:body namespace="http://pxe/bpel/responder.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:input>
       <wsdl:output>
-        <soap:body namespace="http://pxe/bpel/responder.wsdl" use="literal"/>
+        <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
 
   <wsdl:service name="DynResponderService">
     <wsdl:port name="DynResponderPort" binding="tns:DynResponderBinding">
-      <soap:address location="http://localhost:8080/pxe/processes/DynResponderService"/>
+      <soap:address location="http://localhost:8080/ode/processes/DynResponderService"/>
     </wsdl:port>
   </wsdl:service>
 

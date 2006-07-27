@@ -1,117 +1,117 @@
 <?xml version="1.0"?>
 
-<!-- pxe kernel configuration for use with JBOSS
-	 uses PXE-based config mechanism in conjunction with 
+<!-- ode kernel configuration for use with JBOSS
+	 uses ODE-based config mechanism in conjunction with 
 	 the JBoss server (sar) configuration
-	 See jboss-pxekernel-service.xml 
+	 See jboss-odekernel-service.xml 
 -->
-<kconfig xmlns="uri:fivesight.pxe/schemas/pxe-kconfig/2005/03/16">
+<kconfig xmlns="uri:fivesight.ode/schemas/ode-kconfig/2005/03/16">
 
   <!-- For setting system properties. -->
-  <!-- If pxe.home is not set explicitly here, it is expected from the launcher.
-       Failure to set pxe.home in some fashion will result in an error. -->
+  <!-- If ode.home is not set explicitly here, it is expected from the launcher.
+       Failure to set ode.home in some fashion will result in an error. -->
   <setProperty name="javax.xml.parsers.DocumentBuilderFactory">org.apache.xerces.jaxp.DocumentBuilderFactoryImpl</setProperty>
   <setProperty name="javax.xml.parsers.SAXParserFactory">org.apache.xerces.jaxp.SAXParserFactoryImpl</setProperty>
   
-  <classpath type="url">file:<pxe-home/>/bin/kernel-boot.jar</classpath>  
-  <classpath type="url">file:<pxe-home/>/etc/</classpath>  
-  <classpath type="jarDir"><pxe-home/>/pxe-lib</classpath>
+  <classpath type="url">file:<ode-home/>/bin/kernel-boot.jar</classpath>  
+  <classpath type="url">file:<ode-home/>/etc/</classpath>  
+  <classpath type="jarDir"><ode-home/>/ode-lib</classpath>
   <!-- specific library imports
-  	   the following classpath settings assumes that PXE initializes the following:
+  	   the following classpath settings assumes that ODE initializes the following:
   	   hibernate, hsql (sample database), jetty (http provider)
   -->
 
   <!-- hibernate classes -->
-  <classpath type="url">file:<pxe-home/>/lib/cglib-full-2.0.2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/c3p0-0.8.5</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/ehcache-0.9.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/hibernate2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/odmg-3.0.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/cglib-full-2.0.2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/c3p0-0.8.5</classpath>
+  <classpath type="url">file:<ode-home/>/lib/ehcache-0.9.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/hibernate2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/odmg-3.0.jar</classpath>
   
   <!-- jetty: http server on port 8090 -->
-  <classpath type="url">file:<pxe-home/>/lib/jasper-runtime.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/jasper-compiler.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/javax.servlet.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/org.mortbay.jetty.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/org.mortbay.jmx.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/jasper-runtime.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/jasper-compiler.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/javax.servlet.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/org.mortbay.jetty.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/org.mortbay.jmx.jar</classpath>
   
   <!-- required core libraries -->
-  <classpath type="url">file:<pxe-home/>/lib/commons-collection-3.0.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/commons-httpclient-2.0.2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/commons-lang-2.0.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/commong-logging-1.0.3.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/commons-pool-1.2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/activation.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/jax-qname.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/jaxen-1.1-beta-2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/jmxremote.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/log4j-1.2.8.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/mail.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/namespace.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/relaxngDatatype.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/saxon8.dom.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/saxon8.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/spice-metaclass-1.0.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/wsdl4j-1.5.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/xalan-2.6.0.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/xercesImpl-2.6.2.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/xml-apis.jar</classpath>  
-  <classpath type="url">file:<pxe-home/>/lib/xsdlib.jar</classpath>
-  <classpath type="url">file:<pxe-home/>/lib/z-dom4j-1.4.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/commons-collection-3.0.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/commons-httpclient-2.0.2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/commons-lang-2.0.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/commong-logging-1.0.3.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/commons-pool-1.2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/activation.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/jax-qname.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/jaxen-1.1-beta-2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/jmxremote.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/log4j-1.2.8.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/mail.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/namespace.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/relaxngDatatype.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/saxon8.dom.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/saxon8.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/spice-metaclass-1.0.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/wsdl4j-1.5.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/xalan-2.6.0.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/xercesImpl-2.6.2.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/xml-apis.jar</classpath>  
+  <classpath type="url">file:<ode-home/>/lib/xsdlib.jar</classpath>
+  <classpath type="url">file:<ode-home/>/lib/z-dom4j-1.4.jar</classpath>
   
   <!-- Imports are used in turn to try to locate classes given using the "class"
        attribute -->
-  <import package="com.fs.pxe.kernel.modrmi"/>
-  <import package="com.fs.pxe.kernel.modjetty" />
-  <import package="com.fs.pxe.kernel.modjotm" />
-  <import package="com.fs.pxe.kernel.modsfwk" />
-  <import package="com.fs.pxe.kernel.modjmxremote" />
-  <import package="com.fs.pxe.kernel.modhibernatedao" />
-  <import package="com.fs.pxe.kernel.modfsnaming" />
-  <import package="com.fs.pxe.kernel.moddeployer" />
-  <import package="com.fs.pxe.kernel.modbpellog" />
-  <import package="com.fs.pxe.kernel.modjdbc" />
+  <import package="org.apache.ode.kernel.modrmi"/>
+  <import package="org.apache.ode.kernel.modjetty" />
+  <import package="org.apache.ode.kernel.modjotm" />
+  <import package="org.apache.ode.kernel.modsfwk" />
+  <import package="org.apache.ode.kernel.modjmxremote" />
+  <import package="org.apache.ode.kernel.modhibernatedao" />
+  <import package="org.apache.ode.kernel.modfsnaming" />
+  <import package="org.apache.ode.kernel.moddeployer" />
+  <import package="org.apache.ode.kernel.modbpellog" />
+  <import package="org.apache.ode.kernel.modjdbc" />
 
   <!-- For loading MLETS -->
   <mlet url="" />
 
   <!-- Install (and start) an RMI registry on port 2099  -->
-  <kmodule name="com.fivesight.pxe:mod=JmxRmiRegistry" class="ModRmiRegistry">
+  <kmodule name="com.fivesight.ode:mod=JmxRmiRegistry" class="ModRmiRegistry">
 	<attribute name="port">2099</attribute>
   </kmodule>
   
   <!-- Provide JmxRemoting capabilities on port 2099 -->
-  <kmodule name="com.fivesight.pxe:mod=JmxRemote" class="ModJmxRemote">
+  <kmodule name="com.fivesight.ode:mod=JmxRemote" class="ModJmxRemote">
 	<attribute name="JmxURL">service:jmx:rmi:///jndi/rmi://localhost:2099/server</attribute>
   </kmodule>
   
   <!-- log all bpel events to the logger -->
-  <kmodule name="com.fivesight.pxe:mod=BpelLogger" class="ModBpelEventLogger"/>
+  <kmodule name="com.fivesight.ode:mod=BpelLogger" class="ModBpelEventLogger"/>
   
-  <kmodule name="com.fivesight.pxe:mod=HibernateDAO" class="ModHibernateDAO">
+  <kmodule name="com.fivesight.ode:mod=HibernateDAO" class="ModHibernateDAO">
     <attribute name="bpelStateStoreConnectionFactory">bpel_sscf</attribute>
     <attribute name="stateStoreConnectionFactory">sscf</attribute>
     <attribute name="transactionManager">java:TransactionManager</attribute>
-    <attribute name="dataSource">java:pxeDS</attribute>
-    <attribute name="hibernateProperties">file:<pxe-home/>/etc/hibernate.properties</attribute>
+    <attribute name="dataSource">java:odeDS</attribute>
+    <attribute name="hibernateProperties">file:<ode-home/>/etc/hibernate.properties</attribute>
   </kmodule>
 
-  <kmodule name="com.fivesight.pxe:mod=Jetty" class="ModJetty">
-    <attribute name="config">file:<pxe-home/>/etc/jetty.xml</attribute>
+  <kmodule name="com.fivesight.ode:mod=Jetty" class="ModJetty">
+    <attribute name="config">file:<ode-home/>/etc/jetty.xml</attribute>
   </kmodule>
 
-  <kmodule name="com.fivesight.pxe:mod=PXE" class="ModSfwk">
+  <kmodule name="com.fivesight.ode:mod=ODE" class="ModSfwk">
     <attribute name="domainId">MyDomain</attribute>
     <attribute name="registryPort">2099</attribute>
     <attribute name="transactionManager">java:TransactionManager</attribute>
     <attribute name="DAOConnectionFactory">sscf</attribute>
-    <attribute name="PxeProperties">file:<pxe-home/>/etc/pxe.properties</attribute>
+    <attribute name="OdeProperties">file:<ode-home/>/etc/ode.properties</attribute>
   </kmodule>
 
-  <kmodule name="com.fivesight.pxe:mod=Deployer" class="ModDeployer">
-    <attribute name="DeployDir"><pxe-home/>/etc/deploy</attribute>
+  <kmodule name="com.fivesight.ode:mod=Deployer" class="ModDeployer">
+    <attribute name="DeployDir"><ode-home/>/etc/deploy</attribute>
     <attribute name="DomainAdminMBean">
-    	<getAttribute object="com.fivesight.pxe:mod=PXE" name="domainAdminMBean"/>
+    	<getAttribute object="com.fivesight.ode:mod=ODE" name="domainAdminMBean"/>
     </attribute>
   </kmodule>
 </kconfig>

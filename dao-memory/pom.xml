@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>pxe</groupId>
-    <artifactId>pxe-dao-memory</artifactId>
-    <name>PXE :: In-Memory DAO Implementation</name>
+    <groupId>ode</groupId>
+    <artifactId>ode-dao-memory</artifactId>
+    <name>ODE :: In-Memory DAO Implementation</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pxe</groupId>
-        <artifactId>pxe</artifactId>
+        <groupId>ode</groupId>
+        <artifactId>ode</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <version>2.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-jca-ra</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-jca-ra</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-sfwk-core</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-sfwk-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>pxe</groupId>
-            <artifactId>pxe-utils</artifactId>
+            <groupId>ode</groupId>
+            <artifactId>ode-utils</artifactId>
         </dependency>
     </dependencies>
     <build>

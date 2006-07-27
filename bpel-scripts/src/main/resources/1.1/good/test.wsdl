@@ -35,7 +35,7 @@
       This message contains an assortment of different part types.
     </wsdl:documentation>
 
-    <!-- The following parts appear as "virtual" PXE elements -->
+    <!-- The following parts appear as "virtual" ODE elements -->
     <wsdl:part name="StringPart1" type="xsd:string"/>
     <wsdl:part name="StringPart2" type="xsd:string"/>
     <wsdl:part name="IntPart1" type="xsd:int"/>

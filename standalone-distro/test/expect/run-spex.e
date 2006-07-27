@@ -5,11 +5,11 @@ proc abort { msg } {
   exit -1
 }
 log_user 0
-spawn -noecho pxe -v -console
-expect -timeout 30 -re ^pxe.*\r\n?Copyright.*\r {
+spawn -noecho ode -v -console
+expect -timeout 30 -re ^ode.*\r\n?Copyright.*\r {
     # noop.
   } timeout {
-    abort "pxe took too long to output the initial header.
+    abort "ode took too long to output the initial header.
   }
 expect -timeout 100 -re ^\r { 
     exp_continue
@@ -18,15 +18,15 @@ expect -timeout 100 -re ^\r {
   } -re ^Warning.*XSLT.*\r {
     exp_continue
   } -re ^ERROR.*\r {
-    abort "pxe encountered an internal error: $expect_out(buffer)\n"
+    abort "ode encountered an internal error: $expect_out(buffer)\n"
   } eof {
-    abort "pxe exited suddenly (probably due to error).\n"
+    abort "ode exited suddenly (probably due to error).\n"
   } -re ^INFO\.*\ Startup\ completed\. {
     # no op; this is what we wanted.
   } -re ^INFO.*\r {
     exp_continue    
   } timeout {
-    abort "pxe took too long to start up; aborting.\n"
+    abort "ode took too long to start up; aborting.\n"
   }
 expect_background -timeout -1 -re ^\r {
     exp_continue
@@ -35,9 +35,9 @@ expect_background -timeout -1 -re ^\r {
   } -re ^INFO.*\r {
     exp_continue
   } -re ^ERROR.*\r {
-    abort "FAILURE: pxe encountered an error - $expect_out(buffer)
+    abort "FAILURE: ode encountered an error - $expect_out(buffer)
   } eof {
-    abort "FAILURE: pxe exited suddenly.\n"
+    abort "FAILURE: ode exited suddenly.\n"
   }
 spawn -noecho bpeltests
 set spex $spawn_id

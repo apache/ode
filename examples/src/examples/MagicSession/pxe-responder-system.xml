@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <system-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.fivesight.com/pxe/system-descriptor/ http://www.fivesight.com/pxe/system-descriptor/"
-                   xmlns:main="http://pxe/bpel/unit-test.wsdl"
-                   xmlns="http://www.fivesight.com/pxe/system-descriptor/"
+                   xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+                   xmlns:main="http://ode/bpel/unit-test.wsdl"
+                   xmlns="http://www.fivesight.com/ode/system-descriptor/"
                    name="DynResponder"
                    wsdlUri="urn:/Main.wsdl">
   <channels>
@@ -17,7 +17,7 @@
     </service>
     <service name="msResponderService.OutboundSoapService" provider="uri:protocoladapter.soap">
       <properties>
-        <property name="serviceWsdlNamespace" value="http://pxe/bpel/unit-test.wsdl"/>
+        <property name="serviceWsdlNamespace" value="http://ode/bpel/unit-test.wsdl"/>
         <property name="serviceWsdlName" value="MSMainService"/>
       </properties>
       <exports>

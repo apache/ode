@@ -5,7 +5,7 @@ Test the onAlarm functionality of eventHandlers
 <bp11:process xmlns:bp11="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
   name="onalarm-1-1.1"
   targetNamespace="http://www.fivesight.com/tests/1.1/eventHandlers/onalarm-1-1.1"
-  xmlns:test="http://pxe/bpel/unit-test.wsdl">
+  xmlns:test="http://ode/bpel/unit-test.wsdl">
 
   <bp11:partnerLinks>
     <bp11:partnerLink name="testPartnerLink"

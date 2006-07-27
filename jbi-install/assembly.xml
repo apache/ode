@@ -20,7 +20,7 @@
             <scope>compile</scope>
             <outputDirectory/>
             <includes>
-                <include>pxe:pxe-dao-hibernate-db-derby</include>
+                <include>ode:ode-dao-hibernate-db-derby</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>

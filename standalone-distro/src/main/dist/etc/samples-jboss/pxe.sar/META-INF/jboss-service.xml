@@ -1,86 +1,86 @@
 <!-- 
-	JBoss 'Sar' for PXE deployment.  This is an alternative to
-	deployment using the PXE kernel mbean (see jboss-pxekernel-service.xml).
+	JBoss 'Sar' for ODE deployment.  This is an alternative to
+	deployment using the ODE kernel mbean (see jboss-odekernel-service.xml).
 	
 	Deployment using this service configuration has no dependency
-	on the jboss-pxekernel-config.xml configuration.
+	on the jboss-odekernel-config.xml configuration.
 -->
 <server>
-  <classpath codebase="file:/${pxe.home}/bin" archives="kernel-boot.jar"/>
-  <classpath codebase="file:/${pxe.home}/pxe-lib" archives="*"/>
-  <classpath codebase="file:/${pxe.home}/lib" archives="*"/>
+  <classpath codebase="file:/${ode.home}/bin" archives="kernel-boot.jar"/>
+  <classpath codebase="file:/${ode.home}/ode-lib" archives="*"/>
+  <classpath codebase="file:/${ode.home}/lib" archives="*"/>
       
-  <mbean name="com.fivesight.pxe:mod=JmxRmiRegistry" 
-    	   code="com.fs.pxe.kernel.modrmi.ModRmiRegistry">
+  <mbean name="com.fivesight.ode:mod=JmxRmiRegistry" 
+    	   code="org.apache.ode.kernel.modrmi.ModRmiRegistry">
 	 <attribute name="Port">2099</attribute>
   </mbean>
   
   <!-- Provide JmxRemoting capabilities on port 2099 -->
-  <mbean name="com.fivesight.pxe:mod=JmxRemote" 
-  		 code="com.fs.pxe.kernel.modjmxremote.ModJmxRemote">
+  <mbean name="com.fivesight.ode:mod=JmxRemote" 
+  		 code="org.apache.ode.kernel.modjmxremote.ModJmxRemote">
 	<attribute name="JmxURL">service:jmx:rmi:///jndi/rmi://localhost:2099/server</attribute>
   </mbean>
   
   <!-- log all bpel events to the logger -->
-  <mbean name="com.fivesight.pxe:mod=BpelLogger" code="com.fs.pxe.kernel.modbpellog.ModBpelEventLogger"/>
+  <mbean name="com.fivesight.ode:mod=BpelLogger" code="org.apache.ode.kernel.modbpellog.ModBpelEventLogger"/>
   
-  <mbean name="com.fivesight.pxe:mod=HibernateDAO" code="com.fs.pxe.kernel.modhibernatedao.ModHibernateDAO">
-    <depends>jboss.jca:service=DataSourceBinding,name=pxeDS</depends>   
+  <mbean name="com.fivesight.ode:mod=HibernateDAO" code="org.apache.ode.kernel.modhibernatedao.ModHibernateDAO">
+    <depends>jboss.jca:service=DataSourceBinding,name=odeDS</depends>   
     <attribute name="BpelStateStoreConnectionFactory">bpel_sscf</attribute>
     <attribute name="StateStoreConnectionFactory">sscf</attribute>
     <attribute name="TransactionManager">java:TransactionManager</attribute>
-    <attribute name="DataSource">java:pxeDS</attribute>
-    <attribute name="HibernateProperties">file:${pxe.home}/etc/hibernate.properties</attribute>
+    <attribute name="DataSource">java:odeDS</attribute>
+    <attribute name="HibernateProperties">file:${ode.home}/etc/hibernate.properties</attribute>
   </mbean>
   
    <!-- Begin definition of service providers 
 	   MUST PROCEED ModSfwk
 	-->  
-  <mbean name="com.fivesight.pxe:mod=ServiceProvider,name=HttpSoap" code="com.fs.pxe.kernel.modsfwk.ModSvcProvider">
+  <mbean name="com.fivesight.ode:mod=ServiceProvider,name=HttpSoap" code="org.apache.ode.kernel.modsfwk.ModSvcProvider">
 	<attribute name="JndiName">HttpSoapSP</attribute>
 	<attribute name="TransactionManagerName">java:TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.httpsoap.HttpSoapAdapter</attribute>
+	<attribute name="ProviderClass">org.apache.ode.httpsoap.HttpSoapAdapter</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.soap</attribute>
   </mbean>
   
-  <mbean name="com.fivesight.pxe:mod=ServiceProvider,name=Bpel" code="com.fs.pxe.kernel.modsfwk.ModSvcProvider">
-	<depends>fivesight.pxe:mod=HibernateDAO</depends>
+  <mbean name="com.fivesight.ode:mod=ServiceProvider,name=Bpel" code="org.apache.ode.kernel.modsfwk.ModSvcProvider">
+	<depends>fivesight.ode:mod=HibernateDAO</depends>
 	<attribute name="JndiName">BpelSP</attribute>
 	<attribute name="TransactionManagerName">java:TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.bpel.provider.BpelServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.bpel.provider.BpelServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:bpelProvider</attribute>
 	<attribute name="ProviderProperties">stateStoreConnectionFactory=bpel_sscf</attribute>
   </mbean>
   
-  <mbean name="com.fivesight.pxe:mod=ServiceProvider,name=Transformer" code="com.fs.pxe.kernel.modsfwk.ModSvcProvider">
+  <mbean name="com.fivesight.ode:mod=ServiceProvider,name=Transformer" code="org.apache.ode.kernel.modsfwk.ModSvcProvider">
 	<attribute name="JndiName">XsltSP</attribute>
 	<attribute name="TransactionManagerName">java:TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:xsltServiceProvider</attribute>
   </mbean>
   
-  <mbean name="com.fivesight.pxe:mod=ServiceProvider,name=Native" code="com.fs.pxe.kernel.modsfwk.ModSvcProvider">
+  <mbean name="com.fivesight.ode:mod=ServiceProvider,name=Native" code="org.apache.ode.kernel.modsfwk.ModSvcProvider">
 	<attribute name="JndiName">NativeSP</attribute>
 	<attribute name="TransactionManagerName">java:TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.xcontrib.sp.rpc.RpcAdapter</attribute>
+	<attribute name="ProviderClass">org.apache.ode.xcontrib.sp.rpc.RpcAdapter</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.native.inbound</attribute>
   </mbean>
   
-  <mbean name="com.fivesight.pxe:mod=ServiceProvider,name=Spexerciser" code="com.fs.pxe.kernel.modsfwk.ModSvcProvider">
+  <mbean name="com.fivesight.ode:mod=ServiceProvider,name=Spexerciser" code="org.apache.ode.kernel.modsfwk.ModSvcProvider">
 	<attribute name="JndiName">SpexerciserSP</attribute>
 	<attribute name="TransactionManagerName">java:TransactionManager</attribute>
-	<attribute name="ProviderClass">com.fs.pxe.bpel.test.BpelTestServiceProvider</attribute>
+	<attribute name="ProviderClass">org.apache.ode.bpel.test.BpelTestServiceProvider</attribute>
 	<attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
   </mbean>
   
 
-  <mbean name="com.fivesight.pxe:mod=PXE" code="com.fs.pxe.kernel.modsfwk.ModSfwk">
-    <depends>fivesight.pxe:mod=HibernateDAO</depends>
-	<depends>fivesight.pxe:mod=ServiceProvider,name=HttpSoap</depends>
-	<depends>fivesight.pxe:mod=ServiceProvider,name=Bpel</depends>
-	<depends>fivesight.pxe:mod=ServiceProvider,name=Transformer</depends>
-	<depends>fivesight.pxe:mod=ServiceProvider,name=Native</depends>
-	<depends>fivesight.pxe:mod=ServiceProvider,name=Spexerciser</depends>
+  <mbean name="com.fivesight.ode:mod=ODE" code="org.apache.ode.kernel.modsfwk.ModSfwk">
+    <depends>fivesight.ode:mod=HibernateDAO</depends>
+	<depends>fivesight.ode:mod=ServiceProvider,name=HttpSoap</depends>
+	<depends>fivesight.ode:mod=ServiceProvider,name=Bpel</depends>
+	<depends>fivesight.ode:mod=ServiceProvider,name=Transformer</depends>
+	<depends>fivesight.ode:mod=ServiceProvider,name=Native</depends>
+	<depends>fivesight.ode:mod=ServiceProvider,name=Spexerciser</depends>
     <attribute name="DomainId">MyDomain</attribute>
     <attribute name="RegistryPort">2099</attribute>
     <attribute name="TransactionManager">java:TransactionManager</attribute>
@@ -88,10 +88,10 @@
 	<attribute name="SvcProviderJndiBindings">HttpSoapSP,BpelSP,XsltSP,NativeSP,SpexerciserSP</attribute>
   </mbean>
 
-  <mbean name="com.fivesight.pxe:mod=Deployer" code="com.fs.pxe.kernel.moddeployer.ModDeployer">
-    <depends>fivesight.pxe:mod=PXE</depends>
-    <attribute name="DeployDir">${pxe.home}/etc/deploy</attribute>
-    <attribute name="DomainAdminMBean">fivesight.pxe:domain=MyDomain,node=node0,type=DomainAdmin</attribute>
+  <mbean name="com.fivesight.ode:mod=Deployer" code="org.apache.ode.kernel.moddeployer.ModDeployer">
+    <depends>fivesight.ode:mod=ODE</depends>
+    <attribute name="DeployDir">${ode.home}/etc/deploy</attribute>
+    <attribute name="DomainAdminMBean">fivesight.ode:domain=MyDomain,node=node0,type=DomainAdmin</attribute>
   </mbean>
    
 </server>    

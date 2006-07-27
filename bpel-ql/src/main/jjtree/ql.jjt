@@ -6,7 +6,7 @@ options {
 
 PARSER_BEGIN(QLParser)
 
-package com.fs.pxe.ql.jcc;
+package org.apache.ode.ql.jcc;
 
 import java.io.*;
 

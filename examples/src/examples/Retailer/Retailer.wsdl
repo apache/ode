@@ -155,7 +155,7 @@
     </wsdl:binding>
     <wsdl:service name='RetailerServiceImplementation'>
         <wsdl:port name='RetailerServiceImplementationPort' binding='tns:RetailerSoapBinding'>
-            <soap:address location='http://localhost:@PXE_HTTP_PORT@/wsi-server/scm/retailer'/>
+            <soap:address location='http://localhost:@ODE_HTTP_PORT@/wsi-server/scm/retailer'/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

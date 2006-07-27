@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2006 sp1 U (http://www.altova.com) by any (Ru-Board) -->
-<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:pmapi="http://pxe.fivesight.com/schemas/2005/11/11/pmapi" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://pxe.fivesight.com/schemas/2005/11/11/pmapi" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:pmapi="http://ode.fivesight.com/schemas/2005/11/11/pmapi" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode.fivesight.com/schemas/2005/11/11/pmapi" elementFormDefault="qualified">
 	<element name="process-info" type="pmapi:tProcessInfo" id="process-info"/>
 	<element name="activity-info" type="pmapi:tActivityInfo" id="activity-info"/>
 	<element name="process-info-list" type="pmapi:tProcessInfoList"/>

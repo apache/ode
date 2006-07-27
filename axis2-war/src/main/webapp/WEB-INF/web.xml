@@ -8,7 +8,7 @@
         <servlet-name>AxisServlet</servlet-name>
         <display-name>Apache-Axis Servlet</display-name>
         <servlet-class>
-		com.fs.pxe.axis2.hooks.PXEAxisServlet</servlet-class>
+		org.apache.ode.axis2.hooks.ODEAxisServlet</servlet-class>
         <!--<init-param>-->
         <!--<param-name>axis2.xml.path</param-name>-->
         <!--<param-value>/WEB-INF/conf/axis2.xml</param-value>-->

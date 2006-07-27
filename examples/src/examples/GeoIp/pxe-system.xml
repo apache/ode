@@ -2,8 +2,8 @@
 <system-descriptor name="GeoIp" 
   wsdlUri="urn:/GeoIp.wsdl"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.fivesight.com/pxe/system-descriptor/ http://www.fivesight.com/pxe/system-descriptor/"
-  xmlns="http://www.fivesight.com/pxe/system-descriptor/" 
+  xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+  xmlns="http://www.fivesight.com/ode/system-descriptor/" 
   xmlns:wsn="http://www.webservicex.net">
   <channels>
     <channel name="inboundChannel" />
