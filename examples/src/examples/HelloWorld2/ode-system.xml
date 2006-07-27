@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+ xmlns:hw="http://ode/bpel/unit-test.wsdl"
+ xmlns="http://www.fivesight.com/ode/system-descriptor/"
+ name="HelloWorld2"
+ wsdlUri="urn:/HelloWorld2.wsdl">
+    <channels>
+    <channel name="channel1" />
+  </channels>
+  <services>
+        <service name="HelloService" 
+            provider="uri:protocoladapter.soap">
+            <imports>
+                <port name="HelloPort" type="hw:HelloPortType" channel-ref="channel1" />
+            </imports>
+        </service>
+        <service name="HelloWorld2" provider="uri:bpelProvider">
+          <properties>
+             <property name="compiledProcess" value="HelloWorld2.cbp"/>
+           </properties>
+            <exports>
+                <port name="helloPartnerLink" type="hw:HelloPortType" channel-ref="channel1" />
+            </exports>
+        </service>
+  </services>
+</system-descriptor>

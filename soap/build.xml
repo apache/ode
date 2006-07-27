@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<project name="soap" default="dist">
+  <import file="../build/ant-common.xml" />
+  <import file="../build/ant-library.xml" />
+
+  <target name="build" depends="jar" />
+</project>

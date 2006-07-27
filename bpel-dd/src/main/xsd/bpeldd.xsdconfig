@@ -1,0 +1,13 @@
+<xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
+           xmlns:bpeldd="http://ode.fivesight.com/schemas/2006/02/14/bpeldd">
+
+  <xb:namespace uri="http://ode.fivesight.com/schemas/2006/02/14/bpeldd">
+    <xb:package>org.apache.ode.bpel.dd</xb:package>
+  </xb:namespace> 
+  
+  <xb:namespace uri="##any">
+    <xb:prefix></xb:prefix>
+    <xb:suffix></xb:suffix>
+  </xb:namespace>
+
+</xb:config>

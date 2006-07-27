@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<process name="DynPartnerResponder"
+         targetNamespace="http://ode/bpel/responder"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode/bpel/responder"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:resp="http://ode/bpel/responder.wsdl">
+
+  <import location="urn:/Responder.wsdl" namespace="http://ode/bpel/responder.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="mainPartnerLink" partnerLinkType="resp:ResponderPartnerLinkType"
+                 myRole="responder"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy" messageType="resp:DummyMessage"/>
+    <variable name="dummy2" messageType="resp:Dummy2Message"/>
+    <variable name="myEndpoint" messageType="resp:EndpointMessage"/>
+    <variable name="ack" messageType="resp:AcknowledgementMessage"/>
+  </variables>
+
+  <correlationSets>
+    <correlationSet name="dummyCorr" properties="resp:dummyProp" />
+  </correlationSets>
+
+  <sequence>
+    <receive name="start" partnerLink="mainPartnerLink" variable="dummy"
+             portType="resp:DynResponderPortType" operation="getDynamicEndpoint" createInstance="yes">
+      <correlations>
+        <correlation set="dummyCorr" initiate="yes"/>
+      </correlations>
+    </receive>
+    <assign>
+      <copy>
+        <from partnerLink="mainPartnerLink" endpointReference="myRole"/>
+        <to variable="myEndpoint" part="payload"/>
+      </copy>
+    </assign>
+    <reply name="reply-endpoint" partnerLink="mainPartnerLink"
+           portType="resp:DynResponderPortType" operation="getDynamicEndpoint" variable="myEndpoint"/>
+
+    <receive name="dyn-invoke" partnerLink="mainPartnerLink" variable="dummy2"
+             portType="resp:DynResponderPortType" operation="acknowledge">
+      <correlations>
+        <correlation set="dummyCorr" initiate="no"/>
+      </correlations>
+    </receive>
+    <assign>
+      <copy>
+        <from>'OK'</from>
+        <to variable="ack" part="payload"/>
+      </copy>
+    </assign>
+    <reply name="reply-ack" partnerLink="mainPartnerLink"
+           portType="resp:DynResponderPortType" operation="acknowledge" variable="ack"/>
+
+    <receive name="dyn-invoke2" partnerLink="mainPartnerLink" variable="dummy2"
+             portType="resp:DynResponderPortType" operation="acknowledge">
+      <correlations>
+        <correlation set="dummyCorr" initiate="no"/>
+      </correlations>
+    </receive>
+    <reply name="reply-ack" partnerLink="mainPartnerLink"
+           portType="resp:DynResponderPortType" operation="acknowledge" variable="ack"/>
+
+  </sequence>
+</process>

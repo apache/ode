@@ -1,0 +1,25 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:main="http://ode/bpel/unit-test" 
+	xmlns:mws="http://ode/bpel/unit-test.wsdl"
+	xmlns:resp="http://ode/bpel/responder">
+
+	<process name="main:MagicSessionMain">
+		<provide partnerLink="executePartnerLink">
+			<service name="mws:MSMainExecuteService" port="MSExecutePort"/>
+		</provide>
+		<provide partnerLink="responderPartnerLink">
+			<service name="mws:MSMainService" port="MSMainPort"/>
+		</provide>
+		<invoke partnerLink="responderPartnerLink">
+			<service name="mws:MSResponderService" port="MSResponderPort"/>
+		</invoke>
+	</process>
+	<process name="resp:MagicSessionResponder">
+		<provide partnerLink="mainPartnerLink">
+			<service name="mws:MSResponderService" port="MSResponderPort"/>
+		</provide>
+		<invoke partnerLink="mainPartnerLink">
+			<service name="mws:MSMainService" port="MSMainPort"/>
+		</invoke>
+	</process>
+</deploy>

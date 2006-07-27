@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<project>
+  <groupId>ode</groupId>
+  <artifactId>ode-bpel-dd</artifactId>
+  <name>ODE :: BPEL Deployment Descriptor</name>
+  <description>Contains the deployment descriptor classes used to validate the descriptor during compilation and read it on deployment.</description>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ode</groupId>
+    <artifactId>ode</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+  <version>2.0-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-obj</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>stax</groupId>
+      <artifactId>stax-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xmlbeans-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals><goal>xmlbeans</goal></goals>
+            <configuration>
+              <javaSource>1.5</javaSource>
+
+              <!-- The following is needed for Eclipse build. -->
+              <outputJar>${basedir}/target/xmlbeans.jar</outputJar>
+              <schemaDirectory>src/main/xsd</schemaDirectory>
+              <xmlConfigs>
+                <xmlConfig implementation="java.io.File">src/main/xsd/bpeldd.xsdconfig</xmlConfig>
+                <xmlConfig implementation="java.io.File">src/main/xsd/dd.xsdconfig</xmlConfig>
+              </xmlConfigs>
+              <quiet>true</quiet>
+              <failonerror>true</failonerror>
+				<!-- This is needed for eclipse project to work -->
+			  <outputJar>target/xmlbeans.jar</outputJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+	   
+    </plugins>
+  </build>
+</project>

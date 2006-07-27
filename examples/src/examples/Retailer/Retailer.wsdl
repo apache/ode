@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<wsdl:definitions targetNamespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl' 
+    xmlns:tns='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl' 
+    xmlns:ns0='http://idoox.com/interface' 
+    xmlns:cat='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailCatalog.xsd' 
+    xmlns:wsi='http://ws-i.org/schemas/conformanceClaim/' 
+    xmlns:xs='http://www.w3.org/2001/XMLSchema' 
+    xmlns:cfg='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd' 
+    xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' 
+    xmlns:order='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd' 
+    xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/' 
+    xmlns:cfgw='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.wsdl' 
+    xmlns='http://schemas.xmlsoap.org/wsdl/'>
+
+    <wsdl:documentation>
+    This WSDL document describes the Retailer service for the WS-I Basic Sample Application. This 
+    service is part of a supply chain management system. It is used to demonstrate a web service that is conformant 
+    with the Basic Profile and to show how different web service platforms can interoperate.
+</wsdl:documentation>
+    <wsdl:import namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.wsdl' location='Configuration.wsdl'/>
+    <wsdl:types>
+        <schema elementFormDefault="qualified"
+            targetNamespace="http://idoox.com/interface"
+            xmlns="http://www.w3.org/2001/XMLSchema"
+            xmlns:tns="http://idoox.com/interface">
+            <complexType name="serviceReference">
+                <sequence>
+                    <element name="service" type="QName"/>
+                    <element name="wsdl" type="anyURI"/>
+                    <element minOccurs="0" name="instanceID" type="string"/>
+                    <element minOccurs="0" name="portTypeMappings"
+                        type="tns:ArrayOfInterfaceMapping"/>
+                </sequence>
+            </complexType>
+            <complexType name="ArrayOfInterfaceMapping">
+                <sequence>
+                    <element maxOccurs="unbounded" minOccurs="0" name="item"
+                        type="tns:interfaceMapping"/>
+                </sequence>
+            </complexType>
+            <complexType name="interfaceMapping">
+                <sequence>
+                    <element name="portType" type="QName"/>
+                    <element name="className" type="string"/>
+                </sequence>
+            </complexType>
+            <element name="instance">
+                <annotation>
+
+                    <documentation>
+      this is the SOAP header schema
+      this SOAP header SHOULD have soap-env:mustUnderstand set to &quot;1&quot;
+      this header MUST be present at most once in any message
+    </documentation>
+                </annotation>
+                <complexType>
+                    <choice>
+                        <element name="id" type="string"/>
+                        <element name="setId" type="string"/>
+                        <element name="notFound" type="string"/>
+                    </choice>
+                </complexType>
+            </element>
+        </schema>
+
+        <xs:schema>
+            <xs:import
+                namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailCatalog.xsd"
+                schemaLocation="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailCatalog.xsd"/>
+            <xs:import
+                namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd"
+                schemaLocation="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd"/>
+            <xs:import
+                namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd"
+                schemaLocation="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd"/>
+        </xs:schema>
+
+    </wsdl:types>
+    <wsdl:message name='BadOrderFault'>
+        <wsdl:part name='Reason' element='order:BadOrderReason'/>
+    </wsdl:message>
+    <wsdl:message name='InvalidProductCodeFault'>
+        <wsdl:part name='InvalidProductCode' element='order:InvalidProductCode'/>
+    </wsdl:message>
+    <wsdl:message name='getCatalogRequest'/>
+    <wsdl:message name='getCatalogResponse'>
+        <wsdl:part name='return' type='cat:CatalogType'>
+            <wsdl:documentation>the product catalog</wsdl:documentation>
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name='runtimeHeaders_0'>
+        <wsdl:part name='header_0' element='ns0:instance'/>
+    </wsdl:message>
+    <wsdl:message name='submitOrderRequest'>
+        <wsdl:part name='PartsOrder' type='order:PartsOrderType'>
+            <wsdl:documentation>XML structure holding product/quantity pairs</wsdl:documentation>
+        </wsdl:part>
+        <wsdl:part name='CustomerDetails' type='order:CustomerDetailsType'/>
+        <wsdl:part name='ConfigurationHeader' element='cfg:Configuration'/>
+    </wsdl:message>
+    <wsdl:message name='submitOrderResponse'>
+        <wsdl:part name='return' type='order:PartsOrderResponseType'>
+
+            <wsdl:documentation>XML structure holding product/quantity ordered pairs, with optional failure message</wsdl:documentation>
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name='RetailerPortType'>
+        <wsdl:operation name='getCatalog'>
+            <wsdl:documentation>returns a product catalog</wsdl:documentation>
+            <wsdl:input name='getCatalogRequest' message='tns:getCatalogRequest'/>
+            <wsdl:output name='getCatalogResponse' message='tns:getCatalogResponse'/>
+        </wsdl:operation>
+        <wsdl:operation name='submitOrder'>
+
+            <wsdl:documentation>Accept an order for quantities of multiple products</wsdl:documentation>
+            <wsdl:input name='submitOrderRequest' message='tns:submitOrderRequest'/>
+            <wsdl:output name='submitOrderResponse' message='tns:submitOrderResponse'/>
+            <wsdl:fault name='InvalidProductCode' message='tns:InvalidProductCodeFault'/>
+            <wsdl:fault name='BadOrder' message='tns:BadOrderFault'/>
+            <wsdl:fault name='ConfigurationFault' message='cfgw:ConfigurationFaultMessage'/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name='RetailerSoapBinding' type='tns:RetailerPortType'>
+        <wsdl:documentation>
+            <wsi:Claim conformsTo="http://ws-i.org/profiles/basic1.0/"/>
+        </wsdl:documentation>
+        <soap:binding transport='http://schemas.xmlsoap.org/soap/http' style='rpc'/>
+        <wsdl:operation name='getCatalog'>
+            <soap:operation soapAction='' style='rpc'/>
+            <wsdl:input>
+                <soap:body use='literal' namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use='literal' namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name='submitOrder'>
+            <soap:operation soapAction='' style='rpc'/>
+            <wsdl:input>
+                <soap:body parts='PartsOrder CustomerDetails' use='literal' namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+                <soap:header message='tns:submitOrderRequest' part='ConfigurationHeader' use='literal' wsdl:required='true'>
+                    <soap:headerfault message='cfgw:ConfigurationFaultMessage' part='ConfigurationFault' use='literal' wsdl:required='true'/>
+                </soap:header>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use='literal' namespace='http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Retailer.wsdl'/>
+            </wsdl:output>
+            <wsdl:fault name='InvalidProductCode'>
+                <soap:fault name='InvalidProductCode' use='literal'/>
+            </wsdl:fault>
+            <wsdl:fault name='BadOrder'>
+                <soap:fault name='BadOrder' use='literal'/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name='RetailerServiceImplementation'>
+        <wsdl:port name='RetailerServiceImplementationPort' binding='tns:RetailerSoapBinding'>
+            <soap:address location='http://localhost:@ODE_HTTP_PORT@/wsi-server/scm/retailer'/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

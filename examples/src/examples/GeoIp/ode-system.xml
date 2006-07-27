@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor name="GeoIp" 
+  wsdlUri="urn:/GeoIp.wsdl"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+  xmlns="http://www.fivesight.com/ode/system-descriptor/" 
+  xmlns:wsn="http://www.webservicex.net">
+  <channels>
+    <channel name="inboundChannel" />
+    <channel name="outboundChannel" />
+  </channels>
+  <services>
+    <service name="GeoIpProxy" provider="uri:protocoladapter.soap">
+      <imports>
+        <port name="GeoIpSoap" type="wsn:GeoIPServiceSoap" channel-ref="inboundChannel"/>
+      </imports>
+    </service>
+    <service name="GeoIpService.OutboundSoapService" provider="uri:protocoladapter.soap">
+      <properties>
+        <property name="serviceWsdlNamespace" value="http://www.webservicex.net"/>
+        <property name="serviceWsdlName" value="GeoIPService"/>
+      </properties>
+      <exports>
+        <port name="GeoIPServiceSoap" type="wsn:GeoIPServiceSoap" channel-ref="outboundChannel"/>
+      </exports>
+    </service>
+
+    <service name="GeoIp" provider="uri:bpelProvider">
+     <properties>
+        <property name="compiledProcess" value="GeoIp.cbp"/>
+      </properties>
+      <imports>
+        <port name="outboundPartnerLink" type="wsn:GeoIPServiceSoap" channel-ref="outboundChannel"/>
+      </imports>
+      <exports>
+        <port name="inboundPartnerLink" type="wsn:GeoIPServiceSoap" channel-ref="inboundChannel"/>
+      </exports>
+    </service>
+  </services>
+</system-descriptor>

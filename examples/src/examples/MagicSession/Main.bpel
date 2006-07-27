@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<process name="MagicSessionMain"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+         xmlns:test="http://ode/bpel/unit-test.wsdl">
+
+  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="initiatorPartnerLink" partnerLinkType="test:InitiatorPartnerLinkType"
+                 myRole="me"/>
+    <partnerLink name="responderPartnerLink" partnerLinkType="test:ResponderPartnerLinkType"
+                 myRole="main" partnerRole="responder" initializePartnerRole="yes"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy" messageType="test:DummyMessage"/>
+    <variable name="dummy2" messageType="test:Dummy2Message"/>
+    <variable name="dummy3" messageType="test:Dummy3Message"/>
+    <variable name="eprmessage" messageType="test:EndpointMessage"/>
+    <variable name="result" messageType="test:ResultMessage"/>
+  </variables>
+
+  <sequence>
+    <!-- Start message -->
+    <receive name="start" partnerLink="initiatorPartnerLink"
+             portType="test:MSMainInitiatePortType" operation="execute" createInstance="yes" variable="dummy"/>
+
+    <!-- Initializing message, starting the responder process with the magic session
+         and expecting a callback -->
+    <assign>
+      <copy>
+        <from>123</from>
+        <to variable="dummy2" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="initiate" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="initiate" inputVariable="dummy2"/>
+
+    <receive name="callback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="callback" variable="dummy2"/>
+
+    <!-- Initializing message, calling our partner again with magic session (double invocation) -->
+    <assign>
+      <copy>
+        <from>123</from>
+        <to variable="dummy3" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="get-endpoint" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="doubleCall" inputVariable="dummy3"/>
+
+    <receive name="doubleCallback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="doubleCallback" variable="dummy3"/>
+
+    <!-- Sending our endpoint explicitly to have our partner calling us back using it
+         (demonstrating assignment) -->
+    <assign>
+      <copy>
+        <from partnerLink="responderPartnerLink" endpointReference="myRole"/>
+        <to variable="eprmessage" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="eprPassing" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="eprPassing" inputVariable="eprmessage"/>
+
+    <receive name="tripleCallback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="tripleCallback" variable="eprmessage"/>
+
+    <!-- Done. -->
+    <assign>
+      <copy>
+        <from>'OK'</from>
+        <to variable="result" part="ack"/>
+      </copy>
+    </assign>
+    <reply name="end" partnerLink="initiatorPartnerLink"
+           portType="test:MSMainInitiatePortType" operation="execute" variable="result"/>
+
+  </sequence>
+</process>

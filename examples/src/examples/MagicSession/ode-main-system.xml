@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system-descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.fivesight.com/ode/system-descriptor/ http://www.fivesight.com/ode/system-descriptor/"
+                   xmlns:main="http://ode/bpel/unit-test.wsdl"
+                   xmlns="http://www.fivesight.com/ode/system-descriptor/"
+                   name="MSMain"
+                   wsdlUri="urn:/Main.wsdl">
+  <channels>
+    <channel name="inboundChannel1" />
+    <channel name="inboundChannel2" />
+    <channel name="outboundChannel" />
+  </channels>
+  <services>
+    <service name="MSMainService" provider="uri:protocoladapter.soap">
+      <imports>
+        <port name="MSMainPort" type="main:MSMainPortType" channel-ref="inboundChannel1" />
+        <port name="MSMainInitiatePort" type="main:MSMainInitiatePortType" channel-ref="inboundChannel2" />
+      </imports>
+    </service>
+    <service name="msMainService.OutboundSoapService" provider="uri:protocoladapter.soap">
+      <properties>
+        <property name="serviceWsdlNamespace" value="http://ode/bpel/unit-test.wsdl"/>
+        <property name="serviceWsdlName" value="MSResponderService"/>
+      </properties>
+      <exports>
+        <port name="MSResponderPort" type="main:MSResponderPortType" channel-ref="outboundChannel"/>
+      </exports>
+    </service>
+    <service name="msMain.BpelService" provider="uri:bpelProvider">
+      <properties>
+        <property name="compiledProcess" value="MagicSessionMain.cbp"/>
+      </properties>
+      <imports>
+        <port name="responderPartnerLink.responder" type="main:MSResponderPortType" channel-ref="outboundChannel" />
+      </imports>
+      <exports>
+        <port name="responderPartnerLink.main" type="main:MSMainPortType" channel-ref="inboundChannel1" />
+        <port name="initiatorPartnerLink.me" type="main:MSMainInitiatePortType" channel-ref="inboundChannel2" />
+      </exports>
+    </service>
+  </services>
+</system-descriptor>

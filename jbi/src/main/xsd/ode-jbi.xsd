@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://ode.intalio.org/schemas/2006/04/01/ode-jbi"
+           xmlns:dd="http://ode.intalio.org/schemas/2006/04/01/ode-jbi"
+           elementFormDefault="qualified">
+
+
+</xs:schema>
