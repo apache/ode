@@ -19,14 +19,13 @@
 
 package org.apache.ode.jacob;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.ArrayUtils;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -39,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
  * would be represented by the following Java class:
  * <code>
  * <pre>
- * public class Cell extends Abstraction {
+ * public class Cell extends JacobRunnable {
  *   private CellChannel s;
  *   private Object v;
  *   public Cell(CellChannel s, Object v) {
@@ -47,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  *     this.v = v;
  *   }
  *   public void self() {
- *     object(new CellML(s) { read(...) {...}
+ *     object(new CellChannelListener(s) { read(...) {...}
  *                            write(...) {...} } );
  *   }
  * }
@@ -70,13 +69,13 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
-public abstract class Abstraction extends JavaClosure {
-  private static final Log __log = LogFactory.getLog(Abstraction.class);
+public abstract class JacobRunnable extends JacobObject {
+  private static final Log __log = LogFactory.getLog(JacobRunnable.class);
 
   private static final Set<Method> IMPLEMENTED_METHODS;
   static {
     try {
-      IMPLEMENTED_METHODS = Collections.singleton(Abstraction.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY));
+      IMPLEMENTED_METHODS = Collections.singleton(JacobRunnable.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY));
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
@@ -112,7 +111,7 @@ public abstract class Abstraction extends JavaClosure {
   }
 
   /**
-   * @see JavaClosure#log
+   * @see JacobObject#log
    */
   protected Log log() {
     return __log;

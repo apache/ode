@@ -18,7 +18,7 @@
  */
 package org.apache.ode.jacob;
 
-public abstract class Sequence extends Abstraction {
+public abstract class Sequence extends JacobRunnable {
   private int _size;
   private int _step;
   private SynchChannel _done;
@@ -43,7 +43,7 @@ public abstract class Sequence extends Abstraction {
       }
     } else {
       SynchChannel r = newChannel(SynchChannel.class);
-      object(new SynchML(r) {
+      object(new SynchChannelListener(r) {
           public void ret() {
             ++_step;
             instance(Sequence.this);
@@ -53,5 +53,5 @@ public abstract class Sequence extends Abstraction {
     }
   }
 
-  protected abstract Abstraction reduce(int n, SynchChannel r);
+  protected abstract JacobRunnable reduce(int n, SynchChannel r);
 }

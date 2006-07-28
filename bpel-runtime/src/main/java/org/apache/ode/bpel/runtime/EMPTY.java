@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- * Abstraction that performs the work of the <code>empty</code> activity.
+ * JacobRunnable that performs the work of the <code>empty</code> activity.
  */
 class EMPTY extends ACTIVITY {
 	private static final long serialVersionUID = 1L;

@@ -18,15 +18,23 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.ML;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
+import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -36,7 +44,7 @@ import java.util.Set;
 /**
  * Message event handler.
  */
-class EH_EVENT extends BpelAbstraction {
+class EH_EVENT extends BpelJacobRunnable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -93,12 +101,12 @@ class EH_EVENT extends BpelAbstraction {
    * Template that does the actual selection interaction with the runtime system, and
    * then waits on the pick response channel.
    */
-  class SELECT extends BpelAbstraction {
+  class SELECT extends BpelJacobRunnable {
 
 		private static final long serialVersionUID = 1L;
 
 		/**
-     * @see org.apache.ode.jacob.Abstraction#self()
+     * @see org.apache.ode.jacob.JacobRunnable#self()
      */
     public void self() {
       Selector selector;
@@ -139,7 +147,7 @@ class EH_EVENT extends BpelAbstraction {
   /**
    * Template that represents the waiting for a pick response.
    */
-  private class WAITING extends BpelAbstraction {
+  private class WAITING extends BpelJacobRunnable {
 		private static final long serialVersionUID = 1L;
 		private PickResponseChannel _pickResponseChannel;
 
@@ -150,10 +158,10 @@ class EH_EVENT extends BpelAbstraction {
     public void self() {
 
       if (!_active.isEmpty() || _pickResponseChannel != null) {
-        HashSet<ML> mlset = new HashSet<ML>();
+        HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();
 
         if (!_terminated) {
-          mlset.add(new TerminationML(_tc) {
+          mlset.add(new TerminationChannelListener(_tc) {
             private static final long serialVersionUID = 7666910462948788042L;
 
             public void terminate() {
@@ -168,7 +176,7 @@ class EH_EVENT extends BpelAbstraction {
         }
 
         if (!_stopped) {
-          mlset.add(new EventHandlerControlML(_ehc) {
+          mlset.add(new EventHandlerControlChannelListener(_ehc) {
             private static final long serialVersionUID = -1050788954724647970L;
 
             public void stop() {
@@ -182,7 +190,7 @@ class EH_EVENT extends BpelAbstraction {
         }
 
         for (final ActivityInfo ai : _active) {
-          mlset.add(new ParentScopeML(ai.parent) {
+          mlset.add(new ParentScopeChannelListener(ai.parent) {
             private static final long serialVersionUID = 5341207762415360982L;
 
             public void compensate(OScope scope, SynchChannel ret) {
@@ -204,7 +212,7 @@ class EH_EVENT extends BpelAbstraction {
         }
 
         if (_pickResponseChannel != null)
-          mlset.add(new PickResponseML(_pickResponseChannel) {
+          mlset.add(new PickResponseChannelListener(_pickResponseChannel) {
             private static final long serialVersionUID = -4929999153478677288L;
 
 

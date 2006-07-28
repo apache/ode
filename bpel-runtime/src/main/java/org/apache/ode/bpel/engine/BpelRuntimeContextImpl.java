@@ -18,19 +18,28 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.jacob.Abstraction;
-import org.apache.ode.jacob.vpu.FastSoupImpl;
-import org.apache.ode.jacob.vpu.JacobVPU;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.ProcessCompletionEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
-import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
+import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -38,12 +47,12 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.BpelAbstraction;
+import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
@@ -55,33 +64,27 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.bpel.epr.WSDL11Endpoint;
-import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
+import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.ObjectPrinter;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import sun.rmi.transport.Endpoint;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -100,8 +103,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   /** JACOB VPU */
   protected JacobVPU vpu;
 
-  /** JACOB Soup (state) */
-  protected FastSoupImpl soup;
+  /** JACOB ExecutionQueue (state) */
+  protected ExecutionQueueImpl soup;
 
   private MyRoleMessageExchangeImpl _instantiatingMessageExchange;
 
@@ -867,7 +870,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     _outstandingRequests.associate(responsechannel, mex.getMessageExchangeId());
 
     final String mexId = mex.getMessageExchangeId();
-    vpu.inject(new Abstraction() {
+    vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = 3168964409165899533L;
 
       public void self() {
@@ -889,7 +892,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
       return;
     }
 
-    vpu.inject(new Abstraction() {
+    vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = -7767141033611036745L;
 
       public void self() {
@@ -908,7 +911,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     _dao.getProcess().removeRoutes(id, _dao);
     _outstandingRequests.cancel(id);
 
-    vpu.inject(new Abstraction() {
+    vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = 6157913683737696396L;
 
       public void self() {
@@ -925,7 +928,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   void invocationResponse(final String mexid, final String responseChannelId) {
 
-    vpu.inject(new BpelAbstraction() {
+    vpu.inject(new BpelJacobRunnable() {
       private static final long serialVersionUID = -1095444335740879981L;
 
       public void self() {
@@ -984,7 +987,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   private void initVPU() {
     vpu = new JacobVPU();
     vpu.registerExtension(BpelRuntimeContext.class, this);
-    soup = new FastSoupImpl(null);
+    soup = new ExecutionQueueImpl(null);
     soup.setReplacementMap(_bpelProcess._replacementMap);
     vpu.setContext(soup);
   }

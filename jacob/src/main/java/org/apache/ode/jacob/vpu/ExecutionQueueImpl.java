@@ -18,45 +18,66 @@
  */
 package org.apache.ode.jacob.vpu;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.JavaClosure;
-import org.apache.ode.jacob.ML;
-import org.apache.ode.jacob.soup.*;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.JacobObject;
+import org.apache.ode.jacob.soup.Comm;
+import org.apache.ode.jacob.soup.CommChannel;
+import org.apache.ode.jacob.soup.CommGroup;
+import org.apache.ode.jacob.soup.CommRecv;
+import org.apache.ode.jacob.soup.CommSend;
+import org.apache.ode.jacob.soup.Continuation;
+import org.apache.ode.jacob.soup.ExecutionQueue;
+import org.apache.ode.jacob.soup.ExecutionQueueObject;
+import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ArrayUtils;
 import org.apache.ode.utils.ObjectPrinter;
 
-import java.io.*;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * A fast, in-memory {@link org.apache.ode.jacob.soup.Soup} implementation.
+ * A fast, in-memory {@link org.apache.ode.jacob.soup.ExecutionQueue} implementation.
  */
-public class FastSoupImpl implements Soup {
+public class ExecutionQueueImpl implements ExecutionQueue {
   /** Class-level logger. */
-  private static final Log __log = LogFactory.getLog(FastSoupImpl.class);
+  private static final Log __log = LogFactory.getLog(ExecutionQueueImpl.class);
 
   private ClassLoader _classLoader;
 
   /**
-   * Cached set of enqueued {@link Reaction} objects (i.e. those reed using the
-   * {@link #enqueueReaction(org.apache.ode.jacob.soup.Reaction) method}). These reactions are
+   * Cached set of enqueued {@link Continuation} objects (i.e. those reed using the
+   * {@link #enqueueReaction(org.apache.ode.jacob.soup.Continuation) method}). These reactions are
    * "cached"--that is it is not sent directly to the DAO layer--to minimize
    * unnecessary serialization/deserialization of closures. This is a pretty useful
-   * optimization, as most {@link Reaction}s are enqueued, and then immediately
-   * dequeued in the next cycle. By caching {@link Reaction}s, we eliminate practically
+   * optimization, as most {@link Continuation}s are enqueued, and then immediately
+   * dequeued in the next cycle. By caching {@link Continuation}s, we eliminate practically
    * all serialization of these objects, the only exception being cases where the
    * system decides to stop processing a particular soup despite the soup being
    * able to make forward progress; this scenario would occur if a maximum processign
    * time-per-instance policy were in effect.
    */
-  private Set<Reaction> _reactions = new HashSet<Reaction>();
+  private Set<Continuation> _reactions = new HashSet<Continuation>();
   private Map<Integer, ChannelFrame> _channels = new HashMap<Integer, ChannelFrame>();
 
   /** The "expected" cycle counter, use to detect database serialization issues. */
@@ -64,11 +85,11 @@ public class FastSoupImpl implements Soup {
 
   private int _objIdCounter;
 
-  private SoupStatistics _statistics = new SoupStatistics();
+  private ExecutionQueueStatistics _statistics = new ExecutionQueueStatistics();
   private ReplacementMap _replacementMap;
   private Serializable _gdata;
 
-  public FastSoupImpl(ClassLoader classLoader) {
+  public ExecutionQueueImpl(ClassLoader classLoader) {
     _classLoader = classLoader;
   }
 
@@ -91,32 +112,32 @@ public class FastSoupImpl implements Soup {
   }
 
 
-  public void enqueueReaction(Reaction reaction) {
+  public void enqueueReaction(Continuation continuation) {
     if (__log.isTraceEnabled())
-      __log.trace(ObjectPrinter.stringifyMethodEnter("enqueueReaction", new Object[] { "reaction", reaction} ));
+      __log.trace(ObjectPrinter.stringifyMethodEnter("enqueueReaction", new Object[] { "continuation", continuation} ));
 
-    verifyNew(reaction);
-    _reactions.add(reaction);
+    verifyNew(continuation);
+    _reactions.add(continuation);
   }
 
-  public Reaction dequeueReaction() {
+  public Continuation dequeueReaction() {
     if (__log.isTraceEnabled()) {
       __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", ArrayUtils.EMPTY_OBJECT_ARRAY));
     }
 
-    Reaction reaction = null;
+    Continuation continuation = null;
     if (!_reactions.isEmpty()) {
       Iterator it = _reactions.iterator();
-      reaction = (Reaction)it.next();
+      continuation = (Continuation)it.next();
       it.remove();
     }
-    // At this point it is wise to clone the reaction, so that we do not have weird
+    // At this point it is wise to clone the continuation, so that we do not have weird
     // concurrency issues. We only clone the closure, the arguments should not be
     // a problem.
-//    Reaction clone = new Reaction(cloneClosure(reaction.getClosure()), reaction.getMethod(), reaction.getArgs());
-//    clone.setDescription(reaction.getDescription());
+//    Continuation clone = new Continuation(cloneClosure(continuation.getClosure()), continuation.getMethod(), continuation.getArgs());
+//    clone.setDescription(continuation.getDescription());
 //    return clone;
-    return reaction;
+    return continuation;
   }
 
   public void add(CommGroup group) {
@@ -213,13 +234,13 @@ public class FastSoupImpl implements Soup {
     _channels.clear();
     _reactions.clear();
 
-    SoupInputStream sis = new SoupInputStream(iis);
+    ExecutionQueueInputStream sis = new ExecutionQueueInputStream(iis);
 
     _objIdCounter = sis.readInt();
     _currentCycle = sis.readInt();
     int reactions = sis.readInt();
     for (int i = 0; i < reactions; ++i) {
-      JavaClosure closure = (JavaClosure)sis.readObject();
+      JacobObject closure = (JacobObject)sis.readObject();
       String methodName = sis.readUTF();
       Method method = closure.getMethod(methodName);
       int numArgs = sis.readInt();
@@ -227,7 +248,7 @@ public class FastSoupImpl implements Soup {
       for (int j = 0; j < numArgs; ++j) {
         args[j] = sis.readObject();
       }
-      _reactions.add(new Reaction(closure,  method, args));
+      _reactions.add(new Continuation(closure,  method, args));
     }
 
     int numChannels = sis.readInt();
@@ -253,7 +274,7 @@ public class FastSoupImpl implements Soup {
   public void write(OutputStream oos) throws IOException {
     flush();
 
-    SoupOutputStream sos = new SoupOutputStream(oos);
+    ExecutionQueueOutputStream sos = new ExecutionQueueOutputStream(oos);
 
     sos.writeInt(_objIdCounter);
     sos.writeInt(_currentCycle);
@@ -261,12 +282,12 @@ public class FastSoupImpl implements Soup {
     // Write out the reactions.
     sos.writeInt(_reactions.size());
     for (Iterator i = _reactions.iterator();i.hasNext(); ) {
-      Reaction reaction = (Reaction) i.next();
-      sos.writeObject(reaction.getClosure());
-      sos.writeUTF(reaction.getMethod().getName());
-      sos.writeInt(reaction.getArgs() == null ? 0 : reaction.getArgs().length);
-      for (int j = 0; reaction.getArgs() != null && j < reaction.getArgs().length; ++j)
-        sos.writeObject(reaction.getArgs()[j]);
+      Continuation continuation = (Continuation) i.next();
+      sos.writeObject(continuation.getClosure());
+      sos.writeUTF(continuation.getMethod().getName());
+      sos.writeInt(continuation.getArgs() == null ? 0 : continuation.getArgs().length);
+      for (int j = 0; continuation.getArgs() != null && j < continuation.getArgs().length; ++j)
+        sos.writeObject(continuation.getArgs()[j]);
     }
 
     sos.writeInt(_channels.values().size());
@@ -338,8 +359,8 @@ public class FastSoupImpl implements Soup {
       ps.println("-- REACTIONS");
       int cnt =0;
       for (Iterator i = _reactions.iterator(); i.hasNext();) {
-        Reaction reaction = (Reaction) i.next();
-        ps.println("   #" + (++cnt) + ":  " +  reaction.toString());
+        Continuation continuation = (Continuation) i.next();
+        ps.println("   #" + (++cnt) + ":  " +  continuation.toString());
       }
     }
   }
@@ -355,11 +376,11 @@ public class FastSoupImpl implements Soup {
       MessageFrame mframe = cframe.msgFrames.iterator().next();
       ObjectFrame oframe = cframe.objFrames.iterator().next();
 
-      Reaction reaction = new Reaction(oframe.continuation, oframe.continuation.getMethod(mframe.method),  mframe.args);
+      Continuation continuation = new Continuation(oframe._continuation, oframe._continuation.getMethod(mframe.method),  mframe.args);
       if(__log.isInfoEnabled()) {
-      	reaction.setDescription(channel + " ? {...} | " + channel + " ! " + mframe.method + "(...)");
+      	continuation.setDescription(channel + " ? {...} | " + channel + " ! " + mframe.method + "(...)");
       }
-      enqueueReaction(reaction);
+      enqueueReaction(continuation);
       if (!mframe.commGroupFrame.replicated) {
         removeCommGroup(mframe.commGroupFrame);
       }
@@ -374,16 +395,16 @@ public class FastSoupImpl implements Soup {
   }
 
   // TODO revisit: apparently dead wood
-//  private JavaClosure cloneClosure(JavaClosure closure) {
+//  private JacobObject cloneClosure(JacobObject closure) {
 //    long startTime = System.currentTimeMillis();
 //    try {
 //      ByteArrayOutputStream bos = new ByteArrayOutputStream(10000);
-//      SoupOutputStream sos = new SoupOutputStream(bos);
+//      ExecutionQueueOutputStream sos = new ExecutionQueueOutputStream(bos);
 //      sos.writeObject(closure);
 //      sos.close();
 //      long readStart = System.currentTimeMillis();
-//      SoupInputStream cis = new SoupInputStream(new ByteArrayInputStream(bos.toByteArray()));
-//      JavaClosure ret = (JavaClosure) cis.readObject();
+//      ExecutionQueueInputStream cis = new ExecutionQueueInputStream(new ByteArrayInputStream(bos.toByteArray()));
+//      JacobObject ret = (JacobObject) cis.readObject();
 //      cis.close();
 //
 //      long copyTime = System.currentTimeMillis() - startTime;
@@ -400,22 +421,22 @@ public class FastSoupImpl implements Soup {
 //      }
 //      return ret;
 //    } catch (Exception ex) {
-//      throw new RuntimeException("Internal Error in FastSoupImpl.java", ex);
+//      throw new RuntimeException("Internal Error in ExecutionQueueImpl.java", ex);
 //    }
 //  }
 
   /**
-   * Verify that a {@link SoupObject} is new, that is it has not already been
+   * Verify that a {@link ExecutionQueueObject} is new, that is it has not already been
    * added to the soup.
    * @param so object to check.
    * @throws IllegalArgumentException in case the object is not new
    */
-  private void verifyNew(SoupObject so) throws IllegalArgumentException {
+  private void verifyNew(ExecutionQueueObject so) throws IllegalArgumentException {
     if (so.getId() != null)
       throw new IllegalArgumentException("The object " + so + " is not new!");
   }
 
-  private void assignId(SoupObject so, Object id) {
+  private void assignId(ExecutionQueueObject so, Object id) {
     so.setId(id);
   }
 
@@ -561,23 +582,23 @@ public class FastSoupImpl implements Soup {
   }
 
   private static class ObjectFrame extends CommFrame implements Externalizable {
-    ML continuation;
+    ChannelListener _continuation;
 
     public ObjectFrame() { super() ; }
 
-    public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ML continuation) {
+    public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener continuation) {
       super(commGroupFrame, channelFrame);
-      this.continuation = continuation;
+      this._continuation = continuation;
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
       super.readExternal(in);
-      continuation = (ML)in.readObject();
+      _continuation = (ChannelListener)in.readObject();
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
       super.writeExternal(out);
-      out.writeObject(continuation);
+      out.writeObject(_continuation);
     }
   }
 
@@ -619,10 +640,10 @@ public class FastSoupImpl implements Soup {
    *
    * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
    */
-  private class SoupOutputStream extends ObjectOutputStream {
+  private class ExecutionQueueOutputStream extends ObjectOutputStream {
     private Set<Object> _serializedChannels = new HashSet<Object>();
 
-    public SoupOutputStream(OutputStream outputStream) throws IOException {
+    public ExecutionQueueOutputStream(OutputStream outputStream) throws IOException {
       super(new GZIPOutputStream(outputStream));
       enableReplaceObject(true);
     }
@@ -670,10 +691,10 @@ public class FastSoupImpl implements Soup {
 
   /**
    */
-  public class SoupInputStream extends ObjectInputStream {
+  public class ExecutionQueueInputStream extends ObjectInputStream {
     private Set<CommChannel> _deserializedChannels = new HashSet<CommChannel>();
 
-    public SoupInputStream(InputStream in) throws IOException {
+    public ExecutionQueueInputStream(InputStream in) throws IOException {
       super(new GZIPInputStream(in));
       enableResolveObject(true);
     }
@@ -751,7 +772,7 @@ public class FastSoupImpl implements Soup {
   }
 
 
-  private static final class SoupStatistics {
+  private static final class ExecutionQueueStatistics {
     public long cloneClosureTimeMs;
     public long cloneClosureBytes;
     public long cloneClousreCount;

@@ -18,16 +18,16 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.Abstraction;
-import org.apache.ode.jacob.vpu.JacobVPU;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -40,8 +40,8 @@ import javax.xml.namespace.QName;
  * Created on Jan 12, 2004 at 5:41:27 PM.
  * @author Maciej Szefler
  */
-public abstract class BpelAbstraction extends Abstraction {
-  private static final Log __log = LogFactory.getLog(BpelAbstraction.class);
+public abstract class BpelJacobRunnable extends JacobRunnable {
+  private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
 
   protected BpelRuntimeContext getBpelRuntimeContext() {
     BpelRuntimeContext nativeApi = (BpelRuntimeContext) JacobVPU.activeJacobThread().getExtension(BpelRuntimeContext.class);
@@ -66,7 +66,7 @@ public abstract class BpelAbstraction extends Abstraction {
   }
   
 
-  protected Abstraction createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
+  protected JacobRunnable createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     return new ACTIVITYGUARD(childInfo, scopeFrame, linkFrame);
   }
 

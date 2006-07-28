@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 /**
- * Abstraction that performs the work of the <code>empty</code> activity.
+ * JacobRunnable that performs the work of the <code>empty</code> activity.
  */
 class TERMINATE extends ACTIVITY {
 

@@ -18,30 +18,36 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.vpu.FastSoupImpl;
-import org.apache.ode.jacob.vpu.JacobVPU;
+import junit.framework.TestCase;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OCatch;
+import org.apache.ode.bpel.o.OEmpty;
+import org.apache.ode.bpel.o.OFaultHandler;
+import org.apache.ode.bpel.o.OFlow;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.o.OThrow;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
-import java.util.Collection;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
+import org.apache.ode.jacob.vpu.JacobVPU;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-
-import junit.framework.TestCase;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * Test core BPEL processing capabilities.
@@ -50,7 +56,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
   private boolean _completedOk;
   private boolean _terminate;
   private FaultData _fault;
-  private FastSoupImpl _soup;
+  private ExecutionQueueImpl _soup;
   private JacobVPU _vpu;
   private Long _pid;
   private long _seq;
@@ -59,7 +65,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     _completedOk= false;
     _terminate = false;
     _fault = null;
-    _soup = new FastSoupImpl(CoreBpelTest.class.getClassLoader());
+    _soup = new ExecutionQueueImpl(CoreBpelTest.class.getClassLoader());
     _vpu = new JacobVPU(_soup);
     _vpu.registerExtension(BpelRuntimeContext.class, this);
     _pid = new Long(19355);

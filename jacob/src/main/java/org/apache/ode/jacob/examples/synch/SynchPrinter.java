@@ -18,10 +18,10 @@
  */
 package org.apache.ode.jacob.examples.synch;
 
-import org.apache.ode.jacob.Abstraction;
+import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchML;
-import org.apache.ode.jacob.vpu.FastSoupImpl;
+import org.apache.ode.jacob.SynchChannelListener;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
 /**
@@ -32,13 +32,13 @@ import org.apache.ode.jacob.vpu.JacobVPU;
  */
 public class SynchPrinter  {
 
-  public static final class SystemPrinter extends Abstraction {
+  public static final class SystemPrinter extends JacobRunnable {
     private SynchPrintChannel self;
     public SystemPrinter(SynchPrintChannel self) {
       this.self = self;
     }
     public void self() {
-      object(true, new SynchPrintML(self) {
+      object(true, new SynchPrintChannelListener(self) {
         public SynchChannel print(String msg) {
           System.out.println(msg);
           return null;
@@ -47,15 +47,15 @@ public class SynchPrinter  {
     }
   }
 
-  public static final class Tester extends Abstraction {
+  public static final class Tester extends JacobRunnable {
     public void self() {
       final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
       instance(new SystemPrinter(p));
-      object(new SynchML(p.print("1")) {
+      object(new SynchChannelListener(p.print("1")) {
         public void ret() {
-          object(new SynchML(p.print("2")) {
+          object(new SynchChannelListener(p.print("2")) {
             public void ret() {
-              object(new SynchML(p.print("3")) {
+              object(new SynchChannelListener(p.print("3")) {
                 public void ret() {
                 }
               });
@@ -68,7 +68,7 @@ public class SynchPrinter  {
 
   public static void main(String args[]) {
     JacobVPU vpu = new JacobVPU();
-    vpu.setContext(new FastSoupImpl(null));
+    vpu.setContext(new ExecutionQueueImpl(null));
     vpu.inject(new Tester());
     while (vpu.execute()) {
       // run

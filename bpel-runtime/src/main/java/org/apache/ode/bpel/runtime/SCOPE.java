@@ -18,20 +18,37 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.ML;
-import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.bpel.evt.ScopeFaultEvent;
-import org.apache.ode.bpel.evt.ScopeStartEvent;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.runtime.channels.*;
-
-import java.io.Serializable;
-import java.util.*;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.evt.ScopeFaultEvent;
+import org.apache.ode.bpel.evt.ScopeStartEvent;
+import org.apache.ode.bpel.o.OBase;
+import org.apache.ode.bpel.o.OCatch;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OEventHandler;
+import org.apache.ode.bpel.o.OFaultHandler;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.runtime.channels.CompensationChannel;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.SynchChannel;
+
+import javax.xml.namespace.QName;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * An active scope.
@@ -121,10 +138,10 @@ class SCOPE extends ACTIVITY {
 
     public void self() {
       if (_child != null || !_eventHandlers.isEmpty()) {
-        HashSet<ML> mlSet = new HashSet<ML>();
+        HashSet<ChannelListener> mlSet = new HashSet<ChannelListener>();
 
         // Listen to messages from our parent.
-        mlSet.add(new TerminationML(_self.self) {
+        mlSet.add(new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = 1913414844895865116L;
 
         public void terminate() {
@@ -146,7 +163,7 @@ class SCOPE extends ACTIVITY {
 
         // Handle messages from the child if it is still alive
         if (_child != null)
-          mlSet.add(new ParentScopeML(_child.parent) {
+          mlSet.add(new ParentScopeChannelListener(_child.parent) {
             private static final long serialVersionUID = -6934246487304813033L;
 
 
@@ -187,7 +204,7 @@ class SCOPE extends ACTIVITY {
         for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
           final EventHandlerInfo ehi = i.next();
 
-          mlSet.add(new ParentScopeML(ehi.psc) {
+          mlSet.add(new ParentScopeChannelListener(ehi.psc) {
             private static final long serialVersionUID = -4694721357537858221L;
 
             public void compensate(OScope scope, SynchChannel ret) {
@@ -294,7 +311,7 @@ class SCOPE extends ACTIVITY {
             // Create the fault handler scope.
             instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
-            object(new ParentScopeML(faultHandlerActivity.parent) {
+            object(new ParentScopeChannelListener(faultHandlerActivity.parent) {
             private static final long serialVersionUID = -6009078124717125270L;
 
             public void compensate(OScope scope, SynchChannel ret) {
