@@ -1,0 +1,10 @@
+<projectDescription>
+  <name>ode-jca-rar</name>
+  <comment/>
+  <projects>
+    <project>ode-utils</project>
+    <project>ode-jca-ra</project>
+  </projects>
+  <buildSpec/>
+  <natures/>
+</projectDescription>
