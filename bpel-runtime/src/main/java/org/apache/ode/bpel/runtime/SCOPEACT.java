@@ -29,7 +29,7 @@ public class SCOPEACT extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public void self() {
+  public void run() {
     ScopeFrame newFrame = new ScopeFrame(
             (OScope) _self.o,getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,(OScope) _self.o),
             _scopeFrame,

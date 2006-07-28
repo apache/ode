@@ -39,7 +39,7 @@ class THROW extends ACTIVITY {
     _othrow = (OThrow) self.o;
   }
 
-  public void self() {
+  public void run() {
     FaultData fault = null;
     if(_othrow.faultVariable != null){
 			try {

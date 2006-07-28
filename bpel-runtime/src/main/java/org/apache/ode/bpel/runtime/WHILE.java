@@ -48,7 +48,7 @@ class WHILE extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public void self() {
+  public void run() {
 
     boolean condResult = false;
 
@@ -111,7 +111,7 @@ class WHILE extends ACTIVITY {
       _child = child;
     }
 
-    public void self() {
+    public void run() {
       object(false, new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = -5471984635653784051L;
 

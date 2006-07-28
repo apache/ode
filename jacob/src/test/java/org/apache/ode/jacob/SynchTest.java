@@ -30,7 +30,7 @@ public class SynchTest extends TestCase {
 
   // TODO still needed? apparently unused..
   private static final class P extends JacobRunnable {
-    public void self() {
+    public void run() {
     }
   }
 }

@@ -37,7 +37,7 @@ public class SynchPrinter  {
     public SystemPrinter(SynchPrintChannel self) {
       this.self = self;
     }
-    public void self() {
+    public void run() {
       object(true, new SynchPrintChannelListener(self) {
         public SynchChannel print(String msg) {
           System.out.println(msg);
@@ -48,7 +48,7 @@ public class SynchPrinter  {
   }
 
   public static final class Tester extends JacobRunnable {
-    public void self() {
+    public void run() {
       final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
       instance(new SystemPrinter(p));
       object(new SynchChannelListener(p.print("1")) {

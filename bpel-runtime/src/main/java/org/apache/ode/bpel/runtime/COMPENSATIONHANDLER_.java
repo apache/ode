@@ -44,7 +44,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
     _completedChildren = visibleCompensations;
   }
 
-  public void self() {
+  public void run() {
     sendEvent(new CompensationHandlerRegistered());
     object(new CompensationChannelListener(_self.compChannel) {
     private static final long serialVersionUID = -477602498730810094L;

@@ -37,7 +37,7 @@ public class PROCESS extends BpelJacobRunnable {
     _process = process;
   }
 
-  public void self() {
+  public void run() {
     BpelRuntimeContext ntive = getBpelRuntimeContext();
     Long scopeInstanceId = ntive.createScopeInstance(null, _process.procesScope);
 

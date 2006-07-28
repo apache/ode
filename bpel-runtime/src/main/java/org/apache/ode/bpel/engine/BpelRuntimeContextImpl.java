@@ -873,7 +873,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = 3168964409165899533L;
 
-      public void self() {
+      public void run() {
         PickResponseChannel responseChannel = importChannel(responsechannel,
             PickResponseChannel.class);
         responseChannel.onRequestRcvd(idx, mexId);
@@ -895,7 +895,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = -7767141033611036745L;
 
-      public void self() {
+      public void run() {
         TimerResponseChannel responseChannel = importChannel(
             timerResponseChannel, TimerResponseChannel.class);
         responseChannel.onTimeout();
@@ -914,7 +914,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     vpu.inject(new JacobRunnable() {
       private static final long serialVersionUID = 6157913683737696396L;
 
-      public void self() {
+      public void run() {
         TimerResponseChannel responseChannel = importChannel(id,
             TimerResponseChannel.class);
         responseChannel.onCancel();
@@ -931,7 +931,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     vpu.inject(new BpelJacobRunnable() {
       private static final long serialVersionUID = -1095444335740879981L;
 
-      public void self() {
+      public void run() {
         ((BpelRuntimeContextImpl) getBpelRuntimeContext()).invocationResponse2(
             mexid,
             importChannel(responseChannelId, InvokeResponseChannel.class));
