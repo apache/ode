@@ -18,13 +18,21 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -36,7 +44,7 @@ import java.util.Set;
  * "soft" termination (aka stopping) to deal with the case when the scope that owns
  * the event handler completes naturally.
  */
-class EH_ALARM extends BpelAbstraction {
+class EH_ALARM extends BpelJacobRunnable {
 	private static final long serialVersionUID = 1L;
 
 	private ParentScopeChannel _psc;
@@ -98,7 +106,7 @@ class EH_ALARM extends BpelAbstraction {
    * elapsed time. This template also monitors the termination and event-control channels
    * for requests from parent.
    */
-  private class WAIT extends BpelAbstraction {
+  private class WAIT extends BpelJacobRunnable {
     private static final long serialVersionUID = -1426724996925898213L;
     Calendar _alarm;
 
@@ -116,7 +124,7 @@ class EH_ALARM extends BpelAbstraction {
       if (now.before(_alarm)) {
         TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
         getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
-        object(false,new TimerResponseML(trc){
+        object(false,new TimerResponseChannelListener(trc){
         private static final long serialVersionUID = 1110683632756756017L;
 
         public void onTimeout() {
@@ -127,14 +135,14 @@ class EH_ALARM extends BpelAbstraction {
           public void onCancel() {
             _psc.completed(null, _comps);
           }
-        }.or(new EventHandlerControlML(_cc) {
+        }.or(new EventHandlerControlChannelListener(_cc) {
         private static final long serialVersionUID = -7750428941445331236L;
 
         public void stop() {
             _psc.completed(null, _comps);
           }
 
-        }.or(new TerminationML(_tc) {
+        }.or(new TerminationChannelListener(_tc) {
         private static final long serialVersionUID = 6100105997983514609L;
 
         public void terminate() {
@@ -152,7 +160,7 @@ class EH_ALARM extends BpelAbstraction {
   /**
    * Snipped that fires the alarm activity.
    */
-  private class FIRE extends BpelAbstraction {
+  private class FIRE extends BpelJacobRunnable {
     private static final long serialVersionUID = -7261315204412433250L;
 
     public void self() {
@@ -168,7 +176,7 @@ class EH_ALARM extends BpelAbstraction {
   /**
    * Snippet that is used to monitor a running activity.
    */
-  private class ACTIVE extends BpelAbstraction {
+  private class ACTIVE extends BpelJacobRunnable {
     private static final long serialVersionUID = -2166253425722769701L;
 
     private ActivityInfo _activity;
@@ -181,7 +189,7 @@ class EH_ALARM extends BpelAbstraction {
     }
 
     public void self() {
-      object(false,new ParentScopeML(_activity.parent){
+      object(false,new ParentScopeChannelListener(_activity.parent){
         private static final long serialVersionUID = -3357030137175178040L;
 
         public void compensate(OScope scope, SynchChannel ret) {
@@ -207,7 +215,7 @@ class EH_ALARM extends BpelAbstraction {
           }
         }
 
-      }.or(new EventHandlerControlML(_cc) {
+      }.or(new EventHandlerControlChannelListener(_cc) {
         private static final long serialVersionUID = -3873619538789039424L;
 
         public void stop() {
@@ -215,7 +223,7 @@ class EH_ALARM extends BpelAbstraction {
           instance(ACTIVE.this);
         }
 
-      }.or(new TerminationML(_tc) {
+      }.or(new TerminationChannelListener(_tc) {
         private static final long serialVersionUID = -4566956567870652885L;
 
         public void terminate() {

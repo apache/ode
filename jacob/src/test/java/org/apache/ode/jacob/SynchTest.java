@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 public class SynchTest extends TestCase {
 
   // TODO still needed? apparently unused..
-  private static final class P extends Abstraction {
+  private static final class P extends JacobRunnable {
     public void self() {
     }
   }

@@ -18,43 +18,42 @@
  */
 package org.apache.ode.jacob.soup;
 
+import org.apache.ode.jacob.JacobObject;
+import org.apache.ode.utils.ObjectPrinter;
+
+import java.lang.reflect.Method;
+
 /**
- * Base class for items we find in the {@link Soup}.
- * <p>Created on Feb 17, 2004 at 3:44:24 PM.</p>
+ * DOCUMENTME.
+ * <p>Created on Feb 16, 2004 at 9:23:40 PM.</p>
  * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public class SoupObject {
+public class Continuation extends ExecutionQueueObject {
+  private JacobObject _closure;
+  private Method _method;
+  private Object[] _args;
 
-  /** A unique idefntifer for this object in the soup (should only be set by soup). */
-  private Object _id;
-
-  /** A human-readable description of the object. */
-  private String _description;
-
-  public String getDescription() {
-    return _description;
+  public Continuation(JacobObject target, Method method, Object[] args) {
+    _closure = target;
+    _method = method;
+    _args = args;
   }
 
-  public void setDescription(String description) {
-    if (_description != null)
-      throw new IllegalStateException("Description already set for " + this);
-    _description = description;
+  public JacobObject getClosure() {
+    return _closure;
   }
 
-  public void setId(Object id) {
-    if (_id != null)
-      throw new IllegalStateException("Object id already set for " + this);
-    _id = id;
+  public Method getMethod() {
+    return _method;
   }
 
-  public Object getId() {
-    return _id;
+  public Object[] getArgs() {
+    return _args;
   }
 
-  public boolean equals(Object obj) {
-    if (_id == null || ((SoupObject)obj)._id == null)
-      return this==obj;
-    return ((SoupObject)obj)._id.equals(_id);
+  public String toString () {
+    return ObjectPrinter.toString(this, new Object[] { "closure", _closure, "method", _method.getName(), "args", _args});
   }
+
 }

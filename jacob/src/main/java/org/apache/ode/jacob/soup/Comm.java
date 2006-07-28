@@ -26,7 +26,7 @@ import org.apache.ode.utils.ObjectPrinter;
  * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public abstract  class Comm extends SoupObject {
+public abstract  class Comm extends ExecutionQueueObject {
   private CommChannel _channel;
   private CommGroup _group;
 

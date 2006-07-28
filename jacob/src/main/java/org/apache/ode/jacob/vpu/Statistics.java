@@ -48,7 +48,7 @@ public class Statistics {
   /** Number of continuations. */
   public long numContinuations;
 
-  /** Total size of all continuation (in bytes). */
+  /** Total size of all _continuation (in bytes). */
   public long totalContinuationBytes;
 
   /** Number of enqueues to the run queue. */

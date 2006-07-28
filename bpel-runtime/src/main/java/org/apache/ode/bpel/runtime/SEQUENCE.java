@@ -18,13 +18,22 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of the BPEL &lt;sequence&gt; activity.
@@ -56,7 +65,7 @@ class SEQUENCE extends ACTIVITY {
     instance(new ACTIVE(child));
   }
 
-  private class ACTIVE extends BpelAbstraction {
+  private class ACTIVE extends BpelJacobRunnable {
     private static final long serialVersionUID = -2663862698981385732L;
     private ActivityInfo _child;
     private boolean _terminateRequested = false;
@@ -66,7 +75,7 @@ class SEQUENCE extends ACTIVITY {
     }
 
     public void self() {
-      object(false, new TerminationML(_self.self) {
+      object(false, new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = -2680515407515637639L;
 
         public void terminate() {
@@ -78,7 +87,7 @@ class SEQUENCE extends ACTIVITY {
           _terminateRequested = true;
           instance(ACTIVE.this);
         }
-      }.or(new ParentScopeML(_child.parent) {
+      }.or(new ParentScopeChannelListener(_child.parent) {
         private static final long serialVersionUID = 7195562310281985971L;
 
         public void compensate(OScope scope, SynchChannel ret) {

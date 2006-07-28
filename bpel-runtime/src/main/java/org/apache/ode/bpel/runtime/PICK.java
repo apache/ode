@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -25,27 +27,24 @@ import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseML;
-import org.apache.ode.bpel.runtime.channels.TerminationML;
-import org.apache.ode.utils.xsd.Duration;
+import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 
 
 /**
  * Template for the BPEL <code>pick</code> activity.
  */
 class PICK extends ACTIVITY {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private static final Log __log = LogFactory.getLog(PICK.class);
+  private static final Log __log = LogFactory.getLog(PICK.class);
 
   private OPickReceive _opick;
 
@@ -60,7 +59,7 @@ class PICK extends ACTIVITY {
 
 
   /**
-   * @see org.apache.ode.jacob.Abstraction#self()
+   * @see org.apache.ode.jacob.JacobRunnable#self()
    */
   public void self() {
     PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
@@ -139,10 +138,10 @@ class PICK extends ACTIVITY {
   }
 
 
-  private class WAITING extends BpelAbstraction {
-		private static final long serialVersionUID = 1L;
-		
-		private PickResponseChannel _pickResponseChannel;
+  private class WAITING extends BpelJacobRunnable {
+    private static final long serialVersionUID = 1L;
+
+    private PickResponseChannel _pickResponseChannel;
 
     private WAITING(PickResponseChannel pickResponseChannel) {
       this._pickResponseChannel = pickResponseChannel;
@@ -150,7 +149,7 @@ class PICK extends ACTIVITY {
 
     public void self() {
 
-      object(false, new PickResponseML(_pickResponseChannel) {
+      object(false, new PickResponseChannelListener(_pickResponseChannel) {
         private static final long serialVersionUID = -8237296827418738011L;
 
         public void onRequestRcvd(int selectorIdx, String mexId) {
@@ -221,7 +220,7 @@ class PICK extends ACTIVITY {
           _self.parent.completed(null, CompensationHandler.emptySet());
         }
 
-      }.or(new TerminationML(_self.self) {
+      }.or(new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = 4399496341785922396L;
 
         public void terminate() {
