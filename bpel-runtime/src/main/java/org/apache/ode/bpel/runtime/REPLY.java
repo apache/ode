@@ -38,7 +38,7 @@ private static final Log __log = LogFactory.getLog(REPLY.class);
     super(self, scopeFrame, linkFrame);
   }
 
-  public void self() {
+  public void run() {
     final OReply oreply = (OReply)_self.o;
 
     if (__log.isDebugEnabled()) {

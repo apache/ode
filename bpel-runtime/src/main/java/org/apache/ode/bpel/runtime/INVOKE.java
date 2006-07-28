@@ -43,7 +43,7 @@ public class INVOKE extends ACTIVITY {
     _oinvoke = (OInvoke) _self.o;
   }
 
-  public final void self() {
+  public final void run() {
     Element outboundMsg;
     try {
       outboundMsg = setupOutbound(_oinvoke, _oinvoke.initCorrelationsInput);

@@ -63,7 +63,7 @@ public class FOREACH extends ACTIVITY {
     _oforEach = (OForEach) self.o;
   }
 
-  public void self() {
+  public void run() {
     try {
       _startCounter = evaluateCondition(_oforEach.startCounterValue);
       _finalCounter = evaluateCondition(_oforEach.finalCounterValue);
@@ -104,7 +104,7 @@ public class FOREACH extends ACTIVITY {
     private FaultData _fault;
     private boolean _terminateRequested = false;
 
-    public void self() {
+    public void run() {
       Iterator<ChildInfo> active = active();
       // Continuing as long as a child is active
       if (active().hasNext()) {

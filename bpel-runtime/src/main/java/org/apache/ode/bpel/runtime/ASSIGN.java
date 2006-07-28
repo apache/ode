@@ -57,7 +57,7 @@ class ASSIGN extends ACTIVITY {
 		super(self, scopeFrame, linkFrame);
 	}
 
-	public void self() {
+	public void run() {
 		OAssign oassign = getOAsssign();
 
 		FaultData faultData = null;

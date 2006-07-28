@@ -72,7 +72,7 @@ class SCOPE extends ACTIVITY {
     assert _oscope.activity != null;
   }
 
-  public void self() {
+  public void run() {
     // Start the child activity.
     _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,
@@ -136,7 +136,7 @@ class SCOPE extends ACTIVITY {
       _startTime = System.currentTimeMillis();
     }
 
-    public void self() {
+    public void run() {
       if (_child != null || !_eventHandlers.isEmpty()) {
         HashSet<ChannelListener> mlSet = new HashSet<ChannelListener>();
 

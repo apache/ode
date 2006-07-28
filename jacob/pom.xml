@@ -51,7 +51,7 @@
                             <tasks>
                                 <doclet destDir="${project.build.directory}/generated-sources/xdoclet" verbose="false">
                                     <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
-                                    <template havingClassTag="jacob.kind" destinationFile="{0}ML.java" templateFile="${basedir}/src/xdt/org/apache/ode/jacob/ML.xdt"/>
+                                    <template havingClassTag="jacob.kind" destinationFile="{0}ChannelListener.java" templateFile="${basedir}/src/xdt/org/apache/ode/jacob/ChannelListener.xdt"/>
 				    <template havingClassTag="jacob.kind" destinationFile="{0}Channel.java" templateFile="${basedir}/src/xdt/org/apache/ode/jacob/channel.xdt"/>
                                 </doclet>
                             </tasks>

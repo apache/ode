@@ -62,7 +62,7 @@ class ACTIVITYGUARD extends ACTIVITY {
     _oactivity = self.o;
   }
 
-  public void self() {
+  public void run() {
     // Send a notification of the activity being enabled, 
     if (_firstTime) {
       sendEvent(new ActivityEnabledEvent());
@@ -176,7 +176,7 @@ class ACTIVITYGUARD extends ACTIVITY {
       _in = in;
     }
 
-    public void self() {
+    public void run() {
       object(new ParentScopeChannelListener(_in) {
         private static final long serialVersionUID = 2667359535900385952L;
 

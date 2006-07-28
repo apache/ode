@@ -45,7 +45,7 @@ import java.util.Set;
  *     this.s = s;
  *     this.v = v;
  *   }
- *   public void self() {
+ *   public void run() {
  *     object(new CellChannelListener(s) { read(...) {...}
  *                            write(...) {...} } );
  *   }
@@ -75,7 +75,7 @@ public abstract class JacobRunnable extends JacobObject {
   private static final Set<Method> IMPLEMENTED_METHODS;
   static {
     try {
-      IMPLEMENTED_METHODS = Collections.singleton(JacobRunnable.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY));
+      IMPLEMENTED_METHODS = Collections.singleton(JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY));
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
@@ -97,7 +97,7 @@ public abstract class JacobRunnable extends JacobObject {
    * sequencing of JACOB operations is irrelevant</em>
    * </p>
    */
-  public abstract void self();
+  public abstract void run();
 
   /**
    * Pretty print.
