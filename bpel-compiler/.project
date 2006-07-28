@@ -1,11 +1,15 @@
 <projectDescription>
-  <name>ode-bpel-api-jca</name>
-  <comment>BPEL Connector APIs</comment>
+  <name>ode-bpel-compiler</name>
+  <comment>Converts BPEL object model into compiled BPEL representation.</comment>
   <projects>
-    <project>ode-utils</project>
+    <project>ode-bpel-el-xpath20</project>
     <project>ode-bpel-api</project>
-    <project>ode-bpel-bom</project>
+    <project>ode-utils</project>
     <project>ode-bpel-obj</project>
+    <project>ode-bpel-bom</project>
+    <project>ode-bpel-el-xpath10</project>
+    <project>ode-bpel-dd</project>
+    <project>ode-bpel-parser</project>
   </projects>
   <buildSpec>
     <buildCommand>
