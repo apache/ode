@@ -1,10 +1,8 @@
 <projectDescription>
-  <name>ode-bpel-api-jca</name>
-  <comment>BPEL Connector APIs</comment>
+  <name>ode-bpel-dd</name>
+  <comment>Contains the deployment descriptor classes used to validate the descriptor during compilation and read it on deployment.</comment>
   <projects>
     <project>ode-utils</project>
-    <project>ode-bpel-api</project>
-    <project>ode-bpel-bom</project>
     <project>ode-bpel-obj</project>
   </projects>
   <buildSpec>

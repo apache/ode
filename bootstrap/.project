@@ -1,12 +1,7 @@
 <projectDescription>
-  <name>ode-bpel-api-jca</name>
-  <comment>BPEL Connector APIs</comment>
-  <projects>
-    <project>ode-utils</project>
-    <project>ode-bpel-api</project>
-    <project>ode-bpel-bom</project>
-    <project>ode-bpel-obj</project>
-  </projects>
+  <name>ode-bootstrap</name>
+  <comment>ClassLoader configurable via property file.</comment>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

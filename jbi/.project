@@ -1,0 +1,34 @@
+<projectDescription>
+  <name>ode-jbi</name>
+  <comment/>
+  <projects>
+    <project>ode-bpel-scheduler-quartz</project>
+    <project>ode-bpel-bom</project>
+    <project>ode-bpel-compiler</project>
+    <project>ode-utils</project>
+    <project>ode-jca-ra</project>
+    <project>ode-dao-hibernate</project>
+    <project>ode-bpel-el-xpath20</project>
+    <project>ode-bpel-api-jca</project>
+    <project>ode-bpel-dd</project>
+    <project>ode-bpel-el-xpath10</project>
+    <project>ode-bpel-api</project>
+    <project>ode-bpel-parser</project>
+    <project>ode-jca-server</project>
+    <project>ode-bpel-obj</project>
+    <project>ode-bpel-runtime</project>
+    <project>ode-minerva</project>
+    <project>ode-jacob</project>
+    <project>ode-bpel-connector</project>
+    <project>ode-bpel-ql</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+      <arguments/>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>
