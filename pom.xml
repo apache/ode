@@ -15,30 +15,26 @@
   <licenses>
     <license>
       <name>Apache Public License 2.0</name>
-      <url>http://ode.intalio.org/confluence/display/ODE/Common+Public+License+1.0</url>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
     <scm>
-        <connection>scm:svn:svn://svn.intalio.org/ode</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.intalio.org/usr/local/svn/repos/ode/trunk/ode</developerConnection>
-        <url>http://svn.intalio.org/viewrep/ODE-svn</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/ode/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/ode/</developerConnection>
+        <url>http://svn.apache.org/repos/asf/incubator/ode/</url>
     </scm>
 
     <organization>
-        <name>Intalio</name>
-        <url>http://ode.intalio.org</url>
+        <name>Apache Software Foundation</name>
+        <url>http://www.apache.org</url>
     </organization>
 
 
     <properties>
         <maven.test.skip>true</maven.test.skip>
-        <vendor.name>Intalio Inc.</vendor.name>
-        <vendor.address>1000 Bridge Parkway, Suite 210, Redwood City, CA</vendor.address>
-        <vendor.url>http://www.intalio.org</vendor.url>
-        <vendor.copyright>(C)1999-2006 Intalio Inc - ALL RIGHTS RESERVED</vendor.copyright>
-
+        <vendor.name>Apache Software Foundation</vendor.name>
     <!--
         Default ODE properties, these properties may be referenced in resources and the
 	like. -->
@@ -234,9 +230,9 @@
     -->
     <repositories>
         <repository>
-            <id>ode</id>
+            <id>intalio</id>
             <name>ODE Maven2 repository</name>
-            <url>http://ode.intalio.org/public/maven2</url>
+            <url>http://pxe.intalio.org/public/maven2</url>
         </repository>
         <repository>
             <id>central</id>
@@ -269,9 +265,9 @@
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>ode</id>
-            <name>ODE Maven2 repository</name>
-            <url>http://ode.intalio.org/public/maven2</url>
+            <id>intalio</id>
+            <name>Intalio Maven2 repository</name>
+            <url>http://pxe.intalio.org/public/maven2</url>
         </pluginRepository>
         <!--pluginRepository>
             <id>codehaus</id>
