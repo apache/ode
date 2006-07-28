@@ -60,7 +60,7 @@ class PICK extends ACTIVITY {
 
 
   /**
-   * @see com.fs.jacob.Abstraction#self()
+   * @see org.apache.ode.jacob.Abstraction#self()
    */
   public void self() {
     PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);

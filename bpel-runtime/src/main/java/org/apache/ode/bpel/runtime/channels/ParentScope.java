@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.CompensationHandler;
 

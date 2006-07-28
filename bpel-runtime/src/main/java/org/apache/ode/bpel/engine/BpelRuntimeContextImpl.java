@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.engine;
 
-import com.fs.jacob.Abstraction;
-import com.fs.jacob.vpu.FastSoupImpl;
-import com.fs.jacob.vpu.JacobVPU;
+import org.apache.ode.jacob.Abstraction;
+import org.apache.ode.jacob.vpu.FastSoupImpl;
+import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
