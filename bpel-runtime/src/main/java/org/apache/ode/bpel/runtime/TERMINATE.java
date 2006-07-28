@@ -29,7 +29,7 @@ class TERMINATE extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public final void self() {
+  public final void run() {
     getBpelRuntimeContext().terminate();
     _self.parent.completed(null, CompensationHandler.emptySet());
   }

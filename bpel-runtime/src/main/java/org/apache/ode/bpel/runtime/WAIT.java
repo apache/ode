@@ -44,7 +44,7 @@ class WAIT extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public final void self() {
+  public final void run() {
     
   	Date dueDate = null;
   	try{

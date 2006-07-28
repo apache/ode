@@ -36,7 +36,7 @@ public abstract class Sequence extends JacobRunnable {
   /**
    * DOCUMENTME
    */
-  public void self() {
+  public void run() {
     if (_step >= _size) {
       if (_done != null) {
         _done.ret();

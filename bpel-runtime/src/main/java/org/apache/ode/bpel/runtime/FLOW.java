@@ -49,7 +49,7 @@ class FLOW extends ACTIVITY {
     _oflow = (OFlow) self.o;
   }
   
-  public void self() {
+  public void run() {
 
     LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
     for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
@@ -77,7 +77,7 @@ class FLOW extends ACTIVITY {
     private FaultData _fault;
     private HashSet<CompensationHandler> _compensations = new HashSet<CompensationHandler>();
 
-    public void self() {
+    public void run() {
       Iterator<ChildInfo> active = active();
       if (active.hasNext()) {
         Set<ChannelListener> mlSet = new HashSet<ChannelListener>();

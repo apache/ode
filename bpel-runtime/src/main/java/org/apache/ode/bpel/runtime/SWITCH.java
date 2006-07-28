@@ -41,7 +41,7 @@ class SWITCH extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public final void self() {
+  public final void run() {
     OSwitch oswitch = (OSwitch)_self.o;
     OSwitch.OCase matchedOCase = null;
     FaultData faultData = null;

@@ -54,7 +54,7 @@ public class JacobCellTest extends TestCase {
   }
 
   static class CellTest1 extends JacobRunnable {
-    public void self() {
+    public void run() {
       CellChannel cellChannel = newChannel(CellChannel.class, "cell");
       ValChannel retChannel = newChannel(ValChannel.class, "val");
 
@@ -77,7 +77,7 @@ public class JacobCellTest extends TestCase {
       _x = x;
     }
 
-    public void self() {
+    public void run() {
       int y = _x ^ _x;
       _out.val(Integer.valueOf(y));
     }
@@ -85,7 +85,7 @@ public class JacobCellTest extends TestCase {
 
   // TODO still needed?
   private static class Foo extends JacobRunnable {
-    public void self() {
+    public void run() {
       ValChannel print = newChannel(ValChannel.class);
       instance(new Compute(1, print));
       instance(new Compute(2, print));
@@ -101,7 +101,7 @@ public class JacobCellTest extends TestCase {
       _val = val;
     }
 
-    public void self() {
+    public void run() {
       object(new ValChannelListener(_val) {
           public void val(Object retVal) {
             System.out.println(retVal);

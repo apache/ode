@@ -33,7 +33,7 @@ class EMPTY extends ACTIVITY {
     super(self, frame, linkFrame);
   }
 
-  public final void self() {
+  public final void run() {
     if (__log.isDebugEnabled()) {
       __log.debug("<empty name=" + _self.o + ">");
     }

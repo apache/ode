@@ -70,7 +70,7 @@ class EH_ALARM extends BpelJacobRunnable {
     _oalarm  = o;
   }
 
-  public void self() {
+  public void run() {
 
     Calendar alarm = Calendar.getInstance();
 
@@ -118,7 +118,7 @@ class EH_ALARM extends BpelJacobRunnable {
       _alarm = alarm;
     }
 
-    public void self() {
+    public void run() {
       Calendar now = Calendar.getInstance();
 
       if (now.before(_alarm)) {
@@ -163,7 +163,7 @@ class EH_ALARM extends BpelJacobRunnable {
   private class FIRE extends BpelJacobRunnable {
     private static final long serialVersionUID = -7261315204412433250L;
 
-    public void self() {
+    public void run() {
       // Start the child activity.
       ActivityInfo child = new ActivityInfo(genMonotonic(),
               _oalarm.activity,
@@ -188,7 +188,7 @@ class EH_ALARM extends BpelJacobRunnable {
       _activity = activity;
     }
 
-    public void self() {
+    public void run() {
       object(false,new ParentScopeChannelListener(_activity.parent){
         private static final long serialVersionUID = -3357030137175178040L;
 
