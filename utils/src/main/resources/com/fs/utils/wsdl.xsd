@@ -1,40 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-
-	WSDL Schema from http://schemas.xmlsoap.org/wsdl/2003-02-11.xsd
-
--->
-<!-- 
- 
-Copyright 2001-2003 International Business Machines Corporation, Microsoft Corporation. All rights reserved.
-
-The presentation, distribution or other dissemination of the
-information contained herein by Microsoft is not a license,
-either expressly or impliedly, to any intellectual property owned or
-controlled by Microsoft.
-
-This document and the information contained herein is provided on an
-"AS IS" basis and to the maximum extent permitted by applicable law,
-Microsoft provides the document AS IS AND WITH ALL FAULTS, and hereby
-disclaims all other warranties and conditions, either express, implied
-or statutory, including, but not limited to, any (if any) implied
-warranties, duties or conditions of merchantability, of fitness for a
-particular purpose, of accuracy or completeness of responses, of
-results, of workmanlike effort, of lack of viruses, and of lack of
-negligence, all with regard to the document. ALSO, THERE IS NO
-WARRANTY OR CONDITION OF TITLE, QUIET ENJOYMENT, QUIET POSSESSION,
-CORRESPONDENCE TO DESCRIPTION OR NON-INFRINGEMENT WITH REGARD TO THE
-DOCUMENT.
-
-IN NO EVENT WILL MICROSOFT BE LIABLE TO ANY OTHER PARTY FOR THE COST
-OF PROCURING SUBSTITUTE GOODS OR SERVICES, LOST PROFITS, LOSS OF USE,
-LOSS OF DATA, OR ANY INCIDENTAL, CONSEQUENTIAL, DIRECT, INDIRECT, OR
-SPECIAL DAMAGES WHETHER UNDER CONTRACT, TORT, WARRANTY, OR OTHERWISE,
-ARISING IN ANY WAY OUT OF THIS OR ANY OTHER AGREEMENT RELATING TO THIS
-DOCUMENT, WHETHER OR NOT SUCH PARTY HAD ADVANCE NOTICE OF THE
-POSSIBILITY OF SUCH DAMAGES.  
-
---> 
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
            targetNamespace="http://schemas.xmlsoap.org/wsdl/"
