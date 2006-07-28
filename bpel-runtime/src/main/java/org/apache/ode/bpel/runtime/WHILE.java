@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.ML;
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.ML;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OEventHandler;
@@ -98,7 +98,7 @@ class EH_EVENT extends BpelAbstraction {
 		private static final long serialVersionUID = 1L;
 
 		/**
-     * @see com.fs.jacob.Abstraction#self()
+     * @see org.apache.ode.jacob.Abstraction#self()
      */
     public void self() {
       Selector selector;

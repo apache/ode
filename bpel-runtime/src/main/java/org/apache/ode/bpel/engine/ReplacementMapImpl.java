@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.engine;
 
-import com.fs.jacob.soup.ReplacementMap;
+import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OProcess;
 

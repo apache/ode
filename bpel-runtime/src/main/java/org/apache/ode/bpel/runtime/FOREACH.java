@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.ML;
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.ML;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.explang.EvaluationException;

@@ -15,7 +15,7 @@
   <licenses>
     <license>
       <name>Apache Public License 2.0</name>
-      <url>http://pxe.intalio.org/confluence/display/ODE/Common+Public+License+1.0</url>
+      <url>http://ode.intalio.org/confluence/display/ODE/Common+Public+License+1.0</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -28,7 +28,7 @@
 
     <organization>
         <name>Intalio</name>
-        <url>http://pxe.intalio.org</url>
+        <url>http://ode.intalio.org</url>
     </organization>
 
 
@@ -218,7 +218,7 @@
                     </executions>
                     <configuration>
                         <remoteRepositoryId>ode</remoteRepositoryId>
-                        <remoteRepositoryUrl>scpexe://pxe.intalio.org/var/www/public/maven1</remoteRepositoryUrl>
+                        <remoteRepositoryUrl>scpexe://ode.intalio.org/var/www/public/maven1</remoteRepositoryUrl>
                     </configuration>
                 </plugin>
             </plugins>
@@ -234,9 +234,9 @@
     -->
     <repositories>
         <repository>
-            <id>pxe</id>
+            <id>ode</id>
             <name>ODE Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
+            <url>http://ode.intalio.org/public/maven2</url>
         </repository>
         <repository>
             <id>central</id>
@@ -271,7 +271,7 @@
         <pluginRepository>
             <id>ode</id>
             <name>ODE Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
+            <url>http://ode.intalio.org/public/maven2</url>
         </pluginRepository>
         <!--pluginRepository>
             <id>codehaus</id>
@@ -293,13 +293,13 @@
     <distributionManagement>
         <repository>
             <id>ode-maven2</id>
-            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+            <url>scpexe://ode.intalio.org/var/www/public/maven2</url>
         </repository>
 
         <snapshotRepository>
             <id>ode-maven2-snapshot</id>
             <name>ODE Development Repository</name>
-            <url>scpexe://pxe.intalio.org/var/www/public/maven2</url>
+            <url>scpexe://ode.intalio.org/var/www/public/maven2</url>
         </snapshotRepository>
     </distributionManagement>
 

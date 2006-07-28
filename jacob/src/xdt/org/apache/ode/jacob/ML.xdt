@@ -1,0 +1,22 @@
+/*
+ * SOURCE FILE GENERATATED BY JACOB CHANNEL CLASS GENERATOR
+ * !!! DO NOT EDIT !!!!
+ */
+package <XDtPackage:packageOf><XDtClass:fullClassName/></XDtPackage:packageOf>;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
+public abstract class <XDtClass:classOf><XDtClass:fullClassName/>ML</XDtClass:classOf> 
+    extends org.apache.ode.jacob.ML<<XDtClass:classOf><XDtClass:fullClassName/>Channel</XDtClass:classOf>>
+    implements <XDtClass:classOf><XDtClass:fullClassName/></XDtClass:classOf>
+ {
+  private static final Log __log = LogFactory.getLog(<XDtClass:classOf><XDtClass:fullClassName/>ML</XDtClass:classOf>.class);
+  protected Log log() { return __log; }
+
+  protected <XDtClass:classOf><XDtClass:fullClassName/>ML</XDtClass:classOf>(
+    <XDtClass:classOf><XDtClass:fullClassName/>Channel</XDtClass:classOf> channel) {
+    super(channel);
+  }
+
+}
