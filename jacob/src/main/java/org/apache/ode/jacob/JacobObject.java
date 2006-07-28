@@ -18,6 +18,8 @@
  */
 package org.apache.ode.jacob;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
 import java.io.Serializable;
@@ -25,16 +27,13 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 
 /**
  * Base class for constructs which rely on a Java method body to represent
  * some aspect of the process.
  */
-public abstract class JavaClosure implements Serializable {
-  private static final Log __log = LogFactory.getLog(JavaClosure.class);
+public abstract class JacobObject implements Serializable {
+  private static final Log __log = LogFactory.getLog(JacobObject.class);
 
   public abstract Set getImplementedMethods();
 
@@ -88,7 +87,7 @@ public abstract class JavaClosure implements Serializable {
    *
    * @param concretion the concretion of a process template
    */
-  protected void instance(Abstraction concretion) {
+  protected void instance(JacobRunnable concretion) {
     JacobVPU.activeJacobThread().instance(concretion);
   }
 
@@ -124,31 +123,31 @@ public abstract class JavaClosure implements Serializable {
   }
 
   /**
-   * Object; the Java code "object(x, ML)" is equivalent to <code>x ?
-   * ML</code> in the process algebra.
+   * Object; the Java code "object(x, ChannelListener)" is equivalent to <code>x ?
+   * ChannelListener</code> in the process algebra.
    *
    * @param methodList method list for the communication reduction
    *
    * @see JacobThread#object
    */
-  protected <T extends Channel> T object(ML<T> methodList) {
+  protected <T extends Channel> T object(ChannelListener<T> methodList) {
     JacobVPU.activeJacobThread().object(false, methodList);
     return methodList.getChannel();
   }
 
-  protected void object(boolean replication, ML methodList) {
+  protected void object(boolean replication, ChannelListener methodList) {
     JacobVPU.activeJacobThread().object(replication, methodList);
   }
 
-  protected void object(boolean replication, ML[] methodLists) {
+  protected void object(boolean replication, ChannelListener[] methodLists) {
     JacobVPU.activeJacobThread().object(replication, methodLists);
   }
 
-  protected void object(boolean replication, Set<ML> methodLists) {
-    JacobVPU.activeJacobThread().object(replication, methodLists.toArray(new ML[methodLists.size()]));
+  protected void object(boolean replication, Set<ChannelListener> methodLists) {
+    JacobVPU.activeJacobThread().object(replication, methodLists.toArray(new ChannelListener[methodLists.size()]));
   }
 
-  protected  <T extends Channel> T replication(ML<T> methodList) {
+  protected  <T extends Channel> T replication(ChannelListener<T> methodList) {
     JacobVPU.activeJacobThread().object(true, methodList);
     return methodList.getChannel();
   }

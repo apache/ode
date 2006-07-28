@@ -18,7 +18,7 @@
  */
 package org.apache.ode.jacob.examples.cell;
 
-import org.apache.ode.jacob.Abstraction;
+import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.Val;
 
 
@@ -28,7 +28,7 @@ import org.apache.ode.jacob.Val;
  * read(r) = { Cell(self, val) | r ! val(val) } & write(newVal) = {
  * Cell(self, newVal) } ] </code>
  */
-public class CELL_<T> extends Abstraction {
+public class CELL_<T> extends JacobRunnable {
   private CellChannel _self;
   private T _val;
 
@@ -40,7 +40,7 @@ public class CELL_<T> extends Abstraction {
   public void self() {
     // INSTANTIATION{Cell(self,val)}
     // ==> self ? [ read(r)={...} & write(newVal)={...} ]
-    object(new CellML(_self) {
+    object(new CellChannelListener(_self) {
         public void read(Val r) {
           // COMMUNICATION{x & [read... & ... ] | x ! read}
           // ==> Cell(self, val) ...

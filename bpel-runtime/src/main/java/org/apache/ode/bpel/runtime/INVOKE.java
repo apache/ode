@@ -23,16 +23,15 @@ import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseML;
+import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
- * Abstraction that performs the work of the <code>invoke</code> activity.
+ * JacobRunnable that performs the work of the <code>invoke</code> activity.
  */
 public class INVOKE extends ACTIVITY {
   private static final long serialVersionUID = 992248281026821783L;
@@ -63,7 +62,7 @@ public class INVOKE extends ACTIVITY {
         getBpelRuntimeContext().invoke(
             _scopeFrame.resolve(_oinvoke.partnerLink),
             _oinvoke.operation,
-            outboundMsg, 
+            outboundMsg,
             null);
 
         _self.parent.completed(faultData, CompensationHandler.emptySet());
@@ -75,10 +74,10 @@ public class INVOKE extends ACTIVITY {
 
         final String mexId = getBpelRuntimeContext().invoke(
             _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
-            outboundMsg, 
+            outboundMsg,
             invokeResponseChannel);
 
-        object(new InvokeResponseML(invokeResponseChannel) {
+        object(new InvokeResponseChannelListener(invokeResponseChannel) {
           private static final long serialVersionUID = 4496880438819196765L;
 
           public void onResponse() {
@@ -143,7 +142,7 @@ public class INVOKE extends ACTIVITY {
   }
 
   private Element setupOutbound(OInvoke oinvoke,
-      Collection<OScope.CorrelationSet> outboundInitiations)
+                                Collection<OScope.CorrelationSet> outboundInitiations)
       throws FaultException {
     if (outboundInitiations.size() > 0) {
       for (OScope.CorrelationSet c : outboundInitiations) {

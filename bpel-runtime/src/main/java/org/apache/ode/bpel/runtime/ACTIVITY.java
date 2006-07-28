@@ -31,7 +31,7 @@ import java.util.Iterator;
 /**
  * Base template for activities.
  */
-abstract class ACTIVITY extends BpelAbstraction {
+abstract class ACTIVITY extends BpelJacobRunnable {
   protected ActivityInfo _self;
 
   /**

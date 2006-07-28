@@ -18,18 +18,21 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OWhile;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * BPEL &lt;while&gt; activity
@@ -99,7 +102,7 @@ class WHILE extends ACTIVITY {
     }
   }
 
-  private class WAITER extends BpelAbstraction {
+  private class WAITER extends BpelJacobRunnable {
     private static final long serialVersionUID = -7645042174027252066L;
     private ActivityInfo _child;
     private boolean _terminated;
@@ -109,7 +112,7 @@ class WHILE extends ACTIVITY {
     }
 
     public void self() {
-      object(false, new TerminationML(_self.self) {
+      object(false, new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = -5471984635653784051L;
 
         public void terminate() {
@@ -117,7 +120,7 @@ class WHILE extends ACTIVITY {
           replication(_child.self).terminate();
           instance(WAITER.this);
         }
-      }.or(new ParentScopeML(_child.parent) {
+      }.or(new ParentScopeChannelListener(_child.parent) {
         private static final long serialVersionUID = 3907167240907524405L;
 
         public void compensate(OScope scope, SynchChannel ret) {

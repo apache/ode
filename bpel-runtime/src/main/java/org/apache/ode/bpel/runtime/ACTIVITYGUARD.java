@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.ML;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityEnabledEvent;
 import org.apache.ode.bpel.evt.ActivityExecEndEvent;
@@ -29,12 +29,19 @@ import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 
-import java.util.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 class ACTIVITYGUARD extends ACTIVITY {
 	private static final long serialVersionUID = 1L;
@@ -80,8 +87,8 @@ class ACTIVITYGUARD extends ACTIVITY {
         dpe(_oactivity);
       }
     } else /* don't know all our links statuses */ {
-      Set<ML> mlset = new HashSet<ML>();
-      mlset.add(new TerminationML(_self.self) {
+      Set<ChannelListener> mlset = new HashSet<ChannelListener>();
+      mlset.add(new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = 5094153128476008961L;
 
         public void terminate() {
@@ -94,7 +101,7 @@ class ACTIVITYGUARD extends ACTIVITY {
       });
       for (Iterator<OLink> i = _oactivity.targetLinks.iterator();i.hasNext();) {
         final OLink link = i.next();
-        mlset.add(new LinkStatusML(_linkFrame.resolve(link).sub) {
+        mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).sub) {
         private static final long serialVersionUID = 1024137371118887935L;
 
         public void linkStatus(boolean value) {
@@ -161,7 +168,7 @@ class ACTIVITYGUARD extends ACTIVITY {
    * {@link ParentScopeChannel#completed(org.apache.ode.bpel.runtime.channels.FaultData, java.util.Set<org.apache.ode.bpel.runtime.CompensationHandler>)}
    * call, to evaluate transition conditions before returning to the parent.
    */
-  private class TCONDINTERCEPT extends BpelAbstraction {
+  private class TCONDINTERCEPT extends BpelJacobRunnable {
     private static final long serialVersionUID = 4014873396828400441L;
     ParentScopeChannel _in;
 
@@ -170,7 +177,7 @@ class ACTIVITYGUARD extends ACTIVITY {
     }
 
     public void self() {
-      object(new ParentScopeML(_in) {
+      object(new ParentScopeChannelListener(_in) {
         private static final long serialVersionUID = 2667359535900385952L;
 
         public void compensate(OScope scope, SynchChannel ret) {

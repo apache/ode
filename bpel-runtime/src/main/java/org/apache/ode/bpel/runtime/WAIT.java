@@ -18,24 +18,23 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OWait;
-import org.apache.ode.bpel.runtime.channels.TerminationML;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseML;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.utils.xsd.Duration;
 
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 
 /**
- * Abstraction that performs the work of the <code>&lt;wait&gt;</code> activity.
+ * JacobRunnable that performs the work of the <code>&lt;wait&gt;</code> activity.
  */
 class WAIT extends ACTIVITY {
 	private static final long serialVersionUID = 1L;
@@ -67,7 +66,7 @@ class WAIT extends ACTIVITY {
 	    final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
 	    getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 	    
-	    object(false, new TimerResponseML(timerChannel){
+	    object(false, new TimerResponseChannelListener(timerChannel){
          private static final long serialVersionUID = 3120518305645437327L;
 
          public void onTimeout() {
@@ -77,12 +76,12 @@ class WAIT extends ACTIVITY {
         public void onCancel() {
           _self.parent.completed(null, CompensationHandler.emptySet());
         }
-      }.or(new TerminationML(_self.self) {
+      }.or(new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = -2791243270691333946L;
 
         public void terminate() {
           _self.parent.completed(null, CompensationHandler.emptySet());
-          object(new TimerResponseML(timerChannel) {
+          object(new TimerResponseChannelListener(timerChannel) {
             private static final long serialVersionUID = 677746737897792929L;
 
             public void onTimeout() {

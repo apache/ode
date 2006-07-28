@@ -18,13 +18,18 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.ML;
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
@@ -67,7 +72,7 @@ class FLOW extends ACTIVITY {
   }
 
 
-  private class ACTIVE extends BpelAbstraction {
+  private class ACTIVE extends BpelJacobRunnable {
     private static final long serialVersionUID = -8494641460279049245L;
     private FaultData _fault;
     private HashSet<CompensationHandler> _compensations = new HashSet<CompensationHandler>();
@@ -75,8 +80,8 @@ class FLOW extends ACTIVITY {
     public void self() {
       Iterator<ChildInfo> active = active();
       if (active.hasNext()) {
-        Set<ML> mlSet = new HashSet<ML>();
-        mlSet.add(new TerminationML(_self.self) {
+        Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
+        mlSet.add(new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = 2554750258974084466L;
 
         public void terminate() {
@@ -90,7 +95,7 @@ class FLOW extends ACTIVITY {
 
         for (;active.hasNext();) {
           final ChildInfo child = active.next();
-          mlSet.add(new ParentScopeML(child.activity.parent) {
+          mlSet.add(new ParentScopeChannelListener(child.activity.parent) {
             private static final long serialVersionUID = -8027205709169238172L;
 
             public void completed(FaultData faultData, Set<CompensationHandler> compensations) {

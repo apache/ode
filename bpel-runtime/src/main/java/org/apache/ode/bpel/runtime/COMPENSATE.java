@@ -18,10 +18,10 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchML;
 import org.apache.ode.bpel.o.OCompensate;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannelListener;
 
 
 /**
@@ -40,7 +40,7 @@ class COMPENSATE extends ACTIVITY {
     OScope scopeToCompensate = _ocompact.compensatedScope;
     SynchChannel sc = newChannel(SynchChannel.class);
     _self.parent.compensate(scopeToCompensate,sc);
-    object(new SynchML(sc) {
+    object(new SynchChannelListener(sc) {
     private static final long serialVersionUID = 3763991229748926216L;
 
     public void ret() {

@@ -18,11 +18,15 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.evt.CompensationHandlerRegistered;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.channels.CompensationChannelListener;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -30,7 +34,7 @@ import java.util.Set;
 /**
  * A scope that has completed succesfully, and may possibly have a compensation handler.
  */
-class COMPENSATIONHANDLER_ extends BpelAbstraction {
+class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 	private static final long serialVersionUID = 1L;
 	private CompensationHandler _self;
   private Set<CompensationHandler> _completedChildren;
@@ -42,7 +46,7 @@ class COMPENSATIONHANDLER_ extends BpelAbstraction {
 
   public void self() {
     sendEvent(new CompensationHandlerRegistered());
-    object(new CompensationML(_self.compChannel) {
+    object(new CompensationChannelListener(_self.compChannel) {
     private static final long serialVersionUID = -477602498730810094L;
 
     public void forget() {
@@ -69,7 +73,7 @@ class COMPENSATIONHANDLER_ extends BpelAbstraction {
          // Create the compensation handler scope.
          instance(new SCOPE(ai,compHandlerScopeFrame, new LinkFrame(null)));
 
-         object(new ParentScopeML(ai.parent) {
+         object(new ParentScopeChannelListener(ai.parent) {
         private static final long serialVersionUID = 8044120498580711546L;
 
         public void compensate(OScope scope, SynchChannel ret) {

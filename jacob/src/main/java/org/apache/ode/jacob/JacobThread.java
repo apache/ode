@@ -63,7 +63,7 @@ public interface JacobThread {
    *
    * @param concretion new concretion of some abstraction
    */
-  public void instance(Abstraction concretion);
+  public void instance(JacobRunnable concretion);
 
   /**
    * Send a message (object invocation). This method shouldn't really be used
@@ -96,10 +96,10 @@ public interface JacobThread {
    * 
    * <p>
    * With respect to process terms, the Java expression <code>object(false, x,
-   * ML)</code> corresponds to the process term <code> x ? { ML }</code>; if
+   * ChannelListener)</code> corresponds to the process term <code> x ? { ChannelListener }</code>; if
    * in the same expression the initial <code>replicate</code> parameter were
    * instead set to <code>true</code>, corresponding term would be <code> ! x
-   * ? { ML }</code>.
+   * ? { ChannelListener }</code>.
    * </p>
    *
    * @param replicate if set the a replication operator is present
@@ -108,10 +108,10 @@ public interface JacobThread {
    * @throws IllegalArgumentException if the method list does not match the
    *         channel kind
    */
-  public void object(boolean replicate, ML methodList)
+  public void object(boolean replicate, ChannelListener methodList)
               throws IllegalArgumentException;
 
 
-  public void object(boolean reaplicate, ML[] methodLists)
+  public void object(boolean reaplicate, ChannelListener[] methodLists)
               throws IllegalArgumentException;
 }
