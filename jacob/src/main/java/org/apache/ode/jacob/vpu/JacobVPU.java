@@ -59,12 +59,12 @@ public final class JacobVPU {
 
   private static final Method REDUCE_METHOD;
 
-  /** Pre-fetch the {@link JacobRunnable#self} method */
+  /** Pre-fetch the {@link JacobRunnable#run} method */
   static {
     Method rm = null;
 
     try {
-      rm = JacobRunnable.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY);
+      rm = JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY);
     } catch (Exception e) {
       e.printStackTrace();
     }

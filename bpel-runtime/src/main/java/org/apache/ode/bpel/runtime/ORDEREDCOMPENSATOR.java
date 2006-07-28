@@ -41,7 +41,7 @@ class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
     _ret = ret;
   }
 
-  public void self() {
+  public void run() {
     if (_compensations.isEmpty()) {
       _ret.ret();
     }

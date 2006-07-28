@@ -40,7 +40,7 @@ public class Sieve extends JacobRunnable {
   private static int _cnt = 0;
   private static int _last = 0;
 
-  public void self() {
+  public void run() {
     NaturalNumberStreamChannel integers =  newChannel(NaturalNumberStreamChannel.class);
     NaturalNumberStreamChannel primes =  newChannel(NaturalNumberStreamChannel.class);
     instance(new Counter(integers,2));
@@ -65,7 +65,7 @@ public class Sieve extends JacobRunnable {
       _n = n;
     }
 
-    public void self() {
+    public void run() {
       _out.val(_n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
         public void ret() {
           instance(new Counter(_out, _n+1));
@@ -93,7 +93,7 @@ public class Sieve extends JacobRunnable {
       _primes = primes;
     }
 
-    public void self() {
+    public void run() {
       object(new NaturalNumberStreamChannelListener(_in) {
         public void val(final int n, final SynchChannel ret) {
           _primes.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
@@ -114,7 +114,7 @@ public class Sieve extends JacobRunnable {
     public Print(NaturalNumberStreamChannel in) {
       _in = in;
     }
-    public void self() {
+    public void run() {
       object(true, new NaturalNumberStreamChannelListener(_in){
         public void val(int n, SynchChannel ret) {
           _cnt ++;
@@ -144,7 +144,7 @@ public class Sieve extends JacobRunnable {
       _in = in;
       _out = out;
     }
-    public void self() {
+    public void run() {
        object(true, new NaturalNumberStreamChannelListener(_in) {
          public void val(int n, final SynchChannel ret) {
            if (n % _prime != 0)

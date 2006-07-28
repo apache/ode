@@ -59,9 +59,9 @@ class PICK extends ACTIVITY {
 
 
   /**
-   * @see org.apache.ode.jacob.JacobRunnable#self()
+   * @see org.apache.ode.jacob.JacobRunnable#run()
    */
-  public void self() {
+  public void run() {
     PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
     Date timeout;
     Selector[] selectors;
@@ -147,7 +147,7 @@ class PICK extends ACTIVITY {
       this._pickResponseChannel = pickResponseChannel;
     }
 
-    public void self() {
+    public void run() {
 
       object(false, new PickResponseChannelListener(_pickResponseChannel) {
         private static final long serialVersionUID = -8237296827418738011L;

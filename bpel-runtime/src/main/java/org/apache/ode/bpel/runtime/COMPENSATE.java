@@ -36,7 +36,7 @@ class COMPENSATE extends ACTIVITY {
     _ocompact = (OCompensate) self.o;
   }
 
-  public final void self() {
+  public final void run() {
     OScope scopeToCompensate = _ocompact.compensatedScope;
     SynchChannel sc = newChannel(SynchChannel.class);
     _self.parent.compensate(scopeToCompensate,sc);

@@ -82,7 +82,7 @@ class EH_EVENT extends BpelJacobRunnable {
   }
 
 
-  public void self() {
+  public void run() {
     instance(new SELECT());
   }
 
@@ -106,9 +106,9 @@ class EH_EVENT extends BpelJacobRunnable {
 		private static final long serialVersionUID = 1L;
 
 		/**
-     * @see org.apache.ode.jacob.JacobRunnable#self()
+     * @see org.apache.ode.jacob.JacobRunnable#run()
      */
-    public void self() {
+    public void run() {
       Selector selector;
       try {
         PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
@@ -155,7 +155,7 @@ class EH_EVENT extends BpelJacobRunnable {
       _pickResponseChannel = pickResponseChannel;
     }
 
-    public void self() {
+    public void run() {
 
       if (!_active.isEmpty() || _pickResponseChannel != null) {
         HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();

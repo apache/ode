@@ -37,13 +37,13 @@ public class CELL_<T> extends JacobRunnable {
     _val = val;
   }
 
-  public void self() {
-    // INSTANTIATION{Cell(self,val)}
-    // ==> self ? [ read(r)={...} & write(newVal)={...} ]
+  public void run() {
+    // INSTANTIATION{Cell(run,val)}
+    // ==> run ? [ read(r)={...} & write(newVal)={...} ]
     object(new CellChannelListener(_self) {
         public void read(Val r) {
           // COMMUNICATION{x & [read... & ... ] | x ! read}
-          // ==> Cell(self, val) ...
+          // ==> Cell(run, val) ...
           instance(new CELL_<T>(_self, _val));
 
           // ... | r ! val(val)
@@ -55,7 +55,7 @@ public class CELL_<T> extends JacobRunnable {
         @SuppressWarnings("unchecked")
         public void write(Object newVal) {
           // COMMUNICATION{x & [... & write...]
-          // ==> Cell(self, newVal)
+          // ==> Cell(run, newVal)
           instance(new CELL_(_self, newVal));
         }
       });

@@ -57,7 +57,7 @@ class SEQUENCE extends ACTIVITY {
     _compensations =Collections.unmodifiableSet(compensations);
   }
 
-  public void self() {
+  public void run() {
     final ActivityInfo child = new  ActivityInfo(genMonotonic(),
             _remaining.get(0),
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
@@ -74,7 +74,7 @@ class SEQUENCE extends ACTIVITY {
       _child = child;
     }
 
-    public void self() {
+    public void run() {
       object(false, new TerminationChannelListener(_self.self) {
         private static final long serialVersionUID = -2680515407515637639L;
 

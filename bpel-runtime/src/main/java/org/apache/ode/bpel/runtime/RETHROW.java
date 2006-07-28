@@ -31,7 +31,7 @@ class RETHROW extends ACTIVITY {
     super(self, scopeFrame, linkFrame);
   }
 
-  public void self() {
+  public void run() {
     // find the faultData in the scope stack
     FaultData fault = _scopeFrame.getFault();
     if(fault == null){
