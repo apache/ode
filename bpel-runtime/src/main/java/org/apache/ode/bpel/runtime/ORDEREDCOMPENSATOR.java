@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.SynchChannel;
-import com.fs.jacob.SynchML;
+import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchML;
 
 import java.util.List;
 

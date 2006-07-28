@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.ML;
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.ML;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.o.*;

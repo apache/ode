@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;

@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.evt.CompensationHandlerRegistered;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.o.OScope;
