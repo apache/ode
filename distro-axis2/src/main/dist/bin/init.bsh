@@ -1,0 +1,35 @@
+odelib=new java.io.File(System.getProperty(
+	fivesight.bootstrap.BootLoader.PROP_ODEHOME)+"/ode-lib");
+
+lib=new java.io.File(System.getProperty(
+	fivesight.bootstrap.BootLoader.PROP_ODEHOME)+"/lib");
+
+addJars(java.io.File dir) {
+  files = dir.listFiles();
+  for (int i = 0 ; i < files.length; ++i)
+     addClassPath(files[i].toURL());
+}
+
+odeGetBMF() {
+   import org.apache.ode.bpel.pmapi.*;
+   import org.apache.ode.ra.*;
+
+   OdeManagedConnectionFactory pmcf = new OdeManagedConnectionFactory();
+    // the port and domain name should match the rmi port and domain name
+    // defined in ode-config.properties
+    pmcf.setURL("rmi://localhost:2099/MyDomain");
+
+    OdeConnectionFactory cf = (OdeConnectionFactory)pmcf.createConnectionFactory();
+    OdeConnection conn = (OdeConnection)cf.getConnection();
+    BpelManagementFacade bmf =
+      (BpelManagementFacade)conn.createServiceProviderSession(
+          "uri:bpelProvider", BpelManagementFacade.class);
+
+    return bmf;
+}
+
+addJars(odelib);
+addJars(lib);
+desktop();
+
+
