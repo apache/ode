@@ -18,18 +18,17 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchML;
-
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.SynchChannelListener;
+
+import java.util.List;
 
 /**
  * Serially activates a list of compensations in order.
  */
-class ORDEREDCOMPENSATOR extends BpelAbstraction  {
+class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
   private static final long serialVersionUID = -3181661355085428370L;
 
   private static final Log __log = LogFactory.getLog(ORDEREDCOMPENSATOR.class);
@@ -50,7 +49,7 @@ class ORDEREDCOMPENSATOR extends BpelAbstraction  {
       SynchChannel r = newChannel(SynchChannel.class);
       CompensationHandler cdata = _compensations.remove(0);
       cdata.compChannel.compensate(r);
-      object(new SynchML(r) {
+      object(new SynchChannelListener(r) {
         private static final long serialVersionUID = 7173916663479205420L;
 
         public void ret() {

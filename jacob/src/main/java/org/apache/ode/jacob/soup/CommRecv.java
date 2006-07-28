@@ -18,7 +18,7 @@
  */
 package org.apache.ode.jacob.soup;
 
-import org.apache.ode.jacob.ML;
+import org.apache.ode.jacob.ChannelListener;
 
 /**
  * Persistent store representation of an object (i.e. channel read) waiting
@@ -29,11 +29,11 @@ import org.apache.ode.jacob.ML;
  * whether the read is of a replicated variety.
  */
 public class CommRecv extends Comm {
-  private ML _continuation;
+  private ChannelListener _continuation;
 
   protected CommRecv() {}
 
-  public CommRecv(CommChannel chnl,  ML continuation) {
+  public CommRecv(CommChannel chnl,  ChannelListener continuation) {
     super(null, chnl);
     _continuation = continuation;
   }
@@ -42,12 +42,12 @@ public class CommRecv extends Comm {
    * Get the continuation for this object (channel read). The continuation is
    * what happens after a message is matched to the object. It is up to the
    * JACOB VPU to determine what is placed here, but it will generally
-   * consist of some serialized representation of an appropriate ML object
-   * (see {@link ML}.
+   * consist of some serialized representation of an appropriate ChannelListener object
+   * (see {@link ChannelListener}.
    *
    * @return byte array representing the serialized form of the continuation
    */
-  public ML getContinuation() { return _continuation ;}
+  public ChannelListener getContinuation() { return _continuation ;}
 
   public String toString() {
     StringBuffer buf = new StringBuffer(getChannel().toString());

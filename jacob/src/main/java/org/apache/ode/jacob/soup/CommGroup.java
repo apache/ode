@@ -34,7 +34,7 @@ import java.util.List;
  * 
  */
 
-public class CommGroup extends SoupObject {
+public class CommGroup extends ExecutionQueueObject {
 
   boolean _isReplicated;
   List<Comm> _comms = new ArrayList<Comm>();

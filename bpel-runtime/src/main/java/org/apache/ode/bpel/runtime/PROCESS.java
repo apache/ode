@@ -18,18 +18,18 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeML;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Set;
 
-public class PROCESS extends BpelAbstraction {
+public class PROCESS extends BpelJacobRunnable {
 	private static final long serialVersionUID = 1L;
 	private OProcess _process;
 
@@ -52,7 +52,7 @@ public class PROCESS extends BpelAbstraction {
     ScopeFrame processFrame = new ScopeFrame(_process.procesScope, scopeInstanceId, null, null);
     instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-    object(new ParentScopeML(child.parent) {
+    object(new ParentScopeChannelListener(child.parent) {
     private static final long serialVersionUID = -8564969578471906493L;
 
     public void compensate(OScope scope, SynchChannel ret) {

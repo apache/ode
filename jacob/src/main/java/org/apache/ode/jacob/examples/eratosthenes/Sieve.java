@@ -18,10 +18,10 @@
  */
 package org.apache.ode.jacob.examples.eratosthenes;
 
-import org.apache.ode.jacob.Abstraction;
+import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchML;
-import org.apache.ode.jacob.vpu.FastSoupImpl;
+import org.apache.ode.jacob.SynchChannelListener;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
 /**
@@ -36,7 +36,7 @@ import org.apache.ode.jacob.vpu.JacobVPU;
  * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public class Sieve extends Abstraction {
+public class Sieve extends JacobRunnable {
   private static int _cnt = 0;
   private static int _last = 0;
 
@@ -56,7 +56,7 @@ public class Sieve extends Abstraction {
    *  Counter(out, n) := out.val(n) | Counter(out, n+1)
    * </em></pre>
    */
-  private static class Counter extends Abstraction {
+  private static class Counter extends JacobRunnable {
     private NaturalNumberStreamChannel _out;
     private int _n;
 
@@ -66,7 +66,7 @@ public class Sieve extends Abstraction {
     }
 
     public void self() {
-      _out.val(_n, object(new SynchML(newChannel(SynchChannel.class)) {
+      _out.val(_n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
         public void ret() {
           instance(new Counter(_out, _n+1));
         }
@@ -84,7 +84,7 @@ public class Sieve extends Abstraction {
    *
    *
    */
-  private static final class Head extends Abstraction {
+  private static final class Head extends JacobRunnable {
     NaturalNumberStreamChannel _in;
     NaturalNumberStreamChannel _primes;
 
@@ -94,9 +94,9 @@ public class Sieve extends Abstraction {
     }
 
     public void self() {
-      object(new NaturalNumberStreamML(_in) {
+      object(new NaturalNumberStreamChannelListener(_in) {
         public void val(final int n, final SynchChannel ret) {
-          _primes.val(n, object(new SynchML(newChannel(SynchChannel.class)) {
+          _primes.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
             public void ret() {
               NaturalNumberStreamChannel x = newChannel(NaturalNumberStreamChannel.class);
               instance(new PrimeFilter(n, _in, x));
@@ -109,13 +109,13 @@ public class Sieve extends Abstraction {
     }
   }
 
-  private static final class Print extends Abstraction {
+  private static final class Print extends JacobRunnable {
     private NaturalNumberStreamChannel _in;
     public Print(NaturalNumberStreamChannel in) {
       _in = in;
     }
     public void self() {
-      object(true, new NaturalNumberStreamML(_in){
+      object(true, new NaturalNumberStreamChannelListener(_in){
         public void val(int n, SynchChannel ret) {
           _cnt ++;
           _last = n;
@@ -134,7 +134,7 @@ public class Sieve extends Abstraction {
    *     ! in ? [val(n)={ if(n mod prime <> 0) out.val(n) }
    * </em></prime>
    */
-  private static class PrimeFilter extends Abstraction {
+  private static class PrimeFilter extends JacobRunnable {
     private int _prime;
     private NaturalNumberStreamChannel _in;
     private NaturalNumberStreamChannel _out;
@@ -145,10 +145,10 @@ public class Sieve extends Abstraction {
       _out = out;
     }
     public void self() {
-       object(true, new NaturalNumberStreamML(_in) {
+       object(true, new NaturalNumberStreamChannelListener(_in) {
          public void val(int n, final SynchChannel ret) {
            if (n % _prime != 0)
-             _out.val(n, object(new SynchML(newChannel(SynchChannel.class)) {
+             _out.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
                public void ret() {
                  ret.ret();
                }
@@ -170,7 +170,7 @@ public class Sieve extends Abstraction {
     } else {
       int request = Integer.parseInt(args[0]);
       JacobVPU vpu = new JacobVPU();
-      vpu.setContext(new FastSoupImpl(null));
+      vpu.setContext(new ExecutionQueueImpl(null));
       vpu.inject(new Sieve());
       while (_cnt != request) {
         vpu.execute();

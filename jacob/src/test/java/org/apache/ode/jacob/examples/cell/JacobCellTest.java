@@ -18,18 +18,15 @@
  */
 package org.apache.ode.jacob.examples.cell;
 
+import junit.framework.TestCase;
+import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ValChannel;
+import org.apache.ode.jacob.ValChannelListener;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
+import org.apache.ode.jacob.vpu.JacobVPU;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import junit.framework.TestCase;
-
-import org.apache.ode.jacob.Abstraction;
-import org.apache.ode.jacob.ValChannel;
-import org.apache.ode.jacob.ValML;
-import org.apache.ode.jacob.examples.cell.CELL_;
-import org.apache.ode.jacob.examples.cell.CellChannel;
-import org.apache.ode.jacob.vpu.FastSoupImpl;
-import org.apache.ode.jacob.vpu.JacobVPU;
 
 public class JacobCellTest extends TestCase {
   private static Object _val;
@@ -39,7 +36,7 @@ public class JacobCellTest extends TestCase {
   }
 
   public void testJacobCell1() throws IOException {
-    FastSoupImpl fsoup = new FastSoupImpl(null);
+    ExecutionQueueImpl fsoup = new ExecutionQueueImpl(null);
     JacobVPU vpu = new JacobVPU(fsoup, new CellTest1());
 
 
@@ -56,13 +53,13 @@ public class JacobCellTest extends TestCase {
     assertEquals("foo", _val);
   }
 
-  static class CellTest1 extends Abstraction {
+  static class CellTest1 extends JacobRunnable {
     public void self() {
       CellChannel cellChannel = newChannel(CellChannel.class, "cell");
       ValChannel retChannel = newChannel(ValChannel.class, "val");
 
       instance(new CELL_<String>(cellChannel, "foo"));
-      object(new ValML(retChannel) {
+      object(new ValChannelListener(retChannel) {
           public void val(Object retVal) {
             _val = retVal;
           }
@@ -71,7 +68,7 @@ public class JacobCellTest extends TestCase {
     }
   }
 
-  private static class Compute extends Abstraction {
+  private static class Compute extends JacobRunnable {
     ValChannel _out;
     int _x;
 
@@ -87,7 +84,7 @@ public class JacobCellTest extends TestCase {
   }
 
   // TODO still needed?
-  private static class Foo extends Abstraction {
+  private static class Foo extends JacobRunnable {
     public void self() {
       ValChannel print = newChannel(ValChannel.class);
       instance(new Compute(1, print));
@@ -97,7 +94,7 @@ public class JacobCellTest extends TestCase {
     }
   }
 
-  private static class Print extends Abstraction {
+  private static class Print extends JacobRunnable {
     ValChannel _val;
 
     public Print(ValChannel val) {
@@ -105,7 +102,7 @@ public class JacobCellTest extends TestCase {
     }
 
     public void self() {
-      object(new ValML(_val) {
+      object(new ValChannelListener(_val) {
           public void val(Object retVal) {
             System.out.println(retVal);
           }

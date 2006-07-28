@@ -18,8 +18,20 @@
  */
 package org.apache.ode.jacob.vpu;
 
-import org.apache.ode.jacob.*;
-import org.apache.ode.jacob.soup.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jacob.Channel;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.JacobObject;
+import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.JacobThread;
+import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.soup.CommChannel;
+import org.apache.ode.jacob.soup.CommGroup;
+import org.apache.ode.jacob.soup.CommRecv;
+import org.apache.ode.jacob.soup.CommSend;
+import org.apache.ode.jacob.soup.Continuation;
+import org.apache.ode.jacob.soup.ExecutionQueue;
 import org.apache.ode.utils.ArrayUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -28,9 +40,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -50,12 +59,12 @@ public final class JacobVPU {
 
   private static final Method REDUCE_METHOD;
 
-  /** Pre-fetch the {@link Abstraction#self} method */
+  /** Pre-fetch the {@link JacobRunnable#self} method */
   static {
     Method rm = null;
 
     try {
-      rm = Abstraction.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY);
+      rm = JacobRunnable.class.getMethod("self", ArrayUtils.EMPTY_CLASS_ARRAY);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -64,7 +73,7 @@ public final class JacobVPU {
   }
 
   /** Persisted cross-VPU state (state of the channels) */
-  private Soup _soup;
+  private ExecutionQueue _executionQueue;
 
   private Map<Class, Object> _extensions = new HashMap<Class, Object>();
 
@@ -88,11 +97,11 @@ public final class JacobVPU {
 
   /**
    * Re-hydration constructor.
-   * @param soup previously saved execution context
+   * @param executionQueue previously saved execution context
    */
-  public JacobVPU(Soup soup) {
+  public JacobVPU(ExecutionQueue executionQueue) {
     this();
-    setContext(soup);
+    setContext(executionQueue);
   }
 
   /**
@@ -101,7 +110,7 @@ public final class JacobVPU {
    * @param context virgin context object
    * @param concretion the process
    */
-  public JacobVPU(Soup context, Abstraction concretion) {
+  public JacobVPU(ExecutionQueue context, JacobRunnable concretion) {
     setContext(context);
     inject(concretion);
   }
@@ -115,20 +124,20 @@ public final class JacobVPU {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("execute", ArrayUtils.EMPTY_OBJECT_ARRAY));
 
-    if (_soup == null)
+    if (_executionQueue == null)
       throw new IllegalStateException("No state object for VPU!");
     
     if (_fault != null) {
       throw _fault;
     }
 
-    if (!_soup.hasReactions()) {
+    if (!_executionQueue.hasReactions()) {
       return false;
     }
 
-    _cycle = _soup.cycle();
+    _cycle = _executionQueue.cycle();
 
-    Reaction rqe = _soup.dequeueReaction();
+    Continuation rqe = _executionQueue.dequeueReaction();
     JacobThreadImpl jt = new JacobThreadImpl(rqe);
 
     long ctime = System.currentTimeMillis();
@@ -149,7 +158,7 @@ public final class JacobVPU {
   public void flush() {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("flush", ArrayUtils.EMPTY_OBJECT_ARRAY));
-    _soup.flush();
+    _executionQueue.flush();
   }
 
   /**
@@ -163,13 +172,13 @@ public final class JacobVPU {
   /**
    * Set the state of of the VPU; this is analagous to loading a CPU with
    * a thread's context (re-hydration).
-   * @param soup process soup (state)
+   * @param executionQueue process executionQueue (state)
    */
-  public void setContext(Soup soup) {
+  public void setContext(ExecutionQueue executionQueue) {
     if (__log.isTraceEnabled())
-      __log.trace(ObjectPrinter.stringifyMethodEnter("setContext", new Object[] {"soupDao", soup} ));
-    _soup = soup;
-    _soup.setClassLoader(_classLoader);
+      __log.trace(ObjectPrinter.stringifyMethodEnter("setContext", new Object[] {"soupDao", executionQueue} ));
+    _executionQueue = executionQueue;
+    _executionQueue.setClassLoader(_classLoader);
   }
 
 
@@ -186,7 +195,7 @@ public final class JacobVPU {
   /**
    * Add an item to the run queue.
    */
-  public void addReaction(JavaClosure jmb, Method method, Object[] args, String desc) {
+  public void addReaction(JacobObject jmb, Method method, Object[] args, String desc) {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("addReaction", new Object[] {
         "jmb", jmb,
@@ -195,9 +204,9 @@ public final class JacobVPU {
         "desc", desc
       }));
 
-    Reaction reaction = new Reaction(jmb, method, args);
-    reaction.setDescription(desc);
-    _soup.enqueueReaction(reaction);
+    Continuation continuation = new Continuation(jmb, method, args);
+    continuation.setDescription(desc);
+    _executionQueue.enqueueReaction(continuation);
     ++_statistics.runQueueEntries;
   }
 
@@ -224,7 +233,7 @@ public final class JacobVPU {
    * of an active {@link JacobThread}.
    * @param concretion the concretion to inject into the process context
    */
-  public void inject(Abstraction concretion) {
+  public void inject(JacobRunnable concretion) {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("inject", new Object[] { "concretion", concretion }));
 
@@ -290,8 +299,8 @@ public final class JacobVPU {
 
   public void setClassLoader(ClassLoader classLoader) {
     _classLoader = classLoader;
-    if (_soup != null)
-      _soup.setClassLoader(classLoader);
+    if (_executionQueue != null)
+      _executionQueue.setClassLoader(classLoader);
   }
 
 
@@ -300,16 +309,16 @@ public final class JacobVPU {
    */
   public void dumpState() {
     _statistics.printToStream(System.err);
-    _soup.dumpState(System.err);
+    _executionQueue.dumpState(System.err);
   }
 
   public boolean isComplete() {
-    return _soup.isComplete();
+    return _executionQueue.isComplete();
   }
 
 
   private class JacobThreadImpl implements Runnable, JacobThread {
-    private final JavaClosure _methodBody;
+    private final JacobObject _methodBody;
     private final Object[] _args;
     private final Method _method;
     private String _prefix;
@@ -320,7 +329,7 @@ public final class JacobVPU {
     /** Text string identifying the target class and method (for debug) .*/
     private String _targetStr = "Unknown";
 
-    JacobThreadImpl(Reaction rqe) {
+    JacobThreadImpl(Continuation rqe) {
       assert rqe != null;
 
       _methodBody = rqe.getClosure();
@@ -337,7 +346,7 @@ public final class JacobVPU {
      
     }
 
-    public void instance(Abstraction template) {
+    public void instance(JacobRunnable template) {
       String desc = null;
       if (__log.isDebugEnabled()){
         __log.debug(_cycle + ": " + _prefix +  template);
@@ -360,7 +369,7 @@ public final class JacobVPU {
       // Check for synchronous methods; create a synchronization channel
       if (method.getReturnType() != void.class) {
         if (method.getReturnType() != SynchChannel.class)
-          throw new IllegalStateException("ML method can only return SynchChannel: " + method);
+          throw new IllegalStateException("ChannelListener method can only return SynchChannel: " + method);
         replyChannel = (SynchChannel) newChannel(SynchChannel.class,"", "Reply Channel");
         Object[] newArgs = new Object[args.length + 1];
         System.arraycopy(args, 0, newArgs, 0, args.length);
@@ -372,7 +381,7 @@ public final class JacobVPU {
       CommSend send = new CommSend(chnl, method, args);
 
       grp.add(send);
-      _soup.add(grp);
+      _executionQueue.add(grp);
 
       return replyChannel;
     }
@@ -381,7 +390,7 @@ public final class JacobVPU {
                               String description) {
       CommChannel chnl = new CommChannel(channelType);
       chnl.setDescription(description);
-      _soup.add(chnl);
+      _executionQueue.add(chnl);
 
       // Some of the debug information is a bit lengthy...
       //cframe.setDebugInfo(fillDebugInfo());
@@ -400,12 +409,12 @@ public final class JacobVPU {
         __log.debug(_cycle + ": " + _prefix + "export<" + channel + ">");
 
       CommChannel chnl = (CommChannel)ChannelFactory.getBackend(channel);
-      return _soup.createExport(chnl);
+      return _executionQueue.createExport(chnl);
     }
 
     public Channel importChannel(String channelId, Class channelType) {
       try {
-        CommChannel cframe = _soup.consumeExport(channelId);
+        CommChannel cframe = _executionQueue.consumeExport(channelId);
         return ChannelFactory.createChannel(cframe, channelType);
       } catch (RuntimeException re) {
         throw re;
@@ -415,7 +424,7 @@ public final class JacobVPU {
     /**
      * @see JacobThread#object
      */
-    public void object(boolean replicate,  ML[] ml) {
+    public void object(boolean replicate,  ChannelListener[] ml) {
       if (__log.isDebugEnabled()) {
         StringBuffer msg = new StringBuffer();
         msg.append(_cycle);
@@ -443,12 +452,12 @@ public final class JacobVPU {
         grp.add(recv);
       }
 
-      _soup.add(grp);
+      _executionQueue.add(grp);
 
     }
 
-    public void object(boolean replicate, ML methodList) throws IllegalArgumentException {
-      object(replicate, new ML[] { methodList } );
+    public void object(boolean replicate, ChannelListener methodList) throws IllegalArgumentException {
+      object(replicate, new ChannelListener[] { methodList } );
     }
 
 //    private DebugInfo fillDebugInfo() {

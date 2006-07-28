@@ -34,7 +34,7 @@ import org.apache.ode.utils.ObjectPrinter;
  * 
  */
 
-public class CommChannel extends SoupObject {
+public class CommChannel extends ExecutionQueueObject {
 
   private Class _type;
 

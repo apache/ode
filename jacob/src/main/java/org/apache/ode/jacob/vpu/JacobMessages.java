@@ -50,13 +50,13 @@ public class JacobMessages extends MessageBundle {
   }
 
   /**
-   * Error indicating that a re-hydration of a saved continuation object could
+   * Error indicating that a re-hydration of a saved _continuation object could
    * not be completed.
    * 
    * @param channel
-   *          channel with the dangling continuation
+   *          channel with the dangling _continuation
    * @param mlClassName
-   *          name of de-hydrated {@link org.apache.ode.jacob.ML} object
+   *          name of de-hydrated {@link org.apache.ode.jacob.ChannelListener} object
    * 
    */
   public String msgContHydrationErr(String channel, String mlClassName) {
