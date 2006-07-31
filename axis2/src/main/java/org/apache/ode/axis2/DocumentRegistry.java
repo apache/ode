@@ -18,6 +18,9 @@
  */
 package org.apache.ode.axis2;
 
+import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bom.wsdl.PartnerLinkType;
 import org.apache.ode.bom.wsdl.Property;
@@ -28,12 +31,8 @@ import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.wsdl.Definition;
-import javax.wsdl.Import;
 import javax.wsdl.PortType;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -63,9 +62,9 @@ class DocumentRegistry {
 
   public DocumentRegistry(XMLEntityResolver resolver) {
     // bogus schema to force schema creation
-    _schemas.put(URI.create("http://fivesight.com/bogus/namespace"),
+    _schemas.put(URI.create("http://www.apache.org/ode/bogus/namespace"),
                  ("<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
-                 + " targetNamespace=\"http://fivesight.com/bogus/namespace\">"
+                 + " targetNamespace=\"http://www.apache.org/ode/bogus/namespace\">"
                  + "<xsd:simpleType name=\"__bogusType__\">"
                  + "<xsd:restriction base=\"xsd:normalizedString\"/>"
                  + "</xsd:simpleType>" + "</xsd:schema>").getBytes());
@@ -140,36 +139,6 @@ class DocumentRegistry {
 
 
     captureSchemas(def);
-
-    if (__log.isDebugEnabled())
-      __log.debug("Processing <imports> in " + def.getDocumentBaseURI());
-
-    for (List<Import>  imports : ((Map<String, List<Import>>)def.getImports()).values()) {
-      HashSet<String> imported = new HashSet<String>();
-
-      for (Import im : imports) {
-        // If there are several imports in the same WSDL all importing the same namespace
-        // that is a sure sign of programmer error.
-        if (imported.contains(im.getNamespaceURI())) {
-          throw new DeploymentException(__msgs.msgDuplicateWSDLImport(im.getNamespaceURI(), im.getLocationURI()));
-
-        }
-
-        Definition4BPEL importDef = (Definition4BPEL) im.getDefinition();
-
-        // The assumption here is that if the definition is not set on the
-        // import object then there was some problem parsing the thing,
-        // although it would have been nice to actually get the parse
-        // error.
-        if (importDef == null) {
-          throw new DeploymentException(
-                  __msgs.msgWsdlImportNotFound(im.getNamespaceURI(), im.getLocationURI()));
-        }
-
-        imported.add(im.getNamespaceURI());
-        addDefinition((Definition4BPEL) im.getDefinition());
-      }
-    }
   }
 
   @SuppressWarnings("unchecked")
