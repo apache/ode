@@ -26,11 +26,14 @@ import org.apache.axis2.description.WSDL2AxisServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 
 import javax.wsdl.Definition;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
 import javax.wsdl.Port;
-import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Implementation of Axis Service used by ODE iapi to enlist itself
@@ -50,6 +53,10 @@ public class ODEAxisService extends AxisService {
     axisService.setName(serviceName);
     axisService.setWsdlfound(true);
     axisService.setClassLoader(axisConfig.getServiceClassLoader());
+
+    // In doc/lit we need to declare a mapping between operations and message element names
+    // to be able to route properly.
+    declarePartsElements(wsdlDefinition, wsdlServiceName, serviceName, portName);
 
     Iterator operations = axisService.getOperations();
     ODEMessageReceiver msgReceiver = new ODEMessageReceiver();
@@ -104,6 +111,23 @@ public class ODEAxisService extends AxisService {
           }
       }
       return null;
+  }
+
+  private static void declarePartsElements(Definition wsdlDefinition, QName wsdlServiceName,
+                                           String axisServiceName, String portName) {
+    List wsldOps = wsdlDefinition.getService(wsdlServiceName).getPort(portName)
+            .getBinding().getPortType().getOperations();
+    for (Object wsldOp : wsldOps) {
+      Operation wsdlOp = (Operation) wsldOp;
+      Collection parts = wsdlOp.getInput().getMessage().getParts().values();
+      // More than one part, it's rpc/enc, no mapping needs to be declared
+      if (parts.size() == 1) {
+        Part part = (Part) parts.iterator().next();
+        // Parts are types, it's rpc/enc, no mapping needs to be declared
+        if (part.getElementName() != null)
+          ODEAxisDispatcher.addElmtToOpMapping(axisServiceName, wsdlOp.getName(), part.getElementName().getLocalPart());
+      }
+    }
   }
 
 }
