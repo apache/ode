@@ -40,7 +40,10 @@ public class DocumentEntityResolver implements XMLEntityResolver {
 
   public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
     XMLInputSource src = new XMLInputSource(resourceIdentifier);
-    src.setByteStream(new File(_docRoot, resourceIdentifier.getLiteralSystemId()).toURL().openStream());
+    String resourceName = resourceIdentifier.getLiteralSystemId();
+    if (resourceName.indexOf("/") >= 0)
+      resourceName = resourceName.substring(resourceName.indexOf("/") + 1, resourceName.length());
+    src.setByteStream(new File(_docRoot, resourceName).toURL().openStream());
     return src;
   }
 }
