@@ -19,19 +19,20 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.ode.bpel.dd2.DeployDocument;
-import org.apache.ode.bpel.dd2.TDeployment;
-import org.apache.ode.bpel.dd2.TProvide;
-import org.apache.ode.bpel.dd2.TInvoke;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
+import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.dd2.DeployDocument;
+import org.apache.ode.bpel.dd2.TDeployment;
+import org.apache.ode.bpel.dd2.TInvoke;
+import org.apache.ode.bpel.dd2.TProvide;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
 
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
@@ -39,8 +40,8 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 /**
@@ -108,8 +109,17 @@ public class DeploymentUnit {
   public void deploy(boolean activateOnly) {
     // (Re)compile all bpel files if it's a "real" re-deployment, a simple
     // activation doesn't need recompile.
-    if (!activateOnly) compileProcesses();
-    else loadProcessDefinitions();
+    if (!activateOnly) {
+      try {
+        compileProcesses();
+      } catch (CompilationException e) {
+        // No retry on compilation error, we just forget about it
+        _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
+        __log.error("Compilation errors have been reported.");
+        return;
+      }
+    }
+    loadProcessDefinitions();
 
     // Going trough each process declared in the dd
     for (TDeployment.Process processDD : _dd.getDeploy().getProcessList()) {
@@ -187,7 +197,6 @@ public class DeploymentUnit {
     for (File bpel : bpels) {
       compile(bpel);
     }
-    loadProcessDefinitions();
   }
 
   private void compile(File bpelFile) {
