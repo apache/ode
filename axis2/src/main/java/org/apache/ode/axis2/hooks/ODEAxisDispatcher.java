@@ -19,7 +19,6 @@
 
 package org.apache.ode.axis2.hooks;
 
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -30,25 +29,23 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.engine.AbstractDispatcher;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.i18n.Messages;
+import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
-
 
 /**
  * Dispatches the service based on the information from the target endpoint URL.
  */
 public class ODEAxisDispatcher extends AbstractDispatcher {
 
-    /**
-     * Field NAME
-     */
-    public static final QName NAME = new QName("http://ode.intalio.org/",
-            "ODEAxisDispatcher");
+    private static MultiKeyMap _elmtToOperation = new MultiKeyMap();
+
+    /** Field NAME */
+    public static final QName NAME = new QName("http://www.apache.org/ode", "ODEAxisDispatcher");
     private static final Log log = LogFactory.getLog(ODEAxisDispatcher.class);
     QName operationName = null;
-
 
     public AxisOperation findOperation(AxisService service, MessageContext messageContext)
             throws AxisFault {
@@ -88,6 +85,15 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
             if (index >=0 && index + "Response".length() == localName.length()) {
                 return service.getOperation(new QName(localName.substring(0, index)));
             }
+
+            // Seems the operation still couldn't be found, let's check our operation => element
+            // mapping if we can find something (useful for doc/lit when people have the bad idea
+            // of using a different name for their operation and part element)
+            String opName = (String) _elmtToOperation.get(service.getName(), localName);
+            if (opName != null) {
+                operation = service.getOperation(new QName(opName));
+                return operation;
+            }
         }
         log.warn("No operation has been found!");
         return null;
@@ -117,7 +123,6 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
         log.warn("No service has been found!");
         return null;
     }
-    
 
     public void initDispatcher() {
         init(new HandlerDescription(NAME));
@@ -148,4 +153,16 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
         return null;
     }
 
+    /**
+     * Associates an operation and the corresponding message part element name. Only
+     * makes sense for doc/lit services (only one part) for which the operation can't
+     * easily be guessed from the message element name.
+     * @param axisServiceName the service name as registered in Axis2
+     * @param operationName operation local name
+     * @param elmtName element local name
+     */
+    public static void addElmtToOpMapping(String axisServiceName, String operationName, String elmtName) {
+        if (operationName.equals(elmtName)) return;
+        _elmtToOperation.put(axisServiceName, elmtName, operationName);
+    }
 }
