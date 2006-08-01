@@ -21,7 +21,7 @@
 <project>
     <groupId>ode</groupId>
     <artifactId>ode-examples</artifactId>
-    <name>ODE :: BPEL Examples</name>
+    <name>ODE :: JBI Examples</name>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>

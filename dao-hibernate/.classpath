@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry output="target/test-classes" kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="target/generated-resources/xdoclet"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.6.2/xercesImpl-2.6.2.jar"/>
