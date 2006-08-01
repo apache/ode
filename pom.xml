@@ -96,7 +96,7 @@
       |
   -->
     <modules>
-        <module>examples</module>
+        <module>jbi-examples</module>
         <module>tools-bin</module>
 
         <module>axis2</module>
@@ -407,6 +407,12 @@
             <dependency>
                 <groupId>ode</groupId>
                 <artifactId>ode-jbi-install</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>ode</groupId>
+                <artifactId>ode-jbi-examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
