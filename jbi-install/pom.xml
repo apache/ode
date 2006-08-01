@@ -51,6 +51,10 @@
         </dependency>
         <dependency>
             <groupId>ode</groupId>
+            <artifactId>ode-bpel-connector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
             <artifactId>ode-bpel-scheduler-quartz</artifactId>
         </dependency>
     </dependencies>
