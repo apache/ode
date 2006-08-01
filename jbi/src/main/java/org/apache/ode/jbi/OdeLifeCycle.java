@@ -322,6 +322,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
       __log.info("Skipping connector initialization.");
     } else {
       _connector = new BpelServerConnector();
+      _connector.setBpelServer(_ode._server);
       _connector.setPort(_ode._config.getConnectorPort());
       _connector.setId(_ode._config.getConnectorName());
       try {
