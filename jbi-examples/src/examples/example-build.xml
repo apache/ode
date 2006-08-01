@@ -5,11 +5,9 @@
 
 <project name="example-build" default="bpelc">
     <property environment="env"/>
-    <property name="ode.home" location="${basedir}/../../../" />
+    <property name="ode.home" location="${basedir}/../../" />
 
-    <!--
     <property file="${basedir}/../example.properties"/>
-    -->
   
     <!-- pick up environmental ode.xxx properties -->
     <property file="${ode.home}/etc/ode.properties"/>
@@ -73,6 +71,7 @@
     <target name="service-unit" depends="init,clean,bpelc">
         <zip destfile="${sufile}">
             <fileset dir="${build.dir}" includes="**/*"/>
+            <fileset dir="./" includes="*.dd"/>
         </zip>
     </target>
     
