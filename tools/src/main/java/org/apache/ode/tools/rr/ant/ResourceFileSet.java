@@ -19,7 +19,7 @@
 package org.apache.ode.tools.rr.ant;
 
 import org.apache.ode.utils.fs.TempFileManager;
-import org.apache.ode.utils.rr.ResourceRepositoryBuilder;;
+import org.apache.ode.utils.rr.ResourceRepositoryBuilder;
 import org.apache.ode.utils.xml.capture.XmlDependencyScanner;
 
 import java.io.File;
