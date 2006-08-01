@@ -134,7 +134,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
       __log.info(__msgs.msgOdeInitialized());
     } finally {
       if (!_initSuccess) {
-        // TODO ..then what?
+        // TODO ..then what? at least shutdown the scheduler 
       }
     }
   }
@@ -328,7 +328,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
       try {
         _connector.start();
       } catch (Exception e) {
-        throw new JBIException("Failed to initialize JCA connector.",e);
+    	__log.error("Failed to initialize JCA connector.",e);
       }
     }
   }
