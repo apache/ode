@@ -5,8 +5,7 @@
 
 <project name="example-build" default="bpelc">
     <property environment="env"/>
-    <echo message="ODE_HOME = ${env.ODE_HOME}"/>
-    <property name="ode.home" value="${env.ODE_HOME}" />
+    <property name="ode.home" location="${basedir}/../../../" />
 
     <!--
     <property file="${basedir}/../example.properties"/>
@@ -151,7 +150,7 @@
             <pathelement location="${ode.home}/etc" />
         </path>
 
-        <taskdef classpathref="cpath.ode" resource="com/fs/ode/tools/anttasks.properties"
+        <taskdef classpathref="cpath.ode" resource="org/apache/ode/tools/anttasks.properties"
                 onerror="ignore" />
 
         <mkdir dir="${build.dir}"/>
