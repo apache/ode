@@ -1,0 +1,14 @@
+Portions of the source code for this software are covered by different licenses.
+
+The following "core" modules are covered by the Common Public License 1.0
+(see CPL.txt):
+
+bom, bpel, bpel-api, bpel-compiler, bpel-obj, bpel-parser, jacob, jca-ra, kernel,
+sfwk-core, sfwk-impl, sp-bpel
+
+The following "extension" modules are covered by the MIT License (see
+MIT_LICENSE.txt):
+
+adapter-httpsoap, adapter-native, bpel-el-xpath10, bpel-el-xpath20, bpel-test,
+dao-hibernate, fs-naming, minerva, ode-tools, serviceprovider-xslt, soap, utils
+
