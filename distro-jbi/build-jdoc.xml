@@ -1,0 +1,62 @@
+<project name="ode-java-doc" default="javadoc-ode-public">
+<target name="javadoc-ode-public" 
+      depends="init" >
+
+    <mkdir dir="${build.dir.javadoc}/ode-api"/>
+
+    <javadoc destdir="${build.dir.javadoc}/ode-api"
+      author="false"
+      version="false"
+      use="true"
+      source="1.5" 
+      breakiterator="true"
+      additionalparam="-quiet"
+      windowtitle="Intalio ODE API Documentation">
+
+      <classpath>
+        <path refid="cpath" />
+        <fileset dir="${install.dir}" includes="**/*.jar" />
+      </classpath>
+
+     <fileset dir="../" >
+        <include name="**/*.java" />
+     </fileset>
+      
+      <doctitle><![CDATA[<h1>Intalio Process Execution Engine (ODE) JavaDoc</h1>]]></doctitle>
+      <footer><![CDATA[<small><i>Copyright &#169; 2004 FiveSight Technologies Inc. All Rights Reserved.</i></small>]]></footer>
+      <tag name="todo" scope="all" description="To do:" />
+
+      <group title="ODE Deployment and Management API"
+             packages="org.apache.ode.sfwk.mngmt*,org.apache.ode.sfwk.deployment*" />
+
+      <group title="ODE Service Provider API (SPI)"
+             packages="org.apache.ode.sfwk.spi*"/>
+
+      <group title="ODE Binding API (BAPI)"
+             packages="org.apache.ode.sfwk.bapi*" />
+
+      <group title="BPEL APIs"
+             packages="org.apache.ode.bpel*,org.apache.ode.bom.api*" />
+
+      <group title="ODE Protocol Adapters" packages="org.apache.ode.adapters.*" />
+      <group title="ODE Kernel / Server"
+             packages="org.apache.ode.server*,org.apache.ode.kernel*"/>
+    </javadoc>
+   
+  </target>
+
+  <target name="schemadocs" 
+          description="generate schema documentation and place in the staging area." depends="init">
+    <mkdir dir="${build.dir.schemadoc}" />
+    <xslt destdir="${build.dir.schemadoc}" extension=".html" style="${xs3p.xslt}" basedir="../" includes="*/src/**/*.xsd" excludes="**/istate*">
+        <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <globmapper from="*.xsd" to="*.html" casesensitive="no"/>
+        </chainedmapper>      
+	</mapper>
+    </xslt>
+  </target>
+
+
+</project>

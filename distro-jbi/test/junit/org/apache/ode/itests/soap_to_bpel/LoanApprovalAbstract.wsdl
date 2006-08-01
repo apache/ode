@@ -1,0 +1,48 @@
+<definitions 
+      targetNamespace="http://loans.org/wsdl/loan-approval"
+      xmlns="http://schemas.xmlsoap.org/wsdl/"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"    
+      xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+      xmlns:lns="http://loans.org/wsdl/loan-approval"
+      xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+
+<message name="creditInformationMessage">
+   <part name="name" type="xsd:string"/>
+   <part name="amount" type="xsd:integer"/>
+</message>
+
+<bpws:property name="nameProp"
+                 type="xsd:string"/>
+<bpws:property name="amountProp"
+                 type="xsd:integer"/>
+
+<bpws:propertyAlias propertyName="lns:nameProp"
+                    messageType="lns:creditInformationMessage" 
+                    part="name"/>
+                    
+<bpws:propertyAlias propertyName="lns:amountProp"
+                    messageType="lns:creditInformationMessage" 
+                    part="amount"/>
+
+<portType name="loanServicePT">
+   <operation name="request1">
+      <input message="lns:creditInformationMessage"/>
+   </operation>
+   <operation name="request2">
+      <input message="lns:creditInformationMessage"/>
+   </operation>
+   <operation name="request3">
+       <!-- set input and output to be same; echo message -->
+      <input message="lns:creditInformationMessage"/>
+      <output message="lns:creditInformationMessage"/>
+   </operation>
+</portType>
+
+<plnk:partnerLinkType name="loanPartnerLinkType">
+   <plnk:role name="loanService">
+       <plnk:portType name="lns:loanServicePT"/>
+   </plnk:role>
+</plnk:partnerLinkType>
+
+
+</definitions>

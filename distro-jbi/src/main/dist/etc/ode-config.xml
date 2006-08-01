@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+
+<kconfig xmlns="http://www.fivesight.com/ode/kconfig/">
+
+  <!-- For setting system properties. -->
+  <!-- If ode.home is not set explicitly here, it is expected from the launcher.
+       Failure to set ode.home in some fashion will result in an error. -->
+  <!--setProperty name="ode.home">c:/path/to/home/dir</setProperty-->
+  
+  <classpath type="url">file:<ode-home/>/etc/</classpath>  
+  <classpath type="jarDir"><ode-home/>/lib</classpath>
+  
+  <!-- Imports are used in turn to try to locate classes given using the "class"
+       attribute -->
+  <import package="org.apache.ode.kernel.modrmi"/>
+  <import package="org.apache.ode.kernel.modjetty" />
+  <import package="org.apache.ode.kernel.modjotm" />
+  <import package="org.apache.ode.kernel.modsfwk" />
+  <import package="org.apache.ode.kernel.modjmxremote" />
+  <import package="org.apache.ode.kernel.modhibernatedao" />
+  <import package="org.apache.ode.kernel.modfsnaming" />
+  <import package="org.apache.ode.kernel.moddeployer" />
+  <import package="org.apache.ode.kernel.modbpellog" />
+  <import package="org.apache.ode.kernel.modjdbc" />
+  <import package="org.apache.ode.kernel.modxslt" />
+
+  <kmodule name="com.fivesight.ode:mod=RmiRegistry" class="ModRmiRegistry">
+	  <attribute name="port"><getProperty name="ode.registry.port" 
+	  									  default="@ODE_RMI_PORT@" /></attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.ode:mod=Naming" class="ModFsNaming">
+    <!-- <attribute ...> elements used to set MBean attributes (before start()). -->
+    <attribute name="providerURL">ode</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.ode:mod=BpelLogger" class="ModBpelEventLogger"/>
+
+  <kmodule name="com.fivesight.ode:mod=XSLTransformer" class="ModXslt"/>
+
+  <kmodule name="com.fivesight.ode:mod=JOTM" class="ModJOTM">
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="txTimeout">30000</attribute>
+  </kmodule>
+
+  <!--
+      - Comment out the following for MySql database.
+      -
+      -->
+  <kmodule name="com.fivesight.ode:mod=OdeDB" class="ModJdbcDS">
+    <attribute name="dataSourceName">ode-ds</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="driver">org.apache.derby.jdbc.EmbeddedDriver</attribute>
+    <attribute name="username">sa</attribute>
+    <attribute name="password"></attribute>
+    <attribute name="url">jdbc:derby:<ode-home/>/data</attribute>
+    <attribute name="poolMax">10</attribute>
+    <attribute name="poolMin">5</attribute>
+	<attribute name="type">MANAGED</attribute>
+  </kmodule>
+	
+ <!--
+    - Uncomment the following for MySql database.
+    -
+
+ <kmodule name="com.fivesight.ode:mod=OdeDB" class="ModJdbcDS">
+    <attribute name="dataSourceName">ode-ds</attribute>
+    <attribute name="transactionManagerName">TransactionManager</attribute>
+    <attribute name="driver">com.mysql.jdbc.Driver</attribute>
+    <attribute name="url">jdbc:mysql://localhost/ode</attribute>
+    <attribute name="username">ode</attribute>
+    <attribute name="password"></attribute>
+    <attribute name="poolMax">10</attribute>
+    <attribute name="poolMin">5</attribute>
+  </kmodule>
+ -->
+
+  <kmodule name="com.fivesight.ode:mod=HibernateDAO" class="ModHibernateDAO">
+    <attribute name="bpelStateStoreConnectionFactory">bpel_sscf</attribute>
+    <attribute name="stateStoreConnectionFactory">sscf</attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="dataSource">ode-ds</attribute>
+    <attribute name="hibernateProperties">file:<ode-home/>/etc/hibernate.properties</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.ode:mod=Jetty" class="ModJetty">
+    <attribute name="config">file:<ode-home/>/etc/jetty.xml</attribute>
+  </kmodule>
+
+  <!-- Begin definition of service providers 
+	   MUST PRECEED ModSfwk
+	-->  
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=HttpSoap" class="ModSvcProvider">
+	<attribute name="ProviderClass">org.apache.ode.httpsoap.HttpSoapAdapter</attribute>
+	<attribute name="ProviderURI">uri:protocoladapter.soap</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Bpel" class="ModSvcProvider">
+	<attribute name="ProviderClass">org.apache.ode.bpel.provider.BpelServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:bpelProvider</attribute>
+	<attribute name="ProviderProperties">stateStoreConnectionFactory=bpel_sscf</attribute>
+  </kmodule>
+  
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Transformer" class="ModSvcProvider">
+	<attribute name="ProviderClass">org.apache.ode.xcontrib.sp.xslt.XSLTServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:xsltServiceProvider</attribute>
+  </kmodule>
+    
+  <kmodule name="com.fivesight.ode:mod=ServiceProvider,name=Spexerciser" class="ModSvcProvider">
+	<attribute name="ProviderClass">org.apache.ode.bpel.test.BpelTestServiceProvider</attribute>
+	<attribute name="ProviderURI">uri:protocoladapter.bpel.unit-test</attribute>
+  </kmodule>
+  
+  <!-- End ServiceProvider definition -->
+  
+  <kmodule name="com.fivesight.ode:mod=ODE" class="ModSfwk">
+    <attribute name="domainId"><getProperty name="ode.domain" default="@ODE_DOMAIN@"/></attribute>
+    <attribute name="transactionManager">TransactionManager</attribute>
+    <attribute name="DAOConnectionFactory">sscf</attribute>
+  </kmodule>
+
+  <kmodule name="com.fivesight.ode:mod=Deployer" class="ModDeployer">
+    <attribute name="DeployDir"><ode-home/>/etc/deploy</attribute>
+    <attribute name="DomainAdminMBean">
+    	<getAttribute object="com.fivesight.ode:mod=ODE" name="domainAdminMBean"/>
+    </attribute>
+  </kmodule>
+</kconfig>
