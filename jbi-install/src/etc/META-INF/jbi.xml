@@ -51,6 +51,7 @@
         <path-element>lib/ode-bpel-parser.jar</path-element>
         <path-element>lib/ode-bpel-runtime.jar</path-element>
         <path-element>lib/ode-bpel-scheduler-quartz.jar</path-element>
+        <path-element>lib/ode-bpel-connector.jar</path-element>
         <path-element>lib/ode-jca-server.jar</path-element>
         <path-element>lib/ode-jca-ra.jar</path-element>
         <path-element>lib/ode-dao-hibernate.jar</path-element>
