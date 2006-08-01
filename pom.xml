@@ -139,7 +139,7 @@
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
 
-        <!--module>standalone-distro</module--> 
+        <module>distro-jbi</module>
         <!--module>integration</module-->
     </modules>
 
