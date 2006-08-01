@@ -23,18 +23,21 @@
 
     <target name="build-ping">
         <subant target="">
+            <property name="ode.home" value="${ode.home}" />
             <fileset dir="." includes="ping/build.xml"/>
         </subant>
     </target>
 
     <target name="build-pong">
         <subant target="">
+            <property name="ode.home" value="${ode.home}" />
             <fileset dir="." includes="pong/build.xml"/>
         </subant>
     </target>
 
     <target name="build-ping-http">
         <subant target="">
+            <property name="ode.home" value="${ode.home}" />
             <fileset dir="." includes="ping-http/build.xml"/>
         </subant>
     </target>
