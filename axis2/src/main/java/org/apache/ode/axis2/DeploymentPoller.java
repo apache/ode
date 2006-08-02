@@ -21,17 +21,16 @@ package org.apache.ode.axis2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
-import java.io.BufferedReader;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -46,11 +45,12 @@ public class DeploymentPoller {
   private File _deployDir;
   private PollingThread _poller;
   private ODEServer _odeServer;
+  private HashMap<String,Long> _quarantined = new HashMap<String, Long>();
 
   /**
    * Set of {@link DeploymentUnit} objects regarding all deployment units that have been inspected.
    */
-  private final HashMap<String,DeploymentUnit> _inspectedFiles = new HashMap<String,DeploymentUnit>();
+  private final HashMap<String,DeploymentUnit> _inspectedFiles = new HashMap<String, DeploymentUnit>();
 
   /** Filter accepting directories containing a .odedd file. */
   private static final FileFilter _fileFilter = new FileFilter(){
@@ -70,18 +70,19 @@ public class DeploymentPoller {
     _deployDir = deployDir;
     if (!_deployDir.exists())
       _deployDir.mkdir();
+    for (DeploymentUnitImpl deploymentUnit : _odeServer.getBpelServer().getDeployedUnits()) {
+      _inspectedFiles.put(deploymentUnit.getDuDirectory().getName(), deploymentUnit);
+    }
   }
 
   public void start() {
     _poller = new PollingThread();
-    readState();
     _poller.start();
     __log.info("Poller started.");
   }
 
   public void stop() {
     _poller.kill();
-    writeState();
     _poller = null;
   }
 
@@ -92,16 +93,28 @@ public class DeploymentPoller {
   private void check(){
     File[] files = _deployDir.listFiles(_fileFilter);
 
+    // Checking if a quarantined (failed) deployment has been updated
+    if (_quarantined.size() > 0) {
+      ArrayList<String> removals = new ArrayList<String>();
+      for (Map.Entry<String, Long> entry : _quarantined.entrySet()) {
+        if (new File(entry.getKey()).lastModified() > entry.getValue()) {
+          removals.add(entry.getKey());
+        }
+      }
+      for (String file : removals) _quarantined.remove(file);
+    }
+
     // Checking for new deployment directories
     for (File file : files) {
-      if (checkIsNew(new File(file, "deploy.xml"))) {
+      File deployXml = new File(file, "deploy.xml");
+      if (checkIsNew(deployXml) && _quarantined.get(deployXml.getAbsolutePath()) == null) {
         try {
-          DeploymentUnit du = new DeploymentUnit(file, _odeServer);
-          du.deploy(false);
+          DeploymentUnit du = _odeServer.getBpelServer().deploy(file);
           _inspectedFiles.put(file.getName(), du);
           __log.info("Deployment of artifact " + file.getName() + " successful.");
         } catch (Exception e) {
           __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+          _quarantined.put(deployXml.getAbsolutePath(), deployXml.lastModified());
         }
       }
     }
@@ -110,8 +123,8 @@ public class DeploymentPoller {
     HashSet<String> removed = new HashSet<String>();
     for (String duName : _inspectedFiles.keySet()) {
       DeploymentUnit du = _inspectedFiles.get(duName);
-      if (!du.exists()) {
-        du.undeploy();
+      if (du.removed()) {
+//        _odeServer.getBpelServer().undeploy(du);
         removed.add(duName);
       }
     }
@@ -130,7 +143,7 @@ public class DeploymentPoller {
   private boolean checkIsNew(File f){
     for (DeploymentUnit deployed : _inspectedFiles.values()) {
       if (deployed.matches(f))
-        return false;
+        return deployed.checkForUpdate();
     }
     return true;
   }
@@ -167,54 +180,6 @@ public class DeploymentPoller {
       } catch(Throwable t){
         __log.fatal("Encountered an unexpected error.  Exiting poller...", t);
       }
-    }
-  }
-
-  private void readState() {
-    File duState = new File(_deployDir, ".state");
-    if (duState.exists()) {
-      try {
-        BufferedReader duStateReader = new BufferedReader(new FileReader(duState));
-        String line;
-        while ((line = duStateReader.readLine()) != null) {
-          String filename = line.substring(0, line.indexOf("|"));
-          String timestamp = line.substring(line.indexOf("|") + 1 , line.length());
-          File duFile = new File(_deployDir, filename);
-          if (duFile.exists()) {
-            DeploymentUnit du = new DeploymentUnit(duFile, _odeServer);
-            du.setLastModified(Long.valueOf(timestamp));
-            _inspectedFiles.put(duFile.getName(), du);
-            du.deploy(true);
-          }
-        }
-      } catch (FileNotFoundException e) {
-        // Shouldn't happen
-      } catch (IOException e) {
-        __log.error("An error occured while reading past deployments states, some " +
-                "processes will be redeployed.", e);
-      }
-    } else {
-      __log.info("Couldn't find any deployment history, all processes will " +
-              "be redeployed.");
-    }
-  }
-
-  private void writeState() {
-    try {
-      __log.debug("Writing current deployment state.");
-      FileWriter duStateWriter = new FileWriter(new File(_deployDir, ".state"), false);
-      for (DeploymentUnit deploymentUnit : _inspectedFiles.values()) {
-        // Somebody using pipe in their directory names don't deserve to deploy anything
-        duStateWriter.write(deploymentUnit.getDuDirectory().getName());
-        duStateWriter.write("|");
-        duStateWriter.write(""+deploymentUnit.getLastModified());
-        duStateWriter.write("\n");
-      }
-      duStateWriter.flush();
-      duStateWriter.close();
-    } catch (IOException e) {
-      __log.error("Couldn't write deployment state! Processes could be redeployed (or not) " +
-              "even they don't (or do) need to.", e);
     }
   }
 }

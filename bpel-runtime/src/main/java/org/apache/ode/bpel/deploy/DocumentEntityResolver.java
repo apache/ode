@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.deploy;
 
 import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
 import com.sun.org.apache.xerces.internal.xni.XNIException;

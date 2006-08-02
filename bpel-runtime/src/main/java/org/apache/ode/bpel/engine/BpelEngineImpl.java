@@ -19,17 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -38,16 +29,22 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
-
 import org.w3c.dom.Element;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class BpelEngineImpl implements BpelEngine {
@@ -184,7 +181,7 @@ public class BpelEngineImpl implements BpelEngine {
         elangRegistry);
     _activeProcesses.put(pid, process);
     for (QName sn : serviceNames.values()) {
-      __log.info( "Register process: serviceId=" + sn + ", process=" + process );
+      __log.debug( "Register process: serviceId=" + sn + ", process=" + process );
       _serviceMap.put(sn,process);
     }
 

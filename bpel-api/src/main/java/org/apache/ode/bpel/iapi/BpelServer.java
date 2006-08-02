@@ -18,13 +18,13 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import java.io.IOException;
-import java.net.URI;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 
 
 /**
@@ -113,16 +113,22 @@ public interface BpelServer {
    * @throws IOException
    * @throws BpelEngineException
    */
-  void deploy(QName pid, URI deployURI) throws IOException,
-    BpelEngineException;
+  void deploy(QName pid, URI deployURI) throws IOException, BpelEngineException;
+
+  /**
+   * Deploy a process from the filesystem.
+   * @param deploymentUnitDirectory directory containing all deployment files
+   * @return A deployment unit interface giving information about the deployed package "freshness"
+   */
+  DeploymentUnit deploy(File deploymentUnitDirectory);
   
   /**
    * Undeploy a process.
    * @param pid
-   * @return
+   * @return successful or not
    */
   boolean undeploy(QName pid);
-  
+
   /**
    * Activate a process.
    * @param pid process to activate

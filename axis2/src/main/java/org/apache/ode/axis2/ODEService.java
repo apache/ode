@@ -19,14 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -34,6 +26,13 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
 import org.w3c.dom.Element;
 
 import javax.transaction.TransactionManager;
@@ -60,7 +59,7 @@ public class ODEService {
   private String _portName;
   private Map<String,ResponseCallback> _waitingCallbacks;
 
-  public ODEService(AxisService axisService, Definition4BPEL def, QName serviceName, String portName,
+  public ODEService(AxisService axisService, Definition def, QName serviceName, String portName,
                     BpelServerImpl server, TransactionManager txManager) {
     _axisService = axisService;
     _server = server;

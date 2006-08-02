@@ -138,9 +138,4 @@ public class Messages extends MessageBundle {
     return format("The WSDL for namespace \"{0}\" could not be found in \"{1}\".", wsdlUri, location);
   }
 
-  /** Error in schema processing: {0} **/
-  public String errSchemaError(String detailMessage) {
-    return format("Error in schema processing: {0}", detailMessage);
-  }
-
 }

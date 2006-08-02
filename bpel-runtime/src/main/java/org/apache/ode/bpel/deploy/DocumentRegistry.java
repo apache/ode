@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.deploy;
 
 import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import org.apache.commons.logging.Log;
@@ -27,6 +27,8 @@ import org.apache.ode.bom.wsdl.Property;
 import org.apache.ode.bom.wsdl.PropertyAlias;
 import org.apache.ode.bom.wsdl.XMLSchemaType;
 import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.engine.Messages;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;
 import org.apache.ode.utils.xsd.XSUtils;
@@ -49,7 +51,7 @@ import java.util.Map;
 /**
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
-class DocumentRegistry {
+public class DocumentRegistry {
   private static final Log __log = LogFactory.getLog(DocumentRegistry.class);
   private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -179,7 +181,7 @@ class DocumentRegistry {
             }
 
             if (exceptions.size() > 0) {
-              throw new DeploymentException(
+              throw new BpelEngineException(
                       __msgs.errSchemaError(exceptions.get(0).getDetailMessage()));
             }
           }
