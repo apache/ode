@@ -19,9 +19,10 @@
 
 package org.apache.ode.bpel.iapi;
 
-import javax.xml.namespace.QName;
-
 import org.w3c.dom.Element;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
 
 /**
  * Endpoint reference context: facililates the creation of 
@@ -54,6 +55,21 @@ public interface EndpointReferenceContext {
       QName serviceId, 
       Element externalEpr);
   
+  /**
+   * Activate a "myRole" endpoint.
+   * @param serviceName WSDL service qualified name
+   * @param portName WSDL port
+   * @param wsdl WSDL definition
+   */
+  void activateEndpoint(QName serviceName, String portName, Definition wsdl);
+
+  /**
+   * Activate a "partnerRole" endpoint, used by the engine to send messages.
+   * @param serviceName
+   * @param portName
+   * @param wsdl
+   */
+  void activateExternalEndpoint(QName serviceName, String portName, Definition wsdl);
 
   /**
    * Deactivate a "myRole" endpoint.

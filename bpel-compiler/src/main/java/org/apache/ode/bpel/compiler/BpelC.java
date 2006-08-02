@@ -18,14 +18,13 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.Process;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.capi.CompilationMessage;
 import org.apache.ode.bpel.capi.CompileListener;
-import org.apache.ode.bpel.dd.DDException;
-import org.apache.ode.bpel.dd.DDHandler;
-import org.apache.ode.bpel.dd.DDValidationException;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.parser.BpelParseException;
@@ -37,12 +36,15 @@ import org.apache.ode.bpel.xsl.XslTransformHandler;
 import org.apache.ode.sax.fsa.ParseError;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.TransformerFactory;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -353,8 +355,6 @@ public class BpelC {
 
     _bpelUrl = bpelUrl;
     BpelProcessBuilder bpelProcessBuilder = _bpelProcessBuilderFactory.newBpelProcessBuilder();
-    logCompilationMessage(__cmsgs.infParsingProcess().setSource(bpelUrl.toExternalForm()));
-
     Process process;
     try {
       InputSource isrc = new InputSource(new ByteArrayInputStream(StreamUtils.read(bpelUrl)));

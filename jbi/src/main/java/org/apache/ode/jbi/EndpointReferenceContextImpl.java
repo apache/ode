@@ -19,17 +19,18 @@
 
 package org.apache.ode.jbi;
 
-import javax.jbi.servicedesc.ServiceEndpoint;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
+import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
+
+import javax.jbi.servicedesc.ServiceEndpoint;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReferenceContext}
@@ -106,6 +107,16 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     } catch (Exception ex) {
       throw new ContextException("Could not activate endpoint for " + serviceId, ex);
     }
+  }
+
+  public void activateEndpoint(QName serviceName, String portName, Definition wsdl) {
+    // TODO Implement me
+    throw new UnsupportedOperationException("To implement.");
+  }
+
+  public void activateExternalEndpoint(QName serviceName, String portName, Definition wsdl) {
+    // TODO Implement me
+    throw new UnsupportedOperationException("To implement.");
   }
 
   public void deactivateEndpoint(EndpointReference epr) {

@@ -17,32 +17,33 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.deploy;
 
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bpel.compiler.WsdlFinder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.XsltFinder;
+import org.apache.ode.utils.StreamUtils;
 
-import javax.wsdl.xml.WSDLReader;
-import javax.wsdl.WSDLException;
-import java.net.URI;
-import java.net.MalformedURLException;
 import java.io.File;
-import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Finds WSDL documents within a deployment unit (no relative path shit,
  * everything's in the same directory).
  */
-public class DUWsdlFinder implements WsdlFinder {
+public class DUXsltFinder implements XsltFinder {
+
+  private static final Log __log = LogFactory.getLog(DUXsltFinder.class);
 
   private File _suDir;
 
-  public DUWsdlFinder() {
+  public DUXsltFinder() {
     // no base URL
   }
 
-  public DUWsdlFinder(File suDir) {
+  public DUXsltFinder(File suDir) {
     _suDir = suDir;
   }
 
@@ -50,16 +51,18 @@ public class DUWsdlFinder implements WsdlFinder {
     _suDir = new File(u);
   }
 
-  public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {
+  public String loadXsltSheet(URI uri) {
     // Eliminating whatever path has been provided, we always look into our SU
     // deployment directory.
     String strUri = uri.toString();
     String filename = strUri.substring(strUri.lastIndexOf("/"), strUri.length());
-    return (Definition4BPEL) r.readWSDL(new File(_suDir, filename).getPath());
-  }
-
-  public InputStream openResource(URI uri) throws MalformedURLException, IOException {
-    return uri.toURL().openStream();
+    try {
+      return new String(StreamUtils.read(new FileInputStream(new File(_suDir, filename))));
+    } catch (IOException e) {
+      if (DUXsltFinder.__log.isDebugEnabled())
+        DUXsltFinder.__log.debug("error obtaining resource '" + uri + "' from repository.", e);
+      return null;
+    }
   }
 
 }

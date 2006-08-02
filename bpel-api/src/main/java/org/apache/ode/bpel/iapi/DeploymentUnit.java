@@ -17,22 +17,37 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.iapi;
+
+import java.io.File;
 
 /**
- * Thrown on deployment error.
+ * Provides basic information about a deployment package.
  */
-public class DeploymentException extends RuntimeException {
+public interface DeploymentUnit {
 
-  public DeploymentException(String message) {
-    super(message);
-  }
+  /**
+   * @return timestamp at which this deployment unit was last modified.
+   */
+  public long getLastModified();
 
-  public DeploymentException(String message, Throwable cause) {
-    super(message, cause);
-  }
+  /**
+   * Checks whether the provided file designates this deployment unit.
+   * @param f
+   * @return
+   */
+  public boolean matches(File f);
 
-  public DeploymentException(Throwable cause) {
-    super(cause);
-  }
+  /**
+   * Assess whether the deployment unit has been modified (suppression isn't
+   * considered as an update).
+   * @return true if the deployment unit has been modified (eventually needing a redeploy)
+   */
+  public boolean checkForUpdate();
+
+  /**
+   * Checks whether this deployment unit has been deleted.
+   * @return true if deleted
+   */
+  public boolean removed();
 }

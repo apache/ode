@@ -18,12 +18,11 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.net.URI;
-import java.util.Date;
+import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
-
-import org.apache.ode.utils.msg.MessageBundle;
+import java.net.URI;
+import java.util.Date;
 
 /**
  * Message bundle used by the BPEL provider implementation.
@@ -154,4 +153,10 @@ public class Messages extends MessageBundle {
     return format("The service name and port defined in your deployment descriptor couldn't be found " +
             "in any WSDL document: {0} {1}.", service, port);
   }
+
+  /** Error in schema processing: {0} **/
+  public String errSchemaError(String detailMessage) {
+    return format("Error in schema processing: {0}", detailMessage);
+  }
+
 }
