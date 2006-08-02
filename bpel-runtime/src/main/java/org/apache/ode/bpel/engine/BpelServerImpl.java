@@ -16,30 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.ode.bpel.engine;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlbeans.XmlException;
-
 import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
@@ -48,11 +46,15 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dd.DeploymentDescriptorDocument;
 import org.apache.ode.bpel.dd.TDeploymentDescriptor;
 import org.apache.ode.bpel.dd2.TDeployment;
+import org.apache.ode.bpel.dd2.TInvoke;
+import org.apache.ode.bpel.dd2.TProvide;
+import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
@@ -61,29 +63,30 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bpel.dd2.TDeployment;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.xmlbeans.XmlException;
+import org.w3c.dom.Element;
 
-import java.io.*;
+import javax.xml.namespace.QName;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.xmlbeans.XmlException;
-
-import org.w3c.dom.Element;
 
 /**
  * The BPEL server implementation. 
@@ -91,27 +94,21 @@ import org.w3c.dom.Element;
 public class BpelServerImpl implements BpelServer {
 
   private static final Log __log = LogFactory.getLog(BpelServer.class);
-
   private static final Messages __msgs = MessageBundle
       .getMessages(Messages.class);
 
   private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
-
   private Contexts _contexts = new Contexts();
-
   BpelEngineImpl _engine;
-
   private boolean _started;
-
   private boolean _initialized;
-
   private BpelDatabase _db;
-
+  private File _deploymentDir;
   /** Should processes marked "active" in the DB be activated on server start? */
   private boolean _autoActivate = false;
-
-  private List<BpelEventListener> _listeners = 
+  private List<BpelEventListener> _listeners =
     new CopyOnWriteArrayList<BpelEventListener>();
+  private List<DeploymentUnitImpl> _deployedUnits = new ArrayList<DeploymentUnitImpl>();
 
   public BpelServerImpl() {
 
@@ -136,7 +133,6 @@ public class BpelServerImpl implements BpelServer {
         __log.debug("BPEL SERVER starting.");
       }
 
-      
       _engine = new BpelEngineImpl(_contexts);
       if (_autoActivate) {
         List<QName> pids = findActive();
@@ -148,7 +144,8 @@ public class BpelServerImpl implements BpelServer {
             __log.error(msg,ex);
           }
       }
-      
+
+      readState();
       _contexts.scheduler.start();
       _started = true;
       __log.info(__msgs.msgServerStarted());
@@ -209,6 +206,8 @@ public class BpelServerImpl implements BpelServer {
         __log.debug("BPEL SERVER STOPPING");
       }
 
+      writeState();
+
       _contexts.scheduler.stop();
       _engine = null;
       _started = false;
@@ -262,7 +261,7 @@ public class BpelServerImpl implements BpelServer {
   /**
    * Load the parsed and compiled BPEL process definition from the "net".
    * 
-   * @param processId
+   * @param uri
    *          process identifier
    * @return compiled process representation
    */
@@ -473,9 +472,7 @@ public class BpelServerImpl implements BpelServer {
       ProcessInfo pinfo = loadProcess(pid);
 
       ExpressionLanguageRuntimeRegistry elangRegistry = new ExpressionLanguageRuntimeRegistry();
-      for (Iterator<OExpressionLanguage> i = pinfo.compiledProcess.expressionLanguages
-          .iterator(); i.hasNext();) {
-        OExpressionLanguage elang = i.next();
+      for (OExpressionLanguage elang : pinfo.compiledProcess.expressionLanguages) {
         try {
           elangRegistry.registerRuntime(elang);
         } catch (ConfigurationException e) {
@@ -527,7 +524,6 @@ public class BpelServerImpl implements BpelServer {
    * 
    * @param dduri
    *          URI of the deployment descriptor
-   * @return process id
    */
   public void deploy(final QName processId, final URI dduri) throws IOException {
     if (__log.isDebugEnabled()) {
@@ -612,13 +608,52 @@ public class BpelServerImpl implements BpelServer {
   /**
    * Deploys a process directly from its compiled representation.
    */
-  public void deploy(final QName processId, final URI deployedURI, final OProcess oprocess, final Definition4BPEL[] defs,
-                     TDeployment.Process processDD) throws IOException {
+  public DeploymentUnit deploy(File deploymentUnitDirectory) {
     if (__log.isDebugEnabled()) {
       __log.debug("deployService from oprocess");
     }
+    return deploy(deploymentUnitDirectory, false);
+  }
 
-    // First, make sure we are undeployed.
+  private DeploymentUnit deploy(File deploymentUnitDirectory, boolean activateOnly) {
+    DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
+    // Going trough each process declared in the dd
+    for (TDeployment.Process processDD : du.getDeployDocument().getDeploy().getProcessList()) {
+      OProcess oprocess = du.getProcesses().get(processDD.getName());
+      if (oprocess == null) throw new BpelEngineException("Could not find the compiled process definition for a " +
+              "process referenced in the deployment descriptor: " + processDD.getName());
+      try {
+
+        if (activateOnly) {
+          activate(processDD.getName(), false);
+        } else
+          deploy(processDD.getName(),
+                deploymentUnitDirectory.toURI(), oprocess, du.getDocRegistry().getDefinitions(), processDD);
+
+        // But we still need to declare our services internally
+        for (TProvide provide : processDD.getProvideList()) {
+          Definition4BPEL def = du.getDocRegistry().getDefinition(
+                  provide.getService().getName().getNamespaceURI());
+          _contexts.eprContext.activateEndpoint(provide.getService().getName(),
+                  provide.getService().getPort(), def);
+        }
+        for (TInvoke invoke : processDD.getInvokeList()) {
+          Definition4BPEL def = du.getDocRegistry().getDefinition(
+                  invoke.getService().getName().getNamespaceURI());
+          _contexts.eprContext.activateExternalEndpoint(invoke.getService().getName(),
+                  invoke.getService().getPort(), def);
+        }
+      } catch (Throwable e) {
+        __log.error("Service deployment failed!", e);
+      }
+    }
+    _deployedUnits.add(du);
+    return du;
+  }
+
+  private void deploy(final QName processId, final URI deployedURI, final OProcess oprocess,
+                      final Definition4BPEL[] defs, TDeployment.Process processDD) {
+  // First, make sure we are undeployed.
     undeploy(processId);
 
     Serializer serializer = new Serializer(oprocess.compileDate.getTime(), 1);
@@ -709,6 +744,63 @@ public class BpelServerImpl implements BpelServer {
     _autoActivate = autoActivate;
   }
 
+  public void setDeploymentDir(File deploymentDir) {
+    _deploymentDir = deploymentDir;
+  }
+
+  public void readState() {
+    File duState = new File(_deploymentDir, ".state");
+    if (duState.exists()) {
+      try {
+        BufferedReader duStateReader = new BufferedReader(new FileReader(duState));
+        String line;
+        while ((line = duStateReader.readLine()) != null) {
+          String filename = line.substring(0, line.indexOf("|"));
+          long timestamp = Long.valueOf(line.substring(line.indexOf("|") + 1 , line.length()));
+          File duFile = new File(_deploymentDir, filename);
+          if (duFile.exists()) {
+            if (new File(duFile, "deploy.xml").lastModified() > timestamp) {
+              deploy(duFile);
+            } else {
+              DeploymentUnitImpl du = (DeploymentUnitImpl) deploy(duFile, true);
+              du.setLastModified(timestamp);
+            }
+          }
+        }
+      } catch (FileNotFoundException e) {
+        // Shouldn't happen
+      } catch (Exception e) {
+        __log.error("An error occured while reading past deployments states, some " +
+                "processes will be redeployed.", e);
+      }
+    } else {
+      __log.info("Couldn't find any deployment history, all processes will " +
+              "be redeployed.");
+    }
+  }
+
+  public void writeState() {
+    try {
+      __log.debug("Writing current deployment state.");
+      FileWriter duStateWriter = new FileWriter(new File(_deploymentDir, ".state"), false);
+      for (DeploymentUnitImpl deploymentUnit : _deployedUnits) {
+        // Somebody using pipe in their directory names don't deserve to deploy anything
+        duStateWriter.write(deploymentUnit.getDuDirectory().getName());
+        duStateWriter.write("|");
+        duStateWriter.write(""+deploymentUnit.getLastModified());
+        duStateWriter.write("\n");
+      }
+      duStateWriter.flush();
+      duStateWriter.close();
+    } catch (IOException e) {
+      __log.error("Couldn't write deployment state! Processes could be redeployed (or not) " +
+              "even they don't (or do) need to.", e);
+    }
+  }
+
+  public List<DeploymentUnitImpl> getDeployedUnits() {
+    return _deployedUnits;
+  }
 
   class ProcessInfo {
     OProcess compiledProcess;

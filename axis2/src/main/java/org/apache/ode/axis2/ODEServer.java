@@ -20,9 +20,15 @@
 package org.apache.ode.axis2;
 
 import com.fs.naming.mem.InMemoryContextFactory;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
@@ -31,13 +37,6 @@ import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
@@ -53,6 +52,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -62,8 +62,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -173,7 +173,7 @@ public class ODEServer {
     }
   }
 
-  public void createService(Definition4BPEL def, QName serviceName, String portName) throws AxisFault {
+  public void createService(Definition def, QName serviceName, String portName) throws AxisFault {
     if (_services.get(serviceName, portName) != null){
       AxisService service = ((ODEService)_services.get(serviceName, portName)).getAxisService();
       _axisConfig.removeService(service.getName());
@@ -195,7 +195,7 @@ public class ODEServer {
     __log.debug("Created Axis2 service " + serviceName);
   }
 
-  public void createExternalService(Definition4BPEL def, QName serviceName, String portName) {
+  public void createExternalService(Definition def, QName serviceName, String portName) {
     if (_externalServices.get(serviceName) != null) return;
 
     ExternalService extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
@@ -388,6 +388,7 @@ public class ODEServer {
     // We don't want the server to automatically activate deployed processes,
     // we'll do that explcitly
     _server.setAutoActivate(false);
+    _server.setDeploymentDir(new File(_appRoot, "processes"));
 
     _executorService = Executors.newCachedThreadPool();
     _scheduler = new QuartzSchedulerImpl();
@@ -398,7 +399,7 @@ public class ODEServer {
     _scheduler.init();
 
     _server.setDaoConnectionFactory(_daoCF);
-    _server.setEndpointReferenceContext(new EndpointReferenceContextImpl());
+    _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
     _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
     _server.setScheduler(_scheduler);
     _server.init();
