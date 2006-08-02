@@ -17,9 +17,8 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.deploy;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
@@ -28,9 +27,8 @@ import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.dd2.DeployDocument;
-import org.apache.ode.bpel.dd2.TDeployment;
-import org.apache.ode.bpel.dd2.TInvoke;
-import org.apache.ode.bpel.dd2.TProvide;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 
@@ -45,21 +43,19 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 /**
- * Representation of a process deployment unit. A deployment unit may actually
- * contain more than one process.
+ * Implementation of {@link DeploymentUnit}, used to manage the various
+ * deployments in Ode.
  */
-public class DeploymentUnit {
+public class DeploymentUnitImpl implements DeploymentUnit {
 
-  private static Log __log = LogFactory.getLog(DeploymentUnit.class);
+  private static Log __log = LogFactory.getLog(DeploymentUnitImpl.class);
 
   private long _lastModified;
   private String _name;
   private File _duDirectory;
   private DocumentRegistry _docRegistry;
-  private HashMap<QName,OProcess> _processes;
+  private HashMap<QName, OProcess> _processes;
   private DeployDocument _dd;
-
-  private ODEServer _odeServer;
 
   private static final FileFilter _wsdlFilter = new FileFilter(){
     public boolean accept(File path) {
@@ -77,10 +73,9 @@ public class DeploymentUnit {
     }
   };
 
-  public DeploymentUnit(File dir, ODEServer odeServer) {
+  public DeploymentUnitImpl(File dir) {
     File ddLocation = new File(dir, "deploy.xml");
     _duDirectory = dir;
-    _odeServer = odeServer;
     _lastModified = ddLocation.lastModified();
     _name = dir.getName();
     _docRegistry = new DocumentRegistry(new DocumentEntityResolver(_duDirectory));
@@ -93,7 +88,7 @@ public class DeploymentUnit {
       try {
         _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
       } catch (WSDLException e) {
-        throw new DeploymentException("Couldn't read WSDL document " + file.getAbsolutePath(), e);
+        throw new BpelEngineException("Couldn't read WSDL document " + file.getAbsolutePath(), e);
       }
     }
     _processes = new HashMap<QName, OProcess>();
@@ -101,90 +96,19 @@ public class DeploymentUnit {
     try {
       _dd = DeployDocument.Factory.parse(ddLocation);
     } catch (Exception e) {
-      throw new DeploymentException("Couldnt read deployment descriptor at location " + ddLocation.getAbsolutePath(), e);
+      throw new BpelEngineException("Couldnt read deployment descriptor at location " + ddLocation.getAbsolutePath(), e);
     }
 
-  }
-
-  public void deploy(boolean activateOnly) {
-    // (Re)compile all bpel files if it's a "real" re-deployment, a simple
-    // activation doesn't need recompile.
-    if (!activateOnly) {
-      try {
-        compileProcesses();
-      } catch (CompilationException e) {
-        // No retry on compilation error, we just forget about it
-        _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
-        __log.error("Compilation errors have been reported.");
-        return;
-      }
+    try {
+      compileProcesses();
+    } catch (CompilationException e) {
+      // No retry on compilation error, we just forget about it
+      _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
+      throw new BpelEngineException("Compilation failure!");
     }
     loadProcessDefinitions();
 
-    // Going trough each process declared in the dd
-    for (TDeployment.Process processDD : _dd.getDeploy().getProcessList()) {
-      OProcess oprocess = _processes.get(processDD.getName());
-      if (oprocess == null) throw new DeploymentException("Could not find the compiled process definition for a " +
-              "process referenced in the deployment descriptor: " + processDD.getName());
-      try {
-        // We only need to activate, it's not a full re-deployment
-        if (activateOnly) {
-          _odeServer.getBpelServer().activate(processDD.getName(), false);
-        } else {
-          _odeServer.getBpelServer().deploy(processDD.getName(),
-                  _duDirectory.toURI(), oprocess, _docRegistry.getDefinitions(), processDD);
-        }
-
-        // But we still need to declare our services internally
-        for (TProvide provide : processDD.getProvideList()) {
-          Definition4BPEL def = _docRegistry.getDefinition(
-                  provide.getService().getName().getNamespaceURI());
-          _odeServer.createService(def, provide.getService().getName(),
-                  provide.getService().getPort());
-        }
-        for (TInvoke invoke : processDD.getInvokeList()) {
-          Definition4BPEL def = _docRegistry.getDefinition(
-                  invoke.getService().getName().getNamespaceURI());
-          _odeServer.createExternalService(def, invoke.getService().getName(),
-                  invoke.getService().getPort());
-        }
-      } catch (AxisFault axisFault) {
-        __log.error("Service deployment in Axis2 failed!", axisFault);
-      } catch (Throwable e) {
-        __log.error("Service deployment failed!", e);
-      }
-    }
     _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
-  }
-
-  public void undeploy() {
-    for (TDeployment.Process processDD : _dd.getDeploy().getProcessList()) {
-      OProcess oprocess = _processes.get(processDD.getName());
-      if (oprocess == null) throw new DeploymentException("Could not find the compiled process definition for a " +
-              "process referenced in the deployment descriptor: " + processDD.getName());
-      for (TProvide provide : processDD.getProvideList()) {
-        _odeServer.destroyService(provide.getService().getName());
-      }
-      _odeServer.getBpelServer().undeploy(processDD.getName());
-    }
-  }
-
-  /**
-   * Load the parsed and compiled BPEL process definition.
-   */
-  private OProcess loadProcess(File f) {
-    InputStream is = null;
-    try {
-      is = new FileInputStream(f);
-      Serializer ofh = new Serializer(is);
-      return ofh.readOProcess();
-    } catch (Exception e) {
-      throw new DeploymentException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
-    } finally {
-      try {
-        if (is !=null) is.close();
-      } catch (Exception e) { }
-    }
   }
 
   /**
@@ -219,12 +143,36 @@ public class DeploymentUnit {
     }
   }
 
-  public boolean exists() {
-    return _duDirectory.exists();
+  /**
+   * Load the parsed and compiled BPEL process definition.
+   */
+  private OProcess loadProcess(File f) {
+    InputStream is = null;
+    try {
+      is = new FileInputStream(f);
+      Serializer ofh = new Serializer(is);
+      return ofh.readOProcess();
+    } catch (Exception e) {
+      throw new BpelEngineException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
+    } finally {
+      try {
+        if (is !=null) is.close();
+      } catch (Exception e) { }
+    }
   }
 
-  public boolean matches(File f){
-    return f.lastModified() == _lastModified;
+  public boolean removed() {
+    return !_duDirectory.exists();
+  }
+
+  public boolean matches(File f) {
+    return f.getAbsolutePath().equals(new File(_duDirectory, "deploy.xml").getAbsolutePath());
+  }
+
+  public boolean checkForUpdate() {
+    File deployXml = new File(_duDirectory, "deploy.xml");
+    if (!deployXml.exists()) return false;
+    return deployXml.lastModified() != _lastModified;
   }
 
   public int hashCode(){
@@ -243,8 +191,19 @@ public class DeploymentUnit {
     return _lastModified;
   }
 
+  public DeployDocument getDeployDocument() {
+    return _dd;
+  }
+
+  public HashMap<QName, OProcess> getProcesses() {
+    return _processes;
+  }
+
+  public DocumentRegistry getDocRegistry() {
+    return _docRegistry;
+  }
+
   public String toString() {
     return "{DeploymentUnit " + _name + "}";
   }
-
 }

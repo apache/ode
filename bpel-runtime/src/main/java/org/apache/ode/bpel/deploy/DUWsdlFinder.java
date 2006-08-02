@@ -17,40 +17,32 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.bpel.deploy;
 
-import org.apache.ode.bpel.compiler.WsdlFinder;
-import org.apache.ode.bpel.compiler.XsltFinder;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.utils.StreamUtils;
+import org.apache.ode.bpel.compiler.WsdlFinder;
 
-import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.net.URI;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.net.URI;
 
 /**
  * Finds WSDL documents within a deployment unit (no relative path shit,
  * everything's in the same directory).
  */
-public class DUXsltFinder implements XsltFinder {
-
-  private static final Log __log = LogFactory.getLog(DUXsltFinder.class);
+public class DUWsdlFinder implements WsdlFinder {
 
   private File _suDir;
 
-  public DUXsltFinder() {
+  public DUWsdlFinder() {
     // no base URL
   }
 
-  public DUXsltFinder(File suDir) {
+  public DUWsdlFinder(File suDir) {
     _suDir = suDir;
   }
 
@@ -58,18 +50,16 @@ public class DUXsltFinder implements XsltFinder {
     _suDir = new File(u);
   }
 
-  public String loadXsltSheet(URI uri) {
+  public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {
     // Eliminating whatever path has been provided, we always look into our SU
     // deployment directory.
     String strUri = uri.toString();
     String filename = strUri.substring(strUri.lastIndexOf("/"), strUri.length());
-    try {
-      return new String(StreamUtils.read(new FileInputStream(new File(_suDir, filename))));
-    } catch (IOException e) {
-      if (__log.isDebugEnabled())
-        __log.debug("error obtaining resource '" + uri + "' from repository.", e);
-      return null;
-    }
+    return (Definition4BPEL) r.readWSDL(new File(_suDir, filename).getPath());
+  }
+
+  public InputStream openResource(URI uri) throws MalformedURLException, IOException {
+    return uri.toURL().openStream();
   }
 
 }

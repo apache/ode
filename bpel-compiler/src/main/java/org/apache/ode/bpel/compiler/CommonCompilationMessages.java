@@ -30,11 +30,6 @@ import javax.xml.namespace.QName;
  */
 public class CommonCompilationMessages extends CompilationMessageBundle {
 
-  /** Parsing BPEL process. */
-  public CompilationMessage infParsingProcess() {
-    return this.formatCompilationMessage("Parsing BPEL process.");
-  }
-
   /** Compiling BPEL process. */
   public CompilationMessage infCompilingProcess() {
     return this.formatCompilationMessage("Compiling BPEL process.");
