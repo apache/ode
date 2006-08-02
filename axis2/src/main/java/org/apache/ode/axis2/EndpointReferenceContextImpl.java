@@ -23,6 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.WSDL11Endpoint;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -67,7 +68,11 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   }
 
   public void deactivateEndpoint(EndpointReference endpointReference) {
-    // Axis doesn't need any explicit endpoint activation / deactivation
+    if (endpointReference instanceof WSDL11Endpoint) {
+      _server.destroyService(((WSDL11Endpoint)endpointReference).getServiceName());
+    } else {
+      __log.warn("Couldn't deactivate endpoint " + endpointReference);
+    }
   }
 
   public EndpointReference convertEndpoint(QName qName, Element element) {
