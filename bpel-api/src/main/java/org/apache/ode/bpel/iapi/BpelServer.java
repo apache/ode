@@ -153,4 +153,7 @@ public interface BpelServer {
    */
   BpelManagementFacade getBpelManagementFacade();
   
+  void registerBpelEventListener(BpelEventListener bpelEventListener);
+  void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor);
+  
 }

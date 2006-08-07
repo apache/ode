@@ -29,6 +29,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -44,9 +45,16 @@ import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
+/**
+ * Implementation of the {@link BpelEngine} interface: provides the server
+ * methods that should be invoked in the context of a transaction.
+ * @author mszefler
+ *
+ */
 public class BpelEngineImpl implements BpelEngine {
 
   private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
@@ -69,6 +77,7 @@ public class BpelEngineImpl implements BpelEngine {
   private final HashMap<QName, BpelProcess> _serviceMap = new HashMap<QName,BpelProcess>();
 
   final Contexts _contexts;
+
 
 
   public BpelEngineImpl(Contexts contexts) {
@@ -97,7 +106,7 @@ public class BpelEngineImpl implements BpelEngine {
     dao.setEPR(epr == null ? null : epr.toXML().getDocumentElement());
     MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
 
-    BpelProcess target = route(targetService, epr,null);
+    BpelProcess target = route(targetService, null);
     if (target != null)
       target.initMyRoleMex(mex);
     
@@ -201,20 +210,24 @@ public class BpelEngineImpl implements BpelEngine {
   }
  
   /**
-   * Route to a process using the service id.
+   * Route to a process using the service id. Note, that we do not need the 
+   * endpoint name here, we are assuming that two processes would not be 
+   * registered under the same service qname but different endpoint.  
    * 
-   * @param service
-   *          process id
-   * @param request 
-   * @return
+   * @param service target service id
+   * @param request request message
+   * @return process corresponding to the targetted service, or <code>null</code>
+   * 	     if service identifier is not recognized. 
    */
-  BpelProcess route(QName service, EndpointReference epr, Message request) {
+  BpelProcess route(QName service, Message request) {
     // TODO: use the message to route to the correct service if more than one
     // service is listening on the same endpoint.
-	if ( __log.isDebugEnabled() ) {
-      __log.debug( "Route: service=" + service + ", epr=" + epr + " request=" + request );
-	}
-    return _serviceMap.get(service);
+
+    BpelProcess routed = _serviceMap.get(service);
+    if (__log.isDebugEnabled())
+      __log.debug("Routed: svcQname " +service + " --> " + routed);
+    return routed;
+    
   }
   
 
@@ -256,6 +269,14 @@ public class BpelEngineImpl implements BpelEngine {
   public MessageExchange getMessageExchangeByClientKey(String clientKey) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  /**
+   * Get the list of globally-registered message-exchange interceptors.
+   * @return
+   */
+  List<MessageExchangeInterceptor> getGlobalInterceptors() {
+	  return _contexts.globalIntereceptors;
   }
 
 
