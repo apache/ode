@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
@@ -158,5 +159,9 @@ public class Messages extends MessageBundle {
   public String errSchemaError(String detailMessage) {
     return format("Error in schema processing: {0}", detailMessage);
   }
+
+  public String msgInterceptorAborted(String mexId, String interceptor) {
+	  return format("Message exchange {0} aborted by interceptor {1}", mexId, interceptor);
+  }	
 
 }

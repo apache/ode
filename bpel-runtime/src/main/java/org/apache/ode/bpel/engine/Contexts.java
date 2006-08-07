@@ -19,9 +19,13 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
@@ -34,4 +38,6 @@ class Contexts {
   Scheduler scheduler;
   EndpointReferenceContext eprContext;
   BpelDAOConnectionFactory dao;
+  final List<MessageExchangeInterceptor> globalIntereceptors = new ArrayList<MessageExchangeInterceptor>();
+
 }
