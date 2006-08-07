@@ -209,7 +209,7 @@ public class OdeService implements JbiMessageExchangeProcessor {
     MyRoleMessageExchange odeMex = null;
     try {
       if (__log.isDebugEnabled()) {
-      __log.debug("invokeOde() JBI exchangeId=" + jbiMex.getExchangeId() + " serviceName=" + serviceName + " operation=" + jbiMex.getOperation().getLocalPart() );
+      __log.debug("invokeOde() JBI exchangeId=" + jbiMex.getExchangeId() + " serviceName=" + serviceName + " operation=" + jbiMex.getOperation() );
       __log.debug("invokeOde() ODE servideId=" + _odeServiceId + " serviceName=" + _jbiServiceName + " port=" + _jbiPortName + " internal=" + _internal );
       }
       odeMex = _ode._server.getEngine().createMessageExchange(
@@ -243,7 +243,7 @@ public class OdeService implements JbiMessageExchangeProcessor {
         }
       } else {
         __log.error("ODE MEX "  +odeMex + " was unroutable.");
-        
+        jbiMex.setError(new IllegalArgumentException("Unroutable invocation."));
       }
 
       success = true;
