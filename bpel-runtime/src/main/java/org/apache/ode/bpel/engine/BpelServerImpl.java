@@ -53,10 +53,12 @@ import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OProcess;
@@ -806,5 +808,11 @@ public class BpelServerImpl implements BpelServer {
     OProcess compiledProcess;
     Map<Integer, QName> serviceNames;
     Map<Integer, Element> myEprs;
+  }
+
+  
+  public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
+    // TODO Auto-generated method stub
+    
   }
 }
