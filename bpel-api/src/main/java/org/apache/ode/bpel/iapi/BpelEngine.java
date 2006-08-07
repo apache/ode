@@ -50,7 +50,7 @@ public interface BpelEngine {
   /** 
    *  Create a "my role" message exchange for invoking a BPEL process. 
    *  
-   *  @param callee the process id of the process being called, if known
+   *  @param serviceId the service id of the process being called, if known
    *  @param epr endpoint reference of the port being called, if known
    *  @param operation name of the operation
    *  @return {@link MyRoleMessageExchange} the newly created message
@@ -58,7 +58,7 @@ public interface BpelEngine {
    */
   MyRoleMessageExchange createMessageExchange(
       String clientKey,
-      QName callee,
+      QName serviceId,
       EndpointReference epr, 
       String operation)
     throws BpelEngineException; 

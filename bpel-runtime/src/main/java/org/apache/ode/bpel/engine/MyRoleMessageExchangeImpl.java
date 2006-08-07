@@ -31,6 +31,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 
@@ -65,8 +66,25 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
     
     _dao.setRequest(((MessageImpl)request)._dao);
     _dao.setStatus(MessageExchange.Status.REQUEST.toString());
+
+    for (MessageExchangeInterceptor i: _engine.getGlobalInterceptors()) {
+    	__log.debug("onBpelServerInvoke --> interceptor " + i);
+    	boolean cont = i.onBpelServerInvoked(this);
+    	if (!cont) {
+    		__log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
+    		if (getStatus() == Status.REQUEST) {
+    			__log.debug("aborting interceptor "  + i + " did not set message exchange status, assuming failure");
+    		      setFailure(MessageExchange.FailureType.NO_RESPONSE, 
+    		    		  __msgs.msgInterceptorAborted(getMessageExchangeId(),i.toString()), null);
+
+    		}
+    			
+    		return;
+    	}
+    }
     
-    BpelProcess target = _engine.route(getDAO().getCallee(), _epr, request);
+    
+    BpelProcess target = _engine.route(getDAO().getCallee(), request);
     
 
     if (__log.isDebugEnabled())

@@ -156,6 +156,23 @@ public class Serializer  {
       }
       return super.resolveObject(obj);
 		}
+
+    /**
+     * Override coverts old class names into new class names to preserve compatibility with
+     * pre-Apache namespaces.
+     */
+    @Override
+    protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+      ObjectStreamClass read = super.readClassDescriptor();
+      if (read.getName().startsWith("com.fs.pxe.")) {
+        return ObjectStreamClass.lookup(Class.forName(read.getName().replace("com.fs.pxe.", "org.apache.ode.")));
+      }
+      if (read.getName().startsWith("com.fs.utils.")) {
+        return ObjectStreamClass.lookup(Class.forName(read.getName().replace("com.fs.utils.", "org.apache.ode.utils.")));
+      }
+      return read;
+    }
+    
   }
   
   static class OQName implements Serializable{

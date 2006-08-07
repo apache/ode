@@ -46,6 +46,8 @@ public class ExpressionLanguageRuntimeRegistry  {
   public void registerRuntime(OExpressionLanguage oelang) throws ConfigurationException {
     try {
       String className = oelang.properties.get("runtime-class");
+      // backward compatibility.
+      className = className.replace("com.fs.pxe.","org.apache.ode.");
       Class cls = Class.forName(className);
       ExpressionLanguageRuntime elangRT = (ExpressionLanguageRuntime) cls.newInstance();
       elangRT.initialize(oelang.properties);
