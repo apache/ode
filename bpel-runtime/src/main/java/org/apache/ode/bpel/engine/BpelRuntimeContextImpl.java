@@ -709,8 +709,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     _dao.setState(ProcessState.STATE_TERMINATED);
     evt.setNewState(ProcessState.STATE_TERMINATED);
     sendEvent(evt);
-
     sendEvent(new ProcessTerminationEvent());
+
+    failOutstandingMessageExchanges();
   }
 
   public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
