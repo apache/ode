@@ -25,7 +25,7 @@
        </identification>
        <target>
          <artifacts-zip>HelloWorld2-Process.zip</artifacts-zip>
-         <component-name>PxeBpelEngine</component-name>
+         <component-name>OdeBpelEngine</component-name>
        </target>
     </service-unit>
 

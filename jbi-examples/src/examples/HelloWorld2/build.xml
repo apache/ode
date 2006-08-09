@@ -5,8 +5,8 @@
 
     <target name="test" depends="init">
         <antcall target="_sendsoap">
-            <param name="pxe.sendsoap.url" value="http://localhost:${pxe.http.port}/hello/"/>
-            <param name="pxe.sendsoap.filename" location="message.soap"/>
+            <param name="ode.sendsoap.url" value="http://localhost:${ode.http.port}/hello/"/>
+            <param name="ode.sendsoap.filename" location="message.soap"/>
         </antcall>
     </target>
 
