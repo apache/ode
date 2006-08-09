@@ -23,6 +23,7 @@
 
     <target name="build-process">
         <subant target="">
+            <property name="ode.home" value="${ode.home}" />
             <fileset dir="." includes="HelloWorld2-process/build.xml"/>
         </subant>
     </target>
