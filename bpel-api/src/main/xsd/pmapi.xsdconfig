@@ -18,10 +18,9 @@
   -->
 
 <xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
-           xmlns:pmapi="http://ode.fivesight.com/schemas/2005/11/11/pmapi">
+           xmlns:pmapi="http://www.apache.org/ode/pmapi/types/2006/08/02/">
 
-
-  <xb:namespace uri="http://ode.fivesight.com/schemas/2005/11/11/pmapi">
+  <xb:namespace uri="http://www.apache.org/ode/pmapi/types/2006/08/02/">
     <xb:package>org.apache.ode.bpel.pmapi</xb:package>
   </xb:namespace> 
   

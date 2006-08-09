@@ -18,24 +18,45 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.api.*;
-import org.apache.ode.bom.api.Import;
 import org.apache.ode.bom.api.Process;
-import org.apache.ode.bom.wsdl.*;
-import org.apache.ode.bpel.capi.*;
+import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bom.wsdl.PartnerLinkType;
+import org.apache.ode.bom.wsdl.Property;
+import org.apache.ode.bom.wsdl.PropertyAlias;
+import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.capi.CompilationMessage;
+import org.apache.ode.bpel.capi.CompileListener;
+import org.apache.ode.bpel.capi.CompilerContext;
+import org.apache.ode.bpel.capi.ExpressionCompiler;
 import org.apache.ode.bpel.o.*;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import javax.wsdl.*;
+import org.w3c.dom.Element;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 
 /**
@@ -1130,11 +1151,25 @@ abstract class BpelCompiler implements CompilerContext {
   private DebugInfo createDebugInfo(BpelObject bpelObject, String description) {
     int lineNo = bpelObject == null ?  -1 : bpelObject.getLineNo();
     String str = description == null && bpelObject != null ? bpelObject.toString() : null;
-    DebugInfo debugInfo = new DebugInfo(_processDef.getSource(), lineNo);
+    Map<QName, Element> extElmt = null;
+    if (bpelObject instanceof Activity) {
+      extElmt = ((Activity)bpelObject).getExtensibilityElements();
+      if (extElmt.size() == 0) extElmt = checkRDFHierarchy();
+    }
+    DebugInfo debugInfo = new DebugInfo(_processDef.getSource(), lineNo, extElmt);
     debugInfo.description = str;
     return debugInfo;
   }
 
+  private HashMap<QName, Element> checkRDFHierarchy() {
+    // RDF extensibility elements should be "inherited".
+    for (OActivity oActivity : _compiledActivities) {
+      if (oActivity.debugInfo.extensibilityElements.size() > 0) {
+        return oActivity.debugInfo.extensibilityElements;
+      }
+    }
+    return null;
+  }
 
   private void compile(final Variable src) {
     final OScope oscope = _structureStack.topScope();
