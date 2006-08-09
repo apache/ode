@@ -27,6 +27,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.hooks.ManagementService;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
@@ -128,6 +129,8 @@ public class ODEServer {
     _poller = new DeploymentPoller(deploymentDir, this);
     _poller.start();
     __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
+
+    new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
 
     __log.info(__msgs.msgOdeStarted());
   }

@@ -43,13 +43,13 @@ public interface ProcessManagement {
    * @param custom used to customize the quantity of information returned
    * @return list of {@link ProcessInfoDocument}s (including instance summaries)
    */
-  ProcessInfoListDocument listProcesses(String filter, String orderKeys, ProcessInfoCustomizer custom);
+  ProcessInfoListDocument listProcessesCustom(String filter, String orderKeys, ProcessInfoCustomizer custom);
 
   /**
    * List the processes known to the engine.
    * @return list of {@link ProcessInfoDocument}s (including instance summaries)
    */
-  ProcessInfoListDocument listProcesses();
+  ProcessInfoListDocument listAllProcesses();
   
   /**
    * Get the process info for a process.
@@ -64,8 +64,17 @@ public interface ProcessManagement {
    * @param pid name of the process
    * @return {@link ProcessInfoDocument} with all details.
    */
-  ProcessInfoDocument getProcessInfo(QName pid)
-          throws ManagementException;
+  ProcessInfoDocument getProcessInfo(QName pid) throws ManagementException;
+
+  /**
+   * Get all extensibility elements associated with provided activity ids. Extensibility
+   * elements are extracted from the original BPEL document.
+   * @param pid process identifier
+   * @param aids activity indentifiers
+   * @return a list of activity extension as {@link ActivityExtInfoListDocument}
+   */
+  ActivityExtInfoListDocument getExtensibilityElements(QName pid, int[] aids);
+
 
   /**
    * Set a process property as a Node.
@@ -74,7 +83,7 @@ public interface ProcessManagement {
    * @param value property value
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
-  ProcessInfoDocument setProcessProperty(QName pid, QName propertyName, Node value)
+  ProcessInfoDocument setProcessPropertyNode(QName pid, QName propertyName, Node value)
           throws ManagementException; 
 
   /**
@@ -92,7 +101,7 @@ public interface ProcessManagement {
    * default endpoint address extracted from WSDL).
    * @param pid
    * @param partnerLink
-   * @param partnerRole
+   * @param role
    * @param endpointRef
    * @return {@link ProcessInfoDocument} reflecting the modification
    * TODO: avoid using Element arguments

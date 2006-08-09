@@ -22,9 +22,13 @@ import org.apache.ode.bom.api.Expression;
 import org.apache.ode.bom.api.LinkSource;
 import org.apache.ode.bom.api.LinkTarget;
 import org.apache.ode.utils.NSContext;
+import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -68,6 +72,11 @@ public abstract class ActivityImpl extends BpelObjectImpl implements org.apache.
    * A user-readable description of the activity (digest of original BPEL XML)
    */
   private String _description;
+
+  /**
+   * Extensibility elements found inside the activity.
+   */
+  private HashMap<QName, Element> _extensibilityElements = new HashMap<QName, Element>();
 
   protected ActivityImpl(NSContext nsContext) {
     super(nsContext);
@@ -178,6 +187,14 @@ public abstract class ActivityImpl extends BpelObjectImpl implements org.apache.
   public void addTarget(LinkTarget linkTarget) {
     ((LinkTargetImpl) linkTarget).setActivity(this);
     _targetLinks.add(linkTarget);
+  }
+
+  public Map<QName, Element> getExtensibilityElements() {
+    return _extensibilityElements;
+  }
+
+  public void setExtensibilityElements(Map<QName, Element> extensibilityElements) {
+    _extensibilityElements = new HashMap<QName, Element>(extensibilityElements);
   }
 
   /**

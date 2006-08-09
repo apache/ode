@@ -18,14 +18,12 @@
  */
 package org.apache.ode.bpel.pmapi;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
+import org.apache.ode.bpel.evt.BpelEvent;
 import org.w3c.dom.Element;
 
-import org.apache.ode.bpel.evt.BpelEvent;
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Interface to managing process instances.
@@ -127,14 +125,14 @@ public interface InstanceManagement {
    */
   InstanceInfoListDocument listInstances(String filter, String order, int limit);
 
-  InstanceInfoListDocument listInstances(String query);
+  InstanceInfoListDocument queryInstances(String query);
   
   /**
    * List all instances in the default (database) order.
    * @see #listInstances(String, String, int) 
    * @return list of matching instances
    */
-  InstanceInfoListDocument listInstances();
+  InstanceInfoListDocument listAllInstances();
   
   /**
    * List up to <code>limit</code> instances in the default (database) order.
@@ -142,7 +140,7 @@ public interface InstanceManagement {
    * @param limit maximum number of instances to return
    * @return list of matching instances
    */
-  InstanceInfoListDocument listInstances(int limit);
+  InstanceInfoListDocument listAllInstancesWithLimit(int limit);
   
   /**
    * Get an instance by id.
@@ -154,7 +152,7 @@ public interface InstanceManagement {
 
   /**
    * Get info about a scope instance by id, not including activity info. 
-   * @see #getScopeInfo(String, boolean)
+   * @see #getScopeInfoWithActivity(String, boolean)
    * @param siid scope instance identifier 
    * @return information about a specific scope instance
    */
@@ -167,7 +165,7 @@ public interface InstanceManagement {
    * @param activityInfo if <code>true</code>, include activity info 
    * @return information about a specific scope instance
    */
-  ScopeInfoDocument getScopeInfo(String siid, boolean activityInfo);
+  ScopeInfoDocument getScopeInfoWithActivity(String siid, boolean activityInfo);
   
   /**
    * Get info about a variable.
