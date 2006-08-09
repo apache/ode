@@ -21,11 +21,11 @@ package org.apache.ode.sax.fsa.bpel_2_0;
 import org.apache.ode.bom.api.Activity;
 import org.apache.ode.bom.api.LinkSource;
 import org.apache.ode.bom.api.LinkTarget;
+import org.apache.ode.sax.evt.StartElement;
+import org.apache.ode.sax.evt.XmlAttributes;
 import org.apache.ode.sax.fsa.ParseContext;
 import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
-import org.apache.ode.sax.evt.StartElement;
-import org.apache.ode.sax.evt.XmlAttributes;
 
 import java.util.Iterator;
 
@@ -71,6 +71,10 @@ abstract class BpelBaseActivityState extends BaseBpelState implements ActivitySt
       case BPEL_SOURCES:
         for(Iterator<LinkSource> iter = ((BpelLinkSourcesState)pn).getSources(); iter.hasNext(); )
         	_activity.addSource(iter.next());
+        break;
+      case EXTENSIBILITY_ELEMENT:
+        ExtensibilityBucketState ebs = ((ExtensibilityBucketState)pn);
+        _activity.getExtensibilityElements().put(ebs.getElementQName(), ebs.getExtensibility());
         break;
     default:
       super.handleChildCompleted(pn);

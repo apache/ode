@@ -18,7 +18,18 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bom.api.Activity;
+import org.apache.ode.bom.api.AssignActivity;
+import org.apache.ode.bom.api.Copy;
+import org.apache.ode.bom.api.ExpressionVal;
+import org.apache.ode.bom.api.From;
+import org.apache.ode.bom.api.LiteralVal;
+import org.apache.ode.bom.api.PartnerLinkVal;
+import org.apache.ode.bom.api.PropertyVal;
+import org.apache.ode.bom.api.To;
+import org.apache.ode.bom.api.VariableVal;
 import org.apache.ode.bom.impl.nodes.ExpressionValImpl;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.o.DebugInfo;
@@ -27,8 +38,6 @@ import org.apache.ode.bpel.o.OAssign;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -56,7 +65,8 @@ class AssignGenerator extends  DefaultActivityGenerator {
     for (Copy scopy : ad.getCopies()) {
       OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
       ocopy.keepSrcElementName = scopy.isKeepSrcElement();
-      ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo());
+      ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
+              source.getExtensibilityElements());
       try {
         if (scopy.getFrom() == null)
           throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
