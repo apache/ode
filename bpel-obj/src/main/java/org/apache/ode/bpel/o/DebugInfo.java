@@ -18,7 +18,12 @@
  */
 package org.apache.ode.bpel.o;
 
+import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Information about the source that was used to create a compiled object.
@@ -37,14 +42,19 @@ public class DebugInfo implements Serializable {
 
   public String description;
 
-  public DebugInfo(String sourceURI, int startLine, int endLine) {
+  public HashMap<QName, Element> extensibilityElements = new HashMap<QName, Element>();
+
+  public DebugInfo(String sourceURI, int startLine, int endLine, Map<QName, Element> extElmt) {
     this.sourceURI = sourceURI;
     this.startLine = startLine;
     this.endLine = endLine;
+    if (extElmt != null && extElmt.size() > 0) {
+      this.extensibilityElements = new HashMap<QName, Element>(extElmt);
+    }
   }
 
-  public DebugInfo(String sourceURI, int line) {
-    this(sourceURI, line, line);
+  public DebugInfo(String sourceURI, int line, Map<QName, Element> extElmt) {
+    this(sourceURI, line, line, extElmt);
   }
 
 }

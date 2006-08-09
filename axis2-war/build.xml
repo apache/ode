@@ -55,6 +55,13 @@
     <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
            dest="${maven.project.build.directory}/resources/WEB-INF"/>
 
+    <!-- Dirty, mean and ugly but will work for now -->
+    <echo>${maven.project.build.directory}</echo>
+    <copy todir="${maven.project.build.directory}/resources/WEB-INF"
+      file="${maven.project.build.directory}/../../axis2/src/main/wsdl/pmapi.wsdl"/>
+    <copy todir="${maven.project.build.directory}/resources/WEB-INF"
+      file="${maven.project.build.directory}/../../bpel-api/src/main/xsd/pmapi.xsd"/>
+
   </target>
 
 </project>

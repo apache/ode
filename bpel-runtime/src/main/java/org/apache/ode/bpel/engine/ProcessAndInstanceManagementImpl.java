@@ -19,10 +19,23 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.common.*;
-import org.apache.ode.bpel.dao.*;
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.common.ProcessFilter;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ProcessPropertyDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
+import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.*;
@@ -31,9 +44,6 @@ import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
-import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +52,13 @@ import org.xml.sax.SAXException;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implentation of the Process and InstanceManagement APIs.
@@ -67,7 +83,7 @@ class ProcessAndInstanceManagementImpl
   }
 
 
-  public ProcessInfoListDocument listProcesses(String filter, String orderKeys, final ProcessInfoCustomizer custom) {
+  public ProcessInfoListDocument listProcessesCustom(String filter, String orderKeys, final ProcessInfoCustomizer custom) {
     ProcessInfoListDocument ret = ProcessInfoListDocument.Factory.newInstance();
     final TProcessInfoList procInfoList = ret.addNewProcessInfoList();
     final ProcessFilter processFilter = new ProcessFilter(filter, orderKeys);
@@ -91,11 +107,11 @@ class ProcessAndInstanceManagementImpl
   }
 
   public ProcessInfoListDocument listProcesses(String filter, String orderKeys) {
-    return listProcesses(filter, orderKeys, ProcessInfoCustomizer.ALL);
+    return listProcessesCustom(filter, orderKeys, ProcessInfoCustomizer.ALL);
   }
 
-  public ProcessInfoListDocument listProcesses() {
-    return listProcesses(null, null, ProcessInfoCustomizer.ALL);
+  public ProcessInfoListDocument listAllProcesses() {
+    return listProcessesCustom(null, null, ProcessInfoCustomizer.ALL);
   }
 
   public ProcessInfoDocument getProcessInfo(QName pid, ProcessInfoCustomizer custom) {
@@ -136,7 +152,7 @@ class ProcessAndInstanceManagementImpl
     return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
   }
 
-  public ProcessInfoDocument setProcessProperty(final QName pid, final QName propertyName, final Node value)
+  public ProcessInfoDocument setProcessPropertyNode(final QName pid, final QName propertyName, final Node value)
           throws ManagementException {
     ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
     final TProcessInfo pi = ret.addNewProcessInfo();
@@ -257,11 +273,11 @@ class ProcessAndInstanceManagementImpl
     return ret;
   }
 
-  public InstanceInfoListDocument listInstances() {
+  public InstanceInfoListDocument listAllInstances() {
     return listInstances(null, null, Integer.MAX_VALUE);
   }
 
-  public InstanceInfoListDocument listInstances(int limit) {
+  public InstanceInfoListDocument listAllInstancesWithLimit(int limit) {
     return listInstances(null, null, limit);
   }
 
@@ -272,10 +288,10 @@ class ProcessAndInstanceManagementImpl
 
 
   public ScopeInfoDocument getScopeInfo(String siid) {
-    return getScopeInfo(siid, false);
+    return getScopeInfoWithActivity(siid, false);
   }
 
-  public ScopeInfoDocument getScopeInfo(String siid, boolean includeActivityInfo) {
+  public ScopeInfoDocument getScopeInfoWithActivity(String siid, boolean includeActivityInfo) {
     return genScopeInfoDocument(siid, includeActivityInfo);
   }
 
@@ -402,6 +418,24 @@ class ProcessAndInstanceManagementImpl
         return session.bpelEventQuery(ifilter, efilter);
       }
     });
+  }
+
+  public ActivityExtInfoListDocument getExtensibilityElements(QName pid, int[] aids) {
+    ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
+    TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
+    OProcess oprocess = _engine.getOProcess(pid);
+
+    for (int aid : aids) {
+      OBase obase = oprocess.getChild(aid);
+      if (obase.debugInfo.extensibilityElements != null) {
+        for (Map.Entry<QName, Element> entry : obase.debugInfo.extensibilityElements.entrySet()) {
+          TActivityExtInfo taei = taeil.addNewActivityExtInfo();
+          taei.setAiid(""+aid);
+          taei.getDomNode().appendChild(taei.getDomNode().getOwnerDocument().importNode(entry.getValue(), true));
+        }
+      }
+    }
+    return aeild;
   }
 
   /**
@@ -858,9 +892,9 @@ class ProcessAndInstanceManagementImpl
 
 
   /**
-   * @see org.apache.ode.bpel.pmapi.InstanceManagement#listInstances(java.lang.String)
+   * @see org.apache.ode.bpel.pmapi.InstanceManagement#queryInstances(java.lang.String)
    */
-  public InstanceInfoListDocument listInstances(final String query) {
+  public InstanceInfoListDocument queryInstances(final String query) {
     InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
     final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
 
