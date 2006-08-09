@@ -5,7 +5,11 @@
 
 <project name="example-build" default="bpelc">
     <property environment="env"/>
-    <property name="ode.home" location="${basedir}/../../" />
+
+    <!-- Use ODE_HOME environment variable if available, otherwise assume $basedir/../.. -->
+    <condition property="ode.home" value="${env.ODE_HOME}" else="${basedir}/../../">
+        <isset property="env.ODE_HOME"/>
+    </condition>
 
     <property file="${basedir}/../example.properties"/>
   
