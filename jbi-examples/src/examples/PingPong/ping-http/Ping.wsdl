@@ -3,7 +3,6 @@
         targetNamespace="urn:/Ping.wsdl"
         xmlns:tns="urn:/Ping.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
         xmlns:smix="http://servicemix.org/wsdl/jbi/"
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
@@ -41,10 +40,6 @@
             <output message="tns:PingResponse"/>
         </operation>
     </portType>
-
-    <plnk:partnerLinkType name="PingPartnerLinkType">
-        <plnk:role name="Provider" portType="tns:PingPortType"/>
-    </plnk:partnerLinkType>
 
     <binding name="PingSoapBinding" type="tns:PingPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
