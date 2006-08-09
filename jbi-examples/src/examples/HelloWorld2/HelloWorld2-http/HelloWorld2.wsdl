@@ -3,7 +3,7 @@
         targetNamespace="urn:/HelloWorld2.wsdl"
         xmlns:tns="urn:/HelloWorld2.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns:smix="http://servicemix.org/wsdl/jbi/"
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
@@ -41,16 +41,31 @@
         </operation>
     </portType>
 
-    <plnk:partnerLinkType name="HelloPartnerLinkType">
-        <plnk:role name="Provider" portType="tns:HelloPortType"/>
-    </plnk:partnerLinkType>
-    
-    <!--
-    
-    This is an abstract interface/portType definition.  Note the lack of 
-    binding and service: these are defined by the HTTP binding component.
-    See HelloWorld2-http/HelloWorld2.wsdl for details.
-    
-    -->
+    <binding name="HelloSoapBinding" type="tns:HelloPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="Hello">
+            <!--soap:operation soapAction="urn:Hello"/-->
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="HelloService">
+        <port name="HelloPort" binding="tns:HelloSoapBinding">
+            <soap:address location="http://localhost:8080/hello"/>
+
+            <!-- Connect this external HTTP endpoint to the process internal 
+                 JBI endpoint defined in HelloWorld2-process/HelloWorld2.dd -->
+            <smix:endpoint xmlns:hello="urn:/HelloWorld2.wsdl"
+                    role="consumer"
+                    defaultMep="in-out"
+                    targetEndpoint="hello:HelloService"/>
+
+        </port>
+    </service>
 
 </definitions>
