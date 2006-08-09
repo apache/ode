@@ -1,12 +1,6 @@
-<project name="HelloWorld2" default="sar"  >
+<?xml version="1.0" encoding="utf-8"?>
+<project name="HelloWorld2" default="service-unit">
 
-  <import file="../example-build.xml" />
+    <import file="../../example-build.xml" />
 
-  <target name="test" depends="init">
-    <antcall target="_sendsoap">
-      <param name="ode.sendsoap.url" value="http://localhost:${ode.http.port}/ode/soap/helloWorld"/>
-      <param name="ode.sendsoap.filename" location="testRequest.soap"/>
-    </antcall>
-  </target>
-  
 </project>
