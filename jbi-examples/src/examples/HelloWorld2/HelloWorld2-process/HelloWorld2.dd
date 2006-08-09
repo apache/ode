@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dd:deployment-descriptor 
-        xmlns:dd="http://pxe.fivesight.com/schemas/2006/02/14/bpeldd"
+        xmlns:dd="http://ode.fivesight.com/schemas/2006/02/14/bpeldd"
         xmlns:jbi="http://java.sun.com/jbi/end-point-reference">
         
     <dd:endpoint-refs>
