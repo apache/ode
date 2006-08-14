@@ -138,4 +138,8 @@ public class Messages extends MessageBundle {
     return format("The WSDL for namespace \"{0}\" could not be found in \"{1}\".", wsdlUri, location);
   }
 
+  public String msgOdeShutdownCompleted() {
+      return "Shutdown completed. ";
+  }
+
 }
