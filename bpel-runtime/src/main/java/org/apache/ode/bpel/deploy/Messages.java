@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.iapi;
+package org.apache.ode.bpel.deploy;
 
-import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.utils.msg.MessageBundle;
 
 /**
- * Listener interface implemented by parties interested in receiving
- * {@link org.apache.ode.bpel.evt.BpelEvent}.
+ * Message bundle used by the BPEL provider implementation.
  * 
  * @author mszefler
- * 
  */
-public interface BpelEventListener {
+class Messages extends MessageBundle {
 
-    /**
-     * Handle events.
-     * @param bpelEvent BPEL event
-     */
-    void onEvent(BpelEvent bpelEvent);
+    String errSchemaError(String detailMessage) {
+      return format("Error in schema processing: {0}", detailMessage);
+    }
+    
 }

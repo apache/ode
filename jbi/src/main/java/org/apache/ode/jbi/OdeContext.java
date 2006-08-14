@@ -47,8 +47,9 @@ import org.apache.ode.utils.DOMUtils;
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
  * 
+ * @author mszefler
  */
-public final class OdeContext {
+final class OdeContext {
 
   private static final Log __log = LogFactory.getLog(OdeContext.class);
   
@@ -65,26 +66,26 @@ public final class OdeContext {
   /** Mapper by class name. */
   private Map<String,Mapper> _mappersByClassName = new HashMap<String,Mapper>();
 
-  public OdeConsumer _consumer = new OdeConsumer(this);
+  OdeConsumer _consumer = new OdeConsumer(this);
 
-  public JbiMessageExchangeProcessor _jbiMessageExchangeProcessor = new JbiMessageExchangeEventRouter(
+  JbiMessageExchangeProcessor _jbiMessageExchangeProcessor = new JbiMessageExchangeEventRouter(
       this);
 
-  public BpelServerImpl _server;
+  BpelServerImpl _server;
 
-  public EndpointReferenceContextImpl _eprContext;
+  EndpointReferenceContextImpl _eprContext;
 
-  public MessageExchangeContextImpl _mexContext;
+  MessageExchangeContextImpl _mexContext;
 
-  public QuartzSchedulerImpl _scheduler;
+  QuartzSchedulerImpl _scheduler;
 
-  public ExecutorService _executorService;
+  ExecutorService _executorService;
 
-  public BpelDAOConnectionFactory _daocf;
+  BpelDAOConnectionFactory _daocf;
 
-  public OdeConfigProperties _config;
+  OdeConfigProperties _config;
 
-  public DataSource _dataSource;
+  DataSource _dataSource;
 
   /** Mapping of OdeServiceId to OdeService */
   private Map<QName, OdeService> _activeOdeServices = new ConcurrentHashMap<QName, OdeService>();
@@ -92,9 +93,6 @@ public final class OdeContext {
   /** Mapping of JbiServiceName to OdeService */
   private Map<QName, OdeService> _activeJbiServices = new ConcurrentHashMap<QName, OdeService>();
 
-
-  public OdeContext() {
-  }
 
   /**
    * Gets the delivery channel.

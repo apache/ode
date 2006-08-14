@@ -134,32 +134,13 @@ public interface ProcessDAO {
    */
   Collection<ProcessPropertyDAO> getProperties();
 
-  /**
-   * Gets the holder of the default endpoint references values for 
-   * this process.
-   * @return collection of {@link PartnerLinkDAO}
-   */
-  public Collection<PartnerLinkDAO> getDeployedEndpointReferences();
-
-  public PartnerLinkDAO addDeployedPartnerLink(int plinkModelId, 
-      String plinkName,
-      String myRoleName,
-      String partnerRoleName);
-
-  /**
-   * Get the default EPR value holder for this process.
-   * @param plinkModelId partner link model identifier
-   * @param role 
-   * @return 
-   */
-  public PartnerLinkDAO getDeployedEndpointReference(int plinkModelId);
   
-
   /**
    * Remove the process from the database (along with any instance,
    * variable data, etc...).
    */
   void delete();
+  
   
   public boolean isRetired();
   
@@ -179,4 +160,5 @@ public interface ProcessDAO {
   byte[] getCompiledProcess();
   
   URI getDeployURI();
+
 }

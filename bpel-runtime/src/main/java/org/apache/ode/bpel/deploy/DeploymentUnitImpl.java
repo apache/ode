@@ -26,7 +26,8 @@ import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.compiler.BpelC;
-import org.apache.ode.bpel.dd2.DeployDocument;
+import org.apache.ode.bpel.dd.DeployDocument;
+import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.o.OProcess;
@@ -40,170 +41,225 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * Implementation of {@link DeploymentUnit}, used to manage the various
- * deployments in Ode.
+ * Container providing various functions on the deployment directory.
+ * 
+ * @author mriou
+ * 
+ * TODO Add a way to cause lazy methods to re-process stuff on disk.
  */
 public class DeploymentUnitImpl implements DeploymentUnit {
 
-  private static Log __log = LogFactory.getLog(DeploymentUnitImpl.class);
+    private static Log __log = LogFactory.getLog(DeploymentUnitImpl.class);
 
-  private long _lastModified;
-  private String _name;
-  private File _duDirectory;
-  private DocumentRegistry _docRegistry;
-  private HashMap<QName, OProcess> _processes;
-  private DeployDocument _dd;
+    private long _lastModified;
 
-  private static final FileFilter _wsdlFilter = new FileFilter(){
-    public boolean accept(File path) {
-      return path.getName().endsWith(".wsdl");
+    private String _name;
+
+    private File _duDirectory;
+
+    private DocumentRegistry _docRegistry;
+
+    private HashMap<QName, OProcess> _processes;
+
+    private DeployDocument _dd;
+
+    private File _descriptorFile;
+
+    private HashMap<QName, TDeployment.Process> _processInfo; 
+    
+    private static final FileFilter _wsdlFilter = new FileFilter() {
+        public boolean accept(File path) {
+            return path.getName().endsWith(".wsdl");
+        }
+    };
+
+    private static final FileFilter _cbpFilter = new FileFilter() {
+        public boolean accept(File path) {
+            return path.getName().endsWith(".cbp");
+        }
+    };
+
+    private static final FileFilter _bpelFilter = new FileFilter() {
+        public boolean accept(File path) {
+            return path.getName().endsWith(".bpel");
+        }
+    };
+
+    public DeploymentUnitImpl(File dir) {
+        if (!dir.exists())
+            throw new IllegalArgumentException("Directory "  + dir + " does not exist!");
+        
+        _duDirectory = dir;
+        _name = dir.getName();
+        _descriptorFile = new File(_duDirectory, "deploy.xml");
+        
+        if (!_descriptorFile.exists())
+            throw new IllegalArgumentException("Directory " + dir + " does not contain a deploy.xml file!");
+        
+        _lastModified = _descriptorFile.lastModified();
     }
-  };
-  private static final FileFilter _cbpFilter = new FileFilter(){
-    public boolean accept(File path) {
-      return path.getName().endsWith(".cbp");
-    }
-  };
-  private static final FileFilter _bpelFilter = new FileFilter(){
-    public boolean accept(File path) {
-      return path.getName().endsWith(".bpel");
-    }
-  };
 
-  public DeploymentUnitImpl(File dir) {
-    File ddLocation = new File(dir, "deploy.xml");
-    _duDirectory = dir;
-    _lastModified = ddLocation.lastModified();
-    _name = dir.getName();
-    _docRegistry = new DocumentRegistry(new DocumentEntityResolver(_duDirectory));
-
-    WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
-    WSDLReader r = wsdlFactory.newWSDLReader();
-
-    File[] wsdls = _duDirectory.listFiles(_wsdlFilter);
-    for (File file : wsdls) {
-      try {
-        _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
-      } catch (WSDLException e) {
-        throw new BpelEngineException("Couldn't read WSDL document " + file.getAbsolutePath(), e);
-      }
-    }
-    _processes = new HashMap<QName, OProcess>();
-
-    try {
-      _dd = DeployDocument.Factory.parse(ddLocation);
-    } catch (Exception e) {
-      throw new BpelEngineException("Couldnt read deployment descriptor at location " + ddLocation.getAbsolutePath(), e);
+    /**
+     * Checking for each BPEL file if we have a corresponding compiled process.
+     * If we don't, starts compilation. The force parameter just forces
+     * compilation, whether a cbp file exists or not.
+     */
+    private void compileProcesses() {
+        File[] bpels = _duDirectory.listFiles(_bpelFilter);
+        for (File bpel : bpels) {
+            compile(bpel);
+        }
     }
 
-    try {
-      compileProcesses();
-    } catch (CompilationException e) {
-      // No retry on compilation error, we just forget about it
-      _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
-      throw new BpelEngineException("Compilation failure!");
+    private void compile(File bpelFile) {
+        BpelC bpelc = BpelC.newBpelCompiler();
+        bpelc.setOutputDirectory(_duDirectory);
+        bpelc.setWsdlFinder(new DUWsdlFinder(_duDirectory));
+        bpelc.setXsltFinder(new DUXsltFinder(_duDirectory));
+        try {
+            bpelc.compile(bpelFile.toURL());
+        } catch (IOException e) {
+            __log.error("Couldn't compile process file!", e);
+        }
     }
-    loadProcessDefinitions();
 
-    _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
-  }
-
-  /**
-   * Checking for each BPEL file if we have a corresponding compiled process. If we
-   * don't, starts compilation. The force parameter just forces compilation, whether
-   * a cbp file exists or not.
-   */
-  private void compileProcesses() {
-    File[] bpels = _duDirectory.listFiles(_bpelFilter);
-    for (File bpel : bpels) {
-      compile(bpel);
+    private void loadProcessDefinitions() {
+        try {
+            compileProcesses();
+        } catch (CompilationException e) {
+            // No retry on compilation error, we just forget about it
+            _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
+            throw new BpelEngineException("Compilation failure!");
+        }
+        if (_processes == null) {
+            _processes = new HashMap<QName, OProcess>();
+            File[] cbps = _duDirectory.listFiles(_cbpFilter);
+            for (File file : cbps) {
+                OProcess oprocess = loadProcess(file);
+                _processes.put(new QName(oprocess.targetNamespace, oprocess.getName()), oprocess);
+            }
+        }
     }
-  }
 
-  private void compile(File bpelFile) {
-    BpelC bpelc = BpelC.newBpelCompiler();
-    bpelc.setOutputDirectory(_duDirectory);
-    bpelc.setWsdlFinder(new DUWsdlFinder(_duDirectory));
-    bpelc.setXsltFinder(new DUXsltFinder(_duDirectory));
-    try {
-      bpelc.compile(bpelFile.toURL());
-    } catch (IOException e) {
-      __log.error("Couldn't compile process file!", e);
+    /**
+     * Load the parsed and compiled BPEL process definition.
+     */
+    private OProcess loadProcess(File f) {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(f);
+            Serializer ofh = new Serializer(is);
+            return ofh.readOProcess();
+        } catch (Exception e) {
+            throw new BpelEngineException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
+        } finally {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (Exception e) {
+            }
+        }
     }
-  }
 
-  private void loadProcessDefinitions() {
-    File[] cbps = _duDirectory.listFiles(_cbpFilter);
-    for (File file : cbps) {
-      OProcess oprocess = loadProcess(file);
-      _processes.put(new QName(oprocess.targetNamespace, oprocess.getName()), oprocess);
+    public boolean removed() {
+        return !_duDirectory.exists();
     }
-  }
 
-  /**
-   * Load the parsed and compiled BPEL process definition.
-   */
-  private OProcess loadProcess(File f) {
-    InputStream is = null;
-    try {
-      is = new FileInputStream(f);
-      Serializer ofh = new Serializer(is);
-      return ofh.readOProcess();
-    } catch (Exception e) {
-      throw new BpelEngineException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
-    } finally {
-      try {
-        if (is !=null) is.close();
-      } catch (Exception e) { }
+    public boolean matches(File f) {
+        return f.getAbsolutePath().equals(new File(_duDirectory, "deploy.xml").getAbsolutePath());
     }
-  }
 
-  public boolean removed() {
-    return !_duDirectory.exists();
-  }
+    public boolean checkForUpdate() {
+        File deployXml = new File(_duDirectory, "deploy.xml");
+        if (!deployXml.exists())
+            return false;
+        return deployXml.lastModified() != _lastModified;
+    }
 
-  public boolean matches(File f) {
-    return f.getAbsolutePath().equals(new File(_duDirectory, "deploy.xml").getAbsolutePath());
-  }
+    public int hashCode() {
+        return (int) (_name.hashCode() + _lastModified);
+    }
 
-  public boolean checkForUpdate() {
-    File deployXml = new File(_duDirectory, "deploy.xml");
-    if (!deployXml.exists()) return false;
-    return deployXml.lastModified() != _lastModified;
-  }
+    public File getDeployDir() {
+        return _duDirectory;
+    }
 
-  public int hashCode(){
-    return (int) (_name.hashCode() + _lastModified);
-  }
+    public void setLastModified(long lastModified) {
+        _lastModified = lastModified;
+    }
 
-  public File getDuDirectory() {
-    return _duDirectory;
-  }
+    public long getLastModified() {
+        return _lastModified;
+    }
 
-  public void setLastModified(long lastModified) {
-    _lastModified = lastModified;
-  }
+    public DeployDocument getDeploymentDescriptor() {
+        if (_dd == null) {
+            File ddLocation = new File(_duDirectory, "deploy.xml");
+            try {
+                _dd = DeployDocument.Factory.parse(ddLocation);
+            } catch (Exception e) {
+                throw new BpelEngineException("Couldnt read deployment descriptor at location "
+                        + ddLocation.getAbsolutePath(), e);
+            }
 
-  public long getLastModified() {
-    return _lastModified;
-  }
+        }
+        return _dd;
+    }
 
-  public DeployDocument getDeployDocument() {
-    return _dd;
-  }
+    public HashMap<QName, OProcess> getProcesses() {
+        loadProcessDefinitions();
+        return _processes;
+    }
 
-  public HashMap<QName, OProcess> getProcesses() {
-    return _processes;
-  }
+    public DocumentRegistry getDocRegistry() {
+        if (_docRegistry == null) {
+            _docRegistry = new DocumentRegistry(new DocumentEntityResolver(_duDirectory));
 
-  public DocumentRegistry getDocRegistry() {
-    return _docRegistry;
-  }
+            WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
+            WSDLReader r = wsdlFactory.newWSDLReader();
 
-  public String toString() {
-    return "{DeploymentUnit " + _name + "}";
-  }
+            File[] wsdls = _duDirectory.listFiles(_wsdlFilter);
+            for (File file : wsdls) {
+                try {
+                    _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
+                } catch (WSDLException e) {
+                    throw new BpelEngineException("Couldn't read WSDL document " + file.getAbsolutePath(), e);
+                }
+            }
+        }
+        return _docRegistry;
+    }
+    
+    public Definition4BPEL getDefinitionForNamespace(String namespaceURI) {
+        return getDocRegistry().getDefinition(namespaceURI);
+    }
+    
+    public Collection<Definition4BPEL> getDefinitions() {
+        Definition4BPEL defs[] = getDocRegistry().getDefinitions();
+        ArrayList<Definition4BPEL> ret = new ArrayList<Definition4BPEL>(defs.length);
+        for (Definition4BPEL def: defs)
+            ret.add(def);
+        return ret;
+    }
+
+    public String toString() {
+        return "{DeploymentUnit " + _name + "}";
+    }
+
+    public TDeployment.Process getProcessDeployInfo(QName pid) {
+        if (_processInfo == null) {
+            _processInfo = new HashMap<QName, TDeployment.Process>();
+            
+            for (TDeployment.Process p : getDeploymentDescriptor().getDeploy().getProcessList()) {
+                _processInfo.put(p.getName(), p);
+            }
+        }
+        
+        return _processInfo.get(pid);
+    }
 }

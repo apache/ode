@@ -20,34 +20,42 @@
 package org.apache.ode.bpel.iapi;
 
 import java.io.File;
+import java.util.Collection;
+
+import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.dd.DeployDocument;
+
 
 /**
- * Provides basic information about a deployment package.
+ * Provides information about a deployment package.
  */
 public interface DeploymentUnit {
+    
+    /**
+     * Get the deployment directory location.
+     * @return deployment directory location
+     */
+    File getDeployDir();
+    
+    
+    /**
+     * Get the deployment descriptor for this deployment unit.
+     * @return parsed deployment descriptor
+     */
+    DeployDocument getDeploymentDescriptor();
+    
+    /**
+     * Get a WSDL definition from the deployment directory for the given namespace. 
+     * @param namespaceURI WSDL targetNamespace
+     * @return corresponding WSDL document
+     */
+    Definition4BPEL getDefinitionForNamespace(String namespaceURI);
 
-  /**
-   * @return timestamp at which this deployment unit was last modified.
-   */
-  public long getLastModified();
+    
+    /**
+     * Get a collection of all the WSDL definitions in the deployment directory.
+     * @return collection of WSDL documents
+     */
+    Collection<Definition4BPEL> getDefinitions();
 
-  /**
-   * Checks whether the provided file designates this deployment unit.
-   * @param f
-   * @return
-   */
-  public boolean matches(File f);
-
-  /**
-   * Assess whether the deployment unit has been modified (suppression isn't
-   * considered as an update).
-   * @return true if the deployment unit has been modified (eventually needing a redeploy)
-   */
-  public boolean checkForUpdate();
-
-  /**
-   * Checks whether this deployment unit has been deleted.
-   * @return true if deleted
-   */
-  public boolean removed();
 }

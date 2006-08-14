@@ -215,7 +215,6 @@ public class OdeService implements JbiMessageExchangeProcessor {
       odeMex = _ode._server.getEngine().createMessageExchange(
         jbiMex.getExchangeId(),
         _odeServiceId,
-        null,
         jbiMex.getOperation().getLocalPart());
 
       if (odeMex.getOperation() != null) {

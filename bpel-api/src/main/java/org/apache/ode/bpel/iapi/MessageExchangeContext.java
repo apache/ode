@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.iapi;
 
+import javax.wsdl.Definition;
+
 
 /**
  * <p>
@@ -93,5 +95,6 @@ public interface MessageExchangeContext {
    */
   void onAsyncReply(MyRoleMessageExchange myRoleMex)
     throws BpelEngineException; 
-    
+
+
 }

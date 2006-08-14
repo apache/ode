@@ -170,14 +170,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public boolean isEndpointReferenceInitialized(PartnerLinkInstance pLink,
                                                 boolean isMyEpr) {
-    ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
-    PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
-    PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
-        .getDeployedEndpointReference(pLink.partnerLink.getId());
+    PartnerLinkDAO spl = fetchPartnerLinkDAO(pLink);
+
     if (isMyEpr) {
-      return spl.getMyEPR() != null || ppl.getMyEPR() != null;
+      return spl.getMyEPR() != null || _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink) != null;
     } else
-      return spl.getPartnerEPR() != null || ppl.getPartnerEPR() != null;
+      return spl.getPartnerEPR() != null ||_bpelProcess.getInitialPartnerRoleEPR(pLink.partnerLink) != null;
   }
 
   /**
@@ -425,7 +423,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public Element fetchEndpointReferenceData(PartnerLinkInstance pLink,
                                             boolean isMyEPR) throws FaultException {
-    PartnerLinkDAO pl = fetchEndpointReference(pLink, isMyEPR);
+    PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
     Element epr = (isMyEPR ? pl.getMyEPR() : pl.getPartnerEPR());
 
     if (epr == null) {
@@ -435,20 +433,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
       return epr;
   }
 
-  private PartnerLinkDAO fetchEndpointReference(PartnerLinkInstance pLink,
-                                                boolean isMyEPR) throws FaultException {
+  private PartnerLinkDAO fetchPartnerLinkDAO(PartnerLinkInstance pLink)  {
     ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
-    PartnerLinkDAO spl = scopeDAO.getPartnerLink(pLink.partnerLink.getId());
-    PartnerLinkDAO ppl = scopeDAO.getProcessInstance().getProcess()
-        .getDeployedEndpointReference(pLink.partnerLink.getId());
-
-    PartnerLinkDAO rightpl;
-    if (isMyEPR)
-      rightpl = spl.getMyEPR() != null ? spl : ppl;
-    else
-      rightpl = spl.getPartnerEPR() != null ? spl : ppl;
-
-    return rightpl;
+    return  scopeDAO.getPartnerLink(pLink.partnerLink.getId());
   }
 
   /**
@@ -483,6 +470,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   public Node initializeVariable(VariableInstance variable, Node initData) {
     ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
     XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
+    
     dataDAO.set(initData);
 
     writeProperties(variable, initData, dataDAO);
@@ -492,7 +480,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   public Element writeEndpointReference(PartnerLinkInstance variable,
                                         Element data) throws FaultException {
-    PartnerLinkDAO eprDAO = fetchEndpointReference(variable, false);
+    PartnerLinkDAO eprDAO = fetchPartnerLinkDAO(variable);
     Element originalEprElmt = eprDAO.getPartnerEPR();
 
     if (__log.isDebugEnabled()) {
@@ -529,7 +517,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
   private EndpointReference fetchMyRoleSessionEndpoint(PartnerLinkInstance pLink)
       throws FaultException {
-    PartnerLinkDAO pl = fetchEndpointReference(pLink, true);
+    PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
     Element myRoleEpr = pl.getMyEPR();
     if (myRoleEpr == null) throw new FaultException(
             _bpelProcess._oprocess.constants.qnUninitializedPartnerRole,
@@ -956,7 +944,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     MessageExchange.Status status = MessageExchange.Status.valueOf(mex
         .getStatus());
-    sendEvent(evt);
 
     switch (status) {
     case FAULT:
@@ -971,6 +958,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
       responseChannel.onFailure();
       break;
     }
+    sendEvent(evt);
+
   }
 
   /**
@@ -1159,6 +1148,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
   public Node getPartData(Element message, Part part) {
     Element partEl = DOMUtils.findChildByName((Element) message, new QName(
         null, part.name), false);
+    
+    // This could occur if the message does not contain the required part. 
+    if (partEl == null)
+       return null;
+    
     Node container = DOMUtils.getFirstChildElement(partEl);
     if (container == null)
       container = partEl.getFirstChild(); // either a text node / element /

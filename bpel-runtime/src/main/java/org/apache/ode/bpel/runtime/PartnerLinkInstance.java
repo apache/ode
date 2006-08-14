@@ -23,30 +23,34 @@ import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
 
+/**
+ * Serializable reference to a partner link instance.
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
+ *
+ */
 public class PartnerLinkInstance implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public OPartnerLink partnerLink;
-  public Long scopeInstanceId;
+    public OPartnerLink partnerLink;
 
-  public PartnerLinkInstance(Long scopeInstanceId, OPartnerLink partnerLink) {
-    this.partnerLink = partnerLink;
-    this.scopeInstanceId = scopeInstanceId;
-  }
+    public Long scopeInstanceId;
 
-  public boolean equals(Object obj) {
-    PartnerLinkInstance other = (PartnerLinkInstance) obj;
-    return partnerLink.equals(other.partnerLink) && scopeInstanceId.equals(other.scopeInstanceId);
-  }
+    public PartnerLinkInstance(Long scopeInstanceId, OPartnerLink partnerLink) {
+        this.partnerLink = partnerLink;
+        this.scopeInstanceId = scopeInstanceId;
+    }
 
-  public int hashCode() {
-    return this.partnerLink.hashCode() ^ scopeInstanceId.hashCode();
-  }
+    public boolean equals(Object obj) {
+        PartnerLinkInstance other = (PartnerLinkInstance) obj;
+        return partnerLink.equals(other.partnerLink) && scopeInstanceId.equals(other.scopeInstanceId);
+    }
 
-  public String toString() {
-    return ObjectPrinter.toString(this, new Object[] {
-      "partnerLinkDecl", partnerLink,
-      "scopeInstanceId", scopeInstanceId
-    });
-  }
+    public int hashCode() {
+        return this.partnerLink.hashCode() ^ scopeInstanceId.hashCode();
+    }
+
+    public String toString() {
+        return ObjectPrinter.toString(this, new Object[] { "partnerLinkDecl", partnerLink, "scopeInstanceId",
+                scopeInstanceId });
+    }
 }

@@ -68,7 +68,6 @@
               <outputJar>${basedir}/target/xmlbeans.jar</outputJar>
               <schemaDirectory>src/main/xsd</schemaDirectory>
               <xmlConfigs>
-                <xmlConfig implementation="java.io.File">src/main/xsd/bpeldd.xsdconfig</xmlConfig>
                 <xmlConfig implementation="java.io.File">src/main/xsd/dd.xsdconfig</xmlConfig>
               </xmlConfigs>
               <quiet>true</quiet>

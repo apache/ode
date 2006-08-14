@@ -44,6 +44,10 @@
             <groupId>ode</groupId>
             <artifactId>ode-bpel-obj</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-dd</artifactId>
+        </dependency>
         
 	<dependency>
             <groupId>wsdl4j</groupId>

@@ -27,6 +27,8 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import sun.security.action.GetLongAction;
+
 import javax.xml.namespace.QName;
 import java.util.Collection;
 
@@ -85,13 +87,15 @@ public class INVOKE extends ACTIVITY {
             // happened in the nativeAPI impl
             FaultData fault = null;
 
+            Element response;
             try {
-              Element response = getBpelRuntimeContext().getPartnerResponse(mexId);
-              getBpelRuntimeContext().initializeVariable(outputVar, response);
+              response = getBpelRuntimeContext().getPartnerResponse(mexId);
             } catch (Exception ex) {
               // TODO: Better error handling
               throw new RuntimeException(ex);
             }
+           
+            getBpelRuntimeContext().initializeVariable(outputVar, response);
 
             try {
               for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.initCorrelationsOutput) {

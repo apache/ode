@@ -22,6 +22,7 @@ package org.apache.ode.axis2;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
@@ -45,7 +46,7 @@ import java.util.concurrent.Future;
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to
  * maintain the WSDL decription of used services.
  */
-public class ExternalService {
+public class ExternalService implements PartnerRoleChannel {
 
   private static final Log __log = LogFactory.getLog(ExternalService.class);
 
@@ -135,5 +136,15 @@ public class ExternalService {
       options.setProperty("callbackSessionEndpoint", odeMex.getCallbackEndpointReference());
     }
   }
+
+    public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void close() {
+        // TODO Auto-generated method stub
+        
+    }
 
 }
