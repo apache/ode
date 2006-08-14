@@ -92,7 +92,7 @@ public class ODEServer {
 
   private MultiKeyMap _services = new MultiKeyMap();
   private MultiKeyMap _externalServices = new MultiKeyMap();
-  private BpelConnector _connector;
+  private BpelServerConnector _connector;
 
 //  private HashMap<QName,ODEService> _services = new HashMap<QName,ODEService>();
 //  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
@@ -290,9 +290,9 @@ public class ODEServer {
         __log.info("Skipping connector initialization.");
       } else {
         _connector = new BpelServerConnector();
-        _connector.setBpelServer(_ode._server);
-        _connector.setPort(_ode._config.getConnectorPort());
-        _connector.setId(_ode._config.getConnectorName());
+        _connector.setBpelServer(_server);
+        _connector.setPort(_odeConfig.getConnectorPort());
+        _connector.setId("jcaServer");
         try {
           _connector.start();
         } catch (Exception e) {
