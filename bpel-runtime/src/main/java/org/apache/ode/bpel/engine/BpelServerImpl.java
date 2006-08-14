@@ -40,12 +40,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -109,7 +110,7 @@ public class BpelServerImpl implements BpelServer {
 
     private List<BpelEventListener> _listeners = new CopyOnWriteArrayList<BpelEventListener>();
 
-//    private List<DeploymentUnitImpl> _deployedUnits = new ArrayList<DeploymentUnitImpl>();
+    private Map<QName, DeploymentUnitImpl> _deploymentUnits = new HashMap<QName,DeploymentUnitImpl>();
 
     public BpelServerImpl() {
 
@@ -413,10 +414,13 @@ public class BpelServerImpl implements BpelServer {
 
             // Figure out where on the local file system we can find the
             // deployment directory for this process
-            File deployDir = getProcessDeployDir(pid);
-
-            // Read in the deployment unit information
-            DeploymentUnitImpl du = new DeploymentUnitImpl(deployDir);
+            DeploymentUnitImpl du  = getDeploymentUnit(pid);
+            if (du == null) {
+                // Indicates process not deployed.
+                String errmsg = "Process " + pid + " is not deployed, it cannot be activated";
+                __log.error(errmsg);
+                throw new BpelEngineException(errmsg);
+            }
 
             // Load the compiled process from the database, note we do not want
             // to recompile / or read from the file system as
@@ -513,9 +517,8 @@ public class BpelServerImpl implements BpelServer {
         }
     }
 
-    private File getProcessDeployDir(QName pid) {
-        // TODO: implement me.
-        throw new UnsupportedOperationException("todo");
+    private DeploymentUnitImpl getDeploymentUnit(QName pid) {
+        return _deploymentUnits.get(pid);
     }
 
     private void dbSetProcessActive(final QName pid, final boolean val) {
@@ -562,7 +565,7 @@ public class BpelServerImpl implements BpelServer {
                         + "process referenced in the deployment descriptor: " + processDD.getName());
             try {
 
-                deploy(processDD.getName(), deploymentUnitDirectory.toURI(), oprocess, du.getDocRegistry()
+                deploy(processDD.getName(), du, oprocess, du.getDocRegistry()
                         .getDefinitions(), processDD);
 
             } catch (Throwable e) {
@@ -574,7 +577,7 @@ public class BpelServerImpl implements BpelServer {
         return du.getProcesses().keySet();
     }
 
-    private void deploy(final QName processId, final URI deployedURI, final OProcess oprocess,
+    private void deploy(final QName processId, final DeploymentUnitImpl du, final OProcess oprocess,
             final Definition4BPEL[] defs, TDeployment.Process processDD) {
         // First, make sure we are undeployed.
         undeploy(processId);
@@ -610,7 +613,6 @@ public class BpelServerImpl implements BpelServer {
                     }
 
                     ProcessDAO newDao = conn.createProcess(processId, oprocess.getQName());
-                    newDao.setDeployURI(deployedURI);
                     newDao.setCompiledProcess(bits);
                     pi.init(newDao);
                     pi.update(newDao);
@@ -626,6 +628,8 @@ public class BpelServerImpl implements BpelServer {
             throw new BpelEngineException("", dce);
         }
 
+        _deploymentUnits.put(processDD.getName(), du);
+        
         doActivateProcess(processId);
     }
 
