@@ -25,7 +25,7 @@ import org.apache.ode.utils.msg.MessageBundle;
  * 
  * @author mszefler
  */
-class Messages extends MessageBundle {
+public class Messages extends MessageBundle {
 
     String errSchemaError(String detailMessage) {
       return format("Error in schema processing: {0}", detailMessage);
