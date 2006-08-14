@@ -159,14 +159,12 @@ public class BpelEngineImpl implements BpelEngine {
      */
     void registerProcess(BpelProcess process) {
 
-        process._engine = this;
-        
         _activeProcesses.put(process.getPID(), process);
         for (Endpoint e : process.getServiceNames()) {
             __log.debug("Register process: serviceId=" + e + ", process=" + process);
             _serviceMap.put(e, process);
         }
-        process.activate();
+        process.activate(this);
     }
 
     /**
