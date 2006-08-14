@@ -19,7 +19,6 @@
 
 package org.apache.ode.jbi.msgmap;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.jbi.messaging.MessagingException;
@@ -31,7 +30,6 @@ import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.utils.DOMUtils;

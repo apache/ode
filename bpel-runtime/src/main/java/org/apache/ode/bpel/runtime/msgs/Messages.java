@@ -46,15 +46,6 @@ public class Messages extends MessageBundle {
   }
 
   /**
-   * Unable to evaluate apply property alias "{0}" to incoming message: {1}
-   */
-  public String msgPropertyAliasDerefFailedOnMessage(String aliasDescription, String reason) {
-    return this.format(
-        "Unable to evaluate apply property alias \"{0}\" to incoming message: {1}",
-        aliasDescription, reason);
-  }
-
-  /**
    * Format a message about passing a non-static location path where one is
    * expected.
    * 
@@ -74,11 +65,6 @@ public class Messages extends MessageBundle {
   }
 
   // TODO better message
-  public String msgPropertyAliasReturnedNullSet(String alias, String variable) {
-    return this.format("msgPropertyAliasReturnedNullSet: {0} {1}", alias, variable);
-  }
-
-  // TODO better message
   public String msgPropertyAliasReturnedRValue(String alias, String variable) {
     return this.format("msgPropertyAliasReturnedRValue: {0} {1}", alias, variable);
   }
@@ -94,16 +80,6 @@ public class Messages extends MessageBundle {
 
   public String msgUnknownEPR(String string) {
     return format("Unknown EPR: {0}", string);
-  }
-
-  public String msgUnknownOperation(String operationName,QName portType) {
-    return format("Unknown operation \"{0}\" for port type \"{1}\".",operationName,portType);
-  }
-
-  public String msgMyRoleRoutingFailure(String messageExchangeId) {
-    return format("Unable to route message exchange {0}, EPR was not specified " +
-        "and the target my-role could not be inferred.",messageExchangeId);
-
   }
 
 }

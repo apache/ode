@@ -223,20 +223,21 @@ class ProcessAndInstanceManagementImpl
             throw new InvalidRequestException("Unknown partner-link "
                 + partnerLink + " for process " + pid);
                         
-          PartnerLinkDAO depdao = proc.getDeployedEndpointReference(plink.getId());
-          
-          if (plink != null && ((plink.myRoleName != null) && (plink.myRoleName.equals(roleName)))) {
-            depdao.setMyEPR(endpointRef);
-          } else if (plink != null && ((plink.partnerRoleName != null) && (plink.partnerRoleName.equals(roleName)))) {
-            depdao.setPartnerEPR(endpointRef);
-          } else {
-            throw new InvalidRequestException("Invalid partnerLink/partnerRole combination "
-                + partnerLink + "/" + roleName + " for process " + pid);
-            
-          }
-          
-          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.ENDPOINTS));
-          return null;
+          throw new UnsupportedOperationException("todo: reimplement");
+//          PartnerLinkDAO depdao = proc.getDeployedEndpointReference(plink.getId());
+//          
+//          if (plink != null && ((plink.myRoleName != null) && (plink.myRoleName.equals(roleName)))) {
+//            depdao.setMyEPR(endpointRef);
+//          } else if (plink != null && ((plink.partnerRoleName != null) && (plink.partnerRoleName.equals(roleName)))) {
+//            depdao.setPartnerEPR(endpointRef);
+//          } else {
+//            throw new InvalidRequestException("Invalid partnerLink/partnerRole combination "
+//                + partnerLink + "/" + roleName + " for process " + pid);
+//            
+//          }
+//          
+//          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.ENDPOINTS));
+//          return null;
         }
       });
     } catch (ManagementException me) {
@@ -712,12 +713,13 @@ class ProcessAndInstanceManagementImpl
 
   private MultiKeyMap buildEprMap(ProcessDAO proc) {
     MultiKeyMap mm = new MultiKeyMap();
-    for (PartnerLinkDAO eprDao : proc.getDeployedEndpointReferences()) {
-      if (eprDao.getMyEPR() != null)
-        mm.put(eprDao.getPartnerLinkName(), eprDao.getMyRoleName(), eprDao.getMyEPR());
-      if (eprDao.getPartnerEPR() != null)
-        mm.put(eprDao.getPartnerLinkName(), eprDao.getPartnerEPR(), eprDao.getPartnerEPR());
-    }
+    // TODO: eliminate or fix?
+//    for (PartnerLinkDAO eprDao : proc.getDeployedEndpointReferences()) {
+//      if (eprDao.getMyEPR() != null)
+//        mm.put(eprDao.getPartnerLinkName(), eprDao.getMyRoleName(), eprDao.getMyEPR());
+//      if (eprDao.getPartnerEPR() != null)
+//        mm.put(eprDao.getPartnerLinkName(), eprDao.getPartnerEPR(), eprDao.getPartnerEPR());
+//    }
     return mm;
   }
 

@@ -28,15 +28,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,6 +65,9 @@ public class ODEService {
   private QName _serviceName;
   private String _portName;
   private Map<String,ResponseCallback> _waitingCallbacks;
+  
+  /** XML representation of the EPR for this service. */
+  private Element _serviceRef;
 
   public ODEService(AxisService axisService, Definition def, QName serviceName, String portName,
                     BpelServerImpl server, TransactionManager txManager) {
@@ -68,6 +78,7 @@ public class ODEService {
     _serviceName = serviceName;
     _portName = portName;
     _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
+    _serviceRef = createServiceRef(genEPRfromWSDL(serviceName,portName));
   }
 
   public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext,
@@ -80,8 +91,7 @@ public class ODEService {
 
       // Creating mesage exchange
       String messageId = new GUID().toString();
-      odeMex = _server.getEngine().createMessageExchange(""+messageId, _serviceName, null,
-              msgContext.getAxisOperation().getName().getLocalPart());
+      odeMex = _server.getEngine().createMessageExchange(""+messageId, _serviceName, msgContext.getAxisOperation().getName().getLocalPart());
       __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
 
       if (odeMex.getOperation() != null) {
@@ -280,4 +290,78 @@ public class ODEService {
     }
   }
 
-}
+   /**
+     * Return the service-ref element that will be used to represent this
+     * endpoint.
+     * 
+     * @return
+     */
+    public Element getMyServiceRef() {
+        return _serviceRef;
+    }
+
+    /**
+     * Get the EPR of this service from the WSDL.
+     * 
+     * @param name
+     *            service name
+     * @param portName
+     *            port name
+     * @return XML representation of the EPR
+     */
+    private Element genEPRfromWSDL(QName name, String portName) {
+        Service serviceDef = _wsdlDef.getService(name);
+        if (serviceDef != null) {
+            Port portDef = serviceDef.getPort(portName);
+            if (portDef != null) {
+                Document doc = DOMUtils.newDocument();
+                Element service = doc.createElementNS(Namespaces.WSDL_11, "service");
+                service.setAttribute("name", serviceDef.getQName().getLocalPart());
+                service.setAttribute("targetNamespace", serviceDef.getQName().getNamespaceURI());
+                Element port = doc.createElementNS(Namespaces.WSDL_11, "port");
+                service.appendChild(port);
+                port.setAttribute("name", portDef.getName());
+                port.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:bindns", portDef.getBinding().getQName()
+                        .getNamespaceURI());
+                port.setAttribute("bindns:binding", portDef.getName());
+                for (Object extElmt : portDef.getExtensibilityElements()) {
+                    if (extElmt instanceof SOAPAddress) {
+                        Element soapAddr = doc.createElementNS(Namespaces.SOAP_NS, "address");
+                        port.appendChild(soapAddr);
+                        soapAddr.setAttribute("location", ((SOAPAddress) extElmt).getLocationURI());
+                    } else {
+                        port.appendChild(doc.importNode(((UnknownExtensibilityElement) extElmt).getElement(), true));
+                    }
+                }
+                return service;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create-and-copy a service-ref element.
+     * 
+     * @param elmt
+     * @return wrapped element
+     */
+    private Element createServiceRef(Element elmt) {
+        Document doc = DOMUtils.newDocument();
+        QName elQName = new QName(elmt.getNamespaceURI(), elmt.getLocalName());
+        // If we get a service-ref, just copy it, otherwise make a service-ref
+        // wrapper
+        if (!EndpointReference.SERVICE_REF_QNAME.equals(elQName)) {
+            Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
+                    EndpointReference.SERVICE_REF_QNAME.getLocalPart());
+            serviceref.appendChild(doc.importNode(elmt, true));
+            doc.appendChild(serviceref);
+        } else {
+            doc.appendChild(doc.importNode(elmt, true));
+        }
+
+        return doc.getDocumentElement();
+    }
+
+  }
+    
+

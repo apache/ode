@@ -66,6 +66,18 @@
             <xs:element name="provide"  minOccurs="0" maxOccurs="unbounded" type="dd:tProvide"/>
             <xs:element name="invoke"  minOccurs="0" maxOccurs="unbounded" type="dd:tInvoke"/>
 
+		  <xs:element name="mex-interceptors" minOccurs="0" maxOccurs="1" >
+		    <xs:annotation>
+    	        <xs:documentation>
+   		         	List of message exchange interceptors that should be registered for this process. 
+  	          </xs:documentation>
+  	       </xs:annotation>
+		     <xs:complexType>
+		       <xs:sequence>
+		         <xs:element name="mex-interceptor" minOccurs="0" maxOccurs="unbounded" type="dd:tMexInterceptor" />
+		       </xs:sequence>
+		     </xs:complexType>
+		  </xs:element>
           </xs:sequence>
           <xs:attribute name="name" type="xs:QName" use="required"/>
         </xs:complexType>
@@ -100,5 +112,18 @@
     <xs:attribute name="name" type="xs:QName" use="required"/>
     <xs:attribute name="port" type="xs:NCName" use="required"/>
   </xs:complexType>
+  
+  <xs:complexType name="tMexInterceptor" >    
+  	<xs:annotation>
+    	<xs:documentation>
+            Message exchange interceptor configuration.
+        </xs:documentation>
+     </xs:annotation>
+  
+     <xs:sequence>
+        <xs:element name="class-name" type="xs:string" />
+     </xs:sequence>
+  </xs:complexType>
+    
 
 </xs:schema>

@@ -34,6 +34,13 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
   QName getCaller();
   
   /**
+   * Get the communication channel.
+   * @return communication channel
+   */
+  PartnerRoleChannel getChannel();
+  
+  
+  /**
    * Indicate that the partner faulted in processing the message exchange.
    * 
    * @param faultType fault type

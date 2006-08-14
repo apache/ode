@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
@@ -27,8 +26,10 @@ import java.util.Date;
 
 /**
  * Message bundle used by the BPEL provider implementation.
+ * 
+ * @author mszefler
  */
-public class Messages extends MessageBundle {
+class Messages extends MessageBundle {
 
   String msgBarProcessLoadErr() {
     return format("Unable to load compiled BPEL process.");
@@ -38,12 +39,6 @@ public class Messages extends MessageBundle {
     return format("Process {0} deployed." , processId);
   }
  
-  /** Documents not available. */
-  String msgDocumentsNotAvailable(){ 
-    return format("Documents not available. ");
-  }
-
-
   /** A database error prevented the operation from succeeding. */
   String msgDbError() {
     return format("A database error prevented the operation from succeeding.");
@@ -54,39 +49,39 @@ public class Messages extends MessageBundle {
     return format("The instance \"{0}\" was not found in the database.",pid);
   }
 
-  public String msgUnknownEPR(String epr) {
+  String msgUnknownEPR(String epr) {
     return format("Unkown EPR: {0}" , epr);
   }
 
-  public String msgProcessUndeployed(QName process) {
+  String msgProcessUndeployed(QName process) {
     return format("Process {0} has been undeployed." , process);
   }
 
-  public String msgProcessUndeployFailed(QName process) {
+  String msgProcessUndeployFailed(QName process) {
     return format("Failed to undeploy process {0}! Check database for consistency!" , process);
   }
 
-  public String msgProcessNotFound(QName pid) {
+  String msgProcessNotFound(QName pid) {
     return format("Process {0} not found. ",pid);
   }
 
-  public String msgProcessNotActive(QName processId) {
+  String msgProcessNotActive(QName processId) {
     return format("Process {0} is not active. ", processId);
   }
 
-  public String msgProcessLoadError(QName processId) {
+  String msgProcessLoadError(QName processId) {
     return format("Process {0}, could not be loaded. ", processId);
   }
 
-  public String msgDeployFailDescriptorURIInvalid(URI dduri) {
+  String msgDeployFailDescriptorURIInvalid(URI dduri) {
     return format("Deployment failure: invalid deployment descriptor URI \"{0}\" ", dduri);
   }
 
-  public String msgDeployFailDescriptorInvalid(URI dduri) {
+  String msgDeployFailDescriptorInvalid(URI dduri) {
     return format("Deployment failure: invalid/malformed deployment descriptor at \"{0}\"", dduri);
   }
 
-  public String msgDeployFailDescriptorIOError(URI dduri) {
+  String msgDeployFailDescriptorIOError(URI dduri) {
     return format("Deployment failure: IO error reading deployment descriptor at \"{0}\"", dduri);
   }
 
@@ -96,72 +91,80 @@ public class Messages extends MessageBundle {
             "definition: {0}", partnerLinkName);
   }
 
-  /** Role 'partnerRole' declared in process deployment descriptor isn't defined in process definition for partner link : {0} */
   String msgDDPartnerRoleNotFound(String partnerLinkName) {
     return format("Role 'partnerRole' declared in process deployment descriptor isn't defined in process definition " +
             "for partner link : {0}", partnerLinkName);
   }
 
-  /** Role 'myRole' declared in process deployment descriptor isn't defined in process definition for partner link : {0} */
   String msgDDMyRoleNotFound(String partnerLinkName) {
     return format("Role 'myRole' declared in process deployment descriptor isn't defined in process definition for " +
             "partner link : {0}", partnerLinkName);
   }
 
-  /**
-   * Partner link {0} is defined in process as initializePartnerRole=no, its partner role endpoint can't be
-   * initialized by deployment descriptor.
-   */
   String msgDDNoInitiliazePartnerRole(String partnerLinkName) {
     return format("Partner link {0} is defined in process as initializePartnerRole=no, its partner role endpoint " +
             "can't be initialized by deployment descriptor.", partnerLinkName);
   }
 
-  public String msgProcessDeployErrAlreadyDeployed(QName processId) {
+  String msgProcessDeployErrAlreadyDeployed(QName processId) {
     return format("The process could not be deployed; another process is already deployed as {0}!",processId); 
   }
 
-  public String msgScheduledJobReferencesUnknownInstance(Long iid) {
+  String msgScheduledJobReferencesUnknownInstance(Long iid) {
     return format("Received a scheduled job event for unknown instance {0}", iid); 
   }
 
-  public String msgReschedulingJobForInactiveProcess(QName processId, String jobId, Date rescheduled) {
+  String msgReschedulingJobForInactiveProcess(QName processId, String jobId, Date rescheduled) {
     return format("Received a scheduled job event for inactive process {0}; " +
         "rescheduling job {1} for {2}", processId, jobId, rescheduled); 
   }
 
-  public String msgProcessActivationError(QName pid) {
+  String msgProcessActivationError(QName pid) {
     return format("Error activating process {0}",pid);
   }
 
-  public String msgOperationInterrupted() {
+  String msgOperationInterrupted() {
     return format("Operation was interrupted.");
   }
 
-  public String msgProcessActivated(QName pid) {
+  String msgProcessActivated(QName pid) {
     return format("Activated process {0}.",pid);
   }
 
-  public String msgServerStarted() {
+  String msgServerStarted() {
     return format("BPEL Server Started.");
   }
 
-  public String msgServerStopped() {
+  String msgServerStopped() {
     return format("BPEL Server Stopped.");
   }
 
-  public String msgUndefinedServicePort(QName service, String port) {
+  String msgUndefinedServicePort(QName service, String port) {
     return format("The service name and port defined in your deployment descriptor couldn't be found " +
             "in any WSDL document: {0} {1}.", service, port);
   }
 
-  /** Error in schema processing: {0} **/
-  public String errSchemaError(String detailMessage) {
-    return format("Error in schema processing: {0}", detailMessage);
-  }
-
-  public String msgInterceptorAborted(String mexId, String interceptor) {
+  String msgInterceptorAborted(String mexId, String interceptor) {
 	  return format("Message exchange {0} aborted by interceptor {1}", mexId, interceptor);
   }	
+  
+  String msgMyRoleRoutingFailure(String messageExchangeId) {
+    return format("Unable to route message exchange {0}, EPR was not specified " +
+        "and the target my-role could not be inferred.",messageExchangeId);
+  }
+
+  String msgPropertyAliasReturnedNullSet(String alias, String variable) {
+    return this.format("msgPropertyAliasReturnedNullSet: {0} {1}", alias, variable);
+  }
+
+  String msgUnknownOperation(String operationName,QName portType) {
+    return format("Unknown operation \"{0}\" for port type \"{1}\".",operationName,portType);
+  }
+
+  String msgPropertyAliasDerefFailedOnMessage(String aliasDescription, String reason) {
+    return this.format(
+        "Unable to evaluate apply property alias \"{0}\" to incoming message: {1}",
+        aliasDescription, reason);
+  }
 
 }

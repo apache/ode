@@ -213,6 +213,9 @@ public class DOMUtils {
    * @return the first child element.
    */
   public static Element getFirstChildElement(Element elem) {
+    if (elem == null)
+      throw new NullPointerException("elem parameter must not be null!");
+    
     for (Node n = elem.getFirstChild(); n != null; n = n.getNextSibling()) {
       if (n.getNodeType() == Node.ELEMENT_NODE) { return (Element) n; }
     }

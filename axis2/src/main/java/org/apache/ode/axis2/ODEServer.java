@@ -176,7 +176,7 @@ public class ODEServer {
     }
   }
 
-  public void createService(Definition def, QName serviceName, String portName) throws AxisFault {
+  public ODEService createService(Definition def, QName serviceName, String portName) throws AxisFault {
     if (_services.get(serviceName, portName) != null){
       AxisService service = ((ODEService)_services.get(serviceName, portName)).getAxisService();
       _axisConfig.removeService(service.getName());
@@ -196,14 +196,18 @@ public class ODEServer {
     // We're public!
     _axisConfig.addService(axisService);
     __log.debug("Created Axis2 service " + serviceName);
+    return odeService;
   }
 
-  public void createExternalService(Definition def, QName serviceName, String portName) {
-    if (_externalServices.get(serviceName) != null) return;
+  public ExternalService createExternalService(Definition def, QName serviceName, String portName) {
+    ExternalService extService = (ExternalService) _externalServices.get(serviceName);
+    if (extService != null) 
+        return extService;
 
-    ExternalService extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
+    extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
     _externalServices.put(serviceName, portName, extService);
     __log.debug("Created external service " + serviceName);
+    return extService;
   }
 
   public void destroyService(QName serviceName) {
@@ -391,7 +395,6 @@ public class ODEServer {
     // We don't want the server to automatically activate deployed processes,
     // we'll do that explcitly
     _server.setAutoActivate(false);
-    _server.setDeploymentDir(new File(_appRoot, "processes"));
 
     _executorService = Executors.newCachedThreadPool();
     _scheduler = new QuartzSchedulerImpl();
@@ -404,6 +407,7 @@ public class ODEServer {
     _server.setDaoConnectionFactory(_daoCF);
     _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
     _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
+    _server.setBindingContext(new BindingContextImpl(this));
     _server.setScheduler(_scheduler);
     _server.init();
   }
