@@ -59,6 +59,11 @@
       <artifactId>ode-bpel-api</artifactId>
     </dependency>
 
+	      <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-connector</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>axis2</groupId>
       <artifactId>axis2</artifactId>

@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ManagementService;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
+import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
@@ -91,6 +92,7 @@ public class ODEServer {
 
   private MultiKeyMap _services = new MultiKeyMap();
   private MultiKeyMap _externalServices = new MultiKeyMap();
+  private BpelConnector _connector;
 
 //  private HashMap<QName,ODEService> _services = new HashMap<QName,ODEService>();
 //  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
@@ -125,6 +127,9 @@ public class ODEServer {
       throw new ServletException(errmsg, ex);
     }
 
+    __log.debug("Initializing JCA adapter.");
+    initConnector();
+    
     File deploymentDir = new File(_appRoot, "processes");
     _poller = new DeploymentPoller(deploymentDir, this);
     _poller.start();
@@ -279,6 +284,23 @@ public class ODEServer {
     }
   }
 
+  private void initConnector() throws ServletException {
+      int port = _odeConfig.getConnectorPort();
+      if (port == 0) {
+        __log.info("Skipping connector initialization.");
+      } else {
+        _connector = new BpelServerConnector();
+        _connector.setBpelServer(_ode._server);
+        _connector.setPort(_ode._config.getConnectorPort());
+        _connector.setId(_ode._config.getConnectorName());
+        try {
+          _connector.start();
+        } catch (Exception e) {
+        __log.error("Failed to initialize JCA connector.",e);
+        }
+      }
+    }
+  
   private void initExternalDb() throws ServletException {
     try {
       _datasource = lookupInJndi(_odeConfig.getDbDataSource());
