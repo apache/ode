@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
@@ -30,87 +29,86 @@ import org.apache.ode.bpel.engine.WorkEvent.Type;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
+class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
 
-class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl 
-  implements  PartnerRoleMessageExchange {
+    private PartnerRoleChannel _channel;
 
-  PartnerRoleMessageExchangeImpl(BpelEngineImpl engine,
-      MessageExchangeDAO dao,
-      PortType portType,
-      Operation operation,
-      EndpointReference epr) {
-    super(engine, dao);
-    setPortOp(portType, operation);
-  }
- 
-
-  public void replyOneWayOk() {
-    setStatus(Status.ONE_WAY);
-  }
-
-  public void replyAsync() {
-    setStatus(Status.ASYNC);
-  }
-
-  public void replyWithFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
-    boolean isAsync = isAsync();
-    setFault(faultType, outputFaultMessage);
-    if (isAsync)
-      continueAsync();
-  }
-
-
-  public void reply(Message response) throws BpelEngineException {
-    boolean isAsync = isAsync();
-    setResponse(response);
-    if (isAsync)
-      continueAsync();
-    
-  }
-
-  public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-    setFailure(type, description, details);
-    continueAsync();
-  }
-
-  /**
-   * Continue from the ASYNC state.
-   *
-   */
-  private void continueAsync() {
-    WorkEvent we = new WorkEvent();
-    we.setIID(getDAO().getInstance().getInstanceId());
-    we.setType(Type.INVOKE_RESPONSE);
-    we.setChannel(getDAO().getChannel());
-    we.setMexId(getDAO().getMessageExchangeId());
-    _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(),null);
-  }
-
-  /**
-   * Check if we are in the ASYNC state.
-   * @return
-   */
-  private boolean isAsync() {
-    return getStatus()==Status.ASYNC;
-  }
-
-
-  public QName getCaller() {
-    return _dao.getProcess().getProcessId();
-  }
-  
-  public String toString() {
-    try {
-      return "{PartnerRoleMex#" + getMessageExchangeId() 
-      + " [PID " + getCaller() + "] calling "
-      + _epr + "." + getOperationName() + "(...)}";
-      
-    } catch (Throwable t) {
-      return "{PartnerRoleMex#????}";
+    PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
+            Operation operation, EndpointReference epr) {
+        super(engine, dao);
+        setPortOp(portType, operation);
     }
-    
-  }
-  
+
+    public void replyOneWayOk() {
+        setStatus(Status.ONE_WAY);
+    }
+
+    public void replyAsync() {
+        setStatus(Status.ASYNC);
+    }
+
+    public void replyWithFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
+        boolean isAsync = isAsync();
+        setFault(faultType, outputFaultMessage);
+        if (isAsync)
+            continueAsync();
+    }
+
+    public void reply(Message response) throws BpelEngineException {
+        boolean isAsync = isAsync();
+        setResponse(response);
+        if (isAsync)
+            continueAsync();
+
+    }
+
+    public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
+        setFailure(type, description, details);
+        continueAsync();
+    }
+
+    /**
+     * Continue from the ASYNC state.
+     * 
+     */
+    private void continueAsync() {
+        WorkEvent we = new WorkEvent();
+        we.setIID(getDAO().getInstance().getInstanceId());
+        we.setType(Type.INVOKE_RESPONSE);
+        we.setChannel(getDAO().getChannel());
+        we.setMexId(getDAO().getMessageExchangeId());
+        _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+    }
+
+    /**
+     * Check if we are in the ASYNC state.
+     * 
+     * @return
+     */
+    private boolean isAsync() {
+        return getStatus() == Status.ASYNC;
+    }
+
+    public QName getCaller() {
+        return _dao.getProcess().getProcessId();
+    }
+
+    public String toString() {
+        try {
+            return "{PartnerRoleMex#" + getMessageExchangeId() + " [PID " + getCaller() + "] calling " + _epr + "."
+                    + getOperationName() + "(...)}";
+
+        } catch (Throwable t) {
+            return "{PartnerRoleMex#????}";
+        }
+
+    }
+
+    public PartnerRoleChannel getChannel() {
+        return _channel;
+    }
+
 }

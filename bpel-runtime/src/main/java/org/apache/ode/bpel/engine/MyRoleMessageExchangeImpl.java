@@ -68,24 +68,21 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
     _dao.setStatus(MessageExchange.Status.REQUEST.toString());
 
     for (MessageExchangeInterceptor i: _engine.getGlobalInterceptors()) {
-    	__log.debug("onBpelServerInvoke --> interceptor " + i);
+    	__log.debug("onBpelServerInvoked --> interceptor " + i);
     	boolean cont = i.onBpelServerInvoked(this);
     	if (!cont) {
     		__log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
     		if (getStatus() == Status.REQUEST) {
     			__log.debug("aborting interceptor "  + i + " did not set message exchange status, assuming failure");
-    		      setFailure(MessageExchange.FailureType.NO_RESPONSE, 
+    		      setFailure(MessageExchange.FailureType.ABORTED, 
     		    		  __msgs.msgInterceptorAborted(getMessageExchangeId(),i.toString()), null);
-
     		}
-    			
     		return;
     	}
     }
     
     
     BpelProcess target = _engine.route(getDAO().getCallee(), request);
-    
 
     if (__log.isDebugEnabled())
       __log.debug("invoke() EPR= " + _epr + " ==> " + target);
@@ -98,7 +95,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
       setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT);
       setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null,null);
     } else {
-      target.invokeProcess(getDAO().getCallee(), _epr, this);
+      target.invokeProcess(this);
     }
     
   }

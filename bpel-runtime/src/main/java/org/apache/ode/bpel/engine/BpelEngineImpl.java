@@ -19,6 +19,15 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -26,257 +35,210 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.w3c.dom.Element;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server
  * methods that should be invoked in the context of a transaction.
+ * 
  * @author mszefler
- *
+ * 
  */
 public class BpelEngineImpl implements BpelEngine {
 
-  private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
+    private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
 
-  private static final Messages __msgs = MessageBundle
-      .getMessages(Messages.class);
+    private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-  /**
-   * Active processes, keyed by process id.
-   */
-  final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
+    /** Active processes, keyed by process id. */
+    final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
 
-  /**
-   * Active processes, keyed by myRole endpoint. NOTE: this is not being used at
-   * this point. 
-   */
-  final HashMap<EndpointReference, BpelProcess> _eprToProcessMap = new HashMap<EndpointReference, BpelProcess>();
+    /** Mapping from myrole endpoint name to active process. */
+    private final HashMap<Endpoint, BpelProcess> _serviceMap = new HashMap<Endpoint, BpelProcess>();
 
-  /** Mapping from service name to active process. */
-  private final HashMap<QName, BpelProcess> _serviceMap = new HashMap<QName,BpelProcess>();
+    final Contexts _contexts;
 
-  final Contexts _contexts;
-
-
-
-  public BpelEngineImpl(Contexts contexts) {
-    _contexts = contexts;
-  }
-
-  public boolean isMyRoleEndpoint(EndpointReference epr)
-      throws BpelEngineException {
-    return _eprToProcessMap.containsKey(epr);
-  }
-
-  public MyRoleMessageExchange createMessageExchange(
-      String clientKey,
-      QName targetService,
-      EndpointReference epr,
-      String operation) throws BpelEngineException {
-
-    MessageExchangeDAO dao = _contexts.dao.getConnection()
-        .createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-    dao.setCorrelationId(clientKey);
-    dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
-    dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
-    dao.setCallee(targetService);
-    dao.setStatus(Status.NEW.toString());
-    dao.setOperation(operation);
-    dao.setEPR(epr == null ? null : epr.toXML().getDocumentElement());
-    MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
-
-    BpelProcess target = route(targetService, null);
-    if (target != null)
-      target.initMyRoleMex(mex);
-    
-    return mex;
-  }
-
-  public MessageExchange getMessageExchange(String mexId)
-      throws BpelEngineException {
-    MessageExchangeDAO mexdao = _contexts.dao.getConnection()
-        .getMessageExchange(mexId);
-    if (mexdao == null)
-      return null;
-
-    ProcessDAO pdao = mexdao.getProcess();
-    BpelProcess process = pdao == null ? null : _activeProcesses.get(pdao
-        .getProcessId());
-
-    MessageExchangeImpl mex;
-    switch (mexdao.getDirection()) {
-    case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
-      if (process == null) {
-        String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
-        __log.error(errmsg);
-        // TODO: Perhaps we should define a checked exception for this
-        // condition.
-        throw new BpelEngineException(errmsg);
-      } else {
-        OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao
-            .getPartnerLinkModelId());
-        PortType ptype = plink.partnerRolePortType;
-        Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
-        mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null);
-      }
-      break;
-    case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-      mex = new MyRoleMessageExchangeImpl(this, mexdao);
-      if (process != null) {
-        OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao
-            .getPartnerLinkModelId());
-        PortType ptype = plink.myRolePortType;
-        Operation op = plink.getMyRoleOperation(mexdao.getOperation());
-        mex.setPortOp(ptype, op);
-      }
-      break;
-    default:
-      String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: "
-          + mexId;
-      __log.fatal(errmsg);
-      throw new BpelEngineException(errmsg);
+    public BpelEngineImpl(Contexts contexts) {
+        _contexts = contexts;
     }
 
-    if (process != null)
-      mex.setProcess(process._oprocess);
+    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation)
+            throws BpelEngineException {
 
-    return mex;
-  }
+        MessageExchangeDAO dao = _contexts.dao.getConnection().createMessageExchange(
+                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        dao.setCorrelationId(clientKey);
+        dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
+        dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
+        dao.setCallee(targetService);
+        dao.setStatus(Status.NEW.toString());
+        dao.setOperation(operation);
+        MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
 
-  boolean unregisterProcess(QName process) {
-    BpelProcess p = _activeProcesses.remove(process);
-    if (p != null) {
-      p.deactivate();
-      _eprToProcessMap.values().remove(p);
-      _serviceMap.values().remove(p);
-    }
-    return p != null;
-  }
+        BpelProcess target = route(targetService, null);
+        if (target != null)
+            target.initMyRoleMex(mex);
 
-  boolean isProcessRegistered(QName pid) {
-    return _activeProcesses.containsKey(pid);
-  }
-
-  void registerProcess(QName pid,
-      OProcess compiledProcess,
-      Map<Integer,QName> serviceNames,
-      Map<Integer,Element> myEprs,
-      ExpressionLanguageRuntimeRegistry elangRegistry) {
-    BpelProcess process = new BpelProcess(this, pid, compiledProcess,
-        serviceNames,
-        myEprs,
-        null,
-        elangRegistry);
-    _activeProcesses.put(pid, process);
-    for (QName sn : serviceNames.values()) {
-      __log.debug( "Register process: serviceId=" + sn + ", process=" + process );
-      _serviceMap.put(sn,process);
+        return mex;
     }
 
-    process.activate();
-  }
+    public MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
+        MessageExchangeDAO mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
+        if (mexdao == null)
+            return null;
 
-  void addRoute(EndpointReference epr, QName pid) {
-    BpelProcess target = _activeProcesses.get(pid);
-    if (target == null)
-      throw new IllegalArgumentException("Process " + pid + " is not active.");
-    _eprToProcessMap.put(epr, target);
-  }
-  
-  void delRoute(EndpointReference epr) {
-    _eprToProcessMap.remove(epr);
-    
-  }
- 
-  /**
-   * Route to a process using the service id. Note, that we do not need the 
-   * endpoint name here, we are assuming that two processes would not be 
-   * registered under the same service qname but different endpoint.  
-   * 
-   * @param service target service id
-   * @param request request message
-   * @return process corresponding to the targetted service, or <code>null</code>
-   * 	     if service identifier is not recognized. 
-   */
-  BpelProcess route(QName service, Message request) {
-    // TODO: use the message to route to the correct service if more than one
-    // service is listening on the same endpoint.
+        ProcessDAO pdao = mexdao.getProcess();
+        BpelProcess process = pdao == null ? null : _activeProcesses.get(pdao.getProcessId());
 
-    BpelProcess routed = _serviceMap.get(service);
-    if (__log.isDebugEnabled())
-      __log.debug("Routed: svcQname " +service + " --> " + routed);
-    return routed;
-    
-  }
-  
+        MessageExchangeImpl mex;
+        switch (mexdao.getDirection()) {
+        case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
+            if (process == null) {
+                String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
+                __log.error(errmsg);
+                // TODO: Perhaps we should define a checked exception for this
+                // condition.
+                throw new BpelEngineException(errmsg);
+            } else {
+                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                PortType ptype = plink.partnerRolePortType;
+                Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
+                mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null);
+            }
+            break;
+        case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
+            mex = new MyRoleMessageExchangeImpl(this, mexdao);
+            if (process != null) {
+                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                PortType ptype = plink.myRolePortType;
+                Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+                mex.setPortOp(ptype, op);
+            }
+            break;
+        default:
+            String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
+            __log.fatal(errmsg);
+            throw new BpelEngineException(errmsg);
+        }
 
-  OProcess getOProcess(QName processId) {
-    return _activeProcesses.get(processId)._oprocess;
-  }
+        if (process != null)
+            mex.setProcess(process._oprocess);
 
-  public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
-
-    WorkEvent we = new WorkEvent(jobDetail);
-
-    ProcessInstanceDAO instance = _contexts.dao.getConnection().getInstance(
-        we.getIID());
-    if (instance == null) {
-      __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
-      // nothing we can do, this instance is not in the database, it will always
-      // fail.
-      return;
+        return mex;
     }
 
-    ProcessDAO processDao = instance.getProcess();
-    BpelProcess process = _activeProcesses.get(processDao.getProcessId());
-    if (process == null) {
-      // If the process is not active, it means that we should not be doing
-      // any work on its behalf, therefore we will reschedule the events
-      // for some time in the future (1 minute).
-      Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-      __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao
-          .getProcessId(), jobId, future));
-      _contexts.scheduler.schedulePersistedJob(jobDetail, future);
+    boolean unregisterProcess(QName process) {
+        BpelProcess p = _activeProcesses.remove(process);
+        if (p != null) {
+            p.deactivate();
+            while (_serviceMap.values().remove(p))
+                ;
+        }
+        return p != null;
     }
 
-    assert process != null;
-    process.handleWorkEvent(jobDetail);
-  }
+    boolean isProcessRegistered(QName pid) {
+        return _activeProcesses.containsKey(pid);
+    }
 
+    /**
+     * Register a process with the engine.
+     * 
+     * @param process
+     *            the process to register
+     */
+    void registerProcess(BpelProcess process) {
 
-  public MessageExchange getMessageExchangeByClientKey(String clientKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
+        process._engine = this;
+        
+        _activeProcesses.put(process.getPID(), process);
+        for (Endpoint e : process.getServiceNames()) {
+            __log.debug("Register process: serviceId=" + e + ", process=" + process);
+            _serviceMap.put(e, process);
+        }
+        process.activate();
+    }
 
-  /**
-   * Get the list of globally-registered message-exchange interceptors.
-   * @return
-   */
-  List<MessageExchangeInterceptor> getGlobalInterceptors() {
-	  return _contexts.globalIntereceptors;
-  }
+    /**
+     * Route to a process using the service id. Note, that we do not need the
+     * endpoint name here, we are assuming that two processes would not be
+     * registered under the same service qname but different endpoint.
+     * 
+     * @param service
+     *            target service id
+     * @param request
+     *            request message
+     * @return process corresponding to the targetted service, or
+     *         <code>null</code> if service identifier is not recognized.
+     */
+    BpelProcess route(QName service, Message request) {
+        // TODO: use the message to route to the correct service if more than
+        // one
+        // service is listening on the same endpoint.
 
+        BpelProcess routed = _serviceMap.get(service);
+        if (__log.isDebugEnabled())
+            __log.debug("Routed: svcQname " + service + " --> " + routed);
+        return routed;
+
+    }
+
+    OProcess getOProcess(QName processId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("todo");
+    }
+
+    public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
+
+        WorkEvent we = new WorkEvent(jobDetail);
+
+        ProcessInstanceDAO instance = _contexts.dao.getConnection().getInstance(we.getIID());
+        if (instance == null) {
+            __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+            // nothing we can do, this instance is not in the database, it will
+            // always
+            // fail.
+            return;
+        }
+
+        ProcessDAO processDao = instance.getProcess();
+        BpelProcess process = _activeProcesses.get(processDao.getProcessId());
+        if (process == null) {
+            // If the process is not active, it means that we should not be
+            // doing
+            // any work on its behalf, therefore we will reschedule the events
+            // for some time in the future (1 minute).
+            Date future = new Date(System.currentTimeMillis() + (60 * 1000));
+            __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao.getProcessId(), jobId, future));
+            _contexts.scheduler.schedulePersistedJob(jobDetail, future);
+        }
+
+        assert process != null;
+        process.handleWorkEvent(jobDetail);
+    }
+
+    public MessageExchange getMessageExchangeByClientKey(String clientKey) {
+        // TODO: implement me.
+        throw new UnsupportedOperationException("Todo: implementme");
+    }
+
+    /**
+     * Get the list of globally-registered message-exchange interceptors.
+     * 
+     * @return
+     */
+    List<MessageExchangeInterceptor> getGlobalInterceptors() {
+        return _contexts.globalIntereceptors;
+    }
 
 }
