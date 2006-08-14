@@ -133,6 +133,13 @@ public interface BpelServer {
   boolean undeploy(QName pid);
 
   /**
+   * Undeploy a package.
+   * @param file package file
+   * @return successful or not
+   */
+  boolean undeploy(File file);
+
+  /**
    * Activate a process.
    * @param pid process to activate
    * @param sticky is this change sticky, i.e. will the process be activated

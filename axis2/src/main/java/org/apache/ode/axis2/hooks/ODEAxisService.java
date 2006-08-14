@@ -24,6 +24,7 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.WSDL2AxisServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.engine.MessageReceiver;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Operation;
@@ -68,6 +69,25 @@ public class ODEAxisService extends AxisService {
     }
     return axisService;
   }
+
+  public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
+                             String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
+    WSDL2AxisServiceBuilder serviceBuilder =
+            new WSDL2AxisServiceBuilder(wsdlDef, serviceQName, port);
+    AxisService axisService = serviceBuilder.populateService();
+    axisService.setName(axisName);
+    axisService.setWsdlfound(true);
+    axisService.setClassLoader(axisConfig.getServiceClassLoader());
+    Iterator operations = axisService.getOperations();
+    while (operations.hasNext()) {
+      AxisOperation operation = (AxisOperation) operations.next();
+      if (operation.getMessageReceiver() == null) {
+        operation.setMessageReceiver(receiver);
+      }
+    }
+    return axisService;
+  }
+
 
   private static String extractServiceName(Definition wsdlDefinition, QName wsdlServiceName, String portName) throws AxisFault {
     String url = null;

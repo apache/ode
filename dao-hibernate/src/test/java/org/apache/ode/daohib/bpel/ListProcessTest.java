@@ -29,7 +29,7 @@ import java.io.FileInputStream;
 import java.util.*;
 
 /**
- * Testing BpelDAOConnectionImpl.listProcesses. We're just producing a lot
+ * Testing BpelDAOConnectionImpl.listAllProcesses. We're just producing a lot
  * of different filter combinations and test if they execute ok. To really
  * test that the result is the one expected would take a huge test database
  * (with at least a process and an instance for every possible combination).
