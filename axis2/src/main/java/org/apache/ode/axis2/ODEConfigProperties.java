@@ -40,6 +40,7 @@ public class ODEConfigProperties extends Properties {
   private static final String PROP_DB_EMBEDDED_NAME = "ode-axis2.db.emb.name";
   private static final String PROP_POOL_MAX = "ode-axis2.db.pool.max";
   private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
+  private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
 
   private File _installDir;
 
@@ -105,6 +106,10 @@ public class ODEConfigProperties extends Properties {
 
   public int getPoolMinSize() {
     return Integer.valueOf(getProperty(ODEConfigProperties.PROP_POOL_MIN, "1"));
+  }
+
+  public int getConnectorPort() {
+    return Integer.valueOf(getProperty(ODEConfigProperties.PROP_CONNECTOR_PORT,"0")); 
   }
 
 }
