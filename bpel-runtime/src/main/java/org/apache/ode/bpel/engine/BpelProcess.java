@@ -94,7 +94,7 @@ public class BpelProcess {
 
     BpelEngineImpl _engine;
     
-    private DebuggerSupport _debugger;
+    DebuggerSupport _debugger;
 
     final OProcess _oprocess;
 
