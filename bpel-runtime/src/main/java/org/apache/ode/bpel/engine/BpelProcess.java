@@ -92,7 +92,9 @@ public class BpelProcess {
 
     private Map<OPartnerLink, PartnerLinkMyRoleImpl> _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
 
-    final DebuggerSupport _debugger;
+    private BpelEngineImpl _engine;
+    
+    private DebuggerSupport _debugger;
 
     final OProcess _oprocess;
 
@@ -101,8 +103,6 @@ public class BpelProcess {
     final ReplacementMap _replacementMap;
 
     final QName _pid;
-
-    BpelEngineImpl _engine;
 
     /** Mapping from {"Service Name" (QNAME) / port} to a myrole. */
     private Map<Endpoint, PartnerLinkMyRoleImpl> _endpointToMyRoleMap = new HashMap<Endpoint, PartnerLinkMyRoleImpl>();
@@ -143,8 +143,8 @@ public class BpelProcess {
                 _partnerRoles.put(pl, partnerRole);
             }
         }
-        _debugger = new DebuggerSupport(this);
     }
+
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
         StringBuffer sb = new StringBuffer(partnerlinkName);
@@ -704,7 +704,9 @@ public class BpelProcess {
         return _endpointToMyRoleMap.keySet();
     }
 
-    void activate() {
+    void activate(BpelEngineImpl engine) {
+        _engine = engine;
+        _debugger = new DebuggerSupport(this);
         // Activate all the my-role endpoints.
         for (PartnerLinkMyRoleImpl myrole : _myRoles.values()) {
             myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint, myrole._plinkDef.myRolePortType);
