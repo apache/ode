@@ -114,7 +114,7 @@ public class ODEServer {
 
     __log.debug("Starting Hibernate.");
     initHibernate();
-    __log.info("Hibernate started.");
+    __log.debug("Hibernate started.");
 
     __log.debug("Initializing BPEL server.");
     initBpelServer();
@@ -175,7 +175,7 @@ public class ODEServer {
       _jotm.stop();
       _jotm = null;
 
-      __log.info("Shutdown completed.");
+      __log.info(__msgs.msgOdeShutdownCompleted());
     } finally {
       Thread.currentThread().setContextClassLoader(old);
     }

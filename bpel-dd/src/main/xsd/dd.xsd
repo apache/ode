@@ -78,8 +78,17 @@
 		       </xs:sequence>
 		     </xs:complexType>
 		  </xs:element>
+	      <xs:element name="type" minOccurs="1" maxOccurs="1"  type="xs:QName">
+              <xs:annotation>
+                <xs:documentation> Process type -- indicates which process defintion should be used
+                for the process.</xs:documentation>
+              </xs:annotation>
+		    </xs:element>
+
           </xs:sequence>
+
           <xs:attribute name="name" type="xs:QName" use="required"/>
+          
         </xs:complexType>
       </xs:element>
 
