@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.util;
 
 import org.apache.ode.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;

@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -76,6 +77,7 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -157,6 +159,42 @@ public class BpelServerImpl implements BpelServer {
 
     }
 
+    public boolean undeploy(File file) {
+        DeploymentUnit du = null;
+        for (DeploymentUnitImpl deploymentUnit : new HashSet<DeploymentUnitImpl>(_deploymentUnits.values())) {
+            if (deploymentUnit.getDeployDir().getName().equals(file.getName())) du = deploymentUnit;
+        }
+        if (du == null) {
+            __log.warn("Couldn't deploy " + file.getName() + ", package was not found.");
+            return false;
+        }
+        else {
+            boolean success = true;
+            for (QName pName : du.getProcessNames()) {
+                success = success && undeploy(pName);
+            }
+            System.out.println("### Trying to delete " + du.getDeployDir().getAbsolutePath());
+            rm(du.getDeployDir());
+
+            for (QName pname : du.getProcessNames()) {
+                _deploymentUnits.remove(pname);
+            }
+
+
+            return success;
+        }
+    }
+
+    private void rm(File f) {
+        if (f.isDirectory()) {
+            for (File child : f.listFiles())
+                rm(child);
+            f.delete();
+        } else {
+            f.delete();
+        }
+    }
+
     public void registerBpelEventListener(BpelEventListener listener) {
         _listeners.add(listener);
     }
@@ -173,8 +211,7 @@ public class BpelServerImpl implements BpelServer {
 
     /**
      * Find the active processes in the database.
-     * 
-     * @return
+     * @return list of process qnames
      */
     private List<QName> findActive() {
 
@@ -262,7 +299,7 @@ public class BpelServerImpl implements BpelServer {
 
     /**
      * Load the parsed and compiled BPEL process definition from the database.
-     * 
+     *
      * @param processId
      *            process identifier
      * @return process information from configuration database
@@ -397,7 +434,7 @@ public class BpelServerImpl implements BpelServer {
 
     /**
      * Activate the process in the engine.
-     * 
+     *
      * @param pid
      */
     private void doActivateProcess(final QName pid) {
@@ -491,21 +528,21 @@ public class BpelServerImpl implements BpelServer {
                     throw new BpelEngineException(errmsg);
                 }
 
-               
+
                 TService service = invoke.getService();
                 // NOTE: service can be null for partner links
                 if (service == null)
                     continue;
-                
+
                 __log.debug("Processing <invoke> element for process " + pid + ": partnerlink " + plinkName + " --> "
                         + service);
 
                 partnerRoleIntialValues.put(plink, new Endpoint(service.getName(), service.getPort()));
             }
-            
+
             BpelProcess process = new BpelProcess(pid,
                     du,
-                    compiledProcess, myRoleEndpoints, 
+                    compiledProcess, myRoleEndpoints,
                     partnerRoleIntialValues, null, elangRegistry,
                     localMexInterceptors);
 
@@ -555,22 +592,22 @@ public class BpelServerImpl implements BpelServer {
      * Deploys a process.
      */
     public Collection<QName> deploy(File deploymentUnitDirectory) {
-        
+
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
-        
+
         DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
 
         ArrayList<QName> deployed = new ArrayList<QName> ();
         BpelEngineException failed = null;
         // Going trough each process declared in the dd
         for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
-            
+
             // If a type is not specified, assume the process id is also the type.
             QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
             OProcess oprocess = du.getProcesses().get(type);
             if (oprocess == null)
                 throw new BpelEngineException("Could not find the compiled process definition for BPEL" +
-                        "type " +  type + " when deploying process " + processDD.getName() 
+                        "type " +  type + " when deploying process " + processDD.getName()
                         + " in " +  deploymentUnitDirectory);
             try {
 
@@ -581,12 +618,11 @@ public class BpelServerImpl implements BpelServer {
             } catch (Throwable e) {
                 String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
                 __log.error(errmsg, e);
-                
                 failed = new BpelEngineException(errmsg,e);
                 break;
             }
         }
-        
+
         // Roll back succesfull deployments if we failed.
         if (failed != null) {
             if (!deployed.isEmpty()) {
@@ -598,14 +634,14 @@ public class BpelServerImpl implements BpelServer {
                         __log.fatal("Unexpect error undeploying process " + pid, t);
                     }
                 }
-            }            
+            }
             throw failed;
-        } else 
+        } else
             return du.getProcesses().keySet();
     }
 
     private void deploy(final QName processId, final DeploymentUnitImpl du, final OProcess oprocess,
-            final Definition4BPEL[] defs, TDeployment.Process processDD) {
+                        final Definition4BPEL[] defs, TDeployment.Process processDD) {
         // First, make sure we are undeployed.
         undeploy(processId);
 
@@ -630,8 +666,7 @@ public class BpelServerImpl implements BpelServer {
             _db.exec(new BpelDatabase.Callable<ProcessDAO>() {
                 public ProcessDAO run(BpelDAOConnection conn) throws Exception {
                     // Hack, but at least for now we need to ensure that we are
-                    // the only
-                    // process with this process id.
+                    // the only process with this process id.
                     ProcessDAO old = conn.getProcess(processId);
                     if (old != null) {
                         String errmsg = __msgs.msgProcessDeployErrAlreadyDeployed(processId);
@@ -656,7 +691,7 @@ public class BpelServerImpl implements BpelServer {
         }
 
         _deploymentUnits.put(processDD.getName(), du);
-        
+
         doActivateProcess(processId);
     }
 
@@ -673,7 +708,7 @@ public class BpelServerImpl implements BpelServer {
     /**
      * Get the flag that determines whether processes marked as active are
      * automatically activated at startup.
-     * 
+     *
      * @return
      */
     public boolean isAutoActivate() {
@@ -683,7 +718,7 @@ public class BpelServerImpl implements BpelServer {
     /**
      * Set the flag the determines whether processes marked as active are
      * automatically activated at startup.
-     * 
+     *
      * @param autoActivate
      */
     public void setAutoActivate(boolean autoActivate) {
@@ -695,12 +730,7 @@ public class BpelServerImpl implements BpelServer {
         // TODO Auto-generated method stub
     }
 
-    public void undeploy(File serviceUnitRootPath) {
-        // TODO Auto-generated method stub
-        
-    }
 
-    
 //  public void readState() {
 //  File duState = new File(_deploymentDir, ".state");
 //  if (duState.exists()) {
@@ -750,5 +780,5 @@ public class BpelServerImpl implements BpelServer {
 //              + "even they don't (or do) need to.", e);
 //  }
 //}
-    
+
 }

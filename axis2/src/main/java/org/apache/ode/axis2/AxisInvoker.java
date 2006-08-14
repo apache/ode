@@ -24,6 +24,7 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.axis2.util.OMUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;

@@ -27,9 +27,11 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.hooks.ManagementService;
+import org.apache.ode.axis2.service.ManagementService;
+import org.apache.ode.axis2.service.DeploymentService;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
+import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -64,7 +66,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -129,13 +130,14 @@ public class ODEServer {
 
     __log.debug("Initializing JCA adapter.");
     initConnector();
-    
+
     File deploymentDir = new File(_appRoot, "processes");
     _poller = new DeploymentPoller(deploymentDir, this);
     _poller.start();
     __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
 
     new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
+    new DeploymentService().enableService(_axisConfig, _server, _poller, _appRoot.getAbsolutePath());
 
     __log.info(__msgs.msgOdeStarted());
   }
@@ -206,7 +208,7 @@ public class ODEServer {
 
   public ExternalService createExternalService(Definition def, QName serviceName, String portName) {
     ExternalService extService = (ExternalService) _externalServices.get(serviceName);
-    if (extService != null) 
+    if (extService != null)
         return extService;
 
     extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
@@ -231,9 +233,9 @@ public class ODEServer {
 
   public ODEService getService(QName serviceName, QName portTypeName) {
     // TODO Normally this lookup should't exist as there could be more one than port
-    // TODO for a portType. See MessageExchnageContextImpl.
-    for (Iterator iterator = _services.values().iterator(); iterator.hasNext();) {
-      ODEService service = (ODEService) iterator.next();
+    // TODO for a portType. See MessageExchangeContextImpl.
+    for (Object o : _services.values()) {
+      ODEService service = (ODEService) o;
       if (service.respondsTo(serviceName, portTypeName)) return service;
     }
     return null;
@@ -244,8 +246,7 @@ public class ODEServer {
   }
 
   public AxisInvoker createInvoker() {
-    AxisInvoker invoker = new AxisInvoker(_executorService);
-    return invoker;
+    return new AxisInvoker(_executorService);
   }
 
   private void initTxMgr() throws ServletException {
@@ -300,7 +301,7 @@ public class ODEServer {
         }
       }
     }
-  
+
   private void initExternalDb() throws ServletException {
     try {
       _datasource = lookupInJndi(_odeConfig.getDbDataSource());
@@ -449,7 +450,6 @@ public class ODEServer {
           try {
             ctx.close();
           } catch (Exception ex1) {
-            ; // swallow
             __log.error("Error closing JNDI connection.", ex1);
           }
       }

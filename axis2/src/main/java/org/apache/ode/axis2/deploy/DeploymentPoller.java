@@ -17,7 +17,26 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.apache.ode.axis2.deploy;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -26,24 +45,22 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEServer;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
  */
 public class DeploymentPoller {
 
-    private static final Log __log = LogFactory.getLog(DeploymentPoller.class);
+    private static Log __log = LogFactory.getLog(DeploymentPoller.class);
 
     /** The polling interval. */
     private static final long POLL_TIME = 3000;
-
     private File _deployDir;
-
     private PollingThread _poller;
-
     private ODEServer _odeServer;
+    private boolean _onHold = false;
 
-   
     /** Filter accepting directories containing a .odedd file. */
     private static final FileFilter _fileFilter = new FileFilter() {
         public boolean accept(File path) {
@@ -57,13 +74,13 @@ public class DeploymentPoller {
                 return false;
         }
     };
-    
+
     private static final FileFilter _deployedFilter = new FileFilter() {
         public boolean accept(File path) {
             return path.isFile() && path.getName().endsWith(".deployed");
         }
     };
-    
+
     public DeploymentPoller(File deployDir, ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
@@ -121,15 +138,15 @@ public class DeploymentPoller {
 
         // Removing deployments that disappeared
         for (File m :_deployDir.listFiles(_deployedFilter)) {
-            File deployDir = new File(m.getParentFile(),m.getName().substring(0,m.getName().length() 
+            File deployDir = new File(m.getParentFile(),m.getName().substring(0,m.getName().length()
                     - ".deployed".length()));
 
             if (!deployDir.exists()) {
                 // TODO handle undeploy
-                
+
             }
         }
-            
+
      }
 
 
@@ -138,13 +155,12 @@ public class DeploymentPoller {
      */
     private class PollingThread extends Thread {
         private boolean _active = true;
-        private byte[] _mutex = new byte[0];
 
         /** Stop this poller, and block until it terminates. */
         void kill() {
-            synchronized (_mutex) {
+            synchronized (this) {
                 _active = false;
-                _mutex.notify();
+                this.notifyAll();
             }
             try {
                 join();
@@ -156,10 +172,10 @@ public class DeploymentPoller {
         public void run() {
             try {
                 while (_active) {
-                    check();
-                    synchronized (_mutex) {
+                    if (!_onHold) check();
+                    synchronized (this) {
                         try {
-                            _mutex.wait(POLL_TIME);
+                            this.wait(POLL_TIME);
                         } catch (InterruptedException e) {
                         }
                     }
@@ -168,5 +184,27 @@ public class DeploymentPoller {
                 __log.fatal("Encountered an unexpected error.  Exiting poller...", t);
             }
         }
+    }
+
+    public void hold() {
+        _onHold = true;
+    }
+
+    public void release() {
+        _onHold = false;
+    }
+
+    public void markAsDeployed(File file) {
+        File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
+        try {
+            deployedMarker.createNewFile();
+        } catch (IOException e) {
+            __log.error("Couldn't create marker file for " + file.getName());
+        }
+    }
+
+    public void markAsUndeployed(File file) {
+        File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
+        deployedMarker.delete();
     }
 }

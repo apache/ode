@@ -51,9 +51,9 @@ public class InstanceManagementTest extends TestCase {
 
     //use the factory to create three elements
     OMNamespace pmns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
-    OMElement root = factory.createOMElement(operation, null);
+    OMElement root = factory.createOMElement(operation, pmns);
     for (int m = 0; m < params.length; m++) {
-      OMElement omelmt = factory.createOMElement(params[m], pmns);
+      OMElement omelmt = factory.createOMElement(params[m], null);
       omelmt.setText(values[m]);
       root.addChild(omelmt);
     }

@@ -346,6 +346,11 @@
       <version>2.9.3</version>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- ODE Database -->
     <dependency>
