@@ -29,7 +29,7 @@ import java.util.Date;
  * 
  * @author mszefler
  */
-class Messages extends MessageBundle {
+public class Messages extends MessageBundle {
 
   String msgBarProcessLoadErr() {
     return format("Unable to load compiled BPEL process.");
