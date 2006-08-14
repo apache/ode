@@ -24,16 +24,18 @@ package org.apache.ode.bpel.iapi;
  */
 public class BpelEngineException extends RuntimeException {
 
-  public BpelEngineException(String msg, Exception e) {
-    super(msg,e);
-  }
+    private static final long serialVersionUID = 1L;
 
-  public BpelEngineException(Exception ex) {
-    super(ex);
-  }
+    public BpelEngineException(String msg, Throwable e) {
+        super(msg, e);
+    }
 
-  public BpelEngineException(String string) {
-    super(string);
-  }
+    public BpelEngineException(Throwable ex) {
+        super(ex);
+    }
+
+    public BpelEngineException(String string) {
+        super(string);
+    }
 
 }
