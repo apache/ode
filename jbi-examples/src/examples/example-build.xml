@@ -75,7 +75,7 @@
     <target name="service-unit" depends="init,clean,bpelc">
         <zip destfile="${sufile}">
             <fileset dir="${build.dir}" includes="**/*"/>
-            <fileset dir="./" includes="*.dd"/>
+            <fileset dir="./" includes="deploy.xml"/>
         </zip>
     </target>
     
