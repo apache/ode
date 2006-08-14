@@ -21,6 +21,8 @@ package org.apache.ode.bpel.engine;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
+
+import java.io.File;
 import java.net.URI;
 import java.util.Date;
 
@@ -167,4 +169,16 @@ public class Messages extends MessageBundle {
         aliasDescription, reason);
   }
 
+  public String msgDeployStarting(File deploymentUnitDirectory) {
+      return format("Starting deployment of processes from directory \"{0}\". ", deploymentUnitDirectory);
+  }
+
+  public String msgDeployFailed(QName name, File deploymentUnitDirectory) {
+      return format("Deployment of process \"{0}\" from \"{1}\" failed.", name,deploymentUnitDirectory);
+  }
+
+  public String msgDeployRollback(File deploymentUnitDirectory) {
+      return format("Deployment of processes from \"{0}\" failed, rolling back. ", deploymentUnitDirectory);
+  }
+  
 }

@@ -154,7 +154,6 @@ public interface ProcessDAO {
 
   void setDeployURI(URI dduri);
   
-  
   void setCompiledProcess(byte[] cbp);
   
   byte[] getCompiledProcess();

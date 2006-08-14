@@ -555,8 +555,13 @@ public class BpelServerImpl implements BpelServer {
      * Deploys a process.
      */
     public Collection<QName> deploy(File deploymentUnitDirectory) {
+        
+        __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
+        
         DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
 
+        ArrayList<QName> deployed = new ArrayList<QName> ();
+        BpelEngineException failed = null;
         // Going trough each process declared in the dd
         for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
             OProcess oprocess = du.getProcesses().get(processDD.getName());
@@ -568,13 +573,31 @@ public class BpelServerImpl implements BpelServer {
                 deploy(processDD.getName(), du, oprocess, du.getDocRegistry()
                         .getDefinitions(), processDD);
 
+                deployed.add(processDD.getName());
             } catch (Throwable e) {
-                __log.error("Process deployment failed!", e);
-                // TODO: we need to got back and undeploy the processes that were deployed. 
+                String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
+                __log.error(errmsg, e);
+                
+                failed = new BpelEngineException(errmsg,e);
+                break;
             }
         }
         
-        return du.getProcesses().keySet();
+        // Roll back succesfull deployments if we failed.
+        if (failed != null) {
+            if (!deployed.isEmpty()) {
+                __log.error(__msgs.msgDeployRollback(deploymentUnitDirectory));
+                for (QName pid : deployed) {
+                    try {
+                        undeploy(pid);
+                    } catch (Throwable t) {
+                        __log.fatal("Unexpect error undeploying process " + pid, t);
+                    }
+                }
+            }            
+            throw failed;
+        } else 
+            return du.getProcesses().keySet();
     }
 
     private void deploy(final QName processId, final DeploymentUnitImpl du, final OProcess oprocess,
