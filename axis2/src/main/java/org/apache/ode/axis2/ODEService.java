@@ -34,6 +34,8 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.axis2.util.OMUtils;
+import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,7 +80,7 @@ public class ODEService {
     _serviceName = serviceName;
     _portName = portName;
     _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
-    _serviceRef = createServiceRef(genEPRfromWSDL(serviceName,portName));
+    _serviceRef = createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName,portName));
   }
 
   public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext,
@@ -293,7 +295,6 @@ public class ODEService {
    /**
      * Return the service-ref element that will be used to represent this
      * endpoint.
-     * 
      * @return
      */
     public Element getMyServiceRef() {
@@ -309,8 +310,8 @@ public class ODEService {
      *            port name
      * @return XML representation of the EPR
      */
-    private Element genEPRfromWSDL(QName name, String portName) {
-        Service serviceDef = _wsdlDef.getService(name);
+    public static Element genEPRfromWSDL(Definition wsdlDef, QName name, String portName) {
+        Service serviceDef = wsdlDef.getService(name);
         if (serviceDef != null) {
             Port portDef = serviceDef.getPort(portName);
             if (portDef != null) {
@@ -345,7 +346,7 @@ public class ODEService {
      * @param elmt
      * @return wrapped element
      */
-    private Element createServiceRef(Element elmt) {
+    public static Element createServiceRef(Element elmt) {
         Document doc = DOMUtils.newDocument();
         QName elQName = new QName(elmt.getNamespaceURI(), elmt.getLocalName());
         // If we get a service-ref, just copy it, otherwise make a service-ref

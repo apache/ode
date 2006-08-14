@@ -18,13 +18,12 @@
   -->
 
 <definitions
-        name="Process"
+        name="ProcessAndInstanceManagement"
         targetNamespace="http://www.apache.org/ode/pmapi"
         xmlns:tns="http://www.apache.org/ode/pmapi"
         xmlns:typ="http://www.apache.org/ode/pmapi/types/2006/08/02/"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
   <types>

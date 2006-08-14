@@ -17,10 +17,11 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.util;
 
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.axis2.Messages;
 
 import javax.wsdl.Binding;
 import javax.wsdl.Port;

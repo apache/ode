@@ -45,7 +45,6 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     return EndpointFactory.createEndpoint(element);
   }
 
-
   public EndpointReference convertEndpoint(QName qName, Element element) {
     EndpointReference endpoint = EndpointFactory.convert(qName, element);
     return endpoint;

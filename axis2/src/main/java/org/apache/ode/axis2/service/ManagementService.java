@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2.hooks;
+package org.apache.ode.axis2.service;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -35,7 +35,8 @@ import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.OMUtils;
+import org.apache.ode.axis2.util.OMUtils;
+import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
@@ -56,11 +57,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 
 /**
- * Created by IntelliJ IDEA.
- * User: dusty
- * Date: Aug 3, 2006
- * Time: 5:27:59 PM
- * To change this template use File | Settings | File Templates.
+ * Axis2 wrapper for process and instance management interfaces.
  */
 public class ManagementService {
 
@@ -77,33 +74,19 @@ public class ManagementService {
     try {
       WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
       def = wsdlReader.readWSDL(rootpath + "/pmapi.wsdl");
-      createService(axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
+      AxisService processService = ODEAxisService.createService(
+              axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
               "ProcessManagementPort", "ProcessManagement", def, new ProcessMessageReceiver());
-      createService(axisConfig, new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService"),
+      AxisService instanceService = ODEAxisService.createService(
+              axisConfig, new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService"),
               "InstanceManagementPort", "InstanceManagement", def, new InstanceMessageReceiver());
+      axisConfig.addService(processService);
+      axisConfig.addService(instanceService);
     } catch (WSDLException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private void createService(AxisConfiguration axisConfig, QName serviceQName, String port,
-                             String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
-    WSDL2AxisServiceBuilder serviceBuilder =
-            new WSDL2AxisServiceBuilder(wsdlDef, serviceQName, port);
-    AxisService axisService = serviceBuilder.populateService();
-    axisService.setName(axisName);
-    axisService.setWsdlfound(true);
-    axisService.setClassLoader(axisConfig.getServiceClassLoader());
-    Iterator operations = axisService.getOperations();
-    while (operations.hasNext()) {
-      AxisOperation operation = (AxisOperation) operations.next();
-      if (operation.getMessageReceiver() == null) {
-        operation.setMessageReceiver(receiver);
-      }
-    }
-    axisConfig.addService(axisService);
   }
 
   private static void receive(MessageContext msgContext, Class mgmtClass,
@@ -116,9 +99,6 @@ public class ManagementService {
       try {
         // Our services are defined in WSDL which requires operation names to be different
         Method invokedMethod = findMethod(mgmtClass, methodName);
-        System.out.println("====================================");
-        System.out.println(msgContext.getEnvelope());
-        System.out.println("====================================");
         Object[] params = extractParams(invokedMethod, msgContext.getEnvelope().getBody().getFirstElement());
         Object result = invokedMethod.invoke(mgmtObject, params);
 
