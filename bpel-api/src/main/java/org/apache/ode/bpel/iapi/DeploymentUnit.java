@@ -19,7 +19,9 @@
 
 package org.apache.ode.bpel.iapi;
 
+import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.Set;
 import java.util.Collection;
 
 import org.apache.ode.bom.wsdl.Definition4BPEL;
@@ -57,5 +59,12 @@ public interface DeploymentUnit {
      * @return collection of WSDL documents
      */
     Collection<Definition4BPEL> getDefinitions();
+
+
+  /**
+   * Names of the processes included in the deployment unit.
+   * @return
+   */
+  public Set<QName> getProcessNames();
 
 }

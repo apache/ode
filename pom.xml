@@ -52,6 +52,7 @@
 	| and execution.
 	|
     -->
+        <activationVersion>1.1</activationVersion>
         <antVersion>1.6.5</antVersion>
         <axisVersion>1.3</axisVersion>
         <axis2Version>1.0</axis2Version>
@@ -139,7 +140,7 @@
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
 
-        <module>distro-jbi</module>
+        <!-- module>distro-jbi</module -->
         <!--module>integration</module-->
     </modules>
 
@@ -491,6 +492,11 @@
                  <version>${quartzVersion}</version>
              </dependency>
 
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>${activationVersion}</version>
+            </dependency>
             <dependency>
                 <groupId>axis2</groupId>
                 <artifactId>axis2</artifactId>
