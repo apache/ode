@@ -564,10 +564,14 @@ public class BpelServerImpl implements BpelServer {
         BpelEngineException failed = null;
         // Going trough each process declared in the dd
         for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
-            OProcess oprocess = du.getProcesses().get(processDD.getName());
+            
+            // If a type is not specified, assume the process id is also the type.
+            QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
+            OProcess oprocess = du.getProcesses().get(type);
             if (oprocess == null)
-                throw new BpelEngineException("Could not find the compiled process definition for a "
-                        + "process referenced in the deployment descriptor: " + processDD.getName());
+                throw new BpelEngineException("Could not find the compiled process definition for BPEL" +
+                        "type " +  type + " when deploying process " + processDD.getName() 
+                        + " in " +  deploymentUnitDirectory);
             try {
 
                 deploy(processDD.getName(), du, oprocess, du.getDocRegistry()

@@ -211,6 +211,10 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return _dd;
     }
 
+    /**
+     * Get the mapping of process <em>types</em> to compiled processes. 
+     * @return
+     */
     public HashMap<QName, OProcess> getProcesses() {
         loadProcessDefinitions();
         return _processes;

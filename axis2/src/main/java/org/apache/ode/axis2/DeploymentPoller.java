@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class DeploymentPoller {
 
-    private static Log __log = LogFactory.getLog(DeploymentPoller.class);
+    private static final Log __log = LogFactory.getLog(DeploymentPoller.class);
 
     /** The polling interval. */
     private static final long POLL_TIME = 3000;
@@ -138,12 +138,13 @@ public class DeploymentPoller {
      */
     private class PollingThread extends Thread {
         private boolean _active = true;
+        private byte[] _mutex = new byte[0];
 
         /** Stop this poller, and block until it terminates. */
         void kill() {
-            synchronized (this) {
+            synchronized (_mutex) {
                 _active = false;
-                this.notifyAll();
+                _mutex.notify();
             }
             try {
                 join();
@@ -156,9 +157,9 @@ public class DeploymentPoller {
             try {
                 while (_active) {
                     check();
-                    synchronized (this) {
+                    synchronized (_mutex) {
                         try {
-                            this.wait(POLL_TIME);
+                            _mutex.wait(POLL_TIME);
                         } catch (InterruptedException e) {
                         }
                     }

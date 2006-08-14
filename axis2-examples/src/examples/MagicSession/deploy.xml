@@ -15,6 +15,7 @@
 		</invoke>
 	</process>
 	<process name="resp:MagicSessionResponder">
+                <type>resp:MagicSessionResponder</type>
 		<provide partnerLink="mainPartnerLink">
 			<service name="mws:MSResponderService" port="MSResponderPort"/>
 		</provide>
