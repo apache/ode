@@ -100,11 +100,6 @@ public class DeploymentPoller {
                 __log.debug("Not deploying " + file + " (missing deploy.xml)");
             }
 
-            if (deployedMarker.exists() && deployedMarker.lastModified() < deployXml.lastModified()) {
-                __log.debug("Deployed marker for " + file + " is out of date, removing");
-                deployedMarker.delete();
-            }
-
             if (deployedMarker.exists()) {
                 __log.debug("Deployed marker for " + file + " exists, skipping deployment");
                 continue;
