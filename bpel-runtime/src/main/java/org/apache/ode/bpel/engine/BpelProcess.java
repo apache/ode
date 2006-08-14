@@ -92,7 +92,7 @@ public class BpelProcess {
 
     private Map<OPartnerLink, PartnerLinkMyRoleImpl> _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
 
-    private BpelEngineImpl _engine;
+    BpelEngineImpl _engine;
     
     private DebuggerSupport _debugger;
 
