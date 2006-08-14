@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
@@ -37,6 +38,7 @@ class Contexts {
   MessageExchangeContext mexContext;
   Scheduler scheduler;
   EndpointReferenceContext eprContext;
+  BindingContext bindingContext;
   BpelDAOConnectionFactory dao;
   final List<MessageExchangeInterceptor> globalIntereceptors = new ArrayList<MessageExchangeInterceptor>();
 

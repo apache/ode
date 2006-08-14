@@ -44,38 +44,6 @@ public interface EndpointReferenceContext {
    */
   EndpointReference resolveEndpointReference(Element epr);
   
-  /**
-   * Activate a "myRole" endpoint.
-   * @param pid process identifier
-   * @param serviceId service identifier
-   * @param externalEpr external EPR representation
-   * @return 
-   */
-  EndpointReference activateEndpoint(QName pid,
-      QName serviceId, 
-      Element externalEpr);
-  
-  /**
-   * Activate a "myRole" endpoint.
-   * @param serviceName WSDL service qualified name
-   * @param portName WSDL port
-   * @param wsdl WSDL definition
-   */
-  void activateEndpoint(QName serviceName, String portName, Definition wsdl);
-
-  /**
-   * Activate a "partnerRole" endpoint, used by the engine to send messages.
-   * @param serviceName
-   * @param portName
-   * @param wsdl
-   */
-  void activateExternalEndpoint(QName serviceName, String portName, Definition wsdl);
-
-  /**
-   * Deactivate a "myRole" endpoint.
-   * @param epr EPR returned from {@link #activateEndpoint(QName, QName, Element)}
-   */
-  void deactivateEndpoint(EndpointReference epr);
 
   /**
    * Converts an endpoint reference from its XML representation to another

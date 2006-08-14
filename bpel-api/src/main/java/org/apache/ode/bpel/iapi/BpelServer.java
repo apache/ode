@@ -25,11 +25,14 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 
 
 /**
  * Interface implemented by the BPEL server. Provides methods for
  * life-cycle management.
+ * 
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
 public interface BpelServer {
 
@@ -59,6 +62,15 @@ public interface BpelServer {
   void setEndpointReferenceContext(EndpointReferenceContext eprContext)
     throws BpelEngineException; 
 
+  /**
+   * Configure the {@BpelEngine} with a binding context. The BPEL engine uses 
+   * this context to register the services that it exposes and obtain communication
+   * links to partner services. 
+   * @see BindingContext
+   * @param bindingContext {@link BindingContext} implementation
+   */  
+  void setBindingContext(BindingContext bindingContext) 
+    throws BpelEngineException;
   
   /**
    * Set the DAO connection factory. The DAO is used by the BPEL engine
@@ -101,26 +113,17 @@ public interface BpelServer {
 
   
   /**
-   * Get the {@link BpelEngine} interface.
-   * @return {@link BpelEngine} implementation
+   * Get the {@link BpelEngine} interface for handling transaction operations.
+   * @return transactional {@link BpelEngine} interfacce
    */
   BpelEngine getEngine();
   
   /**
-   * Deploy a process.
-   * @param pid process identifier (unique)
-   * @param deployURI location of deployment bundle
-   * @throws IOException
-   * @throws BpelEngineException
-   */
-  void deploy(QName pid, URI deployURI) throws IOException, BpelEngineException;
-
-  /**
    * Deploy a process from the filesystem.
    * @param deploymentUnitDirectory directory containing all deployment files
-   * @return A deployment unit interface giving information about the deployed package "freshness"
+   * @return A collection of the process ids of the deployed processes
    */
-  DeploymentUnit deploy(File deploymentUnitDirectory);
+  Collection<QName> deploy(File deploymentUnitDirectory);
   
   /**
    * Undeploy a process.
@@ -149,11 +152,20 @@ public interface BpelServer {
   
   /**
    * Get the BPEL management interface.
-   * @return
+   * @return BPEL management interface
    */
   BpelManagementFacade getBpelManagementFacade();
   
+  /**
+   * Register a global BPEL event listener with the server.
+   * @param bpelEventListener global bpel event listener
+   */
   void registerBpelEventListener(BpelEventListener bpelEventListener);
+  
+  /**
+   * Register a global message exchange interceptor with the server. 
+   * @param interceptor global message exchange interceptor
+   */
   void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor);
   
 }

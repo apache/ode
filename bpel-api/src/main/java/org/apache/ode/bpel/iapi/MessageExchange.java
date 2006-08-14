@@ -25,6 +25,8 @@ import javax.xml.namespace.QName;
 /**
  * A representation of a communication (message-exchange) between the BPEL 
  * BPEL engine and an  external "partner".
+ * 
+ * @author mszefler
  */
 public interface MessageExchange {
 
@@ -76,12 +78,28 @@ public interface MessageExchange {
    * Enumeration of the types of failures. 
    */
   public enum FailureType {
+    /** Requested endpoint is invalid. */
     INVALID_ENDPOINT,
+    
+    /** Requested endpoint is unknown/unavailable. */
     UNKNOWN_ENDPOINT,
+    
+    /** Requested operation is unknown/unimplemented. */
     UNKNOWN_OPERATION,
+    
+    /** Network / IPC errror. */
     COMMUNICATION_ERROR,
+    
+    /** Request message was of an invalid/unrecognized format. */ 
     FORMAT_ERROR,
+    
+    /** An internal failure: no response was provided. */
     NO_RESPONSE,
+    
+    /** Message exchange processing was aborted. */
+    ABORTED,
+    
+    /** Other failure. */
     OTHER
   }
   

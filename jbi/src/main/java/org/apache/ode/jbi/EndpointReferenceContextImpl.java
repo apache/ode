@@ -109,7 +109,7 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     }
   }
 
-  public void activateEndpoint(QName serviceName, String portName, Definition wsdl) {
+  public void activateMyRoleEndpoint(QName serviceName, String portName, Definition wsdl) {
     // TODO Implement me
     throw new UnsupportedOperationException("To implement.");
   }

@@ -27,7 +27,6 @@ import org.apache.ode.bom.wsdl.Property;
 import org.apache.ode.bom.wsdl.PropertyAlias;
 import org.apache.ode.bom.wsdl.XMLSchemaType;
 import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.engine.Messages;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;

@@ -18,11 +18,39 @@
  */
 package org.apache.ode.bpel.iapi;
 
+/**
+ * Hook into the BPEL server that enables intercepting of 
+ * message exchange invocation. 
+ * @author mszefler
+ *
+ */
 public interface MessageExchangeInterceptor {
-	boolean onBpelServerInvoked(MyRoleMessageExchange mex);
+
+  /**
+   * Called when the BPEL server is invoked, before any 
+   * attempt to route the message exchange to a process.
+   * @param mex message exchange
+   * @return <code>true</code> if message exchange processing
+   *         should continue, <code>false</code> otherwise
+   */
+  boolean onBpelServerInvoked(MyRoleMessageExchange mex);
 	
+  /**
+   * Called when the BPEL server is invoked, after the message
+   * exchange has been routed to the process.
+   * @param mex message exchange
+   * @return <code>true</code> if message exchange processing
+   *         should continue, <code>false</code> otherwise
+   */
 	boolean onProcessInvoked(MyRoleMessageExchange mex);
 	
+  /**
+   * Called when the BPEL server is invoked, before any 
+   * attempt to route the message exchange to a process.
+   * @param mex message exchange
+   * @return <code>true</code> if message exchange processing
+   *         should continue, <code>false</code> otherwise
+   */
 	boolean onPartnerInvoked(MessageExchange mex);
 	
 	
