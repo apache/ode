@@ -57,7 +57,7 @@ public interface ProcessManagement {
    * @param custom used to customize the quantity of information returned
    * @return {@link ProcessInfoDocument}
    */
-  ProcessInfoDocument getProcessInfo(QName pid, ProcessInfoCustomizer custom) throws ManagementException;
+  ProcessInfoDocument getProcessInfoCustom(QName pid, ProcessInfoCustomizer custom) throws ManagementException;
 
   /**
    * Get the process info for a process (includingthe instance summary). 
