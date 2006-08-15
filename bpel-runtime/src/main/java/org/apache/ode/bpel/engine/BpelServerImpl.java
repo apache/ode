@@ -36,24 +36,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
@@ -72,12 +54,12 @@ import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -85,6 +67,22 @@ import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
+
+import javax.xml.namespace.QName;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * The BPEL server implementation.
@@ -173,14 +171,10 @@ public class BpelServerImpl implements BpelServer {
             for (QName pName : du.getProcessNames()) {
                 success = success && undeploy(pName);
             }
-            System.out.println("### Trying to delete " + du.getDeployDir().getAbsolutePath());
             rm(du.getDeployDir());
-
             for (QName pname : du.getProcessNames()) {
                 _deploymentUnits.remove(pname);
             }
-
-
             return success;
         }
     }
