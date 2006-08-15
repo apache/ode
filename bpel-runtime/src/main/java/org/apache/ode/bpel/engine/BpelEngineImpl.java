@@ -193,7 +193,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     OProcess getOProcess(QName processId) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("todo");
+        return _activeProcesses.get(processId)._oprocess;
     }
 
     public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {

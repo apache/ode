@@ -35,129 +35,125 @@ import org.apache.ode.bpel.common.CorrelationKey;
  * yet to be created or not yet correlated..
  */
 public interface ProcessDAO {
-  /**
-   * Get the unique process identifier.
-   * @return process identifier
-   */
-  QName getProcessId();
+    /**
+     * Get the unique process identifier.
+     * @return process identifier
+     */
+    QName getProcessId();
 
-  /**
-   * Get the BPEL process name.
-   * @return qualified BPEL process name.
-   */
-  QName getType();
+    /**
+     * Get the BPEL process name.
+     * @return qualified BPEL process name.
+     */
+    QName getType();
 
-  
-  /**
-   * Get the name of the user that deployed the proces.s
-   * @return name of deploying user.
-   */
-  String getDeployer();
 
-  /**
-   * Get the date when the process was deployed.
-   * @return deployment date.
-   */
-  Date getDeployDate();
+    /**
+     * Get the name of the user that deployed the proces.s
+     * @return name of deploying user.
+     */
+    String getDeployer();
 
-  /**
-   * Get the process version
-   * @return version
-   */
-  int getVersion();
+    /**
+     * Get the date when the process was deployed.
+     * @return deployment date.
+     */
+    Date getDeployDate();
 
-  /**
-   * Get a message correlator instance.
-   *
-   * @param correlatorId correlator identifier
-   * @return correlator corresponding to the given identifier
-   */
-  CorrelatorDAO getCorrelator(String correlatorId);
+    /**
+     * Get the process version
+     * @return version
+     */
+    int getVersion();
 
-  /**
-   * Create a new process instance object.
-   *
-   * @param instantiatingCorrelator instantiating {@link CorrelatorDAO}
-   * @return newly generated instance DAO
-   */
-  ProcessInstanceDAO createInstance(CorrelatorDAO instantiatingCorrelator);
+    /**
+     * Get a message correlator instance.
+     *
+     * @param correlatorId correlator identifier
+     * @return correlator corresponding to the given identifier
+     */
+    CorrelatorDAO getCorrelator(String correlatorId);
 
-  /**
-   * Get a process instance (by identifier).
-   * @param iid unique instance identifier.
-   * @return DAO corresponding to the process instance
-   */
-  ProcessInstanceDAO getInstance(Long iid);
+    /**
+     * Create a new process instance object.
+     *
+     * @param instantiatingCorrelator instantiating {@link CorrelatorDAO}
+     * @return newly generated instance DAO
+     */
+    ProcessInstanceDAO createInstance(CorrelatorDAO instantiatingCorrelator);
 
-  /**
-   * Locates a process instance based on a correlation key.
-   * @param cckey correlation key
-   * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
-   */
-  Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey);
+    /**
+     * Get a process instance (by identifier).
+     * @param iid unique instance identifier.
+     * @return DAO corresponding to the process instance
+     */
+    ProcessInstanceDAO getInstance(Long iid);
 
-  /**
-   * Remove the routes with the given Id for all the correlators in the
-   * process.
-   * @todo remove this method.
-   * @param routeId
-   */
-  void removeRoutes(String routeId, ProcessInstanceDAO target);
+    /**
+     * Locates a process instance based on a correlation key.
+     * @param cckey correlation key
+     * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
+     */
+    Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey);
 
-  /**
-   * Callback indicating that a process instance has completed its duties. 
-   * @param instance the completed {@link ProcessInstanceDAO}
-   */
-  void instanceCompleted(ProcessInstanceDAO instance);
+    /**
+     * Remove the routes with the given Id for all the correlators in the
+     * process.
+     * @todo remove this method.
+     * @param routeId
+     */
+    void removeRoutes(String routeId, ProcessInstanceDAO target);
 
-  /**
-   * Adds a named property on the process providing its value as
-   * and XML Node.
-   * @param name of the property
-   * @param ns namespace of the property
-   * @param content value of the property
-   */
-  void setProperty(String name, String ns, Node content);
+    /**
+     * Callback indicating that a process instance has completed its duties.
+     * @param instance the completed {@link ProcessInstanceDAO}
+     */
+    void instanceCompleted(ProcessInstanceDAO instance);
 
-  /**
-   * Adds a named property on the process providing its value as
-   * a simple type (handled as a simple string).
-   * @param name of the property
-   * @param ns namespace of the property
-   * @param content value of the property
-   */
-  void setProperty(String name, String ns, String content);
+    /**
+     * Adds a named property on the process providing its value as
+     * and XML Node.
+     * @param name of the property
+     * @param ns namespace of the property
+     * @param content value of the property
+     */
+    void setProperty(String name, String ns, Node content);
 
-  /**
-   * Gets the properties for the process.
-   * @return collection of {@link ProcessPropertyDAO}
-   */
-  Collection<ProcessPropertyDAO> getProperties();
+    /**
+     * Adds a named property on the process providing its value as
+     * a simple type (handled as a simple string).
+     * @param name of the property
+     * @param ns namespace of the property
+     * @param content value of the property
+     */
+    void setProperty(String name, String ns, String content);
 
-  
-  /**
-   * Remove the process from the database (along with any instance,
-   * variable data, etc...).
-   */
-  void delete();
-  
-  
-  public boolean isRetired();
-  
-  public void setRetired(boolean retired);
+    /**
+     * Gets the properties for the process.
+     * @return collection of {@link ProcessPropertyDAO}
+     */
+    Collection<ProcessPropertyDAO> getProperties();
 
-  void setActive(boolean active);
 
-  boolean isActive();
-  
-  void addCorrelator(String correlator);
+    /**
+     * Remove the process from the database (along with any instance,
+     * variable data, etc...).
+     */
+    void delete();
 
-  void setDeployURI(URI dduri);
-  
-  void setCompiledProcess(byte[] cbp);
-  
-  byte[] getCompiledProcess();
-  
-  URI getDeployURI();
+
+    public boolean isRetired();
+
+    public void setRetired(boolean retired);
+
+    void setActive(boolean active);
+
+    boolean isActive();
+
+    void addCorrelator(String correlator);
+
+    void setCompiledProcess(byte[] cbp);
+
+    byte[] getCompiledProcess();
 
 }
