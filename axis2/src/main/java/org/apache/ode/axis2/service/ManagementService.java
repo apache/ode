@@ -123,7 +123,7 @@ public class ManagementService {
       } catch (IllegalAccessException e) {
         throw new AxisFault("Couldn't invoke method named " + methodName + " in management interface!", e);
       } catch (InvocationTargetException e) {
-        throw new AxisFault("Couldn't invoke method named " + methodName + " in management interface!", e);
+        throw new AxisFault("Invocation of method " + methodName + " in management interface failed!", e);
       }
   }
 
