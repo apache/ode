@@ -71,8 +71,6 @@ public class HProcess extends HObject{
 
   private boolean _active;
 
-  private String _deployURI;
-
   private HLargeData _compiledProcess;
 
   /**
@@ -285,19 +283,6 @@ public class HProcess extends HObject{
   
   public void setActive(boolean active) {
     _active = active;
-  }
-
-  public void setDeployURI(String uri) {
-    _deployURI = uri;
-  }
-
-  /**
-   * The URI of the depoloyment descriptor.
-   * @hibernate.property
-   *    column="DEPLOYURI"
-   */
-  public String getDeployURI() {
-    return _deployURI;
   }
 
   /** @hibernate.many-to-one column="CBP" */
