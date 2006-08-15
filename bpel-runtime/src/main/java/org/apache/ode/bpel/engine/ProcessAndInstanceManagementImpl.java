@@ -27,7 +27,6 @@ import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessPropertyDAO;
@@ -114,13 +113,13 @@ class ProcessAndInstanceManagementImpl
         return listProcessesCustom(null, null, ProcessInfoCustomizer.ALL);
     }
 
-    public ProcessInfoDocument getProcessInfo(QName pid, ProcessInfoCustomizer custom) {
+    public ProcessInfoDocument getProcessInfoCustom(QName pid, ProcessInfoCustomizer custom) {
         return genProcessInfoDocument(pid, custom);
     }
 
 
     public ProcessInfoDocument getProcessInfo(QName pid) {
-        return getProcessInfo(pid, ProcessInfoCustomizer.ALL);
+        return getProcessInfoCustom(pid, ProcessInfoCustomizer.ALL);
     }
 
     public ProcessInfoDocument activate(QName pid) {

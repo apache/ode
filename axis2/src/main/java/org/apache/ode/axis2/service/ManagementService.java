@@ -27,16 +27,14 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.WSDL2AxisServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
-import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.hooks.ODEAxisService;
+import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
@@ -61,158 +59,168 @@ import java.util.Iterator;
  */
 public class ManagementService {
 
-  private static final Log __log = LogFactory.getLog(ManagementService.class);
+    private static final Log __log = LogFactory.getLog(ManagementService.class);
 
-  private ProcessManagement _processMgmt;
-  private InstanceManagement _instanceMgmt;
+    private ProcessManagement _processMgmt;
+    private InstanceManagement _instanceMgmt;
 
-  public void enableService(AxisConfiguration axisConfig, BpelServer server, String rootpath) {
-    _processMgmt = server.getBpelManagementFacade();
-    _instanceMgmt = server.getBpelManagementFacade();
+    public void enableService(AxisConfiguration axisConfig, BpelServer server, String rootpath) {
+        _processMgmt = server.getBpelManagementFacade();
+        _instanceMgmt = server.getBpelManagementFacade();
 
-    Definition def;
-    try {
-      WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-      def = wsdlReader.readWSDL(rootpath + "/pmapi.wsdl");
-      AxisService processService = ODEAxisService.createService(
-              axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
-              "ProcessManagementPort", "ProcessManagement", def, new ProcessMessageReceiver());
-      AxisService instanceService = ODEAxisService.createService(
-              axisConfig, new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService"),
-              "InstanceManagementPort", "InstanceManagement", def, new InstanceMessageReceiver());
-      axisConfig.addService(processService);
-      axisConfig.addService(instanceService);
-    } catch (WSDLException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private static void receive(MessageContext msgContext, Class mgmtClass,
-                              Object mgmtObject, SOAPFactory soapFactory) throws AxisFault {
-    if (__log.isDebugEnabled())
-      __log.debug("Received mgmt message for " + msgContext.getAxisService().getName() +
-              "." + msgContext.getAxisOperation().getName());
-
-      String methodName = msgContext.getAxisOperation().getName().getLocalPart();
-      try {
-        // Our services are defined in WSDL which requires operation names to be different
-        Method invokedMethod = findMethod(mgmtClass, methodName);
-        Object[] params = extractParams(invokedMethod, msgContext.getEnvelope().getBody().getFirstElement());
-        Object result = invokedMethod.invoke(mgmtObject, params);
-
-        if (hasResponse(msgContext.getAxisOperation())) {
-          MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
-          outMsgContext.getOperationContext().addMessageContext(outMsgContext);
-
-          SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-          outMsgContext.setEnvelope(envelope);
-
-          envelope.getBody().addChild(convertToOM(result));
-
-          if (__log.isDebugEnabled()) {
-            __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
-                    "." + msgContext.getAxisOperation().getName());
-            __log.debug("Reply mgmt message " + outMsgContext.getEnvelope());
-          }
-          AxisEngine engine = new AxisEngine(
-                  msgContext.getOperationContext().getServiceContext().getConfigurationContext());
-          engine.send(outMsgContext);
+        Definition def;
+        try {
+            WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
+            def = wsdlReader.readWSDL(rootpath + "/pmapi.wsdl");
+            AxisService processService = ODEAxisService.createService(
+                    axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
+                    "ProcessManagementPort", "ProcessManagement", def, new ProcessMessageReceiver());
+            AxisService instanceService = ODEAxisService.createService(
+                    axisConfig, new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService"),
+                    "InstanceManagementPort", "InstanceManagement", def, new InstanceMessageReceiver());
+            axisConfig.addService(processService);
+            axisConfig.addService(instanceService);
+        } catch (WSDLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-      } catch (IllegalAccessException e) {
-        throw new AxisFault("Couldn't invoke method named " + methodName + " in management interface!", e);
-      } catch (InvocationTargetException e) {
-        throw new AxisFault("Invocation of method " + methodName + " in management interface failed!", e);
-      }
-  }
-
-  private static Object[] extractParams(Method method, OMElement omElmt) throws AxisFault {
-    Class[] paramTypes = method.getParameterTypes();
-    Object[] params = new Object[method.getParameterTypes().length];
-    Iterator omChildren = omElmt.getChildElements();
-    int paramIdx = 0;
-    for (Class<?> paramClass : paramTypes) {
-      OMElement omchild = (OMElement) omChildren.next();
-      params[paramIdx++] = convertFromOM(paramClass, omchild);
     }
-    return params;
-  }
 
-  private static Object convertFromOM(Class clazz, OMElement elmt) throws AxisFault {
-    // Here comes the nasty code...
-    if (elmt.getText() == null || elmt.getText().length() == 0) return null;
-    else if (clazz.equals(String.class)) {
-      return elmt.getText();
-    } else if (clazz.equals(Boolean.class)) {
-      return (elmt.getText().equals("true") || elmt.getText().equals("yes")) ? Boolean.TRUE : Boolean.FALSE;
-    } else if (clazz.equals(QName.class)) {
-      return elmt.getTextAsQName();
-    } else if (clazz.equals(ProcessInfoCustomizer.class)) {
-      return new ProcessInfoCustomizer(elmt.getText());
-    } else if (clazz.isAssignableFrom(Node.class)) {
-      return OMUtils.toDOM(elmt);
-    } else if (clazz.equals(Long.TYPE) || clazz.equals(Long.class)) {
-      return Long.parseLong(elmt.getText());
-    } else if (clazz.equals(Integer.TYPE) || clazz.equals(Integer.class)) {
-      return Integer.parseInt(elmt.getText());
-    } else if (clazz.isAssignableFrom(XmlObject.class)) {
-      try {
-        Class beanFactory = Class.forName(clazz.getCanonicalName() + ".Factory");
-        return beanFactory.getMethod("parse", XMLStreamReader.class)
-                .invoke(elmt.getXMLStreamReaderWithoutCaching());
-      } catch (ClassNotFoundException e) {
-        throw new AxisFault("Couldn't find class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
-      } catch (IllegalAccessException e) {
-        throw new AxisFault("Couldn't access class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
-      } catch (InvocationTargetException e) {
-        throw new AxisFault("Couldn't access xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
-                "to instantiate xml bean", e);
-      } catch (NoSuchMethodException e) {
-        throw new AxisFault("Couldn't find xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
-                "to instantiate xml bean", e);
-      }
-    } else throw new AxisFault("Couldn't use element " + elmt + " to obtain a management method parameter.");
-  }
+    private static void receive(MessageContext msgContext, Class mgmtClass,
+                                Object mgmtObject, SOAPFactory soapFactory) throws AxisFault {
+        if (__log.isDebugEnabled())
+            __log.debug("Received mgmt message for " + msgContext.getAxisService().getName() +
+                    "." + msgContext.getAxisOperation().getName());
 
-  private static OMElement convertToOM(Object obj) throws AxisFault {
-    if (obj instanceof XmlObject) {
-      try {
-        return new StAXOMBuilder(((XmlObject)obj).newInputStream()).getDocumentElement();
-      } catch (XMLStreamException e) {
-        throw new AxisFault("Couldn't serialize result to an outgoing messages.", e);
-      }
-    } else throw new AxisFault("Couldn't convert object " + obj + " into a response element.");
-  }
+        String methodName = msgContext.getAxisOperation().getName().getLocalPart();
+        try {
+            // Our services are defined in WSDL which requires operation names to be different
+            Method invokedMethod = findMethod(mgmtClass, methodName);
+            Object[] params = extractParams(invokedMethod, msgContext.getEnvelope().getBody().getFirstElement());
+            Object result = invokedMethod.invoke(mgmtObject, params);
 
-  private static boolean hasResponse(AxisOperation op) {
-    switch(op.getAxisSpecifMEPConstant()) {
-      case AxisOperation.MEP_CONSTANT_IN_OUT: return true;
-      case AxisOperation.MEP_CONSTANT_OUT_ONLY: return true;
-      case AxisOperation.MEP_CONSTANT_OUT_OPTIONAL_IN: return true;
-      case AxisOperation.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
-      default: return false;
+            if (hasResponse(msgContext.getAxisOperation())) {
+                MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
+                outMsgContext.getOperationContext().addMessageContext(outMsgContext);
+
+                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+                outMsgContext.setEnvelope(envelope);
+
+                envelope.getBody().addChild(convertToOM(result));
+
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
+                            "." + msgContext.getAxisOperation().getName());
+                    __log.debug("Reply mgmt message " + outMsgContext.getEnvelope());
+                }
+                AxisEngine engine = new AxisEngine(
+                        msgContext.getOperationContext().getServiceContext().getConfigurationContext());
+                engine.send(outMsgContext);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AxisFault("Couldn't invoke method named " + methodName + " in management interface!", e);
+        } catch (InvocationTargetException e) {
+            throw new AxisFault("Invocation of method " + methodName + " in management interface failed!", e);
+        }
     }
-  }
 
-  class ProcessMessageReceiver extends AbstractMessageReceiver {
-    public void receive(MessageContext messageContext) throws AxisFault {
-      ManagementService.receive(messageContext, ProcessManagement.class,
-              _processMgmt, getSOAPFactory(messageContext));
+    private static Object[] extractParams(Method method, OMElement omElmt) throws AxisFault {
+        Class[] paramTypes = method.getParameterTypes();
+        Object[] params = new Object[method.getParameterTypes().length];
+        Iterator omChildren = omElmt.getChildElements();
+        int paramIdx = 0;
+        for (Class<?> paramClass : paramTypes) {
+            OMElement omchild = (OMElement) omChildren.next();
+            System.out.println("Extracting param " + paramClass + " from " + omchild);
+            params[paramIdx++] = convertFromOM(paramClass, omchild);
+        }
+        return params;
     }
-  }
 
-  class InstanceMessageReceiver extends AbstractMessageReceiver {
-    public void receive(MessageContext messageContext) throws AxisFault {
-      ManagementService.receive(messageContext, InstanceManagement.class,
-              _instanceMgmt, getSOAPFactory(messageContext));
+    private static Object convertFromOM(Class clazz, OMElement elmt) throws AxisFault {
+        // Here comes the nasty code...
+        if (elmt == null || elmt.getText() == null || elmt.getText().length() == 0) return null;
+        else if (clazz.equals(String.class)) {
+            return elmt.getText();
+        } else if (clazz.equals(Boolean.class)) {
+            return (elmt.getText().equals("true") || elmt.getText().equals("yes")) ? Boolean.TRUE : Boolean.FALSE;
+        } else if (clazz.equals(QName.class)) {
+            QName qname = elmt.getTextAsQName();
+            // The getTextAsQName is buggy, it sometimes return the full text without extracting namespace
+            if (qname.getNamespaceURI().length() == 0) {
+                int colonIdx = elmt.getText().indexOf(":");
+                String localpart = elmt.getText().substring(colonIdx + 1, elmt.getText().length());
+                String prefix = elmt.getText().substring(0, colonIdx);
+                String ns = elmt.findNamespaceURI(prefix).getName();
+                qname = new QName(ns, localpart, prefix);
+            }
+            return qname;
+        } else if (clazz.equals(ProcessInfoCustomizer.class)) {
+            return new ProcessInfoCustomizer(elmt.getText());
+        } else if (clazz.isAssignableFrom(Node.class)) {
+            return OMUtils.toDOM(elmt);
+        } else if (clazz.equals(Long.TYPE) || clazz.equals(Long.class)) {
+            return Long.parseLong(elmt.getText());
+        } else if (clazz.equals(Integer.TYPE) || clazz.equals(Integer.class)) {
+            return Integer.parseInt(elmt.getText());
+        } else if (clazz.isAssignableFrom(XmlObject.class)) {
+            try {
+                Class beanFactory = Class.forName(clazz.getCanonicalName() + ".Factory");
+                return beanFactory.getMethod("parse", XMLStreamReader.class)
+                        .invoke(elmt.getXMLStreamReaderWithoutCaching());
+            } catch (ClassNotFoundException e) {
+                throw new AxisFault("Couldn't find class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
+            } catch (IllegalAccessException e) {
+                throw new AxisFault("Couldn't access class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
+            } catch (InvocationTargetException e) {
+                throw new AxisFault("Couldn't access xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
+                        "to instantiate xml bean", e);
+            } catch (NoSuchMethodException e) {
+                throw new AxisFault("Couldn't find xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
+                        "to instantiate xml bean", e);
+            }
+        } else throw new AxisFault("Couldn't use element " + elmt + " to obtain a management method parameter.");
     }
-  }
 
-  private static Method findMethod(Class clazz, String methodName) throws AxisFault {
-    for (Method method : clazz.getMethods()) {
-      if (method.getName().equals(methodName)) return method;
+    private static OMElement convertToOM(Object obj) throws AxisFault {
+        if (obj instanceof XmlObject) {
+            try {
+                return new StAXOMBuilder(((XmlObject)obj).newInputStream()).getDocumentElement();
+            } catch (XMLStreamException e) {
+                throw new AxisFault("Couldn't serialize result to an outgoing messages.", e);
+            }
+        } else throw new AxisFault("Couldn't convert object " + obj + " into a response element.");
     }
-    throw new AxisFault("Couldn't find any method named " + methodName + " in interface " + clazz.getName());
-  }
+
+    private static boolean hasResponse(AxisOperation op) {
+        switch(op.getAxisSpecifMEPConstant()) {
+            case AxisOperation.MEP_CONSTANT_IN_OUT: return true;
+            case AxisOperation.MEP_CONSTANT_OUT_ONLY: return true;
+            case AxisOperation.MEP_CONSTANT_OUT_OPTIONAL_IN: return true;
+            case AxisOperation.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
+            default: return false;
+        }
+    }
+
+    class ProcessMessageReceiver extends AbstractMessageReceiver {
+        public void receive(MessageContext messageContext) throws AxisFault {
+            ManagementService.receive(messageContext, ProcessManagement.class,
+                    _processMgmt, getSOAPFactory(messageContext));
+        }
+    }
+
+    class InstanceMessageReceiver extends AbstractMessageReceiver {
+        public void receive(MessageContext messageContext) throws AxisFault {
+            ManagementService.receive(messageContext, InstanceManagement.class,
+                    _instanceMgmt, getSOAPFactory(messageContext));
+        }
+    }
+
+    private static Method findMethod(Class clazz, String methodName) throws AxisFault {
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(methodName)) return method;
+        }
+        throw new AxisFault("Couldn't find any method named " + methodName + " in interface " + clazz.getName());
+    }
 }
