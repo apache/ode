@@ -109,7 +109,7 @@ public class ODEConfigProperties extends Properties {
   }
 
   public int getConnectorPort() {
-    return Integer.valueOf(getProperty(ODEConfigProperties.PROP_CONNECTOR_PORT,"0")); 
+    return Integer.valueOf(getProperty(ODEConfigProperties.PROP_CONNECTOR_PORT,"1099")); 
   }
 
 }
