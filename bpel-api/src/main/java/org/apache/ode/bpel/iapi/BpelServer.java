@@ -163,16 +163,5 @@ public interface BpelServer {
    */
   BpelManagementFacade getBpelManagementFacade();
   
-  /**
-   * Register a global BPEL event listener with the server.
-   * @param bpelEventListener global bpel event listener
-   */
-  void registerBpelEventListener(BpelEventListener bpelEventListener);
-  
-  /**
-   * Register a global message exchange interceptor with the server. 
-   * @param interceptor global message exchange interceptor
-   */
-  void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor);
   
 }
