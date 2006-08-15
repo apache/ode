@@ -338,7 +338,7 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public BpelManagementFacade getBpelManagementFacade() {
-        return new BpelManagementFacadeImpl(_db, _engine);
+        return new BpelManagementFacadeImpl(_db, _engine, this);
     }
 
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
@@ -554,7 +554,7 @@ public class BpelServerImpl implements BpelServer {
         }
     }
 
-    private DeploymentUnitImpl getDeploymentUnit(QName pid) {
+    public DeploymentUnitImpl getDeploymentUnit(QName pid) {
         return _deploymentUnits.get(pid);
     }
 

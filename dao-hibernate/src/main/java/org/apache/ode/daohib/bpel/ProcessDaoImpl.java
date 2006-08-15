@@ -246,19 +246,6 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     getSession().saveOrUpdate(_process);
   }
 
-  public void setDeployURI(URI dduri) {
-    _process.setDeployURI(dduri.toString());
-    update();
-  }
-
-  public URI getDeployURI() {
-    try {
-      return _process.getDeployURI() == null ? null : new URI(_process.getDeployURI());
-    } catch (URISyntaxException e) {
-      throw new RuntimeException("Invalid deployment URI in DB for process " + _process.getProcessId());
-    }
-  }
-
   public void setCompiledProcess(byte[] cbp) {
     if (_process.getCompiledProcess() != null)
       getSession().delete(_process.getCompiledProcess());

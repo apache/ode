@@ -33,6 +33,7 @@ import org.apache.axis2.client.ServiceClient;
 
 import java.io.FileInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class DeploymentTest extends TestCase {
 
@@ -49,10 +50,9 @@ public class DeploymentTest extends TestCase {
         OMElement zipElmt = factory.createOMElement("zip", depns);
 
         // Add the zip to deploy
-        // TODO figure out a way to get a process zip
-        FileInputStream fis = new FileInputStream("/home/dusty/tmp/DynPartner.zip");
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("DynPartner.zip");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (int b = fis.read(); b >= 0; b = fis.read()) {
+        for (int b = is.read(); b >= 0; b = is.read()) {
             outputStream.write((byte) b);
         }
         String base64Enc = Base64.encode(outputStream.toByteArray());
@@ -65,6 +65,11 @@ public class DeploymentTest extends TestCase {
         // Deploy
         sendToDeployment(root);
 
+        // Check deployment
+        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"}, new String[] {"", ""});
+        OMElement result = sendToPM(listRoot);
+        System.out.println(result);
+
         // Prepare undeploy message
         root = factory.createOMElement("undeploy", depns);
         OMElement part = factory.createOMElement("processName", null);
@@ -72,18 +77,41 @@ public class DeploymentTest extends TestCase {
         root.addChild(part);
 
         // Undeploy
-//    sendToDeployment(root);
+        sendToDeployment(root);
+    }
+
+    private OMElement sendToPM(OMElement msg) throws AxisFault {
+        return send(msg, "http://localhost:8080/ode/services/ProcessManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
+        return send(msg, "http://localhost:8080/ode/services/DeploymentService");
+    }
+
+    private OMElement send(OMElement msg, String url) throws AxisFault {
         Options options = new Options();
-        EndpointReference target = new EndpointReference("http://localhost:8080/ode/services/DeploymentService");
+        EndpointReference target = new EndpointReference(url);
         options.setTo(target);
 
         ServiceClient serviceClient = new ServiceClient();
         serviceClient.setOptions(options);
 
         return serviceClient.sendReceive(msg);
+    }
+
+    private OMElement buildMessage(String operation, String[] params, String[] values) {
+      //create a factory
+      OMFactory factory = OMAbstractFactory.getOMFactory();
+
+      //use the factory to create three elements
+      OMNamespace pmns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
+      OMElement root = factory.createOMElement(operation, pmns);
+      for (int m = 0; m < params.length; m++) {
+        OMElement omelmt = factory.createOMElement(params[m], null);
+        omelmt.setText(values[m]);
+        root.addChild(omelmt);
+      }
+      return root;
     }
 
 }
