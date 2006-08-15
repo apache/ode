@@ -26,16 +26,16 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.axis2.util.OMUtils;
+import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.apache.ode.axis2.util.OMUtils;
-import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,7 +61,7 @@ public class ODEService {
   private static final int TIMEOUT = 2 * 60 * 1000;
 
   private AxisService _axisService;
-  private BpelServerImpl _server;
+  private BpelServer _server;
   private TransactionManager _txManager;
   private Definition _wsdlDef;
   private QName _serviceName;
@@ -72,7 +72,7 @@ public class ODEService {
   private Element _serviceRef;
 
   public ODEService(AxisService axisService, Definition def, QName serviceName, String portName,
-                    BpelServerImpl server, TransactionManager txManager) {
+                    BpelServer server, TransactionManager txManager) {
     _axisService = axisService;
     _server = server;
     _txManager = txManager;
