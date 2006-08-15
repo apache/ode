@@ -20,10 +20,10 @@
 package org.apache.ode.axis2.management;
 
 import junit.framework.TestCase;
-import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
@@ -31,18 +31,19 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 
-import java.io.FileInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class DeploymentTest extends TestCase {
+
+    public static final String PMAPI_NS = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
 
     public void testDeployUndeploy() throws Exception {
         // Create a factory
         OMFactory factory = OMAbstractFactory.getOMFactory();
 
         // Use the factory to create three elements
-        OMNamespace depns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","deployapi");
+        OMNamespace depns = factory.createOMNamespace(PMAPI_NS,"deployapi");
         OMElement root = factory.createOMElement("deploy", null);
         OMElement namePart = factory.createOMElement("name", depns);
         namePart.setText("DynPartner");
@@ -66,9 +67,15 @@ public class DeploymentTest extends TestCase {
         sendToDeployment(root);
 
         // Check deployment
-        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"}, new String[] {"", ""});
+        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
-        System.out.println(result);
+        // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
+        assert(result.toString().split("process-info").length == 3);
+        listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name=DynPartnerResponder", ""});
+        result = sendToPM(listRoot);
+        assert(result.toString().split("process-info").length == 3);
 
         // Prepare undeploy message
         root = factory.createOMElement("undeploy", depns);
@@ -78,6 +85,11 @@ public class DeploymentTest extends TestCase {
 
         // Undeploy
         sendToDeployment(root);
+
+        listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name=DynPartnerMain", ""});
+        result = sendToPM(listRoot);
+        assert(result.toString().indexOf("process-info") < 0);
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
@@ -104,7 +116,7 @@ public class DeploymentTest extends TestCase {
       OMFactory factory = OMAbstractFactory.getOMFactory();
 
       //use the factory to create three elements
-      OMNamespace pmns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
+      OMNamespace pmns = factory.createOMNamespace(PMAPI_NS,"pmapi");
       OMElement root = factory.createOMElement(operation, pmns);
       for (int m = 0; m < params.length; m++) {
         OMElement omelmt = factory.createOMElement(params[m], null);
