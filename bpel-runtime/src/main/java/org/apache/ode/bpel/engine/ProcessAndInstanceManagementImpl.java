@@ -647,14 +647,14 @@ class ProcessAndInstanceManagementImpl
 
 
       TProcessInfo.Documents docinfo = info.addNewDocuments();
-      //TODO: what happens if we have a remote URI?
-      File deployDir = new File(proc.getDeployURI().getPath());
-      File files[] = deployDir.listFiles();
-      if (files != null)
-        genDocumentInfo(docinfo, deployDir, files,true);
-      else
-      if (__log.isDebugEnabled())
-        __log.debug("fillProcessInfo: No files for " + deployDir + " !!!");
+      // TODO: need to get this from the server not the database.  
+//      File deployDir = new File(proc.getDeployURI().getPath());
+//      File files[] = deployDir.listFiles();
+//      if (files != null)
+//        genDocumentInfo(docinfo, deployDir, files,true);
+//      else
+//      if (__log.isDebugEnabled())
+//        __log.debug("fillProcessInfo: No files for " + deployDir + " !!!");
 
 
 
