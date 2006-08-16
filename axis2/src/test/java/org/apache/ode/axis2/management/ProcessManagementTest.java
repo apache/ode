@@ -94,11 +94,14 @@ public class ProcessManagementTest extends TestCase {
         assert(result.toString().indexOf("DynPartnerResponder") >= 0);
     }
 
-    public void testGetProcessInfo() throws Exception {
-        OMElement root = buildMessage("getProcessInfo", new String[] {"pid"},
-                new QName[] { new QName("http://ode/bpel/responder", "DynPartnerResponder")});
+    public void testSetProcessProperty() throws Exception {
+        OMElement root = buildMessage("setProcessProperty",
+                new String[] {"pid", "propertyName", "propertyValue"},
+                new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
+                        new QName("http://ode/custom/ns", "someprop"), "somevalue" });
         OMElement result = sendToPM(root);
-        assert(result.toString().indexOf("DynPartnerResponder") >= 0);
+        assert(result.toString().indexOf("DynPartnerMain") >= 0);
+        assert(result.toString().indexOf("somevalue") >= 0);
     }
 
     protected void setUp() throws Exception {

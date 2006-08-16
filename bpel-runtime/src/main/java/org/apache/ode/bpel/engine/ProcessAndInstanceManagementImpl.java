@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
@@ -200,55 +199,6 @@ class ProcessAndInstanceManagementImpl
 
         return ret;
     }
-
-    public ProcessInfoDocument setEndpointReference(final QName pid, final String partnerLink,
-                                                    final String roleName, final Element endpointRef)
-            throws ManagementException {
-        ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
-        final TProcessInfo pi = ret.addNewProcessInfo();
-        try {
-            _db.exec(new BpelDatabase.Callable<Object>() {
-                public Object run(BpelDAOConnection conn) throws Exception {
-                    ProcessDAO proc = conn.getProcess(pid);
-                    if (proc == null)
-                        throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-
-                    OProcess oprocess = _engine.getOProcess(pid);
-                    if (oprocess == null)
-                        throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-
-                    OPartnerLink plink = oprocess.getPartnerLink(partnerLink);
-                    if (plink == null)
-                        throw new InvalidRequestException("Unknown partner-link "
-                                + partnerLink + " for process " + pid);
-
-                    throw new UnsupportedOperationException("todo: reimplement");
-//          PartnerLinkDAO depdao = proc.getDeployedEndpointReference(plink.getId());
-//          
-//          if (plink != null && ((plink.myRoleName != null) && (plink.myRoleName.equals(roleName)))) {
-//            depdao.setMyEPR(endpointRef);
-//          } else if (plink != null && ((plink.partnerRoleName != null) && (plink.partnerRoleName.equals(roleName)))) {
-//            depdao.setPartnerEPR(endpointRef);
-//          } else {
-//            throw new InvalidRequestException("Invalid partnerLink/partnerRole combination "
-//                + partnerLink + "/" + roleName + " for process " + pid);
-//            
-//          }
-//          
-//          fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.ENDPOINTS));
-//          return null;
-                }
-            });
-        } catch (ManagementException me) {
-            throw me;
-        } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
-        }
-
-        return ret;
-    }
-
 
     public InstanceInfoListDocument listInstances(String filter, String order, int limit) {
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
@@ -685,36 +635,18 @@ class ProcessAndInstanceManagementImpl
             OProcess oprocess = _engine.getOProcess(proc.getProcessId());
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
-                    MultiKeyMap mm = buildEprMap(proc);
-                    Node eprNode = (Node) mm.get(oplink.name, oplink.partnerRoleName);
-                    if (eprNode != null) {
+                    Element eprElmt = _engine._activeProcesses.get(proc.getProcessId())
+                            .getInitialPartnerRoleEPR(oplink);
+                    if (eprElmt != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
-                        epr.setPartnerLink(oplink.name);
-                        epr.setPartnerRole(oplink.partnerRoleName);
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
-                        epr.getDomNode().appendChild(eprNodeDoc.importNode(eprNode, true));
-                    } else {
-                        __log.error("The process " + proc.getProcessId() + " has probably been deployed in a wrong way, the " +
-                                "partner link " + oplink.name + " has no endpoint associated with it, which probably means " +
-                                "that the deployment descriptor wasn't included in the process package you deployed.");
+                        epr.getDomNode().appendChild(eprNodeDoc.importNode(eprElmt, true));
                     }
                 }
             }
         }
 
         //TODO: add documents to the above data structure.
-    }
-
-    private MultiKeyMap buildEprMap(ProcessDAO proc) {
-        MultiKeyMap mm = new MultiKeyMap();
-        // TODO: eliminate or fix?
-//    for (PartnerLinkDAO eprDao : proc.getDeployedEndpointReferences()) {
-//      if (eprDao.getMyEPR() != null)
-//        mm.put(eprDao.getPartnerLinkName(), eprDao.getMyRoleName(), eprDao.getMyEPR());
-//      if (eprDao.getPartnerEPR() != null)
-//        mm.put(eprDao.getPartnerLinkName(), eprDao.getPartnerEPR(), eprDao.getPartnerEPR());
-//    }
-        return mm;
     }
 
     /**
