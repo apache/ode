@@ -19,14 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
-
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -35,6 +29,11 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.w3c.dom.Element;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 
 abstract class MessageExchangeImpl implements MessageExchange {
   
@@ -138,8 +137,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
   public Operation getOperation() {
     return _operation;
   }
-
-  
 
   public PortType getPortType() {
     return _portType;
