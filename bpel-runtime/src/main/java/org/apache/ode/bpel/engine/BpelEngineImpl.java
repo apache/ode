@@ -19,15 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -38,14 +29,22 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server
@@ -158,7 +157,6 @@ public class BpelEngineImpl implements BpelEngine {
      *            the process to register
      */
     void registerProcess(BpelProcess process) {
-
         _activeProcesses.put(process.getPID(), process);
         for (Endpoint e : process.getServiceNames()) {
             __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -181,10 +179,13 @@ public class BpelEngineImpl implements BpelEngine {
      */
     BpelProcess route(QName service, Message request) {
         // TODO: use the message to route to the correct service if more than
-        // one
-        // service is listening on the same endpoint.
+        // one service is listening on the same endpoint.
 
-        BpelProcess routed = _serviceMap.get(service);
+        BpelProcess routed = null;
+        for (Endpoint endpoint : _serviceMap.keySet()) {
+            if (endpoint.serviceName.equals(service))
+                routed = _serviceMap.get(endpoint);
+        }
         if (__log.isDebugEnabled())
             __log.debug("Routed: svcQname " + service + " --> " + routed);
         return routed;
