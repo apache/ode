@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.pmapi;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
@@ -96,20 +95,6 @@ public interface ProcessManagement {
   ProcessInfoDocument setProcessProperty(QName pid, QName propertyName, String value)
           throws ManagementException;
 
-  /**
-   * Associates an endpoint reference with the provided partner link role (overriding
-   * default endpoint address extracted from WSDL).
-   * @param pid
-   * @param partnerLink
-   * @param role
-   * @param endpointRef
-   * @return {@link ProcessInfoDocument} reflecting the modification
-   * TODO: avoid using Element arguments
-   */
-  ProcessInfoDocument setEndpointReference(QName pid, String partnerLink, String role, Element endpointRef)
-          throws ManagementException;
-
-  
   /**
    * Activate a process.
    * @param pid identifier for the process to activate
