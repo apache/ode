@@ -424,6 +424,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                                               boolean isMyEPR) throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
         Element epr = (isMyEPR ? pl.getMyEPR() : pl.getPartnerEPR());
+        if (epr != null) System.out.println("### EPR from DB " + DOMUtils.domToString(epr));
+
+        if (epr == null && isMyEPR)
+            epr = _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink);
+        if (epr == null && !isMyEPR)
+            epr = _bpelProcess.getInitialPartnerRoleEPR(pLink.partnerLink);
 
         if (epr == null) {
             throw new FaultException(
@@ -480,7 +486,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public Element writeEndpointReference(PartnerLinkInstance variable,
                                           Element data) throws FaultException {
         PartnerLinkDAO eprDAO = fetchPartnerLinkDAO(variable);
-        Element originalEprElmt = eprDAO.getPartnerEPR();
+        Element originalEprElmt = fetchEndpointReferenceData(variable, false);
 
         if (__log.isDebugEnabled()) {
             __log.debug("Writing endpoint reference " + variable.partnerLink.getName() +
@@ -518,6 +524,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
         Element myRoleEpr = pl.getMyEPR();
+        if (myRoleEpr == null)
+            myRoleEpr = _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink);
+
         if (myRoleEpr == null) throw new FaultException(
                 _bpelProcess._oprocess.constants.qnUninitializedPartnerRole,
                 "Endpoint reference for myRole on partner link " + pLink.partnerLink.getName() + " isn't initialized!");
