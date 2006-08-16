@@ -18,12 +18,16 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -35,83 +39,83 @@ import java.util.Map;
  * variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
-  private static final Log __log = LogFactory
-      .getLog(ExprEvaluationContextImpl.class);
+    private static final Log __log = LogFactory
+            .getLog(ExprEvaluationContextImpl.class);
 
-  private BpelRuntimeContext _native;
+    private BpelRuntimeContext _native;
 
-  private ScopeFrame _scopeInstance;
+    private ScopeFrame _scopeInstance;
 
-  private Map<OLink, Boolean> _linkVals;
+    private Map<OLink, Boolean> _linkVals;
 
-  private Node _root;
+    private Node _root;
 
-  public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-      BpelRuntimeContext ntv) {
-    _native = ntv;
-    _scopeInstance = scopeInstace;
-  }
-
-  public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-      BpelRuntimeContext ntv, Node root) {
-    this(scopeInstace, ntv);
-    _root = root;
-  }
-
-  public ExprEvaluationContextImpl(ScopeFrame scopeInstnce,
-      BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
-    this(scopeInstnce, ntv);
-    _linkVals = linkVals;
-  }
-
-  public Node readVariable(OScope.Variable variable, OMessageVarType.Part part)
-      throws FaultException {
-    if (__log.isTraceEnabled())
-      __log.trace("readVariable(" + variable + "," + part + ")");
-
-    // TODO: check for null _scopeInstance
-
-    Node ret;
-    // TODO: catch resolveVariable(..) == null
-    VariableInstance varInstance = _scopeInstance.resolve(variable);
-    ret = _native.fetchVariableData(varInstance, part, false);
-    return ret;
-  }
-
-  public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
-    try {
-      return _native.getExpLangRuntime().evaluateNode(expr,
-          new ExprEvaluationContextImpl(_scopeInstance, _native, root));
-    } catch (org.apache.ode.bpel.explang.EvaluationException e) {
-      throw new InvalidProcessException("Expression Failed: " + expr, e);
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
+                                     BpelRuntimeContext ntv) {
+        _native = ntv;
+        _scopeInstance = scopeInstace;
     }
-  }
 
-  public String readMessageProperty(OScope.Variable variable,
-      OProcess.OProperty property) throws FaultException {
-    VariableInstance varInstance = _scopeInstance.resolve(variable);
-    return _native.readProperty(varInstance, property);
-  }
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
+                                     BpelRuntimeContext ntv, Node root) {
+        this(scopeInstace, ntv);
+        _root = root;
+    }
 
-  public boolean isLinkActive(OLink olink) throws FaultException {
-    return _linkVals.get(olink);
-  }
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce,
+                                     BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
+        this(scopeInstnce, ntv);
+        _linkVals = linkVals;
+    }
 
-  public String toString() {
-    return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance
-        + ", activeLinks=" + _linkVals + "}";
-  }
+    public Node readVariable(OScope.Variable variable, OMessageVarType.Part part)
+            throws FaultException {
+        if (__log.isTraceEnabled())
+            __log.trace("readVariable(" + variable + "," + part + ")");
 
-  public Node getRootNode() {
-    return _root;
-  }
+        // TODO: check for null _scopeInstance
 
-  public Node getPartData(Element message, Part part) throws FaultException {
-    return _native.getPartData(message, part);
-  }
+        Node ret;
+        VariableInstance varInstance = _scopeInstance.resolve(variable);
+        if (varInstance == null) return null;
+        ret = _native.fetchVariableData(varInstance, part, false);
+        return ret;
+    }
 
-  public Long getProcessId() {
-    return _native.getPid();
-  }
+    public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
+        try {
+            return _native.getExpLangRuntime().evaluateNode(expr,
+                    new ExprEvaluationContextImpl(_scopeInstance, _native, root));
+        } catch (org.apache.ode.bpel.explang.EvaluationException e) {
+            throw new InvalidProcessException("Expression Failed: " + expr, e);
+        }
+    }
+
+    public String readMessageProperty(OScope.Variable variable,
+                                      OProcess.OProperty property) throws FaultException {
+        VariableInstance varInstance = _scopeInstance.resolve(variable);
+        return _native.readProperty(varInstance, property);
+    }
+
+    public boolean isLinkActive(OLink olink) throws FaultException {
+        return _linkVals.get(olink);
+    }
+
+    public String toString() {
+        return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance
+                + ", activeLinks=" + _linkVals + "}";
+    }
+
+    public Node getRootNode() {
+        return _root;
+    }
+
+    public Node getPartData(Element message, Part part) throws FaultException {
+        return _native.getPartData(message, part);
+    }
+
+    public Long getProcessId() {
+        return _native.getPid();
+    }
 
 }
