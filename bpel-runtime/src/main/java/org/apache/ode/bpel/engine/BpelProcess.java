@@ -18,22 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -53,12 +37,12 @@ import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
@@ -77,6 +61,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -159,7 +158,11 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
-        PartnerLinkMyRoleImpl target = _endpointToMyRoleMap.get(mex.getServiceName());
+        PartnerLinkMyRoleImpl target = null;
+        for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
+            if (endpoint.serviceName.equals(mex.getServiceName()))
+                target = _endpointToMyRoleMap.get(endpoint);
+        }
         if (target == null) {
             String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
             __log.error(errmsg);
@@ -179,9 +182,16 @@ public class BpelProcess {
     }
 
     void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
-        PartnerLinkMyRoleImpl target = _endpointToMyRoleMap.get(mex.getServiceName());
+        PartnerLinkMyRoleImpl target = null;
+        for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
+            if (endpoint.serviceName.equals(mex.getServiceName()))
+                target = _endpointToMyRoleMap.get(endpoint);
+        }
         if (target != null) {
             mex.setPortOp(target._plinkDef.myRolePortType, target._plinkDef.getMyRoleOperation(mex.getOperationName()));
+        } else {
+            __log.warn("Couldn't find endpoint from service " + mex.getServiceName()
+                    + " when initializing a myRole mex.");
         }
     }
 
@@ -575,8 +585,7 @@ public class BpelProcess {
 
             Set<OScope.CorrelationSet> csets = _plinkDef.getCorrelationSetsForOperation(operation);
 
-            for (Iterator<OScope.CorrelationSet> i = csets.iterator(); i.hasNext();) {
-                OScope.CorrelationSet cset = i.next();
+            for (OScope.CorrelationSet cset : csets) {
                 CorrelationKey key = computeCorrelationKey(cset, _oprocess.messageTypes.get(msgDescription.getQName()),
                         msg);
                 keys.add(key);
