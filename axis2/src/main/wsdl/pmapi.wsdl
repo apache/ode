@@ -72,6 +72,13 @@
   <message name="getProcessInfoOutput">
     <part name="process-info" type="typ:tProcessInfo"/>
   </message>
+  <message name="getProcessInfoCustomInput">
+    <part name="pid" type="xsd:QName"/>
+    <part name="customizer" type="xsd:string"/>
+  </message>
+  <message name="getProcessInfoCustomOutput">
+    <part name="process-info" type="typ:tProcessInfo"/>
+  </message>
   <message name="getExtensibilityElementsInput">
     <part name="pid" type="xsd:QName"/>
     <part name="aids" type="tns:aidsType"/>
@@ -97,8 +104,8 @@
   </message>
   <message name="setEndpointReferenceInput">
     <part name="pid" type="xsd:QName"/>
-    <part name="partnerLink" type="xsd:QName"/>
-    <part name="role" type="xsd:QName"/>
+    <part name="partnerLink" type="xsd:string"/>
+    <part name="role" type="xsd:string"/>
     <part name="endpoint" type="xsd:anyType"/>
   </message>
   <message name="setEndpointReferenceOutput">
@@ -221,6 +228,10 @@
     <operation name="getProcessInfo">
       <input message="tns:getProcessInfoInput"/>
       <output message="tns:getProcessInfoOutput"/>
+    </operation>
+    <operation name="getProcessInfoCustom">
+      <input message="tns:getProcessInfoCustomInput"/>
+      <output message="tns:getProcessInfoCustomOutput"/>
     </operation>
     <operation name="setProcessProperty">
       <input message="tns:setProcessPropertyInput"/>

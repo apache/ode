@@ -424,7 +424,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                                               boolean isMyEPR) throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
         Element epr = (isMyEPR ? pl.getMyEPR() : pl.getPartnerEPR());
-        if (epr != null) System.out.println("### EPR from DB " + DOMUtils.domToString(epr));
 
         if (epr == null && isMyEPR)
             epr = _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink);

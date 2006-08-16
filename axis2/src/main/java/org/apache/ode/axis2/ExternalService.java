@@ -19,16 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.bpel.epr.EndpointFactory;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.axis2.util.OMUtils;
-import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -38,6 +28,16 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.util.OMUtils;
+import org.apache.ode.axis2.util.SOAPUtils;
+import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
@@ -146,6 +146,9 @@ public class ExternalService implements PartnerRoleChannel {
                 ODEService.genEPRfromWSDL(_definition, _serviceName, _portName));
         org.apache.ode.bpel.iapi.EndpointReference ref = EndpointFactory.convert(
                 new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"), eprElmt);
+        System.out.println("INITIAL EPR CREATION #########################################################");
+        System.out.println(DOMUtils.domToString(ref.toXML()));
+        System.out.println("#########################################################");
         return ref;
     }
 
