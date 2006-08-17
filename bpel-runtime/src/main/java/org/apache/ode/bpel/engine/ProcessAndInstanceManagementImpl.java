@@ -370,7 +370,7 @@ class ProcessAndInstanceManagementImpl
         });
     }
 
-    public ActivityExtInfoListDocument getExtensibilityElements(QName pid, int[] aids) {
+    public ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids) {
         ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
         TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
         OProcess oprocess = _engine.getOProcess(pid);
@@ -656,10 +656,8 @@ class ProcessAndInstanceManagementImpl
      * @param recurse recurse down directories?
      */
     private void genDocumentInfo(TProcessInfo.Documents docinfo,  File rootdir, File[] files,boolean recurse) {
-
         if (files == null)
             return;
-
         for (File f : files) {
             if (f.isHidden())
                 continue;
@@ -670,14 +668,11 @@ class ProcessAndInstanceManagementImpl
             } else if (f.isFile()) {
                 genDocumentInfo(docinfo, rootdir, f);
             }
-
         }
-
     }
 
     private void genDocumentInfo(TProcessInfo.Documents docinfo, File rootDir, File f) {
         DocumentInfoGenerator dig = new DocumentInfoGenerator(rootDir,f);
-
         if (dig.isRecognized() && dig.isVisible()) {
             TDocumentInfo doc = docinfo.addNewDocument();
 
@@ -685,7 +680,6 @@ class ProcessAndInstanceManagementImpl
             doc.setSource(dig.getURL());
             doc.setType(dig.getType());
         }
-
     }
 
     private void genInstanceSummaryEntry(TInstanceSummary.Instances instances, TInstanceStatus.Enum state, ProcessDAO proc) {
