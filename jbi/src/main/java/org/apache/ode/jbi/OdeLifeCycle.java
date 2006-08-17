@@ -249,7 +249,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     _ode._server = new BpelServerImpl();
     // We don't want the server to automatically activate deployed processes,
     // we'll do that explcitly
-    _ode._server.setAutoActivate(false);
+    _ode._server.setAutoActivate(true);
     _ode._eprContext = new EndpointReferenceContextImpl(_ode);
     _ode._mexContext = new MessageExchangeContextImpl(_ode);
     _ode._executorService = Executors.newCachedThreadPool();
@@ -264,6 +264,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     _ode._server.setDaoConnectionFactory(_ode._daocf);
     _ode._server.setEndpointReferenceContext(_ode._eprContext);
     _ode._server.setMessageExchangeContext(_ode._mexContext);
+    _ode._server.setBindingContext(new BindingContextImpl(_ode));
     _ode._server.setScheduler(_ode._scheduler);
     _ode._server.init();
 

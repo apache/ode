@@ -19,6 +19,7 @@
 package org.apache.ode.jbi;
 
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,15 +35,12 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
 
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
@@ -51,214 +49,181 @@ import org.apache.ode.utils.DOMUtils;
  */
 final class OdeContext {
 
-  private static final Log __log = LogFactory.getLog(OdeContext.class);
-  
-  /** static singleton */
-  private static OdeContext __self;
+    private static final Log __log = LogFactory.getLog(OdeContext.class);
 
-  private ComponentContext _context;
+    /** static singleton */
+    private static OdeContext __self;
 
-  private Map<QName, Document> _descriptorCache = new ConcurrentHashMap<QName, Document>();
+    private ComponentContext _context;
 
-  /** Ordered list of messsage mappers. */
-  private ArrayList<Mapper> _mappers = new ArrayList<Mapper>();
+    private Map<QName, Document> _descriptorCache = new ConcurrentHashMap<QName, Document>();
 
-  /** Mapper by class name. */
-  private Map<String,Mapper> _mappersByClassName = new HashMap<String,Mapper>();
+    /** Ordered list of messsage mappers. */
+    private ArrayList<Mapper> _mappers = new ArrayList<Mapper>();
 
-  OdeConsumer _consumer = new OdeConsumer(this);
+    /** Mapper by class name. */
+    private Map<String, Mapper> _mappersByClassName = new HashMap<String, Mapper>();
 
-  JbiMessageExchangeProcessor _jbiMessageExchangeProcessor = new JbiMessageExchangeEventRouter(
-      this);
+    OdeConsumer _consumer = new OdeConsumer(this);
 
-  BpelServerImpl _server;
+    JbiMessageExchangeProcessor _jbiMessageExchangeProcessor = new JbiMessageExchangeEventRouter(this);
 
-  EndpointReferenceContextImpl _eprContext;
+    BpelServerImpl _server;
 
-  MessageExchangeContextImpl _mexContext;
+    EndpointReferenceContextImpl _eprContext;
 
-  QuartzSchedulerImpl _scheduler;
+    MessageExchangeContextImpl _mexContext;
 
-  ExecutorService _executorService;
+    QuartzSchedulerImpl _scheduler;
 
-  BpelDAOConnectionFactory _daocf;
+    ExecutorService _executorService;
 
-  OdeConfigProperties _config;
+    BpelDAOConnectionFactory _daocf;
 
-  DataSource _dataSource;
+    OdeConfigProperties _config;
 
-  /** Mapping of OdeServiceId to OdeService */
-  private Map<QName, OdeService> _activeOdeServices = new ConcurrentHashMap<QName, OdeService>();
+    DataSource _dataSource;
 
-  /** Mapping of JbiServiceName to OdeService */
-  private Map<QName, OdeService> _activeJbiServices = new ConcurrentHashMap<QName, OdeService>();
+    /** Mapping of Endpoint to OdeService */
+    private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
 
+    /**
+     * Gets the delivery channel.
+     * 
+     * @return delivery channel
+     */
+    public DeliveryChannel getChannel() {
+        DeliveryChannel chnl = null;
 
-  /**
-   * Gets the delivery channel.
-   * 
-   * @return delivery channel
-   */
-  public DeliveryChannel getChannel() {
-    DeliveryChannel chnl = null;
+        if (_context != null) {
+            try {
+                chnl = _context.getDeliveryChannel();
+            } catch (Exception e) {
+                // TODO better error logging
+                e.printStackTrace();
+            }
+        }
 
-    if (_context != null) {
-      try {
-        chnl = _context.getDeliveryChannel();
-      } catch (Exception e) {
-        // TODO better error logging
-        e.printStackTrace();
-      }
+        return chnl;
     }
 
-    return chnl;
-  }
+    /**
+     * Sets the Component context.
+     * 
+     * @param ctx
+     *            component context.
+     */
+    public void setContext(ComponentContext ctx) {
+        _context = ctx;
+    }
 
-  /**
-   * Sets the Component context.
-   * 
-   * @param ctx
-   *          component context.
-   */
-  public void setContext(ComponentContext ctx) {
-    _context = ctx;
-  }
+    /**
+     * DOCUMENT ME!
+     * 
+     * @return Transformation engine context
+     */
+    public ComponentContext getContext() {
+        return _context;
+    }
 
-  /**
-   * DOCUMENT ME!
-   * 
-   * @return Transformation engine context
-   */
-  public ComponentContext getContext() {
-    return _context;
-  }
-
-  /**
-   * Used to grab a reference of this object.
-   * 
-   * @return an initialized TransformationEngineContext reference
-   */
-  public static synchronized OdeContext getInstance() {
-    if (__self == null) {
-      synchronized (OdeContext.class) {
+    /**
+     * Used to grab a reference of this object.
+     * 
+     * @return an initialized TransformationEngineContext reference
+     */
+    public static synchronized OdeContext getInstance() {
         if (__self == null) {
-          __self = new OdeContext();
+            synchronized (OdeContext.class) {
+                if (__self == null) {
+                    __self = new OdeContext();
+                }
+            }
         }
-      }
+
+        return __self;
     }
 
-    return __self;
-  }
-
-  public void addEndpointDoc(QName svcname, Document df) {
-    _descriptorCache.put(svcname, df);
-  }
-
-  public Document getServiceDescription(QName svcName) {
-    return _descriptorCache.get(svcName);
-  }
-
-  public TransactionManager getTransactionManager() {
-    return (TransactionManager) getContext().getTransactionManager();
-  }
-
-  public MyEndpointReference activateEndpoint(QName pid, QName odeServiceId,
-      Element externalEpr) throws Exception {
-    QName jbiServiceName;
-    String jbiEndpointName;
-
-    if ( __log.isDebugEnabled() ) {
-      __log.debug( "Activate endpoint: " + prettyPrint( externalEpr ) );
+    public void addEndpointDoc(QName svcname, Document df) {
+        _descriptorCache.put(svcname, df);
     }
 
-    QName elname = new QName(externalEpr.getNamespaceURI(),externalEpr.getLocalName());
-    if (elname.equals(EndpointReference.SERVICE_REF_QNAME)) {
-        externalEpr = DOMUtils.getFirstChildElement(externalEpr);
-        if ( externalEpr == null ) {
-            throw new IllegalArgumentException( "Unsupported EPR: " + prettyPrint(externalEpr) );
+    public Document getServiceDescription(QName svcName) {
+        return _descriptorCache.get(svcName);
+    }
+
+    public TransactionManager getTransactionManager() {
+        return (TransactionManager) getContext().getTransactionManager();
+    }
+
+    public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
+        if (__log.isDebugEnabled()) {
+            __log.debug("Activate endpoint: " + endpoint);
         }
-        elname = new QName(externalEpr.getNamespaceURI(),externalEpr.getLocalName());
+
+        OdeService service = new OdeService(this, endpoint);
+        MyEndpointReference myepr = new MyEndpointReference(service);
+        service.activate();
+        _activeOdeServices.put(endpoint, service);
+        return myepr;
+
+    }
+
+    public void deactivateEndpoint(Endpoint endpoint) throws Exception {
+        OdeService svc = _activeOdeServices.remove(endpoint);
+
+        if (svc != null) {
+            svc.deactivate();
+        }
+    }
+
+    public OdeService getService(Endpoint endpoint) {
+        return _activeOdeServices.get(endpoint);
+    }
+
+    public OdeService getService(QName serviceName) {
+        for (Map.Entry<Endpoint,OdeService> e : _activeOdeServices.entrySet()){
+            if (e.getKey().serviceName.equals(serviceName))
+                return e.getValue();
+        }
+        return null;
     }
     
-    // extract serviceName and endpointName from JBI EPR 
-    if (elname.equals(EndpointReferenceContextImpl.JBI_EPR)) {
-      String serviceName = externalEpr.getAttribute("service-name");
-      jbiServiceName = EndpointReferenceContextImpl.convertClarkQName( serviceName );
-      jbiEndpointName = externalEpr.getAttribute("end-point-name");
-    } else {
-      throw new IllegalArgumentException( "Unsupported EPR: " + prettyPrint(externalEpr) );
+    public Mapper findMapper(NormalizedMessage nmsMsg, Operation op) {
+        ArrayList<Mapper> maybe = new ArrayList<Mapper>();
+
+        for (Mapper m : _mappers) {
+            Mapper.Recognized result = m.isRecognized(nmsMsg, op);
+            switch (result) {
+            case TRUE:
+                return m;
+            case FALSE:
+                continue;
+            case UNSURE:
+                maybe.add(m);
+                break;
+            }
+        }
+
+        if (maybe.size() == 0)
+            return null;
+        if (maybe.size() == 1)
+            return maybe.get(0);
+
+        __log.warn("Multiple mappers may match input message for operation " + op.getName());
+        // Get the first match.
+        return maybe.get(0);
     }
-    
-    OdeService service = new OdeService(this, odeServiceId, jbiServiceName, jbiEndpointName);
-    MyEndpointReference myepr = new MyEndpointReference(service);
-    service.activate();
-    _activeOdeServices.put(odeServiceId, service);
-    _activeJbiServices.put(jbiServiceName, service);
-    return myepr;
 
-  }
-
-  public void deactivateEndpoint(MyEndpointReference epr) throws Exception {
-    OdeService svc = _activeOdeServices.remove(epr.getService().getOdeServiceId());
-    _activeJbiServices.remove(epr.getService().getJbiServiceName());
-    if (svc != null) {
-      svc.deactivate();
+    public Mapper getMapper(String name) {
+        return _mappersByClassName.get(name);
     }
-  }
 
-  public OdeService getService(QName odeServiceId) {
-	    return _activeOdeServices.get(odeServiceId);
-	  }
-
-  public OdeService getServiceByServiceName(QName jbiServiceName) {
-	    return _activeJbiServices.get(jbiServiceName);
-	  }
-
-  public Mapper findMapper(NormalizedMessage nmsMsg, Operation op) {
-    ArrayList<Mapper> maybe = new ArrayList<Mapper>();
-
-    for (Mapper m : _mappers) {
-      Mapper.Recognized result = m.isRecognized(nmsMsg, op);
-      switch (result) {
-      case TRUE:
-        return m;
-      case FALSE:
-        continue;
-      case UNSURE:
-        maybe.add(m);
-        break;
-      }
+    public void registerMapper(Mapper mapper) {
+        _mappers.add(mapper);
+        _mappersByClassName.put(mapper.getClass().getName(), mapper);
     }
-    
-    if (maybe.size() == 0)
-      return null;
-    if (maybe.size() == 1)
-      return maybe.get(0);
-    
-    __log.warn("Multiple mappers may match input message for operation " + op.getName());
-    // Get the first match.
-    return maybe.get(0);
-  }
-  
-  public Mapper getMapper(String name) {
-    return _mappersByClassName.get(name);
-  }
-  
-  public void registerMapper(Mapper mapper) {
-    _mappers.add(mapper);
-    _mappersByClassName.put(mapper.getClass().getName(), mapper);
-  }
-  
-  public Mapper getDefaultMapper() {
-    return _mappers.get(0);
-  }
 
-  private String prettyPrint( Element el ) {
-      try {
-          return DOMUtils.prettyPrint( el );
-      } catch ( java.io.IOException ioe ) {
-          return ioe.getMessage();
-      }
-  }
-  
+    public Mapper getDefaultMapper() {
+        return _mappers.get(0);
+    }
 }

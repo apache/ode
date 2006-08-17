@@ -45,7 +45,6 @@
     <dependency>
       <groupId>ode</groupId>
       <artifactId>ode-bpel-schemas</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

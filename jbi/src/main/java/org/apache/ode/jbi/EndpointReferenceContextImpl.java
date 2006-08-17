@@ -101,39 +101,6 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     return null;
   }
   
-  public EndpointReference activateEndpoint(QName pid, QName serviceId, Element externalEpr) {
-    try {
-      return _ode.activateEndpoint(pid,serviceId,externalEpr);
-    } catch (Exception ex) {
-      throw new ContextException("Could not activate endpoint for " + serviceId, ex);
-    }
-  }
-
-  public void activateMyRoleEndpoint(QName serviceName, String portName, Definition wsdl) {
-    // TODO Implement me
-    throw new UnsupportedOperationException("To implement.");
-  }
-
-  public void activateExternalEndpoint(QName serviceName, String portName, Definition wsdl) {
-    // TODO Implement me
-    throw new UnsupportedOperationException("To implement.");
-  }
-
-  public void deactivateEndpoint(EndpointReference epr) {
-    if (!(epr instanceof MyEndpointReference)) {
-      String errmsg = "deactivateEndpoint misused.";
-      __log.fatal(errmsg);
-      throw new IllegalArgumentException(errmsg);
-    }
-
-    try {
-      _ode.deactivateEndpoint((MyEndpointReference)epr);
-    } catch (Exception ex) {
-      String errmsg = "Could not deactivate endpoint: " + epr;
-      __log.error(errmsg, ex);
-      throw new ContextException(errmsg,ex);
-    }
-  }
 
   public EndpointReference convertEndpoint(QName eprType, Element element) {
     EndpointReference endpoint = EndpointFactory.convert(eprType, element);

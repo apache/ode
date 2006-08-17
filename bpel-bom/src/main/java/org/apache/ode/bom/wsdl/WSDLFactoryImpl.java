@@ -69,7 +69,7 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
 
 
   public WSDLReader newWSDLReader() {
-    WSDLReader reader = _wsdlFactory.newWSDLReader();
+    WSDLReader reader = new WSDLReaderImpl(this);
     reader.setFactoryImplName(getClass().getName());
     reader.setFeature("javax.wsdl.verbose", false);
     reader.setExtensionRegistry(newPopulatedExtensionRegistry());

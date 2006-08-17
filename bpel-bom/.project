@@ -1,9 +1,7 @@
 <projectDescription>
   <name>ode-bpel-bom</name>
   <comment>A DOM-like structure to represent BPEL documents (API).</comment>
-  <projects>
-    <project>ode-utils</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
