@@ -50,8 +50,10 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -132,7 +134,7 @@ public class ManagementService {
         int paramIdx = 0;
         for (Class<?> paramClass : paramTypes) {
             OMElement omchild = (OMElement) omChildren.next();
-            System.out.println("Extracting param " + paramClass + " from " + omchild);
+            __log.debug("Extracting param " + paramClass + " from " + omchild);
             params[paramIdx++] = convertFromOM(paramClass, omchild);
         }
         return params;
@@ -140,7 +142,7 @@ public class ManagementService {
 
     private static Object convertFromOM(Class clazz, OMElement elmt) throws AxisFault {
         // Here comes the nasty code...
-        if (elmt == null || elmt.getText() == null || elmt.getText().length() == 0) return null;
+        if (elmt == null) return null;
         else if (clazz.equals(String.class)) {
             return elmt.getText();
         } else if (clazz.equals(Boolean.class)) {
@@ -158,13 +160,20 @@ public class ManagementService {
             return qname;
         } else if (clazz.equals(ProcessInfoCustomizer.class)) {
             return new ProcessInfoCustomizer(elmt.getText());
-        } else if (clazz.isAssignableFrom(Node.class)) {
-            return OMUtils.toDOM(elmt);
+        } else if (Node.class.isAssignableFrom(clazz)) {
+            return OMUtils.toDOM(elmt.getFirstElement());
         } else if (clazz.equals(Long.TYPE) || clazz.equals(Long.class)) {
             return Long.parseLong(elmt.getText());
         } else if (clazz.equals(Integer.TYPE) || clazz.equals(Integer.class)) {
             return Integer.parseInt(elmt.getText());
-        } else if (clazz.isAssignableFrom(XmlObject.class)) {
+        } else if (clazz.isArray()) {
+            ArrayList alist = new ArrayList();
+            Iterator children = elmt.getChildElements();
+            Class targetClazz = clazz.getComponentType();
+            while (children.hasNext())
+                alist.add(parseType(targetClazz, ((OMElement)children.next()).getText()));
+            return alist.toArray((Object[]) Array.newInstance(targetClazz, alist.size()));
+        } else if (XmlObject.class.isAssignableFrom(clazz)) {
             try {
                 Class beanFactory = Class.forName(clazz.getCanonicalName() + ".Factory");
                 return beanFactory.getMethod("parse", XMLStreamReader.class)
@@ -222,5 +231,12 @@ public class ManagementService {
             if (method.getName().equals(methodName)) return method;
         }
         throw new AxisFault("Couldn't find any method named " + methodName + " in interface " + clazz.getName());
+    }
+
+    private static Object parseType(Class clazz, String str) {
+        if (clazz.equals(Integer.class)) return Integer.valueOf(str);
+        if (clazz.equals(Float.class)) return Integer.valueOf(str);
+        if (clazz.equals(String.class)) return str;
+        return null;
     }
 }

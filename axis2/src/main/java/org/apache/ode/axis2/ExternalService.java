@@ -146,9 +146,6 @@ public class ExternalService implements PartnerRoleChannel {
                 ODEService.genEPRfromWSDL(_definition, _serviceName, _portName));
         org.apache.ode.bpel.iapi.EndpointReference ref = EndpointFactory.convert(
                 new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"), eprElmt);
-        System.out.println("INITIAL EPR CREATION #########################################################");
-        System.out.println(DOMUtils.domToString(ref.toXML()));
-        System.out.println("#########################################################");
         return ref;
     }
 

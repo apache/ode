@@ -102,15 +102,6 @@
   <message name="setProcessPropertyOutput">
     <part name="process-info" type="typ:tProcessInfo"/>
   </message>
-  <message name="setEndpointReferenceInput">
-    <part name="pid" type="xsd:QName"/>
-    <part name="partnerLink" type="xsd:string"/>
-    <part name="role" type="xsd:string"/>
-    <part name="endpoint" type="xsd:anyType"/>
-  </message>
-  <message name="setEndpointReferenceOutput">
-    <part name="process-info" type="typ:tProcessInfo"/>
-  </message>
   <message name="activateInput">
     <part name="pid" type="xsd:QName"/>
   </message>
@@ -241,10 +232,6 @@
       <input message="tns:setProcessPropertyNodeInput"/>
       <output message="tns:setProcessPropertyNodeOutput"/>
     </operation>
-    <operation name="setEndpointReference">
-      <input message="tns:setEndpointReferenceInput"/>
-      <output message="tns:setEndpointReferenceOutput"/>
-    </operation>
     <operation name="getExtensibilityElements">
       <input message="tns:getExtensibilityElementsInput"/>
       <output message="tns:getExtensibilityElementsOutput"/>
@@ -373,15 +360,6 @@
       </output>
     </operation>
     <operation name="setProcessPropertyNode">
-      <soap:operation soapAction="" style="rpc"/>
-      <input>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </input>
-      <output>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </output>
-    </operation>
-    <operation name="setEndpointReference">
       <soap:operation soapAction="" style="rpc"/>
       <input>
         <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
