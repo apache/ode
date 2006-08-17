@@ -19,6 +19,21 @@
 
 package org.apache.ode.bpel.deploy;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Set;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
@@ -32,19 +47,6 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
-
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -93,7 +95,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
 
     public DeploymentUnitImpl(File dir) {
         if (!dir.exists())
-            throw new IllegalArgumentException("Directory "  + dir + " does not exist!");
+            throw new IllegalArgumentException("Directory " + dir + " does not exist!");
 
         _duDirectory = dir;
         _name = dir.getName();
@@ -113,6 +115,9 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     private void compileProcesses() {
         File[] bpels = _duDirectory.listFiles(_bpelFilter);
         for (File bpel : bpels) {
+            File compiled = new File(bpel.getParentFile(), bpel.getName().substring(0,bpel.getName().length()-".bpel".length()) + ".cbp");
+            if (compiled.exists())
+                continue;
             compile(bpel);
         }
     }
@@ -236,14 +241,14 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return _docRegistry;
     }
 
-    public Definition4BPEL getDefinitionForNamespace(String namespaceURI) {
+    public Definition getDefinitionForNamespace(String namespaceURI) {
         return getDocRegistry().getDefinition(namespaceURI);
     }
 
-    public Collection<Definition4BPEL> getDefinitions() {
+    public Collection<Definition> getDefinitions() {
         Definition4BPEL defs[] = getDocRegistry().getDefinitions();
-        ArrayList<Definition4BPEL> ret = new ArrayList<Definition4BPEL>(defs.length);
-        for (Definition4BPEL def: defs)
+        ArrayList<Definition> ret = new ArrayList<Definition>(defs.length);
+        for (Definition4BPEL def : defs)
             ret.add(def);
         return ret;
     }

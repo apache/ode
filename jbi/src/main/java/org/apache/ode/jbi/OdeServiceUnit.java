@@ -48,10 +48,6 @@ class OdeServiceUnit {
     /** Our JBI indentifier. */
     private String _serviceUnitID;
 
-    /** List of process IDs for each of the above files. */
-
-    private List<QName> _pids;
-
     /** Ctor. */
     OdeServiceUnit(OdeContext ode, String serviceUnitID, String serviceUnitRootPath) {
         _ode = ode;
@@ -91,39 +87,39 @@ class OdeServiceUnit {
     }
 
     public void start() throws Exception {
-        List<QName> activated = new ArrayList<QName>(_pids.size());
-        Exception e = null;
-        for (QName pid : _pids) {
-            try {
-                _ode._server.activate(pid, false);
-                activated.add(pid);
-            } catch (Exception ex) {
-                e = ex;
-                __log.error("Unable to activate " + pid, ex);
-                break;
-            }
-        }
-        if (activated.size() != _pids.size()) {
-            for (QName pid : activated)
-                try {
-                    _ode._server.deactivate(pid, true);
-                } catch (Exception ex) {
-                    __log.error("Unable to deactivate " + pid, ex);
-                }
-        }
-
-        if (e != null)
-            throw e;
+//        List<QName> activated = new ArrayList<QName>(_pids.size());
+//        Exception e = null;
+//        for (QName pid : _pids) {
+//            try {
+//                _ode._server.activate(pid, false);
+//                activated.add(pid);
+//            } catch (Exception ex) {
+//                e = ex;
+//                __log.error("Unable to activate " + pid, ex);
+//                break;
+//            }
+//        }
+//        if (activated.size() != _pids.size()) {
+//            for (QName pid : activated)
+//                try {
+//                    _ode._server.deactivate(pid, true);
+//                } catch (Exception ex) {
+//                    __log.error("Unable to deactivate " + pid, ex);
+//                }
+//        }
+//
+//        if (e != null)
+//            throw e;
     }
 
     public void stop() throws Exception {
-        for (QName pid : _pids) {
-            try {
-                _ode._server.deactivate(pid, true);
-            } catch (Exception ex) {
-                __log.error("Unable to deactivate " + pid, ex);
-            }
-        }
+//        for (QName pid : _pids) {
+//            try {
+//                _ode._server.deactivate(pid, true);
+//            } catch (Exception ex) {
+//                __log.error("Unable to deactivate " + pid, ex);
+//            }
+//        }
     }
 
 }
