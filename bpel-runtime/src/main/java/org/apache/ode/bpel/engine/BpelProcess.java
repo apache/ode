@@ -55,6 +55,7 @@ import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -720,18 +721,32 @@ public class BpelProcess {
     void activate(BpelEngineImpl engine) {
         _engine = engine;
         _debugger = new DebuggerSupport(this);
+        
+        __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (PartnerLinkMyRoleImpl myrole : _myRoles.values()) {
             myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint,
                     myrole._plinkDef.myRolePortType);
+            
+            __log.debug("Activated "  + _pid + " myrole " + myrole.getPartnerLinkName()
+                    + ": EPR is " + DOMUtils.domToString(myrole._initialEPR));
         }
 
         for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
             PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid, _du,
                     prole._plinkDef.partnerRolePortType, prole._initialPartner);
             prole._channel = channel;
-            prole._initialEPR = channel.getInitialEndpointReference().toXML().getDocumentElement();
+            EndpointReference epr = channel.getInitialEndpointReference();
+            if (epr != null) {
+                prole._initialEPR = epr.toXML().getDocumentElement();
+            }
+            
+            __log.debug("Activated "  + _pid + " partnerrole " + prole.getPartnerLinkName()
+                    + ": EPR is " + prole._initialEPR == null ? "null" : DOMUtils.domToString(prole._initialEPR));
+            
         }
+        
+        __log.debug("Activated " + _pid);
     }
 
     void deactivate() {
