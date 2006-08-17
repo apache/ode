@@ -139,6 +139,10 @@ public class BpelProcess {
         }
     }
 
+    public String toString() {
+        return "BpelProcess[" + _pid + " in " + _du  + "]";
+    }
+    
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
         StringBuffer sb = new StringBuffer(partnerlinkName);
         sb.append('.');
