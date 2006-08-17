@@ -104,6 +104,28 @@ public class ProcessManagementTest extends TestCase {
         assert(result.toString().indexOf("somevalue") >= 0);
     }
 
+    public void testSetProcessPropertyNode() throws Exception {
+        OMElement propElmt = _factory.createOMElement("testprop", null);
+        propElmt.setText("propvalue");
+        OMElement root = buildMessage("setProcessPropertyNode",
+                new String[] {"pid", "propertyName", "propertyValue"},
+                new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
+                        new QName("http://ode/custom/ns", "someprop"), propElmt });
+        OMElement result = sendToPM(root);
+        assert(result.toString().indexOf("DynPartnerMain") >= 0);
+        assert(result.toString().indexOf("testprop") >= 0);
+        assert(result.toString().indexOf("propvalue") >= 0);
+    }
+
+    public void testGetExtensibilityElements() throws Exception {
+        OMElement root = buildMessage("getExtensibilityElements",
+                new String[] {"pid", "aids"},
+                new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
+                        new String[] {"aid", "12", "14"} });
+        OMElement result = sendToPM(root);
+        assert(result.toString().indexOf("activity-ext-info-list") >= 0);
+    }
+
     protected void setUp() throws Exception {
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
@@ -170,19 +192,29 @@ public class ProcessManagementTest extends TestCase {
     }
 
     private OMElement buildMessage(String operation, String[] params, Object[] values) {
-        //create a factory
-        OMFactory factory = OMAbstractFactory.getOMFactory();
+        int[] ia = new int[] {1, 2, 3};
+        System.out.println("=> " + ia.getClass().isArray());
 
         //use the factory to create three elements
-        OMNamespace pmns = factory.createOMNamespace(PMAPI_NS, "pmapi");
-        OMElement root = factory.createOMElement(operation, pmns);
+        OMNamespace pmns = _factory.createOMNamespace(PMAPI_NS, "pmapi");
+        OMElement root = _factory.createOMElement(operation, pmns);
         for (int m = 0; m < params.length; m++) {
-            OMElement omelmt = factory.createOMElement(params[m], null);
+            OMElement omelmt = _factory.createOMElement(params[m], null);
             if (values[m] instanceof String)
                 omelmt.setText((String) values[m]);
             else if (values[m] instanceof QName)
                 omelmt.setText((QName) values[m]);
-            else throw new UnsupportedOperationException("Type " + values[m].getClass() + "isn't supported as " +
+            else if (values[m] instanceof OMElement)
+                omelmt.addChild((OMElement) values[m]);
+            else if (values[m] instanceof Object[]) {
+                Object[] subarr = (Object[]) values[m];
+                String elmtName = (String) subarr[0];
+                for (int p = 1; p < subarr.length; p++) {
+                    OMElement omarrelmt = _factory.createOMElement(elmtName, null);
+                    omarrelmt.setText(subarr[p].toString());
+                    omelmt.addChild(omarrelmt);
+                }
+            } else throw new UnsupportedOperationException("Type " + values[m].getClass() + "isn't supported as " +
                     "a parameter type (only String and QName are).");
             root.addChild(omelmt);
         }

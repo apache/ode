@@ -38,60 +38,62 @@ import javax.xml.namespace.QName;
  */
 class ExtensibilityBucketState extends AbstractState {
 
-  private static final StateFactory _factory = new Factory();
+    private static final StateFactory _factory = new Factory();
 
-  private QName _elementQName;
-  private Element _extensibility;
-  private DOMGenerator _domGenerator;
+    private QName _elementQName;
+    private Element _extensibility;
+    private DOMGenerator _domGenerator;
 
-  ExtensibilityBucketState(StartElement se, ParseContext pc) {
-    super(pc);
-    _elementQName = se.getName();
-    _domGenerator = new DOMGenerator();
-  }
-
-  static class Factory implements StateFactory
-  {
-    public State newInstance(StartElement se, ParseContext pc)
-            throws ParseException {
-      return new ExtensibilityBucketState(se, pc);
+    ExtensibilityBucketState(StartElement se, ParseContext pc) {
+        super(pc);
+        _elementQName = se.getName();
+        _domGenerator = new DOMGenerator();
     }
-  }
 
-  public void handleSaxEvent(SaxEvent se) throws ParseException {
-    /*
-    * For the moment, this is a basic implementation, but if supporting
-    * extensions is desired, those extensions can be hooked from here.
-    * Ideally, we'd have some kind of registry implementation that routes
-    * SaxEvent streams based on URI or some other scheme. However, for the
-    * moment, we don't have any use cases. WS-BPEL 2.0 extensibility can be
-    * implemented according to the spec, once that's settled.
-    */
-    _domGenerator.handleSaxEvent(se);
-  }
+    static class Factory implements StateFactory
+    {
+        public State newInstance(StartElement se, ParseContext pc)
+                throws ParseException {
+            return new ExtensibilityBucketState(se, pc);
+        }
+    }
 
-  public void done() {
-    Document doc = DOMUtils.newDocument();
-    Element root = doc.createElementNS(_elementQName.getNamespaceURI(), _elementQName.getLocalPart());
-    root.appendChild(doc.importNode(_domGenerator.getRoot(), true));
-    doc.appendChild(root);
-    _extensibility = root;
-  }
+    public void handleSaxEvent(SaxEvent se) throws ParseException {
+        /*
+        * For the moment, this is a basic implementation, but if supporting
+        * extensions is desired, those extensions can be hooked from here.
+        * Ideally, we'd have some kind of registry implementation that routes
+        * SaxEvent streams based on URI or some other scheme. However, for the
+        * moment, we don't have any use cases. WS-BPEL 2.0 extensibility can be
+        * implemented according to the spec, once that's settled.
+        */
+        _domGenerator.handleSaxEvent(se);
+    }
 
-  public StateFactory getFactory() {
-    return _factory;
-  }
+    public void done() {
+        if (_domGenerator.getRoot() != null) {
+            Document doc = DOMUtils.newDocument();
+            Element root = doc.createElementNS(_elementQName.getNamespaceURI(), _elementQName.getLocalPart());
+            root.appendChild(doc.importNode(_domGenerator.getRoot(), true));
+            doc.appendChild(root);
+            _extensibility = root;
+        }
+    }
 
-  public int getType() {
-    return EXTENSIBILITY_ELEMENT;
-  }
+    public StateFactory getFactory() {
+        return _factory;
+    }
 
-  public QName getElementQName() {
-    return _elementQName;
-  }
+    public int getType() {
+        return EXTENSIBILITY_ELEMENT;
+    }
 
-  public Element getExtensibility() {
-    return _extensibility;
-  }
+    public QName getElementQName() {
+        return _elementQName;
+    }
+
+    public Element getExtensibility() {
+        return _extensibility;
+    }
 
 }
