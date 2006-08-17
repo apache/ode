@@ -18,6 +18,7 @@
  */
 package org.apache.ode.jbi;
 
+import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -54,21 +55,15 @@ public class OdeService implements JbiMessageExchangeProcessor {
 
   private OdeContext  _ode;
 
-  private QName _odeServiceId;
-
-  private QName _jbiServiceName;
-
-  private String _jbiPortName;
-
   private Element _serviceref;
+
+  private Endpoint _endpoint;
   
   
-  public OdeService(OdeContext odeContext, QName odeServiceId, QName jbiServiceName, String jbiPortName)
+  public OdeService(OdeContext odeContext, Endpoint endpoint)
       throws Exception {
     _ode = odeContext;
-    _odeServiceId = odeServiceId;
-    _jbiServiceName = jbiServiceName;
-    _jbiPortName = jbiPortName;
+    _endpoint = endpoint;
   }
 
   /**
@@ -78,14 +73,14 @@ public class OdeService implements JbiMessageExchangeProcessor {
    */
   public void activate() throws JBIException {
     if (_serviceref ==  null) {
-      ServiceEndpoint[] candidates = _ode.getContext().getExternalEndpointsForService(_jbiServiceName);
+      ServiceEndpoint[] candidates = _ode.getContext().getExternalEndpointsForService(_endpoint.serviceName);
       if (candidates.length != 0) {
         _external = candidates[0];
       }
     }
-    _internal = _ode.getContext().activateEndpoint(_jbiServiceName, _jbiPortName);
+    _internal = _ode.getContext().activateEndpoint(_endpoint.serviceName, _endpoint.portName);
     if (__log.isDebugEnabled()) {
-      __log.debug("Activated service " + _jbiServiceName + " on port " +  _jbiPortName);
+      __log.debug("Activated endpoint " + _endpoint);
     }
     // TODO: Is there a race situation here?
   }
@@ -95,7 +90,7 @@ public class OdeService implements JbiMessageExchangeProcessor {
    */
   public void deactivate() throws JBIException {
     _ode.getContext().deactivateEndpoint(_internal);
-    __log.debug("Dectivated service " + _jbiServiceName + " with port " +  _jbiPortName);
+    __log.debug("Dectivated endpoint " +  _endpoint);
   }
 
   public ServiceEndpoint getInternalServiceEndpoint() {
@@ -209,12 +204,11 @@ public class OdeService implements JbiMessageExchangeProcessor {
     MyRoleMessageExchange odeMex = null;
     try {
       if (__log.isDebugEnabled()) {
-      __log.debug("invokeOde() JBI exchangeId=" + jbiMex.getExchangeId() + " serviceName=" + serviceName + " operation=" + jbiMex.getOperation() );
-      __log.debug("invokeOde() ODE servideId=" + _odeServiceId + " serviceName=" + _jbiServiceName + " port=" + _jbiPortName + " internal=" + _internal );
+          __log.debug("invokeOde() JBI exchangeId=" + jbiMex.getExchangeId() + " endpoint=" + _endpoint + " operation=" + jbiMex.getOperation() );
       }
       odeMex = _ode._server.getEngine().createMessageExchange(
         jbiMex.getExchangeId(),
-        _odeServiceId,
+        _endpoint.serviceName,
         jbiMex.getOperation().getLocalPart());
 
       if (odeMex.getOperation() != null) {
@@ -333,13 +327,8 @@ public class OdeService implements JbiMessageExchangeProcessor {
     }
   }
 
-  public QName getJbiServiceName() {
-    return _jbiServiceName;
-  }
-
-  
-  public QName getOdeServiceId() {
-    return _jbiServiceName;
+  public Endpoint getEndpoint() {
+    return _endpoint;
   }
 
   

@@ -92,7 +92,7 @@ public class BpelProcess {
     private Map<OPartnerLink, PartnerLinkMyRoleImpl> _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
 
     BpelEngineImpl _engine;
-    
+
     DebuggerSupport _debugger;
 
     final OProcess _oprocess;
@@ -111,14 +111,9 @@ public class BpelProcess {
 
     private DeploymentUnit _du;
 
-    public BpelProcess(
-            QName pid, 
-            DeploymentUnit du,
-            OProcess oprocess, 
-            Map<OPartnerLink, Endpoint> myRoleEndpointNames,
-            Map<OPartnerLink, Endpoint> initialPartners,
-            BpelEventListener debugger, 
-            ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,
+    public BpelProcess(QName pid, DeploymentUnit du, OProcess oprocess,
+            Map<OPartnerLink, Endpoint> myRoleEndpointNames, Map<OPartnerLink, Endpoint> initialPartners,
+            BpelEventListener debugger, ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,
             List<MessageExchangeInterceptor> localMexInterceptors) {
         _pid = pid;
         _du = du;
@@ -132,7 +127,7 @@ public class BpelProcess {
                 Endpoint endpoint = myRoleEndpointNames.get(pl);
                 if (endpoint == null)
                     throw new NullPointerException("No service name for plink " + pl);
-                PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(pl,endpoint);
+                PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(pl, endpoint);
                 _myRoles.put(pl, myRole);
                 _endpointToMyRoleMap.put(endpoint, myRole);
             }
@@ -143,7 +138,6 @@ public class BpelProcess {
             }
         }
     }
-
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
         StringBuffer sb = new StringBuffer(partnerlinkName);
@@ -158,11 +152,8 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
-        PartnerLinkMyRoleImpl target = null;
-        for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
-            if (endpoint.serviceName.equals(mex.getServiceName()))
-                target = _endpointToMyRoleMap.get(endpoint);
-        }
+        PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
+
         if (target == null) {
             String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
             __log.error(errmsg);
@@ -179,6 +170,14 @@ public class BpelProcess {
         }
 
         target.invokeMyRole(mex);
+    }
+
+    private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
+        for (Map.Entry<Endpoint,PartnerLinkMyRoleImpl> e : _endpointToMyRoleMap.entrySet()) {
+            if (e.getKey().serviceName.equals(serviceName))
+                return e.getValue();
+        }
+        return null;
     }
 
     void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
@@ -325,20 +324,21 @@ public class BpelProcess {
 
     private abstract class PartnerLinkRoleImpl {
         protected OPartnerLink _plinkDef;
+
         protected Element _initialEPR;
-        
+
         PartnerLinkRoleImpl(OPartnerLink plink) {
             _plinkDef = plink;
         }
-
 
         String getPartnerLinkName() {
             return _plinkDef.name;
         }
 
         /**
-         * Get the initial value of this role's EPR. This value is obtained from 
-         * the integration layer when the process is enabled on the server. 
+         * Get the initial value of this role's EPR. This value is obtained from
+         * the integration layer when the process is enabled on the server.
+         * 
          * @return
          */
         Element getInitialEPR() {
@@ -357,7 +357,6 @@ public class BpelProcess {
             _endpoint = endpoint;
         }
 
-        
         public String toString() {
             StringBuffer buf = new StringBuffer("{PartnerLinkRole-");
             buf.append(_plinkDef.name);
@@ -366,7 +365,7 @@ public class BpelProcess {
             buf.append(" on ");
             buf.append(_endpoint);
             buf.append('}');
-            
+
             return buf.toString();
         }
 
@@ -629,8 +628,9 @@ public class BpelProcess {
 
     private class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         Endpoint _initialPartner;
+
         public PartnerRoleChannel _channel;
-        
+
         private PartnerLinkPartnerRoleImpl(OPartnerLink plink, Endpoint initialPartner) {
             super(plink);
             _initialPartner = initialPartner;
@@ -646,7 +646,7 @@ public class BpelProcess {
             processInstance.invocationResponse(messageExchange);
             processInstance.execute();
         }
-        
+
     }
 
     /**
@@ -718,11 +718,13 @@ public class BpelProcess {
         _debugger = new DebuggerSupport(this);
         // Activate all the my-role endpoints.
         for (PartnerLinkMyRoleImpl myrole : _myRoles.values()) {
-            myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint, myrole._plinkDef.myRolePortType);
+            myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint,
+                    myrole._plinkDef.myRolePortType);
         }
-        
+
         for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
-            PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid, _du, prole._plinkDef.partnerRolePortType,prole._initialPartner);
+            PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid, _du,
+                    prole._plinkDef.partnerRolePortType, prole._initialPartner);
             prole._channel = channel;
             prole._initialEPR = channel.getInitialEndpointReference().toXML().getDocumentElement();
         }

@@ -19,12 +19,13 @@
 
 package org.apache.ode.bpel.iapi;
 
-import javax.xml.namespace.QName;
 import java.io.File;
-import java.util.Set;
 import java.util.Collection;
+import java.util.Set;
 
-import org.apache.ode.bom.wsdl.Definition4BPEL;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dd.DeployDocument;
 
 
@@ -51,14 +52,14 @@ public interface DeploymentUnit {
      * @param namespaceURI WSDL targetNamespace
      * @return corresponding WSDL document
      */
-    Definition4BPEL getDefinitionForNamespace(String namespaceURI);
+    Definition getDefinitionForNamespace(String namespaceURI);
 
     
     /**
      * Get a collection of all the WSDL definitions in the deployment directory.
      * @return collection of WSDL documents
      */
-    Collection<Definition4BPEL> getDefinitions();
+    Collection<Definition> getDefinitions();
 
 
   /**
