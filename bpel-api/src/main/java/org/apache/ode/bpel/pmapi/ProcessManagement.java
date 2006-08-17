@@ -72,7 +72,7 @@ public interface ProcessManagement {
    * @param aids activity indentifiers
    * @return a list of activity extension as {@link ActivityExtInfoListDocument}
    */
-  ActivityExtInfoListDocument getExtensibilityElements(QName pid, int[] aids);
+  ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids);
 
 
   /**
