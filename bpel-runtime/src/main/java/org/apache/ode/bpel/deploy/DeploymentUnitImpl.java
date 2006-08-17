@@ -107,6 +107,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         _lastModified = _descriptorFile.lastModified();
     }
 
+    
     /**
      * Checking for each BPEL file if we have a corresponding compiled process.
      * If we don't, starts compilation. The force parameter just forces
