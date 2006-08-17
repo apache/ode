@@ -67,7 +67,7 @@ class MyEndpointReference implements EndpointReference {
     
     // TODO: handle the operation name problem.
     DocumentFragment fragment = se.getAsReference(null);
-    root.appendChild(fragment);
+    root.appendChild(xml.importNode(fragment,true));
     return xml;
   }
 

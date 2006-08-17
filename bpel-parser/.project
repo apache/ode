@@ -1,12 +1,7 @@
 <projectDescription>
   <name>ode-bpel-parser</name>
   <comment/>
-  <projects>
-    <project>ode-bpel-bom</project>
-    <project>ode-bpel-scripts</project>
-    <project>ode-utils</project>
-    <project>ode-bpel-schemas</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
