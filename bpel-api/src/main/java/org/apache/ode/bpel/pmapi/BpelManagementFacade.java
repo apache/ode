@@ -22,14 +22,11 @@ import org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OProcess;
 
-import java.util.Date;
-import java.util.List;
-
 import javax.xml.namespace.QName;
+import java.util.Date;
 
 /**
  * <p>
@@ -77,7 +74,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @param count maximum number of events to get
    * @return array of {@link ProcessInstanceEvent}s.
    */
-  List<BpelEvent> getEvents(Long iid, int startIdx, int count) throws ManagementException;
+  EventInfoListDocument getEvents(Long iid, int startIdx, int count) throws ManagementException;
   
   /**
    * Get the current number of events for an instance.

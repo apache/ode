@@ -18,17 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Node;
-
 import org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
@@ -38,9 +27,9 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.pmapi.EventInfoListDocument;
 import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.InvalidRequestException;
 import org.apache.ode.bpel.pmapi.ManagementException;
@@ -49,6 +38,14 @@ import org.apache.ode.bpel.pmapi.TInstanceInfo.EventInfo;
 import org.apache.ode.bpel.runtime.breaks.ActivityBreakpointImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.uuid.UUIDGen;
+import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Implementation of the instance/process management interaction. This class implements
@@ -85,7 +82,7 @@ class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         });
     }
 
-    public List<BpelEvent> getEvents(final Long iid, final int startIdx, final int count)
+    public EventInfoListDocument getEvents(final Long iid, final int startIdx, final int count)
             throws ManagementException {
 
         // TODO: this is a bit of hack, if there are two events with exactly the
@@ -100,7 +97,7 @@ class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         }
 
         if (startIdx >= timeline.size())
-            return Collections.emptyList();
+            return EventInfoListDocument.Factory.newInstance();
 
         timeline = timeline.subList(startIdx,Math.min(timeline.size(),startIdx+count));
         String startdt = timeline.get(0);
