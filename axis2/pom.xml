@@ -103,6 +103,11 @@
         </dependency>
 
         <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-tools</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>ws-commons</groupId>
             <artifactId>neethi</artifactId>
             <version>1.0.1</version>

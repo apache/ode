@@ -55,6 +55,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Axis2 wrapper for process and instance management interfaces.
@@ -109,7 +110,7 @@ public class ManagementService {
                 SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
                 outMsgContext.setEnvelope(envelope);
 
-                envelope.getBody().addChild(convertToOM(result));
+                envelope.getBody().addChild(convertToOM(soapFactory, result));
 
                 if (__log.isDebugEnabled()) {
                     __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
@@ -145,7 +146,7 @@ public class ManagementService {
         if (elmt == null) return null;
         else if (clazz.equals(String.class)) {
             return elmt.getText();
-        } else if (clazz.equals(Boolean.class)) {
+        } else if (clazz.equals(Boolean.class) || clazz.equals(Boolean.TYPE)) {
             return (elmt.getText().equals("true") || elmt.getText().equals("yes")) ? Boolean.TRUE : Boolean.FALSE;
         } else if (clazz.equals(QName.class)) {
             QName qname = elmt.getTextAsQName();
@@ -192,13 +193,21 @@ public class ManagementService {
         } else throw new AxisFault("Couldn't use element " + elmt + " to obtain a management method parameter.");
     }
 
-    private static OMElement convertToOM(Object obj) throws AxisFault {
+    private static OMElement convertToOM(SOAPFactory soapFactory, Object obj) throws AxisFault {
         if (obj instanceof XmlObject) {
             try {
                 return new StAXOMBuilder(((XmlObject)obj).newInputStream()).getDocumentElement();
             } catch (XMLStreamException e) {
                 throw new AxisFault("Couldn't serialize result to an outgoing messages.", e);
             }
+        } else if (obj instanceof List) {
+            OMElement listElmt = soapFactory.createOMElement("list", null);
+            for (Object stuff : ((List) obj)) {
+                OMElement stuffElmt = soapFactory.createOMElement("element", null);
+                stuffElmt.setText(stuff.toString());
+                listElmt.addChild(stuffElmt);
+            }
+            return listElmt;
         } else throw new AxisFault("Couldn't convert object " + obj + " into a response element.");
     }
 

@@ -88,7 +88,7 @@ public class ProcessManagementTest extends TestCase {
         OMElement root = buildMessage("listAllProcesses", new String[] {}, new String[] {});
         OMElement result = sendToPM(root);
         // Hopefully we have at least two processes (so 4 opening/closing elmts)
-        assert(result.toString().indexOf("process-info") >= 4);
+        assert(result.toString().split("process-info").length >= 5);
         // And our deployed processes are there
         assert(result.toString().indexOf("DynPartnerMain") >= 0);
         assert(result.toString().indexOf("DynPartnerResponder") >= 0);
@@ -192,9 +192,6 @@ public class ProcessManagementTest extends TestCase {
     }
 
     private OMElement buildMessage(String operation, String[] params, Object[] values) {
-        int[] ia = new int[] {1, 2, 3};
-        System.out.println("=> " + ia.getClass().isArray());
-
         //use the factory to create three elements
         OMNamespace pmns = _factory.createOMNamespace(PMAPI_NS, "pmapi");
         OMElement root = _factory.createOMElement(operation, pmns);
