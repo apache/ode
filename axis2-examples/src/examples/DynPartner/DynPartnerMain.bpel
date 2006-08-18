@@ -39,6 +39,7 @@
 
     <invoke name="get-endpoint" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
             operation="getDynamicEndpoint" inputVariable="dummy" outputVariable="partnerEndpoint">
+      <rdfs:label xml:space="preserve">Receive Order 1</rdfs:label>
       <correlations>
         <correlation set="dummyCorr" initiate="yes" pattern="request"/>
       </correlations>
@@ -60,6 +61,7 @@
     <!-- Invoking the partner link service endpoint that has just been assigned -->
     <invoke name="dynamic-invoke" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
             operation="acknowledge" inputVariable="dummy2" outputVariable="partnerAck">
+      <rdfs:label xml:space="preserve">Receive Order 2</rdfs:label>
       <correlations>
         <correlation set="dummyCorr" initiate="no" pattern="request"/>
       </correlations>
@@ -98,6 +100,7 @@
     <!-- Invoking the partner link service endpoint that has just been explicitly assigned -->
     <invoke name="dynamic-invoke" partnerLink="responderPartnerLink" portType="resp:DynResponderPortType"
             operation="acknowledge" inputVariable="dummy2" outputVariable="partnerAck">
+      <rdfs:label xml:space="preserve">Receive Order 3</rdfs:label>
       <correlations>
         <correlation set="dummyCorr" initiate="no" pattern="request"/>
       </correlations>
@@ -111,7 +114,9 @@
     </assign>
 
     <reply name="end" partnerLink="initiatorPartnerLink"
-           portType="test:DynMainPortType" operation="execute" variable="result"/>
+           portType="test:DynMainPortType" operation="execute" variable="result">
+        <rdfs:label xml:space="preserve">Receive Order 4</rdfs:label>
+    </reply>
 
   </sequence>
 </process>
