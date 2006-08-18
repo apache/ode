@@ -27,23 +27,22 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
+import org.apache.ode.axis2.service.ServiceClientUtil;
+import org.apache.ode.utils.Namespaces;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class DeploymentTest extends TestCase {
 
-    public static final String PMAPI_NS = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
+    private ServiceClientUtil _client;
 
     public void testDeployUndeploy() throws Exception {
         // Create a factory
         OMFactory factory = OMAbstractFactory.getOMFactory();
 
         // Use the factory to create three elements
-        OMNamespace depns = factory.createOMNamespace(PMAPI_NS,"deployapi");
+        OMNamespace depns = factory.createOMNamespace(Namespaces.ODE_PMAPI,"deployapi");
         OMElement root = factory.createOMElement("deploy", null);
         OMElement namePart = factory.createOMElement("name", depns);
         namePart.setText("DynPartner");
@@ -67,12 +66,12 @@ public class DeploymentTest extends TestCase {
         sendToDeployment(root);
 
         // Check deployment
-        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
         assert(result.toString().split("process-info").length == 3);
-        listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerResponder", ""});
         result = sendToPM(listRoot);
         assert(result.toString().split("process-info").length == 3);
@@ -86,44 +85,22 @@ public class DeploymentTest extends TestCase {
         // Undeploy
         sendToDeployment(root);
 
-        listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         result = sendToPM(listRoot);
         assert(result.toString().indexOf("process-info") < 0);
     }
 
+    protected void setUp() throws Exception {
+        _client = new ServiceClientUtil();
+    }
+
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return send(msg, "http://localhost:8080/ode/services/ProcessManagement");
+        return _client.send(msg, "http://localhost:8080/ode/services/ProcessManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return send(msg, "http://localhost:8080/ode/services/DeploymentService");
-    }
-
-    private OMElement send(OMElement msg, String url) throws AxisFault {
-        Options options = new Options();
-        EndpointReference target = new EndpointReference(url);
-        options.setTo(target);
-
-        ServiceClient serviceClient = new ServiceClient();
-        serviceClient.setOptions(options);
-
-        return serviceClient.sendReceive(msg);
-    }
-
-    private OMElement buildMessage(String operation, String[] params, String[] values) {
-      //create a factory
-      OMFactory factory = OMAbstractFactory.getOMFactory();
-
-      //use the factory to create three elements
-      OMNamespace pmns = factory.createOMNamespace(PMAPI_NS,"pmapi");
-      OMElement root = factory.createOMElement(operation, pmns);
-      for (int m = 0; m < params.length; m++) {
-        OMElement omelmt = factory.createOMElement(params[m], null);
-        omelmt.setText(values[m]);
-        root.addChild(omelmt);
-      }
-      return root;
+        return _client.send(msg, "http://localhost:8080/ode/services/DeploymentService");
     }
 
 }
