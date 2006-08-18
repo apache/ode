@@ -19,20 +19,19 @@
 
 package org.apache.ode.daohib.bpel;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
+import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.common.Filter;
+import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.utils.ISO8601DateParser;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.common.Filter;
-import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.utils.ISO8601DateParser;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class used for converting "filter" objects into Hibernate
@@ -57,10 +56,10 @@ class CriteriaBuilder {
     
     // Filtering on name and namespace
     if (filter.getNameFilter() != null) {
-      processCrit.add(Restrictions.like("processName", filter.getNameFilter().replaceAll("\\*", "%")));
+      processCrit.add(Restrictions.like("typeName", filter.getNameFilter().replaceAll("\\*", "%")));
     }
     if (filter.getNamespaceFilter() != null) {
-      processCrit.add(Restrictions.like("processNamespace", filter.getNamespaceFilter().replaceAll("\\*", "%")));
+      processCrit.add(Restrictions.like("typeNamespace", filter.getNamespaceFilter().replaceAll("\\*", "%")));
     }
 
     // Specific filter for status (using a disjunction between possible statuses)

@@ -31,7 +31,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessPropertyDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -358,16 +358,22 @@ class ProcessAndInstanceManagementImpl
         return ret;
     }
 
-    public List<BpelEvent> listEvents(String instanceFilter, String eventFilter, int maxCount) {
-
+    public EventInfoListDocument listEvents(String instanceFilter, String eventFilter, int maxCount) {
         final InstanceFilter ifilter = new InstanceFilter(instanceFilter,null,0);
         final BpelEventFilter efilter = new BpelEventFilter(eventFilter,maxCount);
-
-        return dbexec(new BpelDatabase.Callable<List<BpelEvent>>()  {
-            public List<BpelEvent> run(BpelDAOConnection session) throws Exception {
-                return session.bpelEventQuery(ifilter, efilter);
+        EventInfoListDocument eid = EventInfoListDocument.Factory.newInstance();
+        final TEventInfoList eil = eid.addNewEventInfoList();
+        dbexec(new BpelDatabase.Callable<Object>()  {
+            public Object run(BpelDAOConnection session) throws Exception {
+                List<BpelEvent> events = session.bpelEventQuery(ifilter, efilter);
+                for (BpelEvent event : events) {
+                    TEventInfo tei = eil.addNewEventInfo();
+                    fillEventInfo(tei, event);
+                }
+                return null;
             }
         });
+        return eid;
     }
 
     public ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids) {
@@ -523,8 +529,6 @@ class ProcessAndInstanceManagementImpl
         return ret;
     }
 
-
-
     /**
      * Generate a {@link ScopeInfoDocument} for a given scope instance.
      * @param siid scope instance identifier
@@ -556,11 +560,8 @@ class ProcessAndInstanceManagementImpl
                 return null;
             }
         });
-
-
         return ret;
     }
-
 
     /**
      * Fill in the <code>process-info</code> element of the transfer object.
@@ -796,6 +797,92 @@ class ProcessAndInstanceManagementImpl
         tref.setStatus(__psc.cvtScopeStatus(scope.getState()));
         tref.setName(scope.getName());
         tref.setModelId("" + scope.getModelId());
+    }
+
+    private void fillEventInfo(TEventInfo info, BpelEvent event) {
+        info.setName(BpelEvent.eventName(event));
+        info.setType(event.getType().toString());
+        info.setLineNumber(event.getLineNo());
+        Calendar c = Calendar.getInstance();
+        c.setTime(event.getTimestamp());
+        info.setTimestamp(c);
+        if (event instanceof ActivityEvent) {
+            info.setActivityName(((ActivityEvent)event).getActivityName());
+            info.setActivityId(((ActivityEvent)event).getActivityId());
+            info.setActivityType(((ActivityEvent)event).getActivityType());
+            info.setActivityDefinitionId(((ActivityEvent)event).getActivityDeclarationId());
+        }
+        if (event instanceof CorrelationEvent) {
+            info.setPortType(((CorrelationEvent)event).getPortType());
+            info.setOperation(((CorrelationEvent)event).getOperation());
+            info.setMexId(((CorrelationEvent)event).getMessageExchangeId());
+        }
+        if (event instanceof CorrelationMatchEvent) {
+            info.setPortType(((CorrelationMatchEvent)event).getPortType());
+        }
+        if (event instanceof CorrelationSetEvent) {
+            info.setCorrelationSet(((CorrelationSetEvent)event).getCorrelationSetName());
+        }
+        if (event instanceof CorrelationSetWriteEvent) {
+            info.setCorrelationKey(((CorrelationSetWriteEvent)event).getCorrelationSetName());
+        }
+        if (event instanceof ExpressionEvaluationEvent) {
+            info.setExpression(((ExpressionEvaluationEvent)event).getExpression());
+        }
+        if (event instanceof ExpressionEvaluationFailedEvent) {
+            info.setFault(((ExpressionEvaluationFailedEvent)event).getFault());
+        }
+        if (event instanceof NewProcessInstanceEvent) {
+            if ((((NewProcessInstanceEvent)event).getRootScopeId()) != null)
+                info.setRootScopeId(((NewProcessInstanceEvent)event).getRootScopeId());
+            info.setScopeDefinitionId(((NewProcessInstanceEvent)event).getScopeDeclarationId());
+        }
+        if (event instanceof PartnerLinkEvent) {
+            info.setPartnerLinkName(((PartnerLinkEvent)event).getpLinkName());
+        }
+        if (event instanceof ProcessCompletionEvent) {
+            info.setFault(((ProcessCompletionEvent)event).getFault());
+        }
+        if (event instanceof ProcessEvent) {
+            info.setProcessId(((ProcessEvent)event).getProcessId());
+            info.setProcessType(((ProcessEvent)event).getProcessName());
+        }
+        if (event instanceof ProcessInstanceEvent) {
+            info.setInstanceId(((ProcessInstanceEvent)event).getProcessInstanceId());
+        }
+        if (event instanceof ProcessInstanceStartedEvent) {
+            info.setRootScopeId(((ProcessInstanceStartedEvent)event).getRootScopeId());
+            info.setRootScopeDeclarationId(((ProcessInstanceStartedEvent)event).getScopeDeclarationId());
+        }
+        if (event instanceof ProcessInstanceStateChangeEvent) {
+            info.setOldState(((ProcessInstanceStateChangeEvent)event).getOldState());
+            info.setNewState(((ProcessInstanceStateChangeEvent)event).getNewState());
+        }
+        if (event instanceof ProcessMessageExchangeEvent) {
+            info.setPortType(((ProcessMessageExchangeEvent)event).getPortType());
+            info.setOperation(((ProcessMessageExchangeEvent)event).getOperation());
+            info.setMexId(((ProcessMessageExchangeEvent)event).getMessageExchangeId());
+        }
+        if (event instanceof ScopeCompletionEvent) {
+            info.setSuccess(((ScopeCompletionEvent)event).isSuccess());
+            info.setFault(((ScopeCompletionEvent)event).getFault());
+        }
+        if (event instanceof ScopeEvent) {
+            info.setScopeId(((ScopeEvent)event).getScopeId());
+            if (((ScopeEvent)event).getParentScopeId() != null)
+                info.setParentScopeId(((ScopeEvent)event).getParentScopeId());
+            if (((ScopeEvent)event).getScopeName() != null)
+                info.setScopeName(((ScopeEvent)event).getScopeName());
+            info.setScopeDefinitionId(((ScopeEvent)event).getScopeDeclarationId());
+        }
+        if (event instanceof ScopeFaultEvent) {
+            info.setFault(((ScopeFaultEvent)event).getFaultType());
+            info.setFaultLineNumber(((ScopeFaultEvent)event).getFaultLineNo());
+            info.setExplanation(((ScopeFaultEvent)event).getExplanation());
+        }
+        if (event instanceof VariableEvent) {
+            info.setVariableName(((VariableEvent)event).getVarName());
+        }
     }
 
     /**
