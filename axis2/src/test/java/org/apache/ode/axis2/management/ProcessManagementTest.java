@@ -27,9 +27,8 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
+import org.apache.ode.axis2.service.ServiceClientUtil;
+import org.apache.ode.utils.Namespaces;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -42,13 +41,12 @@ import java.util.Iterator;
 
 public class ProcessManagementTest extends TestCase {
 
-    public static final String PMAPI_NS = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
-
     private OMFactory _factory;
     private DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private ServiceClientUtil _client;
 
     public void testListProcesses() throws Exception {
-        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
@@ -58,7 +56,7 @@ public class ProcessManagementTest extends TestCase {
         Calendar notSoLongAgo = Calendar.getInstance();
         notSoLongAgo.add(Calendar.MINUTE, -2);
         String notSoLongAgoStr = xsdDF.format(notSoLongAgo.getTime());
-        listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerResponder namespace=http://ode/bpel/responder " +
                         "deployed>=" + notSoLongAgoStr, ""});
         result = sendToPM(listRoot);
@@ -66,15 +64,15 @@ public class ProcessManagementTest extends TestCase {
     }
 
     public void testProcessFiles() throws Exception {
-        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         System.out.println("=> " + result);
         ArrayList<String> filenames = new ArrayList<String>();
-        Iterator docs = result.getFirstElement().getFirstChildWithName(new QName(PMAPI_NS, "documents")).getChildElements();
+        Iterator docs = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "documents")).getChildElements();
         while (docs.hasNext()) {
             OMElement docElmt = (OMElement) docs.next();
-            filenames.add(docElmt.getFirstChildWithName(new QName(PMAPI_NS, "name")).getText());
+            filenames.add(docElmt.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "name")).getText());
         }
         // Checking that all necessary files are really there
         assert(filenames.contains("deploy.xml"));
@@ -85,7 +83,7 @@ public class ProcessManagementTest extends TestCase {
     }
 
     public void testListAllProcesses() throws Exception {
-        OMElement root = buildMessage("listAllProcesses", new String[] {}, new String[] {});
+        OMElement root = _client.buildMessage("listAllProcesses", new String[] {}, new String[] {});
         OMElement result = sendToPM(root);
         // Hopefully we have at least two processes (so 4 opening/closing elmts)
         assert(result.toString().split("process-info").length >= 5);
@@ -95,7 +93,7 @@ public class ProcessManagementTest extends TestCase {
     }
 
     public void testSetProcessProperty() throws Exception {
-        OMElement root = buildMessage("setProcessProperty",
+        OMElement root = _client.buildMessage("setProcessProperty",
                 new String[] {"pid", "propertyName", "propertyValue"},
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
                         new QName("http://ode/custom/ns", "someprop"), "somevalue" });
@@ -107,7 +105,7 @@ public class ProcessManagementTest extends TestCase {
     public void testSetProcessPropertyNode() throws Exception {
         OMElement propElmt = _factory.createOMElement("testprop", null);
         propElmt.setText("propvalue");
-        OMElement root = buildMessage("setProcessPropertyNode",
+        OMElement root = _client.buildMessage("setProcessPropertyNode",
                 new String[] {"pid", "propertyName", "propertyValue"},
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
                         new QName("http://ode/custom/ns", "someprop"), propElmt });
@@ -118,7 +116,7 @@ public class ProcessManagementTest extends TestCase {
     }
 
     public void testGetExtensibilityElements() throws Exception {
-        OMElement root = buildMessage("getExtensibilityElements",
+        OMElement root = _client.buildMessage("getExtensibilityElements",
                 new String[] {"pid", "aids"},
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
                         new String[] {"aid", "12", "14"} });
@@ -129,9 +127,10 @@ public class ProcessManagementTest extends TestCase {
     protected void setUp() throws Exception {
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
+        _client = new ServiceClientUtil();
 
         // Use the factory to create three elements
-        OMNamespace depns = _factory.createOMNamespace(PMAPI_NS, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("deploy", null);
         OMElement namePart = _factory.createOMElement("name", depns);
         namePart.setText("DynPartner");
@@ -157,7 +156,7 @@ public class ProcessManagementTest extends TestCase {
 
     protected void tearDown() throws Exception {
         // Prepare undeploy message
-        OMNamespace depns = _factory.createOMNamespace(PMAPI_NS, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("processName", null);
         part.setText("DynPartner");
@@ -166,56 +165,18 @@ public class ProcessManagementTest extends TestCase {
         // Undeploy
         sendToDeployment(root);
 
-        OMElement listRoot = buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         assert(result.toString().indexOf("process-info") < 0);
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return send(msg, "http://localhost:8080/ode/services/ProcessManagement");
+        return _client.send(msg, "http://localhost:8080/ode/services/ProcessManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return send(msg, "http://localhost:8080/ode/services/DeploymentService");
-    }
-
-    private OMElement send(OMElement msg, String url) throws AxisFault {
-        Options options = new Options();
-        EndpointReference target = new EndpointReference(url);
-        options.setTo(target);
-
-        ServiceClient serviceClient = new ServiceClient();
-        serviceClient.setOptions(options);
-
-        return serviceClient.sendReceive(msg);
-    }
-
-    private OMElement buildMessage(String operation, String[] params, Object[] values) {
-        //use the factory to create three elements
-        OMNamespace pmns = _factory.createOMNamespace(PMAPI_NS, "pmapi");
-        OMElement root = _factory.createOMElement(operation, pmns);
-        for (int m = 0; m < params.length; m++) {
-            OMElement omelmt = _factory.createOMElement(params[m], null);
-            if (values[m] instanceof String)
-                omelmt.setText((String) values[m]);
-            else if (values[m] instanceof QName)
-                omelmt.setText((QName) values[m]);
-            else if (values[m] instanceof OMElement)
-                omelmt.addChild((OMElement) values[m]);
-            else if (values[m] instanceof Object[]) {
-                Object[] subarr = (Object[]) values[m];
-                String elmtName = (String) subarr[0];
-                for (int p = 1; p < subarr.length; p++) {
-                    OMElement omarrelmt = _factory.createOMElement(elmtName, null);
-                    omarrelmt.setText(subarr[p].toString());
-                    omelmt.addChild(omarrelmt);
-                }
-            } else throw new UnsupportedOperationException("Type " + values[m].getClass() + "isn't supported as " +
-                    "a parameter type (only String and QName are).");
-            root.addChild(omelmt);
-        }
-        return root;
+        return _client.send(msg, "http://localhost:8080/ode/services/DeploymentService");
     }
 
 }
