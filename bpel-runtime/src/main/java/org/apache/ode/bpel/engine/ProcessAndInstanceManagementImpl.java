@@ -383,7 +383,7 @@ class ProcessAndInstanceManagementImpl
 
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
-            if (obase.debugInfo.extensibilityElements != null) {
+            if (obase.debugInfo != null && obase.debugInfo.extensibilityElements != null) {
                 for (Map.Entry<QName, Element> entry : obase.debugInfo.extensibilityElements.entrySet()) {
                     TActivityExtInfo taei = taeil.addNewActivityExtInfo();
                     taei.setAiid(""+aid);
