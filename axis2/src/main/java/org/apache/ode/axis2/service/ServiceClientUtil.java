@@ -74,7 +74,9 @@ public class ServiceClientUtil {
         OMElement root = _factory.createOMElement(operation, pmns);
         for (int m = 0; m < params.length; m++) {
             OMElement omelmt = _factory.createOMElement(params[m], null);
-            if (values[m] instanceof String)
+            if (values[m] == null)
+                omelmt.setText("");
+            else if (values[m] instanceof String)
                 omelmt.setText((String) values[m]);
             else if (values[m] instanceof QName)
                 omelmt.setText((QName) values[m]);
