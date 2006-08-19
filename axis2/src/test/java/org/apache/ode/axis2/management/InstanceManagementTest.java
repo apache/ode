@@ -188,4 +188,8 @@ public class InstanceManagementTest extends TestCase {
         return _client.send(msg, "http://localhost:8080/ode/services/DeploymentService");
     }
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(new InstanceManagementTest());
+    }
+
 }

@@ -143,7 +143,8 @@ public class ManagementService {
 
     private static Object convertFromOM(Class clazz, OMElement elmt) throws AxisFault {
         // Here comes the nasty code...
-        if (elmt == null) return null;
+        if (elmt == null || elmt.getText().length() == 0 && !elmt.getChildElements().hasNext())
+            return null;
         else if (clazz.equals(String.class)) {
             return elmt.getText();
         } else if (clazz.equals(Boolean.class) || clazz.equals(Boolean.TYPE)) {
