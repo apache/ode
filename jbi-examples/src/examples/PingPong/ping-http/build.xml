@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="Ping-HTTP" default="service-unit">
-
-    <target name="clean" depends="">
-        <delete dir="build" />
-    </target>
-    
-    <target name="service-unit" depends="clean">
-        <mkdir dir="build" />
-        <zip destfile="build/Ping-HTTP.zip">
-            <fileset dir="." includes="*.wsdl"/>
-        </zip>
-    </target>
-
+    <import file="../../base-su.xml" />
 </project>
