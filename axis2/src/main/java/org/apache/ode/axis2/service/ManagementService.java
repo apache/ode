@@ -84,9 +84,9 @@ public class ManagementService {
             axisConfig.addService(processService);
             axisConfig.addService(instanceService);
         } catch (WSDLException e) {
-            e.printStackTrace();
+            __log.error("Couldn't start-up management services!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            __log.error("Couldn't start-up management services!", e);
         }
     }
 
