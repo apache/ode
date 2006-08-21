@@ -1,0 +1,39 @@
+
+<!-- ANT Build File used for building JBI examples. This file
+     is imported from each example directory, and should not
+     be used directly. -->
+
+<project name="base-sa" >
+    <import file="base.xml" />
+
+    <property name="safilename" value="${ant.project.name}-sa.zip" />
+    <property name="safile" location="${build.dir}/${safilename}" />
+    <property name="sus.dir" location="${build.dir}/su" />
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <subant target="clean">
+            <fileset dir="${basedir}" includes="*/build.xml"/>
+        </subant>
+    </target>
+ 
+    <target name="service-units" depends="init" >
+        <subant target="service-unit">
+            <property name="dist.dir" value="${sus.dir}" />
+            <fileset dir="." includes="*/build.xml"/>
+        </subant>
+    </target>
+
+    <target name="init" depends="base.init">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${sus.dir}" />
+    </target>
+
+    <target name="assembly" depends="init,service-units">
+
+        <zip destfile="build/HelloWorld2-Assembly.zip">
+            <fileset dir="${sus.dir}" includes="*" />
+            <zipfileset dir="." includes="jbi.xml" prefix="META-INF/" />
+        </zip>
+    </target>
+</project>
