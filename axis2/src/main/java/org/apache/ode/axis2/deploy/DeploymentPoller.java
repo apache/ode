@@ -141,8 +141,7 @@ public class DeploymentPoller {
                     - ".deployed".length()));
 
             if (!deployDir.exists()) {
-                // TODO handle undeploy
-
+                _odeServer.getBpelServer().undeploy(deployDir);
             }
         }
 
