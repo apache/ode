@@ -27,11 +27,11 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.service.ManagementService;
-import org.apache.ode.axis2.service.DeploymentService;
+import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
-import org.apache.ode.axis2.deploy.DeploymentPoller;
+import org.apache.ode.axis2.service.DeploymentService;
+import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -221,8 +221,7 @@ public class ODEServer {
     try {
       _axisConfig.removeService(serviceName.getLocalPart());
     } catch (AxisFault axisFault) {
-      // TODO do something!
-      axisFault.printStackTrace();
+      __log.error("Couldn't destroy service " + serviceName);
     }
     _services.remove(serviceName);
   }
