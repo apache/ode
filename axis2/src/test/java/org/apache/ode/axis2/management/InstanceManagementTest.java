@@ -83,6 +83,16 @@ public class InstanceManagementTest extends TestCase {
         assert(result.toString().split("instance-info").length == 3);
     }
 
+    public void testGetInstanceInfoFault() throws Exception {
+        // Hopefully this id won't exist
+        OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {"65431"});
+        try {
+            OMElement result = sendToIM(root);
+        } catch (AxisFault axisFault) {
+            assert(axisFault.getCause().toString().indexOf("InstanceNotFoundException") > 0);
+        }
+    }
+
     public void testGetScopeInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
