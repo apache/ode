@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="Pong" default="service-unit">
+<project name="Pong-Process" default="service-unit">
 
-    <import file="../../example-build.xml" />
+    <import file="../../base-su.xml" />
 
 </project>

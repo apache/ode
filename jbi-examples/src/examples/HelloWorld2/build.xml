@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="HelloWorld2" default="assembly">
 
-    <import file="../example-build.xml" />
+    <import file="../base-sa.xml" />
 
     <target name="test" depends="init">
         <antcall target="_sendsoap">
@@ -10,37 +10,4 @@
         </antcall>
     </target>
 
-    <target name="_clean">
-        <delete dir="build" />
-    </target>
-
-    <target name="clean" depends="_clean">
-        <subant target="clean">
-            <fileset dir="." includes="*/build.xml"/>
-        </subant>
-    </target>
-
-
-    <target name="build-process">
-        <subant target="">
-            <property name="ode.home" value="${ode.home}" />
-            <fileset dir="." includes="HelloWorld2-process/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="build-http">
-        <subant target="">
-            <fileset dir="." includes="HelloWorld2-http/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="assembly" depends="_clean,build-process,build-http">
-        <mkdir dir="build" />
-        <zip destfile="build/HelloWorld2-Assembly.zip">
-            <fileset dir="HelloWorld2-process/build" includes="HelloWorld2-Process.zip"/>
-            <fileset dir="HelloWorld2-http/build" includes="HelloWorld2-HTTP.zip"/>
-            <fileset dir="assembly" includes="META-INF/*"/>
-        </zip>
-    </target>
-    
 </project>
