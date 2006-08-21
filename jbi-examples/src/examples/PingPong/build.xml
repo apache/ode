@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="PingPong" default="assembly">
 
-    <import file="../example-build.xml" />
+    <import file="../base-sa.xml" />
 
     <target name="test" depends="init">
         <antcall target="_sendsoap">
@@ -10,46 +10,4 @@
         </antcall>
     </target>
 
-    <target name="_clean">
-        <delete dir="build" />
-    </target>
-
-    <target name="clean" depends="_clean">
-        <subant target="clean">
-            <fileset dir="." includes="*/build.xml"/>
-        </subant>
-    </target>
-
-
-    <target name="build-ping">
-        <subant target="">
-            <property name="ode.home" value="${ode.home}" />
-            <fileset dir="." includes="ping/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="build-pong">
-        <subant target="">
-            <property name="ode.home" value="${ode.home}" />
-            <fileset dir="." includes="pong/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="build-ping-http">
-        <subant target="">
-            <property name="ode.home" value="${ode.home}" />
-            <fileset dir="." includes="ping-http/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="assembly" depends="_clean,build-ping,build-pong,build-ping-http">
-        <mkdir dir="build" />
-        <zip destfile="build/PingPong-Assembly.zip">
-            <fileset dir="ping/build" includes="Ping-Process.zip"/>
-            <fileset dir="ping-http/build" includes="Ping-HTTP.zip"/>
-            <fileset dir="pong/build" includes="Pong-Process.zip"/>
-            <fileset dir="assembly" includes="META-INF/*"/>
-        </zip>
-    </target>
-    
 </project>
