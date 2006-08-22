@@ -19,12 +19,13 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.ode.utils.DOMUtils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
@@ -35,28 +36,47 @@ import java.io.ByteArrayOutputStream;
  */
 public class OMUtils {
 
-  public static Element toDOM(OMElement element) throws AxisFault {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      element.serialize(baos);
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      return DOMUtils.parse(bais).getDocumentElement();
-    } catch (Exception e) {
-      throw new AxisFault("Unable to read Axis input messag.e", e);
+    public static Element toDOM(OMElement element) throws AxisFault {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            element.serialize(baos);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            return DOMUtils.parse(bais).getDocumentElement();
+        } catch (Exception e) {
+            throw new AxisFault("Unable to read Axis input messag.e", e);
+        }
     }
-  }
 
-  public static OMElement toOM(Element element) throws AxisFault {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      DOMUtils.serialize(element, baos);
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(bais);
-      StAXOMBuilder builder = new StAXOMBuilder(parser);
-      return builder.getDocumentElement();
-    } catch (Exception e) {
-      throw new AxisFault("Unable to read Axis input messag.e", e);
+    public static OMElement toOM(Element element) throws AxisFault {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            DOMUtils.serialize(element, baos);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(bais);
+            StAXOMBuilder builder = new StAXOMBuilder(parser);
+            return builder.getDocumentElement();
+        } catch (Exception e) {
+            throw new AxisFault("Unable to read Axis input messag.e", e);
+        }
     }
-  }
+
+    /**
+     * Axiom is supposed to handle this properly however this method is buggy
+     * and doesn't work (whereas setting a QName as text works).
+     * @param elmt
+     * @return text qname
+     */
+    public static QName getTextAsQName(OMElement elmt) {
+        QName qname = elmt.getTextAsQName();
+        // The getTextAsQName is buggy, it sometimes return the full text without extracting namespace
+        if (qname.getNamespaceURI().length() == 0) {
+            int colonIdx = elmt.getText().indexOf(":");
+            String localpart = elmt.getText().substring(colonIdx + 1, elmt.getText().length());
+            String prefix = elmt.getText().substring(0, colonIdx);
+            String ns = elmt.findNamespaceURI(prefix).getName();
+            qname = new QName(ns, localpart, prefix);
+        }
+        return qname;
+    }
 
 }
