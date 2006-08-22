@@ -6,7 +6,7 @@
 	<process name="pns:HelloWorld2">
 		<active>true</active>
 		<provide partnerLink="helloPartnerLink">
-			<service name="sns:HelloService" port="jbi"/>
+			<service name="sns:HelloService" port="HelloPort"/>
 		</provide>
 	</process>
 </deploy>

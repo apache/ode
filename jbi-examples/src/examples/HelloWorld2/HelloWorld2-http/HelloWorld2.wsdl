@@ -44,7 +44,7 @@
     <binding name="HelloSoapBinding" type="tns:HelloPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <operation name="Hello">
-            <!--soap:operation soapAction="urn:Hello"/-->
+            <soap:operation soapAction=""/>
             <input>
                 <soap:body use="literal"/>
             </input>
@@ -56,14 +56,11 @@
 
     <service name="HelloService">
         <port name="HelloPort" binding="tns:HelloSoapBinding">
-            <soap:address location="http://localhost:8080/hello"/>
+            <soap:address location="http://localhost:8080/hello-doc"/>
 
             <!-- Connect this external HTTP endpoint to the process internal 
                  JBI endpoint defined in HelloWorld2-process/HelloWorld2.dd -->
-            <smix:endpoint xmlns:hello="urn:/HelloWorld2.wsdl"
-                    role="consumer"
-                    defaultMep="in-out"
-                    targetEndpoint="hello:HelloService"/>
+            <smix:endpoint role="consumer" defaultMep="in-out"/>
 
         </port>
     </service>
