@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jbi version="1.0" xmlns="http://java.sun.com/xml/ns/jbi">
+  <service-assembly>
+    <identification>
+       <name>HelloWorld2-RPC-SA</name>
+       <description>HelloWorld2-RPC Service Assembly</description>
+    </identification>
+
+    <service-unit>
+       <identification>
+         <name>HelloWorld2-RPC-HTTP</name>
+         <description>HelloWorld2 HTTP Binding</description>
+       </identification>
+
+      <target>
+         <artifacts-zip>HelloWorld2-RPC-HTTP.zip</artifacts-zip>
+         <component-name>servicemix-http</component-name>
+      </target>
+    </service-unit>
+
+    <service-unit>
+       <identification>
+         <name>HelloWorld2-RPC-process</name>
+         <description>HelloWorld2 BPEL Service Unit</description>
+       </identification>
+       <target>
+         <artifacts-zip>HelloWorld2-RPC-Process.zip</artifacts-zip>
+         <component-name>OdeBpelEngine</component-name>
+       </target>
+    </service-unit>
+
+  </service-assembly>
+</jbi>
+
