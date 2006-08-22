@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<definitions name="Hello"
+        targetNamespace="urn:/HelloWorld2-RPC.wsdl"
+        xmlns:tns="urn:/HelloWorld2-RPC.wsdl"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <message name="HelloRequest">
+        <part name="text" type="xsd:string"/>
+    </message>
+
+    <message name="HelloResponse">
+        <part name="text" type="xsd:string"/>
+    </message>
+
+    <portType name="HelloPortType">
+        <operation name="Hello">
+            <input message="tns:HelloRequest"/>
+            <output message="tns:HelloResponse"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="HelloPartnerLinkType">
+        <plnk:role name="Provider" portType="tns:HelloPortType"/>
+    </plnk:partnerLinkType>
+    
+    <!--
+    
+    This is an abstract interface/portType definition.  Note the lack of 
+    binding and service: these are defined by the HTTP binding component.
+    See HelloWorld2-RPC-http/HelloWorld2-RPC.wsdl for details.
+    
+    -->
+
+</definitions>
+
