@@ -31,7 +31,7 @@
 
     <target name="assembly" depends="init,service-units">
 
-        <zip destfile="build/HelloWorld2-Assembly.zip">
+        <zip destfile="${safile}">
             <fileset dir="${sus.dir}" includes="*" />
             <zipfileset dir="." includes="jbi.xml" prefix="META-INF/" />
         </zip>
