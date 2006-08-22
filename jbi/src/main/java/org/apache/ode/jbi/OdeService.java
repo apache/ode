@@ -163,7 +163,7 @@ public class OdeService implements JbiMessageExchangeProcessor {
   public void onResponse(MyRoleMessageExchange mex) {
     javax.jbi.messaging.MessageExchange jbiMex = _jbiMexTracker.consume(mex.getClientId());
     if (jbiMex == null) {
-      __log.warn("Ingorning unknown async reply: " + mex);
+      __log.warn("Ignoring unknown async reply: " + mex);
       return;
     }
 
