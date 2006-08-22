@@ -44,7 +44,7 @@
     <binding name="PingSoapBinding" type="tns:PingPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <operation name="Ping">
-            <!--soap:operation soapAction="urn:Ping"/-->
+            <soap:operation soapAction=""/>
             <input>
                 <soap:body use="literal"/>
             </input>
@@ -60,10 +60,7 @@
 
             <!-- Connect this external HTTP endpoint to the process internal 
                  JBI endpoint defined in ping/Ping.dd -->
-            <smix:endpoint xmlns:ping="urn:/Ping.wsdl"
-                    role="consumer"
-                    defaultMep="in-out"
-                    targetEndpoint="ping:PingService"/>
+            <smix:endpoint role="consumer" defaultMep="in-out"/>
 
         </port>
     </service>
