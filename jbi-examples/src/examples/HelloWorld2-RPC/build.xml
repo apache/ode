@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="HelloWorld2-RPC" default="assembly">
+
+    <import file="../base-sa.xml" />
+
+    <target name="test" depends="init">
+        <antcall target="_sendsoap">
+            <param name="ode.sendsoap.url" value="http://localhost:${ode.http.port}/hello-rpc/"/>
+            <param name="ode.sendsoap.filename" location="message.soap"/>
+        </antcall>
+    </target>
+
+</project>
