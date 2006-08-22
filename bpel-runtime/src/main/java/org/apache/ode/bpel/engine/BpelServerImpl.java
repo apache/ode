@@ -46,6 +46,7 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TProvide;
 import org.apache.ode.bpel.dd.TService;
+import org.apache.ode.bpel.deploy.DeploymentServiceImpl;
 import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
@@ -54,6 +55,7 @@ import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.DeploymentService;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -335,6 +337,10 @@ public class BpelServerImpl implements BpelServer {
         return new BpelManagementFacadeImpl(_db, _engine, this);
     }
 
+    public DeploymentService getDeploymentService() {
+        return new DeploymentServiceImpl(this);
+    }
+
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
         _contexts.mexContext = mexContext;
     }
@@ -445,7 +451,7 @@ public class BpelServerImpl implements BpelServer {
 
             // Figure out where on the local file system we can find the
             // deployment directory for this process
-            DeploymentUnitImpl du  = getDeploymentUnit(pid);
+            DeploymentUnitImpl du  = _deploymentUnits.get(pid);
             if (du == null) {
                 // Indicates process not deployed.
                 String errmsg = "Process " + pid + " is not deployed, it cannot be activated";
@@ -548,8 +554,16 @@ public class BpelServerImpl implements BpelServer {
         }
     }
 
-    public DeploymentUnitImpl getDeploymentUnit(QName pid) {
+    public DeploymentUnit getDeploymentUnit(QName pid) {
         return _deploymentUnits.get(pid);
+    }
+
+    public Collection<DeploymentUnit> getDeploymentUnits() {
+        ArrayList<DeploymentUnit> dus = new ArrayList<DeploymentUnit>(_deploymentUnits.size());
+        for (DeploymentUnitImpl du : _deploymentUnits.values()) {
+            dus.add(du);
+        }
+        return dus;
     }
 
     private void dbSetProcessActive(final QName pid, final boolean val) {

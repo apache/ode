@@ -150,16 +150,8 @@ public class ManagementService {
         } else if (clazz.equals(Boolean.class) || clazz.equals(Boolean.TYPE)) {
             return (elmt.getText().equals("true") || elmt.getText().equals("yes")) ? Boolean.TRUE : Boolean.FALSE;
         } else if (clazz.equals(QName.class)) {
-            QName qname = elmt.getTextAsQName();
             // The getTextAsQName is buggy, it sometimes return the full text without extracting namespace
-            if (qname.getNamespaceURI().length() == 0) {
-                int colonIdx = elmt.getText().indexOf(":");
-                String localpart = elmt.getText().substring(colonIdx + 1, elmt.getText().length());
-                String prefix = elmt.getText().substring(0, colonIdx);
-                String ns = elmt.findNamespaceURI(prefix).getName();
-                qname = new QName(ns, localpart, prefix);
-            }
-            return qname;
+            return OMUtils.getTextAsQName(elmt);
         } else if (clazz.equals(ProcessInfoCustomizer.class)) {
             return new ProcessInfoCustomizer(elmt.getText());
         } else if (Node.class.isAssignableFrom(clazz)) {
