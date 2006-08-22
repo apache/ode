@@ -389,8 +389,8 @@ class ASSIGN extends ACTIVITY {
         final VariableInstance lval = _scopeFrame.resolve(ocopy.to
             .getVariable());
         if (__log.isDebugEnabled())
-          __log.debug("ASSIGN Writing variable" + lval.declaration.name +
-                  " value " + DOMUtils.domToString(lvalue));
+          __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
+                  "' value '" + DOMUtils.domToString(lvalue) +"'");
         napi.commitChanges(lval, lvalue);
 			}
 		}
