@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
-import org.apache.ode.axis2.service.DeploymentService;
+import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
@@ -137,7 +137,7 @@ public class ODEServer {
     __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
 
     new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
-    new DeploymentService().enableService(_axisConfig, _server, _poller, _appRoot.getAbsolutePath());
+    new DeploymentWebService().enableService(_axisConfig, _server, _poller, _appRoot.getAbsolutePath());
 
     __log.info(__msgs.msgOdeStarted());
   }

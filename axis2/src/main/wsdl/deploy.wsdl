@@ -26,66 +26,131 @@
         xmlns:xmime="http://schemas.xmlsoap.org/2003/04/xmime"
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
-  <types>
-    <xsd:complexType name="package">
-      <xsd:all>
-        <xsd:element name="zip" type="xmime:base64Binary"
-            xmime:expectedContentType="application/zip" />
-      </xsd:all>
-    </xsd:complexType>
-  </types>
+    <types>
+        <xsd:complexType name="package">
+            <xsd:all>
+                <xsd:element name="zip" type="xmime:base64Binary"
+                             xmime:expectedContentType="application/zip" />
+            </xsd:all>
+        </xsd:complexType>
+        <xsd:complexType name="packageNames">
+            <xsd:all>
+                <xsd:element name="name" type="xsd:string"/>
+            </xsd:all>
+        </xsd:complexType>
+        <xsd:complexType name="processIds">
+            <xsd:all>
+                <xsd:element name="id" type="xsd:QName"/>
+            </xsd:all>
+        </xsd:complexType>
+    </types>
 
-  <message name="deployInput">
-    <part name="name" type="xsd:string"/>
-    <part name="package" type="tns:package"/>
-  </message>
-  <message name="deployOutput">
-    <part name="response" type="xsd:boolean"/>
-  </message>
-  <message name="undeployInput">
-    <part name="processName" type="xsd:QName"/>
-  </message>
-  <message name="undeployOutput">
-    <part name="response" type="xsd:boolean"/>
-  </message>
+    <message name="deployInput">
+        <part name="name" type="xsd:string"/>
+        <part name="package" type="tns:package"/>
+    </message>
+    <message name="deployOutput">
+        <part name="response" type="xsd:boolean"/>
+    </message>
+    <message name="undeployInput">
+        <part name="processName" type="xsd:QName"/>
+    </message>
+    <message name="undeployOutput">
+        <part name="response" type="xsd:boolean"/>
+    </message>
+    <message name="listDeployedPackagesInput"/>
+    <message name="listDeployedPackagesOutput">
+        <part name="deployedPackages" type="tns:packageNames"/>
+    </message>
+    <message name="listProcessesInput">
+        <part name="packageName" type="xsd:string"/>
+    </message>
+    <message name="listProcessesOutput">
+        <part name="processIds" type="tns:processIds"/>
+    </message>
+    <message name="getProcessPackageInput">
+        <part name="processName" type="xsd:QName"/>
+    </message>
+    <message name="getProcessPackageOutput">
+        <part name="packageName" type="xsd:string"/>
+    </message>
 
-  <portType name="DeploymentPortType">
-    <operation name="deploy">
-      <input message="tns:deployInput"/>
-      <output message="tns:deployOutput"/>
-    </operation>
-    <operation name="undeploy">
-      <input message="tns:undeployInput"/>
-      <output message="tns:undeployOutput"/>
-    </operation>
-  </portType>
+    <portType name="DeploymentPortType">
+        <operation name="deploy">
+            <input message="tns:deployInput"/>
+            <output message="tns:deployOutput"/>
+        </operation>
+        <operation name="undeploy">
+            <input message="tns:undeployInput"/>
+            <output message="tns:undeployOutput"/>
+        </operation>
+        <operation name="listDeployedPackages">
+            <input message="tns:listDeployedPackagesInput"/>
+            <output message="tns:listDeployedPackagesOutput"/>
+        </operation>
+        <operation name="listProcesses">
+            <input message="tns:listProcessesInput"/>
+            <output message="tns:listProcessesOutput"/>
+        </operation>
+        <operation name="getProcessPackage">
+            <input message="tns:getProcessPackageInput"/>
+            <output message="tns:getProcessPackageOutput"/>
+        </operation>
+    </portType>
 
-  <binding name="DeploymentBinding" type="tns:DeploymentPortType">
-    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <operation name="deploy">
-      <soap:operation soapAction="" style="rpc"/>
-      <input>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </input>
-      <output>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </output>
-    </operation>
-    <operation name="undeploy">
-      <soap:operation soapAction="" style="rpc"/>
-      <input>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </input>
-      <output>
-        <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
-      </output>
-    </operation>
-  </binding>
+    <binding name="DeploymentBinding" type="tns:DeploymentPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="deploy">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+        <operation name="undeploy">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+        <operation name="listDeployedPackages">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+        <operation name="listProcesses">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+        <operation name="getProcessPackage">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+    </binding>
 
-  <service name="DeploymentService">
-    <port name="DeploymentPort" binding="tns:DeploymentBinding">
-      <soap:address location="http://localhost:8080/ode/services/deploy"/>
-    </port>
-  </service>
+    <service name="DeploymentService">
+        <port name="DeploymentPort" binding="tns:DeploymentBinding">
+            <soap:address location="http://localhost:8080/ode/services/deploy"/>
+        </port>
+    </service>
 
 </definitions>
