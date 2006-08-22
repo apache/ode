@@ -742,7 +742,7 @@ public class BpelProcess {
             }
             
             __log.debug("Activated "  + _pid + " partnerrole " + prole.getPartnerLinkName()
-                    + ": EPR is " + prole._initialEPR == null ? "null" : DOMUtils.domToString(prole._initialEPR));
+                    + ": EPR is " + (prole._initialEPR == null ? "null" : DOMUtils.domToString(prole._initialEPR)));
             
         }
         
