@@ -48,7 +48,7 @@
                 <to>$response.body</to>
             </copy>
             <copy>
-                <from>concat($text,' World')"</from>
+                <from>concat($text,' World')</from>
                 <to>$response.body/hello:text</to>
             </copy>
         </assign>
