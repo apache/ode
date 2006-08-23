@@ -22,8 +22,6 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 
 import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Collection;
 
 
 /**
@@ -115,20 +113,6 @@ public interface BpelServer {
      * @return transactional {@link BpelEngine} interfacce
      */
     BpelEngine getEngine();
-
-    /**
-     * Deploy a process from the filesystem.
-     * @param deploymentUnitDirectory directory containing all deployment files
-     * @return A collection of the process ids of the deployed processes
-     */
-    Collection<QName> deploy(File deploymentUnitDirectory);
-
-    /**
-     * Undeploy a package.
-     * @param file package file
-     * @return successful or not
-     */
-    boolean undeploy(File file);
 
     /**
      * Activate a process.
