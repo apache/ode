@@ -17,6 +17,17 @@
          <component-name>servicemix-http</component-name>
       </target>
     </service-unit>
+    
+    <service-unit>
+       <identification>
+         <name>Pong-process</name>
+         <description>Pong BPEL Service Unit</description>
+       </identification>
+       <target>
+         <artifacts-zip>Pong-Process.zip</artifacts-zip>
+         <component-name>OdeBpelEngine</component-name>
+       </target>
+    </service-unit>
 
     <service-unit>
        <identification>
@@ -29,16 +40,6 @@
        </target>
     </service-unit>
 
-    <service-unit>
-       <identification>
-         <name>Pong-process</name>
-         <description>Pong BPEL Service Unit</description>
-       </identification>
-       <target>
-         <artifacts-zip>Pong-Process.zip</artifacts-zip>
-         <component-name>OdeBpelEngine</component-name>
-       </target>
-    </service-unit>
   </service-assembly>
 </jbi>
 
