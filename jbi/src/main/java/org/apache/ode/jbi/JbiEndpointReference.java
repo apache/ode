@@ -50,7 +50,7 @@ class JbiEndpointReference implements EndpointReference {
     
     Document doc = DOMUtils.newDocument();
     Element root = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(),SERVICE_REF_QNAME.getLocalPart());
-    root.appendChild(fragment);
+    root.appendChild(doc.importNode(fragment,true));
     doc.appendChild(root);
     return doc;
   }
