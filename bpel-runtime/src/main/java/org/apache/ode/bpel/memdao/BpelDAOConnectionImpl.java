@@ -5,6 +5,18 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
@@ -20,16 +32,6 @@ import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
 
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 
 /**
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
@@ -37,9 +39,16 @@ import java.util.Map;
 class BpelDAOConnectionImpl implements BpelDAOConnection {
   private Map<QName, ProcessDaoImpl> _store;
   private List<BpelEvent> _events = new LinkedList<BpelEvent>();
+  private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
+  private static long counter = 0;
+  
   
   BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store) {
     _store = store;
+  }
+  
+  private synchronized String getId() {
+	  return Long.toString(counter++);
   }
 
   public ProcessDAO getProcess(QName processId) {
@@ -47,7 +56,9 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
   }
 
   public ProcessDAO createProcess(QName pid, QName type) {
-    return null;
+	  ProcessDaoImpl process = new ProcessDaoImpl(this,_store,pid,type);
+	  _store.put(pid,process);
+	  return process;
   }
 
   public ProcessInstanceDAO getInstance(Long iid) {
@@ -147,13 +158,14 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
   }
 
   public MessageExchangeDAO createMessageExchange(char dir) {
-    // TODO implement this.
-    throw new UnsupportedOperationException("Implement me.");
+	  String id = getId();
+	  MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir,id);
+	  _mexStore.put(id,mex);
+	  return mex;
   }
 
   public MessageExchangeDAO getMessageExchange(String mexid) {
-    // TODO implement this.
-    throw new UnsupportedOperationException("Implement me.");
+    return _mexStore.get(mexid);
   }
 
   private int compareInstanceUsingKey(String key, ProcessInstanceDAO instanceDAO1, ProcessInstanceDAO instanceDAO2) {
