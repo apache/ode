@@ -38,7 +38,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private final Map<String, CorrelatorDAO> _correlators = new ConcurrentHashMap<String, CorrelatorDAO>();
     protected final Map<Long, ProcessInstanceDAO> _instances = new ConcurrentHashMap<Long, ProcessInstanceDAO>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
-    private Map<String, ProcessDaoImpl> _store;
+    private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
     private final Date _deployDate = new Date();
     private boolean _retired;
@@ -47,7 +47,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private MultiKeyMap _properties = new MultiKeyMap();
 
     public ProcessDaoImpl(BpelDAOConnectionImpl conn,
-                          Map<String, ProcessDaoImpl> store,
+                          Map<QName, ProcessDaoImpl> store,
                           QName processId, QName type) {
         if (__log.isDebugEnabled()) {
             __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
