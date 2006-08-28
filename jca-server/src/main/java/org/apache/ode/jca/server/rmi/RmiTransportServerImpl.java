@@ -18,10 +18,6 @@
  */
 package org.apache.ode.jca.server.rmi;
 
-import org.apache.ode.jca.server.ConnectionProvider;
-import org.apache.ode.ra.transports.rmi.OdeRemote;
-import org.apache.ode.ra.transports.rmi.OdeTransportPipeRemote;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -30,80 +26,101 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jca.server.ConnectionProvider;
+import org.apache.ode.ra.transports.rmi.OdeRemote;
+import org.apache.ode.ra.transports.rmi.OdeTransportPipeRemote;
+
 /**
  * Server-side of the RMI transport. Manages a collection of communication
  * "pipes", each represented by its own remote object.
  */
 public class RmiTransportServerImpl implements OdeRemote {
-  private List<RmiPipeServerImpl> _pipes = new ArrayList<RmiPipeServerImpl>();
-  private int _port = 1099;
-  private Remote _remote;
-  private ConnectionProvider _connProvider;
-  private String _id;
+    private static final Log __log = LogFactory.getLog(RmiTransportServerImpl.class);
 
-  public RmiTransportServerImpl() {
-  }
+    private List<RmiPipeServerImpl> _pipes = new ArrayList<RmiPipeServerImpl>();
 
-  public void setId(String id) {
-    _id = id;
-  }
-  
-  public void setConnectionProvider(ConnectionProvider connprovider) {
-    _connProvider = connprovider;;
-  }
-  
-  public void setPort(int port) {
-    _port = port;
-  }
+    private int _port = 1099;
 
-  public int getPort() {
-    return _port;
-  }
+    private Remote _remote;
 
-  public synchronized void start() throws RemoteException {
-    if (_id == null)
-      throw new IllegalStateException("Must set id!");
-    if (_connProvider == null)
-      throw new IllegalStateException("Must set connection provider.");
-    
-    _remote = UnicastRemoteObject.exportObject(this,0);
+    private ConnectionProvider _connProvider;
 
-    // Bind the RMI-server to the registry, creating one if necessary
-    try {
-      LocateRegistry.createRegistry(_port);
-    } catch (Exception ex) {
-      /*ignore*/
+    private String _id;
+
+    public RmiTransportServerImpl() {
     }
 
-    Registry registry = LocateRegistry.getRegistry(_port);
-    registry.rebind(_id, _remote);
-  }
-
-  public synchronized void stop() throws RemoteException {
-    UnicastRemoteObject.unexportObject(this, false);
-  }
-
-
-  public synchronized OdeTransportPipeRemote newPipe() throws RemoteException  {
-    RmiPipeServerImpl pipe = new RmiPipeServerImpl(this, _connProvider.createConnectionObject(),_connProvider.getConnectionIntefaces());
-    OdeTransportPipeRemote remote = (OdeTransportPipeRemote) UnicastRemoteObject.exportObject(pipe,0);
-    pipe.remote = remote;
-    _pipes.add(pipe);
-    return remote;
-  }
-
-  void pipeClosed(RmiPipeServerImpl pipe) {
-    try {
-      UnicastRemoteObject.unexportObject(pipe.remote,false);
-    } catch (RemoteException re) {
-      // ignore
+    public void setId(String id) {
+        _id = id;
     }
 
-    synchronized(this) {
-      _pipes.remove(pipe);
+    public void setConnectionProvider(ConnectionProvider connprovider) {
+        _connProvider = connprovider;
+        ;
     }
-    
-    _connProvider.destroyConnectionObject(pipe.target);
 
-  }
+    public void setPort(int port) {
+        _port = port;
+    }
+
+    public int getPort() {
+        return _port;
+    }
+
+    public synchronized void start() throws RemoteException {
+        if (_id == null)
+            throw new IllegalStateException("Must set id!");
+        if (_connProvider == null)
+            throw new IllegalStateException("Must set connection provider.");
+
+        _remote = UnicastRemoteObject.exportObject(this, 0);
+
+        // Bind the RMI-server to the registry, creating one if necessary
+        try {
+            LocateRegistry.createRegistry(_port);
+            __log.debug("Created registry on port " + _port);
+        } catch (Exception ex) {
+            __log.debug("Could not create registry on port " + _port + " (perhaps it's already there)");
+            /* ignore */
+        }
+
+        Registry registry = LocateRegistry.getRegistry(_port);
+        
+        registry.rebind(_id, _remote);
+        
+        __log.debug("Bound JCA server as \"" + _id + "\" on registry port " + _port);
+    }
+
+    public synchronized void stop() throws RemoteException {
+        UnicastRemoteObject.unexportObject(this, false);
+    }
+
+    public synchronized OdeTransportPipeRemote newPipe() throws RemoteException {
+        RmiPipeServerImpl pipe = new RmiPipeServerImpl(this, _connProvider.createConnectionObject(), _connProvider
+                .getConnectionIntefaces());
+        OdeTransportPipeRemote remote = (OdeTransportPipeRemote) UnicastRemoteObject.exportObject(pipe, 0);
+        pipe.remote = remote;
+        _pipes.add(pipe);
+        return remote;
+    }
+
+    void pipeClosed(RmiPipeServerImpl pipe) {
+        if (__log.isDebugEnabled())
+            __log.debug("Closing RMI pipe " + pipe);
+            
+        try {
+            UnicastRemoteObject.unexportObject(pipe.remote, false);
+        } catch (RemoteException re) {
+            // ignore
+        }
+
+        synchronized (this) {
+            _pipes.remove(pipe);
+        }
+
+        _connProvider.destroyConnectionObject(pipe.target);
+
+    }
 }
