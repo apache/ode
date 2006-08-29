@@ -74,7 +74,7 @@ public class XPathMessages extends CompilationMessageBundle {
   }
 
   /** The string "{0}" is not a valid XPath 1.0 expression. */
-  public CompilationMessage errXPath20Syntax(String xPathString, String message) {
+  public CompilationMessage warnXPath20Syntax(String xPathString, String message) {
     return super.formatCompilationMessage(
         "The string \"{0}\" is not a valid XPath 2.0 expression: {1}", xPathString, message);
   }
