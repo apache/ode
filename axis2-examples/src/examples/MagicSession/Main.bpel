@@ -9,7 +9,7 @@
          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
          xmlns:test="http://ode/bpel/unit-test.wsdl">
 
-  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+  <import location="Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
   <partnerLinks>

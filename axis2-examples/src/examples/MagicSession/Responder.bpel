@@ -8,7 +8,7 @@
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:resp="http://ode/bpel/unit-test.wsdl">
 
-  <import location="urn:/Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+  <import location="Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
   <partnerLinks>
