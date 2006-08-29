@@ -66,8 +66,10 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
+        boolean isAsync = isAsync();
         setFailure(type, description, details);
-        continueAsync();
+        if (isAsync)
+            continueAsync();
     }
 
     /**
