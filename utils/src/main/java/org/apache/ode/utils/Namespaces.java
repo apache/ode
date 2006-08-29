@@ -48,4 +48,6 @@ public class Namespaces {
 
     public static final String ODE_PMAPI = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
 
+    public static final String ODE_EXTENSION_NS = "http://www.apache.org/ode/type/extension";
+
 }

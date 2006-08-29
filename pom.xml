@@ -71,7 +71,7 @@
         <jotmVersion>2.0.10</jotmVersion>
         <junitVersion>3.8.1</junitVersion>
         <log4jVersion>1.2.12</log4jVersion>
-        <saxonVersion>8.4</saxonVersion>
+        <saxonVersion>8.7</saxonVersion>
         <servicemixVersion>3.0-incubating-SNAPSHOT</servicemixVersion>
         <staxApiVersion>1.0</staxApiVersion>
         <staxVersion>1.1.2-dev</staxVersion>
@@ -102,6 +102,7 @@
 
         <module>axis2</module>
         <module>axis2-war</module>
+	    <!--module>axis2-examples</module-->
 
         <module>bootstrap</module>
         <module>utils</module>
@@ -140,8 +141,7 @@
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
 
-        <!-- module>distro-jbi</module -->
-        <!--module>integration</module-->
+        <!--module>distro-axis2</module-->
     </modules>
 
     <dependencies>
@@ -678,17 +678,17 @@
                 <version>${servicemixVersion}</version>
             </dependency>
             <dependency>
-                <groupId>saxon</groupId>
+                <groupId>net.sf.saxon</groupId>
                 <artifactId>saxon</artifactId>
                 <version>${saxonVersion}</version>
             </dependency>
             <dependency>
-                <groupId>saxon</groupId>
+                <groupId>net.sf.saxon</groupId>
                 <artifactId>saxon-dom</artifactId>
                 <version>${saxonVersion}</version>
             </dependency>
             <dependency>
-                <groupId>saxon</groupId>
+                <groupId>net.sf.saxon</groupId>
                 <artifactId>saxon-xpath</artifactId>
                 <version>${saxonVersion}</version>
             </dependency>

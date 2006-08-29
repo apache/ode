@@ -24,8 +24,14 @@ import org.apache.ode.bpel.capi.CompilationMessageBundle;
 
 /**
  * Compilation messages related to XPath 1.0 expressions.
+ * @author mriou <mriou at apache dot org>
  */
 public class XPathMessages extends CompilationMessageBundle {
+
+    public CompilationMessage errUnconfigurableXPathFactory() {
+        return super.formatCompilationMessage("Couldn't configure XPath factory");
+    }
+
 
   /** Invalid number of argument to function "{0}". */
   public CompilationMessage errInvalidNumberOfArguments(String functionName) {
@@ -65,6 +71,12 @@ public class XPathMessages extends CompilationMessageBundle {
   public CompilationMessage errXPathSyntax(String xPathString) {
     return super.formatCompilationMessage(
         "The string \"{0}\" is not a valid XPath 1.0 expression.", xPathString);
+  }
+
+  /** The string "{0}" is not a valid XPath 1.0 expression. */
+  public CompilationMessage errXPath20Syntax(String xPathString, String message) {
+    return super.formatCompilationMessage(
+        "The string \"{0}\" is not a valid XPath 2.0 expression: {1}", xPathString, message);
   }
 
   /** The XPath node with value "{0}" was not a text node. */
