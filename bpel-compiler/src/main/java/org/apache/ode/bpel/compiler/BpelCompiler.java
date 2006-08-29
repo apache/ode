@@ -205,7 +205,7 @@ abstract class BpelCompiler implements CompilerContext {
         return result;
     }
 
-   public OScope.Variable resolveMessageVariable(String inputVar) throws CompilationException {
+    public OScope.Variable resolveMessageVariable(String inputVar) throws CompilationException {
         OScope.Variable var = resolveVariable(inputVar);
         if (!(var.type instanceof OMessageVarType))
             throw new CompilationException(__cmsgs.errMessageVariableRequired(inputVar));
@@ -568,7 +568,12 @@ abstract class BpelCompiler implements CompilerContext {
 
         assert _structureStack.size() == 0;
 
-        if (!_errors.isEmpty())
+        boolean hasErrors = false;
+        for (CompilationMessage msg : _errors) {
+            if (msg.severity >= CompilationMessage.ERROR) hasErrors = true;
+        }
+
+        if (hasErrors)
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size()));
 
         return _oprocess;
