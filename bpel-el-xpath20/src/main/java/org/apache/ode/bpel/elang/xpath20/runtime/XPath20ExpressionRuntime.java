@@ -18,10 +18,15 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import net.sf.saxon.Configuration;
+import net.sf.saxon.xpath.XPathEvaluator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath20.SaxonCompileContext;
-import org.apache.ode.bpel.elang.xpath20.SaxonXPathContext;
+import org.apache.ode.bpel.elang.xpath20.Constants;
+import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
+import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -30,20 +35,21 @@ import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.utils.xsd.XMLCalendar;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.ExpressionTool;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.SequenceExtent;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
-import java.util.*;
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * XPath 2.0 Expression Language run-time subsytem.
@@ -51,169 +57,128 @@ import java.util.*;
  */
 public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
 
-  static final short NODE_TYPE = 1;
-  static final short NODESET_TYPE = 2;
-  static final short STRING_TYPE = 3;
-  static final short BOOLEAN_TYPE = 4;
-  static final short NUMBER_TYPE = 5;
+    static final short NODE_TYPE = 1;
+    static final short NODESET_TYPE = 2;
+    static final short STRING_TYPE = 3;
+    static final short BOOLEAN_TYPE = 4;
+    static final short NUMBER_TYPE = 5;
 
-  /** Class-level logger. */
-  private static final Log __log = LogFactory.getLog(XPath20ExpressionRuntime.class);
+    /** Class-level logger. */
+    private static final Log __log = LogFactory.getLog(XPath20ExpressionRuntime.class);
 
-  /** Compiled expression cache. */
-  private final Map<String, Expression> _compiledExpressions = new HashMap<String, Expression>();
+    /** Registered extension functions. */
+    // TODO unused as of now
+    // private final HashMap _extensionFunctions  = new HashMap();
 
-  /** Registered extension functions. */
-  // TODO unused as of now
-  // private final HashMap _extensionFunctions  = new HashMap();
-  
-  private Configuration _config;
-  
-  public XPath20ExpressionRuntime(){
-  	_config = new Configuration();
-  }
-  
-  public void initialize(Map properties) throws ConfigurationException {
-  }
-  
-  /**
-   * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-   */
-  public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-  	return (String)evaluate(cexp, ctx, STRING_TYPE);
-  }
+    private Configuration _config;
 
-  /**
-   * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-   */
-  public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return ((Boolean)evaluate(cexp, ctx, BOOLEAN_TYPE)).booleanValue();
-  }
-
-  public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return (Number) evaluate(cexp, ctx, NUMBER_TYPE);
-  }
-
-  /**
-   * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-   */
-  public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return (List)evaluate(cexp, ctx, NODESET_TYPE);
-  }
-
-  public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    List retVal = evaluate(cexp, ctx);
-    if (retVal.size() == 0)
-      throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
-    if (retVal.size() > 1)
-      throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: " + cexp);
-    return (Node) retVal.get(0);
-  }
-
-  public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
-
-    String literal = evaluateAsString(cexp, context);
-
-    try {
-      return new XMLCalendar(literal);
-    } catch (Exception ex) {
-      __log.error("Date conversion error." ,ex);
-      throw new EvaluationException("Date conversion errror.", ex);
+    public XPath20ExpressionRuntime(){
+        _config = new Configuration();
     }
-  }
 
-  public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
-    String literal = this.evaluateAsString(cexp, context);
-    try {
-      Duration duration = new org.apache.ode.utils.xsd.Duration(literal);
-      return duration;
-    } catch (Exception ex) {
-      __log.error("Date conversion error.", ex);
-      throw new EvaluationException("Duration conversion error." ,ex);
+    public void initialize(Map properties) throws ConfigurationException {
     }
-  }
-  
-  private Object evaluate(OExpression cexp, EvaluationContext ctx, short type) throws FaultException, EvaluationException {
-    try {
-      Expression compiledXPath = compile((OXPath10Expression) cexp);
-      Node node = ctx.getRootNode();
-      NodeInfo startNode = null;
-      if(node != null){
-        ExternalObjectModel model = _config.findExternalObjectModel(ctx.getRootNode());
-        if (model == null) {
-            throw new IllegalArgumentException(
-                    "Cannot locate an object model implementation for nodes of class "
-                    + node.getClass().getName());
-        }
-        DocumentInfo doc = model.wrapDocument(node, "", _config);
-        startNode = model.wrapNode(doc, node);
-      }
-      
-      SaxonXPathContext xpathCtx = new SaxonXPathContext((OXPath10Expression) cexp, ctx, startNode, _config);
-      xpathCtx.openStackFrame(1);
-      SequenceIterator iter = compiledXPath.iterate(xpathCtx);
-      switch(type){
-        case NODESET_TYPE: {
-          SequenceExtent extent = new SequenceExtent(iter);
-          List list = (List)extent.convertToJava(List.class, xpathCtx);
-          if(list.size() == 1 && !(list.get(0) instanceof Node)){
-          	Document doc = DOMUtils.newDocument();
-            Element e = doc.createElement("foo");
-            Node tnode= doc.createTextNode(list.get(0).toString());
-            doc.appendChild(e);
-            e.appendChild(tnode);
-            return Collections.singletonList(tnode);
-          }else{
-          	return list;
-          }
-        }
-//        case NODE_TYPE:
-//        {
-//           Item first = iter.next();
-//           if (first == null){
-//            return null;
-//           }else if(first instanceof NodeInfo) {
-//             return Value.convert(first);
-//           }else{
-//           	 Document doc = DOMUtils.newDocument();
-//             return doc.createTextNode(first.getStringValue());
-//           }
-//        }
-        case BOOLEAN_TYPE: {
-          return Boolean.valueOf(ExpressionTool.effectiveBooleanValue(iter));
-        } case NUMBER_TYPE: {
-          Item first = iter.next();
-          if (first != null) {
-            Item typedItem = first.getTypedValue().next();
-            if (typedItem != null && typedItem instanceof NumericValue) return ((NumericValue)typedItem).longValue();
-          } else return null;
-        } case STRING_TYPE: {
-           Item first = iter.next();
-           return first != null
-             ? first.getStringValue()
-             : null;
-        }
-        default:
-          throw new IllegalArgumentException("Bad type");
-      }
-    } catch(FaultXPathException e){
-      throw (FaultException)e.getCause();
-    } catch (XPathException e) {
-      throw new EvaluationException(e.getMessage(), e);
-    } 
-  }
-  
 
-  private Expression compile(OXPath10Expression exp) throws net.sf.saxon.trans.XPathException {
-    Expression expr = _compiledExpressions.get(exp.xpath);
-    if (expr == null) {
-      expr = SaxonCompileContext.compileExpression(exp, _config);
-      synchronized(_compiledExpressions) {
-        _compiledExpressions.put(exp.xpath, expr);
-      }
+    /**
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     */
+    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+        return (String)evaluate(cexp, ctx, XPathConstants.STRING);
     }
-    return expr;
-  }
 
+    /**
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     */
+    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+        return (Boolean) evaluate(cexp, ctx, XPathConstants.BOOLEAN);
+    }
+
+    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+        return (Number) evaluate(cexp, ctx, XPathConstants.NUMBER);
+    }
+
+    /**
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     */
+    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+        List result = null;
+        Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
+        if (someRes instanceof List) {
+            result = (List) someRes;
+            if ((result.size() == 1) && !(result.get(0) instanceof Node)) {
+              Document d = DOMUtils.newDocument();
+              // Giving our node a parent just in case it's an LValue expression
+              Element wrapper = d.createElement("wrapper");
+              Text text = d.createTextNode(result.get(0).toString());
+              wrapper.appendChild(text);
+              d.appendChild(wrapper);
+              result = Collections.singletonList(text);
+            }
+        }
+        if (someRes instanceof NodeList) {
+            NodeList retVal = (NodeList) someRes;
+            result = new ArrayList(retVal.getLength());
+            for(int m = 0; m < retVal.getLength(); m++) result.add(retVal.item(m));
+        }
+
+        return result;
+    }
+
+    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+        List retVal = evaluate(cexp, ctx);
+        if (retVal.size() == 0)
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
+        if (retVal.size() > 1)
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: " + cexp);
+        return (Node) retVal.get(0);
+    }
+
+    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
+
+        String literal = evaluateAsString(cexp, context);
+
+        try {
+            return new XMLCalendar(literal);
+        } catch (Exception ex) {
+            __log.error("Date conversion error." ,ex);
+            throw new EvaluationException("Date conversion errror.", ex);
+        }
+    }
+
+    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
+        String literal = this.evaluateAsString(cexp, context);
+        try {
+            return new Duration(literal);
+        } catch (Exception ex) {
+            __log.error("Date conversion error.", ex);
+            throw new EvaluationException("Duration conversion error." ,ex);
+        }
+    }
+
+    private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException, EvaluationException {
+        try {
+            net.sf.saxon.xpath.XPathFactoryImpl xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
+
+            OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
+            xpf.setXPathFunctionResolver(new JaxpFunctionResolver(ctx, oxpath20, Constants.BPEL20_NS));
+            xpf.setXPathVariableResolver(new JaxpVariableResolver(ctx, oxpath20));
+            XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
+            xpe.setNamespaceContext(oxpath20.namespaceCtx);
+            // Just checking that the expression is valid
+            XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
+            Object evalResult = expr.evaluate(DOMUtils.newDocument(), type);
+            if (evalResult != null && __log.isDebugEnabled())
+                __log.debug("Expression " + cexp.toString() + " generated result " + evalResult
+                        + " - type=" + evalResult.getClass().getName());
+            return evalResult;
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new EvaluationException("Error while executing an XPath expression." ,e);
+        } catch (WrappedResolverException wre) {
+            wre.printStackTrace();
+            throw (FaultException)wre.getCause();
+        }
+
+    }
 
 }

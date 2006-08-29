@@ -55,12 +55,17 @@
         </dependency>
 
         <dependency>
-          <groupId>saxon</groupId>
+          <groupId>net.sf.saxon</groupId>
           <artifactId>saxon</artifactId>
         </dependency>
 
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon-xpath</artifactId>
+        </dependency>
+
        <dependency>
-         <groupId>saxon</groupId>
+         <groupId>net.sf.saxon</groupId>
          <artifactId>saxon-dom</artifactId>
        </dependency>
 

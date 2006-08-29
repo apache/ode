@@ -20,85 +20,97 @@ package org.apache.ode.bpel.capi;
 
 import org.apache.ode.bom.api.Activity;
 import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.o.OXslSheet;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import java.util.List;
 
 
 /**
  * Interface providing access to the compiler .
  */
 public interface CompilerContext {
-  
-  OExpression constantExpr(boolean value);
-  
-  OExpression compileJoinCondition(Expression expr)
-  				throws CompilationException;
-  
-  OExpression compileExpr(Expression expr)
-          throws CompilationException;
-  
-  OLValueExpression compileLValueExpr(Expression expr)
-  				throws CompilationException;
 
-  OXslSheet compileXslt(String docStrUri)
-          throws CompilationException;
+    OExpression constantExpr(boolean value);
 
-  OXsdTypeVarType resolveXsdType(QName typeName)
-          throws CompilationException;
+    OExpression compileJoinCondition(Expression expr)
+            throws CompilationException;
 
-  OProcess.OProperty resolveProperty(QName name)
-          throws CompilationException;
+    OExpression compileExpr(Expression expr)
+            throws CompilationException;
 
-  OScope.Variable resolveVariable(String name)
-          throws CompilationException;
+    OLValueExpression compileLValueExpr(Expression expr)
+            throws CompilationException;
 
-  OScope.Variable resolveMessageVariable(String inputVar)
-          throws CompilationException;
+    OXslSheet compileXslt(String docStrUri)
+            throws CompilationException;
 
-  OScope.Variable resolveMessageVariable(String inputVar, QName messageType)
-          throws CompilationException;
+    OXsdTypeVarType resolveXsdType(QName typeName)
+            throws CompilationException;
 
-  OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
-          throws CompilationException;
+    OProcess.OProperty resolveProperty(QName name)
+            throws CompilationException;
 
-  OActivity compile(Activity child)
-          throws CompilationException;
+    OScope.Variable resolveVariable(String name)
+            throws CompilationException;
 
-  OActivity compileSLC(final Activity source)
-          throws CompilationException;
-  
-  OPartnerLink resolvePartnerLink(String name)
-          throws CompilationException;
+    List<OScope.Variable> getAccessibleVariables();
 
-  Operation resolvePartnerRoleOperation(OPartnerLink partnerLink, String operationName)
-          throws CompilationException;
+    OScope.Variable resolveMessageVariable(String inputVar)
+            throws CompilationException;
 
-  Operation resolveMyRoleOperation(OPartnerLink partnerLink, String operationName)
-          throws CompilationException;
+    OScope.Variable resolveMessageVariable(String inputVar, QName messageType)
+            throws CompilationException;
 
-  OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property)
-          throws CompilationException;
+    OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
+            throws CompilationException;
 
-  void recoveredFromError(Object where, CompilationException bce)
-          throws CompilationException;
+    OActivity compile(Activity child)
+            throws CompilationException;
 
-  OLink resolveLink(String linkName)
-          throws CompilationException;
+    OActivity compileSLC(final Activity source)
+            throws CompilationException;
 
-  OScope resolveCompensatableScope(String scopeToCompensate)
-          throws CompilationException;
+    OPartnerLink resolvePartnerLink(String name)
+            throws CompilationException;
 
-  OProcess getOProcess()
-          throws CompilationException;
+    Operation resolvePartnerRoleOperation(OPartnerLink partnerLink, String operationName)
+            throws CompilationException;
 
-  OScope.CorrelationSet resolveCorrelationSet(String csetName)
-          throws CompilationException;
+    Operation resolveMyRoleOperation(OPartnerLink partnerLink, String operationName)
+            throws CompilationException;
 
-  String getSourceLocation();
+    OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property)
+            throws CompilationException;
 
-  void compile(OActivity context, Runnable run);
+    void recoveredFromError(Object where, CompilationException bce)
+            throws CompilationException;
 
-  public boolean isPartnerLinkAssigned(String plink);
+    OLink resolveLink(String linkName)
+            throws CompilationException;
+
+    OScope resolveCompensatableScope(String scopeToCompensate)
+            throws CompilationException;
+
+    OProcess getOProcess()
+            throws CompilationException;
+
+    OScope.CorrelationSet resolveCorrelationSet(String csetName)
+            throws CompilationException;
+
+    String getSourceLocation();
+
+    void compile(OActivity context, Runnable run);
+
+    public boolean isPartnerLinkAssigned(String plink);
 }
