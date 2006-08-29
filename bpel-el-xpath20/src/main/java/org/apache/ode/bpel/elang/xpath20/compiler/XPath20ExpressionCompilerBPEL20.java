@@ -131,10 +131,6 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             xpf.setXPathVariableResolver(new JaxpVariableResolver(_compilerContext, out));
             XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
 
-            for (String nsuri : source.getNamespaceContext().getUriSet()) {
-                System.out.println("=> " + nsuri);
-            }
-
             xpe.setNamespaceContext(source.getNamespaceContext());
             XPathExpression expr = xpe.compile(xpathStr);
             // Here we're "faking" an evaluation to parse properly variables and functions and
@@ -143,7 +139,7 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             expr.evaluate(DOMUtils.newDocument());
         } catch (XPathExpressionException e) {
             e.printStackTrace();
-            throw new CompilationException(__msgs.errXPath20Syntax(xpathStr, e.toString()), e);
+            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.toString()), e);
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null) throw new CompilationException(wre._compilationMsg, wre);
             if (wre.getCause() instanceof CompilationException) throw (CompilationException)wre.getCause();
