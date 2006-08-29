@@ -138,8 +138,7 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             // return guessed appropriate values from variable types.
             expr.evaluate(DOMUtils.newDocument());
         } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.toString()), e);
+            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.getCause().toString()), e.getCause());
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null) throw new CompilationException(wre._compilationMsg, wre);
             if (wre.getCause() instanceof CompilationException) throw (CompilationException)wre.getCause();
