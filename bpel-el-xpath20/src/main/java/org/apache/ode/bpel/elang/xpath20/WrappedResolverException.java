@@ -16,16 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import org.apache.ode.bpel.common.FaultException;
+package org.apache.ode.bpel.elang.xpath20;
 
-import net.sf.saxon.trans.XPathException;
+import org.apache.ode.bpel.capi.CompilationMessage;
 
-public class FaultXPathException extends XPathException {
-	
-	public FaultXPathException(FaultException err) {
-		super(err);
-	}
-	
+/**
+ * @author mriou <mriou at apache dot org>
+ */
+public class WrappedResolverException extends RuntimeException {
+
+    public CompilationMessage _compilationMsg;
+
+    public WrappedResolverException(String message) {
+        super(message);
+    }
+
+    public WrappedResolverException(CompilationMessage message) {
+        _compilationMsg = message;
+    }
+
+    public WrappedResolverException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public WrappedResolverException(Throwable cause) {
+        super(cause);
+    }
 }
