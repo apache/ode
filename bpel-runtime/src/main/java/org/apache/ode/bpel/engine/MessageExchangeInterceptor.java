@@ -18,8 +18,10 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * Hook into the BPEL server that enables intercepting of message exchange
@@ -39,7 +41,7 @@ public interface MessageExchangeInterceptor {
      * @return <code>true</code> if message exchange processing should
      *         continue, <code>false</code> otherwise
      */
-    boolean onBpelServerInvoked(MyRoleMessageExchange mex);
+    boolean onBpelServerInvoked(MyRoleMessageExchange mex, InterceptorContext ic);
 
     /**
      * Called when the BPEL server is invoked, after the message exchange has
@@ -50,7 +52,7 @@ public interface MessageExchangeInterceptor {
      * @return <code>true</code> if message exchange processing should
      *         continue, <code>false</code> otherwise
      */
-    boolean onProcessInvoked(MyRoleMessageExchange mex);
+    boolean onProcessInvoked(MyRoleMessageExchange mex, InterceptorContext ic);
 
     /**
      * Called when the BPEL server is invoked, before any attempt to route the
@@ -61,6 +63,14 @@ public interface MessageExchangeInterceptor {
      * @return <code>true</code> if message exchange processing should
      *         continue, <code>false</code> otherwise
      */
-    boolean onPartnerInvoked(MessageExchange mex);
+    boolean onPartnerInvoked(PartnerRoleMessageExchange mex, InterceptorContext ic);
 
+    
+    public interface InterceptorContext {
+    	
+    	BpelDAOConnection getConnection();
+    	
+    	ProcessDAO getProcessDAO();
+    	
+    }
 }
