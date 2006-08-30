@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
-import net.sf.saxon.xpath.XPathEvaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bom.api.Expression;
@@ -37,6 +36,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
+import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -129,8 +129,7 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             XPathFactory xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
             xpf.setXPathFunctionResolver(new JaxpFunctionResolver(_compilerContext, out, source.getNamespaceContext(), Constants.BPEL20_NS));
             xpf.setXPathVariableResolver(new JaxpVariableResolver(_compilerContext, out));
-            XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
-
+            XPath xpe = xpf.newXPath();
             xpe.setNamespaceContext(source.getNamespaceContext());
             XPathExpression expr = xpe.compile(xpathStr);
             // Here we're "faking" an evaluation to parse properly variables and functions and
@@ -138,7 +137,8 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             // return guessed appropriate values from variable types.
             expr.evaluate(DOMUtils.newDocument());
         } catch (XPathExpressionException e) {
-            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.getCause().toString()), e.getCause());
+            __log.info("Couldn't validate properly expression " + xpathStr);
+//            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.getCause().toString()), e.getCause());
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null) throw new CompilationException(wre._compilationMsg, wre);
             if (wre.getCause() instanceof CompilationException) throw (CompilationException)wre.getCause();
