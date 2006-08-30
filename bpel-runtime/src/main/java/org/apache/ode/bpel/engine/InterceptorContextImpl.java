@@ -16,36 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.ode.bpel.engine;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.engine.MessageExchangeInterceptor.InterceptorContext;
 
 /**
- * Aggregation of all the contexts provided to the BPEL engine by the
- * integration layer.
+ * Implementation of the {@link org.apache.ode.bpel.engine.MessageExchangeInterceptor.InterceptorContext}
+ * interface.
+ * @author Maciej Szefler (m s z e f l e r @ g m a i l . c o m)
+ *
  */
-class Contexts {
+public class InterceptorContextImpl implements InterceptorContext{
+	private ProcessDAO _processDao;
+	private BpelDAOConnection _connection;
+	
+	public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO) {
+		_connection = connection;
+		_processDao = processDAO;
+	}
 
-    MessageExchangeContext mexContext;
+	public BpelDAOConnection getConnection() {
+		return _connection;
+	}
 
-    Scheduler scheduler;
-
-    EndpointReferenceContext eprContext;
-
-    BindingContext bindingContext;
-
-    BpelDAOConnectionFactory dao;
-
-    MessageExchangeInterceptor[] globalIntereceptors = new MessageExchangeInterceptor[0];
-
+	public ProcessDAO getProcessDAO() {
+		return _processDao;
+	}
+	
 }
