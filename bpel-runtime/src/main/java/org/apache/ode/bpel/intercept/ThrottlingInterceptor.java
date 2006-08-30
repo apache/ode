@@ -24,7 +24,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dao.ProcessPropertyDAO;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * An example of a  simple interceptor providing a "throttling"  capability - that is an 
@@ -37,7 +36,7 @@ public class ThrottlingInterceptor extends NoOpInterceptor {
 	private static final QName PROP_MAX_INSTANCES = new QName("urn:org.apache.ode.bpel.intercept", "maxInstances");
 
 	@Override
-	public void onProcessInvoked(MyRoleMessageExchange mex,
+	public void onNewInstanceInvoked(MyRoleMessageExchange mex,
 			InterceptorContext ic) throws FailMessageExchangeException {
 		int maxInstances;
 		try {
