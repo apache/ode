@@ -484,15 +484,16 @@ public class BpelServerImpl implements BpelServer {
 
             // Create local message-exchange interceptors.
             List<MessageExchangeInterceptor> localMexInterceptors = new LinkedList<MessageExchangeInterceptor>();
-            for (TMexInterceptor mexi : deployInfo.getMexInterceptors().getMexInterceptorList()) {
-                try {
-                    Class cls = Class.forName(mexi.getClassName());
-                    localMexInterceptors.add((MessageExchangeInterceptor) cls.newInstance());
-                } catch (Throwable t) {
-                   String errmsg = "Error instantiating message-exchange interceptor " + mexi.getClassName();
-                   __log.error(errmsg,t);
+            if (deployInfo.getMexInterceptors() != null)
+                for (TMexInterceptor mexi : deployInfo.getMexInterceptors().getMexInterceptorList()) {
+                    try {
+                        Class cls = Class.forName(mexi.getClassName());
+                        localMexInterceptors.add((MessageExchangeInterceptor) cls.newInstance());
+                    } catch (Throwable t) {
+                       String errmsg = "Error instantiating message-exchange interceptor " + mexi.getClassName();
+                       __log.error(errmsg,t);
+                    }
                 }
-            }
 
             // Create myRole endpoint name mapping (from deployment descriptor)
             HashMap<OPartnerLink, Endpoint> myRoleEndpoints = new HashMap<OPartnerLink, Endpoint>();
