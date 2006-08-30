@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 
 
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.engine.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
@@ -35,6 +34,10 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
+import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl 
@@ -78,17 +81,19 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
   }
 
   private boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx) {
-      boolean cont = i.onBpelServerInvoked(mex, ictx);
-      if (!cont) {
-          __log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
-          if (mex.getStatus() == Status.REQUEST) {
-              __log.debug("aborting interceptor " + i + " did not set message exchange status, assuming failure");
-              mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
-                      .getMessageExchangeId(), i.toString()), null);
-          }
+      __log.debug("onBpelServerInvoked --> interceptor " + i);
+      try {
+      	i.onBpelServerInvoked(mex, ictx);
+      } catch (FaultMessageExchangeException fme) {
+          __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
+          mex.setFault(fme.getFaultName().getLocalPart(), fme.getFaultData());
           return false;
+      } catch (AbortMessageExchangeException ame) {
+      	__log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: "+  ame.getMessage());
+      	mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
+                      .getMessageExchangeId(), i.toString(), ame.getMessage()), null);
+      	return false;
       }
-
       return true;
   }
 

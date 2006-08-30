@@ -156,4 +156,6 @@ public interface ProcessDAO {
 
     byte[] getCompiledProcess();
 
+	int getNumInstances();
+
 }
