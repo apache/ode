@@ -21,139 +21,43 @@
 
 <project name="tools-bin" default="tarball">
 
-  <property file="../build.properties" />
+    <property file="../build.properties" />
 
-  <property name="src" value="src/main" />
-  <property name="src.bin" value="${src}/dist/bin" />
-  <property name="stage" location="target/stage" />
-  <property name="stage.bin" location="${stage}/bin" />
-  <property name="stage.etc" location="${stage}/etc" />
-
-
-  <target name="tarball" depends="stage">
-    <tar destfile="target/tarball.tar" longfile="gnu" >
-       <tarfileset dir="${stage}" username="ode" group="ode" />
-       <tarfileset dir="${stage.bin}" prefix="bin/" username="ode" group="ode" mode="755" />
-    </tar>
-  </target>
- 
-  <target name="stage" depends="stage_executables,stage_etc" 
-	description="stage a distribution"/>
-
-  <target name="stage_etc">
-    <mkdir dir="${stage.etc}" />
-    <mkdir dir="${stage.etc}/deploy" />
-    <copy todir="${stage.etc}">
-      <filterset>
-        <filter token="ODE_HTTP_PORT" value="${ode.default.http.port}"/>
-        <filter token="ODE_RMI_PORT" value="${ode.default.rmi.port}"/>
-        <filter token="ODE_JMX_PORT" value="${ode.default.jmx.port}"/>
-        <filter token="ODE_JMX_USERNAME" value="${ode.default.jmx.username}"/>
-        <filter token="ODE_JMX_PASSWORD" value="${ode.default.jmx.password}"/>
-        <filter token="ODE_DOMAIN" value="${ode.default.domain}"/>
-      </filterset>
-      <fileset dir="${src}/dist/etc" includes="**/*" />
-    </copy>
-  </target>
+    <property name="src" value="src/main" />
+    <property name="src.bin" value="${src}/dist/bin" />
+    <property name="src.doc" value="${src}/dist/doc" />
+    <property name="stage" location="target/stage" />
+    <property name="stage.bin" location="${stage}/bin" />
+    <property name="stage.doc" location="${stage}/doc" />
 
 
- 
-  <target name="stage_executables">
-    <description>
-           Build the various commandline executables and place them 
-           in the staging area.
-    </description>
+    <target name="tarball" depends="stage">
+        <tar destfile="target/tarball.tar" longfile="gnu" >
+            <tarfileset dir="${stage}" username="ode" group="ode" />
+            <tarfileset dir="${stage.bin}" prefix="bin/" username="ode" group="ode" mode="755" />
+        </tar>
+    </target>
 
-    <antcall target="_makecommand">
-	<param name="cmd" value="version"/>
-    </antcall>
-    
-    <antcall target="_makecommand">
-	<param name="cmd" value="ddvalidate"/>
-    </antcall>
+    <target name="stage" depends="stage_executables, stage_doc" description="stage a distribution"/>
 
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-bsh"/>
-    </antcall>
+    <!-- Make all the UNIX/Windows executables. -->
+    <target name="stage_executables">
+        <description>Build the various commandline executables and place them in the staging area.</description>
+        <!-- Copy the ode and ode.bat into the output directory. -->
+        <copy todir="${stage.bin}" overwrite="true">
+            <fileset dir="${src.bin}">
+                <include name="*.*" />
+            </fileset>
+        </copy>
+        <chmod perm="755" dir="${stage.bin}" includes="*" excludes="*.bat" />
+    </target>
 
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-status"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-bsh"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-deploy"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-undeploy"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-activate"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-deactivate"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="rradd"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="rralias"/>
-    </antcall>
-    
-    <antcall target="_makecommand">
-	<param name="cmd" value="rrdrop"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="rrget"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="rrls"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="sarls"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="bpelc"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="ode-shutdown"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="sendsoap"/>
-    </antcall>
-
-    <antcall target="_makecommand">
-	<param name="cmd" value="bpeltests"/>
-    </antcall>
-
-  </target>
-
-  <target name="_makecommand">
-
-    <!-- create the MS-DOS / Windows executable -->
-    <copy tofile="${stage.bin}/${cmd}.bat" 
-	file="${src}/template/run.bat.template" />
-
-
-    <!-- create the UNIX executable -->
-    <copy tofile="${stage.bin}/${cmd}" 
-	  file="${src}/template/run.sh.template" />
-
-    <chmod file="${stage.bin}/${cmd}" perm="755" />
-  </target>
+    <target name="stage_doc">
+        <copy todir="${stage.doc}" overwrite="true">
+            <fileset dir="${src.doc}">
+                <include name="*.*" />
+            </fileset>
+        </copy>
+    </target>
 
 </project>

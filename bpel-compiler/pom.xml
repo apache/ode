@@ -55,7 +55,6 @@
             <artifactId>ode-bpel-el-xpath20</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>ode</groupId>
             <artifactId>ode-bpel-obj</artifactId>

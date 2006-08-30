@@ -21,6 +21,7 @@ package org.apache.ode.tools.bpelc;
 
 import org.apache.ode.utils.msg.MessageBundle;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -59,8 +60,8 @@ public class BpelCompileCommandMessages extends MessageBundle {
   }
 
   /** Error reading stream at "{0}": {1} */
-  public String msgIoExReadingStreamWithMsg(URL streamUrl, String msg) {
-    return this.format("Error reading stream at \"{0}\": {1}", streamUrl, msg);
+  public String msgIoExReadingStreamWithMsg(File file, String msg) {
+    return this.format("Error reading file at \"{0}\": {1}", file, msg);
   }
 
   /** The BPEL URL "{0}" is malformed. */

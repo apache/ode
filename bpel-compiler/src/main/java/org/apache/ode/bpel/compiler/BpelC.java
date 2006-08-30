@@ -46,8 +46,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * <p>
@@ -65,7 +63,7 @@ public class BpelC {
   public OutputStream _outputStream = null;
   private File _outputDir = null;
 
-  private URL _bpelUrl;
+  private File _bpelFile;
   private WsdlFinder _wsdlFinder;
   private XsltFinder _xsltFinder;
   private URI _bpel11wsdl;
@@ -207,40 +205,26 @@ public class BpelC {
     WsdlFinder wf;
     XsltFinder xf;
 
-    try {
       if (_wsdlFinder != null) {
         wf = _wsdlFinder;
       } else {
-        wf = new DefaultWsdlFinder(_bpelUrl.toURI());
+        wf = new DefaultWsdlFinder(_bpelFile.getParentFile());
       }
-    } catch (URISyntaxException e) {
-      CompilationMessage cmsg = __cmsgs.errInvalidImport(_bpelUrl.toExternalForm());
-      logCompilationMessage(cmsg);
-      this.invalidate();
-      throw new CompilationException(cmsg);
-    }
 
-    try {
       if (_xsltFinder != null) {
         xf = _xsltFinder;
       } else {
-        xf = new DefaultXsltFinder(_bpelUrl.toURI());
+        xf = new DefaultXsltFinder(_bpelFile.getParentFile());
       }
-    } catch (URISyntaxException e) {
-      CompilationMessage cmsg = __cmsgs.errInvalidImport(_bpelUrl.toExternalForm());
-      logCompilationMessage(cmsg);
-      this.invalidate();
-      throw new CompilationException(cmsg);
-    }
 
     CompileListener clistener = new CompileListener() {
       public void onCompilationMessage(CompilationMessage compilationMessage) {
         Object location = compilationMessage.source;
         if (location == null) {
-          compilationMessage.source = _bpelUrl.toExternalForm() + ":";
+          compilationMessage.source = _bpelFile + ":";
         }
         if (location instanceof BpelObject) {
-          compilationMessage.source = _bpelUrl.toExternalForm() + ":" + ((BpelObject)location).getLineNo();
+          compilationMessage.source = _bpelFile + ":" + ((BpelObject)location).getLineNo();
         }
         logCompilationMessage(compilationMessage);
       }
@@ -306,8 +290,8 @@ public class BpelC {
       fileHeader.write(_outputStream);
       fileHeader.writeOProcess(oprocess, _outputStream);
 
-//      if (_bpelUrl.toString().startsWith("file:") && _outputDir != null) {
-//        String filePath = _bpelUrl.getFile();
+//      if (_bpelFile.toString().startsWith("file:") && _outputDir != null) {
+//        String filePath = _bpelFile.getFile();
 //        filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".dd";
 //
 //        DDHandler ddHandler;
@@ -338,29 +322,29 @@ public class BpelC {
    * Compile a BPEL process from a URL.  This method uses a {@link BpelProcessBuilder}
    * to parse the XML and then calls {@link #compile(Process)}.
    * </p>
-   * @param bpelUrl the URL of the BPEL process to be compiled.
+   * @param bpelFile the URL of the BPEL process to be compiled.
    * @throws IOException if one occurs while reading the BPEL process or writing the
    * output.
    * @throws CompilationException if one occurs while compiling the process.
    */
-  public void compile(URL bpelUrl) throws CompilationException, IOException {
+  public void compile(File bpelFile) throws CompilationException, IOException {
     if (__log.isDebugEnabled()) {
       __log.debug("compile(URL)");
     }
 
-    if (bpelUrl == null) {
+    if (bpelFile == null) {
       this.invalidate();
-      throw new IllegalArgumentException("Null bpelUrl");
+      throw new IllegalArgumentException("Null bpelFile");
     }
 
-    _bpelUrl = bpelUrl;
+    _bpelFile = bpelFile;
     BpelProcessBuilder bpelProcessBuilder = _bpelProcessBuilderFactory.newBpelProcessBuilder();
     Process process;
     try {
-      InputSource isrc = new InputSource(new ByteArrayInputStream(StreamUtils.read(bpelUrl)));
-      isrc.setSystemId(bpelUrl.toExternalForm());
+      InputSource isrc = new InputSource(new ByteArrayInputStream(StreamUtils.read(bpelFile.toURL())));
+      isrc.setSystemId(bpelFile.getAbsolutePath());
       try {
-        process = bpelProcessBuilder.parse(isrc, bpelUrl.toExternalForm());
+        process = bpelProcessBuilder.parse(isrc, bpelFile.getAbsolutePath());
       } finally {
         ParseError[] parseErrors = bpelProcessBuilder.getParseErrors();
         for (ParseError parseError : parseErrors) {
@@ -369,7 +353,7 @@ public class BpelC {
         }
       }
     } catch (BpelParseException e) {
-      CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(bpelUrl.toExternalForm());
+      CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(bpelFile.getAbsolutePath());
       this.invalidate();
       throw new CompilationException(cmsg, e);
     }
