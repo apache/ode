@@ -20,26 +20,34 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
- * Aggregation of all the contexts provided to the BPEL engine
- * by the integration layer.
+ * Aggregation of all the contexts provided to the BPEL engine by the
+ * integration layer.
  */
 class Contexts {
 
-  MessageExchangeContext mexContext;
-  Scheduler scheduler;
-  EndpointReferenceContext eprContext;
-  BindingContext bindingContext;
-  BpelDAOConnectionFactory dao;
-  final List<MessageExchangeInterceptor> globalIntereceptors = new ArrayList<MessageExchangeInterceptor>();
+    ConfigurationContext configurationContext;
+    
+    MessageExchangeContext mexContext;
+
+    Scheduler scheduler;
+
+    EndpointReferenceContext eprContext;
+
+    BindingContext bindingContext;
+
+    BpelDAOConnectionFactory dao;
+
+    MessageExchangeInterceptor[] globalIntereceptors = new MessageExchangeInterceptor[0];
 
 }
