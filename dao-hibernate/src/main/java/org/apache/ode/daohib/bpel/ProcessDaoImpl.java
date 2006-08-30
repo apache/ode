@@ -287,4 +287,9 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new PartnerLinkDAOImpl(_sm,hepr);
     }
 
+	public int getNumInstances() {
+		// TODO: Is this efficient? 
+		return _process.getInstances().size();
+	}
+
 }

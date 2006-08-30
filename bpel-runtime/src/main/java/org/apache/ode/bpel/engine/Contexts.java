@@ -29,6 +29,7 @@ import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the

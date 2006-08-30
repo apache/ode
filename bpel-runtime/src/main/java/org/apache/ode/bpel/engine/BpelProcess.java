@@ -27,7 +27,6 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.engine.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
@@ -43,6 +42,10 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
+import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
@@ -294,20 +297,24 @@ public class BpelProcess {
     }
 
     private boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx) {
-        __log.debug("onBpelServerInvoked --> interceptor " + i);
-        boolean cont = i.onProcessInvoked(mex, ictx);
-        if (!cont) {
-            __log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
-            if (mex.getStatus() == Status.REQUEST) {
-                __log.debug("aborting interceptor " + i + " did not set message exchange status, assuming failure");
-                mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
-                        .getMessageExchangeId(), i.toString()), null);
-            }
+        __log.debug("onProcessInvoked --> interceptor " + i);
+        try {
+        	i.onProcessInvoked(mex, ictx);
+        } catch (FaultMessageExchangeException fme) {
+            __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
+            mex.setFault(fme.getFaultName().getLocalPart(), fme.getFaultData());
             return false;
+        } catch (AbortMessageExchangeException ame) {
+        	__log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: "+  ame.getMessage());
+        	mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
+                        .getMessageExchangeId(), i.toString(), ame.getMessage()), null);
+        	return false;
         }
-    	
+        
         return true;
     }
+    
+    
     /**
      * Replacement object for serializtation of the {@link OBase} (compiled
      * BPEL) objects in the JACOB VPU.

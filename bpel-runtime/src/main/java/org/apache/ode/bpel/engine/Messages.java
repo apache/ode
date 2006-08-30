@@ -146,8 +146,8 @@ public class Messages extends MessageBundle {
             "in any WSDL document: {0} {1}.", service, port);
   }
 
-  String msgInterceptorAborted(String mexId, String interceptor) {
-	  return format("Message exchange {0} aborted by interceptor {1}", mexId, interceptor);
+  String msgInterceptorAborted(String mexId, String interceptor, String msg) {
+	  return format("Message exchange {0} aborted by interceptor {1}: {2}", mexId, interceptor, msg);
   }	
   
   String msgMyRoleRoutingFailure(String messageExchangeId) {
