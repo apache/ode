@@ -20,13 +20,15 @@ package org.apache.ode.bpel.intercept;
 
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
 /**
- * No-Op implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor interface;
+ * No-Op implementation of the
+ * {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor interface;
  * good for sub-classing.
  * 
  * @author mszefler
- *
+ * 
  */
 public class NoOpInterceptor implements MessageExchangeInterceptor {
 
@@ -43,6 +45,12 @@ public class NoOpInterceptor implements MessageExchangeInterceptor {
 	public void onPartnerInvoked(PartnerRoleMessageExchange mex,
 			InterceptorContext ic) throws FailMessageExchangeException,
 			FaultMessageExchangeException {
+	}
+
+	public void onNewInstanceInvoked(MyRoleMessageExchange mex,
+			InterceptorContext ic) throws FailMessageExchangeException,
+			FaultMessageExchangeException {
+
 	}
 
 }
