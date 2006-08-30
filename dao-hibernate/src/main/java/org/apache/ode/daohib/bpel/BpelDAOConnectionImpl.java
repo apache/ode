@@ -170,15 +170,18 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
         // Filtering using an example object
         HProcess exampleProcess = new HProcess();
-        crit.add(Example.create(exampleProcess).ignoreCase().enableLike().excludeZeroes());
+        crit.add(Example.create(exampleProcess).ignoreCase().enableLike().excludeZeroes()
+                .excludeProperty("retired").excludeProperty("active").excludeProperty("version"));
         // TODO Implement process status filtering when status will exist
 
         // TODO separate localname and namespace to provide proper querying
         if (filter != null) {
-            if (filter.getNameFilter() != null)
+            if (filter.getNameFilter() != null) {
                 exampleProcess.setTypeName(filter.getNameFilter().replaceAll("\\*", "%"));
-            if (filter.getNamespaceFilter() != null)
+            }
+            if (filter.getNamespaceFilter() != null) {
                 exampleProcess.setTypeNamespace(filter.getNamespaceFilter().replaceAll("\\*", "%"));
+            }
 
             // Specific filter for deployment date.
             if (filter.getDeployedDateFilter() != null) {
@@ -206,6 +209,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
             // Ordering
             if (filter.getOrders() != null) {
+                System.out.println("######## ORDER " + filter.getOrders());
                 for (String key : filter.getOrders()) {
                     boolean ascending = true;
                     String orderKey = key;
