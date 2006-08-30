@@ -109,12 +109,12 @@ class ProcessDDInitializer {
       for (TDeployment.Process.Property property : _dd.getPropertyList()) {
         String textContent = DOMUtils.getTextContent(property.getDomNode());
         if (textContent != null) {
-          processDAO.setProperty(property.getName(), property.getNamespace(),
+          processDAO.setProperty(property.getName().getLocalPart(), property.getName().getNamespaceURI(),
               textContent);
         } else {
           Element elmtContent = DOMUtils.getElementContent(property
               .getDomNode());
-          processDAO.setProperty(property.getName(), property.getNamespace(),
+          processDAO.setProperty(property.getName().getLocalPart(), property.getName().getNamespaceURI(),
               elmtContent);
         }
       }
