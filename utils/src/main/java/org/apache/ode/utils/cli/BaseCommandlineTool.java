@@ -19,14 +19,20 @@
 
 package org.apache.ode.utils.cli;
 
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.SimpleLayout;
 import org.apache.ode.utils.Version;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import org.apache.log4j.*;
 
 public abstract class BaseCommandlineTool {
 
@@ -124,9 +130,8 @@ public abstract class BaseCommandlineTool {
     CLAZZ = c;
   }
 
-  protected static final String getProgramName() {
-    String progname = System.getProperty("com.fs.progname");
-    return (progname == null) ? ("java " + CLAZZ.getName()) : progname;
+  protected static String getProgramName() {
+    return "java " + CLAZZ.getName();
   }
 
   protected static void initLogging() {

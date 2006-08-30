@@ -21,19 +21,14 @@ package org.apache.ode.tools.bpelc.ant;
 import org.apache.ode.tools.CommandTask;
 import org.apache.ode.tools.ExecutionException;
 import org.apache.ode.tools.bpelc.BpelCompileCommand;
+import org.apache.tools.ant.BuildException;
 
 import java.io.File;
-
-import org.apache.tools.ant.BuildException;
 
 public class BpelCTask extends CommandTask {
   
   BpelCompileCommand _bcc = new BpelCompileCommand();
-  
-  public void setRr(File f) {
-    _bcc.setResourceRepository(f);
-  }
-  
+
   public void setTargetdir(File f) {
     _bcc.setOuputDirectory(f);
   }

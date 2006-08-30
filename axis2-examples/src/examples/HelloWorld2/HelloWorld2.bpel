@@ -4,7 +4,9 @@
     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl">
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import location="HelloWorld2.wsdl"
      namespace="http://ode/bpel/unit-test.wsdl"
@@ -19,6 +21,7 @@
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
+     <variable name="tmpVarInt" type="xsd:int"/>
    </variables>
         
    <sequence>   
@@ -32,11 +35,35 @@
 
       <assign name="assign1">
          <copy>
+            <from>10 + 2</from>
+            <to variable="tmpVarInt"/>
+         </copy>
+         <copy>
+            <from>$tmpVarInt/foo/bar</from>
+            <to variable="tmpVarInt"/>
+         </copy>
+         <copy>
+            <from>number('10') + 2</from>
+            <to variable="tmpVarInt"/>
+         </copy>
+         <copy>
+            <from>abs($tmpVarInt) + 2</from>
+            <to variable="tmpVarInt"/>
+         </copy>
+         <copy>
             <from variable="myVar" part="TestPart"/>
             <to variable="tmpVar"/>
          </copy>
          <copy>
-             <from>concat($tmpVar,' World')"</from>
+            <from>bpws:getVariableData('myVar', 'TestPart')</from>
+            <to variable="tmpVar"/>
+         </copy>
+         <copy>
+            <from>replace($tmpVar, 'llo', 'ck')</from>
+            <to variable="tmpVar"/>
+         </copy>
+         <copy>
+             <from>concat($tmpVar,' World ', $tmpVarInt)</from>
              <to variable="myVar" part="TestPart"/>
          </copy>
       </assign>
