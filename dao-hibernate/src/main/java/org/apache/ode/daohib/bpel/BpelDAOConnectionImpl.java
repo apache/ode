@@ -209,7 +209,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
             // Ordering
             if (filter.getOrders() != null) {
-                System.out.println("######## ORDER " + filter.getOrders());
                 for (String key : filter.getOrders()) {
                     boolean ascending = true;
                     String orderKey = key;
