@@ -61,7 +61,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dd.*;
 import org.apache.ode.bpel.deploy.DeploymentServiceImpl;
-import org.apache.ode.bpel.engine.deploy.DeploymentUnitImpl;
+import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.BindingContext;
