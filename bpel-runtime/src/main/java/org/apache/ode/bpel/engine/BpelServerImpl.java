@@ -36,41 +36,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.dd.TInvoke;
-import org.apache.ode.bpel.dd.TProvide;
-import org.apache.ode.bpel.dd.TService;
-import org.apache.ode.bpel.deploy.DeploymentServiceImpl;
-import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
-import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.DeploymentService;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.utils.msg.MessageBundle;
-
-import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -85,6 +50,38 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dd.*;
+import org.apache.ode.bpel.deploy.DeploymentServiceImpl;
+import org.apache.ode.bpel.engine.deploy.DeploymentUnitImpl;
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.explang.ConfigurationException;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEngine;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.DeploymentService;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
+import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * The BPEL server implementation.
@@ -168,17 +165,16 @@ public class BpelServerImpl implements BpelServer {
             __log.warn("Couldn't deploy " + file.getName() + ", package was not found.");
             return false;
         }
-        else {
-            boolean success = true;
-            for (QName pName : du.getProcessNames()) {
-                success = success && undeploy(pName);
-            }
-            rm(du.getDeployDir());
-            for (QName pname : du.getProcessNames()) {
-                _deploymentUnits.remove(pname);
-            }
-            return success;
+
+        boolean success = true;
+        for (QName pName : du.getProcessNames()) {
+            success = success && undeploy(pName);
         }
+        rm(du.getDeployDir());
+        for (QName pname : du.getProcessNames()) {
+            _deploymentUnits.remove(pname);
+        }
+        return success;
     }
 
     private void rm(File f) {
@@ -487,7 +483,15 @@ public class BpelServerImpl implements BpelServer {
 
             // Create local message-exchange interceptors.
             List<MessageExchangeInterceptor> localMexInterceptors = new LinkedList<MessageExchangeInterceptor>();
-            // TODO
+            for (TMexInterceptor mexi : deployInfo.getMexInterceptors().getMexInterceptorList()) {
+                try {
+                    Class cls = Class.forName(mexi.getClassName());
+                    localMexInterceptors.add((MessageExchangeInterceptor) cls.newInstance());
+                } catch (Throwable t) {
+                   String errmsg = "Error instantiating message-exchange interceptor " + mexi.getClassName();
+                   __log.error(errmsg,t);
+                }
+            }
 
             // Create myRole endpoint name mapping (from deployment descriptor)
             HashMap<OPartnerLink, Endpoint> myRoleEndpoints = new HashMap<OPartnerLink, Endpoint>();
@@ -734,59 +738,20 @@ public class BpelServerImpl implements BpelServer {
     }
 
 
+    /**
+     * Register a global message exchange interceptor. 
+     * @param interceptor message-exchange interceptor
+     */
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-        // TODO Auto-generated method stub
+        // We don't really care all that much about concurrency here, we just want to 
+        // avoid ConcurrentModificationEx, so use an array instead of a collection. 
+        synchronized(_contexts) {
+            MessageExchangeInterceptor[] r = new MessageExchangeInterceptor[1+_contexts.globalIntereceptors.length];
+            System.arraycopy(_contexts.globalIntereceptors,0,r,0,_contexts.globalIntereceptors.length);
+            r[r.length-1] = interceptor;
+            _contexts.globalIntereceptors = r;
+        }
     }
 
-
-//  public void readState() {
-//  File duState = new File(_deploymentDir, ".state");
-//  if (duState.exists()) {
-//      try {
-//          BufferedReader duStateReader = new BufferedReader(new FileReader(duState));
-//          String line;
-//          while ((line = duStateReader.readLine()) != null) {
-//              String filename = line.substring(0, line.indexOf("|"));
-//              long timestamp = Long.valueOf(line.substring(line.indexOf("|") + 1, line.length()));
-//              File duFile = new File(_deploymentDir, filename);
-//              if (duFile.exists()) {
-//                  if (new File(duFile, "deploy.xml").lastModified() > timestamp) {
-//                      deploy(duFile);
-//                  } else {
-//                      DeploymentUnitImpl du = (DeploymentUnitImpl) deploy(duFile, true);
-//                      du.setLastModified(timestamp);
-//                  }
-//              }
-//          }
-//      } catch (FileNotFoundException e) {
-//          // Shouldn't happen
-//      } catch (Exception e) {
-//          __log.error("An error occured while reading past deployments states, some "
-//                  + "processes will be redeployed.", e);
-//      }
-//  } else {
-//      __log.info("Couldn't find any deployment history, all processes will " + "be redeployed.");
-//  }
-//}
-//
-//public void writeState() {
-//  try {
-//      __log.debug("Writing current deployment state.");
-//      FileWriter duStateWriter = new FileWriter(new File(_deploymentDir, ".state"), false);
-//      for (DeploymentUnitImpl deploymentUnit : _deployedUnits) {
-//          // Somebody using pipe in their directory names don't deserve to
-//          // deploy anything
-//          duStateWriter.write(deploymentUnit.getDuDirectory().getName());
-//          duStateWriter.write("|");
-//          duStateWriter.write("" + deploymentUnit.getLastModified());
-//          duStateWriter.write("\n");
-//      }
-//      duStateWriter.flush();
-//      duStateWriter.close();
-//  } catch (IOException e) {
-//      __log.error("Couldn't write deployment state! Processes could be redeployed (or not) "
-//              + "even they don't (or do) need to.", e);
-//  }
-//}
 
 }
