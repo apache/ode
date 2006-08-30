@@ -44,6 +44,7 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
+import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.o.OBase;
@@ -172,7 +173,7 @@ public class BpelProcess {
         mex.getDAO().setProcess(getProcessDAO());
         mex.setProcess(_oprocess);
 
-        if (!processInterceptors(mex)) {
+        if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
             __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
             return;
         }
@@ -281,39 +282,21 @@ public class BpelProcess {
      * @return <code>true</code> if execution should continue,
      *         <code>false</code> otherwise
      */
-    private boolean processInterceptors(MyRoleMessageExchangeImpl mex) {
+    private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
     	InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO());
     	
         for (MessageExchangeInterceptor i : _mexInterceptors) 
-        	if (!processInterceptor(i,mex, ictx))
+        	if (!mex.processInterceptor(i,mex, ictx, invoker))
         		return false;
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
-        	if (!processInterceptor(i,mex, ictx))
+        	if (!mex.processInterceptor(i,mex, ictx, invoker))
         		return false;
         	
         
         return true;
     }
 
-    private boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx) {
-        __log.debug("onProcessInvoked --> interceptor " + i);
-        try {
-        	i.onProcessInvoked(mex, ictx);
-        } catch (FaultMessageExchangeException fme) {
-            __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
-            mex.setFault(fme.getFaultName().getLocalPart(), fme.getFaultData());
-            return false;
-        } catch (AbortMessageExchangeException ame) {
-        	__log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: "+  ame.getMessage());
-        	mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
-                        .getMessageExchangeId(), i.toString(), ame.getMessage()), null);
-        	return false;
-        }
-        
-        return true;
-    }
-    
     
     /**
      * Replacement object for serializtation of the {@link OBase} (compiled
@@ -496,6 +479,12 @@ public class BpelProcess {
                 if (processDAO.isRetired()) {
                     throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
                 }
+                
+                if (!processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
+                	__log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+                	return;
+                }
+                
                 ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
                 BpelRuntimeContextImpl instance = createRuntimeContext(newInstance, new PROCESS(_oprocess), mex);
 

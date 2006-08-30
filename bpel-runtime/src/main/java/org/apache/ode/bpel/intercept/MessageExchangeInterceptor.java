@@ -53,6 +53,17 @@ public interface MessageExchangeInterceptor {
     	throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
+     * Called when the BPEL server is invoked, after the message exchange has
+     * been routed to the process and it has been determined that a new instance
+     * needs to be created.
+     * 
+     * @param mex
+     *            message exchange
+     */
+    void onNewInstanceInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
+    	throws FailMessageExchangeException, FaultMessageExchangeException;
+    
+    /**
      * Called when the BPEL server is invoked, before any attempt to route the
      * message exchange to a process.
      * 
