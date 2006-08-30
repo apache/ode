@@ -31,7 +31,6 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -236,7 +235,7 @@ public class BpelEngineImpl implements BpelEngine {
      * 
      * @return
      */
-    List<MessageExchangeInterceptor> getGlobalInterceptors() {
+    MessageExchangeInterceptor[] getGlobalInterceptors() {
         return _contexts.globalIntereceptors;
     }
 
