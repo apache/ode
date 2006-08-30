@@ -47,7 +47,7 @@
               </xs:annotation>
             </xs:element>
 
-            <xs:element name="property"  minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="property"  minOccurs="0" maxOccurs="unbounded">
               <xs:annotation>
                 <xs:documentation>
                   A user-defined property that will be attached to a process upon
@@ -58,8 +58,7 @@
                 <xs:sequence>
                   <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
                 </xs:sequence>
-                <xs:attribute name="name" type="xs:string" use="required"/>
-                <xs:attribute name="namespace" type="xs:anyURI" use="required"/>
+                <xs:attribute name="name" type="xs:QName" use="required"/>
               </xs:complexType>
             </xs:element>
 
