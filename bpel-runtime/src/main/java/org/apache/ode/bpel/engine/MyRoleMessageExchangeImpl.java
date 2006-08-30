@@ -27,13 +27,14 @@ import org.apache.commons.logging.LogFactory;
 
 
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.engine.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchangeInterceptor;
 
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl 
@@ -57,6 +58,40 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
     getDAO().setCorrelationStatus(status.toString());
   }
 
+  /**
+   * Process the message-exchange interceptors.
+   * 
+   * @param mex
+   *            message exchange
+   * @return <code>true</code> if execution should continue,
+   *         <code>false</code> otherwise
+   */
+  private boolean processInterceptors(MyRoleMessageExchangeImpl mex) {
+  	InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), null);
+  	
+      for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
+      	if (!processInterceptor(i, mex, ictx))
+      		return false;
+      	
+      
+      return true;
+  }
+
+  private boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx) {
+      boolean cont = i.onBpelServerInvoked(mex, ictx);
+      if (!cont) {
+          __log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
+          if (mex.getStatus() == Status.REQUEST) {
+              __log.debug("aborting interceptor " + i + " did not set message exchange status, assuming failure");
+              mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex
+                      .getMessageExchangeId(), i.toString()), null);
+          }
+          return false;
+      }
+
+      return true;
+  }
+
   public void invoke(Message request) {
     if (request == null) {
       String errmsg = "Must pass non-null message to invoke()!";
@@ -67,20 +102,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl
     _dao.setRequest(((MessageImpl)request)._dao);
     _dao.setStatus(MessageExchange.Status.REQUEST.toString());
 
-    for (MessageExchangeInterceptor i: _engine.getGlobalInterceptors()) {
-    	__log.debug("onBpelServerInvoked --> interceptor " + i);
-    	boolean cont = i.onBpelServerInvoked(this);
-    	if (!cont) {
-    		__log.debug("interceptor " + i + " caused invoke on " + this + "to be aborted");
-    		if (getStatus() == Status.REQUEST) {
-    			__log.debug("aborting interceptor "  + i + " did not set message exchange status, assuming failure");
-    		      setFailure(MessageExchange.FailureType.ABORTED, 
-    		    		  __msgs.msgInterceptorAborted(getMessageExchangeId(),i.toString()), null);
-    		}
-    		return;
-    	}
-    }
-    
+    if (!processInterceptors(this))
+    	return;
     
     BpelProcess target = _engine.route(getDAO().getCallee(), request);
 
