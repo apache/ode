@@ -65,6 +65,7 @@
         <path-element>lib/jaxen.jar</path-element>
         <path-element>lib/saxon.jar</path-element> 
         <path-element>lib/saxon-dom.jar</path-element> 
+        <path-element>lib/saxon-xpath.jar</path-element> 
         <path-element>lib/dom4j.jar</path-element>
         <path-element>lib/hibernate.jar</path-element>
         <path-element>lib/commons-collections.jar</path-element>
