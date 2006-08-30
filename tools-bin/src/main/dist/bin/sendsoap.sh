@@ -1,13 +1,4 @@
 #! /bin/sh
-# (C) 2004--2005 Intalio Inc.
-# ALL RIGHTS RESERVED
-
-
-#
-# Universal ODE program loader.
-# Based on Apache ANT script.
-#
-
 
 cygwin=false;
 darwin=false;
@@ -81,6 +72,12 @@ fi
 # Add user-specified classpath. 
 LOCALCLASSPATH="$ODE_CLASSPATH"
 
+# Add Ode libraries
+for f in $LIB/*.jar
+do
+  LOCALCLASSPATH=$LOCALCLASSPATH:$f
+done
+
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
     ODE_HOME=`cygpath --windows "$ODE_HOME"`
@@ -92,10 +89,5 @@ if $cygwin; then
     ETC=`cygpath --windows "$ETC"`
 fi
 
-if [ "$1" = "--jdb" ] ; then
-   ODE_JAVAOPTS="-ea -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 $ODE_JAVAOPTS"
-   shift
-fi
-
-exec  "$JAVACMD" $ODE_JAVAOPTS -Djava.system.class.loader=fivesight.bootstrap.BootLoader -D"fivesight.bootstrap.BootLoader.basedir=$ODE_HOME" -D"fivesight.bootstrap.BootLoader.cfg=$ETC/${progname}.cfg" -D"com.fs.progname=$progname" -cp "$LIB/ode-bootstrap.jar" org.apache.ode.utils.cli.Main "$ETC/${progname}.cfg" "$@" 
+exec "$JAVACMD" $ODE_JAVAOPTS -cp "$LOCALCLASSPATH" org.apache.ode.tools.sendsoap.cline.HttpSoapSender "$@"
 

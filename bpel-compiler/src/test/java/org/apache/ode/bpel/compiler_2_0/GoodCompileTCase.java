@@ -18,16 +18,16 @@
  */
 package org.apache.ode.bpel.compiler_2_0;
 
+import junit.framework.TestCase;
 import org.apache.ode.bpel.capi.CompilationMessage;
 import org.apache.ode.bpel.capi.CompileListener;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.utils.StreamUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 
 /**
@@ -56,7 +56,7 @@ class GoodCompileTCase extends TestCase implements CompileListener {
 
   public void runTest() throws Exception {
     try {
-      _compiler.compile(_bpelURL);
+      _compiler.compile(new File(_bpelURL.toURI()));
     } catch (Exception ex) {
       ex.printStackTrace();
       fail("Compilation did not succeed.");

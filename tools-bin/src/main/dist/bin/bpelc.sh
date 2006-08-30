@@ -1,13 +1,4 @@
 #! /bin/sh
-# (C) 2004 FiveSight Technologies Inc.
-# ALL RIGHTS RESERVED
-
-
-#
-# Universal ODE program loader.
-# Based on Apache ANT script.
-#
-
 
 cygwin=false;
 darwin=false;
@@ -47,8 +38,8 @@ if $cygwin ; then
 fi
 
 ODE_HOME=`cd "$ODE_BIN/.." && pwd`
-ODE_LIB="$ODE_HOME/lib"
-ODE_ETC="$ODE_HOME/etc"
+LIB="$ODE_HOME/lib"
+ETC="$ODE_HOME/etc"
 
 
 if [ -z "$JAVACMD" ] ; then
@@ -79,7 +70,13 @@ if [ ! -d "$JAVA_HOME" ] ; then
 fi
 
 # Add user-specified classpath. 
-LOCALCLASSPATH="$LOCALCLASSPATH:$ODE_CLASSPATH"
+LOCALCLASSPATH="$ODE_CLASSPATH"
+
+# Add Ode libraries
+for f in $LIB/*.jar
+do
+  LOCALCLASSPATH=$LOCALCLASSPATH:$f
+done
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
@@ -87,15 +84,10 @@ if $cygwin; then
     JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
     LOCALCLASSPATH=`cygpath --path --windows "$LOCALCLASSPATH"`
     CYGHOME=`cygpath --windows "$HOME"`
-    ODE_LIB=`cygpath --windows "$ODE_LIB"`
-    ODE_ETC=`cygpath --windows "$ODE_ETC"`
+    LIB=`cygpath --windows "$LIB"`
     ODE_BIN=`cygpath --windows "$ODE_BIN"`
+    ETC=`cygpath --windows "$ETC"`
 fi
 
-if [ "$1" = "--jdb" ] ; then
-   ODE_JAVAOPTS="-ea -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 $ODE_JAVAOPTS"
-   shift
-fi
-
-exec  "$JAVACMD" -server $ODE_JAVAOPTS -D"com.sun.management.config.file=${ODE_ETC}/ode-management.properties" -Djava.system.class.loader=fivesight.bootstrap.BootLoader -D"fivesight.bootstrap.BootLoader.basedir=$ODE_HOME" -D"fivesight.bootstrap.BootLoader.cfg=$ODE_ETC/${progname}.cfg" -D"com.fs.progname=$progname" -cp "$ODE_LIB/ode-bootstrap.jar" org.apache.ode.utils.cli.Main "$ODE_ETC/${progname}.cfg" "$@" 
+exec "$JAVACMD" $ODE_JAVAOPTS -cp "$LOCALCLASSPATH" org.apache.ode.tools.bpelc.cline.BpelC "$@"
 

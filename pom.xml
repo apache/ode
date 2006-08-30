@@ -102,7 +102,7 @@
 
         <module>axis2</module>
         <module>axis2-war</module>
-	    <!--module>axis2-examples</module-->
+	    <module>axis2-examples</module>
 
         <module>bootstrap</module>
         <module>utils</module>
@@ -141,7 +141,7 @@
         <module>soap</module>
         <module>bpel-scheduler-quartz</module>
 
-        <!--module>distro-axis2</module-->
+        <module>distro-axis2</module>
     </modules>
 
     <dependencies>

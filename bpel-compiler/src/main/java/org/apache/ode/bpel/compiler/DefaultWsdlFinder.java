@@ -20,46 +20,41 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bom.wsdl.Definition4BPEL;
 
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
 
+public class DefaultWsdlFinder implements WsdlFinder {
 
-class DefaultWsdlFinder implements WsdlFinder {
-  
-  private URI _base;
-  
-  public DefaultWsdlFinder() {
-    // no base URL
-  }
-  
-  public DefaultWsdlFinder(URI u) {
-    setBaseURI(u);
-  }
-  
-  public void setBaseURI(URI u) {
-    File f = new File(u);
-    if (f.exists() && f.isFile()) {
-      _base = f.getParentFile().toURI();
-    } else {
-      _base = u;
+    private File _suDir;
+
+    public DefaultWsdlFinder() {
+        _suDir = new File(".");
     }
-  }
- 
-  public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {
-    return (Definition4BPEL) r.readWSDL(
-        (_base == null?null:(_base.toASCIIString())),
-        uri.toASCIIString());
-  }
 
-	public InputStream openResource(URI uri) throws MalformedURLException, IOException {
-		return uri.toURL().openStream();
-	}
-  
-  
+    public DefaultWsdlFinder(File suDir) {
+        _suDir = suDir;
+    }
+
+    public void setBaseURI(URI u) {
+        _suDir = new File(u);
+    }
+
+    public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {
+        // Eliminating whatever path has been provided, we always look into our SU
+        // deployment directory.
+        String strUri = uri.toString();
+//        String filename = strUri.substring(strUri.lastIndexOf("/"), strUri.length());
+        return (Definition4BPEL) r.readWSDL(new File(_suDir, strUri).getPath());
+    }
+
+    public InputStream openResource(URI uri) throws MalformedURLException, IOException {
+        return uri.toURL().openStream();
+    }
+
 }
