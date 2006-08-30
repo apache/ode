@@ -75,6 +75,10 @@ public class HttpSoapSender extends BaseCommandlineTool {
     private static final String SYNOPSIS =
             "send the contents of a file to a URL as a SOAP request and print the response (if any) to the console or a file.";
 
+    protected static String getProgramName() {
+      return "sendsoap";
+    }
+
     public static void doSend(URL u, InputStream is, OutputStream os) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(8192);
         StreamUtils.copy(bos, is);

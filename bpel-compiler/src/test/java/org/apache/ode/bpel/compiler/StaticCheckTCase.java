@@ -18,24 +18,26 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import junit.framework.TestCase;
 import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.capi.CompilationMessage;
 import org.apache.ode.bpel.capi.CompileListener;
+import org.xml.sax.InputSource;
 
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
-
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-
-import junit.framework.TestCase;
-
-import org.xml.sax.InputSource;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -90,7 +92,7 @@ class StaticCheckTCase extends TestCase implements CompileListener, WsdlFinder {
 
   public void runTest() throws Exception {
     try {
-      _compiler.compile(_bpelURL);
+      _compiler.compile(new File(_bpelURL.toURI()));
       fail("Expected compilation exception.");
     } catch (CompilationException ce) {
       _errors.add(ce.getCompilationMessage());

@@ -19,6 +19,26 @@
 
 package org.apache.ode.bpel.deploy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
+import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.DefaultWsdlFinder;
+import org.apache.ode.bpel.compiler.DefaultXsltFinder;
+import org.apache.ode.bpel.dd.DeployDocument;
+import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -28,25 +48,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
-
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.compiler.BpelC;
-import org.apache.ode.bpel.dd.DeployDocument;
-import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -126,10 +127,10 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     private void compile(File bpelFile) {
         BpelC bpelc = BpelC.newBpelCompiler();
         bpelc.setOutputDirectory(_duDirectory);
-        bpelc.setWsdlFinder(new DUWsdlFinder(_duDirectory));
-        bpelc.setXsltFinder(new DUXsltFinder(_duDirectory));
+        bpelc.setWsdlFinder(new DefaultWsdlFinder(_duDirectory));
+        bpelc.setXsltFinder(new DefaultXsltFinder(_duDirectory));
         try {
-            bpelc.compile(bpelFile.toURL());
+            bpelc.compile(bpelFile);
         } catch (IOException e) {
             __log.error("Couldn't compile process file!", e);
         }
