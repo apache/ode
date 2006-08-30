@@ -208,4 +208,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public void update() {
         //TODO Check requirement for persisting.
     }
+
+	public int getNumInstances() {
+		return _instances.size();
+	}
 }

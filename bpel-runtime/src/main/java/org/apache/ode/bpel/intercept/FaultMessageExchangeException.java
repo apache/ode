@@ -16,33 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.engine;
+package org.apache.ode.bpel.intercept;
 
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.Message;
 
 /**
- * Implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext}
- * interface.
- * @author Maciej Szefler (m s z e f l e r @ g m a i l . c o m)
- *
+ * Exception thrown by {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor}
+ * implementations that is used to indicate that the processing of the exchange should
+ * be aborted with a fault.
+ * @author Maciej Szefler
  */
-public class InterceptorContextImpl implements InterceptorContext{
-	private ProcessDAO _processDao;
-	private BpelDAOConnection _connection;
-	
-	public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO) {
-		_connection = connection;
-		_processDao = processDAO;
-	}
+public final class FaultMessageExchangeException extends AbortMessageExchangeException {
+	private static final long serialVersionUID = 1L;
 
-	public BpelDAOConnection getConnection() {
-		return _connection;
-	}
+	private QName _faultName;
+	private Message _faultData;
 
-	public ProcessDAO getProcessDAO() {
-		return _processDao;
+	public FaultMessageExchangeException(String errmsg, QName faultName, Message faultData) {
+		super(errmsg);
+		
+		_faultName = faultName;
+		_faultData = faultData;
 	}
 	
+	public QName getFaultName() {
+		return _faultName;
+	}
+	
+	public Message getFaultData() {
+		return _faultData;
+	}
 }

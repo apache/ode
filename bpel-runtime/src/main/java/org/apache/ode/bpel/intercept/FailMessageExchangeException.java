@@ -16,33 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.engine;
-
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+package org.apache.ode.bpel.intercept;
 
 /**
- * Implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext}
- * interface.
- * @author Maciej Szefler (m s z e f l e r @ g m a i l . c o m)
- *
+ * Exception thrown by {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor}
+ * implementations that is used to indicate that the processing of the exchange should
+ * be aborted with a failure.
+ * @author Maciej Szefler
  */
-public class InterceptorContextImpl implements InterceptorContext{
-	private ProcessDAO _processDao;
-	private BpelDAOConnection _connection;
+public final class FailMessageExchangeException extends AbortMessageExchangeException{
+	private static final long serialVersionUID = 1L;
+
+	protected FailMessageExchangeException(String msg) {
+		super(msg);
+	}
 	
-	public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO) {
-		_connection = connection;
-		_processDao = processDAO;
-	}
-
-	public BpelDAOConnection getConnection() {
-		return _connection;
-	}
-
-	public ProcessDAO getProcessDAO() {
-		return _processDao;
+	protected FailMessageExchangeException(String msg, Throwable cause) {
+		super(msg,cause);
 	}
 	
 }
