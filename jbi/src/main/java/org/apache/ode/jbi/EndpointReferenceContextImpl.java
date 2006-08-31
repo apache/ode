@@ -19,19 +19,18 @@
 
 package org.apache.ode.jbi;
 
-import javax.jbi.servicedesc.ServiceEndpoint;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
+import javax.jbi.servicedesc.ServiceEndpoint;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReferenceContext}
@@ -62,6 +61,28 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     if (__log.isDebugEnabled()) {
       __log.debug( "resolveEndpointReference:\n" + prettyPrint( epr ) );
     }
+    if (elname.equals(EndpointReference.SERVICE_REF_QNAME)) {
+        epr = DOMUtils.getFirstChildElement(epr);
+        elname = new QName(epr.getNamespaceURI(),epr.getLocalName());
+    }
+    // resolve JBI end-point-references directly
+    if (epr != null && elname.equals(JBI_EPR)) {
+      String serviceName = epr.getAttribute("service-name");
+      QName serviceQName = convertClarkQName( serviceName );
+      String endpointName = epr.getAttribute("end-point-name");
+      ServiceEndpoint se = _ode.getContext().getEndpoint(serviceQName, endpointName);
+      if (se == null) {
+        __log.warn( "Unable to resolve JBI endpoint reference:\n" + prettyPrint( epr ) );
+        return null;
+      }
+      if (__log.isDebugEnabled()) {
+        __log.debug( "Resolved JBI endpoint reference: " + se );
+      }
+      return new JbiEndpointReference(se);
+    }
+    
+    // Otherwise, we expect the EPR to be wrapped in a BPEL service-ref element.
+    /*
     if (!elname.equals(EndpointReference.SERVICE_REF_QNAME))
       throw new IllegalArgumentException("EPR root element "
           + elname + " should be " + EndpointReference.SERVICE_REF_QNAME);
@@ -75,6 +96,9 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     if (se == null)
       return null;
     return new JbiEndpointReference(se);
+    */
+  __log.warn( "Unsupported endpoint reference:\n" + prettyPrint( epr ) );
+    return null;
   }
   
 
