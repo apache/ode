@@ -7,7 +7,7 @@
         xmlns:hello="urn:/HelloWorld2-RPC.wsdl"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
-    <import location="urn:/HelloWorld2-RPC.wsdl"
+    <import location="HelloWorld2-RPC.wsdl"
             namespace="urn:/HelloWorld2-RPC.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
