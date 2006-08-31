@@ -13,46 +13,63 @@
             <directory>target/stage/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
-	    <excludes>
-		<exclude>*.bat</exclude>
-	    </excludes>
+            <excludes>
+                <exclude>*.bat</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
-            <scope>compile</scope>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
+            <includes>
+                <include>ode:ode-utils</include>
+                <include>ode:ode-tools</include>
+                <include>ode:ode-bpel-compiler</include>
+                <include>ode:ode-bpel-bom</include>
+                <include>ode:ode-bpel-api</include>
+                <include>ode:ode-bpel-el-xpath10</include>
+                <include>ode:ode-bpel-el-xpath20</include>
+                <include>ode:ode-bpel-obj</include>
+                <include>ode:ode-bpel-parser</include>
+                <include>ode:ode-bpel-schemas</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <scope>runtime</scope>
             <outputDirectory/>
-	    <includes>
-		<include>ode:ode-tools-bin</include>
-	    </includes>
+            <includes>
+                <include>ode:ode-jbi-examples</include>
+                <include>ode:ode-tools-bin</include>
+            </includes>
             <unpack>true</unpack>
+        </dependencySet>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory/>
+            <outputFileNameMapping>${groupId}.${extension}</outputFileNameMapping>
+            <includes>
+                <include>ode:ode-jbi-install</include>
+            </includes>
         </dependencySet>
 
         <dependencySet>
             <scope>runtime</scope>
             <outputDirectory>lib</outputDirectory>
-	    <excludes>
-		<exclude>ode:ode-bootstrap</exclude>
-	    </excludes>
+            <includes>
+                <include>commons-logging:commons-logging</include>
+                <include>commons-codec:commons-codec</include>
+                <include>commons-httpclient:commons-httpclient</include>
+                <include>commons-pool:commons-pool</include>
+                <include>commons-collections:commons-collections</include>
+                <include>jaxen:jaxen</include>
+                <include>net.sf.saxon:saxon</include>
+                <include>net.sf.saxon:saxon-xpath</include>
+                <include>net.sf.saxon:saxon-dom</include>
+                <include>log4j:log4j</include>
+                <include>wsdl4j:wsdl4j</include>
+            </includes>
         </dependencySet>
-
-        <dependencySet>
-            <scope>runtime</scope>
-            <outputDirectory>lib</outputDirectory>
-	    <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
-	    <includes>
-		<include>ode:ode-bootstrap</include>
-	    </includes>
-        </dependencySet>
-
-        <dependencySet>
-            <scope>compile</scope>
-            <outputDirectory/>
-	    <includes>
-		<include>ode:ode-jbi-examples</include>
-		<include>ode:ode-dao-hibernate-db-derby</include>
-	    </includes>
-            <unpack>true</unpack>
-        </dependencySet>
-     </dependencySets>
+    </dependencySets>
 </assembly>
