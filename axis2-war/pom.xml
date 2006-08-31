@@ -359,6 +359,7 @@
       <artifactId>ode-dao-hibernate-db-derby</artifactId>
       <type>tar</type>
       <classifier>tar</classifier>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>
