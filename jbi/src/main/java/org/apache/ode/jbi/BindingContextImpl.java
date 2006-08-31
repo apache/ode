@@ -48,10 +48,10 @@ class BindingContextImpl implements BindingContext {
         _ode = ode;
     }
 
-    public Element activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
+    public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
             PortType portType) {
         try {
-            return _ode.activateEndpoint(processId, myRoleEndpoint).toXML().getDocumentElement();
+            return _ode.activateEndpoint(processId, myRoleEndpoint);
         } catch (Exception ex) {
             throw new ContextException("Could not activate endpoint " + myRoleEndpoint + " for process " + processId,
                     ex);
