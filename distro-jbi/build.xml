@@ -2,135 +2,29 @@
 
 <project name="ODE" default="stage">
 
-  <import file="build-jdoc.xml" />
+    <property name="build.dir" value="${basedir}/target/stage" />
+    <property name="src" value="${basedir}/src/main/dist" />
+    <property name="src.bin" value="${src}/bin" />
+    <property name="stage" location="target/stage" />
+    <property name="stage.bin" location="${stage}/bin" />
 
-  <property file="../build.properties" />
+    <target name="init">
+        <mkdir dir="${build.dir}" />
+    </target>
 
-  <property name="build.dir" value="${basedir}/target/stage" />
-  <property name="build.dir.schemadoc" value="${build.dir}/schemadoc" />
-  <property name="src" value="${basedir}/src/main/dist" />
-  <property name="src.bin" value="${src}/bin" />
-  <property name="stage" location="target/stage" />
-  <property name="stage.bin" location="${stage}/bin" />
-  <property name="stage.lib" location="${stage}/lib" />
-  <property name="stage.logs" location="${stage}/logs" />
-  <property name="stage.docs" location="${stage}/docs" />
-  <property name="stage.examples" location="${stage}/examples" />
-  <property name="stage.src" location="${stage}/src" />
-  <property name="stage.etc" location="${stage}/etc" />
+    <target name="stage" depends="init" description="stage a distribution">
+        <mkdir dir="${stage}" />
+        <antcall target="_stage_license" />
+    </target>
 
-  <target name="init">
-    <mkdir dir="${build.dir}" />
-  </target>
-
-  <target name="docs" depends="apidocs, schemadocs" unless="skip.docs" />
-
-  <target name="apidocs" depends="javadoc-ode-public" 
-		unless="skip.docs" 
-		description="generate API documentation (Javadoc) and place in the staging area." />
-
-  <target name="stage" depends="init" description="stage a distribution">
-    <mkdir dir="${stage}" />
-
-    <copy flatten="yes" todir="${stage}">
-      <fileset dir="${src}" includes="*.txt" />
-    </copy>
-    <mkdir dir="${stage.bin}" />
-    <mkdir dir="${stage.lib}" />
-    <mkdir dir="${stage.logs}" />
-    <mkdir dir="${stage.docs}" />
-    <mkdir dir="${stage.examples}" />
-
-    <mkdir dir="${stage.src}" />
-
-    <antcall target="_stage_executables" />
-    <antcall target="_stage_etc" />
-    <antcall target="_stage_bshcmds" />
-    <antcall target="_stage_spexerciser" />
-    <antcall target="_stage_documentation" />
-  </target>
-  
-  <target name="_stage_etc">
-    <mkdir dir="${stage.etc}" />
-    <mkdir dir="${stage.etc}/deploy" />
-    <copy todir="${stage.etc}">
-      <filterset>
-        <filter token="ODE_HTTP_PORT" value="${ode.default.http.port}"/>
-        <filter token="ODE_RMI_PORT" value="${ode.default.rmi.port}"/>
-        <filter token="ODE_JMX_PORT" value="${ode.default.jmx.port}"/>
-        <filter token="ODE_JMX_USERNAME" value="${ode.default.jmx.username}"/>
-        <filter token="ODE_JMX_PASSWORD" value="${ode.default.jmx.password}"/>
-	<filter token="ODE_DOMAIN" value="${ode.default.domain}"/>
-      </filterset>
-      <fileset dir="${src}/etc" includes="**/*" />
-    </copy>
-  </target>
-
-  <target name="_stage_info">
-    <copy todir="${stage}">
-      <fileset dir="${src}" includes="**/*.in" />
-    </copy>
-  </target>
-
-  <target name="_stage_extras">
-    <mkdir dir="${stage}/extras" />
-    <copy todir="${stage}/extras">
-      <fileset dir="${src}/extras" includes="**/*" />
-    </copy>
-  </target>
-
-
-  <target name="_stage_bshcmds">
-    <mkdir dir="${stage}/bsh-cmds" />
-    <copy todir="${stage}/bsh-cmds">
-      <fileset dir="${src}/bsh-cmds" includes="**/*" />
-    </copy>
-  </target>
-
-  <target name="_stage_documentation" unless="skip.docs">
-    <description>Place documentation in the staging area.</description>
-    <!-- Copy API documentation -->
-    <mkdir dir="${stage.docs}/apidocs" />
-    <copy failonerror="false" todir="${stage.docs}/apidocs">
-      <fileset dir="${build.dir.javadoc}/ode-api" includes="**/*" />
-    </copy>
-
-    <mkdir dir="${stage.docs}/schemadocs" />
-    <copy failonerror="false" todir="${stage.docs}/schemadocs">
-      <fileset dir="${build.dir.schemadoc}" includes="**/*.html" />
-    </copy>
-
-    <mkdir dir="${stage.docs}/schemas" />
-    <copy failonerror="false" todir="${stage.docs}/schemas">
-      <fileset dir="../" includes="*/src/**/*.xsd" />
-      <mapper type="flatten" />
-    </copy>
-
-  </target>
-
-  <!-- Make all the UNIX/Windows executables. -->
-  <target name="_stage_executables">
-    <description>Build the various commandline executables and place them in the staging area.</description>
-    <!-- Copy the ode and ode.bat into the output directory. -->
-    <copy todir="${stage.bin}" overwrite="true">
-      <fileset dir="${src.bin}">
-        <include name="ode" />
-        <include name="ode.bat" />
-        <include name="ode.cfg" />
-      </fileset>
-    </copy>
-    <chmod perm="755" dir="${stage.bin}" includes="*" excludes="*.bat" />
-  </target>
-
-  <target name="_stage_spexerciser">
-    <mkdir dir="${stage}/examples/spexerciser/1.1" />
-    <mkdir dir="${stage}/examples/spexerciser/2.0" />
-    <copy todir="${stage}/examples/spexerciser/1.1" includeEmptyDirs="false">
-      <fileset dir="../bpel-scripts/src/main/resources/1.1/good" includes="**/*" />
-    </copy>
-    <copy todir="${stage}/examples/spexerciser/2.0" includeEmptyDirs="false">
-      <fileset dir="../bpel-scripts/src/main/resources/2.0/good" includes="**/*" />
-    </copy>
-  </target>
+    <target name="_stage_license">
+        <copy todir="${stage}" overwrite="true">
+            <fileset dir="..">
+                <include name="LICENSE"/>
+                <include name="NOTICE"/>
+                <include name="DISCLAIMER"/>
+            </fileset>
+        </copy>
+    </target>
 
 </project>
