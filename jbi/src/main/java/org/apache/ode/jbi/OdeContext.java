@@ -99,7 +99,8 @@ final class OdeContext {
             try {
                 chnl = _context.getDeliveryChannel();
             } catch (Exception e) {
-                __log.error("JBI Error", e);
+                // TODO better error logging
+                e.printStackTrace();
             }
         }
 
