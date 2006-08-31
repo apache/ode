@@ -10,11 +10,11 @@
         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
 
-    <import location="urn:/Ping.wsdl"
+    <import location="Ping.wsdl"
             namespace="urn:/Ping.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
-    <import location="urn:/Pong.wsdl"
+    <import location="Pong.wsdl"
             namespace="urn:/Pong.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
