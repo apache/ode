@@ -18,10 +18,9 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 
 
 /**
@@ -66,14 +65,6 @@ public interface BpelServer {
      * @param bindingContext {@link BindingContext} implementation
      */
     void setBindingContext(BindingContext bindingContext)
-            throws BpelEngineException;
-
-    /**
-     * Set the DAO connection factory. The DAO is used by the BPEL engine
-     * to persist information about active processes.
-     * @param daoCF {@link BpelDAOConnectionFactory} implementation.
-     */
-    void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF)
             throws BpelEngineException;
 
 

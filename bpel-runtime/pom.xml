@@ -37,6 +37,10 @@
         </dependency>
         <dependency>
             <groupId>ode</groupId>
+            <artifactId>ode-bpel-dao</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ode</groupId>
             <artifactId>ode-bpel-compiler</artifactId>
         </dependency>
         <dependency>

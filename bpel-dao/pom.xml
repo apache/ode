@@ -32,5 +32,9 @@
     <groupId>ode</groupId>
     <version>2.0-SNAPSHOT</version>
     <dependencies>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
+        </dependency>
     </dependencies>
 </project>
