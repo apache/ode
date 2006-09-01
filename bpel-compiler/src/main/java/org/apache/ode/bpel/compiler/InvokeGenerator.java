@@ -104,7 +104,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
           }
         }
       }
-      element = DOMUtils.findChildByName(failure, new QName(null, "retryDelay"));
+      element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryDelay"));
       if (element != null) {
         textValue = DOMUtils.getTextContent(element);
         if (textValue != null) {
@@ -117,7 +117,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
           }
         }
       }
-      element = DOMUtils.findChildByName(failure, new QName(null, "faultOnFailure"));
+      element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "faultOnFailure"));
       if (element != null) {
         textValue = DOMUtils.getTextContent(element);
         if (textValue != null)
