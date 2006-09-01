@@ -43,6 +43,7 @@
         <path-element>lib/ode-utils.jar</path-element>
         <path-element>lib/ode-bpel-bom.jar</path-element>
         <path-element>lib/ode-bpel-api.jar</path-element>
+        <path-element>lib/ode-bpel-dao.jar</path-element>
         <path-element>lib/ode-bpel-compiler.jar</path-element>
         <path-element>lib/ode-bpel-el-xpath10.jar</path-element>
         <path-element>lib/ode-bpel-el-xpath20.jar</path-element>

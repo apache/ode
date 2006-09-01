@@ -350,6 +350,11 @@ public class BpelServerImpl implements BpelServer {
         _contexts.eprContext = eprContext;
     }
 
+    /**
+     * Set the DAO connection factory. The DAO is used by the BPEL engine
+     * to persist information about active processes.
+     * @param daoCF {@link BpelDAOConnectionFactory} implementation.
+     */
     public void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF) throws BpelEngineException {
         _contexts.dao = daoCF;
     }
