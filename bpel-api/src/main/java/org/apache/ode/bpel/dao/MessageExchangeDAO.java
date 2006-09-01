@@ -156,10 +156,6 @@ public interface MessageExchangeDAO {
 
   Element getEPR();
 
-  void setCallbackEPR(Element epr);
-
-  Element getCallbackEPR();
-
   String getPattern();
 
   /**
@@ -228,5 +224,7 @@ public interface MessageExchangeDAO {
 
   void setProperty(String key, String value);
 
+  void setPartnerLink(PartnerLinkDAO plinkDAO);
 
+  PartnerLinkDAO getPartnerLink();
 }

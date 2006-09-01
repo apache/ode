@@ -24,6 +24,11 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 
+/**
+ * A message exchange orginating from the BPEL server and targeting some external partner.
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
+ *
+ */
 public interface PartnerRoleMessageExchange extends MessageExchange {
 
 
@@ -83,6 +88,13 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
    * asynchronously.
    */
   void replyAsync();
+
+  /**
+   * Get the {@link EndpointReference} associated with the my-role of the partner link to which this message
+   * exchange belongs. This method is typically used to provide protocol-specific "callback" mechanisms. 
+   * @return endpoint reference associate with the corresponding my-role, or null if no my-role is defined
+   */
+  EndpointReference getMyRoleEndpointReference();
 
 
 

@@ -32,6 +32,7 @@ import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
@@ -133,20 +134,33 @@ public class ExternalService implements PartnerRoleChannel {
      * Axis MessageContext.
      */
     private void writeHeader(Options options, PartnerRoleMessageExchange odeMex) {
-        if (odeMex.getEndpointReference() != null) {
-            options.setProperty("targetSessionEndpoint", odeMex.getEndpointReference());
+        WSAEndpoint targetEPR  = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
+        WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+        
+        String partnerSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
+        String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+
+        if (partnerSessionId != null) {
+            __log.debug("Partner session identifier found for WSA endpoint: " + partnerSessionId);
+            targetEPR.setSessionId(partnerSessionId);
         }
-        if (odeMex.getCallbackEndpointReference() != null) {
-            options.setProperty("callbackSessionEndpoint", odeMex.getCallbackEndpointReference());
+        options.setProperty("targetSessionEndpoint", targetEPR);
+
+        if (myRoleEPR != null)  {
+            if  (myRoleSessionId != null) {
+                __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);
+                myRoleEPR.setSessionId(myRoleSessionId);
+            }
+
+            options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
+        } else {
+            __log.debug("My-Role EPR not specified, SEP will not be used.");
         }
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
-        Element eprElmt = ODEService.createServiceRef(
-                ODEService.genEPRfromWSDL(_definition, _serviceName, _portName));
-        org.apache.ode.bpel.iapi.EndpointReference ref = EndpointFactory.convert(
-                new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"), eprElmt);
-        return ref;
+        return EndpointFactory.convertToWSA(ODEService.createServiceRef(
+                ODEService.genEPRfromWSDL(_definition, _serviceName, _portName)));
     }
 
     public void close() {
