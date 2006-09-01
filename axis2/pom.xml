@@ -59,6 +59,10 @@
             <groupId>ode</groupId>
             <artifactId>ode-bpel-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-epr</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>ode</groupId>
