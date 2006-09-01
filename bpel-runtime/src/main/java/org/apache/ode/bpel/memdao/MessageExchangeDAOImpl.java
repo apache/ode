@@ -7,6 +7,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.w3c.dom.Element;
@@ -34,6 +35,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private char direction;
 	private QName callee;
 	private Properties properties;
+    private PartnerLinkDAOImpl _plink;
 	
 	public MessageExchangeDAOImpl(char direction, String mesageEchangeId){
 		this.direction = direction;
@@ -212,5 +214,14 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	public void setProperty(String key, String value) {
 		properties.setProperty(key,value);
 	}
+
+    public void setPartnerLink(PartnerLinkDAO plinkDAO) {
+        _plink = (PartnerLinkDAOImpl) plinkDAO;
+        
+    }
+
+    public PartnerLinkDAO getPartnerLink() {
+        return _plink;
+    }
 
 }

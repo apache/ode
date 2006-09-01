@@ -115,13 +115,8 @@ class EH_EVENT extends BpelJacobRunnable {
         CorrelationKey key;
         PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
         if (_oevent.matchCorrelation == null) {
-          // Adding a route for opaque correlation. In this particular case, correlation is done
-          // on the epr session identifier.
-          if (!getBpelRuntimeContext().isEndpointReferenceInitialized(pLinkInstance, true))
-            throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,
-                    "Endpoint reference for myRole on partner link " + _oevent.partnerLink + " has never been" +
-                    "initialized even though it's necessary for opaque correlations to work.");
-          String sessionId = getBpelRuntimeContext().fetchEndpointSessionId(pLinkInstance, true);
+          // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
+          String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
           key = new CorrelationKey(-1, new String[] {sessionId});
         } else {
           if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
@@ -229,14 +224,27 @@ class EH_EVENT extends BpelJacobRunnable {
                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
                   initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(_oevent.variable));
                 }
+                
                 if (_oevent.partnerLink.hasPartnerRole()) {
                   // Trying to initialize partner epr based on a message-provided epr/session.
-                  Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
-                  if (fromEpr != null) {
-                    getBpelRuntimeContext().writeEndpointReference(
-                            _scopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
+                  if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
+                          .resolve(_oevent.partnerLink))) {
+                      Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
+                      if (fromEpr != null) {
+                        getBpelRuntimeContext().writeEndpointReference(
+                                _scopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
+                      }
                   }
+                  
+                  String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
+                  if (partnersSessionId != null)
+                      getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oevent.partnerLink),
+                              partnersSessionId);
                 }
+                
+               
+                
+                
               } catch (FaultException e) {
                 if (_fault == null) {
                   _fault = createFault(e.getQName(), _oevent);

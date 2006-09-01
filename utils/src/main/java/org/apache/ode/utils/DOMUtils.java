@@ -42,6 +42,8 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.w3c.dom.*;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -416,7 +418,7 @@ public class DOMUtils {
     return a.getName().substring(a.getPrefix().length()+1);
   }
 
-  /**
+    /**
    * Convert a DOM node to a stringified XML representation.
    */
   static public String domToString(Node node) {

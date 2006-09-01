@@ -2,16 +2,17 @@
   <name>ode-bpel-runtime</name>
   <comment/>
   <projects>
-    <project>ode-bpel-parser</project>
-    <project>ode-bpel-api</project>
-    <project>ode-jacob</project>
-    <project>ode-bpel-obj</project>
-    <project>ode-utils</project>
     <project>ode-bpel-el-xpath10</project>
     <project>ode-bpel-dd</project>
+    <project>ode-bpel-api</project>
+    <project>ode-utils</project>
+    <project>ode-bpel-schemas</project>
     <project>ode-bpel-el-xpath20</project>
+    <project>ode-bpel-obj</project>
     <project>ode-bpel-bom</project>
+    <project>ode-bpel-parser</project>
     <project>ode-bpel-compiler</project>
+    <project>ode-jacob</project>
   </projects>
   <buildSpec>
     <buildCommand>

@@ -32,269 +32,280 @@ import java.util.Map;
  */
 public class HMessageExchange extends HObject {
 
-  private String _channelName;
+    private String _channelName;
 
-  private String _operationName;
+    private String _operationName;
 
-  private String _state;
+    private String _state;
 
-  private Date _insertTime;
+    private Date _insertTime;
 
-  private String _portType;
+    private String _portType;
 
-  private HLargeData _endpoint;
+    private HLargeData _endpoint;
 
-  private HLargeData _callbackEndpoint;
+    private HLargeData _callbackEndpoint;
 
-  private HMessage _request;
+    private HMessage _request;
 
-  private HMessage _response;
+    private HMessage _response;
+    
+    private HPartnerLink _partnerLink;
 
-  private String _clientKey;
+    private String _clientKey;
 
-  private HProcessInstance _instance;
+    private HProcessInstance _instance;
 
-  private HProcess _process;
+    private HProcess _process;
 
-  private char _dir;
+    private char _dir;
 
-  private int _plinkModelId;
+    private int _plinkModelId;
 
-  private String _pattern;
+    private String _pattern;
 
-  private String _corrstatus;
+    private String _corrstatus;
 
-  private String _faultType;
+    private String _faultType;
 
-  private String _callee;
+    private String _callee;
 
-  private Map<String, String> _properties = new HashMap<String,String>();
+    private Map<String, String> _properties = new HashMap<String, String>();
 
-  /**
-   * 
-   */
-  public HMessageExchange() {
-    super();
-  }
+    /**
+     * 
+     */
+    public HMessageExchange() {
+        super();
+    }
 
-  /**
-   * @hibernate.property column="PORT_TYPE"
-   */
-  public String getPortType() {
-    return _portType;
-  }
+    /**
+     * @hibernate.property column="PORT_TYPE"
+     */
+    public String getPortType() {
+        return _portType;
+    }
 
-  public void setPortType(String portType) {
-    _portType = portType;
-  }
+    public void setPortType(String portType) {
+        _portType = portType;
+    }
 
-  /**
-   * @hibernate.property column="CHANNEL_NAME"
-   */
-  public String getChannelName() {
-    return _channelName;
-  }
+    /**
+     * @hibernate.property column="CHANNEL_NAME"
+     */
+    public String getChannelName() {
+        return _channelName;
+    }
 
-  public void setChannelName(String channelName) {
-    _channelName = channelName;
-  }
+    public void setChannelName(String channelName) {
+        _channelName = channelName;
+    }
 
-  /**
-   * @hibernate.property column="CLIENTKEY"
-   */
-  public String getClientKey() {
-    return _clientKey;
-  }
+    /**
+     * @hibernate.property column="CLIENTKEY"
+     */
+    public String getClientKey() {
+        return _clientKey;
+    }
 
-  public void setClientKey(String clientKey) {
-    _clientKey = clientKey;
-  }
+    public void setClientKey(String clientKey) {
+        _clientKey = clientKey;
+    }
 
-  /**
-   * @hibernate.many-to-one column="LDATA_EPR_ID" cascade="delete"
-   */
-  public HLargeData getEndpoint() {
-    return _endpoint;
-  }
+    /**
+     * @hibernate.many-to-one column="LDATA_EPR_ID" cascade="delete"
+     */
+    public HLargeData getEndpoint() {
+        return _endpoint;
+    }
 
-  public void setEndpoint(HLargeData endpoint) {
-    _endpoint = endpoint;
-  }
+    public void setEndpoint(HLargeData endpoint) {
+        _endpoint = endpoint;
+    }
 
-  /**
-   * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete"
-   */
-  public HLargeData getCallbackEndpoint() {
-    return _callbackEndpoint;
-  }
+    /**
+     * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete"
+     */
+    public HLargeData getCallbackEndpoint() {
+        return _callbackEndpoint;
+    }
 
-  public void setCallbackEndpoint(HLargeData endpoint) {
-    _callbackEndpoint = endpoint;
-  }
+    public void setCallbackEndpoint(HLargeData endpoint) {
+        _callbackEndpoint = endpoint;
+    }
 
-  /**
-   * @hibernate.many-to-one column="REQUEST" cascade="delete"
-   */
-  public HMessage getRequest() {
-    return _request;
-  }
+    /**
+     * @hibernate.many-to-one column="REQUEST" cascade="delete"
+     */
+    public HMessage getRequest() {
+        return _request;
+    }
 
-  public void setRequest(HMessage request) {
-    _request = request;
-  }
+    public void setRequest(HMessage request) {
+        _request = request;
+    }
 
-  /**
-   * @hibernate.many-to-one column="RESPONSE" cascade="delete"
-   */
-  public HMessage getResponse() {
-    return _response;
-  }
+    /**
+     * @hibernate.many-to-one column="RESPONSE" cascade="delete"
+     */
+    public HMessage getResponse() {
+        return _response;
+    }
 
-  public void setResponse(HMessage response) {
-    _response = response;
-  }
+    public void setResponse(HMessage response) {
+        _response = response;
+    }
 
-  /**
-   * @hibernate.property column="INSERT_DT"
-   */
-  public Date getInsertTime() {
-    return _insertTime;
-  }
+    /**
+     * @hibernate.property column="INSERT_DT"
+     */
+    public Date getInsertTime() {
+        return _insertTime;
+    }
 
-  public void setInsertTime(Date insertTime) {
-    _insertTime = insertTime;
-  }
+    public void setInsertTime(Date insertTime) {
+        _insertTime = insertTime;
+    }
 
-  /**
-   * @hibernate.property column="OPERATION"
-   */
-  public String getOperationName() {
-    return _operationName;
-  }
+    /**
+     * @hibernate.property column="OPERATION"
+     */
+    public String getOperationName() {
+        return _operationName;
+    }
 
-  public void setOperationName(String operationName) {
-    _operationName = operationName;
-  }
+    public void setOperationName(String operationName) {
+        _operationName = operationName;
+    }
 
-  /**
-   * @hibernate.property column="STATE"
-   */
-  public String getState() {
-    return _state;
-  }
+    /**
+     * @hibernate.property column="STATE"
+     */
+    public String getState() {
+        return _state;
+    }
 
-  public void setState(String state) {
-    _state = state;
-  }
+    public void setState(String state) {
+        _state = state;
+    }
 
-  /**
-   * @hibernate.many-to-one column="PROCESS"
-   */
-  public HProcess getProcess() {
-    return _process;
-  }
+    /**
+     * @hibernate.many-to-one column="PROCESS"
+     */
+    public HProcess getProcess() {
+        return _process;
+    }
 
-  public void setProcess(HProcess process) {
-    _process = process;
-  }
+    public void setProcess(HProcess process) {
+        _process = process;
+    }
 
-  /**
-   * @hibernate.many-to-one column="INSTANCE"
-   */
-  public HProcessInstance getInstance() {
-    return _instance;
-  }
+    /**
+     * @hibernate.many-to-one column="INSTANCE"
+     */
+    public HProcessInstance getInstance() {
+        return _instance;
+    }
 
-  public void setInstance(HProcessInstance instance) {
-    _instance = instance;
-  }
+    public void setInstance(HProcessInstance instance) {
+        _instance = instance;
+    }
 
-  public void setDirection(char dir) {
-    _dir = dir;
-  }
+    public void setDirection(char dir) {
+        _dir = dir;
+    }
 
-  /**
-   * @hibernate.property column="DIR"
-   */
-  public char getDirection() {
-    return _dir;
-  }
+    /**
+     * @hibernate.property column="DIR"
+     */
+    public char getDirection() {
+        return _dir;
+    }
 
-  /**
-   * @hibernate.property column="PLINK_MODELID"
-   */
-  public int getPartnerLinkModelId() {
-    return _plinkModelId;
-  }
+    /**
+     * @hibernate.property column="PLINK_MODELID"
+     */
+    public int getPartnerLinkModelId() {
+        return _plinkModelId;
+    }
 
-  public void setPartnerLinkModelId(int id) {
-    _plinkModelId = id;
-  }
+    public void setPartnerLinkModelId(int id) {
+        _plinkModelId = id;
+    }
 
-  /**
-   * @hibernate.property column="PATTERN"
-   */
-  public String getPattern() {
-    return _pattern;
-  }
+    /**
+     * @hibernate.property column="PATTERN"
+     */
+    public String getPattern() {
+        return _pattern;
+    }
 
-  public void setPattern(String pattern) {
-    _pattern = pattern;
+    public void setPattern(String pattern) {
+        _pattern = pattern;
 
-  }
+    }
 
-  /**
-   * @hibernate.property column="CORR_STATUS"
-   * @return
-   */
-  public String getCorrelationStatus() {
-    return _corrstatus;
-  }
+    /**
+     * @hibernate.property column="CORR_STATUS"
+     * @return
+     */
+    public String getCorrelationStatus() {
+        return _corrstatus;
+    }
 
-  public void setCorrelationStatus(String cstatus) {
-    _corrstatus = cstatus;
+    public void setCorrelationStatus(String cstatus) {
+        _corrstatus = cstatus;
 
-  }
+    }
 
-  /**
-   * @hibernate.property column="FAULT_TYPE"
-   * @return
-   */
-  public String getFault() {
-    return _faultType;
-  }
+    /**
+     * @hibernate.property column="FAULT_TYPE"
+     * @return
+     */
+    public String getFault() {
+        return _faultType;
+    }
 
-  public void setFault(String faultType) {
-    _faultType = faultType;
+    public void setFault(String faultType) {
+        _faultType = faultType;
 
-  }
+    }
 
-  /**
-   * @hibernate.property column="CALLEE"
-   */
-  public String getCallee() {
-    return _callee;
-  }
+    /**
+     * @hibernate.property column="CALLEE"
+     */
+    public String getCallee() {
+        return _callee;
+    }
 
-  public void setCallee(String callee) {
-    _callee = callee;
-  }
+    public void setCallee(String callee) {
+        _callee = callee;
+    }
 
-  /**
-   * @hibernate.map name="properties" 
-   *                table="BPEL_MEX_PROPS"
-   *                lazy="false"
-   *                cascade="delete"
-   * @hibernate.collection-key column="MEX"
-   * @hibernate.collection-index column="NAME" type="string"
-   * @hibernate.collection-element column="VALUE" type="string" length="8000"
-   */
-  public Map<String, String> getProperties() {
-    return _properties;
-  }
-  
-  public void setProperties(Map<String,String> props) {
-    _properties = props;
-  }
+    /**
+     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false"
+     *                cascade="delete"
+     * @hibernate.collection-key column="MEX"
+     * @hibernate.collection-index column="NAME" type="string"
+     * @hibernate.collection-element column="VALUE" type="string" length="8000"
+     */
+    public Map<String, String> getProperties() {
+        return _properties;
+    }
+
+    public void setProperties(Map<String, String> props) {
+        _properties = props;
+    }
+
+    public void setPartnerLink(HPartnerLink link) {
+        _partnerLink = link;
+    }
+
+    /**
+     * @hibernate.many-to-one column="PARTNERLINK" 
+     */
+    public HPartnerLink getPartnerLink() {
+        return _partnerLink;
+    }
 
 }

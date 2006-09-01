@@ -53,325 +53,339 @@ import java.util.Date;
  * Test core BPEL processing capabilities.
  */
 public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
-  private boolean _completedOk;
-  private boolean _terminate;
-  private FaultData _fault;
-  private ExecutionQueueImpl _soup;
-  private JacobVPU _vpu;
-  private Long _pid;
-  private long _seq;
+    private boolean _completedOk;
 
-  protected void setUp() throws Exception {
-    _completedOk= false;
-    _terminate = false;
-    _fault = null;
-    _soup = new ExecutionQueueImpl(CoreBpelTest.class.getClassLoader());
-    _vpu = new JacobVPU(_soup);
-    _vpu.registerExtension(BpelRuntimeContext.class, this);
-    _pid = new Long(19355);
-  }
+    private boolean _terminate;
 
-  public Long getPid() {
-    return _pid;
-  }
-  
-  public boolean isVariableInitialized(VariableInstance variable) {
-    return false;
-  }
+    private FaultData _fault;
 
-  public Long createScopeInstance(Long parentScopeId, OScope scopeType) {
-    return new Long((long)(Math.random()*1000L) + scopeType.getId());
-  }
+    private ExecutionQueueImpl _soup;
 
-  public Node fetchVariableData(VariableInstance var, boolean forWriting) throws FaultException {
-    return null;
-  }
+    private JacobVPU _vpu;
 
-  public Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting) throws FaultException {
-    return null;
-  }
+    private Long _pid;
 
-  public String readProperty(VariableInstance var, OProcess.OProperty property) throws FaultException {
-    return null;
-  }
+    private long _seq;
 
-  public Node initializeVariable(VariableInstance var, Node initData) {
-    return null;
-  }
-
-  public void commitChanges(VariableInstance var, Node changes) {
-  }
-
-  public boolean isCorrelationInitialized(CorrelationSetInstance cset) {
-    return false;
-  }
-
-  public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
-    return null;
-  }
-
-  public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
-  }
-
-
-  public void cancel(TimerResponseChannel timerResponseChannel) {
-  }
-
-  public void completedOk() {
-    _completedOk = true;
-  }
-
-  public void completedFault(FaultData faultData) {
-    _fault = faultData;
-  }
-
-  public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors) throws FaultException {
-  }
-
-  public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, String fault) throws FaultException {
-  }
-
-  public String invoke(PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg, InvokeResponseChannel invokeResponseChannel) {
-    return null;
-  }
-
-  public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
-  }
-
-  public void terminate() {
-    _terminate = true;
-  }
-
-  public void sendEvent(ProcessInstanceEvent event) {
-  }
-
-  public ExpressionLanguageRuntimeRegistry getExpLangRuntime() {
-    return null;
-  }
-
-  public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
-  }
-
-  public Element fetchEndpointReferenceData(PartnerLinkInstance pLink, boolean isMyEPR) throws FaultException {
-    return null;
-  }
-
-  public Node writeEndpointReference(PartnerLinkInstance variable, Node data) throws FaultException {
-    return null;
-  }
-
-  public void testEmptyProcess() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    proc.procesScope.activity = new OEmpty(proc);
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-  public void testThrow() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OThrow othrow = new OThrow(proc);
-    othrow.faultName = new QName("foo", "bar");
-    proc.procesScope.activity = othrow;
-
-    run(proc);
-
-    assertFalse(_completedOk);
-    assertFalse(_terminate);
-    assertEquals(_fault.getFaultName(), othrow.faultName);
-  }
-
-  public void testFaultHandling() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OThrow othrow = new OThrow(proc);
-    othrow.faultName = new QName("foo", "bar");
-    proc.procesScope.activity = othrow;
-    proc.procesScope.faultHandler = new OFaultHandler(proc);
-    OCatch ocatch = new OCatch(proc);
-    proc.procesScope.faultHandler.catchBlocks.add(ocatch);
-    ocatch.activity = new OEmpty(proc);
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
- 
-  public void testOneElementSequence() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OSequence sequence = new OSequence(proc);
-    proc.procesScope.activity = sequence;
-    sequence.sequence.add(new OEmpty(proc));
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-  public void testTwoElementSequence() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OSequence sequence = new OSequence(proc);
-    proc.procesScope.activity = sequence;
-    sequence.sequence.add(new OEmpty(proc));
-    sequence.sequence.add(new OEmpty(proc));
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-  public void testEmptyFlow() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    proc.procesScope.activity = new OFlow(proc);
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-  public void testSingleElementFlow() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OFlow flow = new OFlow(proc);
-    proc.procesScope.activity = flow;
-    flow.parallelActivities.add(new OEmpty(proc));
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-  public void testTwoElementFlow() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OFlow flow = new OFlow(proc);
-    proc.procesScope.activity = flow;
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-
-    run(proc);
-
-    assertTrue(_completedOk);
-    assertFalse(_terminate);
-    assertNull(_fault);
-  }
-
-
-  public void testFlowTermination() {
-    OProcess proc = new OProcess("2.0");
-    proc.procesScope = new OScope(proc);
-    OFlow flow = new OFlow(proc);
-    proc.procesScope.activity = flow;
-    OThrow othrow = new OThrow(proc);
-    othrow.faultName = new QName("foo","bar");
-    flow.parallelActivities.add(othrow);
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-    flow.parallelActivities.add(new OEmpty(proc));
-
-    run(proc);
-
-    assertFalse(_completedOk);
-    assertFalse(_terminate);
-    assertEquals(_fault.getFaultName(), othrow.faultName);
-  }
-
-  private void run(OProcess proc) {
-    _vpu.inject(new PROCESS(proc));
-    for (int i = 0; i < 100000 && !_completedOk && _fault == null && !_terminate; ++i ) {
-      _vpu.execute();
+    protected void setUp() throws Exception {
+        _completedOk = false;
+        _terminate = false;
+        _fault = null;
+        _soup = new ExecutionQueueImpl(CoreBpelTest.class.getClassLoader());
+        _vpu = new JacobVPU(_soup);
+        _vpu.registerExtension(BpelRuntimeContext.class, this);
+        _pid = new Long(19355);
     }
 
-    assertTrue(_soup.isComplete());
+    public Long getPid() {
+        return _pid;
+    }
 
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    public boolean isVariableInitialized(VariableInstance variable) {
+        return false;
+    }
 
-    try {
-      _soup.write(bos);
-      _soup.read(new ByteArrayInputStream(bos.toByteArray()));
-      // check empty soup.
-    } catch (Exception ex) {
+    public Long createScopeInstance(Long parentScopeId, OScope scopeType) {
+        return new Long((long) (Math.random() * 1000L) + scopeType.getId());
+    }
+
+    public Node fetchVariableData(VariableInstance var, boolean forWriting) throws FaultException {
+        return null;
+    }
+
+    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
+            throws FaultException {
+        return null;
+    }
+
+    public String readProperty(VariableInstance var, OProcess.OProperty property) throws FaultException {
+        return null;
+    }
+
+    public Node initializeVariable(VariableInstance var, Node initData) {
+        return null;
+    }
+
+    public void commitChanges(VariableInstance var, Node changes) {
+    }
+
+    public boolean isCorrelationInitialized(CorrelationSetInstance cset) {
+        return false;
+    }
+
+    public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
+        return null;
+    }
+
+    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
+    }
+
+    public void cancel(TimerResponseChannel timerResponseChannel) {
+    }
+
+    public void completedOk() {
+        _completedOk = true;
+    }
+
+    public void completedFault(FaultData faultData) {
+        _fault = faultData;
+    }
+
+    public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors)
+            throws FaultException {
+    }
+
+    public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, String fault)
+            throws FaultException {
+    }
+
+    public String invoke(PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
+            InvokeResponseChannel invokeResponseChannel) {
+        return null;
+    }
+
+    public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
+    }
+
+    public void terminate() {
+        _terminate = true;
+    }
+
+    public void sendEvent(ProcessInstanceEvent event) {
+    }
+
+    public ExpressionLanguageRuntimeRegistry getExpLangRuntime() {
+        return null;
+    }
+
+    public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
+    }
+    
+    public void testEmptyProcess() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        proc.procesScope.activity = new OEmpty(proc);
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testThrow() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OThrow othrow = new OThrow(proc);
+        othrow.faultName = new QName("foo", "bar");
+        proc.procesScope.activity = othrow;
+
+        run(proc);
+
+        assertFalse(_completedOk);
+        assertFalse(_terminate);
+        assertEquals(_fault.getFaultName(), othrow.faultName);
+    }
+
+    public void testFaultHandling() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OThrow othrow = new OThrow(proc);
+        othrow.faultName = new QName("foo", "bar");
+        proc.procesScope.activity = othrow;
+        proc.procesScope.faultHandler = new OFaultHandler(proc);
+        OCatch ocatch = new OCatch(proc);
+        proc.procesScope.faultHandler.catchBlocks.add(ocatch);
+        ocatch.activity = new OEmpty(proc);
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testOneElementSequence() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OSequence sequence = new OSequence(proc);
+        proc.procesScope.activity = sequence;
+        sequence.sequence.add(new OEmpty(proc));
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testTwoElementSequence() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OSequence sequence = new OSequence(proc);
+        proc.procesScope.activity = sequence;
+        sequence.sequence.add(new OEmpty(proc));
+        sequence.sequence.add(new OEmpty(proc));
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testEmptyFlow() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        proc.procesScope.activity = new OFlow(proc);
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testSingleElementFlow() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OFlow flow = new OFlow(proc);
+        proc.procesScope.activity = flow;
+        flow.parallelActivities.add(new OEmpty(proc));
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testTwoElementFlow() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OFlow flow = new OFlow(proc);
+        proc.procesScope.activity = flow;
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+
+        run(proc);
+
+        assertTrue(_completedOk);
+        assertFalse(_terminate);
+        assertNull(_fault);
+    }
+
+    public void testFlowTermination() {
+        OProcess proc = new OProcess("2.0");
+        proc.procesScope = new OScope(proc);
+        OFlow flow = new OFlow(proc);
+        proc.procesScope.activity = flow;
+        OThrow othrow = new OThrow(proc);
+        othrow.faultName = new QName("foo", "bar");
+        flow.parallelActivities.add(othrow);
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+        flow.parallelActivities.add(new OEmpty(proc));
+
+        run(proc);
+
+        assertFalse(_completedOk);
+        assertFalse(_terminate);
+        assertEquals(_fault.getFaultName(), othrow.faultName);
+    }
+
+    private void run(OProcess proc) {
+        _vpu.inject(new PROCESS(proc));
+        for (int i = 0; i < 100000 && !_completedOk && _fault == null && !_terminate; ++i) {
+            _vpu.execute();
+        }
+
+        assertTrue(_soup.isComplete());
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            _soup.write(bos);
+            _soup.read(new ByteArrayInputStream(bos.toByteArray()));
+            // check empty soup.
+        } catch (Exception ex) {
+
+        }
+    }
+
+    public long genId() {
+        return _seq++;
+    }
+
+    public Element getPartnerResponse(String mexId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Element getMyRequest(String mexId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public QName getPartnerFault(String mexId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public QName getPartnerResponseType(String mexId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Node convertEndpointReference(Element epr, Node targetNode) {
+        return null;
+    }
+
+    public Node getPartData(Element message, Part part) {
+        return null;
+    }
+
+    public Element getSourceEPR(String mexId) {
+        return null;
+    }
+
+    public void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
+    }
+
+    public Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public String fetchMySessionId(PartnerLinkInstance pLink) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String fetchPartnersSessionId(PartnerLinkInstance pLink) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void initializePartnersSessionId(PartnerLinkInstance pLink, String session) {
+        // TODO Auto-generated method stub
 
     }
-  }
 
-  public long genId() {
-    return _seq++;
-  }
-
-  public Element getPartnerResponse(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Element getMyRequest(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public QName getPartnerFault(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public QName getPartnerResponseType(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public boolean isEndpointReferenceInitialized(PartnerLinkInstance pLink, boolean isMyEpr) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  public String fetchEndpointSessionId(PartnerLinkInstance pLink, boolean isMyEPR) throws FaultException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Element updatePartnerEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Node convertEndpointReference(Element epr, Node targetNode) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Node getPartData(Element message, Part part) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Element getSourceEPR(String mexId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Element writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+    public String getSourceSessionId(String mexId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

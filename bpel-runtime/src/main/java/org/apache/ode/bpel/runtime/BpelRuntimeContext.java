@@ -62,14 +62,7 @@ public interface BpelRuntimeContext {
    */
   boolean isVariableInitialized(VariableInstance variable);
 
-  /**
-   * Checks for endpoint reference initialization, i.e. has had a 'write'
-   * @param variable variable
-   * @return <code>true</code> if initialized
-   */
-  boolean isEndpointReferenceInitialized(PartnerLinkInstance pLink, boolean isMyEpr);
-
-  /**
+   /**
    * Create a scope instance object.
    * @param parentScopeId _id of parent scope (null if root scope)
    * @param scopeType the type of scope, i.e. the name of the scope
@@ -97,22 +90,43 @@ public interface BpelRuntimeContext {
           throws FaultException;
 
   /**
-   * Fetches an endpoint reference.
+   * Fetches the my-role endpoint reference data.
    * @param pLink
    * @param isMyEPR
    * @return
    * @throws FaultException
    */
-  Element fetchEndpointReferenceData(PartnerLinkInstance pLink, boolean isMyEPR) throws FaultException;
+  Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink);
+  
+  Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException;
 
   /**
-   * Fetches the session id associated with an endpoint reference (if there's one).
-   * @param pLink
-   * @param isMyEPR
-   * @return session id
-   * @throws FaultException
+   * Determine if the partner role of an endpoint has been initialized (either explicitly throug assginment or via the
+   * deployment descriptor)
+   * @param pLink partner link
+   * @return
    */
-  String fetchEndpointSessionId(PartnerLinkInstance pLink, boolean isMyEPR) throws FaultException;
+  boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink);
+
+  /**
+   * Fetches our session id associated with the partner link instance.  This will always return a 
+   * non-null value.
+   * @param pLink partner link
+   */
+  String fetchMySessionId(PartnerLinkInstance pLink);
+  
+  /**
+   * Fetches the partner's session id associated with the partner link instance.  
+   * @param pLink partner link
+   */
+  String fetchPartnersSessionId(PartnerLinkInstance pLink);
+  
+  /**
+   * Initialize the partner's session id for this partner link instance.
+   * @param pLink partner link
+   * @param session session identifier 
+   */
+  void initializePartnersSessionId(PartnerLinkInstance pLink, String session);
 
   /**
    * Evaluate a property alias query expression against a variable, returning the normalized
@@ -128,15 +142,13 @@ public interface BpelRuntimeContext {
   Node initializeVariable(VariableInstance var, Node initData);
 
   /**
-   * Writes (potentially partially) a partner EPR by consolidating the data received
-   * during a session-based interaction (message exchanges with session information)
-   * with the data we already have.
+   * Writes a partner EPR.
+   * 
    * @param variable
    * @param data
-   * @return the updated endpoint
    * @throws FaultException
    */
-  Element writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
+  void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
 
   Node convertEndpointReference(Element epr, Node targetNode);
 
@@ -230,4 +242,5 @@ public interface BpelRuntimeContext {
 
   Element getSourceEPR(String mexId);
 
+  String getSourceSessionId(String mexId);
 }

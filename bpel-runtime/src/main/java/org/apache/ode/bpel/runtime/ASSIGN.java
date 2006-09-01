@@ -166,8 +166,9 @@ class ASSIGN extends ACTIVITY {
 			OAssign.PartnerLinkRef pLinkRef = (OAssign.PartnerLinkRef) from;
 			PartnerLinkInstance pLink = _scopeFrame
 					.resolve(pLinkRef.partnerLink);
-			Node tempVal = getBpelRuntimeContext().fetchEndpointReferenceData(
-					pLink, pLinkRef.isMyEndpointReference);
+			Node tempVal =pLinkRef.isMyEndpointReference ?
+                    getBpelRuntimeContext().fetchMyRoleEndpointReferenceData(pLink)
+                    : getBpelRuntimeContext().fetchPartnerRoleEndpointReferenceData(pLink);
 			if (__log.isDebugEnabled())
 				__log.debug("RValue is a partner link, corresponding endpoint "
 						+ tempVal.getClass().getName() + " has value "

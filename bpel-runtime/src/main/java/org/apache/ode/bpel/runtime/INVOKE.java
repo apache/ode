@@ -103,11 +103,21 @@ public class INVOKE extends ACTIVITY {
               }
               if (_oinvoke.partnerLink.hasPartnerRole()) {
                 // Trying to initialize partner epr based on a message-provided epr/session.
-                Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
-                if (fromEpr != null) {
-                  getBpelRuntimeContext().writeEndpointReference(
-                          _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
-                }
+                if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
+                        .resolve(_oinvoke.partnerLink))) {
+    
+                    Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
+                    if (fromEpr != null) {
+                      getBpelRuntimeContext().writeEndpointReference(
+                              _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
+                    }
+                }                    
+                
+                String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
+                if (partnersSessionId != null)
+                    getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.partnerLink),
+                            partnersSessionId);
+                
               }
             } catch (FaultException e) {
               fault = createFault(e.getQName(), _oinvoke);
