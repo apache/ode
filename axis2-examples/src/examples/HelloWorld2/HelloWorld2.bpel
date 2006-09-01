@@ -21,7 +21,6 @@
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
-     <variable name="tmpVarInt" type="xsd:int"/>
    </variables>
         
    <sequence>   
@@ -35,35 +34,7 @@
 
       <assign name="assign1">
          <copy>
-            <from>10 + 2</from>
-            <to variable="tmpVarInt"/>
-         </copy>
-         <copy>
-            <from>$tmpVarInt/foo/bar</from>
-            <to variable="tmpVarInt"/>
-         </copy>
-         <copy>
-            <from>number('10') + 2</from>
-            <to variable="tmpVarInt"/>
-         </copy>
-         <copy>
-            <from>abs($tmpVarInt) + 2</from>
-            <to variable="tmpVarInt"/>
-         </copy>
-         <copy>
-            <from variable="myVar" part="TestPart"/>
-            <to variable="tmpVar"/>
-         </copy>
-         <copy>
-            <from>bpws:getVariableData('myVar', 'TestPart')</from>
-            <to variable="tmpVar"/>
-         </copy>
-         <copy>
-            <from>replace($tmpVar, 'llo', 'ck')</from>
-            <to variable="tmpVar"/>
-         </copy>
-         <copy>
-             <from>concat($tmpVar,' World ', $tmpVarInt)</from>
+             <from>concat($tmpVar,' World')</from>
              <to variable="myVar" part="TestPart"/>
          </copy>
       </assign>
