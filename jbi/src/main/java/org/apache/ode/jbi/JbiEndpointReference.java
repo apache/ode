@@ -20,6 +20,7 @@
 package org.apache.ode.jbi;
 
 import javax.jbi.servicedesc.ServiceEndpoint;
+import javax.xml.namespace.QName;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -36,15 +37,21 @@ import org.apache.ode.utils.DOMUtils;
 class JbiEndpointReference implements EndpointReference {
 
   private ServiceEndpoint _se;
-
+  private QName _type;
+  
   JbiEndpointReference(ServiceEndpoint se) {
     if (se == null)
       throw new NullPointerException("Null ServiceEndpoint");
     _se = se;
   }
   
-  public Document toXML() {
-    DocumentFragment fragment = _se.getAsReference(null);
+  public JbiEndpointReference(ServiceEndpoint se, QName eprType) {
+      this(se);
+      _type = eprType;
+  }
+
+public Document toXML() {
+    DocumentFragment fragment = _se.getAsReference(_type);
     if (fragment == null)
       return null;
     

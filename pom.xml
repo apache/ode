@@ -124,6 +124,7 @@
         <module>bpel-runtime</module>
         <module>bpel-ql</module>
         <module>bpel-connector</module>
+        <module>bpel-epr</module>
 
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
@@ -332,6 +333,11 @@
             <dependency>
                 <groupId>ode</groupId>
                 <artifactId>ode-bpel-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-epr</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

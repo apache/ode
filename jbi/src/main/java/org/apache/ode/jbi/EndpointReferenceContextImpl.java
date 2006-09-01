@@ -24,7 +24,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.utils.DOMUtils;
@@ -78,13 +77,18 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   }
   
 
-  public EndpointReference convertEndpoint(QName eprType, Element element) {
-    EndpointReference endpoint = EndpointFactory.convert(eprType, element);
+  public EndpointReference convertEndpoint(QName eprType, Element epr) {
+      Document doc = DOMUtils.newDocument();
+      DocumentFragment fragment = doc.createDocumentFragment();
+      NodeList children = epr.getChildNodes();
+      for (int i = 0 ; i < children.getLength(); ++i)
+        fragment.appendChild(doc.importNode(children.item(i), true));
+      ServiceEndpoint se = _ode.getContext().resolveEndpointReference(fragment);
+      if (se == null)
+          return null;
+      
+      return new JbiEndpointReference(se, eprType);
  
-    __log.warn( "convertEndpoint: " + eprType + " " + prettyPrint( element ) );
-    
-    // Forcing JBI lookup
-    return resolveEndpointReference(endpoint.toXML().getDocumentElement());
   }
   
   public static QName convertClarkQName(String name) {
