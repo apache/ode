@@ -21,34 +21,39 @@ package org.apache.ode.utils.msg;
 
 public class CommonMessages extends MessageBundle {
 
-  public String strError() {
-    return this.format("Error");
-  }
+    public String strError() {
+        return this.format("Error");
+    }
 
-  public String strFatal() {
-    return this.format("Fatal");
-  }
+    public String strFatal() {
+        return this.format("Fatal");
+    }
 
-  public String strInfo() {
-    return this.format("Info");
-  }
+    public String strInfo() {
+        return this.format("Info");
+    }
 
-  public String strWarning() {
-    return this.format("Warning");
-  }
+    public String strWarning() {
+        return this.format("Warning");
+    }
 
-  public String msgFileNotFound(String string) {
-    return this.format("File not found: {0}", string);
-  }
+    public String msgFileNotFound(String string) {
+        return this.format("File not found: {0}", string);
+    }
 
-  public String msgCannotWriteToFile(String string) {
-    return this.format("Unable to write to file \"{0}\";"
-        + " it may be a directory or otherwise unwritable.", string);
-  }
+    public String msgCannotWriteToFile(String string) {
+        return this.format("Unable to write to file \"{0}\";"
+                + " it may be a directory or otherwise unwritable.", string);
+    }
 
-  public String msgCannotReadFromFile(String string) {
-    return this.format("Unable to read from file \"{0}\";"
-        + " it may be missing, a directory, or otherwise unreadable.", string);
-  }
+    public String msgCannotReadFromFile(String string) {
+        return this.format("Unable to read from file \"{0}\";"
+                + " it may be missing, a directory, or otherwise unreadable.", string);
+    }
+
+    public String msgBadPort(String string) {
+        return this.format("The string you specified for proxy port \"{0}\" doesn't appear to be "
+                + " correct, it must be a number.", string);
+    }
 
 }
