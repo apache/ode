@@ -40,6 +40,10 @@
             <artifactId>ode-bpel-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>ode</groupId>
+            <artifactId>ode-bpel-dao</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate</artifactId>
         </dependency>

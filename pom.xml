@@ -117,6 +117,7 @@
         <module>bpel-dd</module>
         <module>bpel-parser</module>
         <module>bpel-api</module>
+        <module>bpel-dao</module>
         <module>bpel-api-jca</module>
         <module>bpel-el-xpath10</module>
         <module>bpel-el-xpath20</module>
@@ -333,6 +334,11 @@
             <dependency>
                 <groupId>ode</groupId>
                 <artifactId>ode-bpel-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ode</groupId>
+                <artifactId>ode-bpel-dao</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
