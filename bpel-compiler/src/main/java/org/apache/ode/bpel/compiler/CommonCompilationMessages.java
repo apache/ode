@@ -406,4 +406,18 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
   public CompilationMessage errInvalidDeploymentDescriptor(String message) {
     return this.formatCompilationMessage("Deployment descriptor is invalid: {0}", message);
   }
+
+  /**
+   * The retryFor attribute must be a positive integer, found {0}
+   */
+  public CompilationMessage errInvalidRetryForValue(String message) {
+    return this.formatCompilationMessage("The retryFor attribute must be a positive integer, found {0}", message);
+  }
+
+  /**
+   * The retryDelay attribute must be a positive integer, found {0}
+   */
+  public CompilationMessage errInvalidRetryDelayValue(String message) {
+    return this.formatCompilationMessage("The retryDelay attribute must be a positive integer, found {0}", message);
+  }
 }
