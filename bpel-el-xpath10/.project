@@ -2,9 +2,10 @@
   <name>ode-bpel-el-xpath10</name>
   <comment>Implementation of the XPath 1.0 expression language.</comment>
   <projects>
-    <project>ode-bpel-obj</project>
-    <project>ode-bpel-api</project>
+    <project>ode-bpel-dd</project>
     <project>ode-bpel-bom</project>
+    <project>ode-bpel-api</project>
+    <project>ode-bpel-obj</project>
     <project>ode-utils</project>
   </projects>
   <buildSpec>

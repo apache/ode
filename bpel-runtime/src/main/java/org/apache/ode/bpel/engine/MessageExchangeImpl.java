@@ -51,8 +51,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
   protected EndpointReference _epr;
 
-  protected EndpointReference _callbackEpr;
-
   protected final MessageExchangeDAO _dao;
   
   /**
@@ -222,33 +220,23 @@ abstract class MessageExchangeImpl implements MessageExchange {
     return _epr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getEPR());
   }
 
-  public void setCallbackEndpointReference(EndpointReference ref) {
-    _callbackEpr = ref;
-    if (ref != null)
-      getDAO().setCallbackEPR(ref.toXML().getDocumentElement());
-  }
-
-  public EndpointReference getCallbackEndpointReference() throws BpelEngineException {
-    if (_callbackEpr != null) return _callbackEpr;
-    if (getDAO().getCallbackEPR() == null)
-      return null;
-
-    return _callbackEpr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getCallbackEPR());
-  }
-
+ 
   QName getServiceName() {
     return getDAO().getCallee();
   }
 
   public String getProperty(String key) {
-    return getDAO().getProperty(key);
+      String val = getDAO().getProperty(key);
+      if (__log.isDebugEnabled())
+          __log.debug("GET MEX property " + key + " = " + val);
+      return val;
   }
 
   public void setProperty(String key, String value) {
     getDAO().setProperty(key,value);
+    if (__log.isDebugEnabled())
+        __log.debug("SET MEX property " + key + " = " + value);
   }
-  
-  
   
   
 }

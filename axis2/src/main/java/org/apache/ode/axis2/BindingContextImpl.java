@@ -46,6 +46,7 @@ import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.w3c.dom.Element;
 
@@ -63,7 +64,7 @@ public class BindingContextImpl implements BindingContext {
         _server = server;
     }
 
-    public Element activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
+    public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
             PortType portType) {
         try {
             ODEService svc = _server.createService(deploymentUnit.getDefinitionForNamespace(myRoleEndpoint.serviceName

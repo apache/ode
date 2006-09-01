@@ -35,10 +35,14 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
 
     private PartnerRoleChannel _channel;
-
+    private EndpointReference _myRoleEPR;
+    
     PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
-            Operation operation, EndpointReference epr) {
+            Operation operation, 
+            EndpointReference epr,
+            EndpointReference myRoleEPR) {
         super(engine, dao);
+        _myRoleEPR = myRoleEPR;
         setPortOp(portType, operation);
     }
 
@@ -111,6 +115,10 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
 
     public PartnerRoleChannel getChannel() {
         return _channel;
+    }
+
+    public EndpointReference getMyRoleEndpointReference() {
+        return _myRoleEPR;
     }
 
 }

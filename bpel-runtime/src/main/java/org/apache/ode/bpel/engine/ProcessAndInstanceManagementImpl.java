@@ -33,6 +33,7 @@ import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -636,12 +637,13 @@ class ProcessAndInstanceManagementImpl
             OProcess oprocess = _engine.getOProcess(proc.getProcessId());
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
-                    Element eprElmt = _engine._activeProcesses.get(proc.getProcessId())
+                    EndpointReference pepr = _engine._activeProcesses.get(proc.getProcessId())
                             .getInitialPartnerRoleEPR(oplink);
-                    if (eprElmt != null) {
+                    
+                    if (pepr!= null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
-                        epr.getDomNode().appendChild(eprNodeDoc.importNode(eprElmt, true));
+                        epr.getDomNode().appendChild(eprNodeDoc.importNode(pepr.toXML().getDocumentElement(), true));
                     }
                 }
             }

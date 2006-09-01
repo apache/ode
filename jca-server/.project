@@ -2,8 +2,8 @@
   <name>ode-jca-server</name>
   <comment>Server-side implementation of a JCA connector.</comment>
   <projects>
-    <project>ode-utils</project>
     <project>ode-jca-ra</project>
+    <project>ode-utils</project>
   </projects>
   <buildSpec>
     <buildCommand>
