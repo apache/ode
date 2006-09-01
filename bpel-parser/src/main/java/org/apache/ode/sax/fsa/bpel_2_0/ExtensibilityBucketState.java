@@ -20,6 +20,7 @@ package org.apache.ode.sax.fsa.bpel_2_0;
 
 import org.apache.ode.sax.evt.SaxEvent;
 import org.apache.ode.sax.evt.StartElement;
+import org.apache.ode.sax.evt.EndElement;
 import org.apache.ode.sax.fsa.AbstractState;
 import org.apache.ode.sax.fsa.DOMGenerator;
 import org.apache.ode.sax.fsa.ParseContext;
@@ -27,6 +28,7 @@ import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
 import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -44,10 +46,11 @@ class ExtensibilityBucketState extends AbstractState {
     private Element _extensibility;
     private DOMGenerator _domGenerator;
 
-    ExtensibilityBucketState(StartElement se, ParseContext pc) {
+    ExtensibilityBucketState(StartElement se, ParseContext pc) throws ParseException {
         super(pc);
         _elementQName = se.getName();
         _domGenerator = new DOMGenerator();
+        _domGenerator.handleSaxEvent(se);
     }
 
     static class Factory implements StateFactory
@@ -71,6 +74,10 @@ class ExtensibilityBucketState extends AbstractState {
     }
 
     public void done() {
+      Node root = _domGenerator.getRoot();
+      if (root instanceof Element)
+        _extensibility = (Element) _domGenerator.getRoot();
+/* --
         if (_domGenerator.getRoot() != null) {
             Document doc = DOMUtils.newDocument();
             Element root = doc.createElementNS(_elementQName.getNamespaceURI(), _elementQName.getLocalPart());
@@ -78,6 +85,7 @@ class ExtensibilityBucketState extends AbstractState {
             doc.appendChild(root);
             _extensibility = root;
         }
+*/
     }
 
     public StateFactory getFactory() {
