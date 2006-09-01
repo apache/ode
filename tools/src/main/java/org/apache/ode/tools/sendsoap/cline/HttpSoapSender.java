@@ -19,6 +19,8 @@
 package org.apache.ode.tools.sendsoap.cline;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.ode.tools.ToolMessages;
@@ -56,6 +58,7 @@ public class HttpSoapSender extends BaseCommandlineTool {
     private static final int RETURN_SEND_ERROR = 3;
     private static final int RETURN_CANT_READ = 4;
     private static final int RETURN_CANT_WRITE = 5;
+    private static final int RETURN_BAD_PORT = 6;
 
     private static Pattern SEQ = Pattern.compile("\\$sequence\\$");
 
@@ -65,11 +68,21 @@ public class HttpSoapSender extends BaseCommandlineTool {
     private static final Argument URL_A = new Argument("url","the URL to send the SOAP to.",false);
     private static final Argument FILE_A = new Argument("file","the file that contains the SOAP to send.",false);
 
+    private static final FlagWithArgument PROXY_SERVER = new FlagWithArgument("s", "proxyServer",
+            "server to use for proxy authentication.",true);
+    private static final FlagWithArgument PROXY_PORT = new FlagWithArgument("p", "proxyPort",
+            "port to use for proxy authentication.",true);
+    private static final FlagWithArgument PROXY_USER = new FlagWithArgument("u", "username",
+            "username to use for proxy authentication.",true);
+    private static final FlagWithArgument PROXY_PASS = new FlagWithArgument("w", "password",
+            "password to use for proxy authentication.",true);
+    private static final FlagWithArgument SOAP_ACTION = new FlagWithArgument("a", "soapAction",
+            "SOAP action to include in the message header.",true);
     private static final FlagWithArgument OUTFILE_FWA = new FlagWithArgument("o","outfile",
             "a file to write the output to (instead of standard out).",true);
 
     private static final Fragments CLINE = new Fragments(new CommandlineFragment[] {
-            OUTFILE_FWA,URL_A, FILE_A
+            OUTFILE_FWA, URL_A, FILE_A, PROXY_SERVER, PROXY_PORT, PROXY_USER, PROXY_PASS, SOAP_ACTION
     });
 
     private static final String SYNOPSIS =
@@ -79,7 +92,9 @@ public class HttpSoapSender extends BaseCommandlineTool {
       return "sendsoap";
     }
 
-    public static void doSend(URL u, InputStream is, OutputStream os) throws IOException {
+    public static void doSend(URL u, InputStream is, OutputStream os,
+                              String proxyServer, int proxyPort,
+                              String username, String password, String soapAction) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(8192);
         StreamUtils.copy(bos, is);
         String now = Long.toString(System.currentTimeMillis());
@@ -93,8 +108,13 @@ public class HttpSoapSender extends BaseCommandlineTool {
         m.appendTail(sb);
         HttpClient httpClient = new HttpClient();
         PostMethod httpPostMethod = new PostMethod(u.toExternalForm());
-        // TODO what about this header?
-        //_httpPostMethod.setRequestHeader("SOAPAction", writer.getSoapAction());
+        if (proxyServer != null && proxyServer.length() > 0) {
+            httpClient.getState().setCredentials(new AuthScope(proxyServer, proxyPort),
+                    new UsernamePasswordCredentials(username, password));
+            httpPostMethod.setDoAuthentication(true);
+        }
+        if (soapAction != null && soapAction.length() > 0)
+            httpPostMethod.setRequestHeader("SOAPAction", soapAction);
         httpPostMethod.setRequestHeader("Content-Type", "text/xml");
         httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
         httpClient.executeMethod(httpPostMethod);
@@ -151,9 +171,21 @@ public class HttpSoapSender extends BaseCommandlineTool {
             }
         }
 
+        boolean hasProxy = PROXY_SERVER.getValue() != null && PROXY_SERVER.getValue().length() > 0;
+        if (hasProxy) {
+            String proxyPort = PROXY_PORT.getValue();
+            try {
+                Integer.parseInt(proxyPort);
+            } catch (NumberFormatException e) {
+                consoleErr(COMMON.msgBadPort(proxyPort));
+                System.exit(RETURN_BAD_PORT);
+            }
+        }
+
         initLogging();
         try{
-            doSend(u,is,os);
+            doSend(u,is,os, PROXY_SERVER.getValue(), hasProxy ? Integer.parseInt(PROXY_PORT.getValue()) : 0,
+                    PROXY_USER.getValue(), PROXY_PASS.getValue(), SOAP_ACTION.getValue());
         } catch (IOException ioe) {
             consoleErr(MESSAGES.msgIoErrorOnSend(ioe.getMessage()));
             System.exit(RETURN_SEND_ERROR);
