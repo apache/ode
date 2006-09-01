@@ -73,13 +73,8 @@ class PICK extends ACTIVITY {
         CorrelationKey key = null;
         PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
         if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
-          // Adding a route for opaque correlation. In this particular case, correlation is done
-          // on the epr session identifier.
-          if (!getBpelRuntimeContext().isEndpointReferenceInitialized(pLinkInstance, true))
-            throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
-                    "Endpoint reference for myRole on partner link " + onMessage.partnerLink + " has never been" +
-                            "initialized even though it's necessary for opaque correlations to work.");
-          String sessionId = getBpelRuntimeContext().fetchEndpointSessionId(pLinkInstance, true);
+          // Adding a route for opaque correlation. In this case, correlation is on "out-of-band" session-id 
+          String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
           key = new CorrelationKey(-1, new String[]{sessionId});
         } else if (onMessage.matchCorrelation != null) {
           if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(onMessage.matchCorrelation)))
@@ -181,6 +176,10 @@ class PICK extends ACTIVITY {
             }
             if (onMessage.partnerLink.hasPartnerRole()) {
               // Trying to initialize partner epr based on a message-provided epr/session.
+                
+             if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
+                     .resolve(onMessage.partnerLink))) {
+                
               Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
               if (fromEpr != null) {
                 if (__log.isDebugEnabled())
@@ -189,6 +188,13 @@ class PICK extends ACTIVITY {
                 getBpelRuntimeContext().writeEndpointReference(
                         _scopeFrame.resolve(onMessage.partnerLink), (Element) fromEpr);
               }
+             }
+             
+              String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
+              if (partnersSessionId != null)
+                  getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(onMessage.partnerLink),
+                          partnersSessionId);
+              
             }
           } catch (FaultException e) {
             fault = createFault(e.getQName(), onMessage);

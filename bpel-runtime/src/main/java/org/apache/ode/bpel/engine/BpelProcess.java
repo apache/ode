@@ -18,6 +18,22 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -37,11 +53,11 @@ import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -66,21 +82,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -288,15 +289,14 @@ public class BpelProcess {
         for (MessageExchangeInterceptor i : _mexInterceptors) 
         	if (!mex.processInterceptor(i,mex, ictx, invoker))
         		return false;
-
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
         	if (!mex.processInterceptor(i,mex, ictx, invoker))
         		return false;
         	
         
         return true;
+        
     }
-
     
     /**
      * Replacement object for serializtation of the {@link OBase} (compiled
@@ -327,7 +327,7 @@ public class BpelProcess {
     private abstract class PartnerLinkRoleImpl {
         protected OPartnerLink _plinkDef;
 
-        protected Element _initialEPR;
+        protected EndpointReference _initialEPR;
 
         PartnerLinkRoleImpl(OPartnerLink plink) {
             _plinkDef = plink;
@@ -343,7 +343,7 @@ public class BpelProcess {
          * 
          * @return
          */
-        Element getInitialEPR() {
+        EndpointReference getInitialEPR() {
             return _initialEPR;
         }
 
@@ -421,9 +421,12 @@ public class BpelProcess {
             // partnerlink/operation.
             keys = computeCorrelationKeys(mex);
 
+            String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+            String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
             if (__log.isDebugEnabled()) {
                 __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys="
-                        + ArrayUtils.makeCollection(HashSet.class, keys));
+                        + ArrayUtils.makeCollection(HashSet.class, keys) 
+                        + " mySessionId=" +  mySessionId + " partnerSessionId=" + partnerSessionId);
             }
 
             CorrelationKey matchedKey = null;
@@ -442,12 +445,13 @@ public class BpelProcess {
             // Handling the "opaque correlation case": correlation is done on a
             // session identifier associated with my epr
             if (messageRoute == null) {
-                EndpointReference ref = mex.getEndpointReference();
-                // Stateful interactions are only supported with WSA endpoints
-                if (ref != null && ref instanceof WSAEndpoint) {
-                    String sessionId = ((WSAEndpoint) ref).getSessionId();
+                String sessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+                if (sessionId != null) {
                     CorrelationKey key = new CorrelationKey(-1, new String[] { sessionId });
                     messageRoute = correlator.findRoute(key);
+                    if (__log.isDebugEnabled())
+                        __log.debug("INPUTMSG: rouing based on session id " + sessionId + " --> " + messageRoute);
+                    
                 }
             }
 
@@ -732,7 +736,7 @@ public class BpelProcess {
                     myrole._plinkDef.myRolePortType);
             
             __log.debug("Activated "  + _pid + " myrole " + myrole.getPartnerLinkName()
-                    + ": EPR is " + DOMUtils.domToString(myrole._initialEPR));
+                    + ": EPR is " + myrole._initialEPR);
         }
 
         for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
@@ -741,11 +745,11 @@ public class BpelProcess {
             prole._channel = channel;
             EndpointReference epr = channel.getInitialEndpointReference();
             if (epr != null) {
-                prole._initialEPR = epr.toXML().getDocumentElement();
+                prole._initialEPR = epr;
             }
             
             __log.debug("Activated "  + _pid + " partnerrole " + prole.getPartnerLinkName()
-                    + ": EPR is " + (prole._initialEPR == null ? "null" : DOMUtils.domToString(prole._initialEPR)));
+                    + ": EPR is " + prole._initialEPR);
             
         }
         
@@ -761,14 +765,14 @@ public class BpelProcess {
 
     }
 
-    Element getInitialPartnerRoleEPR(OPartnerLink link) {
+    EndpointReference  getInitialPartnerRoleEPR(OPartnerLink link) {
         PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
         if (prole == null)
             throw new IllegalStateException("Unknown partner link " + link);
         return prole.getInitialEPR();
     }
 
-    Element getInitialMyRoleEPR(OPartnerLink link) {
+    EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
         PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
         if (myRole == null)
             throw new IllegalStateException("Unknown partner link " + link);

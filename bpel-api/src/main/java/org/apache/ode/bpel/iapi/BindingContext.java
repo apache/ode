@@ -65,7 +65,7 @@ public interface BindingContext {
      * @param portType port type of the endpoint
      * @returns an endpoint reference in XML  format.
      */
-    Element activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint, PortType portType);
+    EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint, PortType portType);
 
     /**
      * Deactivate a "myRole" endpoint. This is a notification to the integration layer

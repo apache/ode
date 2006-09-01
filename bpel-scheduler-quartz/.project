@@ -2,9 +2,10 @@
   <name>ode-bpel-scheduler-quartz</name>
   <comment/>
   <projects>
+    <project>ode-bpel-dd</project>
     <project>ode-bpel-bom</project>
-    <project>ode-utils</project>
     <project>ode-bpel-obj</project>
+    <project>ode-utils</project>
     <project>ode-bpel-api</project>
   </projects>
   <buildSpec>

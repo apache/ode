@@ -28,44 +28,47 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dd.DeployDocument;
 
-
 /**
  * Provides information about a deployment package.
  */
 public interface DeploymentUnit {
-    
+
     /**
      * Get the deployment directory location.
+     * 
      * @return deployment directory location
      */
     File getDeployDir();
-    
-    
+
     /**
      * Get the deployment descriptor for this deployment unit.
+     * 
      * @return parsed deployment descriptor
      */
     DeployDocument getDeploymentDescriptor();
-    
+
     /**
-     * Get a WSDL definition from the deployment directory for the given namespace. 
-     * @param namespaceURI WSDL targetNamespace
+     * Get a WSDL definition from the deployment directory for the given
+     * namespace.
+     * 
+     * @param namespaceURI
+     *            WSDL targetNamespace
      * @return corresponding WSDL document
      */
     Definition getDefinitionForNamespace(String namespaceURI);
 
-    
     /**
      * Get a collection of all the WSDL definitions in the deployment directory.
+     * 
      * @return collection of WSDL documents
      */
     Collection<Definition> getDefinitions();
 
-
-  /**
-   * Names of the processes included in the deployment unit.
-   * @return
-   */
-  public Set<QName> getProcessNames();
+    /**
+     * Names of the processes included in the deployment unit.
+     * 
+     * @return
+     */
+    Set<QName> getProcessNames();
 
 }

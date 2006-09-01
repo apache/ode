@@ -28,6 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SOAPUtils;
+import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -67,9 +69,7 @@ public class ODEService {
   private QName _serviceName;
   private String _portName;
   private Map<String,ResponseCallback> _waitingCallbacks;
-  
-  /** XML representation of the EPR for this service. */
-  private Element _serviceRef;
+  private WSAEndpoint _serviceRef;
 
   public ODEService(AxisService axisService, Definition def, QName serviceName, String portName,
                     BpelServer server, TransactionManager txManager) {
@@ -80,7 +80,7 @@ public class ODEService {
     _serviceName = serviceName;
     _portName = portName;
     _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
-    _serviceRef = createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName,portName));
+    _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName,portName)));
   }
 
   public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext,
@@ -114,7 +114,7 @@ public class ODEService {
           __log.debug("Invoking ODE using MEX " + odeMex);
           __log.debug("Message content:  " + DOMUtils.domToString(odeRequest.getMessage()));
         }
-        // Invoking ODE
+        // Invoking ODE        
         odeMex.invoke(odeRequest);
       } else {
         success = false;
@@ -234,29 +234,46 @@ public class ODEService {
       Element serviceEpr = (Element) otse;
       WSAEndpoint endpoint = new WSAEndpoint();
       endpoint.set(serviceEpr);
-      odeMex.setEndpointReference(endpoint);
+      // Extract the session ID for the local process.
+      odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
     }
     if (ocse != null) {
       Element serviceEpr = (Element) ocse;
       WSAEndpoint endpoint = new WSAEndpoint();
       endpoint.set(serviceEpr);
-      odeMex.setCallbackEndpointReference(endpoint);
+      
+      // Save the session id of the remote process. Also, magically initialize the EPR
+      // of the partner to the EPR provided.
+      odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, endpoint.getSessionId());
+      odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR, DOMUtils.domToString(serviceEpr));
     }
   }
 
   /**
-   * Extracts endpoint information from ODE message exchange to stuff them into
-   * Axis MessageContext.
+   * Handle callback endpoints for the case where partner contact process my-role which results in 
+   * an "updated" my-role EPR due to session id injection.
    */
   private void writeHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-    if (odeMex.getEndpointReference() != null) {
-      msgContext.setProperty("targetSessionEndpoint", odeMex.getEndpointReference());
-      msgContext.setProperty("soapAction",
-              SOAPUtils.getSoapAction(_wsdlDef, _serviceName, _portName, odeMex.getOperationName()));
-    }
-    if (odeMex.getCallbackEndpointReference() != null) {
-      msgContext.setProperty("callbackSessionEndpoint", odeMex.getCallbackEndpointReference());
-    }
+//    EndpointReference targetEPR = odeMex.getEndpointReference();
+//    if (targetEPR == null)
+//        return;
+//
+//    if (targetEPR instanceof MutableEndpoint)
+//      // The target session endpoint is simply the endpoint that was invoked
+//        // (since this
+//      // is a response header)
+//      msgContext.setProperty("targetSessionEndpoint", odeMex.getEndpointReference());
+//      msgContext.setProperty("soapAction",
+//              SOAPUtils.getSoapAction(_wsdlDef, _serviceName, _portName, odeMex.getOperationName()));
+//
+//      // The callback endpoint is going to be the same as the target endpoint
+//        // in this case, except
+//      // that it is updated with session information (if available).
+//      if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID)!= null) {
+//          msgContext.setProperty("callbackSessionEndpoint", odeMex.getProperty("org.apache.ode.bpel.callerSessionId"));
+//        }
+//
+//    }
   }
 
   public AxisService getAxisService() {
@@ -297,7 +314,7 @@ public class ODEService {
      * endpoint.
      * @return
      */
-    public Element getMyServiceRef() {
+    public EndpointReference getMyServiceRef() {
         return _serviceRef;
     }
 
@@ -346,7 +363,7 @@ public class ODEService {
      * @param elmt
      * @return wrapped element
      */
-    public static Element createServiceRef(Element elmt) {
+    public static MutableEndpoint createServiceRef(Element elmt) {
         Document doc = DOMUtils.newDocument();
         QName elQName = new QName(elmt.getNamespaceURI(), elmt.getLocalName());
         // If we get a service-ref, just copy it, otherwise make a service-ref
@@ -360,7 +377,7 @@ public class ODEService {
             doc.appendChild(doc.importNode(elmt, true));
         }
 
-        return doc.getDocumentElement();
+        return EndpointFactory.createEndpoint(doc.getDocumentElement());
     }
 
   }

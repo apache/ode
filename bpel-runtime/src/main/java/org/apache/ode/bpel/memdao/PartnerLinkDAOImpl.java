@@ -6,72 +6,99 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 /**
- * A very simple, in-memory implementation of the {@link org.apache.ode.bpel.dao.PartnerLinkDAO} interface.
+ * A very simple, in-memory implementation of the
+ * {@link org.apache.ode.bpel.dao.PartnerLinkDAO} interface.
  */
 public class PartnerLinkDAOImpl extends DaoBaseImpl implements PartnerLinkDAO {
 
-  private int _modelId;
-  private String _linkName;
-  private String _myRoleName;
-  private QName _myRoleServiceName;
-  private String _partnerRoleName;
-  private Element _myEpr;
-  private Element _partnerEpr;
+    private int _modelId;
 
-  public String getPartnerLinkName() {
-    return _linkName;
-  }
+    private String _linkName;
 
-  public void setPartnerLinkName(String partnerLinkName) {
-    _linkName = partnerLinkName;
-  }
+    private String _myRoleName;
 
-  public int getPartnerLinkModelId() {
-    return _modelId;
-  }
+    private QName _myRoleServiceName;
 
-  public void setPartnerLinkModelId(int modelId) {
-    _modelId = modelId;
-  }
+    private String _partnerRoleName;
 
-  public String getMyRoleName() {
-    return _myRoleName;
-  }
+    private Element _myEpr;
 
-  public QName getMyRoleServiceName() {
-    return _myRoleServiceName;
-  }
+    private Element _partnerEpr;
 
-  public void setMyRoleServiceName(QName svcName) {
-    _myRoleServiceName = svcName;
-  }
+    private String _partnerSessionId;
 
-  public void setMyRoleName(String myRoleName) {
-    _myRoleName = myRoleName;
-  }
+    private String _mySessionId;
 
-  public String getPartnerRoleName() {
-    return _partnerRoleName;
-  }
+    public String getPartnerLinkName() {
+        return _linkName;
+    }
 
-  public void setPartnerRoleName(String partnerRoleName) {
-    _partnerRoleName = partnerRoleName;
-  }
+    public void setPartnerLinkName(String partnerLinkName) {
+        _linkName = partnerLinkName;
+    }
 
-  public Element getMyEPR() {
-    return _myEpr;
-  }
+    public int getPartnerLinkModelId() {
+        return _modelId;
+    }
 
-  public void setMyEPR(Element myEpr) {
-    _myEpr = myEpr;
-  }
+    public void setPartnerLinkModelId(int modelId) {
+        _modelId = modelId;
+    }
 
-  public Element getPartnerEPR() {
-    return _partnerEpr;
-  }
+    public String getMyRoleName() {
+        return _myRoleName;
+    }
 
-  public void setPartnerEPR(Element partnerEpr) {
-    _partnerEpr = partnerEpr;
-  }
+    public QName getMyRoleServiceName() {
+        return _myRoleServiceName;
+    }
+
+    public void setMyRoleServiceName(QName svcName) {
+        _myRoleServiceName = svcName;
+    }
+
+    public void setMyRoleName(String myRoleName) {
+        _myRoleName = myRoleName;
+    }
+
+    public String getPartnerRoleName() {
+        return _partnerRoleName;
+    }
+
+    public void setPartnerRoleName(String partnerRoleName) {
+        _partnerRoleName = partnerRoleName;
+    }
+
+    public Element getMyEPR() {
+        return _myEpr;
+    }
+
+    public void setMyEPR(Element myEpr) {
+        _myEpr = myEpr;
+    }
+
+    public Element getPartnerEPR() {
+        return _partnerEpr;
+    }
+
+    public void setPartnerEPR(Element partnerEpr) {
+        _partnerEpr = partnerEpr;
+    }
+
+    public String getMySessionId() {
+        return _mySessionId;
+    }
+
+    public String getPartnerSessionId() {
+        return _partnerSessionId;
+    }
+
+    public void setPartnerSessionId(String session) {
+        _partnerSessionId = session;
+    }
+
+    public void setMySessionId(String sessionId) {
+        _mySessionId = sessionId;
+    }
 
 }

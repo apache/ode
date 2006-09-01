@@ -61,4 +61,12 @@ public interface PartnerLinkDAO {
 
   public void setPartnerEPR(Element val);
 
+public String getMySessionId();
+
+public String getPartnerSessionId();
+
+public void setPartnerSessionId(String session);
+
+public void setMySessionId(String sessionId);
+
 }
