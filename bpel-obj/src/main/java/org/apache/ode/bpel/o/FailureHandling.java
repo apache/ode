@@ -18,40 +18,26 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.utils.ObjectPrinter;
-
-import java.util.HashSet;
-import java.util.Set;
-
+import javax.xml.namespace.QName;
+import java.io.Serializable;
 
 /**
- * Compiled represnetation of a BPEL activity.
+ * Holds information about the failure handling of this activity.
  */
-public abstract class OActivity extends OAgent {
-  static final long serialVersionUID = -1L  ;
+public class FailureHandling implements Serializable {
   
-  public OExpression joinCondition;
-  public final Set<OLink>sourceLinks = new HashSet<OLink>();
-  public final Set<OLink>targetLinks = new HashSet<OLink>();
-  public String name;
-  public FailureHandling failureHandling;
+  public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";
+  public static final QName FAILURE_FAULT_NAME  = new QName(EXTENSION_NS_URI, "failure");
+  public static final QName FAILURE_EXT_ELEMENT = new QName(EXTENSION_NS_URI, "failureHandling");
 
-  public String getType() {
-    return ObjectPrinter.getShortClassName(getClass());
-  }
+  // Number of times to retry the activity if failure occurs.
+  // Defaults to zero.
+  public Integer retryFor;
 
-  public OActivity(OProcess owner) {
-    super(owner);
-  }
+  // Time delay between retries of the activity, in seconds.
+  public Integer retryDelay;
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer(super.toString());
-    if (name != null) {
-      buf.append('-');
-      buf.append(name);
-    }
-
-    return buf.toString();
-  }
+  // If true, fault when failure occurs, otherwise, enter activity recovery state.
+  public Boolean faultOnFailure;
 
 }
