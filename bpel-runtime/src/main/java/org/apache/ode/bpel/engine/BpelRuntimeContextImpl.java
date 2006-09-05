@@ -62,6 +62,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -934,7 +935,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     void invocationResponse(final String mexid, final String responseChannelId) {
-
         vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
@@ -1200,6 +1200,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
+    public void registerForRecovery(ActivityRecoveryChannel channel) {
+    }
+
+    public void unregisterForRecovery(ActivityRecoveryChannel channel) {
+    }
+
     /**
      * Fetch the session-identifier for the partner link from the database. 
      */
@@ -1219,5 +1225,4 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         fetchPartnerLinkDAO(pLink).setPartnerSessionId(session);
         
     }
-
 }
