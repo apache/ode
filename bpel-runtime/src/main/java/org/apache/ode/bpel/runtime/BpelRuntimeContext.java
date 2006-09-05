@@ -30,6 +30,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -241,6 +242,10 @@ public interface BpelRuntimeContext {
   Node getPartData(Element message, Part part);
 
   Element getSourceEPR(String mexId);
+
+  void registerForRecovery(ActivityRecoveryChannel channel);
+
+  void unregisterForRecovery(ActivityRecoveryChannel channel);
 
   String getSourceSessionId(String mexId);
 }

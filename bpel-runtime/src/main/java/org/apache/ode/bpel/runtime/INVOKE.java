@@ -20,10 +20,16 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OInvoke;
+import org.apache.ode.bpel.o.FailureHandling;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -31,6 +37,7 @@ import sun.security.action.GetLongAction;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * JacobRunnable that performs the work of the <code>invoke</code> activity.
@@ -39,10 +46,17 @@ public class INVOKE extends ACTIVITY {
   private static final long serialVersionUID = 992248281026821783L;
 
   private OInvoke _oinvoke;
+  // Records number of invocations on the activity.
+  private int     _invoked;
+  // Date/time of last failure.
+  private Date    _lastFailure;
+  // Reason for last failure.
+  private String  _failureReason;
 
   public INVOKE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     super(self, scopeFrame, linkFrame);
     _oinvoke = (OInvoke) _self.o;
+    _invoked = 0;
   }
 
   public final void run() {
@@ -54,6 +68,7 @@ public class INVOKE extends ACTIVITY {
       _self.parent.completed(fault, CompensationHandler.emptySet());
       return;
     }
+    ++_invoked;
 
     // if there is no output variable, then this is a one-way invoke
     boolean isTwoWay = _oinvoke.outputVar != null;
@@ -141,10 +156,9 @@ public class INVOKE extends ACTIVITY {
           public void onFailure() {
             // This indicates a communication failure. We don't throw a fault,
             // because there is no fault, instead we'll re-incarnate the invoke
-            // and ask the runtime to terminate us: this will allow the sys
+            // and either retry or indicate failure condition.
             // admin to resume the process.
-            instance(INVOKE.this);
-            getBpelRuntimeContext().terminate();
+            INVOKE.this.retryOrFailure(null);
           }
         });
       }
@@ -172,6 +186,71 @@ public class INVOKE extends ACTIVITY {
     assert outboundMsg instanceof Element;
 
     return (Element) outboundMsg;
+  }
+
+  private void retryOrFailure(String reason) {
+    _lastFailure = new Date();
+    _failureReason = reason;
+
+    if (_self.getFailureHandling().faultOnFailure) {
+      // No attempt to retry or enter activity recovery state, simply fault.
+      FaultData faultData = createFault(FailureHandling.FAILURE_FAULT_NAME, _oinvoke, reason);
+      _self.parent.completed(faultData, CompensationHandler.emptySet());
+      return;
+    }
+
+    // If maximum number of retries, enter activity recovery state.  
+    if (_invoked > _self.getFailureHandling().retryFor + 1) {
+      requireRecovery();
+      return;
+    }
+    
+    Date future = new Date(new Date().getTime() + (_self.getFailureHandling().retryDelay * 1000));
+    final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
+    getBpelRuntimeContext().registerTimer(timerChannel, future);
+    object(false, new TimerResponseChannelListener(timerChannel) {
+      public void onTimeout() {
+        instance(INVOKE.this);
+      }
+      public void onCancel() {
+        INVOKE.this.requireRecovery();
+      }
+    }.or(new TerminationChannelListener(_self.self) {
+      public void terminate() {
+        _self.parent.completed(null, CompensationHandler.emptySet());
+        object(new TimerResponseChannelListener(timerChannel) {
+          public void onTimeout() { }
+          public void onCancel() { }
+        });
+      }
+    }));
+  }
+
+  private void requireRecovery() {
+    final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
+    getBpelRuntimeContext().registerForRecovery(recoveryChannel);
+    object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
+      public void retry() {
+        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        instance(INVOKE.this);
+      }
+      public void cancel() {
+        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        _self.parent.completed(null, CompensationHandler.emptySet());
+      }
+      public void fault(FaultData faultData) {
+        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        // TODO: real fault name.
+        if (faultData == null)
+          faultData = createFault(FailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
+        _self.parent.completed(faultData, CompensationHandler.emptySet());
+      }
+    }.or(new TerminationChannelListener(_self.self) {
+      public void terminate() {
+        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        _self.parent.completed(null, CompensationHandler.emptySet());
+      }
+    }));
   }
 
 }
