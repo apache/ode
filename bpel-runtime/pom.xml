@@ -19,79 +19,138 @@
   -->
 
 <project>
+  <groupId>ode</groupId>
+  <artifactId>ode-bpel-runtime</artifactId>
+  <name>ODE :: BPEL Runtime</name>
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
     <groupId>ode</groupId>
-    <artifactId>ode-bpel-runtime</artifactId>
-    <name>ODE :: BPEL Runtime</name>
-
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>ode</groupId>
-        <artifactId>ode</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+    <artifactId>ode</artifactId>
     <version>2.0-SNAPSHOT</version>
-    <dependencies>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-bpel-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-bpel-dao</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-bpel-compiler</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-bpel-obj</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-jacob</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ode</groupId>
-            <artifactId>ode-utils</artifactId>
-        </dependency>
+  </parent>
+  <version>2.0-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-dao</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-obj</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-jacob</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-utils</artifactId>
+    </dependency>
 
-        <dependency>
-          <groupId>stax</groupId>
-          <artifactId>stax-api</artifactId>
-        </dependency>
+    <dependency>
+      <groupId>stax</groupId>
+      <artifactId>stax-api</artifactId>
+    </dependency>
 
-        <dependency>
-          <groupId>commons-collections</groupId>
-          <artifactId>commons-collections</artifactId>
-          <version>${commonsCollectionsVersion}</version>
-        </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>${commonsCollectionsVersion}</version>
+    </dependency>
 
-    </dependencies>
+    <dependency>
+      <groupId>jotm</groupId>
+      <artifactId>jotm</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-scheduler-quartz</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-dao-hibernate</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-naming</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-bpel-schemas</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ode</groupId>
+      <artifactId>ode-minerva</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
     <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xdoclet-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>xdoclet</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <doclet destDir="${project.build.directory}/generated-sources/xdoclet" verbose="true">
-                                    <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
-                                    <template havingClassTag="jacob.kind" destinationFile="{0}ChannelListener.java" templateFile="${basedir}/../jacob/src/xdt/org/apache/ode/jacob/ChannelListener.xdt"/>
-                                    <template havingClassTag="jacob.kind" destinationFile="{0}Channel.java" templateFile="${basedir}/../jacob/src/xdt/org/apache/ode/jacob/channel.xdt"/>
-                                </doclet>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>xdoclet-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>xdoclet</goal>
+              </goals>
+              <configuration>
+                <tasks>
+                  <doclet destDir="${project.build.directory}/generated-sources/xdoclet" verbose="true">
+                    <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
+                    <template havingClassTag="jacob.kind" destinationFile="{0}ChannelListener.java" templateFile="${basedir}/../jacob/src/xdt/org/apache/ode/jacob/ChannelListener.xdt"/>
+                    <template havingClassTag="jacob.kind" destinationFile="{0}Channel.java" templateFile="${basedir}/../jacob/src/xdt/org/apache/ode/jacob/channel.xdt"/>
+                  </doclet>
+                </tasks>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>process-resources</phase>
+              <goals><goal>run</goal></goals>
+              <configuration>
+                <tasks>
+                  <ant antfile="build.xml" target="test-db" inheritRefs="true"/>
+                </tasks>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+  </build>
 </project>

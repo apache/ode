@@ -37,6 +37,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
@@ -388,4 +389,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         // TODO Auto-generated method stub
         return null;
     }
+
+  public void registerForRecovery(ActivityRecoveryChannel channel) {
+  }
+
+  public void unregisterForRecovery(ActivityRecoveryChannel channel) {
+  }
 }
