@@ -259,8 +259,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setProperty(String key, String value) {
         _hself.getProperties().put(key, value);
-        getSession().update(_hself.getProperties());
-
+        //getSession().update(_hself.getProperties()); // Does not appear to work ?
+        update();
     }
 
     public void setPartnerLink(PartnerLinkDAO plinkDAO) {
