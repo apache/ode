@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.FailureHandling;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 
@@ -59,5 +60,19 @@ class ActivityInfo implements Serializable {
   
   public int hashCode() {
     return (int)aId;
+  }
+
+  public FailureHandling getFailureHandling() {
+    FailureHandling failure = o.failureHandling;
+    // TODO: Need inheritance mechanism.
+    if (failure == null)
+      failure = new FailureHandling();
+    if (failure.retryFor == null)
+      failure.retryFor = new Integer(0);
+    if (failure.retryDelay == null)
+      failure.retryDelay = new Integer(0);
+    if (failure.faultOnFailure == null)
+      failure.faultOnFailure = Boolean.FALSE;
+    return failure;
   }
 }
