@@ -72,8 +72,6 @@ import org.apache.ode.utils.ObjectPrinter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import sun.security.krb5.internal.p;
-
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
@@ -81,10 +79,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
