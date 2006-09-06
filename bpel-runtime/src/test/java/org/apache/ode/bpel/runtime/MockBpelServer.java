@@ -123,17 +123,10 @@ class MockBpelServer {
       request.setMessage(body);
       mex.invoke(request);
       mex.complete();
+      _txManager.commit();
     } catch (Exception except) {
-      if (_txManager != null) {
-        _txManager.rollback();
-        _txManager = null;
-      }
+      _txManager.rollback();
       throw except;
-    } finally {
-      if (_txManager != null) {
-        _txManager.commit();
-        _txManager = null;
-      }
     }
 /*
         // Preparing a callback just in case we would need one.
@@ -159,18 +152,10 @@ class MockBpelServer {
   }
 
   public void shutdown() throws Exception {
-    if (_server != null) {
-      _server.stop();
-      _server = null;
-    }
-    if (_scheduler != null) {
-      _scheduler.shutdown();
-      _scheduler = null;
-    }
-    if (_jotm != null) {
-      _jotm.stop();
-      _jotm = null;
-    }
+    _server.stop();
+    _scheduler.stop();
+    _scheduler.shutdown();
+    _jotm.stop();
   }
 
   protected TransactionManager createTransactionManager() throws Exception {
