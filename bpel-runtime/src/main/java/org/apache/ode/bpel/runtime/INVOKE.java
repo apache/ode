@@ -198,9 +198,10 @@ public class INVOKE extends ACTIVITY {
       _self.parent.completed(faultData, CompensationHandler.emptySet());
       return;
     }
-
+System.out.println("-- Invoked: " + _invoked);
+System.out.println("-- retryFor: " + _self.getFailureHandling().retryFor);
     // If maximum number of retries, enter activity recovery state.  
-    if (_invoked > _self.getFailureHandling().retryFor + 1) {
+    if (_invoked > _self.getFailureHandling().retryFor) {
       requireRecovery();
       return;
     }
@@ -227,19 +228,21 @@ public class INVOKE extends ACTIVITY {
   }
 
   private void requireRecovery() {
+System.out.println("-- Require recovery");
     final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
-    getBpelRuntimeContext().registerForRecovery(recoveryChannel);
+    getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, null,
+      new String[] { "retry", "cancel", "fault" });
     object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
       public void retry() {
-        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         instance(INVOKE.this);
       }
       public void cancel() {
-        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         _self.parent.completed(null, CompensationHandler.emptySet());
       }
       public void fault(FaultData faultData) {
-        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         // TODO: real fault name.
         if (faultData == null)
           faultData = createFault(FailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
@@ -247,7 +250,7 @@ public class INVOKE extends ACTIVITY {
       }
     }.or(new TerminationChannelListener(_self.self) {
       public void terminate() {
-        getBpelRuntimeContext().unregisterForRecovery(recoveryChannel);
+        getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         _self.parent.completed(null, CompensationHandler.emptySet());
       }
     }));

@@ -390,9 +390,14 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-  public void registerForRecovery(ActivityRecoveryChannel channel) {
-  }
+    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
+                                            Date dateTime, Element data, String[] actions) {
+    }
 
-  public void unregisterForRecovery(ActivityRecoveryChannel channel) {
-  }
+    public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
+    }
+
+    public void recoverActivity(final String channel, final String action, final FaultData fault) {
+    }
+
 }
