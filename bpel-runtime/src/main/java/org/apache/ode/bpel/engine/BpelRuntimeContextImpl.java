@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -1200,10 +1201,37 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
-    public void registerForRecovery(ActivityRecoveryChannel channel) {
+    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
+                                            Date dateTime, Element data, String[] actions) {
+System.out.println("-- Registering activity for recovery: " + channel.export().toString());
+      if (reason == null)
+        reason = "Unspecified";
+      if (dateTime == null)
+        dateTime = new Date();
+      _dao.createActivityRecovery(channel.export(), (int)activityId, reason, dateTime, data, actions);
     }
 
-    public void unregisterForRecovery(ActivityRecoveryChannel channel) {
+    public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
+System.out.println("-- Unregistering activity for recovery: " + channel.export().toString());
+      _dao.deleteActivityRecovery(channel.export());
+    }
+
+    public void recoverActivity(final String channel, final String action, final FaultData fault) {
+System.out.println("-- Recovery activity: " + channel + ": " + action);
+      vpu.inject(new JacobRunnable() {
+          private static final long serialVersionUID = 3168964409165899533L;
+          public void run() {
+              // ActivityRecoveryChannel channel = importChannel(channel, ActivityRecoveryChannel.class);
+              ActivityRecoveryChannel channel = null;
+              if ("cancel".equals(action))
+                channel.cancel();
+              else if ("retry".equals(action))
+                channel.retry();
+              else if ("fault".equals(action))
+                channel.fault(fault);
+          }
+      });
+      _dao.deleteActivityRecovery(channel);
     }
 
     /**
