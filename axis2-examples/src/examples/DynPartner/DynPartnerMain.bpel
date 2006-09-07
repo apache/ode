@@ -54,7 +54,7 @@
       </copy>
       <copy>
         <!-- Just needed for correlation -->
-        <from>$dummy.payload/foo/bar</from>
+        <from>$dummy.payload</from>
         <to>$dummy2.payload</to>
       </copy>
     </assign>
