@@ -33,7 +33,7 @@
 
 
     <properties>
-        <!--maven.test.skip>true</maven.test.skip-->
+        <maven.test.skip>true</maven.test.skip>
         <vendor.name>Apache Software Foundation</vendor.name>
         <!--
           Default ODE properties, these properties may be referenced in resources and the
