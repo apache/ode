@@ -256,6 +256,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     }
 
     public Set<QName> getProcessNames() {
+        
+        loadProcessDefinitions();
         return _processes.keySet();
     }
 

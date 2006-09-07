@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.iapi;
 
+import java.util.Set;
+
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
@@ -212,6 +214,14 @@ public interface MessageExchange {
    * @return property value
    */
   String getProperty(String key);
+  
+
+  /**
+   * Get a set containing the names of the defined properties.
+   * @return set of property names.
+   */
+  public Set<String> getPropertyNames();
+
   
   public static final String PROPERTY_SEP_MYROLE_SESSIONID = "org.apache.ode.bpel.myRoleSessionId";
   public static final String PROPERTY_SEP_PARTNERROLE_SESSIONID = "org.apache.ode.bpel.partnerRoleSessionId";
