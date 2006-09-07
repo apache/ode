@@ -16,24 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.apache.ode.bpel.engine;
 
 import java.io.ByteArrayInputStream;
@@ -60,6 +42,8 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dd.*;
+import org.apache.ode.bpel.deploy.DeploymentManager;
+import org.apache.ode.bpel.deploy.DeploymentManagerImpl;
 import org.apache.ode.bpel.deploy.DeploymentServiceImpl;
 import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -85,7 +69,12 @@ import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
 
 /**
- * The BPEL server implementation.
+ * The BPEL server implementation. This implementation is intended to be thread
+ * safe. The key concurrency mechanism is a "management" read/write lock that
+ * synchronizes all management operations (they require "write" access) and
+ * prevents concurrent management operations and processing (processing requires
+ * "read" access). Write access to the lock is scoped to the method, while read
+ * access is scoped to a transaction.
  */
 public class BpelServerImpl implements BpelServer {
 
@@ -93,6 +82,11 @@ public class BpelServerImpl implements BpelServer {
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
+    /**
+     * Management lock for synchronizing management operations and preventing
+     * processing (transactions) from occuring while management operations are
+     * in progress.
+     */
     private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
 
     private Contexts _contexts = new Contexts();
@@ -108,12 +102,21 @@ public class BpelServerImpl implements BpelServer {
     /** Should processes marked "active" in the DB be activated on server start? */
     private boolean _autoActivate = false;
 
-    private List<BpelEventListener> _listeners = new CopyOnWriteArrayList<BpelEventListener>();
+    private Map<QName, DeploymentUnitImpl> _deploymentUnits = new HashMap<QName, DeploymentUnitImpl>();
 
-    private Map<QName, DeploymentUnitImpl> _deploymentUnits = new HashMap<QName,DeploymentUnitImpl>();
+    /** Object that keeps track (persistently) of the deployment units */
+    private DeploymentManager _deploymentManager;
+
+    private ThreadLocal<Boolean> _associated = new ThreadLocal<Boolean>() {
+        public Boolean initialValue() {
+            return Boolean.FALSE;
+        }
+    };
+
+    /** Directory where we keep track of deployments. */
+    private String _deployDir = null;
 
     public BpelServerImpl() {
-
     }
 
     public void start() {
@@ -135,6 +138,8 @@ public class BpelServerImpl implements BpelServer {
                 __log.debug("BPEL SERVER starting.");
             }
 
+            reloadDeploymentUnits();
+            
             _engine = new BpelEngineImpl(_contexts);
             if (_autoActivate) {
                 List<QName> pids = findActive();
@@ -147,7 +152,7 @@ public class BpelServerImpl implements BpelServer {
                     }
             }
 
-            //readState();
+            // readState();
             _contexts.scheduler.start();
             _started = true;
             __log.info(__msgs.msgServerStarted());
@@ -158,52 +163,69 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public boolean undeploy(File file) {
-        DeploymentUnit du = null;
-        for (DeploymentUnitImpl deploymentUnit : new HashSet<DeploymentUnitImpl>(_deploymentUnits.values())) {
-            if (deploymentUnit.getDeployDir().getName().equals(file.getName())) du = deploymentUnit;
-        }
-        if (du == null) {
-            __log.warn("Couldn't deploy " + file.getName() + ", package was not found.");
-            return false;
-        }
+        _mngmtLock.writeLock().lock();
+        try {
+            DeploymentUnitImpl du = null;
+            for (DeploymentUnitImpl deploymentUnit : new HashSet<DeploymentUnitImpl>(_deploymentUnits.values())) {
+                if (deploymentUnit.getDeployDir().getName().equals(file.getName()))
+                    du = deploymentUnit;
+            }
+            if (du == null) {
+                __log.warn("Couldn't deploy " + file.getName() + ", package was not found.");
+                return false;
+            }
 
-        boolean success = true;
-        for (QName pName : du.getProcessNames()) {
-            success = success && undeploy(pName);
+            boolean success = true;
+            for (QName pName : du.getProcessNames()) {
+                success = success && undeploy(pName);
+            }
+
+            for (QName pname : du.getProcessNames()) {
+                _deploymentUnits.remove(pname);
+            }
+
+            _deploymentManager.remove(du);
+
+            return success;
+        } finally {
+            _mngmtLock.writeLock().unlock();
+
         }
-        rm(du.getDeployDir());
-        for (QName pname : du.getProcessNames()) {
-            _deploymentUnits.remove(pname);
-        }
-        return success;
     }
 
-    private void rm(File f) {
-        if (f.isDirectory()) {
-            for (File child : f.listFiles())
-                rm(child);
-            f.delete();
-        } else {
-            f.delete();
-        }
-    }
-
+    /**
+     * Register a global listener to receive {@link BpelEvent}s froom all
+     * processes.
+     * 
+     * @param listener
+     */
     public void registerBpelEventListener(BpelEventListener listener) {
-        _listeners.add(listener);
+        // Do not synchronize, eventListeners is copy-on-write array.
+        _contexts.eventListeners.add(listener);
     }
 
+    /**
+     * Unregister a global listener from receive {@link BpelEvent}s from all
+     * processes.
+     * 
+     * @param listener
+     */
     public void unregisterBpelEventListener(BpelEventListener listener) {
-        _listeners.remove(listener);
+        // Do not synchronize, eventListeners is copy-on-write array.
+        _contexts.eventListeners.remove(listener);
     }
 
     void fireEvent(BpelEvent event) {
-        for (BpelEventListener l : _listeners) {
+        // Note that the eventListeners list is a copy-on-write array, so need
+        // to mess with synchronization.
+        for (BpelEventListener l : _contexts.eventListeners) {
             l.onEvent(event);
         }
     }
 
     /**
      * Find the active processes in the database.
+     * 
      * @return list of process qnames
      */
     private List<QName> findActive() {
@@ -238,7 +260,7 @@ public class BpelServerImpl implements BpelServer {
                 __log.debug("BPEL SERVER STOPPING");
             }
 
-            //writeState();
+            // writeState();
 
             _contexts.scheduler.stop();
             _engine = null;
@@ -292,7 +314,7 @@ public class BpelServerImpl implements BpelServer {
 
     /**
      * Load the parsed and compiled BPEL process definition from the database.
-     *
+     * 
      * @param processId
      *            process identifier
      * @return process information from configuration database
@@ -351,9 +373,11 @@ public class BpelServerImpl implements BpelServer {
     }
 
     /**
-     * Set the DAO connection factory. The DAO is used by the BPEL engine
-     * to persist information about active processes.
-     * @param daoCF {@link BpelDAOConnectionFactory} implementation.
+     * Set the DAO connection factory. The DAO is used by the BPEL engine to
+     * persist information about active processes.
+     * 
+     * @param daoCF
+     *            {@link BpelDAOConnectionFactory} implementation.
      */
     public void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF) throws BpelEngineException {
         _contexts.dao = daoCF;
@@ -374,6 +398,7 @@ public class BpelServerImpl implements BpelServer {
             }
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
+            _deploymentManager = new DeploymentManagerImpl(new File(_deployDir, "ode-deployed.dat"));
             _initialized = true;
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -381,15 +406,38 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public void shutdown() throws BpelEngineException {
+        _mngmtLock.writeLock().lock();
+        try {
+            if (!_initialized)
+                return;
+
+            stop();
+        } finally {
+            _mngmtLock.writeLock().unlock();
+        }
 
     }
 
     public BpelEngine getEngine() {
-        acquireWorkLockForTx();
-        if (!_started) {
-            __log.debug("call on getEngine() on server that has not been started!");
-            throw new IllegalStateException("Server must be started!");
-        }
+        // Acquire a readlock for the current thread / transaction and then
+        // return
+        // an engine instance.
+
+        // First check if this thread has already requested the engine for this
+        // transaction, if not, acquire the lock.
+        // if (!_associated.get()) {
+        // if (!_started) {
+        // String errmsg = "call on getEngine() on server that has not been
+        // started!";
+        // __log.debug(errmsg);
+        // throw new IllegalStateException(errmsg);
+        // }
+        //
+        // // We need to schedule a task to release the lock.
+        // // _contexts.scheduler.scheduleTransactionCallback();
+        // _associated.set(Boolean.TRUE);
+        // }
+
         return _engine;
     }
 
@@ -436,7 +484,7 @@ public class BpelServerImpl implements BpelServer {
 
     /**
      * Activate the process in the engine.
-     *
+     * 
      * @param pid
      */
     private void doActivateProcess(final QName pid) {
@@ -453,7 +501,7 @@ public class BpelServerImpl implements BpelServer {
 
             // Figure out where on the local file system we can find the
             // deployment directory for this process
-            DeploymentUnitImpl du  = _deploymentUnits.get(pid);
+            DeploymentUnitImpl du = _deploymentUnits.get(pid);
             if (du == null) {
                 // Indicates process not deployed.
                 String errmsg = "Process " + pid + " is not deployed, it cannot be activated";
@@ -473,7 +521,6 @@ public class BpelServerImpl implements BpelServer {
                 __log.error(errmsg);
                 throw new BpelEngineException(errmsg);
             }
-
 
             // Create an expression language registry for this process
             ExpressionLanguageRuntimeRegistry elangRegistry = new ExpressionLanguageRuntimeRegistry();
@@ -495,8 +542,8 @@ public class BpelServerImpl implements BpelServer {
                         Class cls = Class.forName(mexi.getClassName());
                         localMexInterceptors.add((MessageExchangeInterceptor) cls.newInstance());
                     } catch (Throwable t) {
-                       String errmsg = "Error instantiating message-exchange interceptor " + mexi.getClassName();
-                       __log.error(errmsg,t);
+                        String errmsg = "Error instantiating message-exchange interceptor " + mexi.getClassName();
+                        __log.error(errmsg, t);
                     }
                 }
 
@@ -523,7 +570,7 @@ public class BpelServerImpl implements BpelServer {
                     __log.error(errmsg);
                     throw new BpelEngineException(errmsg);
                 }
-                myRoleEndpoints.put(plink,new Endpoint(service.getName(), service.getPort()));
+                myRoleEndpoints.put(plink, new Endpoint(service.getName(), service.getPort()));
             }
 
             // Create partnerRole initial value mapping
@@ -539,7 +586,6 @@ public class BpelServerImpl implements BpelServer {
                     throw new BpelEngineException(errmsg);
                 }
 
-
                 TService service = invoke.getService();
                 // NOTE: service can be null for partner links
                 if (service == null)
@@ -551,11 +597,8 @@ public class BpelServerImpl implements BpelServer {
                 partnerRoleIntialValues.put(plink, new Endpoint(service.getName(), service.getPort()));
             }
 
-            BpelProcess process = new BpelProcess(pid,
-                    du,
-                    compiledProcess, myRoleEndpoints,
-                    partnerRoleIntialValues, null, elangRegistry,
-                    localMexInterceptors);
+            BpelProcess process = new BpelProcess(pid, du, compiledProcess, myRoleEndpoints, partnerRoleIntialValues,
+                    null, elangRegistry, localMexInterceptors);
 
             _engine.registerProcess(process);
 
@@ -566,15 +609,179 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public DeploymentUnit getDeploymentUnit(QName pid) {
+        // TODO: Investigate the concurrency implications of returning these
+        // objects
         return _deploymentUnits.get(pid);
     }
 
     public Collection<DeploymentUnit> getDeploymentUnits() {
-        ArrayList<DeploymentUnit> dus = new ArrayList<DeploymentUnit>(_deploymentUnits.size());
-        for (DeploymentUnitImpl du : _deploymentUnits.values()) {
-            dus.add(du);
+        // TODO: Investigate the concurrency implications of returning these
+        // objects
+        return new ArrayList<DeploymentUnit>(_deploymentUnits.values());
+    }
+
+    /**
+     * Deploys a process.
+     */
+    public Collection<QName> deploy(File deploymentUnitDirectory) {
+
+        __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
+
+        _mngmtLock.writeLock().lock();
+        try {
+            DeploymentUnitImpl du = _deploymentManager.createDeploymentUnit(deploymentUnitDirectory);
+
+            ArrayList<QName> deployed = new ArrayList<QName>();
+            BpelEngineException failed = null;
+            // Going trough each process declared in the dd
+            for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
+
+                // If a type is not specified, assume the process id is also the
+                // type.
+                QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
+                OProcess oprocess = du.getProcesses().get(type);
+                if (oprocess == null)
+                    throw new BpelEngineException("Could not find the compiled process definition for BPEL" + "type "
+                            + type + " when deploying process " + processDD.getName() + " in "
+                            + deploymentUnitDirectory);
+                try {
+
+                    deploy(processDD.getName(), du, oprocess, du.getDocRegistry().getDefinitions(), processDD);
+
+                    deployed.add(processDD.getName());
+                } catch (Throwable e) {
+                    String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
+                    __log.error(errmsg, e);
+                    failed = new BpelEngineException(errmsg, e);
+                    break;
+                }
+            }
+
+            // Roll back succesfull deployments if we failed.
+            if (failed != null) {
+                if (!deployed.isEmpty()) {
+                    __log.error(__msgs.msgDeployRollback(deploymentUnitDirectory));
+                    for (QName pid : deployed) {
+                        try {
+                            undeploy(pid);
+                        } catch (Throwable t) {
+                            __log.fatal("Unexpect error undeploying process " + pid, t);
+                        }
+                    }
+                }
+
+                _deploymentManager.remove(du);
+                throw failed;
+            }
+
+            return new HashSet<QName>(du.getProcesses().keySet());
+        } finally {
+            _mngmtLock.writeLock().unlock();
         }
-        return dus;
+    }
+
+    private void deploy(final QName processId, final DeploymentUnitImpl du, final OProcess oprocess,
+            final Definition4BPEL[] defs, TDeployment.Process processDD) {
+
+        _mngmtLock.writeLock().lock();
+        try {
+            // First, make sure we are undeployed.
+            undeploy(processId);
+
+            Serializer serializer = new Serializer(oprocess.compileDate.getTime(), 1);
+            final byte[] bits;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                serializer.write(bos);
+                serializer.writeOProcess(oprocess, bos);
+                bos.close();
+                bits = bos.toByteArray();
+            } catch (Exception ex) {
+                String errmsg = "Error re-serializing CBP";
+                __log.fatal(errmsg, ex);
+                throw new BpelEngineException(errmsg, ex);
+            }
+
+            final ProcessDDInitializer pi = new ProcessDDInitializer(oprocess, processDD);
+
+            try {
+
+                _db.exec(new BpelDatabase.Callable<ProcessDAO>() {
+                    public ProcessDAO run(BpelDAOConnection conn) throws Exception {
+                        // Hack, but at least for now we need to ensure that we
+                        // are
+                        // the only process with this process id.
+                        ProcessDAO old = conn.getProcess(processId);
+                        if (old != null) {
+                            String errmsg = __msgs.msgProcessDeployErrAlreadyDeployed(processId);
+                            __log.error(errmsg);
+                            throw new BpelEngineException(errmsg);
+                        }
+
+                        ProcessDAO newDao = conn.createProcess(processId, oprocess.getQName());
+                        newDao.setCompiledProcess(bits);
+                        pi.init(newDao);
+                        pi.update(newDao);
+                        return newDao;
+
+                    }
+                });
+                __log.info(__msgs.msgProcessDeployed(processId));
+            } catch (BpelEngineException ex) {
+                throw ex;
+            } catch (Exception dce) {
+                __log.error("", dce);
+                throw new BpelEngineException("", dce);
+            }
+
+            _deploymentUnits.put(processDD.getName(), du);
+
+            doActivateProcess(processId);
+        } finally {
+            _mngmtLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Get the flag that determines whether processes marked as active are
+     * automatically activated at startup.
+     * 
+     * @return
+     */
+    public boolean isAutoActivate() {
+        return _autoActivate;
+    }
+
+    /**
+     * Set the flag the determines whether processes marked as active are
+     * automatically activated at startup.
+     * 
+     * @param autoActivate
+     */
+    public void setAutoActivate(boolean autoActivate) {
+        _autoActivate = autoActivate;
+    }
+
+    /**
+     * Register a global message exchange interceptor.
+     * 
+     * @param interceptor
+     *            message-exchange interceptor
+     */
+    public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
+        // NOTE: do not synchronize, globalInterceptors is copy-on-write.
+        _contexts.globalIntereceptors.add(interceptor);
+    }
+
+    /**
+     * Unregister a global message exchange interceptor.
+     * 
+     * @param interceptor
+     *            message-exchange interceptor
+     */
+    public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
+        // NOTE: do not synchronize, globalInterceptors is copy-on-write.
+        _contexts.globalIntereceptors.remove(interceptor);
     }
 
     private void dbSetProcessActive(final QName pid, final boolean val) {
@@ -607,158 +814,18 @@ public class BpelServerImpl implements BpelServer {
         }
     }
 
-    /**
-     * Deploys a process.
-     */
-    public Collection<QName> deploy(File deploymentUnitDirectory) {
-
-        __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
-
-        DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
-
-        ArrayList<QName> deployed = new ArrayList<QName> ();
-        BpelEngineException failed = null;
-        // Going trough each process declared in the dd
-        for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
-
-            // If a type is not specified, assume the process id is also the type.
-            QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
-            OProcess oprocess = du.getProcesses().get(type);
-            if (oprocess == null)
-                throw new BpelEngineException("Could not find the compiled process definition for BPEL" +
-                        "type " +  type + " when deploying process " + processDD.getName()
-                        + " in " +  deploymentUnitDirectory);
+    private void reloadDeploymentUnits() {
+        for (DeploymentUnitImpl du : _deploymentManager.getDeploymentUnits())
             try {
-
-                deploy(processDD.getName(), du, oprocess, du.getDocRegistry()
-                        .getDefinitions(), processDD);
-
-                deployed.add(processDD.getName());
-            } catch (Throwable e) {
-                String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
-                __log.error(errmsg, e);
-                failed = new BpelEngineException(errmsg,e);
-                break;
-            }
-        }
-
-        // Roll back succesfull deployments if we failed.
-        if (failed != null) {
-            if (!deployed.isEmpty()) {
-                __log.error(__msgs.msgDeployRollback(deploymentUnitDirectory));
-                for (QName pid : deployed) {
-                    try {
-                        undeploy(pid);
-                    } catch (Throwable t) {
-                        __log.fatal("Unexpect error undeploying process " + pid, t);
-                    }
+                for (QName procName : du.getProcessNames()) {
+                    _deploymentUnits.put(procName, du);
                 }
+            } catch (Exception ex) {
+                String errmsg = "Error processing deployment unit " + du.getDeployDir()
+                        + "; some processes may not be loaded.";
+                __log.error(errmsg, ex);
             }
-            throw failed;
-        } else
-            return du.getProcesses().keySet();
-    }
-
-    private void deploy(final QName processId, final DeploymentUnitImpl du, final OProcess oprocess,
-                        final Definition4BPEL[] defs, TDeployment.Process processDD) {
-        // First, make sure we are undeployed.
-        undeploy(processId);
-
-        Serializer serializer = new Serializer(oprocess.compileDate.getTime(), 1);
-        final byte[] bits;
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            serializer.write(bos);
-            serializer.writeOProcess(oprocess, bos);
-            bos.close();
-            bits = bos.toByteArray();
-        } catch (Exception ex) {
-            String errmsg = "Error re-serializing CBP";
-            __log.fatal(errmsg, ex);
-            throw new BpelEngineException(errmsg, ex);
-        }
-
-        final ProcessDDInitializer pi = new ProcessDDInitializer(oprocess, processDD);
-
-        try {
-
-            _db.exec(new BpelDatabase.Callable<ProcessDAO>() {
-                public ProcessDAO run(BpelDAOConnection conn) throws Exception {
-                    // Hack, but at least for now we need to ensure that we are
-                    // the only process with this process id.
-                    ProcessDAO old = conn.getProcess(processId);
-                    if (old != null) {
-                        String errmsg = __msgs.msgProcessDeployErrAlreadyDeployed(processId);
-                        __log.error(errmsg);
-                        throw new BpelEngineException(errmsg);
-                    }
-
-                    ProcessDAO newDao = conn.createProcess(processId, oprocess.getQName());
-                    newDao.setCompiledProcess(bits);
-                    pi.init(newDao);
-                    pi.update(newDao);
-                    return newDao;
-
-                }
-            });
-            __log.info(__msgs.msgProcessDeployed(processId));
-        } catch (BpelEngineException ex) {
-            throw ex;
-        } catch (Exception dce) {
-            __log.error("", dce);
-            throw new BpelEngineException("", dce);
-        }
-
-        _deploymentUnits.put(processDD.getName(), du);
-
-        doActivateProcess(processId);
-    }
-
-    /**
-     * Acquire a work lock for the current transaction, releasing the lock once
-     * the transaction completes.
-     */
-    private void acquireWorkLockForTx() {
-        // TODO We need to have support for a TransactionContext in order to
-        // do this.
 
     }
-
-    /**
-     * Get the flag that determines whether processes marked as active are
-     * automatically activated at startup.
-     *
-     * @return
-     */
-    public boolean isAutoActivate() {
-        return _autoActivate;
-    }
-
-    /**
-     * Set the flag the determines whether processes marked as active are
-     * automatically activated at startup.
-     *
-     * @param autoActivate
-     */
-    public void setAutoActivate(boolean autoActivate) {
-        _autoActivate = autoActivate;
-    }
-
-
-    /**
-     * Register a global message exchange interceptor. 
-     * @param interceptor message-exchange interceptor
-     */
-    public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-        // We don't really care all that much about concurrency here, we just want to 
-        // avoid ConcurrentModificationEx, so use an array instead of a collection. 
-        synchronized(_contexts) {
-            MessageExchangeInterceptor[] r = new MessageExchangeInterceptor[1+_contexts.globalIntereceptors.length];
-            System.arraycopy(_contexts.globalIntereceptors,0,r,0,_contexts.globalIntereceptors.length);
-            r[r.length-1] = interceptor;
-            _contexts.globalIntereceptors = r;
-        }
-    }
-
 
 }

@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -238,5 +240,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
         __log.debug("SET MEX property " + key + " = " + value);
   }
   
+  public Set<String> getPropertyNames() {
+      return getDAO().getPropertyNames();
+  }
+  public String toString() {
+      return "MEX["+getDAO().getMessageExchangeId() +"]"; 
+  }
   
 }

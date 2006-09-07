@@ -1,7 +1,12 @@
 package org.apache.ode.bpel.memdao;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
 
@@ -222,6 +227,14 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public PartnerLinkDAO getPartnerLink() {
         return _plink;
+    }
+
+    public Set<String> getPropertyNames() {
+        HashSet<String> retVal = new HashSet<String>();
+        for (Entry<Object,Object> e : properties.entrySet()) {
+            retVal.add((String)e.getKey());
+        }
+        return retVal;
     }
 
 }
