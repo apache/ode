@@ -6,6 +6,7 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.ProcessState;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
@@ -278,6 +279,13 @@ import java.util.Set;
     ret.last = last;
     return ret;
   }
+
+  
+  public int getActivityFailureCount() { return 0; }
+  public Date getActivityFailureDateTime() { return null; }
+  public Collection<ActivityRecoveryDAO> getActivityRecoveries() { return null; }
+  public void createActivityRecovery(String channel, int activityId, String reason, Date dateTime, Element data, String[] actions) { }
+  public void deleteActivityRecovery(String channel) { }
 
   public long genMonotonic() {
     return ++_seq;
