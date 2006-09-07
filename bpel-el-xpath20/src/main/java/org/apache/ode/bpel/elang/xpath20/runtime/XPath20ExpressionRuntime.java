@@ -118,7 +118,11 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         if (someRes instanceof NodeList) {
             NodeList retVal = (NodeList) someRes;
             result = new ArrayList(retVal.getLength());
-            for(int m = 0; m < retVal.getLength(); m++) result.add(retVal.item(m));
+            for(int m = 0; m < retVal.getLength(); m++) {
+                Node val = retVal.item(m);
+                if (val.getNodeType() == Node.DOCUMENT_NODE) val = ((Document)val).getDocumentElement();
+                result.add(val);
+            }
         }
 
         return result;
