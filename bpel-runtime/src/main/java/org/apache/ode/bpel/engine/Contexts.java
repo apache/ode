@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
@@ -47,6 +49,11 @@ class Contexts {
 
     BpelDAOConnectionFactory dao;
 
-    MessageExchangeInterceptor[] globalIntereceptors = new MessageExchangeInterceptor[0];
+    /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
+    final List<MessageExchangeInterceptor >globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
+
+    /** Global event listeners. Must be copy-on-write!!! */
+    final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
+
 
 }

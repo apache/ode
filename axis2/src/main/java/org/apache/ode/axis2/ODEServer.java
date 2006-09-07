@@ -414,10 +414,9 @@ public class ODEServer {
         }
 
         _server = new BpelServerImpl();
-        // We don't want the server to automatically activate deployed processes,
-        // we'll do that explcitly
-        _server.setAutoActivate(false);
+        _server.setAutoActivate(true);
 
+    
         _executorService = Executors.newCachedThreadPool();
         _scheduler = new QuartzSchedulerImpl();
         _scheduler.setBpelServer(_server);
