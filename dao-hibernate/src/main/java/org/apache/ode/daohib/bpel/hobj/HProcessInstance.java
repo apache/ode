@@ -51,6 +51,10 @@ public class HProcessInstance extends HObject{
   private short _previousState;
   private short _state;
   private Date _lastActiveTime;
+  private Date _activityFailureDateTime;
+  private int  _activityFailureCount;
+
+  private Collection<HActivityRecovery> _activityRecoveries = new HashSet<HActivityRecovery>();
 
   private long _seq;
   
@@ -231,6 +235,44 @@ public class HProcessInstance extends HObject{
     return _seq;
   }
   
+  /**
+   * @hibernate.bag
+   *  lazy="true"
+   *  inverse="true"
+   *  cascade="delete"
+   * @hibernate.collection-key
+   *  column="PIID"
+   * @hibernate.collection-one-to-many
+   *  class="org.apache.ode.daohib.bpel.hobj.HActivityRecovery"
+   */
+	public Collection<HActivityRecovery> getActivityRecoveries() {
+		return _activityRecoveries;
+	}
+
+	public void setActivityRecoveries(Collection<HActivityRecovery> activityRecoveries) {
+		_activityRecoveries = activityRecoveries;
+	}
+
+  /**
+   * @hibernate.property column="FAILURE_COUNT"
+   */
+  public int getActivityFailureCount() {
+    return _activityFailureCount;
+  }
+
+  public void setActivityFailureCount(int count) {
+    _activityFailureCount = count;
+  }
   
+  /**
+   * @hibernate.property column="FAILURE_DT"
+   */
+  public Date getActivityFailureDateTime() {
+    return _activityFailureDateTime;
+  }
+
+  public void setActivityFailureDateTime(Date dateTime) {
+    _activityFailureDateTime = dateTime;
+  }
 
 }

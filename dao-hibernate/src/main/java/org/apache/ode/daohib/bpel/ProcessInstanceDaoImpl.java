@@ -333,9 +333,60 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     q.executeUpdate();    
   }
 
+  public int getActivityFailureCount() {
+    return _instance.getActivityFailureCount();
+  }
+
+  public Date getActivityFailureDateTime() {
+    return _instance.getActivityFailureDateTime();
+  }
+
+  public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
+    List<ActivityRecoveryDAO> results = new ArrayList<ActivityRecoveryDAO>();
+    for (HActivityRecovery recovery : _instance.getActivityRecoveries())
+      results.add(new ActivityRecoveryDaoImpl(_sm, recovery));
+    return results;
+  }
+
+  public void createActivityRecovery(String channel, int activityId, String reason,
+                                     Date dateTime, Element data, String[] actions) {
+    HActivityRecovery recovery = new HActivityRecovery();
+    recovery.setChannel(channel);
+    recovery.setActivityId(activityId);
+    recovery.setReason(reason);
+    recovery.setDateTime(dateTime);
+    if (data != null) {
+      HLargeData ld = new HLargeData(DOMUtils.domToString(data));
+      recovery.setData(ld);
+      getSession().save(ld);
+    }
+    String list = actions[0];
+    for (int i = 1; i < actions.length; ++i)
+      list += " " + actions[i];
+    recovery.setActions(list);
+    _instance.getActivityRecoveries().add(recovery);
+    getSession().save(recovery);
+    _instance.setActivityFailureDateTime(dateTime);
+    _instance.setActivityFailureCount(_instance.getActivityFailureCount() + 1);
+    getSession().update(_instance);
+  }
+
+  /**
+   * Delete previously registered activity recovery.
+   */
+  public void deleteActivityRecovery(String channel) {
+    for (HActivityRecovery recovery : _instance.getActivityRecoveries()) {
+      if (recovery.getChannel().equals(channel)) {
+        getSession().delete(recovery);
+        _instance.setActivityFailureCount(_instance.getActivityFailureCount() - 1);
+        getSession().update(_instance);
+        return;
+      }
+    }
+  }
+
   public BpelDAOConnection getConnection() {
     return new BpelDAOConnectionImpl(_sm);
   }
-
 
 }
