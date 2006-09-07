@@ -206,28 +206,52 @@ public interface ProcessInstanceDAO {
    * Get a triple containing the first
    * @return
    */
- EventsFirstLastCountTuple getEventsFirstLastCount();
+  EventsFirstLastCountTuple getEventsFirstLastCount();
 
- /** 
-  * Get the next number from a monotonically increasing sequence.
-  * @return next number in seqeunce
-  */
- public long genMonotonic();
+  /** 
+   * Get the next number from a monotonically increasing sequence.
+   * @return next number in seqeunce
+   */
+  public long genMonotonic();
 
- public BpelDAOConnection getConnection();
+  public BpelDAOConnection getConnection();
+
+  /**
+   * Get number of activities in the failure state.
+   */
+  int getActivityFailureCount();
+
+  /**
+   * Get date/time of last activity failure.
+   */
+  Date getActivityFailureDateTime();
+
+  /**
+   * Returns all activity recovery objects for this process instance.
+   */
+  Collection<ActivityRecoveryDAO> getActivityRecoveries();
+
+  /**
+   * Create an activity recovery object for a given activity instance.
+   * Specify the reason and optional data associated with the failure.
+   * Date/time failure occurred, and the recovery channel and available
+   * recovery actions.
+   */
+  void createActivityRecovery(String channel, int activityId, String reason, Date dateTime, Element data, String[] actions);
+
+  /**
+   * Delete previously registered activity recovery.
+   */
+  void deleteActivityRecovery(String channel);
  
- /**
-  * Transport object holding the date of the first and last instance event
-  * along with the number events.
-  */
+  /**
+   * Transport object holding the date of the first and last instance event
+   * along with the number events.
+   */
   public class EventsFirstLastCountTuple {
-    public Date first;
+  public Date first;
     public Date last;
     public int count;
   }
-
-
-
-  
 
 }

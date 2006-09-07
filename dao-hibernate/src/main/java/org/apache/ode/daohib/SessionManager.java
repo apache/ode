@@ -105,6 +105,7 @@ public class SessionManager {
             .addClass(HVariableProperty.class)
             .addClass(HBpelEvent.class)
 	    .addClass(HFaultData.class)
+	    .addClass(HActivityRecovery.class)
             .addClass(HLargeData.class);
   }
 
