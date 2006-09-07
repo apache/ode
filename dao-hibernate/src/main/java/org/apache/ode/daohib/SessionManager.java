@@ -92,9 +92,7 @@ public class SessionManager {
             .addClass(HProcessProperty.class)
             .addClass(HProcessInstance.class)
             .addClass(HCorrelator.class)
-            .addClass(HCorrelatorSelector.class)
-            .addClass(HCorrelatorMessage.class)
-            .addClass(HCorrelatorMessageKey.class)
+            .addClass(HCorrelatorEntry.class)
             .addClass(HCorrelationProperty.class)
             .addClass(HMessageExchange.class)
             .addClass(HMessage.class)
@@ -104,7 +102,7 @@ public class SessionManager {
             .addClass(HXmlData.class)
             .addClass(HVariableProperty.class)
             .addClass(HBpelEvent.class)
-	    .addClass(HFaultData.class)
+	        .addClass(HFaultData.class)
 	    .addClass(HActivityRecovery.class)
             .addClass(HLargeData.class);
   }

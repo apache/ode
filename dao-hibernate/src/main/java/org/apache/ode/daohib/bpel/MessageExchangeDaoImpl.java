@@ -19,7 +19,9 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -259,7 +261,6 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setProperty(String key, String value) {
         _hself.getProperties().put(key, value);
-        //getSession().update(_hself.getProperties()); // Does not appear to work ?
         update();
     }
 
@@ -270,6 +271,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public PartnerLinkDAO getPartnerLink() {
         return new PartnerLinkDAOImpl(_sm, _hself.getPartnerLink());
+    }
+
+    public Set<String> getPropertyNames() {
+        return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
 }
