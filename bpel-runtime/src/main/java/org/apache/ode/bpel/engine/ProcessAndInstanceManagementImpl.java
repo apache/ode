@@ -736,6 +736,13 @@ class ProcessAndInstanceManagementImpl
         eventInfo.setLastDtime(last);
         eventInfo.setCount(flc.count);
 
+        if (instance.getActivityFailureCount() > 0) {
+          TInstanceInfo.Failures failures = info.addNewFailures();
+          Calendar failureDt = Calendar.getInstance();
+          failureDt.setTime(instance.getActivityFailureDateTime());
+          failures.setCount(instance.getActivityFailureCount());
+          failures.setDtFailure(failureDt);
+        }
     }
 
     private void fillScopeInfo(TScopeInfo scopeInfo, ScopeDAO scope, boolean includeActivityInfo) {

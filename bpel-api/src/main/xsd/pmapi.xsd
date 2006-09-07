@@ -129,6 +129,11 @@
                     <documentation>Activity has finished execution.</documentation>
                 </annotation>
             </enumeration>
+            <enumeration value="FAILURE">
+                <annotation>
+                    <documentation>Activity is in failure state, recovery required.</documentation>
+                </annotation>
+            </enumeration>
         </restriction>
     </simpleType>
     <simpleType name="tScopeStatus">
@@ -421,6 +426,35 @@
                         completed.</documentation>
                 </annotation>
             </element>
+            <element name="failure" minOccurs="0">
+                <complexType>
+                    <annotation>
+                        <documentation>Indicates activity is in the failure state and requires recovery.</documentation>
+                    </annotation>
+                    <sequence>
+                      <element name="dt-failure" type="xs:dateTime">
+                          <annotation>
+                              <documentation>The date/time when failure occurred.</documentation>
+                          </annotation>
+                      </element>
+                      <element name="retries" type="xs:int">
+                          <annotation>
+                              <documentation>Number of retries.</documentation>
+                          </annotation>
+                      </element>
+                      <element name="reason" type="xs:string">
+                          <annotation>
+                              <documentation>Reason for failure.</documentation>
+                          </annotation>
+                      </element>
+                      <element name="action" type="xs:string">
+                          <annotation>
+                              <documentation>Allowed recovery actions (space separated list of action names).</documentation>
+                          </annotation>
+                      </element>
+                    </sequence>
+                </complexType>
+            </element>
         </sequence>
     </complexType>
     <complexType name="tVariableInfo">
@@ -530,6 +564,26 @@
                         instance failed. </documentation>
                 </annotation>
             </element>
+            <element name="failures" minOccurs="0">
+                <complexType>
+                    <annotation>
+                        <documentation>Indicates one or more activities are in the failure
+                            state and require recovery.</documentation>
+                    </annotation>
+                    <sequence>
+                        <element name="dt-failure" type="xs:dateTime">
+                            <annotation>
+                                <documentation>Date/time of last failure.</documentation>
+                            </annotation>
+                        </element>
+                        <element name="count" type="xs:int">
+                            <annotation>
+                                <documentation>Number of activities in failure state.</documentation>
+                            </annotation>
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
             <element name="myElement" type="string"/>
         </sequence>
     </complexType>
@@ -586,6 +640,8 @@
             <element name="activity-name" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="activity-type" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="activity-definition-id" type="xs:int" minOccurs="0" maxOccurs="1"/>
+            <element name="activity-failure-reason" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <element name="activity-recovery-action" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="variable-name" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="port-type" type="xs:QName" minOccurs="0" maxOccurs="1"/>
             <element name="operation" type="xs:string" minOccurs="0" maxOccurs="1"/>
