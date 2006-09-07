@@ -20,10 +20,11 @@
     
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
+     <variable name="tmpVar" type="xsd:string"/>
    </variables>
-        
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           name="start"
           partnerLink="helloPartnerLink"
           portType="test:HelloPortType"
@@ -32,10 +33,14 @@
           createInstance="yes"/>
 
       <assign name="assign1">
-         <copy>
-             <from>concat($myVar.TestPart,' World')</from>
-             <to>$myVar.TestPart</to>
-         </copy>
+          <copy>
+              <from variable="myVar" part="TestPart"/>
+              <to variable="tmpVar"/>
+          </copy>
+          <copy>
+              <from>concat($tmpVar,' World')</from>
+              <to variable="myVar" part="TestPart"/>
+          </copy>
       </assign>
        <reply name="end"  
               partnerLink="helloPartnerLink"
