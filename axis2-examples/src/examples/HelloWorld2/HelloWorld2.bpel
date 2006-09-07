@@ -20,7 +20,6 @@
     
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
-     <variable name="tmpVar" type="xsd:string"/>
    </variables>
         
    <sequence>   
@@ -34,8 +33,8 @@
 
       <assign name="assign1">
          <copy>
-             <from>concat($tmpVar,' World')</from>
-             <to variable="myVar" part="TestPart"/>
+             <from>concat($myVar.TestPart,' World')</from>
+             <to>$myVar.TestPart</to>
          </copy>
       </assign>
        <reply name="end"  
