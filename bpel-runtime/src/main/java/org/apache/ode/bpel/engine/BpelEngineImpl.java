@@ -236,7 +236,7 @@ public class BpelEngineImpl implements BpelEngine {
      * 
      * @return
      */
-    MessageExchangeInterceptor[] getGlobalInterceptors() {
+    List<MessageExchangeInterceptor> getGlobalInterceptors() {
         return _contexts.globalIntereceptors;
     }
 
