@@ -34,7 +34,6 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
@@ -110,11 +109,9 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                     } catch (NumberFormatException e) { }
                     return text;
                 } else {
-                    System.out.println("############### NODELIST " + ((NodeList)variableNode).getLength());
                     // Saxon expects a nodelist, everything will result in a wrong result...
                     Document doc = DOMUtils.newDocument();
                     doc.appendChild(doc.importNode(variableNode, true));
-                    System.out.println("=> WRAPPED " + doc.getChildNodes() + " - " + doc.getChildNodes().getLength());
                     return doc.getChildNodes();
                 }
             }catch(FaultException e){
