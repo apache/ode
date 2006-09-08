@@ -19,7 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import com.fs.naming.mem.InMemoryContextFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -50,6 +49,7 @@ import org.opentools.minerva.MinervaPool;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.Name;
+import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 import javax.servlet.ServletConfig;
@@ -85,7 +85,7 @@ public class ODEServer {
     private ODEConfigProperties _odeConfig;
     private AxisConfiguration _axisConfig;
     private DataSource _datasource;
-    private Jotm _jotm;
+    private TransactionManager _txMgr;
     private BpelDAOConnectionFactory _daoCF;
     private ExecutorService _executorService;
     private QuartzSchedulerImpl _scheduler;
@@ -94,9 +94,6 @@ public class ODEServer {
     private MultiKeyMap _services = new MultiKeyMap();
     private MultiKeyMap _externalServices = new MultiKeyMap();
     private BpelServerConnector _connector;
-
-//  private HashMap<QName,ODEService> _services = new HashMap<QName,ODEService>();
-//  private HashMap<QName,ExternalService> _externalServices = new HashMap<QName,ExternalService>();
 
     public void init(ServletConfig config, AxisConfiguration axisConf)  throws ServletException {
         _axisConfig = axisConf;
@@ -174,8 +171,7 @@ public class ODEServer {
             TempFileManager.cleanup();
 
             __log.debug("shutting down transaction manager.");
-            _jotm.stop();
-            _jotm = null;
+            _txMgr = null;
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {
@@ -191,7 +187,7 @@ public class ODEServer {
         AxisService axisService = ODEAxisService.createService(_axisConfig,
                 def, serviceName, portName);
         ODEService odeService = new ODEService(axisService, def, serviceName, portName,
-                _server, _jotm.getTransactionManager());
+                _server, _txMgr);
         _services.put(serviceName, portName, odeService);
 
         // Setting our new service on the receiver, the same receiver handles all
@@ -249,22 +245,36 @@ public class ODEServer {
     }
 
     private void initTxMgr() throws ServletException {
+        InitialContext ctx;
         try {
-            _jotm = new Jotm(true, false);
-            _jotm.getTransactionManager().setTransactionTimeout(30);
-
-            Reference txm = new Reference("javax.transaction.TransactionManager",
-                    JotmTransactionManagerFactory.class.getName(), null);
-
-            System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-                    InMemoryContextFactory.class.getName());
-            System.setProperty(Context.PROVIDER_URL, "ode");
-            InitialContext ctx = new InitialContext();
-            ctx.rebind("TransactionManager", txm);
-            ctx.close();
-        } catch (Exception ex) {
-            __log.error("Error creating initial JNDI context.",ex);
-            throw new ServletException("Failed to start JNDI!",ex);
+            ctx = new InitialContext();
+        } catch (NamingException e) {
+            throw new ServletException("Couldn't find any JNDI to lookup.", e);
+        }
+        try {
+            // First try
+            _txMgr = (TransactionManager) ctx.lookup("javax.transaction.TransactionManager");
+        } catch (NamingException e) {
+            try {
+                // Second try
+                _txMgr = (TransactionManager) ctx.lookup("javax.transaction.TransactionManager");
+            } catch (NamingException ex) {
+                __log.info("Couldn't find a transaction manager, using the default (JOTM).");
+                // Giving up: couldn't find a proper transaction manager, fallback to Jotm.
+                try {
+                    Jotm jotm = new Jotm(true, false);
+                    jotm.getTransactionManager().setTransactionTimeout(30);
+                    _txMgr = jotm.getTransactionManager();
+                } catch (Exception e1) {
+                    throw new ServletException("Couldn't initialize a proper transaction manager!", e);
+                }
+            }
+        } finally {
+            try {
+                ctx.close();
+            } catch (NamingException e) {
+                __log.error(e);
+            }
         }
     }
 
@@ -322,13 +332,12 @@ public class ODEServer {
     private void initEmbeddedDb() throws ServletException {
         __log.info("Using DataSource Derby");
 
-        String url =
-                "jdbc:derby:" + _appRoot + "/" + _odeConfig.getDbEmbeddedName();
+        String url = "jdbc:derby:" + _appRoot + "/" + _odeConfig.getDbEmbeddedName();
 
         __log.debug("creating Minerva pool for " + url);
 
         MinervaPool minervaPool = new MinervaPool();
-        minervaPool.setTransactionManager(_jotm.getTransactionManager());
+        minervaPool.setTransactionManager(_txMgr);
         minervaPool.getConnectionFactory().setConnectionURL(url);
         minervaPool.getConnectionFactory().setUserName("sa");
         minervaPool.getConnectionFactory().setDriver(
@@ -362,7 +371,7 @@ public class ODEServer {
                 DataSourceConnectionProvider.class.getName());
         properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
                 HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
+//        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
 
         try {
             properties.put(Environment.DIALECT, guessDialect(_datasource));
@@ -390,22 +399,8 @@ public class ODEServer {
                     .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
         }
 
-        SessionManager sm = new SessionManager(properties, _datasource, _jotm.getTransactionManager());
+        SessionManager sm = new SessionManager(properties, _datasource, _txMgr);
         _daoCF = new BpelDAOConnectionFactoryImpl(sm);
-
-        Reference bpelSscfRef = new Reference(BpelDAOConnectionFactory.class.getName(),
-                HibernateDaoObjectFactory.class.getName(), null);
-        try {
-            InitialContext ctx = new InitialContext();
-            try {
-                if (_daoCF  != null)
-                    ctx.rebind("bpelSSCF", bpelSscfRef);
-            } finally {
-                ctx.close();
-            }
-        } catch (Exception ex) {
-            throw new ServletException("Couldn't bind connection factory!", ex);
-        }
     }
 
     private void initBpelServer() {
@@ -421,7 +416,7 @@ public class ODEServer {
         _scheduler = new QuartzSchedulerImpl();
         _scheduler.setBpelServer(_server);
         _scheduler.setExecutorService(_executorService, 20);
-        _scheduler.setTransactionManager(_jotm.getTransactionManager());
+        _scheduler.setTransactionManager(_txMgr);
         _scheduler.setDataSource(_datasource);
         _scheduler.init();
 
@@ -528,7 +523,7 @@ public class ODEServer {
         public Object getObjectInstance(Object objref, Name name, Context ctx, Hashtable env) throws Exception {
             Reference ref = (Reference) objref;
             if (ref.getClassName().equals(TransactionManager.class.getName())) {
-                return _jotm.getTransactionManager();
+                return _txMgr;
             }
             throw new RuntimeException("The reference class name \"" + ref.getClassName() + "\" is unknown.");
         }
