@@ -146,6 +146,9 @@ public class ExternalService implements PartnerRoleChannel {
             targetEPR.setSessionId(partnerSessionId);
         }
         options.setProperty("targetSessionEndpoint", targetEPR);
+        String soapAction = SOAPUtils.getSoapAction(_definition, _serviceName, _portName,
+                odeMex.getOperationName());
+        options.setProperty("soapAction", soapAction);
 
         if (myRoleEPR != null)  {
             if  (myRoleSessionId != null) {
