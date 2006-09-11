@@ -49,13 +49,13 @@
     <assign>
       <copy>
         <!-- Partner link assignment using the value returned by previous invoke -->
-        <from variable="partnerEndpoint" part="payload"/>
+        <from>$partnerEndpoint.payload</from>
         <to partnerLink="responderPartnerLink"/>
       </copy>
       <copy>
         <!-- Just needed for correlation -->
         <from>$dummy.payload</from>
-        <to>$dummy2.payload</to>
+        <to variable="dummy2" part="payload"/>
       </copy>
     </assign>
 

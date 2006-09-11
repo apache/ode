@@ -29,9 +29,9 @@
   </wsdl:portType>
 
   <wsdl:binding name="DynMainBinding" type="tns:DynMainPortType">
-    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="execute">
-      <soap:operation soapAction="" style="rpc"/>
+      <soap:operation soapAction="" style="document"/>
       <wsdl:input>
         <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
       </wsdl:input>

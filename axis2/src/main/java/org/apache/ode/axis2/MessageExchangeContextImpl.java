@@ -21,17 +21,11 @@ package org.apache.ode.axis2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.epr.EndpointFactory;
-import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.utils.Namespaces;
-
-import javax.xml.namespace.QName;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.MessageExchangeContext}
@@ -52,17 +46,19 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
-        EndpointReference epr = partnerRoleMessageExchange.getEndpointReference();
-        // We only invoke with WSA endpoints, that makes our life easier
-        if (!(epr instanceof WSAEndpoint))
-            epr = EndpointFactory.convert(new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"),
-                    epr.toXML().getDocumentElement());
-        // It's now safe to cast
-        QName serviceName = ((WSAEndpoint)epr).getServiceName();
-        String portName = ((WSAEndpoint)epr).getPortName();
-        if (__log.isDebugEnabled())
-            __log.debug("The service to invoke is the external service " + serviceName);
-        ExternalService service = _server.getExternalService(serviceName, portName);
+//        EndpointReference epr = partnerRoleMessageExchange.getEndpointReference();
+//        // We only invoke with WSA endpoints, that makes our life easier
+//        if (!(epr instanceof WSAEndpoint))
+//            epr = EndpointFactory.convert(new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"),
+//                    epr.toXML().getDocumentElement());
+//        // It's now safe to cast
+//        QName serviceName = ((WSAEndpoint)epr).getServiceName();
+//        String portName = ((WSAEndpoint)epr).getPortName();
+//        if (__log.isDebugEnabled())
+//            __log.debug("The service to invoke is the external service " + serviceName);
+//        ExternalService service = _server.getExternalService(serviceName, portName);
+
+        ExternalService service = (ExternalService) partnerRoleMessageExchange.getChannel();
         service.invoke(partnerRoleMessageExchange);
     }
 

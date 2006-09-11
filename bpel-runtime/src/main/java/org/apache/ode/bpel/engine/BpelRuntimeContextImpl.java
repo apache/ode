@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -59,11 +58,11 @@ import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -772,8 +771,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(
                 _bpelProcess._engine, mexDao,
                 partnerLink.partnerLink.partnerRolePortType, operation, 
-                partnerEndpoint,
-                myRoleEndpoint);
+                partnerEndpoint, myRoleEndpoint,
+                _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink));
 
         // If we couldn't find the endpoint, then there is no sense
         // in asking the IL to invoke.
