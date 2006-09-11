@@ -126,7 +126,7 @@ public class BpelProcess {
             if (pl.hasMyRole()) {
                 Endpoint endpoint = myRoleEndpointNames.get(pl);
                 if (endpoint == null)
-                    throw new NullPointerException("No service name for plink " + pl);
+                    throw new IllegalArgumentException("No service name for myRole plink " + pl.getName());
                 PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(pl, endpoint);
                 _myRoles.put(pl, myRole);
                 _endpointToMyRoleMap.put(endpoint, myRole);
