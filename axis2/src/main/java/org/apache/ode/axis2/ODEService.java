@@ -237,6 +237,8 @@ public class ODEService {
         case RESPONSE:
             Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
                     .getOperation(), mex.getOperation().getOutput().getMessage());
+            if (__log.isDebugEnabled()) __log.debug("Received response message " +
+                    DOMUtils.domToString(response));
             msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response));
             writeHeader(msgContext, mex);
             break;

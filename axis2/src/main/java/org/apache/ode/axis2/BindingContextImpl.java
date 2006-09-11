@@ -38,9 +38,6 @@
 
 package org.apache.ode.axis2;
 
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -48,7 +45,9 @@ import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.w3c.dom.Element;
+
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 
 /**
  * AXIS2 implementation of the {@link org.apache.ode.bpel.iapi.BindingContext}
@@ -83,8 +82,7 @@ public class BindingContextImpl implements BindingContext {
     public PartnerRoleChannel createPartnerRoleChannel(QName processId, DeploymentUnit deploymentUnit,
             PortType portType, Endpoint initialPartnerEndpoint) {
         // NOTE: This implementation assumes that the initial value of the
-        // partner role determines the
-        // binding.
+        // partner role determines the binding.
         return _server.createExternalService(deploymentUnit
                 .getDefinitionForNamespace(initialPartnerEndpoint.serviceName.getNamespaceURI()),
                 initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
