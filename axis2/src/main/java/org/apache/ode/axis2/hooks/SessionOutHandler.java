@@ -19,21 +19,20 @@
 
 package org.apache.ode.axis2.hooks;
 
-import org.apache.axis2.handlers.AbstractHandler;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.AxisFault;
-import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.utils.Namespaces;
 
 /**
  * An outgoing handler adding session id information in the message
@@ -69,10 +68,10 @@ public class SessionOutHandler extends AbstractHandler {
         header.addChild(to);
         to.setText(targetEpr.getUrl());
 
-//        String soapAction = (String) messageContext.getProperty("soapAction");
-//        OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
-//        header.addChild(wsaAction);
-//        wsaAction.setText(soapAction);
+        String soapAction = (String) messageContext.getProperty("soapAction");
+        OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
+        header.addChild(wsaAction);
+        wsaAction.setText(soapAction);
 
         if (targetEpr.getSessionId() != null) {
           OMElement session = factory.createOMElement("session", intalioSessNS);
