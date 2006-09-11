@@ -37,7 +37,7 @@
     <assign>
       <copy>
         <from partnerLink="mainPartnerLink" endpointReference="myRole"/>
-        <to variable="myEndpoint" part="payload"/>
+        <to>$myEndpoint.payload</to>
       </copy>
     </assign>
     <reply name="reply-endpoint" partnerLink="mainPartnerLink"

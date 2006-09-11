@@ -43,7 +43,7 @@ public class OMUtils {
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             return DOMUtils.parse(bais).getDocumentElement();
         } catch (Exception e) {
-            throw new AxisFault("Unable to read Axis input messag.e", e);
+            throw new AxisFault("Unable to read Axis input message.", e);
         }
     }
 
@@ -56,7 +56,7 @@ public class OMUtils {
             StAXOMBuilder builder = new StAXOMBuilder(parser);
             return builder.getDocumentElement();
         } catch (Exception e) {
-            throw new AxisFault("Unable to read Axis input messag.e", e);
+            throw new AxisFault("Unable to read Axis input message.", e);
         }
     }
 

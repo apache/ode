@@ -15,6 +15,7 @@
     <xsd:element name="dummy" type="xsd:string"/>
     <xsd:element name="dummy2" type="xsd:string"/>
     <xsd:element name="acknowledgement" type="xsd:string"/>
+    <xsd:element name="url" type="xsd:string"/>
   </types>
 
   <wsdl:message name="DummyMessage">
@@ -26,7 +27,7 @@
   </wsdl:message>
 
   <wsdl:message name="EndpointMessage">
-    <wsdl:part name="payload" type="xsd:string"/>
+    <wsdl:part name="payload" element="tns:url"/>
   </wsdl:message>
 
 <!--
@@ -51,9 +52,9 @@
   </wsdl:portType>
 
   <wsdl:binding name="DynResponderBinding" type="tns:DynResponderPortType">
-    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="getDynamicEndpoint">
-      <soap:operation soapAction="" style="rpc"/>
+      <soap:operation soapAction="" style="document"/>
       <wsdl:input>
         <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:input>
@@ -62,7 +63,7 @@
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="acknowledge">
-      <soap:operation soapAction="" style="rpc"/>
+      <soap:operation soapAction="" style="document"/>
       <wsdl:input>
         <soap:body namespace="http://ode/bpel/responder.wsdl" use="literal"/>
       </wsdl:input>
