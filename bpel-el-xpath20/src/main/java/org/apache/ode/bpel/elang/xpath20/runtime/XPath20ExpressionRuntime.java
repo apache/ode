@@ -170,7 +170,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
             // Just checking that the expression is valid
             XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
-            Object evalResult = expr.evaluate(DOMUtils.newDocument(), type);
+
+            Object evalResult = expr.evaluate(ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode(), type);
             if (evalResult != null && __log.isDebugEnabled())
                 __log.debug("Expression " + cexp.toString() + " generated result " + evalResult
                         + " - type=" + evalResult.getClass().getName());
