@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.ode.bpel.evt.ActivityFailureEvent;
+import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.FailureHandling;
@@ -198,8 +200,6 @@ public class INVOKE extends ACTIVITY {
       _self.parent.completed(faultData, CompensationHandler.emptySet());
       return;
     }
-System.out.println("-- Invoked: " + _invoked);
-System.out.println("-- retryFor: " + _self.getFailureHandling().retryFor);
     // If maximum number of retries, enter activity recovery state.  
     if (_invoked > _self.getFailureHandling().retryFor) {
       requireRecovery();
@@ -228,20 +228,23 @@ System.out.println("-- retryFor: " + _self.getFailureHandling().retryFor);
   }
 
   private void requireRecovery() {
-System.out.println("-- Require recovery");
+    sendEvent(new ActivityFailureEvent(_failureReason));
     final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
     getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, null,
       new String[] { "retry", "cancel", "fault" });
     object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
       public void retry() {
+        sendEvent(new ActivityRecoveryEvent("retry"));
         getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         instance(INVOKE.this);
       }
       public void cancel() {
+        sendEvent(new ActivityRecoveryEvent("cancel"));
         getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         _self.parent.completed(null, CompensationHandler.emptySet());
       }
       public void fault(FaultData faultData) {
+        sendEvent(new ActivityRecoveryEvent("fault"));
         getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
         // TODO: real fault name.
         if (faultData == null)
