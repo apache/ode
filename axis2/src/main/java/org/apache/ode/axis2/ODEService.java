@@ -80,7 +80,7 @@ public class ODEService {
     private WSAEndpoint _serviceRef;
 
     public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server,
-            TransactionManager txManager) {
+                      TransactionManager txManager) {
         _axisService = axisService;
         _server = server;
         _txManager = txManager;
@@ -225,28 +225,28 @@ public class ODEService {
         boolean result = _serviceName.equals(serviceName);
         result = result
                 && _wsdlDef.getService(_serviceName).getPort(_portName).getBinding().getPortType().getQName().equals(
-                        portTypeName);
+                portTypeName);
         return result;
     }
 
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
         switch (mex.getStatus()) {
-        case FAULT:
-            throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
-        case ASYNC:
-        case RESPONSE:
-            Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
-                    .getOperation(), mex.getOperation().getOutput().getMessage());
-            if (__log.isDebugEnabled()) __log.debug("Received response message " +
-                    DOMUtils.domToString(response));
-            msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response));
-            writeHeader(msgContext, mex);
-            break;
-        case FAILURE:
-            // TODO: get failure codes out of the message.
-            throw new AxisFault("Message exchange failure!");
-        default:
-            __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
+            case FAULT:
+                throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
+            case ASYNC:
+            case RESPONSE:
+                Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
+                        .getOperation(), mex.getOperation().getOutput().getMessage());
+                if (__log.isDebugEnabled()) __log.debug("Received response message " +
+                        DOMUtils.domToString(response));
+                msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response));
+                writeHeader(msgContext, mex);
+                break;
+            case FAILURE:
+                // TODO: get failure codes out of the message.
+                throw new AxisFault("Message exchange failure!");
+            default:
+                __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
         }
     }
 
@@ -283,33 +283,18 @@ public class ODEService {
      * injection.
      */
     private void writeHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-        // EndpointReference targetEPR = odeMex.getEndpointReference();
-        // if (targetEPR == null)
-        // return;
-        //
-        // if (targetEPR instanceof MutableEndpoint)
-        // // The target session endpoint is simply the endpoint that was
-        // invoked
-        // // (since this
-        // // is a response header)
-        // msgContext.setProperty("targetSessionEndpoint",
-        // odeMex.getEndpointReference());
-        // msgContext.setProperty("soapAction",
-        // SOAPUtils.getSoapAction(_wsdlDef, _serviceName, _portName,
-        // odeMex.getOperationName()));
-        //
-        // // The callback endpoint is going to be the same as the target
-        // endpoint
-        // // in this case, except
-        // // that it is updated with session information (if available).
-        // if
-        // (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID)!=
-        // null) {
-        // msgContext.setProperty("callbackSessionEndpoint",
-        // odeMex.getProperty("org.apache.ode.bpel.callerSessionId"));
-        // }
-        //
-        // }
+        EndpointReference targetEPR = odeMex.getEndpointReference();
+        if (targetEPR == null)
+            return;
+
+        // The callback endpoint is going to be the same as the target
+        // endpoint in this case, except that it is updated with session
+        // information (if available).
+        if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID)!= null) {
+            _serviceRef.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
+            msgContext.setProperty("callbackSessionEndpoint", _serviceRef);
+        }
+
     }
 
     public AxisService getAxisService() {
