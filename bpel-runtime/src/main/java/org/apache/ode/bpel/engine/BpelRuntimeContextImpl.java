@@ -1202,7 +1202,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
                                             Date dateTime, Element data, String[] actions) {
-System.out.println("-- Registering activity for recovery: " + channel.export().toString());
       if (reason == null)
         reason = "Unspecified";
       if (dateTime == null)
@@ -1211,12 +1210,10 @@ System.out.println("-- Registering activity for recovery: " + channel.export().t
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
-System.out.println("-- Unregistering activity for recovery: " + channel.export().toString());
       _dao.deleteActivityRecovery(channel.export());
     }
 
     public void recoverActivity(final String channel, final String action, final FaultData fault) {
-System.out.println("-- Recovery activity: " + channel + ": " + action);
       vpu.inject(new JacobRunnable() {
           private static final long serialVersionUID = 3168964409165899533L;
           public void run() {
