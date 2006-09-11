@@ -19,11 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Element;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.WorkEvent.Type;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -31,6 +26,11 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.w3c.dom.Element;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 
 class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
 
@@ -40,10 +40,12 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
             Operation operation, 
             EndpointReference epr,
-            EndpointReference myRoleEPR) {
+            EndpointReference myRoleEPR,
+            PartnerRoleChannel channel) {
         super(engine, dao);
         _myRoleEPR = myRoleEPR;
         setPortOp(portType, operation);
+        _channel = channel;
     }
 
     public void replyOneWayOk() {

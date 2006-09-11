@@ -38,7 +38,6 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
@@ -115,9 +114,11 @@ public class ExternalService implements PartnerRoleChannel {
 
                 final Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
                 Element responseElmt = OMUtils.toDOM(reply);
+                responseElmt = SOAPUtils.unwrap(responseElmt, _definition,
+                        odeMex.getOperation().getOutput().getMessage(), _serviceName);
                 __log.debug("Received synchronous response for MEX " + odeMex);
                 __log.debug("Message: " + DOMUtils.domToString(responseElmt));
-                response.setMessage(OMUtils.toDOM(reply));
+                response.setMessage(responseElmt);
                 odeMex.reply(response);
             } else
                 serviceClient.fireAndForget(payload);

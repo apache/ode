@@ -113,7 +113,8 @@ public class BpelEngineImpl implements BpelEngine {
                 PortType ptype = plink.partnerRolePortType;
                 Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
                 // TODO: recover Partner's EPR
-                mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null, process.getInitialMyRoleEPR(plink));
+                mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null,
+                        process.getInitialMyRoleEPR(plink), process.getPartnerRoleChannel(plink));
             }
         case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
             mex = new MyRoleMessageExchangeImpl(this, mexdao);
