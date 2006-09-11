@@ -79,11 +79,13 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
             // Request or Response, so look for those and strip them.
             int index = localName.lastIndexOf("Request");
             if (index >=0 && index + "Request".length() == localName.length()) {
-                return service.getOperation(new QName(localName.substring(0, index)));
+                AxisOperation op = service.getOperation(new QName(localName.substring(0, index)));
+                if (op != null) return op;
             }
             index = localName.lastIndexOf("Response");
             if (index >=0 && index + "Response".length() == localName.length()) {
-                return service.getOperation(new QName(localName.substring(0, index)));
+                AxisOperation op = service.getOperation(new QName(localName.substring(0, index)));
+                if (op != null) return op;
             }
 
             // Seems the operation still couldn't be found, let's check our operation => element
