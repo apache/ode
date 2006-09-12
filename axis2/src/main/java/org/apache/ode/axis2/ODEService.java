@@ -232,7 +232,8 @@ public class ODEService {
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
         switch (mex.getStatus()) {
             case FAULT:
-                throw new AxisFault(null, mex.getFault(), null, null, OMUtils.toOM(mex.getFaultResponse().getMessage()));
+                throw new AxisFault(mex.getResponse().getType(), mex.getFaultExplanation(), null, null,
+                        mex.getFaultResponse().getMessage() == null ? null : OMUtils.toOM(mex.getFaultResponse().getMessage()));
             case ASYNC:
             case RESPONSE:
                 Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
@@ -243,7 +244,6 @@ public class ODEService {
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:
-                // TODO: get failure codes out of the message.
                 throw new AxisFault("Message exchange failure!");
             default:
                 __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());

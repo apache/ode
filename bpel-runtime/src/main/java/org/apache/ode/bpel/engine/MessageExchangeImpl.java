@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -36,215 +34,220 @@ import org.w3c.dom.Element;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
+import java.util.Set;
 
 abstract class MessageExchangeImpl implements MessageExchange {
-  
-  private static final Log __log = LogFactory.getLog(MessageExchangeImpl.class);
-  protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-  /** Process-Instance identifier.*/
-  protected Long _iid;
-  
-  protected OProcess _oprocess;
-  protected PortType _portType;
-  protected Operation _operation;
+    private static final Log __log = LogFactory.getLog(MessageExchangeImpl.class);
+    protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-  protected final BpelEngineImpl _engine;
+    /** Process-Instance identifier.*/
+    protected Long _iid;
 
-  protected EndpointReference _epr;
+    protected OProcess _oprocess;
+    protected PortType _portType;
+    protected Operation _operation;
 
-  protected final MessageExchangeDAO _dao;
-  
-  /**
-   * Constructor: requires the minimal information for a message exchange.
-   * @param pattern
-   * @param opname
-   * @param epr
-   */
-  MessageExchangeImpl(BpelEngineImpl engine,
-      MessageExchangeDAO dao,
-      MessageExchangePattern pattern, 
-      String opname, 
-      EndpointReference epr) {
-    _engine = engine;
-    _dao = dao;
-    _epr = epr;
+    protected final BpelEngineImpl _engine;
 
-    getDAO().setPattern(pattern.toString());
-    getDAO().setOperation(opname);
-    if (epr != null)
-      getDAO().setEPR(epr.toXML().getDocumentElement());
-  }
-  
-  public MessageExchangeImpl(BpelEngineImpl engine,
-      MessageExchangeDAO dao) {
-    _engine = engine;
-    _dao = dao;
-  }
-  
- 
-  public String getMessageExchangeId() throws BpelEngineException {
-    return getDAO().getMessageExchangeId();
-  }
+    protected EndpointReference _epr;
 
-  public String getOperationName() throws BpelEngineException {
-    return getDAO().getOperation();
-  }
+    protected final MessageExchangeDAO _dao;
 
-  public MessageExchangePattern getMessageExchangePattern() {
-    return MessageExchangePattern.valueOf(getDAO().getPattern());
-  }
+    /**
+     * Constructor: requires the minimal information for a message exchange.
+     * @param pattern
+     * @param opname
+     * @param epr
+     */
+    MessageExchangeImpl(BpelEngineImpl engine,
+                        MessageExchangeDAO dao,
+                        MessageExchangePattern pattern,
+                        String opname,
+                        EndpointReference epr) {
+        _engine = engine;
+        _dao = dao;
+        _epr = epr;
 
-  public boolean isTransactionPropagated() throws BpelEngineException {
-    return getDAO().getPropagateTransactionFlag();
-  }
+        getDAO().setPattern(pattern.toString());
+        getDAO().setOperation(opname);
+        if (epr != null)
+            getDAO().setEPR(epr.toXML().getDocumentElement());
+    }
 
-  public boolean isFault() {
-    // TODO
-    return false;
-  }
-
-  public boolean isDone() {
-    // TODO
-    return false;
-  }
-
-  public Message getResponse() {
-    return new MessageImpl(getDAO().getResponse());
-  }
-
-  public String getFault() {
-    return getDAO().getFault();
-  }
-
-  public Message getFaultResponse() {
-    return getResponse();
-  }
+    public MessageExchangeImpl(BpelEngineImpl engine,
+                               MessageExchangeDAO dao) {
+        _engine = engine;
+        _dao = dao;
+    }
 
 
-  public MessageExchangePattern getPattern() {
-    return MessageExchangePattern.valueOf(getDAO().getPattern());
-  }
-  
-  public Status getStatus() {
-    return Status.valueOf(getDAO().getStatus());
-  }
-  
-  public Message getRequest() {
-    return new MessageImpl(getDAO().getRequest());
-  }
+    public String getMessageExchangeId() throws BpelEngineException {
+        return getDAO().getMessageExchangeId();
+    }
 
-  public Operation getOperation() {
-    return _operation;
-  }
+    public String getOperationName() throws BpelEngineException {
+        return getDAO().getOperation();
+    }
 
-  public PortType getPortType() {
-    return _portType;
-  }
+    public MessageExchangePattern getMessageExchangePattern() {
+        return MessageExchangePattern.valueOf(getDAO().getPattern());
+    }
 
-  /**
-   * Associate message exchange with a process. 
-   * @param oprocess
-   */
-  void setProcess(OProcess oprocess) {
-    if (__log.isTraceEnabled())
-      __log.trace("Mex[" + getMessageExchangeId() + "].setProcess("+oprocess+")");
-    _oprocess = oprocess;
-  }
+    public boolean isTransactionPropagated() throws BpelEngineException {
+        return getDAO().getPropagateTransactionFlag();
+    }
+
+    public boolean isFault() {
+        // TODO
+        return false;
+    }
+
+    public boolean isDone() {
+        // TODO
+        return false;
+    }
+
+    public Message getResponse() {
+        return new MessageImpl(getDAO().getResponse());
+    }
+
+    public String getFault() {
+        return getDAO().getFault();
+    }
+
+    public Message getFaultResponse() {
+        return getResponse();
+    }
+
+    public String getFaultExplanation() {
+        return getDAO().getFaultExplanation();
+    }
+
+    public MessageExchangePattern getPattern() {
+        return MessageExchangePattern.valueOf(getDAO().getPattern());
+    }
+
+    public Status getStatus() {
+        return Status.valueOf(getDAO().getStatus());
+    }
+
+    public Message getRequest() {
+        return new MessageImpl(getDAO().getRequest());
+    }
+
+    public Operation getOperation() {
+        return _operation;
+    }
+
+    public PortType getPortType() {
+        return _portType;
+    }
+
+    /**
+     * Associate message exchange with a process.
+     * @param oprocess
+     */
+    void setProcess(OProcess oprocess) {
+        if (__log.isTraceEnabled())
+            __log.trace("Mex[" + getMessageExchangeId() + "].setProcess("+oprocess+")");
+        _oprocess = oprocess;
+    }
 
 
-  /**
-   * Update the pattern of this message exchange. 
-   * @param pattern
-   */
-  void setPattern(MessageExchangePattern pattern) {
-    if (__log.isTraceEnabled())
-      __log.trace("Mex[" + getMessageExchangeId() + "].setPattern("+pattern+")");
-    getDAO().setPattern(pattern.toString());
-  }
-  
+    /**
+     * Update the pattern of this message exchange.
+     * @param pattern
+     */
+    void setPattern(MessageExchangePattern pattern) {
+        if (__log.isTraceEnabled())
+            __log.trace("Mex[" + getMessageExchangeId() + "].setPattern("+pattern+")");
+        getDAO().setPattern(pattern.toString());
+    }
 
-  void setPortOp(PortType portType, Operation operation) {
-    if (__log.isTraceEnabled())
-      __log.trace("Mex[" + getMessageExchangeId()  + "].setPortOp("+portType+","+operation+")");
-    _portType = portType;
-    _operation = operation;
-  }
 
-  protected MessageExchangeDAO getDAO() {
-    return _dao;
-  }
+    void setPortOp(PortType portType, Operation operation) {
+        if (__log.isTraceEnabled())
+            __log.trace("Mex[" + getMessageExchangeId()  + "].setPortOp("+portType+","+operation+")");
+        _portType = portType;
+        _operation = operation;
+    }
 
-  void setFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
-    if (getStatus() != Status.REQUEST)
-      throw new IllegalStateException("Not in REQUEST state!");
-    
-    setStatus(Status.FAULT);
-    getDAO().setFault(faultType);
-    getDAO().setResponse(((MessageImpl)outputFaultMessage)._dao);
-  }
+    protected MessageExchangeDAO getDAO() {
+        return _dao;
+    }
 
-  void setResponse(Message outputMessage) throws BpelEngineException {
-    if (getStatus() != Status.REQUEST && getStatus()!=Status.ASYNC)
-      throw new IllegalStateException("Not in REQUEST state!");
-   
-    setStatus(Status.RESPONSE);
-    getDAO().setFault(null);
-    getDAO().setResponse(((MessageImpl)outputMessage)._dao);
-  }
+    void setFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
+        setStatus(Status.FAULT);
+        getDAO().setFault(faultType);
+        getDAO().setResponse(((MessageImpl)outputFaultMessage)._dao);
+    }
 
-  void setFailure(FailureType type, String description, Element details) throws BpelEngineException {
-    setStatus(Status.FAILURE);
+    void setFaultExplanation(String explanation) {
+        getDAO().setFaultExplanation(explanation);
+    }
+
+    void setResponse(Message outputMessage) throws BpelEngineException {
+        if (getStatus() != Status.REQUEST && getStatus()!=Status.ASYNC)
+            throw new IllegalStateException("Not in REQUEST state!");
+
+        setStatus(Status.RESPONSE);
+        getDAO().setFault(null);
+        getDAO().setResponse(((MessageImpl)outputMessage)._dao);
+    }
+
+    void setFailure(FailureType type, String description, Element details) throws BpelEngineException {
+        setStatus(Status.FAILURE);
 //    getDAO().setFailureMessage(description);
 //    getDAO().setFailureDetails(details);
-  }
+    }
 
-  void setStatus(Status status) {
-    getDAO().setStatus(status.toString());
-  }
+    void setStatus(Status status) {
+        getDAO().setStatus(status.toString());
+    }
 
-  public Message createMessage(javax.xml.namespace.QName msgType) {
-    MessageDAO mdao = getDAO().createMessage(msgType);
-    return new MessageImpl(mdao);
-  }
+    public Message createMessage(javax.xml.namespace.QName msgType) {
+        MessageDAO mdao = getDAO().createMessage(msgType);
+        return new MessageImpl(mdao);
+    }
 
-  public void setEndpointReference(EndpointReference ref) {
-    _epr = ref;
-    if (ref != null)
-      getDAO().setEPR(ref.toXML().getDocumentElement());
-  }
+    public void setEndpointReference(EndpointReference ref) {
+        _epr = ref;
+        if (ref != null)
+            getDAO().setEPR(ref.toXML().getDocumentElement());
+    }
 
-  public EndpointReference getEndpointReference() throws BpelEngineException {
-    if (_epr != null) return _epr;
-    if (getDAO().getEPR() == null)
-      return null;
+    public EndpointReference getEndpointReference() throws BpelEngineException {
+        if (_epr != null) return _epr;
+        if (getDAO().getEPR() == null)
+            return null;
 
-    return _epr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getEPR());
-  }
+        return _epr = _engine._contexts.eprContext.resolveEndpointReference(getDAO().getEPR());
+    }
 
- 
-  QName getServiceName() {
-    return getDAO().getCallee();
-  }
 
-  public String getProperty(String key) {
-      String val = getDAO().getProperty(key);
-      if (__log.isDebugEnabled())
-          __log.debug("GET MEX property " + key + " = " + val);
-      return val;
-  }
+    QName getServiceName() {
+        return getDAO().getCallee();
+    }
 
-  public void setProperty(String key, String value) {
-    getDAO().setProperty(key,value);
-    if (__log.isDebugEnabled())
-        __log.debug("SET MEX property " + key + " = " + value);
-  }
-  
-  public Set<String> getPropertyNames() {
-      return getDAO().getPropertyNames();
-  }
-  public String toString() {
-      return "MEX["+getDAO().getMessageExchangeId() +"]"; 
-  }
-  
+    public String getProperty(String key) {
+        String val = getDAO().getProperty(key);
+        if (__log.isDebugEnabled())
+            __log.debug("GET MEX property " + key + " = " + val);
+        return val;
+    }
+
+    public void setProperty(String key, String value) {
+        getDAO().setProperty(key,value);
+        if (__log.isDebugEnabled())
+            __log.debug("SET MEX property " + key + " = " + value);
+    }
+
+    public Set<String> getPropertyNames() {
+        return getDAO().getPropertyNames();
+    }
+    public String toString() {
+        return "MEX["+getDAO().getMessageExchangeId() +"]";
+    }
+
 }
