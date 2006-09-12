@@ -41,6 +41,7 @@ import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -195,7 +196,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         sendEvent(new ProcessCompletionEvent(faultData.getFaultName()));
         _dao.finishCompletion();
 
-        failOutstandingMessageExchanges();
+        faultOutstandingMessageExchanges(faultData);
     }
 
     /**
@@ -1051,6 +1052,25 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     mex.setFailure(FailureType.OTHER, "No response.", null);
                     _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
             }
+        }
+    }
+
+    private void faultOutstandingMessageExchanges(FaultData faultData) {
+        String[] mexRefs = _outstandingRequests.releaseAll();
+        for (String mexId : mexRefs) {
+            MessageExchangeDAO mexDao = _dao.getConnection()
+                    .getMessageExchange(mexId);
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
+                    _bpelProcess._engine, mexDao);
+            _bpelProcess.initMyRoleMex(mex);
+
+            Message message = mex.createMessage(faultData.getFaultName());
+            if (faultData.getFaultMessage() != null) message.setMessage(faultData.getFaultMessage());
+            mex.setResponse(message);
+
+            mex.setFault(faultData.getFaultName().toString(), message);
+            mex.setFaultExplanation(faultData.getExplanation());
+            _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
         }
     }
 

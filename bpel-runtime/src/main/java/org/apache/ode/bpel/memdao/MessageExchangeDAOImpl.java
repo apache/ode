@@ -1,21 +1,18 @@
 package org.apache.ode.bpel.memdao;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
 public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
@@ -34,7 +31,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private String channel;
 	private boolean propagateTransactionFlag;
 	private String fault;
-	private String correlationStatus;
+    private String faultExplanation;
+    private String correlationStatus;
 	private ProcessDAO process;
 	private ProcessInstanceDAO instance;
 	private char direction;
@@ -169,12 +167,20 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	public void setFault(String faultType) {
 		this.fault = faultType;
-
 	}
 
-	public void setCorrelationStatus(String cstatus) {
-		this.correlationStatus = cstatus;
+    public String getFaultExplanation() {
+        return faultExplanation;
+    }
 
+    public void setFaultExplanation(String explanation) {
+        this.faultExplanation = explanation;
+    }
+
+
+
+    public void setCorrelationStatus(String cstatus) {
+		this.correlationStatus = cstatus;
 	}
 
 	public String getCorrelationStatus() {

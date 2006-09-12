@@ -23,7 +23,7 @@ package org.apache.ode.bpel.explang;
  */
 public class EvaluationException extends Exception {
 
-  public EvaluationException(String message, Exception e) {
+  public EvaluationException(String message, Throwable e) {
     super(message, e);
   }
 
