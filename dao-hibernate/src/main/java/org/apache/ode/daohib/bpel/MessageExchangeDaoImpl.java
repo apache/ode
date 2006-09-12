@@ -19,14 +19,6 @@
 
 package org.apache.ode.daohib.bpel;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Element;
-
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -39,6 +31,12 @@ import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
 
 public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
 
@@ -210,6 +208,15 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setFault(String faultType) {
         _hself.setFault(faultType);
+        update();
+    }
+
+    public String getFaultExplanation() {
+        return _hself.getFaultExplanation();
+    }
+
+    public void setFaultExplanation(String explanation) {
+        _hself.setFaultExplanation(explanation);
         update();
     }
 
