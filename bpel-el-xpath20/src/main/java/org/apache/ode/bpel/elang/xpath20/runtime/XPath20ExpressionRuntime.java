@@ -177,8 +177,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                         + " - type=" + evalResult.getClass().getName());
             return evalResult;
         } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new EvaluationException("Error while executing an XPath expression." ,e);
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
         } catch (WrappedResolverException wre) {
             wre.printStackTrace();
             throw (FaultException)wre.getCause();

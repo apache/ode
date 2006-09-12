@@ -68,6 +68,8 @@ public class HMessageExchange extends HObject {
 
     private String _faultType;
 
+    private String _faultExplanation;
+
     private String _callee;
 
     private Map<String, String> _properties = new HashMap<String, String>();
@@ -269,6 +271,18 @@ public class HMessageExchange extends HObject {
     public void setFault(String faultType) {
         _faultType = faultType;
 
+    }
+
+    /**
+     * @hibernate.property column="FAULT_EXPL"
+     * @return
+     */
+    public String getFaultExplanation() {
+        return _faultExplanation;
+    }
+
+    public void setFaultExplanation(String faultExplanation) {
+        _faultExplanation = faultExplanation;
     }
 
     /**
