@@ -16,13 +16,16 @@ if "%JAVA_HOME%"=="" goto noJavaHome
 if not exist "%JAVA_HOME%"\bin\java.exe goto noJava
 
 set JAVACMD="%JAVA_HOME%\bin\java.exe"
-set LOCALCLASSPATH=%ODE_CLASSPATH%
 
-FOR %%c in (%ODE_LIB%\*.jar) DO set LOCALCLASSPATH=!LOCALCLASSPATH!;%%c
+set LOCALCLASSPATH=%ODE_CLASSPATH%;%ODE_LIB%
+FOR %%c in (%ODE_LIB%\*.jar) DO (call :append_cp %%c)
 
 %JAVACMD% %ODE_JAVAOPTS% -cp "%LOCALCLASSPATH%" org.apache.ode.tools.bpelc.cline.BpelC %* 
 goto end
 
+:append_cp
+set LOCALCLASSPATH=%LOCALCLASSPATH%;%1
+goto end
 
 =====================================================================
                               ERRORS
