@@ -38,6 +38,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
 
 public class InstanceManagementTest extends TestCase {
 
@@ -71,6 +72,22 @@ public class InstanceManagementTest extends TestCase {
         // And one of our executed instances are there
         assert(result.toString().indexOf("DynPartnerMain") >= 0 ||
                 result.toString().indexOf("DynPartnerResponder") >= 0);
+    }
+
+    public void testInstanceSummaryListProcess() throws Exception {
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name=DynPartnerMain", ""});
+        OMElement result = sendToPM(listRoot);
+        // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
+        String ns = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
+        Iterator iter = result.getFirstElement().getFirstChildWithName(new QName(ns, "instance-summary"))
+                .getChildrenWithName(new QName(ns, "instances"));
+        int count = 0;
+        while (iter.hasNext()) {
+            OMElement omelmt = (OMElement) iter.next();
+            count += Integer.parseInt(omelmt.getAttributeValue(new QName(null, "count")));
+        }
+        assert(count == 1);
     }
 
     public void testGetInstanceInfo() throws Exception {
@@ -164,7 +181,7 @@ public class InstanceManagementTest extends TestCase {
         // Execute
         URL svcUrl = new URL("http://localhost:8080/ode/processes/DynMainService");
         InputStream sis = getClass().getClassLoader().getResourceAsStream("testDynPartnerRequest.soap");
-        HttpSoapSender.doSend(svcUrl, sis, System.out);
+        HttpSoapSender.doSend(svcUrl, sis, System.out, null, 0, null, null, null);
         // Just making sure the instance starts
         Thread.sleep(1000);
     }

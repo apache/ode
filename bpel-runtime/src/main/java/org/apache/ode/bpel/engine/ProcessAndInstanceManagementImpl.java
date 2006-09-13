@@ -687,7 +687,10 @@ class ProcessAndInstanceManagementImpl
 
     private void genInstanceSummaryEntry(TInstanceSummary.Instances instances, TInstanceStatus.Enum state, ProcessDAO proc) {
         instances.setState(state);
-        InstanceFilter instanceFilter = new InstanceFilter(""); // TODO: put this query back
+        String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
+        InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus
+                +  " name=" + proc.getType().getLocalPart()
+                +  " namespace=" + proc.getType().getNamespaceURI());
         int count = _db.getConnection().instanceQuery(instanceFilter).size();
         instances.setCount(count);
     }
