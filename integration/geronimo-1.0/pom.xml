@@ -2,11 +2,11 @@
 <project>
   <parent>
     <artifactId>ode-integration</artifactId>
-    <groupId>ode</groupId>
+    <groupId>org.apache.ode</groupId>
     <version>2.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>ode</groupId>	
+  <groupId>org.apache.ode</groupId>
   <artifactId>ode-integration-geronimo-1.0</artifactId>
   <version>2.0-SNAPSHOT</version>
   <packaging>war</packaging>
@@ -38,7 +38,7 @@
   </build>  
   <dependencies>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-integration-common</artifactId>
 	    <version>1.0-SNAPSHOT</version>
     </dependency>
