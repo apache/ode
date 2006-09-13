@@ -163,8 +163,11 @@ public class ExternalService implements PartnerRoleChannel {
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
-        return EndpointFactory.convertToWSA(ODEService.createServiceRef(
-                ODEService.genEPRfromWSDL(_definition, _serviceName, _portName)));
+        Element eprElmt = ODEService.genEPRfromWSDL(_definition, _serviceName, _portName);
+        if (eprElmt == null)
+            throw new IllegalArgumentException("Service " + _serviceName + " and port " + _portName + 
+                "couldn't be found in provided WSDL document!");
+        return EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
     }
 
     public void close() {
