@@ -111,7 +111,7 @@ public class ExecutionPathTest extends TestCase {
         // Execute
         URL svcUrl = new URL("http://localhost:8080/ode/processes/DynMainService");
         InputStream sis = getClass().getClassLoader().getResourceAsStream("testDynPartnerRequest.soap");
-        HttpSoapSender.doSend(svcUrl, sis, System.out);
+        HttpSoapSender.doSend(svcUrl, sis, System.out, null, 0, null, null, null);
         // Just making sure the instance starts
         Thread.sleep(1000);
     }
