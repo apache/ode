@@ -19,14 +19,14 @@
   -->
 
 <project>
-  <groupId>ode</groupId>
+  <groupId>org.apache.ode</groupId>
   <artifactId>ode-axis2-war</artifactId>
   <name>ODE :: Axis2 WAR</name>
   <packaging>war</packaging>
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>ode</groupId>
+    <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <version>2.0-SNAPSHOT</version>
   </parent>
@@ -195,89 +195,89 @@
 
     <!-- ODE JARs -->
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-axis2</artifactId>
       <!-- Move to master POM -->
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-api</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-bom</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-compiler</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-dd</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-el-xpath10</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-el-xpath20</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-obj</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-parser</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-ql</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-runtime</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-scheduler-quartz</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-schemas</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-dao-hibernate</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-jacob</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-minerva</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-utils</artifactId>
       <scope>runtime</scope>
     </dependency>
@@ -355,7 +355,7 @@
     <!-- ODE Database -->
     <dependency>
       <scope>compile</scope>
-      <groupId>ode</groupId>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-dao-hibernate-db-derby</artifactId>
       <type>tar</type>
     </dependency>

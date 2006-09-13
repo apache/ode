@@ -46,7 +46,7 @@
          so grab all the dependencies into the scratch directory
          and process the one we need. -->
     <artifact:dependencies filesetId="dependency.derby" useScope="runtime">
-      <dependency groupId="ode" artifactId="ode-dao-hibernate-db-derby"
+      <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
                   version="${maven.project.version}" type="tar"/>
     </artifact:dependencies>
     <copy todir="${maven.project.build.directory}/scratch" flatten="true">

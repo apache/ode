@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project>
-    <groupId>ode</groupId>
+    <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <name>ODE</name>
 
@@ -316,183 +316,183 @@
         <dependencies>
 
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-bom</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bootstrap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-ql</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-schemas</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-dao</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-epr</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-api-jca</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-dd</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-el-xpath10</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-el-xpath20</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-obj</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-parser</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-scripts</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-hibernate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-hibernate-db-derby</artifactId>
                 <version>${project.version}</version>
                 <type>tar</type>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-memory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jacob</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jbi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jbi-install</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jbi-examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jca-ra</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jca-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jca-rar</artifactId>
                 <version>${project.version}</version>
                 <type>rar</type>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-minerva</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-naming</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-soap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-scheduler-quartz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-tools-bin</artifactId>
                 <type>tar</type>
                 <version>${project.version}</version>
                 <classifier>tar</classifier>
             </dependency>
             <dependency>
-                <groupId>ode</groupId>
+                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-examples</artifactId>
                 <type>tar</type>
                 <version>${project.version}</version>
