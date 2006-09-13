@@ -19,24 +19,7 @@
 
 package org.apache.ode.daohib.ql.instances;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.ql.Compiler;
@@ -56,28 +39,25 @@ import org.apache.ode.ql.eval.skel.LikeEvaluator;
 import org.apache.ode.ql.eval.skel.OrderByEvaluator;
 import org.apache.ode.ql.tree.Builder;
 import org.apache.ode.ql.tree.BuilderFactory;
-import org.apache.ode.ql.tree.nodes.Equality;
-import org.apache.ode.ql.tree.nodes.Field;
-import org.apache.ode.ql.tree.nodes.GE;
-import org.apache.ode.ql.tree.nodes.Greater;
-import org.apache.ode.ql.tree.nodes.Identifier;
-import org.apache.ode.ql.tree.nodes.IdentifierToValueCMP;
-import org.apache.ode.ql.tree.nodes.In;
-import org.apache.ode.ql.tree.nodes.LE;
-import org.apache.ode.ql.tree.nodes.Less;
-import org.apache.ode.ql.tree.nodes.Like;
-import org.apache.ode.ql.tree.nodes.Limit;
-import org.apache.ode.ql.tree.nodes.LogicExprNode;
-import org.apache.ode.ql.tree.nodes.LogicNode;
-import org.apache.ode.ql.tree.nodes.Node;
-import org.apache.ode.ql.tree.nodes.OrderBy;
-import org.apache.ode.ql.tree.nodes.OrderByElement;
-import org.apache.ode.ql.tree.nodes.OrderByType;
-import org.apache.ode.ql.tree.nodes.Property;
-import org.apache.ode.ql.tree.nodes.Query;
-import org.apache.ode.ql.tree.nodes.Value;
-import org.apache.ode.ql.tree.nodes.ValuesHelper;
+import org.apache.ode.ql.tree.nodes.*;
 import org.apache.ode.utils.ISO8601DateParser;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Conjunction;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
   private static class DBFieldValueEq extends FieldValueEquality {
@@ -134,13 +114,13 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
 
   private final static String PROCESS_ID_DB_FIELD = "process.processId";
 
-  private final static String PROCESS_NAME_DB_FIELD = "process.processName";
+  private final static String PROCESS_NAME_DB_FIELD = "process.typeName";
 
-  private final static String PROCESS_NAMESPACE_DB_FIELD = "process.processNamespace";
+  private final static String PROCESS_NAMESPACE_DB_FIELD = "process.typeNamespace";
 
   private final static String INSTANCE_STATUS_DB_FIELD = "state";
 
-  private final static String PROPERTY_NS_DB_FIELD = "process.processNamespace";
+  private final static String PROPERTY_NS_DB_FIELD = "process.typeNamespace";
 
   private final static String PROPERTY_NAME_DB_FIELD = "property.name";
 
