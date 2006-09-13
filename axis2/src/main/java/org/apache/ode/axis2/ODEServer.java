@@ -128,11 +128,12 @@ public class ODEServer {
         __log.debug("Initializing JCA adapter.");
         initConnector();
 
+        File deploymentDir = new File(_appRoot, "processes");
+        _poller = new DeploymentPoller(deploymentDir, this);
+
         new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
         new DeploymentWebService().enableService(_axisConfig, _server, _poller, _appRoot.getAbsolutePath());
 
-        File deploymentDir = new File(_appRoot, "processes");
-        _poller = new DeploymentPoller(deploymentDir, this);
         _poller.start();
         __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
 
