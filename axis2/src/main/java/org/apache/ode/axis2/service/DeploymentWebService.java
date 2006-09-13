@@ -173,7 +173,7 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "getProcessPackageResponse", response);
                 } else unknown = true;
             } catch (Throwable t) {
-                throw new AxisFault("Invokcation of operation " + operation + " failed!", t);
+                throw new AxisFault("Invocation of operation " + operation + " failed!", t);
             }
             if (unknown) throw new AxisFault("Unknown operation: '"
                     + messageContext.getAxisOperation().getName() + "'");
