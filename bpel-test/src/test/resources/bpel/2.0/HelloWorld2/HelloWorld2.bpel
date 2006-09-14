@@ -6,7 +6,7 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:test="http://ode/bpel/unit-test.wsdl">
 
-  <import location="urn:/HelloWorld2.wsdl"
+  <import location="HelloWorld2.wsdl"
      namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
