@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.w3c.dom.Element;
-
 import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -42,18 +40,18 @@ public class DebugInfo implements Serializable {
 
   public String description;
 
-  public HashMap<QName, Element> extensibilityElements = new HashMap<QName, Element>();
+  public HashMap<QName, Object> extensibilityElements = new HashMap<QName, Object>();
 
-  public DebugInfo(String sourceURI, int startLine, int endLine, Map<QName, Element> extElmt) {
+  public DebugInfo(String sourceURI, int startLine, int endLine, Map<QName, Object> extElmt) {
     this.sourceURI = sourceURI;
     this.startLine = startLine;
     this.endLine = endLine;
     if (extElmt != null && extElmt.size() > 0) {
-      this.extensibilityElements = new HashMap<QName, Element>(extElmt);
+      this.extensibilityElements = new HashMap<QName, Object>(extElmt);
     }
   }
 
-  public DebugInfo(String sourceURI, int line, Map<QName, Element> extElmt) {
+  public DebugInfo(String sourceURI, int line, Map<QName, Object> extElmt) {
     this(sourceURI, line, line, extElmt);
   }
 

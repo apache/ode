@@ -20,17 +20,14 @@ package org.apache.ode.sax.fsa.bpel_2_0;
 
 import org.apache.ode.sax.evt.SaxEvent;
 import org.apache.ode.sax.evt.StartElement;
-import org.apache.ode.sax.evt.EndElement;
 import org.apache.ode.sax.fsa.AbstractState;
 import org.apache.ode.sax.fsa.DOMGenerator;
 import org.apache.ode.sax.fsa.ParseContext;
 import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Node;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 
@@ -77,15 +74,6 @@ class ExtensibilityBucketState extends AbstractState {
       Node root = _domGenerator.getRoot();
       if (root instanceof Element)
         _extensibility = (Element) _domGenerator.getRoot();
-/* --
-        if (_domGenerator.getRoot() != null) {
-            Document doc = DOMUtils.newDocument();
-            Element root = doc.createElementNS(_elementQName.getNamespaceURI(), _elementQName.getLocalPart());
-            root.appendChild(doc.importNode(_domGenerator.getRoot(), true));
-            doc.appendChild(root);
-            _extensibility = root;
-        }
-*/
     }
 
     public StateFactory getFactory() {

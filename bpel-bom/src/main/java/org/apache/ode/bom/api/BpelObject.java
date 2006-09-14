@@ -19,6 +19,10 @@
 package org.apache.ode.bom.api;
 
 import org.apache.ode.utils.NSContext;
+import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
+import java.util.Map;
 
 /**
  * Common interface to all BPEL object model (BOM) objects. Provides for location
@@ -26,45 +30,68 @@ import org.apache.ode.utils.NSContext;
  */
 public interface BpelObject {
 
-  /**
-   * Get the line number in the BPEL source document where this object is defined.
-   *
-   * @return line number
-   */
-  int getLineNo();
+    /**
+     * Get the line number in the BPEL source document where this object is defined.
+     *
+     * @return line number
+     */
+    int getLineNo();
 
-  /**
-   * Set the line number in the BPEL source document where this object is defined.
-   *
-   * @param lineNo line number
-   */
-  void setLineNo(int lineNo);
+    /**
+     * Set the line number in the BPEL source document where this object is defined.
+     *
+     * @param lineNo line number
+     */
+    void setLineNo(int lineNo);
 
-  /**
-   * Get the namespace context for this BPEL object (i.e. prefix-to-namespace mapping).
-   *
-   * @return namespace context
-   */
-  NSContext getNamespaceContext();
+    /**
+     * Get the namespace context for this BPEL object (i.e. prefix-to-namespace mapping).
+     *
+     * @return namespace context
+     */
+    NSContext getNamespaceContext();
 
-  /**
-   * Set the namespace context for this BPEL object (i.e. prefix-to-namespace mapping).
-   *
-   * @param ctx namespace context
-   */
-  void setNamespaceContext(NSContext ctx);
+    /**
+     * Set the namespace context for this BPEL object (i.e. prefix-to-namespace mapping).
+     *
+     * @param ctx namespace context
+     */
+    void setNamespaceContext(NSContext ctx);
 
-  /**
-   * Returns the human-readable description of this object.
-   * 
-   * @return the description
-   */
-  String getDescription();
-  
-  /**
-   * Set a description of this model element.
-   * @param description human-readable description
-   */
-  void setDescription(String description);
+    /**
+     * Returns the human-readable description of this object.
+     *
+     * @return the description
+     */
+    String getDescription();
+
+    /**
+     * Set a description of this model element.
+     * @param description human-readable description
+     */
+    void setDescription(String description);
+
+    /**
+     * Return the declared extensibility elements. The extensibility elements
+     * declared as subelements of this BpelObject will be returned with a value type of
+     * org.w3c.dom.Element. The ones declared as extensibility attributes will be
+     * returned as a value type of String.
+     * @return extensibility qualified names and the full elements value (String or Element)
+     */
+    Map<QName, Object> getExtensibilityElements();
+
+    /**
+     * Set the extensibility elements found in an activity.
+     * @param elmtName
+     * @param value
+     */
+    public void addExtensibilityElement(QName elmtName, Element value);
+
+    /**
+     * Set the extensibility elements found in an activity.
+     * @param elmtName
+     * @param value
+     */
+    public void addExtensibilityElement(QName elmtName, String value);
 
 }
