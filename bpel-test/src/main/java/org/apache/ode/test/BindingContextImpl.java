@@ -13,12 +13,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class BindingContextImpl implements BindingContext {
+	
 
-	public Element activateMyRoleEndpoint(QName processId,
+	public EndpointReference activateMyRoleEndpoint(QName processId,
 			DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
 			PortType portType) {
-		
-		Document doc = DOMUtils.newDocument();
+		final Document doc = DOMUtils.newDocument();
 		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());
         serviceref.setNodeValue(deploymentUnit.getDefinitionForNamespace(myRoleEndpoint.serviceName
@@ -26,7 +26,11 @@ public class BindingContextImpl implements BindingContext {
                 myRoleEndpoint.serviceName +":" +
                 myRoleEndpoint.portName);
         doc.appendChild(serviceref);
-		return doc.getDocumentElement();
+        return new EndpointReference() {
+            public Document toXML() {
+              return doc;
+            }
+        };
 	}
 
 	public void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint) {
