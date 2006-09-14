@@ -18,6 +18,7 @@
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
+import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.CorrelationSet;
 import org.apache.ode.bom.api.OnAlarm;
 import org.apache.ode.bom.api.OnEvent;
@@ -52,7 +53,26 @@ class BpelProcessState extends BaseBpelState implements org.apache.ode.bpel.pars
     private Process _process;
 
     BpelProcessState(StartElement se, ParseContext pc) throws ParseException {
-        super(pc);
+        super(se, pc);
+        XmlAttributes atts = se.getAttributes();
+        /*
+        * NOTE: Xerces automatically fills in the default value of the attribute for us,
+        * in this case "no" for enableInstanceCompensation and abstractProcess.  Thus,
+        * we can't warn if it's present because we don't know if the user or the parser
+        * put it in...
+        */
+        if (atts.hasAtt("enableInstanceCompensation") && checkYesNo(atts.getValue("enableInstanceCompensation"))) {
+            pc.parseError(ParseError.WARNING,se,
+                    "","Instance compensation is not well-defined; it will not be used at runtime.");
+        }
+        if (atts.hasAtt("abstractProcess") && checkYesNo(atts.getValue("abstractProcess"))) {
+            pc.parseError(ParseError.FATAL,se,
+                    "","ODE does not support the parsing or compilation of abstract processes.");
+            // TODO: Get a real error key.
+        }
+    }
+
+    protected BpelObject createBpelObject(StartElement se) throws ParseException {
         XmlAttributes atts = se.getAttributes();
         String name = atts.getValue("name");
         String tns = atts.getValue("targetNamespace");
@@ -74,21 +94,7 @@ class BpelProcessState extends BaseBpelState implements org.apache.ode.bpel.pars
         if (atts.hasAtt("expressionLanguage")) {
             _process.setExpressionLanguage(atts.getValue("expressionLanguage"));
         }
-        /*
-        * NOTE: Xerces automatically fills in the default value of the attribute for us,
-        * in this case "no" for enableInstanceCompensation and abstractProcess.  Thus,
-        * we can't warn if it's present because we don't know if the user or the parser
-        * put it in...
-        */
-        if (atts.hasAtt("enableInstanceCompensation") && checkYesNo(atts.getValue("enableInstanceCompensation"))) {
-            pc.parseError(ParseError.WARNING,se,
-                    "","Instance compensation is not well-defined; it will not be used at runtime.");
-        }
-        if (atts.hasAtt("abstractProcess") && checkYesNo(atts.getValue("abstractProcess"))) {
-            pc.parseError(ParseError.FATAL,se,
-                    "","ODE does not support the parsing or compilation of abstract processes.");
-            // TODO: Get a real error key.
-        }
+        return _process;
     }
 
     /**

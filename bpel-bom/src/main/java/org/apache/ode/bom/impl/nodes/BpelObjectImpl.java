@@ -20,48 +20,70 @@ package org.apache.ode.bom.impl.nodes;
 
 import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.utils.NSContext;
+import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for all objects in the BPEL object model.
  */
 public abstract class BpelObjectImpl implements Serializable, BpelObject {
 
-  private int _lineNo = -1;
-  private NSContext _namespaceCtx;
-  private String _description;
+    private int _lineNo = -1;
+    private NSContext _namespaceCtx;
+    private String _description;
 
-  protected BpelObjectImpl() {
-  }
+    /**
+     * Extensibility elements found inside the activity.
+     */
+    private HashMap<QName, Object> _extensibilityElements = new HashMap<QName, Object>();
 
-  protected BpelObjectImpl(NSContext nsctx) {
-    _namespaceCtx = nsctx;
-  }
 
-  public int getLineNo() {
-    return _lineNo;
-  }
+    protected BpelObjectImpl() {
+    }
 
-  public void setLineNo(int lineNo) {
-    _lineNo = lineNo;
-  }
+    protected BpelObjectImpl(NSContext nsctx) {
+        _namespaceCtx = nsctx;
+    }
 
-  public NSContext getNamespaceContext() {
-    return _namespaceCtx;
-  }
+    public int getLineNo() {
+        return _lineNo;
+    }
 
-  public void setNamespaceContext(NSContext ctx) {
-    assert ctx != null;
-    _namespaceCtx = ctx;
-  }
+    public void setLineNo(int lineNo) {
+        _lineNo = lineNo;
+    }
 
-  public String getDescription() {
-    return _description;
-  }
+    public NSContext getNamespaceContext() {
+        return _namespaceCtx;
+    }
 
-  public void setDescription(String description) {
-    _description = description;
-  }
+    public void setNamespaceContext(NSContext ctx) {
+        assert ctx != null;
+        _namespaceCtx = ctx;
+    }
+
+    public String getDescription() {
+        return _description;
+    }
+
+    public void setDescription(String description) {
+        _description = description;
+    }
+
+    public Map<QName, Object> getExtensibilityElements() {
+        return _extensibilityElements;
+    }
+
+    public void addExtensibilityElement(QName elmtName, Element value) {
+        _extensibilityElements.put(elmtName, value);
+    }
+
+    public void addExtensibilityElement(QName name, String value) {
+        _extensibilityElements.put(name, value);
+    }
 
 }

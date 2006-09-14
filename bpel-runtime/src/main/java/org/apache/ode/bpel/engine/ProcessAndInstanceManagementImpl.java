@@ -385,10 +385,19 @@ class ProcessAndInstanceManagementImpl
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
             if (obase != null && obase.debugInfo != null && obase.debugInfo.extensibilityElements != null) {
-                for (Map.Entry<QName, Element> entry : obase.debugInfo.extensibilityElements.entrySet()) {
+                for (Map.Entry<QName, Object> entry : obase.debugInfo.extensibilityElements.entrySet()) {
                     TActivityExtInfo taei = taeil.addNewActivityExtInfo();
                     taei.setAiid(""+aid);
-                    taei.getDomNode().appendChild(taei.getDomNode().getOwnerDocument().importNode(entry.getValue(), true));
+                    Object extValue = entry.getValue();
+                    if (extValue instanceof Element)
+                        taei.getDomNode().appendChild(taei.getDomNode()
+                                .getOwnerDocument().importNode((Element) extValue, true));
+                    else if (extValue instanceof String) {
+                        Element valueElmt = taei.getDomNode().getOwnerDocument().createElementNS(
+                                entry.getKey().getNamespaceURI(), entry.getKey().getLocalPart());
+                        valueElmt.appendChild(taei.getDomNode().getOwnerDocument().createTextNode((String) extValue));
+                        taei.getDomNode().appendChild(valueElmt);
+                    }
                 }
             }
         }

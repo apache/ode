@@ -18,51 +18,56 @@
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
+import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.LinkTarget;
 import org.apache.ode.bom.impl.nodes.LinkTargetImpl;
+import org.apache.ode.sax.evt.StartElement;
+import org.apache.ode.sax.evt.XmlAttributes;
 import org.apache.ode.sax.fsa.ParseContext;
 import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
-import org.apache.ode.sax.evt.StartElement;
-import org.apache.ode.sax.evt.XmlAttributes;
 
 class BpelLinkTargetState extends BaseBpelState {
 
-  private static final StateFactory _factory = new Factory();
-  private LinkTargetImpl _t;
+    private static final StateFactory _factory = new Factory();
+    private LinkTargetImpl _t;
 
-  BpelLinkTargetState(StartElement se, ParseContext pc) throws ParseException {
-    super(pc);
-    XmlAttributes atts = se.getAttributes();
-    _t = new LinkTargetImpl();
-    _t.setNamespaceContext(se.getNamespaceContext());
-    _t.setLineNo(se.getLocation().getLineNumber());
-    _t.setLinkName(atts.getValue("linkName"));
-  }
-  
-  public LinkTarget getTarget() {
-    return _t;
-  }
-  
-  /**
-   * @see org.apache.ode.sax.fsa.State#getFactory()
-   */
-  public StateFactory getFactory() {
-    return _factory;
-  }
-
-  /**
-   * @see org.apache.ode.sax.fsa.State#getType()
-   */
-  public int getType() {
-    return BPEL_TARGET;
-  }
-  
-  static class Factory implements StateFactory {
-    
-    public State newInstance(StartElement se, ParseContext pc) throws ParseException {
-      return new BpelLinkTargetState(se,pc);
+    BpelLinkTargetState(StartElement se, ParseContext pc) throws ParseException {
+        super(se, pc);
     }
-  }
+
+    protected BpelObject createBpelObject(StartElement se) throws ParseException {
+        XmlAttributes atts = se.getAttributes();
+        _t = new LinkTargetImpl();
+        _t.setNamespaceContext(se.getNamespaceContext());
+        _t.setLineNo(se.getLocation().getLineNumber());
+        _t.setLinkName(atts.getValue("linkName"));
+        return _t;
+    }
+
+    public LinkTarget getTarget() {
+        return _t;
+    }
+
+    /**
+     * @see org.apache.ode.sax.fsa.State#getFactory()
+     */
+    public StateFactory getFactory() {
+        return _factory;
+    }
+
+    /**
+     * @see org.apache.ode.sax.fsa.State#getType()
+     */
+    public int getType() {
+        return BPEL_TARGET;
+    }
+
+    static class Factory implements StateFactory {
+
+        public State newInstance(StartElement se, ParseContext pc) throws ParseException {
+            return new BpelLinkTargetState(se,pc);
+        }
+    }
 }
