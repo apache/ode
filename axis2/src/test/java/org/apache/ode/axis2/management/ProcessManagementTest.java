@@ -50,7 +50,7 @@ public class ProcessManagementTest extends TestCase {
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
-        assert(result.toString().split("process-info").length == 3);
+        assertTrue(result.toString().split("process-info>").length == 3);
 
         // Another query with more options
         Calendar notSoLongAgo = Calendar.getInstance();
@@ -60,14 +60,13 @@ public class ProcessManagementTest extends TestCase {
                 new String[] {"name=DynPartnerResponder namespace=http://ode/bpel/responder " +
                         "deployed>=" + notSoLongAgoStr, ""});
         result = sendToPM(listRoot);
-        assert(result.toString().split("process-info").length == 3);
+        assertTrue(result.toString().split("process-info>").length == 3);
     }
 
     public void testProcessFiles() throws Exception {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
-        System.out.println("=> " + result);
         ArrayList<String> filenames = new ArrayList<String>();
         Iterator docs = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "documents")).getChildElements();
         while (docs.hasNext()) {
@@ -75,21 +74,20 @@ public class ProcessManagementTest extends TestCase {
             filenames.add(docElmt.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "name")).getText());
         }
         // Checking that all necessary files are really there
-        assert(filenames.contains("deploy.xml"));
-        assert(filenames.contains("DynPartnerMain.bpel"));
-        assert(filenames.contains("DynPartnerResponder.bpel"));
-        assert(filenames.contains("Main.wsdl"));
-        assert(filenames.contains("Responder.wsdl"));
+        assertTrue(filenames.contains("DynPartnerMain.bpel"));
+        assertTrue(filenames.contains("DynPartnerResponder.bpel"));
+        assertTrue(filenames.contains("Main.wsdl"));
+        assertTrue(filenames.contains("Responder.wsdl"));
     }
 
     public void testListAllProcesses() throws Exception {
         OMElement root = _client.buildMessage("listAllProcesses", new String[] {}, new String[] {});
         OMElement result = sendToPM(root);
         // Hopefully we have at least two processes (so 4 opening/closing elmts)
-        assert(result.toString().split("process-info").length >= 5);
+        assertTrue(result.toString().split("process-info").length >= 5);
         // And our deployed processes are there
-        assert(result.toString().indexOf("DynPartnerMain") >= 0);
-        assert(result.toString().indexOf("DynPartnerResponder") >= 0);
+        assertTrue(result.toString().indexOf("DynPartnerMain") >= 0);
+        assertTrue(result.toString().indexOf("DynPartnerResponder") >= 0);
     }
 
     public void testSetProcessProperty() throws Exception {
@@ -98,8 +96,8 @@ public class ProcessManagementTest extends TestCase {
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
                         new QName("http://ode/custom/ns", "someprop"), "somevalue" });
         OMElement result = sendToPM(root);
-        assert(result.toString().indexOf("DynPartnerMain") >= 0);
-        assert(result.toString().indexOf("somevalue") >= 0);
+        assertTrue(result.toString().indexOf("DynPartnerMain") >= 0);
+        assertTrue(result.toString().indexOf("somevalue") >= 0);
     }
 
     public void testSetProcessPropertyNode() throws Exception {
@@ -110,18 +108,18 @@ public class ProcessManagementTest extends TestCase {
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
                         new QName("http://ode/custom/ns", "someprop"), propElmt });
         OMElement result = sendToPM(root);
-        assert(result.toString().indexOf("DynPartnerMain") >= 0);
-        assert(result.toString().indexOf("testprop") >= 0);
-        assert(result.toString().indexOf("propvalue") >= 0);
+        assertTrue(result.toString().indexOf("DynPartnerMain") >= 0);
+        assertTrue(result.toString().indexOf("testprop") >= 0);
+        assertTrue(result.toString().indexOf("propvalue") >= 0);
     }
 
     public void testGetExtensibilityElements() throws Exception {
         OMElement root = _client.buildMessage("getExtensibilityElements",
                 new String[] {"pid", "aids"},
                 new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain"),
-                        new String[] {"aid", "12", "14"} });
+                        new String[] {"aid", "34", "37"} });
         OMElement result = sendToPM(root);
-        assert(result.toString().indexOf("activity-ext-info-list") >= 0);
+        assertTrue(result.toString().indexOf("activity-ext-info>") >= 0);
     }
 
     protected void setUp() throws Exception {

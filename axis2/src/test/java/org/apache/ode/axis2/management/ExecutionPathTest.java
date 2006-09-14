@@ -73,10 +73,11 @@ public class ExecutionPathTest extends TestCase {
 
         // These extensibility elements are known to be in the deployed process,
         // checking them here:
-        assert(result.toString().indexOf("Receive Order 1") > 0);
-        assert(result.toString().indexOf("Receive Order 2") > 0);
-        assert(result.toString().indexOf("Receive Order 3") > 0);
-        assert(result.toString().indexOf("Receive Order 4") > 0);
+        assertTrue(result.toString().indexOf("Receive Order 1") > 0);
+        assertTrue(result.toString().indexOf("Receive Order 2") > 0);
+        assertTrue(result.toString().indexOf("Receive Order 3") > 0);
+        assertTrue(result.toString().indexOf("Receive Order 4") > 0);
+        assertTrue(result.toString().indexOf("ID-5938e518-bfcf-1004-8cce-0438cf81d0f0") > 0);
     }
 
     protected void setUp() throws Exception {

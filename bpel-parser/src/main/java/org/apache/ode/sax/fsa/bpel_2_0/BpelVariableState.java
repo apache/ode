@@ -18,76 +18,86 @@
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
+import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.Variable;
 import org.apache.ode.bom.impl.nodes.VariableImpl;
-import org.apache.ode.sax.fsa.*;
 import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.evt.XmlAttributes;
 import org.apache.ode.sax.evt.attspec.FilterSpec;
 import org.apache.ode.sax.evt.attspec.OrSpec;
 import org.apache.ode.sax.evt.attspec.XmlAttributeSpec;
+import org.apache.ode.sax.fsa.ParseContext;
+import org.apache.ode.sax.fsa.ParseError;
+import org.apache.ode.sax.fsa.ParseException;
+import org.apache.ode.sax.fsa.State;
+import org.apache.ode.sax.fsa.StateFactory;
 
 
 class BpelVariableState extends BaseBpelState {
 
-  private static final StateFactory _factory = new Factory();
-  private VariableImpl _v;
-  
-  private static final XmlAttributeSpec MESSAGETYPE = new FilterSpec(
-      new String[] {"name","messageType"},
-      new String[] {});
-  private static final XmlAttributeSpec ELEMENTTYPE = new FilterSpec(
-      new String[] {"name","element"},
-      new String[] {});
-  private static final XmlAttributeSpec TYPE = new FilterSpec(
-      new String[] {"name","type"},
-      new String[] {});
+    private static final StateFactory _factory = new Factory();
+    private VariableImpl _v;
 
-  private static final XmlAttributeSpec VALID = new OrSpec(MESSAGETYPE,
-      new OrSpec(TYPE,ELEMENTTYPE));
-  
-  BpelVariableState(StartElement se, ParseContext pc) throws ParseException {
-    super(pc);
-    XmlAttributes atts = se.getAttributes();
-    if (!VALID.matches(atts)){
-      getParseContext().parseError(ParseError.ERROR,se,"",
-          "Invalid attributes on variable declaration.");
-    }
-    _v = new VariableImpl();
-    _v.setNamespaceContext(se.getNamespaceContext());
-    _v.setLineNo(se.getLocation().getLineNumber());
-    _v.setName(atts.getValue("name"));
-    if (MESSAGETYPE.matches(atts)) {
-      _v.setMessageType(se.getNamespaceContext().derefQName(atts.getValue("messageType")));
-    } else if (TYPE.matches(atts)) {
-      _v.setSchemaType(se.getNamespaceContext().derefQName(atts.getValue("type")));
-    } else if (ELEMENTTYPE.matches(atts)) {
-      _v.setElementType(se.getNamespaceContext().derefQName(atts.getValue("element")));
-    }
-  }
-  
-  public Variable getVariable() {
-    return _v;
-  }
-  
-  /**
-   * @see org.apache.ode.sax.fsa.State#getFactory()
-   */
-  public StateFactory getFactory() {
-    return _factory;
-  }
+    private static final XmlAttributeSpec MESSAGETYPE = new FilterSpec(
+            new String[] {"name","messageType"},
+            new String[] {});
+    private static final XmlAttributeSpec ELEMENTTYPE = new FilterSpec(
+            new String[] {"name","element"},
+            new String[] {});
+    private static final XmlAttributeSpec TYPE = new FilterSpec(
+            new String[] {"name","type"},
+            new String[] {});
 
-  /**
-   * @see org.apache.ode.sax.fsa.State#getType()
-   */
-  public int getType() {
-    return BPEL_VARIABLE;
-  }
-  
-  static class Factory implements StateFactory {
-    
-    public State newInstance(StartElement se, ParseContext pc) throws ParseException {
-      return new BpelVariableState(se,pc);
+    private static final XmlAttributeSpec VALID = new OrSpec(MESSAGETYPE,
+            new OrSpec(TYPE,ELEMENTTYPE));
+
+    BpelVariableState(StartElement se, ParseContext pc) throws ParseException {
+        super(se, pc);
+        XmlAttributes atts = se.getAttributes();
+        if (!VALID.matches(atts)){
+            getParseContext().parseError(ParseError.ERROR,se,"",
+                    "Invalid attributes on variable declaration.");
+        }
     }
-  }
+
+    protected BpelObject createBpelObject(StartElement se) throws ParseException {
+        XmlAttributes atts = se.getAttributes();
+        _v = new VariableImpl();
+        _v.setNamespaceContext(se.getNamespaceContext());
+        _v.setLineNo(se.getLocation().getLineNumber());
+        _v.setName(atts.getValue("name"));
+        if (MESSAGETYPE.matches(atts)) {
+            _v.setMessageType(se.getNamespaceContext().derefQName(atts.getValue("messageType")));
+        } else if (TYPE.matches(atts)) {
+            _v.setSchemaType(se.getNamespaceContext().derefQName(atts.getValue("type")));
+        } else if (ELEMENTTYPE.matches(atts)) {
+            _v.setElementType(se.getNamespaceContext().derefQName(atts.getValue("element")));
+        }
+        return _v;
+    }
+
+    public Variable getVariable() {
+        return _v;
+    }
+
+    /**
+     * @see org.apache.ode.sax.fsa.State#getFactory()
+     */
+    public StateFactory getFactory() {
+        return _factory;
+    }
+
+    /**
+     * @see org.apache.ode.sax.fsa.State#getType()
+     */
+    public int getType() {
+        return BPEL_VARIABLE;
+    }
+
+    static class Factory implements StateFactory {
+
+        public State newInstance(StartElement se, ParseContext pc) throws ParseException {
+            return new BpelVariableState(se,pc);
+        }
+    }
 }

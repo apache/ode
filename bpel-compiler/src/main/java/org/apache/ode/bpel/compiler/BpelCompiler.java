@@ -37,7 +37,6 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
-import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Message;
@@ -1162,24 +1161,10 @@ abstract class BpelCompiler implements CompilerContext {
     private DebugInfo createDebugInfo(BpelObject bpelObject, String description) {
         int lineNo = bpelObject == null ?  -1 : bpelObject.getLineNo();
         String str = description == null && bpelObject != null ? bpelObject.toString() : null;
-        Map<QName, Element> extElmt = null;
-        if (bpelObject instanceof Activity) {
-            extElmt = ((Activity)bpelObject).getExtensibilityElements();
-            if (extElmt.size() == 0) extElmt = checkRDFHierarchy();
-        }
+        Map<QName, Object> extElmt = bpelObject == null ? null : bpelObject.getExtensibilityElements();
         DebugInfo debugInfo = new DebugInfo(_processDef.getSource(), lineNo, extElmt);
         debugInfo.description = str;
         return debugInfo;
-    }
-
-    private HashMap<QName, Element> checkRDFHierarchy() {
-        // RDF extensibility elements should be "inherited".
-        for (OActivity oActivity : _compiledActivities) {
-            if (oActivity.debugInfo.extensibilityElements.size() > 0) {
-                return oActivity.debugInfo.extensibilityElements;
-            }
-        }
-        return null;
     }
 
     private void compile(final Variable src) {

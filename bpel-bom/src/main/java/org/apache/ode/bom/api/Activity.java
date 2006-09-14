@@ -18,10 +18,6 @@
  */
 package org.apache.ode.bom.api;
 
-import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -93,17 +89,5 @@ public interface Activity extends BpelObject, JoinFailureSuppressor {
    * @return user-defined name or <code>null</code>
    */
   String getName();
-
-  /**
-   * Return the extensibility elements declared in this activity.
-   * @return extensibility qualified names and the full elements
-   */
-  Map<QName, Element> getExtensibilityElements();
-
-  /**
-   * Set the extensibility elements found in an activity.
-   * @param extensibilityElements
-   */
-  void setExtensibilityElements(Map<QName, Element> extensibilityElements);
 
 }
