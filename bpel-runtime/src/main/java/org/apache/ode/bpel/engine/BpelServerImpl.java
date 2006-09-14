@@ -105,7 +105,7 @@ public class BpelServerImpl implements BpelServer {
     private Map<QName, DeploymentUnitImpl> _deploymentUnits = new HashMap<QName, DeploymentUnitImpl>();
 
     /** Object that keeps track (persistently) of the deployment units */
-    private DeploymentManager _deploymentManager;
+    private DeploymentManager _deploymentManager = null;
 
     private ThreadLocal<Boolean> _associated = new ThreadLocal<Boolean>() {
         public Boolean initialValue() {
@@ -398,7 +398,7 @@ public class BpelServerImpl implements BpelServer {
             }
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
-            _deploymentManager = new DeploymentManagerImpl(new File(_deployDir, "ode-deployed.dat"));
+            if (_deploymentManager == null ) _deploymentManager = new DeploymentManagerImpl(new File(_deployDir, "ode-deployed.dat"));
             _initialized = true;
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -826,6 +826,17 @@ public class BpelServerImpl implements BpelServer {
                 __log.error(errmsg, ex);
             }
 
+    }
+    
+    /**
+     * Inject a DeploymentManager implementation. If an implementation
+     * is not injected a default File based implementation is
+     * used. 
+     * 
+     * @param dm a DeploymentManager instance
+     */
+    public void setDeploymentManager(DeploymentManager dm) {
+    	_deploymentManager = dm;
     }
 
 }
