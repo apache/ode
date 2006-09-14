@@ -37,7 +37,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private ProcessInstanceDAO instance;
 	private char direction;
 	private QName callee;
-	private Properties properties;
+	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
 	
 	public MessageExchangeDAOImpl(char direction, String mesageEchangeId){
