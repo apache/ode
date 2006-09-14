@@ -107,6 +107,12 @@
             <artifactId>activation</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>ws-commons</groupId>
+            <artifactId>neethi</artifactId>
+            <version>1.0.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
