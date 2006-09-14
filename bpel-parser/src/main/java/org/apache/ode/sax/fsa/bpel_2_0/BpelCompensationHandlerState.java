@@ -18,13 +18,14 @@
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
+import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.CompensationHandler;
 import org.apache.ode.bom.impl.nodes.CompensationHandlerImpl;
+import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.fsa.ParseContext;
 import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
-import org.apache.ode.sax.evt.StartElement;
 
 class BpelCompensationHandlerState extends BaseBpelState {
 
@@ -32,10 +33,14 @@ class BpelCompensationHandlerState extends BaseBpelState {
   private CompensationHandlerImpl _c;
   
   BpelCompensationHandlerState(StartElement se, ParseContext pc) throws ParseException {
-    super(pc);
+    super(se, pc);
+  }
+
+    protected BpelObject createBpelObject(StartElement se) throws ParseException {
     _c = new CompensationHandlerImpl();
     _c.setNamespaceContext(se.getNamespaceContext());
     _c.setLineNo(se.getLocation().getLineNumber());
+        return _c;
   }
   
   public void handleChildCompleted(State pn) throws ParseException {

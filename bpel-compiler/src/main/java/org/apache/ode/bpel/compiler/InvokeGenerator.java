@@ -24,18 +24,18 @@ import org.apache.ode.bom.api.Constants;
 import org.apache.ode.bom.api.Correlation;
 import org.apache.ode.bom.api.InvokeActivity;
 import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.o.FailureHandling;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OInvoke;
-import org.apache.ode.bpel.o.FailureHandling;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;
-import org.w3c.dom.Element;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -87,7 +87,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
     }
 
     // Failure handling extensibility element.
-    Element failure = srcx.getExtensibilityElements().get(FailureHandling.FAILURE_EXT_ELEMENT);
+    Element failure = (Element) srcx.getExtensibilityElements().get(FailureHandling.FAILURE_EXT_ELEMENT);
     if (failure != null) {
       oinvoke.failureHandling = new FailureHandling();
       String textValue;
