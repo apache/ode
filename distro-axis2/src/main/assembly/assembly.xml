@@ -48,7 +48,7 @@
         <dependencySet>
             <scope>runtime</scope>
             <outputDirectory/>
-            <outputFileNameMapping>${groupId}.${extension}</outputFileNameMapping>
+            <outputFileNameMapping>ode.war</outputFileNameMapping>
             <includes>
                 <include>org.apache.ode:ode-axis2-war</include>
             </includes>
