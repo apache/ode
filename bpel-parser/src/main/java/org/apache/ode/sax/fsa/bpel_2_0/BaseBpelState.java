@@ -129,7 +129,6 @@ abstract class BaseBpelState extends AbstractState {
             Iterator iter = atts.getQNames();
             while (iter.hasNext()) {
                 QName attrQName = (QName) iter.next();
-                if (attrQName.getNamespaceURI() != null) System.out.println("### ATTR QNAME " + attrQName);
                 if (attrQName.getNamespaceURI() != null && attrQName.getNamespaceURI().length() > 0
                         && !attrQName.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS)) {
                     _bpelObject.addExtensibilityElement(attrQName, atts.getValue(attrQName));
