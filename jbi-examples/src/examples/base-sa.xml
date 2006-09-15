@@ -20,6 +20,7 @@
     <target name="service-units" depends="init" >
         <subant target="service-unit">
             <property name="dist.dir" value="${sus.dir}" />
+            <property name="ode.home" value="${ode.home}" />
             <fileset dir="." includes="*/build.xml"/>
         </subant>
     </target>
