@@ -39,7 +39,7 @@
             <scope>compile</scope>
             <outputDirectory/>
             <includes>
-                <include>ode:ode-dao-hibernate-db-derby</include>
+                <include>org.apache.ode:ode-dao-hibernate-db-derby</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>
