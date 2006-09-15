@@ -50,7 +50,7 @@
             <outputDirectory/>
             <outputFileNameMapping>${groupId}.${extension}</outputFileNameMapping>
             <includes>
-                <include>ode:ode-axis2-war</include>
+                <include>org.apache.ode:ode-axis2-war</include>
             </includes>
         </dependencySet>
 
