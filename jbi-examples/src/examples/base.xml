@@ -30,7 +30,7 @@
         <condition property="ode.script.extension" value=".bat">
             <os family="windows"/>
         </condition>
-        <condition property="ode.script.extension" value="">
+        <condition property="ode.script.extension" value=".sh">
             <os family="unix"/>
         </condition>
         <condition property="ode.exe.extension" value=".exe">
