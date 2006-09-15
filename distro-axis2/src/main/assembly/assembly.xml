@@ -24,24 +24,24 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
             <includes>
-                <include>ode:ode-utils</include>
-                <include>ode:ode-tools</include>
-                <include>ode:ode-bpel-compiler</include>
-                <include>ode:ode-bpel-bom</include>
-                <include>ode:ode-bpel-api</include>
-                <include>ode:ode-bpel-el-xpath10</include>
-                <include>ode:ode-bpel-el-xpath20</include>
-                <include>ode:ode-bpel-obj</include>
-                <include>ode:ode-bpel-parser</include>
-                <include>ode:ode-bpel-schemas</include>
+                <include>org.apache.ode:ode-utils</include>
+                <include>org.apache.ode:ode-tools</include>
+                <include>org.apache.ode:ode-bpel-compiler</include>
+                <include>org.apache.ode:ode-bpel-bom</include>
+                <include>org.apache.ode:ode-bpel-api</include>
+                <include>org.apache.ode:ode-bpel-el-xpath10</include>
+                <include>org.apache.ode:ode-bpel-el-xpath20</include>
+                <include>org.apache.ode:ode-bpel-obj</include>
+                <include>org.apache.ode:ode-bpel-parser</include>
+                <include>org.apache.ode:ode-bpel-schemas</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <scope>runtime</scope>
             <outputDirectory/>
             <includes>
-                <include>ode:ode-axis2-examples</include>
-                <include>ode:ode-tools-bin</include>
+                <include>org.apache.ode:ode-axis2-examples</include>
+                <include>org.apache.ode:ode-tools-bin</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>
