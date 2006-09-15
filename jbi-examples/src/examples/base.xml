@@ -75,7 +75,7 @@
     </target>
 
     <target name="validate-ode-home">
-        <available file="${lib.dir}/ode-bootstrap.jar" property="ode.home.good"/>
+        <available file="${lib.dir}/ode-bpel-compiler.jar" property="ode.home.good"/>
     </target>
 
     <target name="fail-invalid-ode-home" depends="validate-ode-home" unless="ode.home.good">
