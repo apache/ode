@@ -54,7 +54,6 @@
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-utils</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
