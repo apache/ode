@@ -253,12 +253,12 @@
             <name>Apache Snapshot Repository</name>
             <url>http://people.apache.org/maven-snapshot-repository</url>
         </repository>
-<!--        <repository>
+        <repository>
             <id>central</id>
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
-        <repository>
+<!--        <repository>
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
