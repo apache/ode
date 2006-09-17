@@ -19,20 +19,11 @@
 
 package org.apache.ode.daohib.ql;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
-
-import org.hibernate.Session;
-import org.objectweb.jotm.Jotm;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.BaseDAOTest;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.ql.instances.HibernateInstancesQueryCompiler;
@@ -40,8 +31,12 @@ import org.apache.ode.ql.eval.skel.CommandEvaluator;
 import org.apache.ode.ql.tree.Builder;
 import org.apache.ode.ql.tree.BuilderFactory;
 import org.apache.ode.ql.tree.nodes.Query;
+import org.hibernate.Session;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
-public class InstanceSelectionTest extends junit.framework.TestCase {
+public class InstanceSelectionTest extends BaseDAOTest {
   public static class TestCases {
     private Collection<TestCase> testCases;
 
@@ -116,29 +111,11 @@ public class InstanceSelectionTest extends junit.framework.TestCase {
     
   }
   private static final String BEANS_LOCATION = "test/config/test-beans.xml";
-  private static final String HIBERNATE_PROPERTIES = "hibernate.properties";
-  //
-  private Jotm jotm;
+
   private SessionManager sessionManager;
-  //private BpelDAOConnectionFactory bpelConnFactory;
   private Session session;
   private TestCases testCases;
   
-  private Properties readDBProperties() throws IOException {
-    Properties props = new Properties();
-    
-    new File("tmp").delete();
-    
-    props.put("hibernate.connection.url", "jdbc:derby:tmp/dao-hibernate-test;create=true;");
-    
-    InputStream is = InstanceSelectionTest.class.getClassLoader().getResourceAsStream(HIBERNATE_PROPERTIES);
-    try {
-      props.load(is);
-    } finally {
-      is.close();
-    }
-    return props;
-  }
   /**
    * @see junit.framework.TestCase#setUp()
    */
@@ -146,16 +123,8 @@ public class InstanceSelectionTest extends junit.framework.TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     
-    jotm = new Jotm(true, false);
+    initTM();
     
-    sessionManager = new SessionManager(readDBProperties(), jotm.getTransactionManager());
-    /*
-    bpelConnFactory = new BpelDAOConnectionFactoryImpl(sessionManager);
-    
-    BpelDAOConnection bpelConn = bpelConnFactory.createConnection();
-    */
-    jotm.getTransactionManager().begin();
-
     session = sessionManager.getSession();
     session.beginTransaction();
     //init test cases
@@ -165,6 +134,7 @@ public class InstanceSelectionTest extends junit.framework.TestCase {
 
   }
 
+  @SuppressWarnings("unchecked")
   private void runTestCase(TestCase testCase) throws Exception {
     //TODO clean data
     

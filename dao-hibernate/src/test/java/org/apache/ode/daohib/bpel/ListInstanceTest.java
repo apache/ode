@@ -19,15 +19,12 @@
 
 package org.apache.ode.daohib.bpel;
 
-import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.sfwk.DAOConnectionFactoryImpl;
-import junit.framework.TestCase;
-import org.objectweb.jotm.Jotm;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.io.FileInputStream;
-import java.util.*;
+import org.apache.ode.bpel.common.InstanceFilter;
 
 /**
  * Testing BpelDAOConnectionImpl.listInstance. We're just producing a lot
@@ -35,33 +32,18 @@ import java.util.*;
  * test that the result is the one expected would take a huge test database
  * (with at least a process and an instance for every possible combination).
  */
-public class ListInstanceTest extends TestCase {
+public class ListInstanceTest extends BaseDAOTest {
 
   private Map<String, List> filterElmts;
   private ArrayList<String> order;
 
-  private BpelDAOConnection daoConn;
-  private Jotm jotm;
-
   protected void setUp() throws Exception {
-    Properties hibProps = new Properties();
-    hibProps.load(new FileInputStream("../dao-hibernate/src/hibernate/derby.properties"));
-
-    jotm = new Jotm(true, false);
-
-    SessionManager sessMgr = new SessionManager(hibProps, jotm.getTransactionManager());
-    new DAOConnectionFactoryImpl(sessMgr);
-
-    jotm.getTransactionManager().begin();
-
-    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl(sessMgr);
-    daoConn = factoryImpl.createConnection();
-
+    initTM();
     buildFilterElements();
   }
 
   protected void tearDown() throws Exception {
-    jotm.getTransactionManager().commit();
+    stopTM();
   }
 
   public void testListInstance() throws Exception {
