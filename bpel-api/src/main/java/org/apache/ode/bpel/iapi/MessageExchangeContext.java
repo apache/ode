@@ -18,7 +18,8 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import javax.wsdl.Definition;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.w3c.dom.Element;
 
 
 /**

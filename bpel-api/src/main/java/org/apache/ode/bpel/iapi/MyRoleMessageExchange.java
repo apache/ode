@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.iapi;
 
-import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
