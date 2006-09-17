@@ -18,28 +18,27 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Collection;
+import java.util.Date;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import sun.security.action.GetLongAction;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * JacobRunnable that performs the work of the <code>invoke</code> activity.
