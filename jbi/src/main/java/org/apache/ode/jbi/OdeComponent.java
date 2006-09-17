@@ -24,6 +24,8 @@ import javax.jbi.component.ServiceUnitManager;
 import javax.jbi.messaging.MessageExchange;
 import javax.jbi.servicedesc.ServiceEndpoint;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 
@@ -48,7 +50,7 @@ public class OdeComponent implements Component {
 	/**
 	 * 
 	 * @param ref
-	 *          ServiceEndpoint object
+	 *          ServiceEndpoint object                       
 	 * 
 	 * @return Descriptor Object implementing javax.jbi.servicedesc.Descriptor
 	 *         interface.
