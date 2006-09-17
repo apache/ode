@@ -23,7 +23,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
@@ -42,12 +41,6 @@ import javax.transaction.TransactionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
-import org.hibernate.cfg.Environment;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.DialectFactory;
-import org.opentools.minerva.MinervaPool;
-import org.opentools.minerva.MinervaPool.PoolType;
-
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
@@ -57,6 +50,11 @@ import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.utils.fs.TempFileManager;
+import org.hibernate.cfg.Environment;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.DialectFactory;
+import org.opentools.minerva.MinervaPool;
+import org.opentools.minerva.MinervaPool.PoolType;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this
