@@ -19,31 +19,19 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TProvide;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-
-import javax.xml.namespace.QName;
-import javax.wsdl.Service;
-import javax.wsdl.Port;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
-import java.util.HashMap;
 
 /**
  * Extracts and treats process deployment descriptors. The descriptor interacts

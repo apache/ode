@@ -18,48 +18,60 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.naming.mem.InMemoryContextFactory;
+import java.io.File;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.Name;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.*;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.DeploymentUnit;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.hibernate.cfg.Environment;
 import org.objectweb.jotm.Jotm;
 import org.opentools.minerva.MinervaPool;
-import org.hibernate.cfg.Environment;
-
-import java.io.IOException;
-import java.io.File;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.concurrent.*;
-
-import javax.xml.namespace.QName;
-import javax.wsdl.PortType;
-import javax.transaction.TransactionManager;
-import javax.sql.DataSource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.Reference;
-import javax.naming.Name;
-import javax.naming.spi.ObjectFactory;
-import junit.framework.TestCase;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.fs.naming.mem.InMemoryContextFactory;
 
 
 class MockBpelServer {

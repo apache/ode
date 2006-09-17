@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.runtime.msgs;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.utils.msg.MessageBundle;
 
 /**
