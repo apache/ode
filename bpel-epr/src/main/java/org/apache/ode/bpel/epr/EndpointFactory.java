@@ -19,15 +19,15 @@
 
 package org.apache.ode.bpel.epr;
 
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.w3c.dom.Element;
 
 /**
  * Factory for {@link org.apache.ode.bpel.iapi.EndpointReference}
