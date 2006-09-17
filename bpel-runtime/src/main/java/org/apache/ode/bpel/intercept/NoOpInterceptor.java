@@ -20,7 +20,6 @@ package org.apache.ode.bpel.intercept;
 
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
 /**
  * No-Op implementation of the
