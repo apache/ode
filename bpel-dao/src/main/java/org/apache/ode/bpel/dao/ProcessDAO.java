@@ -18,15 +18,13 @@
  */
 package org.apache.ode.bpel.dao;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 
 import javax.xml.namespace.QName;
 
-import org.w3c.dom.Node;
-
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.w3c.dom.Node;
 
 
 /**
