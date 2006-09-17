@@ -30,7 +30,6 @@ import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.w3c.dom.Element;
 
 /**
  * JBI Implementation of ODE's {@link org.apache.ode.bpel.iapi.BindingContext}

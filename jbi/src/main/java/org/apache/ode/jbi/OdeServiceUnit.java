@@ -20,15 +20,11 @@
 package org.apache.ode.jbi;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.jbi.management.DeploymentException;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 
 /**
  * Representation of a JBI service unit. A JBI service unit may actually consist
