@@ -42,8 +42,6 @@ import java.io.File;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-import org.w3c.dom.Element;
-
 
 /**
  * Interface used by the BPEL Server to establish communication links with

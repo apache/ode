@@ -19,10 +19,9 @@
 
 package org.apache.ode.bpel.iapi;
 
-import org.w3c.dom.Element;
-
-import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
+
+import org.w3c.dom.Element;
 
 /**
  * Endpoint reference context: facililates the creation of 
