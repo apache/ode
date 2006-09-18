@@ -18,26 +18,37 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OAssign;
 import org.apache.ode.bpel.o.OAssign.LValueExpression;
 import org.apache.ode.bpel.o.OAssign.PropertyRef;
 import org.apache.ode.bpel.o.OAssign.VariableRef;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
+import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -393,7 +404,10 @@ class ASSIGN extends ACTIVITY {
           __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
                   "' value '" + DOMUtils.domToString(lvalue) +"'");
         napi.commitChanges(lval, lvalue);
-			}
+                System.out.println("#########################################");
+                System.out.println(DOMUtils.domToString(lvalue));
+                System.out.println("#########################################");
+            }
 		}
 
     ScopeEvent se;
@@ -438,12 +452,15 @@ class ASSIGN extends ACTIVITY {
 			Node replacement = doc.importNode(src, true);
 			parent.replaceChild(replacement, dest);
 		} else {
-			Node replacement = doc.createElementNS(dest.getNamespaceURI(), dest
+			Element replacement = doc.createElementNS(dest.getNamespaceURI(), dest
 					.getLocalName());
 			NodeList nl = src.getChildNodes();
 			for (int i = 0; i < nl.getLength(); ++i)
 				replacement.appendChild(doc.importNode(nl.item(i), true));
-			parent.replaceChild(replacement, dest);
+            NamedNodeMap attrs = src.getAttributes();
+            for (int i = 0; i < attrs.getLength(); ++i)
+                replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
+            parent.replaceChild(replacement, dest);
 		}
 	}
 
