@@ -35,7 +35,6 @@ public class PartnerLinkImpl extends BpelObjectImpl implements Serializable, Par
   private String _partnerRole;
   private QName _partnerLinkType;
   private boolean initializePartnerRole = false;
-  private ScopeImpl _declaredIn;
  
 
   public void setMyRole(String string) {
@@ -86,7 +85,4 @@ public class PartnerLinkImpl extends BpelObjectImpl implements Serializable, Par
     this.initializePartnerRole = initializePartnerRole;
   }
 
-  void setDeclaredIn(ScopeImpl scopeLikeConstruct) {
-    _declaredIn = scopeLikeConstruct;
-  }
 }

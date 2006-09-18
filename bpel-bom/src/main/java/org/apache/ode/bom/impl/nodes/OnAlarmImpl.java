@@ -35,11 +35,6 @@ public class OnAlarmImpl extends ScopeImpl implements OnAlarm {
   private Expression _repeatEvery;
   private Activity _activity;
 
-  /**
-   * Hack, could be declared in SCOPE, or PICK
-   */
-  private Object _declaredIn;
-
   public OnAlarmImpl() {
     super();
   }
@@ -84,7 +79,4 @@ public class OnAlarmImpl extends ScopeImpl implements OnAlarm {
 		_repeatEvery = repeatEvery;
 	}
   
-  void setDeclaredIn(Object declaredIn) {
-    _declaredIn = declaredIn;
-  }
 }
