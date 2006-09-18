@@ -80,8 +80,6 @@ public final class JacobVPU {
   /** Classloader used for loading object continuations. */
   private ClassLoader _classLoader = getClass().getClassLoader();
 
-  private boolean _debug = false;
-
   private int _cycle;
 
   private Statistics _statistics = new Statistics();
