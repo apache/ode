@@ -188,18 +188,11 @@ public class TreeBuilder extends Builder<String> {
         //TODO
         throw new IllegalArgumentException("");
     }
-    private ASTProperty extractProperty(Node parentNode, int index) {
-        return (ASTProperty)extractChildNode(parentNode, index, ASTProperty.class);
-    }
-    
-    private ASTField extractField(Node parentNode, int index) {
-        return (ASTField)extractChildNode(parentNode, index, ASTField.class);
-    }
-    
     private ASTValue extractValue(Node parentNode, int index) {
         return (ASTValue)extractChildNode(parentNode, index, ASTValue.class);
     }
     
+    @SuppressWarnings("unchecked")
     private Node extractChildNode(Node parentNode, int index, Class expected) {
         Node node = extractChildNode(parentNode, index);
         if(!(expected.isAssignableFrom(node.getClass()))) {

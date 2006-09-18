@@ -29,7 +29,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.xpath.XPathEvaluator;
 
 import org.apache.commons.logging.Log;
@@ -68,14 +67,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     /** Class-level logger. */
     private static final Log __log = LogFactory.getLog(XPath20ExpressionRuntime.class);
 
-    /** Registered extension functions. */
-    // TODO unused as of now
-    // private final HashMap _extensionFunctions  = new HashMap();
-
-    private Configuration _config;
-
     public XPath20ExpressionRuntime(){
-        _config = new Configuration();
     }
 
     public void initialize(Map properties) throws ConfigurationException {

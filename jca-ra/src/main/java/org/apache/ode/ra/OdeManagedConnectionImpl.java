@@ -40,8 +40,6 @@ class OdeManagedConnectionImpl implements ManagedConnection {
 
   private OdeConnectionImpl _activeConnection;
   private PrintWriter _logWriter;
-  private ConnectionRequestInfo _cri;
-  private Subject _subject;
 
   /** Physical communication pipe. */
   private OdeTransportPipe _transportPipe;
@@ -52,8 +50,6 @@ class OdeManagedConnectionImpl implements ManagedConnection {
   public OdeManagedConnectionImpl(OdeTransportPipe pipe, Subject subject, ConnectionRequestInfo connectionRequestInfo) 
   throws ResourceException {
     _transportPipe = pipe;
-    _subject = subject;
-    _cri = connectionRequestInfo;
     String[] classNames;
     try {
       classNames = _transportPipe.getConnectionClassNames();

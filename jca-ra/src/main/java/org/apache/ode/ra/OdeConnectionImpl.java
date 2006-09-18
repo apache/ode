@@ -40,18 +40,12 @@ import org.apache.ode.utils.Reflect;
  */
 class OdeConnectionImpl implements InvocationHandler, Connection {
 
-  private final Subject _subject;
-
-  private final ConnectionRequestInfo _cri;
-
   private OdeManagedConnectionImpl _managedConnection;
 
   private HashSet<Method> _myMethods = new HashSet<Method>();
 
   public OdeConnectionImpl(Subject subject,
       ConnectionRequestInfo connectionRequestInfo) {
-    _subject = subject;
-    _cri = connectionRequestInfo;
     for (Method m : Connection.class.getMethods())
       _myMethods.add(m);
   }
