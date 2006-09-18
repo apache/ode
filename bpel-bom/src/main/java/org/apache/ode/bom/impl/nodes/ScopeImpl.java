@@ -87,8 +87,6 @@ public abstract class ScopeImpl extends ActivityImpl implements Scope {
  
   public void setTerminationHandler(TerminationHandler terminationHandler) {
     _terminationHandler = (TerminationHandlerImpl)terminationHandler;
-    if(_terminationHandler != null)
-      _terminationHandler.setDeclaredIn(this);
   }
   
   public TerminationHandler getTerminationHandler() {
@@ -122,7 +120,6 @@ public abstract class ScopeImpl extends ActivityImpl implements Scope {
   }
 
   public void addPartnerLink(PartnerLink partnerLink) {
-    ((PartnerLinkImpl) partnerLink).setDeclaredIn(this);
     _partnerLinks.add(partnerLink);
   }
 
@@ -201,12 +198,10 @@ public abstract class ScopeImpl extends ActivityImpl implements Scope {
   }
   
   public void addOnAlarmEventHandler(OnAlarm handler) {
-    ((OnAlarmImpl) handler).setDeclaredIn(this);
     _alarms.add(handler);
   }
 
   public void addOnEventHandler(OnEvent handler) {
-    ((OnEventImpl) handler).setDeclaredIn(this);
     _onEventHandlers.add(handler);
   }
   

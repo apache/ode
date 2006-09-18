@@ -73,7 +73,6 @@ public class PickActivityImpl extends ActivityImpl implements PickActivity {
   }
 
   public void addOnMessage(OnMessage onMsg) {
-    ((OnMessageImpl) onMsg).setDeclaredIn(this);
     _onMessages.add(onMsg);
   }
 
@@ -82,7 +81,6 @@ public class PickActivityImpl extends ActivityImpl implements PickActivity {
   }
 
   public void addOnAlarm(OnAlarm onAlarm) {
-    ((OnAlarmImpl) onAlarm).setDeclaredIn(this);
     _onAlarms.add(onAlarm);
   }
 
