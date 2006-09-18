@@ -145,7 +145,6 @@ public class XAManagedConnectionFactory implements ManagedConnectionFactory {
     public ManagedConnection matchManagedConnections(Set cons, Subject sub, ConnectionRequestInfo info) throws javax.resource.ResourceException {
         // Set user and password to default
         String user = username;
-        String pw = password;
 
         // Check passed Subject and ConnectionRequestInfo for user/password overrides
         if(sub != null) {
@@ -153,7 +152,6 @@ public class XAManagedConnectionFactory implements ManagedConnectionFactory {
             for(Iterator it = creds.iterator(); it.hasNext(); ) {
                 PasswordCredential pc = (PasswordCredential)it.next();
                 user = pc.getUserName();
-                pw = new String(pc.getPassword());
                 break;
             }
         } else {
@@ -163,7 +161,6 @@ public class XAManagedConnectionFactory implements ManagedConnectionFactory {
                 }
                 JDBCConnectionRequestInfo jdbcInfo = (JDBCConnectionRequestInfo)info;
                 user = jdbcInfo.user;
-                pw = jdbcInfo.password;
             }
         }
 
