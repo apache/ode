@@ -18,6 +18,8 @@
  */
 package org.apache.ode.sax.fsa.bpel_2_0;
 
+import java.util.Iterator;
+
 import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.CorrelationSet;
 import org.apache.ode.bom.api.OnAlarm;
@@ -28,27 +30,15 @@ import org.apache.ode.bom.api.Variable;
 import org.apache.ode.bom.impl.nodes.ProcessImpl;
 import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.evt.XmlAttributes;
-import org.apache.ode.sax.evt.attspec.FilterSpec;
-import org.apache.ode.sax.evt.attspec.XmlAttributeSpec;
 import org.apache.ode.sax.fsa.ParseContext;
 import org.apache.ode.sax.fsa.ParseError;
 import org.apache.ode.sax.fsa.ParseException;
 import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
 
-import java.net.URL;
-import java.util.Iterator;
-
 class BpelProcessState extends BaseBpelState implements org.apache.ode.bpel.parser.BpelProcessState {
 
     private static final StateFactory _factory = new Factory();
-
-    // TODO: still needed?
-    private static final XmlAttributeSpec spec = new FilterSpec(
-            new String[] {"name","targetNamespace"},
-            new String[] {"queryLanguage","expressionLanguage","suppressJoinFailure",
-                    "abstractProcess"}
-    );
 
     private Process _process;
 
@@ -76,10 +66,6 @@ class BpelProcessState extends BaseBpelState implements org.apache.ode.bpel.pars
         XmlAttributes atts = se.getAttributes();
         String name = atts.getValue("name");
         String tns = atts.getValue("targetNamespace");
-        // TODO: still needed?
-        short suppressJoinFailure;
-        // TODO: Come back and fix this!
-        URL url = null;
 
         _process = new ProcessImpl();
         _process.setBpelVersion(Process.BPEL_V200);

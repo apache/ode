@@ -21,12 +21,15 @@ package org.apache.ode.sax.fsa.bpel_1_1;
 import org.apache.ode.bom.api.Activity;
 import org.apache.ode.bom.impl.nodes.ExpressionImpl;
 import org.apache.ode.bom.impl.nodes.WaitActivityImpl;
-import org.apache.ode.sax.fsa.*;
 import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.evt.XmlAttributes;
 import org.apache.ode.sax.evt.attspec.FilterSpec;
-import org.apache.ode.sax.evt.attspec.OrSpec;
 import org.apache.ode.sax.evt.attspec.XmlAttributeSpec;
+import org.apache.ode.sax.fsa.ParseContext;
+import org.apache.ode.sax.fsa.ParseError;
+import org.apache.ode.sax.fsa.ParseException;
+import org.apache.ode.sax.fsa.State;
+import org.apache.ode.sax.fsa.StateFactory;
 
 class Bpel11WaitActivityState extends Bpel11BaseActivityState {
 
@@ -34,8 +37,6 @@ class Bpel11WaitActivityState extends Bpel11BaseActivityState {
       new String[] {"for"},BPEL11_BASE_ACTIVITY_ATTS); 
   private static final XmlAttributeSpec UNTIL = new FilterSpec(
       new String[] {"until"},BPEL11_BASE_ACTIVITY_ATTS);
-  // TODO still required?
-  private static final XmlAttributeSpec ALARMSPEC = new OrSpec(FOR,UNTIL);
   
   private static final StateFactory _factory = new Factory();
   
