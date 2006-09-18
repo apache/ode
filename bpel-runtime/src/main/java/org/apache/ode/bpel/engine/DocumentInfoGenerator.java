@@ -30,7 +30,6 @@ import java.util.Map;
  * Class for generating information about a document resource.  
  */
 class DocumentInfoGenerator {
-  private final File _baseDir;
   private final File _file;
   private String _type;
   
@@ -48,7 +47,6 @@ class DocumentInfoGenerator {
   
   
   DocumentInfoGenerator(File baseDir, File f) {
-    _baseDir = baseDir;
     _file = f;
     
     recognize();

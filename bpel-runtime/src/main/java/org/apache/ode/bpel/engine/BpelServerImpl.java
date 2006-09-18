@@ -110,12 +110,6 @@ public class BpelServerImpl implements BpelServer {
     /** Object that keeps track (persistently) of the deployment units */
     private DeploymentManager _deploymentManager = null;
 
-    private ThreadLocal<Boolean> _associated = new ThreadLocal<Boolean>() {
-        public Boolean initialValue() {
-            return Boolean.FALSE;
-        }
-    };
-
     /** Directory where we keep track of deployments. */
     private String _deployDir = null;
 
