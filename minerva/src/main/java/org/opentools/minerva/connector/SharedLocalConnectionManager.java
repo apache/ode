@@ -180,7 +180,7 @@ public class SharedLocalConnectionManager extends BaseConnectionManager implemen
             try {
                 listener.enlist();
             } catch(Exception e) {
-                ResourceException re = new ResourceException("Unable to register listeners for connection: "+e, e);
+                throw new ResourceException("Unable to register listeners for connection: "+e, e);
             }
         } else {
             // Why do we care?  Old trans is over, work will be lost.

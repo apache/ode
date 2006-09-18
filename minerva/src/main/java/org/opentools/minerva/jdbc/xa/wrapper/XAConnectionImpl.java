@@ -67,7 +67,6 @@ import org.opentools.minerva.pool.PooledObject;
  */
 @SuppressWarnings("unchecked")
 public class XAConnectionImpl implements XAConnection, PooledObject {
-    private final static String CLOSED = "Connection has been closed!";
     private Connection con;
     private XAResourceImpl resource;
     private Vector listeners, poolListeners;
@@ -143,7 +142,7 @@ public class XAConnectionImpl implements XAConnection, PooledObject {
     public void clientConnectionClosed() {
         if(--clientConnectionCount > 0)
             return;  // Only take action if the last connection referring to this is closed
-        boolean trans = resource.isTransaction(); // could be committed directly on notification?  Seems unlikely, but let's not rule it out.
+//        boolean trans = resource.isTransaction(); // could be committed directly on notification?  Seems unlikely, but let's not rule it out.
         Vector local = (Vector)listeners.clone();
         for(int i=local.size()-1; i>=0; i--)
             ((ConnectionEventListener)local.elementAt(i)).connectionClosed(new ConnectionEvent(this));

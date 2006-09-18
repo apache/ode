@@ -22,8 +22,10 @@
  */
 package org.opentools.minerva.cache;
 
-import java.io.PrintWriter;
-import java.util.*;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A Least Recently Used cache implementation.  The object in the
@@ -36,7 +38,6 @@ import java.util.*;
 public class LeastRecentlyUsedCache implements ObjectCache {
     private Object lock = new Object();
     private HashMap keyMap = new HashMap();
-    private PrintWriter log = new PrintWriter(System.out);
     private Node mostRecentNode, leastRecentNode;
     private int size;
     private int maxSize;
