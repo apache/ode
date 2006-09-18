@@ -41,7 +41,6 @@ import org.apache.ode.sax.fsa.State;
 import org.apache.ode.sax.fsa.StateFactory;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
-import org.xml.sax.Locator;
 
 class BpelFromState extends BaseBpelState {
 
@@ -51,7 +50,6 @@ class BpelFromState extends BaseBpelState {
 
     private NSContext _nsctx;
     private String _expressionLanguage;
-    private Locator _locator;
     private ExpressionImpl _expr;
     private DOMGenerator _domGenerator;
     private StartElement _se;
@@ -67,7 +65,6 @@ class BpelFromState extends BaseBpelState {
         XmlAttributeSpec VAR_PROP = new FilterSpec(
                 new String[] {"variable","property"},new String[] {});
         _se = se;
-        _locator = se.getLocation();
         _nsctx = se.getNamespaceContext();
         XmlAttributes atts = se.getAttributes();
         _expressionLanguage = atts.getValue("expressionLanguage");
