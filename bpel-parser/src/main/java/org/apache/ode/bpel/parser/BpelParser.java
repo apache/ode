@@ -18,22 +18,17 @@
  */
 package org.apache.ode.bpel.parser;
 
+import java.io.IOException;
+import java.net.URL;
+
 import org.apache.ode.bom.api.Process;
 import org.apache.ode.sax.fsa.FsaHandler;
 import org.apache.ode.utils.XMLParserUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import java.io.IOException;
-import java.net.URL;
-
 class BpelParser {
-  
-  private static final Log __log = LogFactory.getLog(BpelParser.class);
-
   public static final String WSDL = "http://schemas.xmlsoap.org/wsdl/";
 
   public static final String WSBPEL2_PLINK = "http://schemas.xmlsoap.org/ws/2004/03/partner-link/";

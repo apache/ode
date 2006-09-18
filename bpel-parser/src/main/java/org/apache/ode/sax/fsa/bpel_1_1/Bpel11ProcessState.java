@@ -20,27 +20,26 @@ package org.apache.ode.sax.fsa.bpel_1_1;
 
 import java.util.Iterator;
 
-import org.apache.ode.bom.api.*;
+import org.apache.ode.bom.api.CorrelationSet;
+import org.apache.ode.bom.api.OnAlarm;
+import org.apache.ode.bom.api.OnEvent;
+import org.apache.ode.bom.api.PartnerLink;
 import org.apache.ode.bom.api.Process;
+import org.apache.ode.bom.api.Variable;
 import org.apache.ode.bom.impl.nodes.ProcessImpl;
 import org.apache.ode.bpel.parser.BpelProcessState;
-import org.apache.ode.sax.fsa.*;
 import org.apache.ode.sax.evt.StartElement;
 import org.apache.ode.sax.evt.XmlAttributes;
-import org.apache.ode.sax.evt.attspec.FilterSpec;
-import org.apache.ode.sax.evt.attspec.XmlAttributeSpec;
+import org.apache.ode.sax.fsa.ParseContext;
+import org.apache.ode.sax.fsa.ParseError;
+import org.apache.ode.sax.fsa.ParseException;
+import org.apache.ode.sax.fsa.State;
+import org.apache.ode.sax.fsa.StateFactory;
 
 class Bpel11ProcessState extends BaseBpelState implements BpelProcessState {
 
   private static final StateFactory _factory = new Factory();
     
-  // TODO still required?
-  private static final XmlAttributeSpec spec = new FilterSpec(
-        new String[] {"name","targetNamespace"},
-        new String[] {"queryLanguage","expressionLanguage","suppressJoinFailure",
-            "enableInstanceCompensation","abstractProcess"}
-      );
-  
   private Process _process;
   
   Bpel11ProcessState(StartElement se, ParseContext pc) throws ParseException {
@@ -48,8 +47,6 @@ class Bpel11ProcessState extends BaseBpelState implements BpelProcessState {
     XmlAttributes atts = se.getAttributes();
     String name = atts.getValue("name");
     String tns = atts.getValue("targetNamespace");
-    // TODO still required?
-    short suppressJoinFailure;
     
     _process = new ProcessImpl();
     if (se.getLocation() != null) {
