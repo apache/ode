@@ -50,11 +50,6 @@ public class VariableImpl extends BpelObjectImpl implements Serializable, Variab
    */
   private Scope _scope;
 
-  /**
-   * If a schemaType, is type simple
-   */
-  private boolean _isSimpleType;
-  
   public VariableImpl() {
   }
 
@@ -65,7 +60,6 @@ public class VariableImpl extends BpelObjectImpl implements Serializable, Variab
   public VariableImpl(String name, QName schemaType, boolean isSimpleType) {
     _name = name;
     _type = schemaType;
-    _isSimpleType = isSimpleType;
   }
 
 

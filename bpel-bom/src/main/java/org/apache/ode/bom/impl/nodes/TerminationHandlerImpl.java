@@ -30,7 +30,6 @@ public class TerminationHandlerImpl extends BpelObjectImpl implements Terminatio
 
   private static final long serialVersionUID = -1L;
   private ActivityImpl _activity;
-	private ScopeImpl _declaredIn;
 
   public TerminationHandlerImpl(NSContext nsContext) {
     super(nsContext);
@@ -45,8 +44,4 @@ public class TerminationHandlerImpl extends BpelObjectImpl implements Terminatio
     _activity = (ActivityImpl) activity;
   }
   
-  void setDeclaredIn(ScopeImpl scopeLikeConstruct) {
-    _declaredIn = scopeLikeConstruct;
-  }
-
 }

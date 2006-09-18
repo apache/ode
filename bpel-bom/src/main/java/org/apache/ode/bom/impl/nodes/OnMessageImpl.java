@@ -41,7 +41,6 @@ public class OnMessageImpl extends ScopeImpl implements OnMessage {
   private String _variable;
   private CorrelationHelperImpl _correlations = new CorrelationHelperImpl();
   private Activity _activity;
-  private Object _declaredIn;
   private String _messageExchange;
 
   public OnMessageImpl(NSContext nsContext) {
@@ -109,10 +108,6 @@ public class OnMessageImpl extends ScopeImpl implements OnMessage {
     _correlations.addCorrelation(c);
   }
 
-  void setDeclaredIn(Object declaredIn) {
-    _declaredIn = declaredIn;
-  }
-  
 	public String getMessageExchangeId() {
 		return _messageExchange;
 	}
