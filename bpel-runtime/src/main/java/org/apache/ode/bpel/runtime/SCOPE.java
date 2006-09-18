@@ -128,7 +128,6 @@ class SCOPE extends ACTIVITY {
     private FaultData _fault;
     private long _startTime;
     private final HashSet<CompensationHandler> _compensations = new HashSet<CompensationHandler>();
-    private boolean _childCompleted;
     private boolean _childTermRequested;
 
     ACTIVE() {

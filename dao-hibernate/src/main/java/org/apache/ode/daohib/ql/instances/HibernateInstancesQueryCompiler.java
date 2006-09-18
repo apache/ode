@@ -170,10 +170,6 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
     return dbField;
   }
 
-  private static Long getLong(Value<String> value) {
-    return Long.parseLong(value.getValue());
-  }
-
   private void init() {
     propertyInQuery = false;
     orderByStatus = false;

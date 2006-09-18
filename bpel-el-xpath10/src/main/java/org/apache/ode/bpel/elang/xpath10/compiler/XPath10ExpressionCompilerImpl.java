@@ -18,6 +18,11 @@
  */
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bom.api.Expression;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.capi.CompilerContext;
@@ -26,15 +31,10 @@ import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath10.runtime.XPath10ExpressionRuntime;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.jaxen.Function;
 import org.jaxen.saxpath.SAXPathException;
 import org.jaxen.saxpath.XPathReader;
 import org.jaxen.saxpath.helpers.XPathReaderFactory;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -44,7 +44,7 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
 
   private static final XPathMessages __msgs = MessageBundle.getMessages(XPathMessages.class);
 
-  private HashMap<String,Function> _extensionFunctions = new HashMap<String,Function>();
+  // private HashMap<String,Function> _extensionFunctions = new HashMap<String,Function>();
   protected CompilerContext _compilerContext;
 
   /** Namespace of the BPEL functions (for v2 to v1 compatibility) . */
@@ -83,7 +83,8 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
     return _properties;
   }
 
-  // TODO is this dead or just unfinished?
+  // Dead code
+  /*
   private void registerExtensionFunction(String name, Class function) {
     try {
       Function jaxenFunction = (Function)function.newInstance();
@@ -99,6 +100,7 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
                                  + Function.class.getName());
     }
   }
+  */
 
   /**
    * Verifies validity of a xpath expression.
