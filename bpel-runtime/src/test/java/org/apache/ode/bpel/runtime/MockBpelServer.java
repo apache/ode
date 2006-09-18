@@ -87,7 +87,7 @@ class MockBpelServer {
   EndpointReferenceContext  _eprContext;
   MessageExchangeContext    _mexContext;
   BindingContext            _bindContext;
-  HashMap                   _activated = new HashMap();
+  HashMap<String, QName>    _activated = new HashMap();
   HashMap                   _endpoints = new HashMap();
 
 
@@ -253,8 +253,6 @@ class MockBpelServer {
         String service = DOMUtils.getChildCharacterData(element);
         return (EndpointReference)_endpoints.get(service);
       }
-      public EndpointReference activateEndpoint(QName qName, QName qName1, Element element) { return null; }
-      public void deactivateEndpoint(EndpointReference endpointReference) { }
       public EndpointReference convertEndpoint(QName qName, Element element) { return null; }
     };
     return _eprContext;

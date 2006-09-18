@@ -18,6 +18,17 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -46,11 +57,10 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
@@ -73,16 +83,6 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -408,13 +408,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public Node fetchVariableData(VariableInstance var,
                                   OMessageVarType.Part part, boolean forWriting) throws FaultException {
         Node container = fetchVariableData(var, forWriting);
-        OVarType varType = var.declaration.type;
 
         // If we want a specific part, we will need to navigate through the
         // message/part structure
         if (var.declaration.type instanceof OMessageVarType && part != null) {
             container = getPartData((Element) container, part);
-            varType = part.type;
         }
         return container;
     }
