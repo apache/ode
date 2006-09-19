@@ -40,7 +40,7 @@ public class BindingContextImpl implements BindingContext {
 	public PartnerRoleChannel createPartnerRoleChannel(QName processId,
 			DeploymentUnit deploymentUnit, PortType portType,
 			Endpoint initialPartnerEndpoint) {
-		return null;
+		return new PartnerRoleChannelImpl();
 	}
 
 }

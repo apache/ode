@@ -1,0 +1,14 @@
+# Test BPEL control flow objects
+# Control flow one is positive and control flow two is negative the loop indcator is set to minimum.
+# Expected result = Event Start Test1.2 -> root process splits into A and B -> process B completes -> process A completes -> merge into root process -> test switch statement -> case min: set loop iterations = 5 -> test loop iterations -> 2 -> 3 -> 4 -> 5 -> 6 -> test1Process complete
+
+# Note the prefix on the part name identifies the message type ( xml = xml data; str = string data )
+
+target.name.space=urn:sybase:bpel:test1Processing
+port.type=test1PT
+operation=request
+
+part1=xml.requestMessageData
+
+xml.requestMessageData=<testMessage><requestID>Start Test1.2</requestID><requestText>Event Start Test1.2</requestText><flowIndicators><indicatorOne>yes</indicatorOne><indicatorTwo>no</indicatorTwo></flowIndicators><loopIndicator>min</loopIndicator></testMessage>
+
