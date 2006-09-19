@@ -29,8 +29,10 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
@@ -92,27 +94,36 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 Node variableNode = _ectx.readVariable(variable, part);
                 if (variableNode == null)
                     throw new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + variableName.getLocalPart());
-                if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple) {
-                    String text = variableNode.getTextContent();
-                    try {
-                        return XSTypes.toJavaObject(((OXsdTypeVarType)variable.type).xsdType,
-                                text);
-                    } catch (Exception e) { }
-                    // Elegant way failed, trying brute force
-                    try {
-                        return Integer.valueOf(text);
-                    } catch (NumberFormatException e) { }
-                    try {
-                        return Double.valueOf(text);
-                    } catch (NumberFormatException e) { }
-                    return text;
-                } else {
-                    // Saxon expects a nodelist, everything else will result in a wrong result...
-                    return variableNode.getChildNodes();
-                }
+                if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple) 
+                	return getSimpleContent(variableNode.getTextContent(),((OXsdTypeVarType)variable.type).xsdType);
+                if (part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
+                	return getSimpleContent(variableNode.getTextContent(),((OXsdTypeVarType)part.type).xsdType);
+
+                // Saxon expects a nodelist, everything else will result in a wrong result...
+                //Document doc = DOMUtils.newDocument();
+                //doc.appendChild(doc.importNode(variableNode, true));
+                //return doc.getChildNodes();
+                	
+                return variableNode.getChildNodes();
+                
             }catch(FaultException e){
                 throw new WrappedResolverException(e);
             }
         }
     }
+    
+    private Object getSimpleContent(String text, QName type) {
+    	try {
+    		return XSTypes.toJavaObject(type,text);
+    	} catch (Exception e) { }
+        // Elegant way failed, trying brute force
+    	try {
+    		return Integer.valueOf(text);
+    	} catch (NumberFormatException e) { }
+    	try {
+    		return Double.valueOf(text);
+    	} catch (NumberFormatException e) { }
+    	return text;
+    }
+
 }
