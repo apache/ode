@@ -45,6 +45,7 @@ public class BPELTest extends TestCase {
 		server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
 		server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
+		server.setMessageExchangeContext(new MessageExchangeContextImpl());
 		server.setDeploymentManager(new DeploymentManagerImpl());
 		server.init();
 		server.start();
@@ -76,7 +77,8 @@ public class BPELTest extends TestCase {
 		
 		Message request = mex.createMessage(null);
 		
-		Element elem = DOMUtils.stringToDOM(in);			
+		Element elem = DOMUtils.stringToDOM(in);
+		String tmp = elem.toString();
 		request.setMessage(elem);
 		
 		mex.invoke(request);
@@ -84,12 +86,15 @@ public class BPELTest extends TestCase {
 		Message response = mex.getResponse();
 		
 		String resp = DOMUtils.domToString(response.getMessage());
+		System.out.println(resp);
 		assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
-		
 	}
 	
-	public void testHelloWorld2() throws Exception {
-		go("target/test-classes/bpel/2.0/HelloWorld2");
+//	public void testHelloWorld2() throws Exception {
+//		go("target/test-classes/bpel/2.0/HelloWorld2");
+//	}
+	public void testFlowActivity() throws Exception {
+		go("target/test-classes/bpel/2.0/TestFlowActivity");
 	}
 
 }

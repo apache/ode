@@ -1,0 +1,12 @@
+# Test BPEL control flow objects
+# Both control flows are set to positive the loop indcator is set to maximum.
+# Expected result = Event Start Test1.5 -> root process splits into A and B -> process B completes -> process A completes -> processes A and B merge on process C -> merge into root process -> test switch statement -> case max: set loop iterations = 10 -> test loop iterations -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> test1Process complete
+
+target.name.space=urn:sybase:bpel:test1Processing
+port.type=test1PT
+operation=request
+
+part1=xml.requestMessageData
+
+xml.requestMessageData=<testMessage><requestID>Start Test1.5</requestID><requestText>Event Start Test1.5</requestText><flowIndicators><indicatorOne>yes</indicatorOne><indicatorTwo>yes</indicatorTwo></flowIndicators><loopIndicator>max</loopIndicator></testMessage>
+
