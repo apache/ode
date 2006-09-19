@@ -68,31 +68,36 @@ public class BPELTest extends TestCase {
 		QName serviceId = new QName(testProps.getProperty("namespace"),
 				testProps.getProperty("service"));
 		String operation = testProps.getProperty("operation");
-		String in = testProps.getProperty("request");
-		String responsePattern = testProps.getProperty("response");
 		
 		server.getDeploymentService().deploy(new File(deployDir));
 		
-		MyRoleMessageExchange mex = server.getEngine().createMessageExchange("",serviceId,operation);
+		MyRoleMessageExchange mex = server.getEngine().createMessageExchange("",serviceId,operation);		
 		
-		Message request = mex.createMessage(null);
 		
-		Element elem = DOMUtils.stringToDOM(in);
-		String tmp = elem.toString();
-		request.setMessage(elem);
+		for (int i=1; testProps.getProperty("request"+i) != null; i++) {
 		
-		mex.invoke(request);
+			String in = testProps.getProperty("request"+i);
+			String responsePattern = testProps.getProperty("response"+i);
 		
-		Message response = mex.getResponse();
+			Message request = mex.createMessage(null);
 		
-		String resp = DOMUtils.domToString(response.getMessage());
-		System.out.println(resp);
-		assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
+			Element elem = DOMUtils.stringToDOM(in);
+			String tmp = elem.toString();
+			request.setMessage(elem);
+		
+			mex.invoke(request);
+		
+			Message response = mex.getResponse();
+		
+			String resp = DOMUtils.domToString(response.getMessage());
+			System.out.println(resp);
+			assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
+		}
 	}
 	
-//	public void testHelloWorld2() throws Exception {
-//		go("target/test-classes/bpel/2.0/HelloWorld2");
-//	}
+	public void testHelloWorld2() throws Exception {
+		go("target/test-classes/bpel/2.0/HelloWorld2");
+	}
 	public void testFlowActivity() throws Exception {
 		go("target/test-classes/bpel/2.0/TestFlowActivity");
 	}
