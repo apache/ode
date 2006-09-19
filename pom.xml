@@ -104,7 +104,6 @@
         <module>axis2-war</module>
         <module>axis2-examples</module>
 
-        <module>bootstrap</module>
         <module>utils</module>
         <module>minerva</module>
 
@@ -126,6 +125,7 @@
         <module>bpel-ql</module>
         <module>bpel-connector</module>
         <module>bpel-epr</module>
+        <module>bpel-test</module>
 
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
@@ -315,16 +315,9 @@
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-bom</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-bootstrap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
