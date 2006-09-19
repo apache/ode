@@ -1,0 +1,12 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test/testFlowActivity" 
+	xmlns:wns="http://ode/bpel/unit-test/testFlowActivity.wsdl">
+
+
+	<process name="pns:TestFlowActivityProcess">
+		<active>true</active>
+		<provide partnerLink="request">
+			<service name="wns:TestFlowActivityService" port="wns:TestFlowActivityPort"/>
+		</provide>
+	</process>
+</deploy>
