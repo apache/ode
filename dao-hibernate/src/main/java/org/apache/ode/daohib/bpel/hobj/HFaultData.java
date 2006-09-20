@@ -65,6 +65,9 @@ public class HFaultData extends HObject {
   }
 
   public void setExplanation(String explanation) {
+      // Don't want to make this a blob, truncating to avoid errors
+      if (explanation != null && explanation.length() > 255)
+          explanation = explanation.substring(0, 254);
     _explanation = explanation;
   }
 
