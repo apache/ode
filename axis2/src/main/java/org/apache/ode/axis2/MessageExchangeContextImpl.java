@@ -46,19 +46,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
-//        EndpointReference epr = partnerRoleMessageExchange.getEndpointReference();
-//        // We only invoke with WSA endpoints, that makes our life easier
-//        if (!(epr instanceof WSAEndpoint))
-//            epr = EndpointFactory.convert(new QName(Namespaces.WS_ADDRESSING_NS, "EndpointReference"),
-//                    epr.toXML().getDocumentElement());
-//        // It's now safe to cast
-//        QName serviceName = ((WSAEndpoint)epr).getServiceName();
-//        String portName = ((WSAEndpoint)epr).getPortName();
-//        if (__log.isDebugEnabled())
-//            __log.debug("The service to invoke is the external service " + serviceName);
-//        ExternalService service = _server.getExternalService(serviceName, portName);
-
-        ExternalService service = (ExternalService) partnerRoleMessageExchange.getChannel();
+        ExternalService service = (ExternalService)partnerRoleMessageExchange.getChannel();
+        if (__log.isDebugEnabled())
+            __log.debug("The service to invoke is the external service " + service);
         service.invoke(partnerRoleMessageExchange);
     }
 

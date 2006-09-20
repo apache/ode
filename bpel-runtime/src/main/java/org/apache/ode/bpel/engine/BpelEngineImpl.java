@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -45,6 +46,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server
@@ -54,8 +57,21 @@ import java.util.Map;
  * 
  */
 public class BpelEngineImpl implements BpelEngine {
-
     private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
+    /** RNG, for delays */
+    private Random _random = new Random(System.currentTimeMillis());
+    
+    private static double _delayMean = 0;
+    static {
+        try {
+            _delayMean = Double.valueOf(System.getenv("ODE_DEBUG_TX_DELAY"));
+            __log.info("Stochastic debugging delay activated. Delay (Mean)=" + _delayMean + "ms.");
+        } catch (Throwable t) {
+            __log.error("Could not read ODE_DEBUG_TX_DELAY environment variable! Assuming 0 (mean) delay");
+            
+        }
+    }
+
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -201,7 +217,6 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
-
         WorkEvent we = new WorkEvent(jobDetail);
 
         ProcessInstanceDAO instance = _contexts.dao.getConnection().getInstance(we.getIID());
@@ -227,6 +242,18 @@ public class BpelEngineImpl implements BpelEngine {
 
         assert process != null;
         process.handleWorkEvent(jobDetail);
+        
+        // Do a delay for debugging purposes.
+        if (_delayMean != 0 )
+        try {
+            double u = _random.nextDouble();  // Uniform
+            long delay  = (long)(-Math.log(u)*_delayMean); // Exponential distribution with mean _delayMean
+            __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms." );
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            ; // ignore
+        } 
+
     }
 
     public MessageExchange getMessageExchangeByClientKey(String clientKey) {

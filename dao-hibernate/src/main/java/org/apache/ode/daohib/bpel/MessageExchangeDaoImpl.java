@@ -73,10 +73,12 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setPortType(QName porttype) {
         _hself.setPortType(porttype == null ? null : porttype.toString());
+        update();
     }
 
     public void setStatus(String status) {
         _hself.setState(status);
+        update();
     }
 
     public String getStatus() {
@@ -95,11 +97,12 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setRequest(MessageDAO msg) {
         _hself.setRequest(msg == null ? null : (HMessage) ((MessageDaoImpl) msg).getHibernateObj());
-
+        update();
     }
 
     public void setResponse(MessageDAO msg) {
         _hself.setResponse(msg == null ? null : (HMessage) ((MessageDaoImpl) msg).getHibernateObj());
+        update();
     }
 
     public int getPartnerLinkModelId() {
@@ -108,6 +111,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setPartnerLinkModelId(int modelId) {
         _hself.setPartnerLinkModelId(modelId);
+        update();
     }
 
     /**

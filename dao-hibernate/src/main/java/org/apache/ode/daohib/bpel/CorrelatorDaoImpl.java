@@ -36,6 +36,7 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.ArrayUtils;
+import org.hibernate.LockMode;
 import org.hibernate.Query;
 
 /**
@@ -43,16 +44,20 @@ import org.hibernate.Query;
  */
 class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
-    private static final String QRY_MESSAGE = "select this from " + HCorrelatorMessage.class.getName()
-            + " as hk where hk.correlationKey = ?".intern();
+    /** 
+     * Note: the hk.messageExchange=null is a hack to get around a Hibernate bug where the query
+     * does not properly discriminate for the proper subclass.
+     */
+    private static final String QRY_MESSAGE = "where this.correlationKey = ?".intern();
 
     /** filter for finding a matching selector. */
-    private static final String FLTR_SELECTORS = "where this.correlationKey = ?" + " and (this.instance.state = "
-            + ProcessState.STATE_ACTIVE + "      or this.instance.state = " + ProcessState.STATE_READY + ")".intern();
+    private static final String FLTR_SELECTORS = "where this.correlationKey = ?" + " and " +
+            "(this.instance.state = " + ProcessState.STATE_ACTIVE + " or this.instance.state = " 
+            + ProcessState.STATE_READY + ")".intern();
 
     /** Query for removing routes. */
     private static final String QRY_DELSELECTORS = "delete from " + HCorrelatorSelector.class.getName()
-            + " where groupId = ? " + "and instance = ?".intern();
+            + " where groupId = ? and instance = ?".intern();
 
     private static final String QRY_DELMESSAGES = "delete from " + HCorrelatorMessage.class.getName()
             + " where messageExchange = ?".intern();
@@ -67,26 +72,37 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     }
 
     public MessageExchangeDAO dequeueMessage(CorrelationKey key) {
+        String hdr = "dequeueMessage(" + key + "): ";
+        __log.debug(hdr);
+
         Query qry = getSession().createFilter(_hobj.getMessageCorrelations(), QRY_MESSAGE);
-        qry.setString(0, CorrelationKeySerializer.toCanonicalString(key));
+        qry.setString(0, key.toCanonicalString());
         HCorrelatorMessage mcor = (HCorrelatorMessage) qry.uniqueResult();
 
-        if (mcor == null)
+        if (mcor == null) {
+            __log.debug(hdr + "did not find a MESSAGE entry.");
             return null;
-        
+        }
+
+        __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
         removeEntries(mcor.getMessageExchange());
 
         return new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
     }
 
     public MessageRouteDAO findRoute(CorrelationKey key) {
-        if (__log.isTraceEnabled())
-            __log.trace("findRoute(key=" + key + ")");
+        String hdr = "findRoute(key=" + key + "): ";
+        if (__log.isDebugEnabled())
+            __log.debug(hdr);
 
         Query q = getSession().createFilter(_hobj.getSelectors(), FLTR_SELECTORS);
-        q.setString(0, CorrelationKeySerializer.toCanonicalString(key));
+        q.setString(0, key == null ? null : key.toCanonicalString());
+        q.setLockMode("this", LockMode.UPGRADE);
+
         HCorrelatorSelector selector = (HCorrelatorSelector) q.uniqueResult();
-        return selector == null ? null :  new MessageRouteDaoImpl(_sm, selector);
+
+        __log.debug(hdr + "found " + selector);
+        return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
     }
 
     /**
@@ -95,10 +111,11 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
      */
     public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] correlationKeys) {
         String[] keys = canonifyKeys(correlationKeys);
-        if (__log.isDebugEnabled()) {
-            __log.debug("enqueueProcessInvocation: mex=" + mex + " keys="
-                    + ArrayUtils.makeCollection(ArrayList.class, keys));
-        }
+        String hdr = "enqueueMessage(mex=" + ((MessageExchangeDaoImpl) mex)._hobj.getId() + " keys="
+                + ArrayUtils.makeCollection(ArrayList.class, keys) + "): ";
+
+        if (__log.isDebugEnabled())
+            __log.debug(hdr);
 
         for (String key : keys) {
             HCorrelatorMessage mcor = new HCorrelatorMessage();
@@ -107,6 +124,9 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             mcor.setCorrelationKey(key);
             mcor.setMessageExchange((HMessageExchange) ((MessageExchangeDaoImpl) mex)._hobj);
             getSession().save(mcor);
+
+            if (__log.isDebugEnabled())
+                __log.debug(hdr + "saved " + mcor);
         }
 
     }
@@ -114,23 +134,28 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     private String[] canonifyKeys(CorrelationKey[] keys) {
         String[] ret = new String[keys.length];
         for (int i = 0; i < ret.length; ++i) {
-            ret[i] = CorrelationKeySerializer.toCanonicalString(keys[i]);
+            ret[i] = keys[i].toCanonicalString();
         }
         return ret;
     }
 
     public void addRoute(String routeGroupId, ProcessInstanceDAO target, int idx, CorrelationKey correlationKey) {
+        String hdr = "addRoute(" + routeGroupId + ", iid=" + target.getInstanceId() + ", idx=" + idx + ", ckey="
+                + correlationKey + "): ";
+
+        __log.debug(hdr);
 
         HCorrelatorSelector hsel = new HCorrelatorSelector();
         hsel.setGroupId(routeGroupId);
         hsel.setIndex(idx);
-        hsel.setCorrelationKey(CorrelationKeySerializer.toCanonicalString(correlationKey));
+        hsel.setCorrelationKey(correlationKey.toCanonicalString());
         hsel.setInstance((HProcessInstance) ((ProcessInstanceDaoImpl) target).getHibernateObj());
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
         _hobj.getSelectors().add(hsel);
         getSession().save(hsel);
 
+        __log.debug(hdr + "saved " + hsel);
     }
 
     public String getCorrelatorId() {
@@ -138,18 +163,24 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     }
 
     public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
+        String hdr = "removeRoutes(" + routeGroupId + ", iid=" + target.getInstanceId() + "): ";
+        __log.debug(hdr);
         Query q = getSession().createQuery(QRY_DELSELECTORS);
-        q.setString(0, routeGroupId);  // groupId
+        q.setString(0, routeGroupId); // groupId
         q.setEntity(1, ((ProcessInstanceDaoImpl) target).getHibernateObj()); // instance
-        q.executeUpdate();
+        int updates = q.executeUpdate();
+        __log.debug(hdr + "deleted " + updates + " rows");
+
     }
 
-    
     public void removeEntries(HMessageExchange mex) {
+        String hdr = "removeEntries(" + mex + "): ";
+        __log.debug(hdr);
+
         Query q = getSession().createQuery(QRY_DELMESSAGES);
-        q.setEntity(0, mex);  // messageExchange
-        q.executeUpdate();
+        q.setEntity(0, mex); // messageExchange
+        int numMods = q.executeUpdate();
+        __log.debug(hdr + " deleted " + numMods + " rows");
     }
-    
 
 }

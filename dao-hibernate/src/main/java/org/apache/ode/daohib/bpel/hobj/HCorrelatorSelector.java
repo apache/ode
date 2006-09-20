@@ -19,7 +19,7 @@
 package org.apache.ode.daohib.bpel.hobj;
 
 /**
- * @hibernate.subclass table="BPEL_CORRELATOR_ENTRY" discriminator-value="S"
+ * @hibernate.class table="BPEL_SELECTORS"
  * 
  */
 public class HCorrelatorSelector extends HCorrelatorEntry {
@@ -29,6 +29,10 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     private String _groupId;
 
     private int _idx;
+
+    private HCorrelator _correlator;
+
+    private String _correlationKey;
 
     /**
      * @hibernate.many-to-one column="PIID"
@@ -54,7 +58,7 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     }
 
     /**
-     * @hibernate.property column="IDX"
+     * @hibernate.property column="IDX" not-null="true"
      */
     public int getIndex() {
         return _idx;
@@ -63,4 +67,37 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     public void setIndex(int idx) {
         _idx = idx;
     }
+    
+    @Override
+    public String toString() {
+        return "{HCorrelatorSelector correlator=" + this.getCorrelator() + ", ckey=" + getCorrelationKey() + 
+        ", groupId=" + getGroupId() + ", idx=" + getIndex() + ", iid=" + getInstance().getId() + "}";
+    }
+
+    /**
+     * @hibernate.property column="CORRELATION_KEY"
+     * @hibernate.column name="CORRELATION_KEY"
+     *                   index="IDX_SELECTOR_CKEY"
+     *                   
+     */
+    public String getCorrelationKey() {
+        return _correlationKey;
+    }
+
+    public void setCorrelationKey(String correlationKey) {
+        _correlationKey = correlationKey;
+    }
+
+    /**
+     * @hibernate.many-to-one
+     * @hibernate.column name="CORRELATOR" index="IDX_SELECTOR_CORRELATOR"
+     */
+    public HCorrelator getCorrelator() {
+        return _correlator;
+    }
+
+    public void setCorrelator(HCorrelator correlator) {
+        _correlator = correlator;
+    }
+    
 }

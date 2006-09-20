@@ -101,7 +101,7 @@ public interface MessageExchange {
         ABORTED,
 
         /** Other failure. */
-        OTHER
+        OTHER, NOMATCH
     }
 
     /**
