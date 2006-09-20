@@ -1,0 +1,48 @@
+
+<wsdl:definitions 
+   targetNamespace="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns:tns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+   <wsdl:message name="requestMessage">
+     <wsdl:part name="requestID" type="xsd:string"/>
+     <wsdl:part name="requestText" type="xsd:string"/>
+     <wsdl:part name="faultIndicator1" type="xsd:string"/>
+     <wsdl:part name="faultIndicator2" type="xsd:string"/>
+   </wsdl:message>
+   
+   <wsdl:message name="replyMessage">
+      <wsdl:part name="replyID" type="xsd:string"/>
+      <wsdl:part name="replyText" type="xsd:string"/>
+   </wsdl:message>
+
+
+   <wsdl:portType name="testFaultHandlersPT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+   
+   <wsdl:binding name="testFaultHandlersBinding" type="tns:testFaultHandlersPT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="testFaultHandlersService">
+      <wsdl:port name="testFaultHandlersPort" binding="tns:testFaultHandlersBinding">
+      </wsdl:port>
+   </wsdl:service>
+
+   <plnk:partnerLinkType name="testFaultHandlersRequest">
+      <plnk:role name="testFaultHandlersService" portType="testFaultHandlersPT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="probeRequest">
+      <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+   </plnk:partnerLinkType>
+
+</wsdl:definitions>
