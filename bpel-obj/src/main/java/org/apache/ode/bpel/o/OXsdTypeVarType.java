@@ -22,25 +22,31 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 
 /**
  * XSD-typed variable type.
  */
 public class OXsdTypeVarType extends OVarType {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public QName xsdType;
+    public QName xsdType;
 
-	public boolean simple;
+    public boolean simple;
 
-	public OXsdTypeVarType(OProcess owner) {
-		super(owner);
-	}
+    public OXsdTypeVarType(OProcess owner) {
+        super(owner);
+    }
 
-	public Node newInstance(Document doc) {
-		if (simple)
-			return doc.createTextNode("");
-		else
-			return doc.createElement("xsd-complex-type-wrapper");
-	}
+    public Node newInstance(Document doc) {
+        if (simple)
+            return doc.createTextNode("");
+        else {
+            Element el = doc.createElement("xsd-complex-type-wrapper");
+            // Pre-filling the wrapper element with an empty node to avoid an empty nodeset
+            // when selecting the element child nodes
+            el.appendChild(doc.createElement("empty"));
+            return el;
+        }
+    }
 }
