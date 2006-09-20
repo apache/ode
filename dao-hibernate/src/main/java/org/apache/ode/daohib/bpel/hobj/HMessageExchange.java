@@ -282,6 +282,8 @@ public class HMessageExchange extends HObject {
     }
 
     public void setFaultExplanation(String faultExplanation) {
+        if (faultExplanation != null && faultExplanation.length() > 255)
+            faultExplanation = faultExplanation.substring(0, 254);
         _faultExplanation = faultExplanation;
     }
 
