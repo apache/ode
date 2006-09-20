@@ -38,6 +38,7 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -81,13 +82,13 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.omg.CORBA._PolicyStub;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
-    private static final Log __log = LogFactory
-            .getLog(BpelRuntimeContextImpl.class);
+    private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
 
     // private static final Messages __msgs =
     // MessageBundle.getMessages(Messages.class);
@@ -113,9 +114,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /** Five second maximum for continous execution. */
     private long _maxReductionTimeMs = 20000;
 
-    public BpelRuntimeContextImpl(BpelProcess bpelProcess,
-                                  ProcessInstanceDAO dao, PROCESS PROCESS,
-                                  MyRoleMessageExchangeImpl instantiatingMessageExchange) {
+    public BpelRuntimeContextImpl(BpelProcess bpelProcess, ProcessInstanceDAO dao, PROCESS PROCESS,
+            MyRoleMessageExchangeImpl instantiatingMessageExchange) {
         _bpelProcess = bpelProcess;
         _dao = dao;
         _iid = dao.getInstanceId();
@@ -151,8 +151,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public boolean isCorrelationInitialized(CorrelationSetInstance correlationSet) {
         ScopeDAO scopeDAO = _dao.getScope(correlationSet.scopeInstance);
-        CorrelationSetDAO cs = scopeDAO
-                .getCorrelationSet(correlationSet.declaration.name);
+        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(correlationSet.declaration.name);
 
         return cs.getValue() != null;
     }
@@ -168,8 +167,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink) {
         PartnerLinkDAO spl = fetchPartnerLinkDAO(pLink);
-            
-        return spl.getPartnerEPR() != null ||_bpelProcess.getInitialPartnerRoleEPR(pLink.partnerLink) != null;
+
+        return spl.getPartnerEPR() != null || _bpelProcess.getInitialPartnerRoleEPR(pLink.partnerLink) != null;
     }
 
     /**
@@ -177,14 +176,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public void completedFault(FaultData faultData) {
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("ProcessImpl completed with fault '"
-                    + faultData.getFaultName() + "'");
+            BpelProcess.__log.debug("ProcessImpl completed with fault '" + faultData.getFaultName() + "'");
         }
 
-        _dao.setFault(faultData.getFaultName(),faultData.getExplanation(),
-                faultData.getFaultLineNo(),
-                faultData.getActivityId(),
-                faultData.getFaultMessage());
+        _dao.setFault(faultData.getFaultName(), faultData.getExplanation(), faultData.getFaultLineNo(), faultData
+                .getActivityId(), faultData.getFaultMessage());
 
         // send event
         ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
@@ -221,13 +217,13 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     /**
-     * @see BpelRuntimeContext#createScopeInstance(Long, org.apache.ode.bpel.o.OScope)
+     * @see BpelRuntimeContext#createScopeInstance(Long,
+     *      org.apache.ode.bpel.o.OScope)
      */
     public Long createScopeInstance(Long parentScopeId, OScope scope) {
         if (BpelProcess.__log.isTraceEnabled()) {
-            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter(
-                    "createScopeInstance", new Object[] { "parentScopeId", parentScopeId,
-                    "scope", scope }));
+            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("createScopeInstance", new Object[] {
+                    "parentScopeId", parentScopeId, "scope", scope }));
         }
 
         ScopeDAO parent = null;
@@ -240,33 +236,32 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return scopeDao.getScopeInstanceId();
     }
 
-    public void initializePartnerLinks(Long parentScopeId,
-                                       Collection<OPartnerLink> partnerLinks) {
+    public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
 
         if (BpelProcess.__log.isTraceEnabled()) {
-            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter(
-                    "initializeEndpointReferences", new Object[] { "parentScopeId",
-                    parentScopeId, "partnerLinks", partnerLinks }));
+            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("initializeEndpointReferences", new Object[] {
+                    "parentScopeId", parentScopeId, "partnerLinks", partnerLinks }));
         }
 
         ScopeDAO parent = _dao.getScope(parentScopeId);
         for (OPartnerLink partnerLink : partnerLinks) {
             PartnerLinkDAO pdao = parent.createPartnerLink(partnerLink.getId(), partnerLink.name,
                     partnerLink.myRoleName, partnerLink.partnerRoleName);
-            // If there is a myrole on the link, initialize the session id so it is always
-            // available for opaque correlations. The myrole session id should never be changed.
+            // If there is a myrole on the link, initialize the session id so it
+            // is always
+            // available for opaque correlations. The myrole session id should
+            // never be changed.
             if (partnerLink.hasMyRole())
                 pdao.setMySessionId(new GUID().toString());
         }
     }
 
-    public void select(PickResponseChannel pickResponseChannel, Date timeout,
-                       boolean createInstance, Selector[] selectors) throws FaultException {
+    public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance,
+            Selector[] selectors) throws FaultException {
         if (BpelProcess.__log.isTraceEnabled())
-            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select",
-                    new Object[] { "pickResponseChannel", pickResponseChannel, "timeout",
-                            timeout, "createInstance", Boolean.valueOf(createInstance),
-                            "selectors", selectors }));
+            BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select", new Object[] { "pickResponseChannel",
+                    pickResponseChannel, "timeout", timeout, "createInstance", Boolean.valueOf(createInstance),
+                    "selectors", selectors }));
 
         ProcessDAO processDao = _dao.getProcess();
 
@@ -283,103 +278,95 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         final String pickResponseChannelStr = pickResponseChannel.export();
 
-        List<CorrelatorDAO> correlators = new ArrayList<CorrelatorDAO>(
-                selectors.length);
+        List<CorrelatorDAO> correlators = new ArrayList<CorrelatorDAO>(selectors.length);
         for (int i = 0; i < selectors.length; ++i) {
             Selector selector = selectors[i];
-            String correlatorId = BpelProcess.genCorrelatorId(
-                    selector.plinkInstance.partnerLink, selector.opName);
+            String correlatorId = BpelProcess.genCorrelatorId(selector.plinkInstance.partnerLink, selector.opName);
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                        + ": USING CORRELATOR " + correlatorId);
+                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": USING CORRELATOR " + correlatorId);
             }
             correlators.add(processDao.getCorrelator(correlatorId));
         }
 
         int conflict = _outstandingRequests.findConflict(selectors);
         if (conflict != -1)
-            throw new FaultException(
-                    _bpelProcess._oprocess.constants.qnConflictingReceive,
-                    selectors[conflict].toString());
+            throw new FaultException(_bpelProcess._oprocess.constants.qnConflictingReceive, selectors[conflict]
+                    .toString());
 
         _outstandingRequests.register(pickResponseChannelStr, selectors);
 
         // TODO - ODE-58
 
         // First check if we match to a new instance.
-        if (_instantiatingMessageExchange != null
-                && _dao.getState() == ProcessState.STATE_READY) {
+        if (_instantiatingMessageExchange != null && _dao.getState() == ProcessState.STATE_READY) {
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                        + ": CHECKING for NEW INSTANCE match");
+                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": CHECKING for NEW INSTANCE match");
             }
             for (int i = 0; i < correlators.size(); ++i) {
                 CorrelatorDAO ci = correlators.get(i);
                 if (ci.equals(_dao.getInstantiatingCorrelator())) {
-                    inputMsgMatch(pickResponseChannelStr, i,
-                            _instantiatingMessageExchange);
+                    inputMsgMatch(pickResponseChannelStr, i, _instantiatingMessageExchange);
                     if (BpelProcess.__log.isDebugEnabled()) {
                         BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                                + ": FOUND match for NEW instance mexRef="
-                                + _instantiatingMessageExchange);
+                                + ": FOUND match for NEW instance mexRef=" + _instantiatingMessageExchange);
                     }
                     return;
                 }
             }
         }
 
-        if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                    + ": NEW instance match NOT FOUND; CHECKING MESSAGES. ");
-        }
-
-        for (int i = 0; i < selectors.length; ++i) {
-            CorrelatorDAO correlator = correlators.get(i);
-            Selector selector = selectors[i];
-            MessageExchangeDAO mexdao = correlator
-                    .dequeueMessage(selector.correlationKey);
-            if (mexdao != null) {
-                // Found message matching one of our selectors.
-                if (BpelProcess.__log.isDebugEnabled()) {
-                    BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                            + ": FOUND match to MESSAGE " + mexdao + " on CKEY "
-                            + selector.correlationKey);
-                }
-
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
-                        _bpelProcess._engine, mexdao);
-
-                inputMsgMatch(pickResponseChannel.export(), i, mex);
-                return;
-            }
-        }
-
-        if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                    + ": MESSAGE match NOT FOUND.");
-        }
+        // if (BpelProcess.__log.isDebugEnabled()) {
+        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
+        // + ": NEW instance match NOT FOUND; CHECKING MESSAGES. ");
+        // }
+        //
+        //
+        // for (int i = 0; i < selectors.length; ++i) {
+        // CorrelatorDAO correlator = correlators.get(i);
+        // Selector selector = selectors[i];
+        // MessageExchangeDAO mexdao = correlator
+        // .dequeueMessage(selector.correlationKey);
+        // if (mexdao != null) {
+        // // Found message matching one of our selectors.
+        // if (BpelProcess.__log.isDebugEnabled()) {
+        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
+        // + ": FOUND match to MESSAGE " + mexdao + " on CKEY "
+        // + selector.correlationKey);
+        // }
+        //
+        // MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
+        // _bpelProcess._engine, mexdao);
+        //
+        // inputMsgMatch(pickResponseChannel.export(), i, mex);
+        // return;
+        // }
+        // }
+        //
+        // if (BpelProcess.__log.isDebugEnabled()) {
+        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
+        // + ": MESSAGE match NOT FOUND.");
+        // }
 
         if (timeout != null) {
             registerTimer(pickResponseChannel, timeout);
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                        + "REGISTERED TIMEOUT for " + timeout);
+                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + "REGISTERED TIMEOUT for " + timeout);
             }
         }
 
         for (int i = 0; i < selectors.length; ++i) {
             CorrelatorDAO correlator = correlators.get(i);
             Selector selector = selectors[i];
-            String correlatorId = BpelProcess.genCorrelatorId(
-                    selector.plinkInstance.partnerLink, selector.opName);
-            correlator.addRoute(pickResponseChannel.export(), _dao, i,
-                    selector.correlationKey);
+            
+            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKey);
+            scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKey);
+
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-                        + ": ADDED ROUTE" + correlatorId + ": " + selector.correlationKey
-                        + " --> " + _dao.getInstanceId());
+                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": ADDED ROUTE" + correlator.getCorrelatorId() + ": "
+                        + selector.correlationKey + " --> " + _dao.getInstanceId());
             }
         }
+
 
     }
 
@@ -392,21 +379,19 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return cs.getValue();
     }
 
-    public Node fetchVariableData(VariableInstance variable, boolean forWriting)
-            throws FaultException {
+    public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
         if (dataDAO.isNull()) {
-            throw new FaultException(
-                    _bpelProcess._oprocess.constants.qnUninitializedVariable);
+            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedVariable);
         }
 
         return dataDAO.get();
     }
 
-    public Node fetchVariableData(VariableInstance var,
-                                  OMessageVarType.Part part, boolean forWriting) throws FaultException {
+    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
+            throws FaultException {
         Node container = fetchVariableData(var, forWriting);
 
         // If we want a specific part, we will need to navigate through the
@@ -417,8 +402,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return container;
     }
 
-    public Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) 
-        throws FaultException {
+    public Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
         Element epr = pl.getPartnerEPR();
 
@@ -427,48 +411,44 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if (e != null)
                 epr = e.toXML().getDocumentElement();
         }
-        
+
         if (epr == null) {
-            throw new FaultException(
-                    _bpelProcess._oprocess.constants.qnUninitializedPartnerRole);
+            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedPartnerRole);
         }
-         
+
         return epr;
     }
 
-    public Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink)  {
+    public Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink) {
         return _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink).toXML().getDocumentElement();
     }
 
-    private PartnerLinkDAO fetchPartnerLinkDAO(PartnerLinkInstance pLink)  {
+    private PartnerLinkDAO fetchPartnerLinkDAO(PartnerLinkInstance pLink) {
         ScopeDAO scopeDAO = _dao.getScope(pLink.scopeInstanceId);
-        return  scopeDAO.getPartnerLink(pLink.partnerLink.getId());
+        return scopeDAO.getPartnerLink(pLink.partnerLink.getId());
     }
 
     /**
      * Evaluate a property alias query expression against a variable, returning
      * the normalized {@link String} representation of the property value.
-     *
+     * 
      * @param variable
-     *          variable to read
+     *            variable to read
      * @param property
-     *          property to read
+     *            property to read
      * @return value of property for variable, in String form
      * @throws org.apache.ode.bpel.common.FaultException
-     *           in case of selection or other fault
+     *             in case of selection or other fault
      */
-    public String readProperty(VariableInstance variable,
-                               OProcess.OProperty property) throws FaultException {
+    public String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException {
         Node varData = fetchVariableData(variable, false);
 
-        OProcess.OPropertyAlias alias = property
-                .getAlias(variable.declaration.type);
-        String val = _bpelProcess.extractProperty((Element) varData, alias,
-                variable.declaration.getDescription());
+        OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
+        String val = _bpelProcess.extractProperty((Element) varData, alias, variable.declaration.getDescription());
 
         if (BpelProcess.__log.isTraceEnabled()) {
-            BpelProcess.__log.trace("readPropertyAlias(variable=" + variable
-                    + ", alias=" + alias + ") = " + val.toString());
+            BpelProcess.__log.trace("readPropertyAlias(variable=" + variable + ", alias=" + alias + ") = "
+                    + val.toString());
         }
 
         return val;
@@ -485,62 +465,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return dataDAO.get();
     }
 
-    public void writeEndpointReference(PartnerLinkInstance variable,
-                                          Element data) throws FaultException {
+    public void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
         if (__log.isDebugEnabled()) {
-            __log.debug("Writing endpoint reference " + variable.partnerLink.getName() +
-                    " with value " + DOMUtils.domToString(data));
+            __log.debug("Writing endpoint reference " + variable.partnerLink.getName() + " with value "
+                    + DOMUtils.domToString(data));
         }
 
         PartnerLinkDAO eprDAO = fetchPartnerLinkDAO(variable);
         eprDAO.setPartnerEPR(data);
     }
 
-    public String fetchEndpointSessionId(PartnerLinkInstance pLink,
-                                         boolean isMyEPR) throws FaultException {
+    public String fetchEndpointSessionId(PartnerLinkInstance pLink, boolean isMyEPR) throws FaultException {
         PartnerLinkDAO dao = fetchPartnerLinkDAO(pLink);
         return isMyEPR ? dao.getMySessionId() : dao.getPartnerSessionId();
     }
-
-//    private EndpointReference fetchMyRoleSessionEndpoint(PartnerLinkInstance pLink)
-//            throws FaultException {
-//        PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
-//        Element myRoleEpr = pl.getMyEPR();
-//        if (myRoleEpr == null)
-//            myRoleEpr = _bpelProcess.getInitialMyRoleEPR(pLink.partnerLink);
-//
-//        if (myRoleEpr == null) throw new FaultException(
-//                _bpelProcess._oprocess.constants.qnUninitializedPartnerRole,
-//                "Endpoint reference for myRole on partner link " + pLink.partnerLink.getName() + " isn't initialized!");
-//
-//        EndpointReference resolvedEpr = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(myRoleEpr);
-//        WSAEndpoint wsaEpr;
-//        // We're usually careful to only deal with WSA endpoints internally, because
-//        // it's much more convenient, but another endpoint could slip through (for
-//        // example if it's set in the PM API).
-//        if (resolvedEpr instanceof WSAEndpoint) {
-//            wsaEpr = (WSAEndpoint) resolvedEpr;
-//        } else {
-//            wsaEpr = (WSAEndpoint) _bpelProcess._engine._contexts.eprContext
-//                    .convertEndpoint(Namespaces.WS_ADDRESSING_ENDPOINT, myRoleEpr);
-//        }
-//
-//        // Including a session id in our EPR as it could be needed
-//        if (wsaEpr.getSessionId() == null) {
-//            wsaEpr.setSessionId(new GUID().toString());
-//            myRoleEpr = wsaEpr.toXML().getDocumentElement();
-//            pl.setMyEPR(myRoleEpr);
-//        }
-//        return wsaEpr;
-//    }
-
-//  public Element updatePartnerEndpointReference(PartnerLinkInstance variable,
-//                                                Element data) throws FaultException {
-//    ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstanceId);
-//    PartnerLinkDAO eprDAO = scopeDAO.getPartnerLink(variable.partnerLink.getId());
-//    eprDAO.setPartnerEPR(data);
-//    return data;
-//  }
 
     public Node convertEndpointReference(Element sourceNode, Node targetNode) {
         QName nodeQName;
@@ -550,8 +488,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             // We have an element
             nodeQName = new QName(targetNode.getNamespaceURI(), targetNode.getLocalName());
         }
-        return _bpelProcess._engine._contexts.eprContext
-                .convertEndpoint(nodeQName, sourceNode).toXML();
+        return _bpelProcess._engine._contexts.eprContext.convertEndpoint(nodeQName, sourceNode).toXML();
     }
 
     public void commitChanges(VariableInstance variable, Node changes) {
@@ -562,14 +499,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         writeProperties(variable, changes, dataDAO);
     }
 
-    public void reply(final PartnerLinkInstance plinkInstnace,
-                      final String opName, final String mexId, Element msg, String fault)
-            throws FaultException {
+    public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
+            String fault) throws FaultException {
         String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
-            throw new FaultException(
-                    _bpelProcess._oprocess.constants.qnMissingRequest);
+            throw new FaultException(_bpelProcess._oprocess.constants.qnMissingRequest);
         }
 
         // prepare event
@@ -580,11 +515,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexRef);
 
-        MessageExchange.Status prevStatus = MessageExchange.Status.valueOf(mex
-                .getStatus());
+        MessageExchange.Status prevStatus = MessageExchange.Status.valueOf(mex.getStatus());
 
-        MessageDAO message = mex.createMessage(plinkInstnace.partnerLink
-                .getMyRoleOperation(opName).getOutput().getMessage().getQName());
+        MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
+                .getMessage().getQName());
         message.setData(msg);
         mex.setResponse(message);
         if (fault != null) {
@@ -595,8 +529,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             mex.setStatus(MessageExchange.Status.RESPONSE.toString());
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
-        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(
-                _bpelProcess._engine, mex);
+        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
         _bpelProcess.initMyRoleMex(m);
 
         if (prevStatus == MessageExchange.Status.ASYNC)
@@ -611,8 +544,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @see BpelRuntimeContext#writeCorrelation(org.apache.ode.bpel.runtime.CorrelationSetInstance,
      *      org.apache.ode.bpel.common.CorrelationKey)
      */
-    public void writeCorrelation(CorrelationSetInstance cset,
-                                 CorrelationKey correlation) {
+    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
         ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
         OScope.CorrelationSet csetdef = (OScope.CorrelationSet) _bpelProcess._oprocess
@@ -624,8 +556,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
         cs.setValue(propNames, correlation);
 
-        CorrelationSetWriteEvent cswe = new CorrelationSetWriteEvent(
-                cset.declaration.name, correlation);
+        CorrelationSetWriteEvent cswe = new CorrelationSetWriteEvent(cset.declaration.name, correlation);
         cswe.setScopeId(cset.scopeInstance);
         sendEvent(cswe);
 
@@ -634,27 +565,24 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /**
      * Common functionality to initialize a correlation set based on data
      * available in a variable.
-     *
+     * 
      * @param cset
-     *          the correlation set instance
+     *            the correlation set instance
      * @param variable
-     *          variable instance
-     *
+     *            variable instance
+     * 
      * @throws IllegalStateException
-     *           DOCUMENTME
+     *             DOCUMENTME
      */
-    public void initializeCorrelation(CorrelationSetInstance cset,
-                                      VariableInstance variable) throws FaultException {
+    public void initializeCorrelation(CorrelationSetInstance cset, VariableInstance variable) throws FaultException {
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("Initializing correlation set "
-                    + cset.declaration.name);
+            BpelProcess.__log.debug("Initializing correlation set " + cset.declaration.name);
         }
         // if correlation set is already initialized, then skip
         if (isCorrelationInitialized(cset)) {
             // if already set, we ignore
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("OCorrelation set " + cset
-                        + " is already set: ignoring");
+                BpelProcess.__log.debug("OCorrelation set " + cset + " is already set: ignoring");
             }
             return;
         }
@@ -668,8 +596,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             propNames[i] = property.name.toString();
         }
 
-        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(),
-                propValues);
+        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
         writeCorrelation(cset, ckeyVal);
     }
 
@@ -697,33 +624,41 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setIID(_dao.getInstanceId());
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
-        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we
-                .getDetail(), timeToFire);
+        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
-    public String invoke(PartnerLinkInstance partnerLink, Operation operation,
-                         Element outgoingMessage, InvokeResponseChannel channel)
-            throws FaultException {
+    private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
+        WorkEvent we = new WorkEvent();
+        we.setIID(_dao.getInstanceId());
+        we.setType(WorkEvent.Type.MATCHER);
+        we.setCorrelatorId(correlatorId);
+        we.setCorrelationKey(key);
+        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
+
+    }
+
+    public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
+            InvokeResponseChannel channel) throws FaultException {
 
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
-        // The target (partner endpoint) -- if it has not been explicitly initialized
+        // The target (partner endpoint) -- if it has not been explicitly
+        // initialized
         // then use the value from bthe deployment descriptor ..
         Element partnerEPR = plinkDAO.getPartnerEPR();
         EndpointReference partnerEndpoint;
 
         if (partnerEPR == null) {
             partnerEndpoint = _bpelProcess.getInitialPartnerRoleEPR(partnerLink.partnerLink);
-            // In this case, the partner link has not been initialized. 
+            // In this case, the partner link has not been initialized.
             if (partnerEndpoint == null)
                 throw new FaultException(partnerLink.partnerLink.getOwner().constants.qnUninitializedPartnerRole);
         } else {
-           partnerEndpoint = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
+            partnerEndpoint = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
         }
-                
 
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("INVOKING PARTNER: partnerLink=" + partnerLink
-                    + ", op=" + operation + " channel="+channel +")");
+            BpelProcess.__log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" + operation + " channel="
+                    + channel + ")");
         }
 
         // prepare event
@@ -731,7 +666,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setOperation(operation.getName());
         evt.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
         evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
-
 
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
@@ -746,11 +680,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         mexDao.setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE
                 : MessageExchangePattern.REQUEST_ONLY).toString());
         mexDao.setChannel(channel == null ? null : channel.export());
-        
+
         // Properties used by stateful-exchange protocol.
         String mySessionId = plinkDAO.getMySessionId();
         String partnerSessionId = plinkDAO.getPartnerSessionId();
-        
+
 //        mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
 //        mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
         if ( mySessionId != null )
@@ -761,23 +695,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
-        
+
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
         message.setData(outgoingMessage);
         message.setType(operation.getInput().getMessage().getQName());
-        
-        // Get he my-role EPR (if myrole exists) for optional use by partner (for callback
+
+        // Get he my-role EPR (if myrole exists) for optional use by partner
+        // (for callback
         // mechanism).
-        EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() 
-            ? _bpelProcess.getInitialMyRoleEPR(partnerLink.partnerLink)
-                    : null;
-        
-        PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(
-                _bpelProcess._engine, mexDao,
-                partnerLink.partnerLink.partnerRolePortType, operation, 
-                partnerEndpoint, myRoleEndpoint,
-                _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink));
+        EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
+                .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
+
+        PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
+                partnerLink.partnerLink.partnerRolePortType, operation, partnerEndpoint, myRoleEndpoint, _bpelProcess
+                        .getPartnerRoleChannel(partnerLink.partnerLink));
+        _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
 
         // If we couldn't find the endpoint, then there is no sense
         // in asking the IL to invoke.
@@ -787,48 +720,43 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
         } else {
             __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
-            mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint",
-                    partnerEPR);
+            mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint", partnerEPR);
         }
         evt.setMexId(mexDao.getMessageExchangeId());
         sendEvent(evt);
 
-        // MEX pattern is request only, at this point the status can only be a one way
+        // MEX pattern is request only, at this point the status can only be a
+        // one way
         if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
-            mexDao.setStatus(MessageExchange.Status.ONE_WAY.toString());
+            mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
         }
-
-        // Check if there is a synchronous response, if so, we need to inject the
+        // Check if there is a synchronous response, if so, we need to inject
+        // the
         // message on the response channel.
         switch (mex.getStatus()) {
-            case NEW:
-                throw new AssertionError("Impossible!");
-            case ASYNC:
-            case ONE_WAY:
-                // TODO: Check if we should be in these states.
-                break;
-            case RESPONSE:
-            case FAULT:
-            case FAILURE:
-                invocationResponse(mex);
-                break;
-            default:
-                __log.error("Partner did not acknowledge message exchange: " + mex);
-                mex.setFailure(FailureType.NO_RESPONSE, "Partner did not acknowledge.",
-                        null);
-                invocationResponse(mex);
+        case NEW:
+            throw new AssertionError("Impossible!");
+        case ASYNC:
+            break;
+        case RESPONSE:
+        case FAULT:
+        case FAILURE:
+            invocationResponse(mex);
+            break;
+        default:
+            __log.error("Partner did not acknowledge message exchange: " + mex);
+            mex.setFailure(FailureType.NO_RESPONSE, "Partner did not acknowledge.", null);
+            invocationResponse(mex);
         }
 
         return mexDao.getMessageExchangeId();
 
     }
 
-
     void execute() {
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
         boolean canReduce = true;
-        while (ProcessState.canExecute(_dao.getState())
-                && System.currentTimeMillis() < maxTime && canReduce) {
+        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
             canReduce = vpu.execute();
         }
         _dao.setLastActiveTime(new Date());
@@ -851,8 +779,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     WorkEvent we = new WorkEvent();
                     we.setIID(_iid);
                     we.setType(WorkEvent.Type.RESUME);
-                    _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we
-                            .getDetail(), new Date());
+                    _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);
@@ -861,14 +788,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-    void inputMsgMatch(final String responsechannel, final int idx,
-                       MyRoleMessageExchangeImpl mex) {
+    void inputMsgMatch(final String responsechannel, final int idx, MyRoleMessageExchangeImpl mex) {
         // if we have a message match, this instance should be marked
         // active if it isn't already
         if (_dao.getState() == ProcessState.STATE_READY) {
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log
-                        .debug("INPUTMSGMATCH: Changing process instance state from ready to active");
+                BpelProcess.__log.debug("INPUTMSGMATCH: Changing process instance state from ready to active");
             }
 
             _dao.setState(ProcessState.STATE_ACTIVE);
@@ -887,8 +812,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
-                PickResponseChannel responseChannel = importChannel(responsechannel,
-                        PickResponseChannel.class);
+                PickResponseChannel responseChannel = importChannel(responsechannel, PickResponseChannel.class);
                 responseChannel.onRequestRcvd(idx, mexId);
             }
         });
@@ -909,8 +833,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = -7767141033611036745L;
 
             public void run() {
-                TimerResponseChannel responseChannel = importChannel(
-                        timerResponseChannel, TimerResponseChannel.class);
+                TimerResponseChannel responseChannel = importChannel(timerResponseChannel, TimerResponseChannel.class);
                 responseChannel.onTimeout();
             }
         });
@@ -928,32 +851,35 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 6157913683737696396L;
 
             public void run() {
-                TimerResponseChannel responseChannel = importChannel(id,
-                        TimerResponseChannel.class);
+                TimerResponseChannel responseChannel = importChannel(id, TimerResponseChannel.class);
                 responseChannel.onCancel();
             }
         });
     }
 
     void invocationResponse(PartnerRoleMessageExchangeImpl mex) {
-        invocationResponse( mex.getDAO().getMessageExchangeId(), mex.getDAO().getChannel());
+        invocationResponse(mex.getDAO().getMessageExchangeId(), mex.getDAO().getChannel());
     }
 
     void invocationResponse(final String mexid, final String responseChannelId) {
+        if (responseChannelId == null)
+            throw new NullPointerException("Null responseChannelId");
+        if (mexid == null)
+            throw new NullPointerException("Null mexId");
+        
         vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
             public void run() {
-                ((BpelRuntimeContextImpl) getBpelRuntimeContext()).invocationResponse2(
-                        mexid,
-                        importChannel(responseChannelId, InvokeResponseChannel.class));
+                ((BpelRuntimeContextImpl) getBpelRuntimeContext()).invocationResponse2(mexid, importChannel(
+                        responseChannelId, InvokeResponseChannel.class));
             }
         });
     }
 
     /**
      * Continuation of the above.
-     *
+     * 
      * @param mexid
      * @param responseChannel
      */
@@ -965,21 +891,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setMexId(mexid);
         evt.setOperation(mex.getOperation());
 
-        MessageExchange.Status status = MessageExchange.Status.valueOf(mex
-                .getStatus());
+        MessageExchange.Status status = MessageExchange.Status.valueOf(mex.getStatus());
 
         switch (status) {
-            case FAULT:
-                evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAULT);
-                responseChannel.onFault();
-                break;
-            case RESPONSE:
-                evt.setAspect(ProcessMessageExchangeEvent.PARTNER_OUTPUT);
-                responseChannel.onResponse();
-                break;
-            case FAILURE:
-                responseChannel.onFailure();
-                break;
+        case FAULT:
+            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAULT);
+            responseChannel.onFault();
+            break;
+        case RESPONSE:
+            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_OUTPUT);
+            responseChannel.onResponse();
+            break;
+        case FAILURE:
+            responseChannel.onFailure();
+            break;
         }
         sendEvent(evt);
 
@@ -1009,18 +934,16 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * We record all values of properties of a 'MessageType' variable for
      * efficient lookup.
      */
-    private void writeProperties(VariableInstance variable, Node value,
-                                 XmlDataDAO dao) {
+    private void writeProperties(VariableInstance variable, Node value, XmlDataDAO dao) {
         if (variable.declaration.type instanceof OMessageVarType) {
-            for (Iterator<OProcess.OProperty> iter = variable.declaration.getOwner().properties
-                    .iterator(); iter.hasNext();) {
+            for (Iterator<OProcess.OProperty> iter = variable.declaration.getOwner().properties.iterator(); iter
+                    .hasNext();) {
                 OProcess.OProperty property = iter.next();
-                OProcess.OPropertyAlias alias = property
-                        .getAlias(variable.declaration.type);
+                OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
                 if (alias != null) {
                     try {
-                        String val = _bpelProcess.extractProperty((Element) value, alias,
-                                variable.declaration.getDescription());
+                        String val = _bpelProcess.extractProperty((Element) value, alias, variable.declaration
+                                .getDescription());
                         if (val != null) {
                             dao.setProperty(property.name.toString(), val);
                         }
@@ -1037,24 +960,21 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private void completeOutstandingMessageExchanges() {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
-            MessageExchangeDAO mexDao = _dao.getConnection()
-                    .getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
-                    _bpelProcess._engine, mexDao);
-            switch(mex.getStatus()) {
-                case ASYNC:
-                case ONE_WAY:
-                case RESPONSE:
+            MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+            switch (mex.getStatus()) {
+            case ASYNC:
+            case RESPONSE:
+                mex.setStatus(MessageExchange.Status.COMPLETED_OK);
+                break;
+            case REQUEST:
+                if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
                     mex.setStatus(MessageExchange.Status.COMPLETED_OK);
                     break;
-                case REQUEST:
-                    if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
-                        mex.setStatus(MessageExchange.Status.COMPLETED_OK);
-                        break;
-                    }
-                default:
-                    mex.setFailure(FailureType.OTHER, "No response.", null);
-                    _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+                }
+            default:
+                mex.setFailure(FailureType.OTHER, "No response.", null);
+                _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
             }
         }
     }
@@ -1062,14 +982,13 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private void faultOutstandingMessageExchanges(FaultData faultData) {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
-            MessageExchangeDAO mexDao = _dao.getConnection()
-                    .getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
-                    _bpelProcess._engine, mexDao);
+            MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
             _bpelProcess.initMyRoleMex(mex);
 
             Message message = mex.createMessage(faultData.getFaultName());
-            if (faultData.getFaultMessage() != null) message.setMessage(faultData.getFaultMessage());
+            if (faultData.getFaultMessage() != null)
+                message.setMessage(faultData.getFaultMessage());
             mex.setResponse(message);
 
             mex.setFault(faultData.getFaultName().toString(), message);
@@ -1081,10 +1000,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private void failOutstandingMessageExchanges() {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
-            MessageExchangeDAO mexDao = _dao.getConnection()
-                    .getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
-                    _bpelProcess._engine, mexDao);
+            MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
             _bpelProcess.initMyRoleMex(mex);
             mex.setFailure(FailureType.OTHER, "No response.", null);
             _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
@@ -1106,33 +1023,30 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         if (dao.getDirection() != MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE) {
             // this should not happen....
-            String msg = "Engine requested my-role request for a partner-role mex: "
-                    + mexId;
+            String msg = "Engine requested my-role request for a partner-role mex: " + mexId;
             __log.fatal(msg);
             throw new BpelEngineException(msg);
         }
 
-        MessageExchange.Status status = MessageExchange.Status.valueOf(dao
-                .getStatus());
+        MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
-            case REQUEST:
-                MessageDAO request = dao.getRequest();
-                if (request == null) {
-                    // this also should not happen
-                    String msg = "Engine requested request for message exchange that did not have one: "
-                            + mexId;
-                    __log.fatal(msg);
-                    throw new BpelEngineException(msg);
-                }
-
-                return request.getData();
-
-            default:
-                // We should not be in any other state when requesting this.
-                String msg = "Engine requested response while the message exchange "
-                        + mexId + " was in the state " + status;
+        case REQUEST:
+            MessageDAO request = dao.getRequest();
+            if (request == null) {
+                // this also should not happen
+                String msg = "Engine requested request for message exchange that did not have one: " + mexId;
                 __log.fatal(msg);
                 throw new BpelEngineException(msg);
+            }
+
+            return request.getData();
+
+        default:
+            // We should not be in any other state when requesting this.
+            String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
+                    + status;
+            __log.fatal(msg);
+            throw new BpelEngineException(msg);
         }
 
     }
@@ -1156,41 +1070,37 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
         if (dao.getDirection() != MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE) {
             // this should not happen....
-            String msg = "Engine requested partner response for a my-role mex: "
-                    + mexId;
+            String msg = "Engine requested partner response for a my-role mex: " + mexId;
             __log.fatal(msg);
             throw new BpelEngineException(msg);
         }
 
-        MessageExchange.Status status = MessageExchange.Status.valueOf(dao
-                .getStatus());
+        MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
-            case FAULT:
-            case RESPONSE:
-                MessageDAO response = dao.getResponse();
-                if (response == null) {
-                    // this also should not happen
-                    String msg = "Engine requested response for message exchange that did not have one: "
-                            + mexId;
-                    __log.fatal(msg);
-                    throw new BpelEngineException(msg);
-                }
-
-                return response;
-
-            default:
-                // We should not be in any other state when requesting this.
-                String msg = "Engine requested response while the message exchange "
-                        + mexId + " was in the state " + status;
+        case FAULT:
+        case RESPONSE:
+            MessageDAO response = dao.getResponse();
+            if (response == null) {
+                // this also should not happen
+                String msg = "Engine requested response for message exchange that did not have one: " + mexId;
                 __log.fatal(msg);
                 throw new BpelEngineException(msg);
+            }
+
+            return response;
+
+        default:
+            // We should not be in any other state when requesting this.
+            String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
+                    + status;
+            __log.fatal(msg);
+            throw new BpelEngineException(msg);
         }
 
     }
 
     public Node getPartData(Element message, Part part) {
-        Element partEl = DOMUtils.findChildByName((Element) message, new QName(
-                null, part.name), false);
+        Element partEl = DOMUtils.findChildByName((Element) message, new QName(null, part.name), false);
 
         // This could occur if the message does not contain the required part.
         if (partEl == null)
@@ -1198,7 +1108,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         Node container = DOMUtils.getFirstChildElement(partEl);
         if (container == null)
-            container = partEl.getFirstChild(); // either a text node / element /
+            container = partEl.getFirstChild(); // either a text node / element
+        // /
         // xsd-type-wrapper
         return container;
     }
@@ -1214,48 +1125,49 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         } catch (Exception ex) {
             __log.error("Invalid value for SEP property " + MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR + ": " + epr);
         }
-        
 
         return null;
     }
-    
+
     public String getSourceSessionId(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
         return dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
     public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-                                            Date dateTime, Element data, String[] actions) {
-      if (reason == null)
-        reason = "Unspecified";
-      if (dateTime == null)
-        dateTime = new Date();
-      _dao.createActivityRecovery(channel.export(), (int)activityId, reason, dateTime, data, actions);
+            Date dateTime, Element data, String[] actions) {
+        if (reason == null)
+            reason = "Unspecified";
+        if (dateTime == null)
+            dateTime = new Date();
+        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, data, actions);
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
-      _dao.deleteActivityRecovery(channel.export());
+        _dao.deleteActivityRecovery(channel.export());
     }
 
     public void recoverActivity(final String channel, final String action, final FaultData fault) {
-      vpu.inject(new JacobRunnable() {
-          private static final long serialVersionUID = 3168964409165899533L;
-          public void run() {
-              // ActivityRecoveryChannel channel = importChannel(channel, ActivityRecoveryChannel.class);
-              ActivityRecoveryChannel channel = null;
-              if ("cancel".equals(action))
-                channel.cancel();
-              else if ("retry".equals(action))
-                channel.retry();
-              else if ("fault".equals(action))
-                channel.fault(fault);
-          }
-      });
-      _dao.deleteActivityRecovery(channel);
+        vpu.inject(new JacobRunnable() {
+            private static final long serialVersionUID = 3168964409165899533L;
+
+            public void run() {
+                // ActivityRecoveryChannel channel = importChannel(channel,
+                // ActivityRecoveryChannel.class);
+                ActivityRecoveryChannel channel = null;
+                if ("cancel".equals(action))
+                    channel.cancel();
+                else if ("retry".equals(action))
+                    channel.retry();
+                else if ("fault".equals(action))
+                    channel.fault(fault);
+            }
+        });
+        _dao.deleteActivityRecovery(channel);
     }
 
     /**
-     * Fetch the session-identifier for the partner link from the database. 
+     * Fetch the session-identifier for the partner link from the database.
      */
     public String fetchMySessionId(PartnerLinkInstance pLink) {
         String sessionId = fetchPartnerLinkDAO(pLink).getMySessionId();
@@ -1271,6 +1183,48 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (__log.isDebugEnabled())
             __log.debug("initializing partner " + pLink + "  sessionId to " + session);
         fetchPartnerLinkDAO(pLink).setPartnerSessionId(session);
+
+    }
+
+    /**
+     * Attempt to match message exchanges on a correlator.
+     * 
+     */
+    public void matcherEvent(String correlatorId, CorrelationKey ckey) {
         
+        __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
+        CorrelatorDAO correlator = _dao.getProcess().getCorrelator(correlatorId);
+
+        // Find the route first, this is a SELECT FOR UPDATE on the "selector" row, 
+        // So we want to acquire the lock before we do anthing else. 
+        MessageRouteDAO mroute = correlator.findRoute(ckey);
+        if (mroute == null) {
+            // Ok, this means that a message arrived before we did, so nothing to do.
+            __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
+            return;
+        }
+        
+        // Now see if there is a message that matches this selector. 
+        MessageExchangeDAO mexdao = correlator.dequeueMessage(ckey);
+        if (mexdao != null) {
+            __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
+            
+            // We have a match, so we can get rid of the routing entries.
+            correlator.removeRoutes(mroute.getGroupId(),_dao);
+            
+            // Found message matching one of our selectors.
+            if (BpelProcess.__log.isDebugEnabled()) {
+                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
+                        + " on CKEY " + ckey);
+            }
+
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexdao);
+
+            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
+            execute();
+        } else {
+            __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
+            
+        }
     }
 }

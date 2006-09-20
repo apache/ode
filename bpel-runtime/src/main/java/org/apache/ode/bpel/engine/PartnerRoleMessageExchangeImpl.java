@@ -49,7 +49,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public void replyOneWayOk() {
-        setStatus(Status.ONE_WAY);
+        setStatus(Status.ASYNC);
     }
 
     public void replyAsync() {

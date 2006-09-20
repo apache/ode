@@ -307,7 +307,7 @@ public class ODEServer {
             try {
                 _connector.start();
             } catch (Exception e) {
-                __log.error("Failed to initialize JCA connector.",e);
+                __log.error("Failed to initialize JCA connector.");
             }
         }
     }

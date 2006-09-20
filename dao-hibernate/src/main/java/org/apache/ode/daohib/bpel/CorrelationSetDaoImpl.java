@@ -55,7 +55,7 @@ class CorrelationSetDaoImpl extends HibernateDao
   }
 
   public void setValue(QName[] names, CorrelationKey values) {
-    _correlationSet.setValue(CorrelationKeySerializer.toCanonicalString(values));
+    _correlationSet.setValue(values.toCanonicalString());
     if (_correlationSet.getProperties() == null || _correlationSet.getProperties().size() == 0) {
       for (int m = 0; m < names.length; m++) {
         HCorrelationProperty prop =

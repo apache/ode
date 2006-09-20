@@ -139,4 +139,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         }
     }
 
+    public boolean isAsynchronous() {
+        return true;
+    }
+
 }
