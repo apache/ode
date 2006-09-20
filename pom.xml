@@ -125,7 +125,7 @@
         <module>bpel-ql</module>
         <module>bpel-connector</module>
         <module>bpel-epr</module>
-        <module>bpel-test</module>
+        <!--module>bpel-test</module-->
 
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
