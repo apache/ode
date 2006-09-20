@@ -114,7 +114,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 
         Criteria criteria = getSession().createCriteria(HCorrelationSet.class);
         criteria.add(Expression.eq("scope.instance.process.id",_process.getId()));
-        criteria.add(Expression.eq("value", CorrelationKeySerializer.toCanonicalString(ckeyValue)));
+        criteria.add(Expression.eq("value", ckeyValue.toCanonicalString()));
         criteria.addOrder(Order.desc("scope.instance.created"));
         return criteria.list();
 
@@ -243,7 +243,6 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         HCorrelator correlator = new HCorrelator();
         correlator.setCorrelatorId(corrid);
         correlator.setProcess(_process);
-        correlator.setLock(0);
         correlator.setCreated(new Date());
         _process.getCorrelators().add(correlator);
         getSession().save(correlator);

@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  * type handles all communications initiated by ODE that is destined for other
  * JBI providers.
  */
-class OdeConsumer implements JbiMessageExchangeProcessor {
+class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
   private static final Log __log = LogFactory.getLog(OdeConsumer.class);
 
   private OdeContext _ode;

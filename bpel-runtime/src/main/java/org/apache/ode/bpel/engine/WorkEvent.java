@@ -22,66 +22,82 @@ package org.apache.ode.bpel.engine;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.ode.bpel.common.CorrelationKey;
+
 /**
- * Wrapper around job detail map. 
- *
+ * Wrapper around job detail map.
+ * 
  */
 public class WorkEvent {
 
-  private Map<String,Object> _jobDetail;
-  
-  WorkEvent(Map<String,Object> jobDetail) {
-    _jobDetail = jobDetail;
-  }
-  
-  WorkEvent() {
-    _jobDetail = new HashMap<String,Object>();
-  }
+    private Map<String, Object> _jobDetail;
 
-  Long getIID() {
-    return (Long)_jobDetail.get("iid");
-  }
-  
-  Type getType() {
-    return Type.valueOf((String)_jobDetail.get("type"));
-  }
-  
-  void setType(Type timer) {
-  
-    _jobDetail.put("type", timer.toString());
+    WorkEvent(Map<String, Object> jobDetail) {
+        _jobDetail = jobDetail;
+    }
+
+    WorkEvent() {
+        _jobDetail = new HashMap<String, Object>();
+    }
+
+    Long getIID() {
+        return (Long) _jobDetail.get("iid");
+    }
+
+    Type getType() {
+        return Type.valueOf((String) _jobDetail.get("type"));
+    }
+
+    void setType(Type timer) {
+
+        _jobDetail.put("type", timer.toString());
+
+    }
+
+    Map<String, Object> getDetail() {
+        return _jobDetail;
+    }
+
+    public enum Type {
+        TIMER, RESUME, INVOKE_RESPONSE, MATCHER
+    }
+
+    public String getChannel() {
+        return (String) _jobDetail.get("channel");
+    }
+
+    public void setIID(Long instanceId) {
+        _jobDetail.put("iid", instanceId);
+    }
+
+    public void setChannel(String channel) {
+
+        _jobDetail.put("channel", channel);
+
+    }
+
+    public String getMexId() {
+        return (String) _jobDetail.get("mexid");
+    }
+
+    public void setMexId(String mexId) {
+        _jobDetail.put("mexid", mexId);
+    }
+
+    public String getCorrelatorId() {
+        return (String)_jobDetail.get("correlatorId");
+    }
+
+    public void setCorrelatorId(String correlatorId) {
+        _jobDetail.put("correlatorId", correlatorId);
+    }
     
-  }
-
-  
-  Map<String,Object> getDetail() { 
-    return _jobDetail;
-  }
-  
-  public enum Type {
-    TIMER,
-    RESUME, 
-    INVOKE_RESPONSE
-  }
-
-  public String getChannel() {
-    return (String) _jobDetail.get("channel");
-  }
-
-  public void setIID(Long instanceId) {
-    _jobDetail.put("iid", instanceId);
-  }
-
-  public void setChannel(String channel) {
-
-    _jobDetail.put("channel", channel);
+    public CorrelationKey getCorrelationKey() {
+        return new CorrelationKey((String) _jobDetail.get("ckey"));
+    }
     
-  }
-
-  public String getMexId() {
-    return (String) _jobDetail.get("mexid");
-  }
-
-  public void setMexId(String mexId) {
-    _jobDetail.put("mexid", mexId);
-  }
+    public void setCorrelationKey(CorrelationKey ckey) {
+        _jobDetail.put("ckey", ckey == null ? null : ckey.toCanonicalString());
+    }
 }
+

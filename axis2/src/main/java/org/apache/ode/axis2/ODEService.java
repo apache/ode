@@ -36,6 +36,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
@@ -155,7 +156,8 @@ public class ODEService {
                 boolean timeout = false;
                 // Invocation response could be delayed, if so we have to wait
                 // for it.
-                if (odeMex.getStatus() == MessageExchange.Status.ASYNC) {
+                if (odeMex.getMessageExchangePattern() == MessageExchangePattern.REQUEST_RESPONSE &&
+                        odeMex.getStatus() == MessageExchange.Status.ASYNC) {
                     odeMex = callback.getResponse(TIMEOUT);
                     if (odeMex == null)
                         timeout = true;
