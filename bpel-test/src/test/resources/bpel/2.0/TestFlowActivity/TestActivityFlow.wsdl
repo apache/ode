@@ -1,4 +1,3 @@
-<!-- The public service interface for test1.bpel -->
 
 <wsdl:definitions 
   targetNamespace="http://ode/bpel/unit-test/testFlowActivity.wsdl"
