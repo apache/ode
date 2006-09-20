@@ -243,7 +243,10 @@ public interface ProcessInstanceDAO {
    * Delete previously registered activity recovery.
    */
   void deleteActivityRecovery(String channel);
- 
+
+  /** Expermiental -- lock. */
+  //public void lock();
+
   /**
    * Transport object holding the date of the first and last instance event
    * along with the number events.
@@ -253,5 +256,6 @@ public interface ProcessInstanceDAO {
     public Date last;
     public int count;
   }
+
 
 }

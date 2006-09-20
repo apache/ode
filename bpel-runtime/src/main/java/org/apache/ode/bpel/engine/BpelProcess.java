@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bom.api.CorrelationSet;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.InvalidMessageException;
@@ -76,6 +77,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -111,6 +113,9 @@ public class BpelProcess {
 
     private DeploymentUnit _du;
 
+    /** WARNING - EXPERIMENTAL */
+    private InstanceLockManager _lockManager = new InstanceLockManager();
+
     public BpelProcess(QName pid, DeploymentUnit du, OProcess oprocess,
             Map<OPartnerLink, Endpoint> myRoleEndpointNames, Map<OPartnerLink, Endpoint> initialPartners,
             BpelEventListener debugger, ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,
@@ -140,9 +145,9 @@ public class BpelProcess {
     }
 
     public String toString() {
-        return "BpelProcess[" + _pid + " in " + _du  + "]";
+        return "BpelProcess[" + _pid + " in " + _du + "]";
     }
-    
+
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
         StringBuffer sb = new StringBuffer(partnerlinkName);
         sb.append('.');
@@ -177,7 +182,7 @@ public class BpelProcess {
     }
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
-        for (Map.Entry<Endpoint,PartnerLinkMyRoleImpl> e : _endpointToMyRoleMap.entrySet()) {
+        for (Map.Entry<Endpoint, PartnerLinkMyRoleImpl> e : _endpointToMyRoleMap.entrySet()) {
             if (e.getKey().serviceName.equals(serviceName))
                 return e.getValue();
         }
@@ -278,20 +283,19 @@ public class BpelProcess {
      *         <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-    	InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO());
-    	
-        for (MessageExchangeInterceptor i : _mexInterceptors) 
-        	if (!mex.processInterceptor(i,mex, ictx, invoker))
-        		return false;
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO());
+
+        for (MessageExchangeInterceptor i : _mexInterceptors)
+            if (!mex.processInterceptor(i, mex, ictx, invoker))
+                return false;
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
-        	if (!mex.processInterceptor(i,mex, ictx, invoker))
-        		return false;
-        	
-        
+            if (!mex.processInterceptor(i, mex, ictx, invoker))
+                return false;
+
         return true;
-        
+
     }
-    
+
     /**
      * Replacement object for serializtation of the {@link OBase} (compiled
      * BPEL) objects in the JACOB VPU.
@@ -419,8 +423,8 @@ public class BpelProcess {
             String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
             if (__log.isDebugEnabled()) {
                 __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys="
-                        + ArrayUtils.makeCollection(HashSet.class, keys) 
-                        + " mySessionId=" +  mySessionId + " partnerSessionId=" + partnerSessionId);
+                        + ArrayUtils.makeCollection(HashSet.class, keys) + " mySessionId=" + mySessionId
+                        + " partnerSessionId=" + partnerSessionId);
             }
 
             CorrelationKey matchedKey = null;
@@ -436,39 +440,12 @@ public class BpelProcess {
                     break;
                 }
             }
-            // Handling the "opaque correlation case": correlation is done on a
-            // session identifier associated with my epr
-            if (messageRoute == null) {
-                String sessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
-                if (sessionId != null) {
-                    CorrelationKey key = new CorrelationKey(-1, new String[] { sessionId });
-                    messageRoute = correlator.findRoute(key);
-                    if (__log.isDebugEnabled())
-                        __log.debug("INPUTMSG: rouing based on session id " + sessionId + " --> " + messageRoute);
-                    
-                }
-            }
 
             // TODO - ODE-58
 
-            // If no luck try to find a default route.
-            if (messageRoute == null) {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId
-                            + ": CorrelationKey routing failed; checking default route.");
-                }
-
-                messageRoute = correlator.findRoute(null);
-
-                if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId + ": default route is to " + messageRoute);
-                }
-            }
-
-            // If still no luck, and this operation qualifies for
-            // create-instance
-            // treatment,
-            // then create a new process instance.
+            // If no luck, and this operation qualifies for create-instance
+            // treatment, then create a new process
+            // instance.
             if (messageRoute == null && isCreateInstnace) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("INPUTMSG: " + correlatorId + ": default routing failed, CREATING NEW INSTANCE");
@@ -477,12 +454,12 @@ public class BpelProcess {
                 if (processDAO.isRetired()) {
                     throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
                 }
-                
+
                 if (!processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
-                	__log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
-                	return;
+                    __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+                    return;
                 }
-                
+
                 ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
                 BpelRuntimeContextImpl instance = createRuntimeContext(newInstance, new PROCESS(_oprocess), mex);
 
@@ -504,74 +481,69 @@ public class BpelProcess {
                             + messageRoute.getTargetInstance().getInstanceId());
                 }
 
+                // Attempt to acquire an instance-level lock. 
+                // _lockManager.lock(messageRoute.getTargetInstance().getInstanceId(),
+                // 60, TimeUnit.SECONDS);
+
+                ProcessInstanceDAO instanceDao = messageRoute.getTargetInstance();
+
                 // Reload process instance for DAO.
-                BpelRuntimeContextImpl instance = createRuntimeContext(messageRoute.getTargetInstance(), null, null);
+                BpelRuntimeContextImpl instance = createRuntimeContext(instanceDao, null, null);
                 instance.inputMsgMatch(messageRoute.getGroupId(), messageRoute.getIndex(), mex);
 
                 // Kill the route so some new message does not get routed to
                 // same
                 // process
                 // instance.
-                correlator.removeRoutes(messageRoute.getGroupId(), messageRoute.getTargetInstance());
-
-                Long iid = messageRoute.getTargetInstance().getInstanceId();
+                correlator.removeRoutes(messageRoute.getGroupId(), instanceDao);
 
                 // send process instance event
                 CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_oprocess.targetNamespace, _oprocess
-                        .getName()), getProcessDAO().getProcessId(), iid, matchedKey);
+                        .getName()), getProcessDAO().getProcessId(), instanceDao.getInstanceId(), matchedKey);
                 evt.setPortType(mex.getPortType().getQName());
                 evt.setOperation(operation.getName());
                 evt.setMexId(mex.getMessageExchangeId());
 
                 _debugger.onEvent(evt);
                 // store event
-                getProcessDAO().getInstance(iid).insertBpelEvent(evt);
+                instanceDao.insertBpelEvent(evt);
+                
+                // EXPERIMENTAL -- LOCK
+                //instanceDao.lock();
 
                 mex.setCorrelationStatus(CorrelationStatus.MATCHED);
                 mex.getDAO().setInstance(messageRoute.getTargetInstance());
-
-                // run the vpu
                 instance.execute();
             } else {
                 if (__log.isDebugEnabled()) {
                     __log.debug("INPUTMSG: " + correlatorId + ": SAVING to DB (no match) ");
                 }
 
-                // send event
-                CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-                        .getOperation().getName(), mex.getMessageExchangeId(), keys);
+                if (!mex.isAsynchronous()) {
+                    mex.setFailure(FailureType.NOMATCH, "No process instance matching correlation keys.", null);
 
-                evt.setProcessId(getProcessDAO().getProcessId());
-                evt.setProcessName(new QName(_oprocess.targetNamespace, _oprocess.getName()));
-                _debugger.onEvent(evt);
+                } else {
+                    // send event
+                    CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
+                            .getOperation().getName(), mex.getMessageExchangeId(), keys);
 
-                mex.setCorrelationStatus(CorrelationStatus.QUEUED);
+                    evt.setProcessId(getProcessDAO().getProcessId());
+                    evt.setProcessName(new QName(_oprocess.targetNamespace, _oprocess.getName()));
+                    _debugger.onEvent(evt);
 
-                // No match, means we add message exchange to the queue.
-                correlator.enqueueMessage(mex.getDAO(), keys);
+                    mex.setCorrelationStatus(CorrelationStatus.QUEUED);
 
+                    // No match, means we add message exchange to the queue.
+                    correlator.enqueueMessage(mex.getDAO(), keys);
+
+                }
             }
 
-            // Now we have to update our message exchange status. If the <reply>
-            // was
-            // not hit during the invocation, then we will be in the "REQUEST"
-            // phase
-            // which means that either this was a one-way or a two-way that
-            // needs to
-            // delivery the reply asynchronously.
+            // Now we have to update our message exchange status. If the <reply>  was not hit during the 
+            // invocation, then we will be in the "REQUEST" phase which means that either this was a one-way 
+            // or a two-way that needs to delivery the reply asynchronously.
             if (mex.getStatus() == Status.REQUEST) {
-                switch (mex.getPattern()) {
-                case REQUEST_ONLY:
-                    mex.setStatus(Status.ONE_WAY);
-                    break;
-                case REQUEST_RESPONSE:
-                    mex.setStatus(Status.ASYNC);
-                    break;
-                default:
-                    String errmsg = "BpelProcess: internal error, message exchange pattern not set";
-                    __log.fatal(errmsg);
-                    throw new BpelEngineException(errmsg);
-                }
+                mex.setStatus(Status.ASYNC);
             }
 
         }
@@ -595,6 +567,11 @@ public class BpelProcess {
                         msg);
                 keys.add(key);
             }
+
+            // Let's creata a key based on the sessionId
+            String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+            if (mySessionId != null)
+                keys.add(new CorrelationKey(-1, new String[] { mySessionId }));
 
             return keys.toArray(new CorrelationKey[keys.size()]);
         }
@@ -699,6 +676,12 @@ public class BpelProcess {
             processInstance.invocationResponse(we.getMexId(), we.getChannel());
             processInstance.execute();
             break;
+        case MATCHER:
+            if (__log.isDebugEnabled()) {
+                __log.debug("Matcher event for iid " + we.getIID());
+            }
+
+            processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
         }
     }
 
@@ -722,15 +705,15 @@ public class BpelProcess {
     void activate(BpelEngineImpl engine) {
         _engine = engine;
         _debugger = new DebuggerSupport(this);
-        
+
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (PartnerLinkMyRoleImpl myrole : _myRoles.values()) {
             myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint,
                     myrole._plinkDef.myRolePortType);
-            
-            __log.debug("Activated "  + _pid + " myrole " + myrole.getPartnerLinkName()
-                    + ": EPR is " + myrole._initialEPR);
+
+            __log.debug("Activated " + _pid + " myrole " + myrole.getPartnerLinkName() + ": EPR is "
+                    + myrole._initialEPR);
         }
 
         for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
@@ -741,12 +724,12 @@ public class BpelProcess {
             if (epr != null) {
                 prole._initialEPR = epr;
             }
-            
-            __log.debug("Activated "  + _pid + " partnerrole " + prole.getPartnerLinkName()
-                    + ": EPR is " + prole._initialEPR);
-            
+
+            __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
+                    + prole._initialEPR);
+
         }
-        
+
         __log.debug("Activated " + _pid);
     }
 
@@ -759,7 +742,7 @@ public class BpelProcess {
 
     }
 
-    EndpointReference  getInitialPartnerRoleEPR(OPartnerLink link) {
+    EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
         PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
         if (prole == null)
             throw new IllegalStateException("Unknown partner link " + link);
@@ -778,9 +761,9 @@ public class BpelProcess {
     }
 
     PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
-         PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
-         if (prole == null)
-             throw new IllegalStateException("Unknown partner link " + partnerLink);
-         return prole._channel;
-     }
+        PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
+        if (prole == null)
+            throw new IllegalStateException("Unknown partner link " + partnerLink);
+        return prole._channel;
+    }
 }

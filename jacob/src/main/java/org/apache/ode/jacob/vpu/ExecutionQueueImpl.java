@@ -131,12 +131,6 @@ public class ExecutionQueueImpl implements ExecutionQueue {
       continuation = (Continuation)it.next();
       it.remove();
     }
-    // At this point it is wise to clone the continuation, so that we do not have weird
-    // concurrency issues. We only clone the closure, the arguments should not be
-    // a problem.
-//    Continuation clone = new Continuation(cloneClosure(continuation.getClosure()), continuation.getMethod(), continuation.getArgs());
-//    clone.setDescription(continuation.getDescription());
-//    return clone;
     return continuation;
   }
 

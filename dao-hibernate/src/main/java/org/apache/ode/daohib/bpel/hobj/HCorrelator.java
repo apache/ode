@@ -24,112 +24,89 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Hibernate table representing a BPEL correlator, or message-router.
- * This class maintains a set of <em>selectors</em> and <em>messages</em>.
- * The selector set is a database representation of the pick/receive activities
- * that need to be matched up to a message, while the message set is the
- * database representation of the messages that have been received that
- * need to be matched up to a pcik/receive.
- *
- * @hibernate.class
- *   table="BPEL_CORRELATOR"
+ * Hibernate table representing a BPEL correlator, or message-router. This class
+ * maintains a set of <em>selectors</em> and <em>messages</em>. The
+ * selector set is a database representation of the pick/receive activities that
+ * need to be matched up to a message, while the message set is the database
+ * representation of the messages that have been received that need to be
+ * matched up to a pcik/receive.
+ * 
+ * @hibernate.class table="BPEL_CORRELATOR"
  */
-public class HCorrelator extends HObject{
-	
-  private HProcess _process;
-  private String _correlatorId;
-  private long _lock;
+public class HCorrelator extends HObject {
 
-  /** Receives/picks waiting for message. */
-  private Set<HCorrelatorSelector>  _selectors = new HashSet<HCorrelatorSelector>();
+    private HProcess _process;
 
-  /** Messages waiting for picks/receives. */
-  private Set<HCorrelatorMessage> _messages = new HashSet<HCorrelatorMessage>();
+    private String _correlatorId;
 
-  /** Constructor. */
-	public HCorrelator() {
-		super();
-	}
+    /** Receives/picks waiting for message. */
+    private Set<HCorrelatorSelector> _selectors = new HashSet<HCorrelatorSelector>();
 
-  /**
-   * Get the set of {@link HCorrelatorMessage} objects representing the messages
-   * that need matching to a selector (i.e. pick/receive).
-   * @hibernate.set
-   *  lazy="true"
-   *  inverse="true"
-   *  cascade="delete"
-   * @hibernate.collection-key
-   *  column="CORRELATOR"
-   * @hibernate.collection-one-to-many
-   *  class="org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage"
-   */
-	public Set<HCorrelatorMessage> getMessageCorrelations() {
-		return _messages;
-	}
+    /** Messages waiting for picks/receives. */
+    private Set<HCorrelatorMessage> _messages = new HashSet<HCorrelatorMessage>();
 
-  /** Hibernate-mandated setter. */
-	public void setMessageCorrelations(Set<HCorrelatorMessage> messages) {
-		_messages = messages;
-	}
+    /** Constructor. */
+    public HCorrelator() {
+        super();
+    }
 
-  /**
-   * @hibernate.property
-   * @hibernate.column
-   *   name="CID"
-   *   index="IDX_CORRELATOR_CID"
-   */
-  public String getCorrelatorId() {
-		return _correlatorId;
-	}
+    /**
+     * Get the set of {@link HCorrelatorMessage} objects representing the
+     * messages that need matching to a selector (i.e. pick/receive).
+     * 
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="CORRELATOR"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage"
+     */
+    public Set<HCorrelatorMessage> getMessageCorrelations() {
+        return _messages;
+    }
 
-  /** Hibernate-mandated setter. */
-	public void setCorrelatorId(String correlatorId) {
-		_correlatorId = correlatorId;
-	}
+    /** Hibernate-mandated setter. */
+    public void setMessageCorrelations(Set<HCorrelatorMessage> messages) {
+        _messages = messages;
+    }
 
-  /**
-   * @hibernate.many-to-one
-   *  column="PROCESS_ID"
-   */
-	public HProcess getProcess() {
-		return _process;
-	}
+    /**
+     * @hibernate.property
+     * @hibernate.column name="CID" index="IDX_CORRELATOR_CID"
+     */
+    public String getCorrelatorId() {
+        return _correlatorId;
+    }
 
-  /** Hibernate-mandated setter. */
-  public void setProcess(HProcess process) {
-		_process = process;
-	}
+    /** Hibernate-mandated setter. */
+    public void setCorrelatorId(String correlatorId) {
+        _correlatorId = correlatorId;
+    }
 
-  /**
-   * Get the set of {@link HCorrelatorSelector} objects representing the selectors
-   * (i.e. pick/receive) that need matching to an input message.
-   *
-   * @hibernate.set
-   *    lazy="true"
-   *    inverse="true"
-   *    cascade="delete"
-   * @hibernate.collection-key
-   *    column="CORRELATOR"
-   * @hibernate.collection-one-to-many
-   *    class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"
-   */
-	public Set<HCorrelatorSelector> getSelectors() {
-		return _selectors;
-	}
-  
-  /** Hibernate-mandated setter. */
-	public void setSelectors(Set<HCorrelatorSelector> selectors) {
-		_selectors = selectors;
-	}
+    /**
+     * @hibernate.many-to-one column="PROCESS_ID"
+     */
+    public HProcess getProcess() {
+        return _process;
+    }
 
-  public void setLock(long lock) {
-    _lock = lock;
-  }
-  
-  /**
-   * @hibernate.property 
-   */
-  public long getLock() {
-    return _lock;
-  }
+    /** Hibernate-mandated setter. */
+    public void setProcess(HProcess process) {
+        _process = process;
+    }
+
+    /**
+     * Get the set of {@link HCorrelatorSelector} objects representing the
+     * selectors (i.e. pick/receive) that need matching to an input message.
+     * 
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="CORRELATOR"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"
+     */
+    public Set<HCorrelatorSelector> getSelectors() {
+        return _selectors;
+    }
+
+    /** Hibernate-mandated setter. */
+    public void setSelectors(Set<HCorrelatorSelector> selectors) {
+        _selectors = selectors;
+    }
+
 }
