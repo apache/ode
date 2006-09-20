@@ -101,5 +101,8 @@ public class BPELTest extends TestCase {
 	public void testFlowActivity() throws Exception {
 		go("target/test-classes/bpel/2.0/TestFlowActivity");
 	}
+	public void testFaultHandlers() throws Exception {
+		go("target/test-classes/bpel/2.0/TestFaultHandlers");
+	}
 
 }
