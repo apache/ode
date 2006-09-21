@@ -70,19 +70,24 @@ class PICK extends ACTIVITY {
       selectors = new Selector[_opick.onMessages.size()];
       int idx = 0;
       for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
-        CorrelationKey key = null;
+        CorrelationKey key = null; //  this will be the case for the createInstance activity
+        
         PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
         if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
           // Adding a route for opaque correlation. In this case, correlation is on "out-of-band" session-id 
           String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
           key = new CorrelationKey(-1, new String[]{sessionId});
         } else if (onMessage.matchCorrelation != null) {
-          if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(onMessage.matchCorrelation)))
-            throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation, "Correlation not initialized.");
-
-          key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
-
-          assert key != null;
+          if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(onMessage.matchCorrelation))) {
+              // the following should really test if this is a "join" type correlation...
+              if (!_opick.createInstanceFlag)
+                  throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation, "Correlation not initialized.");
+          } else {
+          
+              key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
+    
+              assert key != null;
+          }
         }
 
         selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation.getOutput() == null, onMessage.messageExchangeId, key);
