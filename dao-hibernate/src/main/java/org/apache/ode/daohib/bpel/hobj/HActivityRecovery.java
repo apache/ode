@@ -31,12 +31,13 @@ public class HActivityRecovery extends HObject {
 
   /** Process instance to which this scope belongs. */
   private HProcessInstance _instance;
-  private int         _activityId;
+  private long        _activityId;
   private String      _channel;
   private String      _reason;
   private Date        _dateTime;
   private HLargeData  _data;
   private String      _actions;
+  private int         _retries;
 
   /**
    * Get the {@link HProcessInstance} to which this scope object belongs.
@@ -55,11 +56,11 @@ public class HActivityRecovery extends HObject {
   /**
    * @hibernate.property column="AID"
    */
-  public int getActivityId() {
+  public long getActivityId() {
     return _activityId;
   }
 
-  public void setActivityId(int activityId) {
+  public void setActivityId(long activityId) {
     _activityId = activityId;
   }
 
@@ -117,5 +118,16 @@ public class HActivityRecovery extends HObject {
   public void setActions(String actions) {
 		_actions = actions;
 	}
+
+  /**
+   * @hibernate.property column="RETRIES"
+   */
+  public int getRetries() {
+    return _retries;
+  }
+
+  public void setRetries(int retries) {
+    _retries = retries;
+  }
 
 }

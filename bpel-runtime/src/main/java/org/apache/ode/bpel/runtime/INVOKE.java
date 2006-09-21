@@ -230,7 +230,7 @@ public class INVOKE extends ACTIVITY {
     sendEvent(new ActivityFailureEvent(_failureReason));
     final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
     getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, null,
-      new String[] { "retry", "cancel", "fault" });
+      new String[] { "retry", "cancel", "fault" }, _invoked - 1);
     object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
       public void retry() {
         sendEvent(new ActivityRecoveryEvent("retry"));
