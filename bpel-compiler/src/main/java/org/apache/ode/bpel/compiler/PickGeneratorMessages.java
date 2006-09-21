@@ -24,24 +24,27 @@ import org.apache.ode.bpel.capi.CompilationMessageBundle;
 
 public class PickGeneratorMessages extends CompilationMessageBundle {
 
-  /**
-   * Attempt to use multiple non-initiate correlation sets; second set was
-   * "{0}".
-   */
-  public CompilationMessage errSecondNonInitiateCorrelationSet(String setName) {
-    return this.formatCompilationMessage(
-        "Attempt to use multiple non-initiate correlation sets;" + " second set was \"{0}\".",
-        setName);
-  }
+    /**
+     * Attempt to use multiple non-initiate correlation sets; second set was
+     * "{0}".
+     */
+    public CompilationMessage errSecondNonInitiateCorrelationSet(String setName) {
+        return this.formatCompilationMessage("Attempt to use multiple non-initiate correlation sets;"
+                + " second set was \"{0}\".", setName);
+    }
 
-  // TODO: better error message
-  public CompilationMessage errForOrUntilMustBeGiven() {
-    return this.formatCompilationMessage("errForOrUntilMustBeGiven");
-  }
+    // TODO: better error message
+    public CompilationMessage errForOrUntilMustBeGiven() {
+        return this.formatCompilationMessage("errForOrUntilMustBeGiven");
+    }
 
-  // TODO: better error message
-  public CompilationMessage errOnAlarmWithCreateInstance() {
-    return this.formatCompilationMessage("errOnAlarmWithCreateInstance");
-  }
+    // TODO: better error message
+    public CompilationMessage errOnAlarmWithCreateInstance() {
+        return this.formatCompilationMessage("errOnAlarmWithCreateInstance");
+    }
+
+    public CompilationMessage errRendezvousNotSupported() {
+        return this.formatCompilationMessage("Rendezvous correlation mode not supported in this context.");
+    }
 
 }
