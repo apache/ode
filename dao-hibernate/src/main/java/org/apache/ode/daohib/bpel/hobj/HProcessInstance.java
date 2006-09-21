@@ -74,7 +74,7 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="INSTANTIATING_CORRELATOR" not-null="true"
+     * @hibernate.many-to-one column="INSTANTIATING_CORRELATOR"
      */
     public HCorrelator getInstantiatingCorrelator() {
         return _instantiatingCorrelator;
