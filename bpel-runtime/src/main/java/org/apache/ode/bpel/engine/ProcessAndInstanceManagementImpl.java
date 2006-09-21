@@ -644,6 +644,7 @@ class ProcessAndInstanceManagementImpl
         if (custom.includeEndpoints()) {
             TEndpointReferences eprs = info.addNewEndpoints();
             OProcess oprocess = _engine.getOProcess(proc.getProcessId());
+            if (oprocess == null) throw new InvalidRequestException("ProcessNotActive: " + proc.getProcessId());
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
                     EndpointReference pepr = _engine._activeProcesses.get(proc.getProcessId())
