@@ -1,0 +1,15 @@
+# Test BPEL correlated receive
+# Message one starts the process and message two will cause the process to complete.
+# Message one and Message two will be the same data file.
+# Expected result = 
+
+# Note the prefix on the part name identifies the message type ( xml = xml data; str = string data )
+
+target.name.space=urn:sybase:bpel:test5Processing
+port.type=test5PT
+operation=request
+
+part1=xml.requestMessageData
+
+xml.requestMessageData=<testMessage><requestID>Start Test5.1</requestID><requestText>Event Start Test5.1</requestText><requestEnd>no</requestEnd></testMessage>
+
