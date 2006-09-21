@@ -212,8 +212,9 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     OProcess getOProcess(QName processId) {
-        // TODO Auto-generated method stub
-        return _activeProcesses.get(processId)._oprocess;
+        BpelProcess process = _activeProcesses.get(processId);
+        if (process == null) return null;
+        else return process._oprocess;
     }
 
     public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
