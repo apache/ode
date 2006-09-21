@@ -237,7 +237,7 @@ public interface ProcessInstanceDAO {
    * Date/time failure occurred, and the recovery channel and available
    * recovery actions.
    */
-  void createActivityRecovery(String channel, int activityId, String reason, Date dateTime, Element data, String[] actions);
+  void createActivityRecovery(String channel, long activityId, String reason, Date dateTime, Element data, String[] actions, int retries);
 
   /**
    * Delete previously registered activity recovery.
