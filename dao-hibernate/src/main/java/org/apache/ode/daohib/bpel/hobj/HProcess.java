@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * Hibernate table representing a BPEL process (<em>not</em> a process instance).
- * @hibernate.class table="BPEL_PROCESS"
+ * @hibernate.class table="BPEL_PROCESS" lazy="false"
  *
  */
 public class HProcess extends HObject{

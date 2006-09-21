@@ -22,31 +22,48 @@ import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
+import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
+import org.hibernate.Query;
 
 /**
  * Hibernate-based {@link MessageRouteDAO} implementation.
  */
 class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
-	
-  private HCorrelatorSelector _selector;
 
-	public MessageRouteDaoImpl(SessionManager sm, HCorrelatorSelector hobj) {
-		super(sm, hobj);
-    _selector = hobj;
-	}
-	/**
-	 * @see org.apache.ode.bpel.dao.MessageRouteDAO#getTargetInstance()
-	 */
-	public ProcessInstanceDAO getTargetInstance() {
-		return new ProcessInstanceDaoImpl(_sm, _selector.getInstance());
-	}
+    private static final String LOCK_INSTANCE = "update " + HProcessInstance.class.getName()
+            + " set lock=lock+1 where id=?";
 
-  public String getGroupId() {
-    return _selector.getGroupId();
-  }
+    private HCorrelatorSelector _selector;
 
-  public int getIndex() {
-    return _selector.getIndex();
-  }
+    private boolean _locked = false;
+
+    public MessageRouteDaoImpl(SessionManager sm, HCorrelatorSelector hobj) {
+        super(sm, hobj);
+        _selector = hobj;
+    }
+
+    /**
+     * @see org.apache.ode.bpel.dao.MessageRouteDAO#getTargetInstance()
+     */
+    public ProcessInstanceDAO getTargetInstance() {
+        // First we need to reliably lock the instance:
+        if (!_locked) {
+            Query q = getSession().createQuery(LOCK_INSTANCE);
+            q.setLong(0, _selector.getInstance().getId());
+            q.executeUpdate();
+            _locked = true;
+        }
+
+        // now it is safe to return
+        return new ProcessInstanceDaoImpl(_sm, _selector.getInstance());
+    }
+
+    public String getGroupId() {
+        return _selector.getGroupId();
+    }
+
+    public int getIndex() {
+        return _selector.getIndex();
+    }
 
 }

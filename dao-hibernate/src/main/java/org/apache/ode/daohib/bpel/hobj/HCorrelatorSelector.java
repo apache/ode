@@ -18,11 +18,13 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
+import org.apache.ode.daohib.hobj.HObject;
+
 /**
- * @hibernate.class table="BPEL_SELECTORS"
+ * @hibernate.class table="BPEL_SELECTORS" lazy="true"
  * 
  */
-public class HCorrelatorSelector extends HCorrelatorEntry {
+public class HCorrelatorSelector extends HObject {
 
     private HProcessInstance _instance;
 
@@ -34,10 +36,8 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
 
     private String _correlationKey;
     
-    private int _lock;
-
     /**
-     * @hibernate.many-to-one column="PIID"
+     * @hibernate.many-to-one column="PIID" not-null="true"
      */
     public HProcessInstance getInstance() {
         return _instance;
@@ -49,7 +49,7 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
 
     /**
      * @hibernate.property column="SELGRPID"
-     * @hibernate.column name="SELGRPID" index="IDX_SELECTOR_SELGRPID"
+     * @hibernate.column name="SELGRPID" index="IDX_SELECTOR_SELGRPID" not-null="true"
      */
     public String getGroupId() {
         return _groupId;
@@ -60,7 +60,7 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     }
 
     /**
-     * @hibernate.property column="IDX" not-null="true"
+     * @hibernate.property column="IDX" not-null="true" not-null="true"
      */
     public int getIndex() {
         return _idx;
@@ -70,16 +70,6 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
         _idx = idx;
     }
     
-    /**
-     * @hibernate.property column="LOCK" not-null="true"
-     */
-    public int getLock() {
-        return _lock;
-    }
-    
-    public void setLock(int lock) {
-        _lock = lock;
-    }
     
     @Override
     public String toString() {
@@ -88,7 +78,7 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     }
 
     /**
-     * @hibernate.property column="CORRELATION_KEY"
+     * @hibernate.property column="CORRELATION_KEY" not-null="true"
      * @hibernate.column name="CORRELATION_KEY"
      *                   index="IDX_SELECTOR_CKEY"
      *                   
@@ -102,7 +92,7 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     }
 
     /**
-     * @hibernate.many-to-one
+     * @hibernate.many-to-one not-null="true"
      * @hibernate.column name="CORRELATOR" index="IDX_SELECTOR_CORRELATOR"
      */
     public HCorrelator getCorrelator() {
