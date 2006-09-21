@@ -41,7 +41,7 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     _self = recovery;
   }
 
-  public int getActivityId() {
+  public long getActivityId() {
     return _self.getActivityId();
   }
 
@@ -68,8 +68,16 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     }
   }
 
-  public String[] getActions() {
+  public String getActions() {
+    return _self.getActions();
+  }
+
+  public String[] getActionsList() {
     return _self.getActions().split(" ");
+  }
+
+  public int getRetries() {
+    return _self.getRetries();
   }
 
 }

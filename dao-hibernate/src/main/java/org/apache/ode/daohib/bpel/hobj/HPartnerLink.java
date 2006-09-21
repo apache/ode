@@ -21,6 +21,7 @@ package org.apache.ode.daohib.bpel.hobj;
 
 import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.daohib.hobj.HObject;
+import java.util.Set;
 
 /**
  * The HEndpointReference can either be attached to a scope (when it's specific
@@ -53,6 +54,8 @@ public class HPartnerLink extends HObject {
     private String _mySessionId;
 
     private String _partnerSessionId;
+
+    private Set<HMessageExchange> _mex;
 
     public HPartnerLink() {
         super();
@@ -179,4 +182,23 @@ public class HPartnerLink extends HObject {
     public void setMySessionId(String sessionId) {
         _mySessionId = sessionId;
     }
+
+    /**
+     * @hibernate.set
+     *    lazy="true"
+     *    inverse="true"
+     *    cascade="delete"
+     * @hibernate.collection-key
+     *    column="PARTNERLINK"
+     * @hibernate.collection-one-to-many
+     *    class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
+     */
+    public Set<HMessageExchange> getMessageExchanges() {
+      return _mex;
+    }
+
+    public void setMessageExchanges(Set<HMessageExchange> mex) {
+      _mex = mex;
+    }
+
 }

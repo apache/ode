@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -311,6 +312,31 @@ class ProcessAndInstanceManagementImpl
         assert debugSupport != null : "getDebugger(Long) returned NULL!";
         debugSupport.terminate(iid);
 
+        return genInstanceInfoDocument(iid);
+    }
+
+    public InstanceInfoDocument recoverActivity(final Long iid, final long aid, final String action) {
+        try {
+            QName processId = _db.exec(new BpelDatabase.Callable<QName>() {
+                public QName run(BpelDAOConnection conn) throws Exception {
+                    ProcessInstanceDAO instance = conn.getInstance(iid);
+/*
+                    if (instance == null)
+                      return null;
+                    for (ActivityRecoveryDAO recovery: instance.getActivityRecoveries()) {
+                      if (recovery.getActivityId() == aid) {
+                        runtime.recoverActivity(recovery.getChannel(), action);
+                        break;
+                      }
+                    }
+*/
+                    return instance.getProcess().getProcessId();
+                }
+            });
+        } catch (Exception e) {
+            __log.error("DbError",e);
+            throw new ProcessingException("DbError", e);
+        }
         return genInstanceInfoDocument(iid);
     }
 
@@ -793,12 +819,26 @@ class ProcessAndInstanceManagementImpl
         }
 
         if (includeActivityInfo) {
+           Collection<ActivityRecoveryDAO> recoveries = scope.getProcessInstance().getActivityRecoveries(); 
+
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
             List<BpelEvent> events = scope.listEvents(null);
             ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
             for (BpelEvent e : events) b.onEvent(e);
-            for (ActivityInfoDocument ai : b.getActivities())
+            for (ActivityInfoDocument ai : b.getActivities()) {
+                for (ActivityRecoveryDAO recovery : recoveries) {
+                  if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
+                    TActivityInfo.Failure failure = ai.getActivityInfo().addNewFailure();
+                    failure.setReason(recovery.getReason());
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(recovery.getDateTime());
+                    failure.setDtFailure(cal);
+                    failure.setActions(recovery.getActions());
+                    ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+                  }
+                }
                 activities.addNewActivityInfo().set(ai.getActivityInfo());
+            }
         }
     }
 

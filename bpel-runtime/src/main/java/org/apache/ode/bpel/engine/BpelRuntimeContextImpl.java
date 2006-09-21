@@ -1138,12 +1138,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-            Date dateTime, Element data, String[] actions) {
+            Date dateTime, Element data, String[] actions, int retries) {
         if (reason == null)
             reason = "Unspecified";
         if (dateTime == null)
             dateTime = new Date();
-        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, data, actions);
+        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, data, actions, retries);
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
