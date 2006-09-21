@@ -21,44 +21,58 @@ package org.apache.ode.daohib.hobj;
 import java.util.Date;
 
 /**
- * Base class for Hibernate objects providing auto-generated key and
- * create timestamp.
+ * Base class for Hibernate objects providing auto-generated key, create
+ * timestamp and lock fields.
  */
 public class HObject {
-	
-  private Long _id;
-  private Date _created;
-  
-  /** Constructor.	 */
-	public HObject() {
-		super();
-	}
 
-  /**
-   * Auto-gnerated creation timestamp.
-   * @hibernate.property
-   *  column="INSERT_TIME"
-   *  type="timestamp"
-   */
-  public Date getCreated() {
-    return _created;
-  }
+    private Long _id;
 
-  public void setCreated(Date created) {
-    _created = created;
-  }
+    private Date _created;
 
-  /**
-   * Auto-generated primary key.
-   * @hibernate.id
-   *  generator-class="native"
-   *  column="ID"
-   */
-  public Long getId() {
-    return _id;
-  }
+    private int _lock;
 
-  public void setId(Long id) {
-    _id = id;
-  }
+    /** Constructor. */
+    public HObject() {
+        super();
+        setLock(0);
+    }
+
+    /**
+     * Auto-gnerated creation timestamp.
+     * 
+     * @hibernate.property column="INSERT_TIME" type="timestamp"
+     */
+    public Date getCreated() {
+        return _created;
+    }
+
+    public void setCreated(Date created) {
+        _created = created;
+    }
+
+    /**
+     * Auto-generated primary key.
+     * 
+     * @hibernate.id generator-class="native" column="ID"
+     */
+    public Long getId() {
+        return _id;
+    }
+
+    public void setId(Long id) {
+        _id = id;
+    }
+
+    /**
+     * @hibernate.property column="MLOCK" not-null="true"
+     */
+    public int getLock() {
+        return _lock;
+    }
+
+    public void setLock(int lock) {
+        _lock = lock;
+    }
+
 }

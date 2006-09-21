@@ -18,17 +18,19 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
+import org.apache.ode.daohib.hobj.HObject;
+
 /**
- * @hibernate.class table="BPEL_UNMATCHED" 
+ * @hibernate.class table="BPEL_UNMATCHED" lazy="true"
  */
-public class HCorrelatorMessage extends HCorrelatorEntry {
+public class HCorrelatorMessage extends HObject {
 
     private HMessageExchange _messageExchange;
     private HCorrelator _correlator;
     private String _correlationKey;
 
     /**
-     * @hibernate.many-to-one column="MEX"
+     * @hibernate.many-to-one column="MEX" not-null="true"
      */
     public HMessageExchange getMessageExchange() {
         return _messageExchange;
@@ -60,7 +62,7 @@ public class HCorrelatorMessage extends HCorrelatorEntry {
 
     /**
      * @hibernate.many-to-one
-     * @hibernate.column name="CORRELATOR" index="IDX_UNMATCHED_CORRELATOR"
+     * @hibernate.column name="CORRELATOR" index="IDX_UNMATCHED_CORRELATOR" not-null="true"
      */
     public HCorrelator getCorrelator() {
         return _correlator;
