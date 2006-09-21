@@ -136,6 +136,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (PROCESS != null) {
             vpu.inject(PROCESS);
         }
+        
+        __log.debug("BpelRuntimeContextImpl created. INDEXED STATE=" + soup.getIndex());
     }
 
     public Long getPid() {
@@ -1030,6 +1032,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
+        case ASYNC:
         case REQUEST:
             MessageDAO request = dao.getRequest();
             if (request == null) {
