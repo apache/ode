@@ -48,13 +48,16 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
      * Note: the hk.messageExchange=null is a hack to get around a Hibernate bug where the query
      * does not properly discriminate for the proper subclass.
      */
-    private static final String QRY_MESSAGE = "where this.correlationKey = ?".intern();
+    private static final String QRY_MESSAGE = " where this.correlationKey = ?".intern();
 
     /** filter for finding a matching selector. */
-    private static final String FLTR_SELECTORS = "where this.correlationKey = ?" + " and " +
+    private static final String FLTR_SELECTORS = " where this.correlationKey = ?" + " and " +
             "(this.instance.state = " + ProcessState.STATE_ACTIVE + " or this.instance.state = " 
             + ProcessState.STATE_READY + ")".intern();
 
+    private static final String LOCK_SELECTORS = "update " + HCorrelatorSelector.class.getName() + 
+        " set lock = lock+1 where correlationKey = :ckey and correlator= :corr".intern();
+    
     /** Query for removing routes. */
     private static final String QRY_DELSELECTORS = "delete from " + HCorrelatorSelector.class.getName()
             + " where groupId = ? and instance = ?".intern();
@@ -95,14 +98,27 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         if (__log.isDebugEnabled())
             __log.debug(hdr);
 
-        Query q = getSession().createFilter(_hobj.getSelectors(), FLTR_SELECTORS);
-        q.setString(0, key == null ? null : key.toCanonicalString());
-        q.setLockMode("this", LockMode.UPGRADE);
-
-        HCorrelatorSelector selector = (HCorrelatorSelector) q.uniqueResult();
-
-        __log.debug(hdr + "found " + selector);
-        return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
+        // Make sure we obtain a lock for the selector we want to find. Note that a SELECT FOR UPDATE
+        // will not necessarily work, as different DB vendors attach a different meaning to this syntax.
+        // In particular it is not clear how long the lock should be held, for the lifetime of the 
+        // resulting cursor, or for the lifetime of the transaction. So really, an UPDATE of the row
+        // is a much safer alternative. 
+        Query lockQry = getSession().createQuery(LOCK_SELECTORS);
+        lockQry.setString("ckey", key == null ? null : key.toCanonicalString());
+        lockQry.setEntity("corr",_hobj);
+        if (lockQry.executeUpdate() > 0) {
+            
+            Query q = getSession().createFilter(_hobj.getSelectors(), FLTR_SELECTORS);
+            q.setString(0, key == null ? null : key.toCanonicalString());
+            q.setLockMode("this", LockMode.UPGRADE);
+    
+            HCorrelatorSelector selector = (HCorrelatorSelector) q.uniqueResult();
+    
+            __log.debug(hdr + "found " + selector);
+            return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
+        } 
+        
+        return null;
     }
 
     /**
@@ -148,6 +164,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         HCorrelatorSelector hsel = new HCorrelatorSelector();
         hsel.setGroupId(routeGroupId);
         hsel.setIndex(idx);
+        hsel.setLock(0);
         hsel.setCorrelationKey(correlationKey.toCanonicalString());
         hsel.setInstance((HProcessInstance) ((ProcessInstanceDaoImpl) target).getHibernateObj());
         hsel.setCorrelator(_hobj);
