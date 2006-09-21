@@ -211,6 +211,14 @@
     <message name="deleteOutput">
         <part name="iids" type="tns:iidsType"/>
     </message>
+    <message name="recoverActivityInput">
+        <part name="iid" type="xsd:long"/>
+        <part name="aid" type="xsd:long"/>
+        <part name="action" type="xsd:string"/>
+    </message>
+    <message name="recoverActivityOutput">
+        <part name="instance-info" type="typ:tInstanceInfo"/>
+    </message>
 
     <portType name="ProcessManagementPortType">
         <operation name="listProcesses">
@@ -315,6 +323,10 @@
         <operation name="delete">
             <input message="tns:deleteInput"/>
             <output message="tns:deleteOutput"/>
+        </operation>
+        <operation name="recoverActivity">
+            <input message="tns:recoverActivityInput"/>
+            <output message="tns:recoverActivityOutput"/>
         </operation>
     </portType>
 
@@ -527,6 +539,15 @@
             </output>
         </operation>
         <operation name="delete">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+            </output>
+        </operation>
+        <operation name="recoverActivity">
             <soap:operation soapAction="" style="rpc"/>
             <input>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>

@@ -447,7 +447,7 @@
                               <documentation>Reason for failure.</documentation>
                           </annotation>
                       </element>
-                      <element name="action" type="xs:string">
+                      <element name="actions" type="xs:string">
                           <annotation>
                               <documentation>Allowed recovery actions (space separated list of action names).</documentation>
                           </annotation>
