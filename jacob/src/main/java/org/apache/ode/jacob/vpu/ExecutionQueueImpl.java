@@ -248,6 +248,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     public void read(InputStream iis) throws IOException, ClassNotFoundException {
         _channels.clear();
         _reactions.clear();
+        _index.clear();
 
         ExecutionQueueInputStream sis = new ExecutionQueueInputStream(iis);
 
@@ -256,8 +257,6 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         int reactions = sis.readInt();
         for (int i = 0; i < reactions; ++i) {
             JacobObject closure = (JacobObject) sis.readObject();
-            if (closure instanceof IndexedObject)
-                index((IndexedObject) closure);
             String methodName = sis.readUTF();
             Method method = closure.getMethod(methodName);
             int numArgs = sis.readInt();
@@ -272,9 +271,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         for (int i = 0; i < numChannels; ++i) {
             int objFrames = sis.readInt();
             for (int j = 0; j < objFrames; ++j) {
-                ObjectFrame oframe = (ObjectFrame) sis.readObject();
-                if (oframe._continuation instanceof IndexedObject)
-                    index((IndexedObject) oframe._continuation);
+                sis.readObject();
             }
             int msgFrames = sis.readInt();
             for (int j = 0; j < msgFrames; ++j) {
@@ -297,6 +294,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             vals = new LinkedList<IndexedObject>();
             _index.put(object.getKey(), vals);
         }
+        vals.add(object);
     }
 
     public void write(OutputStream oos) throws IOException {
@@ -785,6 +783,10 @@ public class ExecutionQueueImpl implements ExecutionQueue {
                 resolved = obj;
             }
 
+            
+            if (resolved != null && resolved instanceof IndexedObject)
+                index((IndexedObject) resolved);
+            
             return resolved;
         }
     }
