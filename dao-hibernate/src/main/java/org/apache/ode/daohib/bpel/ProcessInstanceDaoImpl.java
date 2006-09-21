@@ -384,7 +384,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
       }
     }
   }
-
+  
   public BpelDAOConnection getConnection() {
     return new BpelDAOConnectionImpl(_sm);
   }
