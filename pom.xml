@@ -70,7 +70,7 @@
         <jasperVersion>4.2.20RC0</jasperVersion>
         <jotmVersion>2.0.10</jotmVersion>
         <junitVersion>3.8.1</junitVersion>
-        <log4jVersion>1.2.12</log4jVersion>
+        <log4jVersion>1.2.13</log4jVersion>
         <saxonVersion>8.7</saxonVersion>
         <servicemixVersion>3.0-incubating-SNAPSHOT</servicemixVersion>
         <staxApiVersion>1.0</staxApiVersion>
