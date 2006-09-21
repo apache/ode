@@ -51,6 +51,9 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
   private static final String QRY_VARIABLES = "from " + HXmlData.class.getName()
     + " as x where x.name = ? and x.scope.scopeModelId = ? and x.scope.instance.id = ?";
 
+  private static final String QRY_RECOVERIES = "from " + HActivityRecovery.class.getName() +
+    " AS x WHERE x.instance.id = ?";
+
   private HProcessInstance _instance;
 
   private ScopeDAO _root;
@@ -343,18 +346,24 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
 
   public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
     List<ActivityRecoveryDAO> results = new ArrayList<ActivityRecoveryDAO>();
-    for (HActivityRecovery recovery : _instance.getActivityRecoveries())
-      results.add(new ActivityRecoveryDaoImpl(_sm, recovery));
+    Query qry = getSession().createQuery(QRY_RECOVERIES);
+    qry.setLong(0, _instance.getId());
+    Iterator iter = qry.iterate();
+    while (iter.hasNext())
+      results.add(new ActivityRecoveryDaoImpl(_sm, (HActivityRecovery) iter.next()));
+    Hibernate.close(iter);
     return results;
   }
 
-  public void createActivityRecovery(String channel, int activityId, String reason,
-                                     Date dateTime, Element data, String[] actions) {
+  public void createActivityRecovery(String channel, long activityId, String reason,
+                                     Date dateTime, Element data, String[] actions, int retries) {
     HActivityRecovery recovery = new HActivityRecovery();
+    recovery.setInstance(_instance);
     recovery.setChannel(channel);
     recovery.setActivityId(activityId);
     recovery.setReason(reason);
     recovery.setDateTime(dateTime);
+    recovery.setRetries(retries);
     if (data != null) {
       HLargeData ld = new HLargeData(DOMUtils.domToString(data));
       recovery.setData(ld);

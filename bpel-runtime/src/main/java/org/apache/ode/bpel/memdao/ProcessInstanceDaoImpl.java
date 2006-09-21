@@ -50,6 +50,9 @@ import java.util.Set;
   private FaultDAO _fault;
   private CorrelatorDAO _instantiatingCorrelator;
   private BpelDAOConnection _conn;
+  private int _failureCount;
+  private Date _failureDateTime;
+  private Map<String, ActivityRecoveryDAO> _activityRecoveries = new HashMap<String, ActivityRecoveryDAO>();
   
   // TODO: Remove this, we should be using the main event store... 
   private List<ProcessInstanceEvent> _events = new ArrayList<ProcessInstanceEvent>();
@@ -280,15 +283,89 @@ import java.util.Set;
     return ret;
   }
 
-  
-  public int getActivityFailureCount() { return 0; }
-  public Date getActivityFailureDateTime() { return null; }
-  public Collection<ActivityRecoveryDAO> getActivityRecoveries() { return null; }
-  public void createActivityRecovery(String channel, int activityId, String reason, Date dateTime, Element data, String[] actions) { }
-  public void deleteActivityRecovery(String channel) { }
+  public int getActivityFailureCount() {
+    return _failureCount;
+  }
+
+  public Date getActivityFailureDateTime() {
+    return _failureDateTime;
+  }
+
+  public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
+    return _activityRecoveries.values();
+  }
+
+  public void createActivityRecovery(String channel, long activityId, String reason, Date dateTime,
+                                     Element data, String[] actions, int retries) {
+    _activityRecoveries.put(channel, new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries));
+    _failureCount = _activityRecoveries.size();
+    _failureDateTime = dateTime;
+  }
+
+  public void deleteActivityRecovery(String channel) {
+    _activityRecoveries.remove(channel);
+    _failureCount = _activityRecoveries.size();
+  }
 
   public long genMonotonic() {
     return ++_seq;
+  }
+
+  static class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
+
+    private long    _activityId;
+    private String  _channel;
+    private String  _reason;
+    private Element _data;
+    private Date    _dateTime;
+    private String  _actions;
+    private int     _retries;
+
+    ActivityRecoveryDAOImpl(String channel, long activityId, String reason, Date dateTime,
+                            Element data, String[] actions, int retries) {
+      _activityId = activityId;
+      _channel = channel;
+      _reason = reason;
+      _data = data;
+      _dateTime = dateTime;
+      _actions = actions[0];
+      for (int i = 1; i < actions.length; ++i)
+        _actions += " " + actions[i];
+      _retries = retries;
+    }
+
+    public long getActivityId() {
+      return _activityId;
+    }
+
+    public String getChannel() {  
+      return _channel;
+    }
+
+    public String getReason() {
+      return _reason;
+    }
+
+    public Element getData() {
+      return _data;
+    }
+
+    public Date getDateTime() {
+      return _dateTime;
+    }
+
+    public String getActions() {
+      return _actions;
+    }
+
+    public String[] getActionsList() {
+      return _actions.split(" ");
+    }
+
+    public int getRetries() {
+      return _retries;
+    }
+
   }
 
 }

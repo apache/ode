@@ -165,6 +165,10 @@ class MockBpelServer {
     return _server.getBpelManagementFacade();
   }
 
+  public TransactionManager getTransactionManager() {
+    return _txManager;
+  }
+
   public void waitForBlocking() {
     try {
       // TODO: change this to lock on an object.

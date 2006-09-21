@@ -244,7 +244,7 @@ public interface BpelRuntimeContext {
   Element getSourceEPR(String mexId);
 
   void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-                                   Date dateTime, Element data, String[] actions);
+                                   Date dateTime, Element data, String[] actions, int retries);
 
   void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
 
