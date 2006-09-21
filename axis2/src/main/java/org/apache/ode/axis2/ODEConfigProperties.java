@@ -55,7 +55,7 @@ public class ODEConfigProperties extends Properties {
         File configFile = new File(_installDir, ODEConfigProperties.CONFIG_FILE_NAME);
         if (!configFile.exists()) {
             try {
-                URL resource = getClass().getResource(ODEConfigProperties.CONFIG_FILE_NAME);
+                URL resource = getClass().getClassLoader().getResource(ODEConfigProperties.CONFIG_FILE_NAME);
                 if (resource != null) configFile = new File(resource.toURI());
                 else found = false;
             } catch (URISyntaxException e) {
