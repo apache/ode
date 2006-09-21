@@ -33,6 +33,8 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
     private HCorrelator _correlator;
 
     private String _correlationKey;
+    
+    private int _lock;
 
     /**
      * @hibernate.many-to-one column="PIID"
@@ -66,6 +68,17 @@ public class HCorrelatorSelector extends HCorrelatorEntry {
 
     public void setIndex(int idx) {
         _idx = idx;
+    }
+    
+    /**
+     * @hibernate.property column="LOCK" not-null="true"
+     */
+    public int getLock() {
+        return _lock;
+    }
+    
+    public void setLock(int lock) {
+        _lock = lock;
     }
     
     @Override
