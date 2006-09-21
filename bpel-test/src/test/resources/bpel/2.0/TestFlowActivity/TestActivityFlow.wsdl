@@ -79,7 +79,7 @@
     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       testMessage/requestText
     </bpws:query>
-  </bpws:propertyAlias>/>
+  </bpws:propertyAlias>
   
   <bpws:property name="testFlow1" type="xsd:boolean"/>
   <bpws:propertyAlias propertyName="tns:testFlow1" messageType="tns:requestMessage" part="requestMessageData">

@@ -1,0 +1,12 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test/testCompensationHandlers" 
+	xmlns:wns="http://ode/bpel/unit-test/testCompensationHandlers.wsdl">
+
+
+	<process name="pns:TestCompensationHandlersProcess">
+		<active>true</active>
+		<provide partnerLink="request">
+			<service name="wns:testCompensationHandlersService" port="wns:testCompensationHandlersPort"/>
+		</provide>
+	</process>
+</deploy>
