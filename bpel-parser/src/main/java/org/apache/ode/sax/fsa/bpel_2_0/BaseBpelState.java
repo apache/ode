@@ -164,7 +164,16 @@ abstract class BaseBpelState extends AbstractState {
     }
 
     protected short getInitiateYesNo(XmlAttributes atts) {
-        return checkYesNo(atts.getValue("initiate"))?Correlation.INITIATE_YES:Correlation.INITIATE_NO;
+        String val = atts.getValue("initiate");
+        if (val == null || "".equals(val))
+            return Correlation.INITIATE_NO;
+        if (val.equals("yes"))
+                return Correlation.INITIATE_YES;
+        if (val.equals("join"))
+            return Correlation.INITIATE_RENDEZVOUS;
+
+        // TODO: Should really throw an error here no?
+        return Correlation.INITIATE_NO;
     }
 
     protected abstract BpelObject createBpelObject(StartElement se) throws ParseException;
