@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
  */
 public interface ActivityRecoveryDAO {
 
-  int getActivityId();
+  long getActivityId();
 
   String getChannel();
 
@@ -37,6 +37,10 @@ public interface ActivityRecoveryDAO {
 
   Date getDateTime();
 
-  String[] getActions();
+  String getActions();
+
+  String[] getActionsList();
+
+  int getRetries();
 
 }
