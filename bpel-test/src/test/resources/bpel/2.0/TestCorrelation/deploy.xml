@@ -1,0 +1,12 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test/testCorrelation" 
+	xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl">
+
+
+	<process name="pns:TestCorrelationProcess">
+		<active>true</active>
+		<provide partnerLink="request">
+			<service name="wns:testCorrelationService" port="wns:testCorrelationPort"/>
+		</provide>
+	</process>
+</deploy>
