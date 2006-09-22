@@ -92,7 +92,7 @@ public class ODEConfigProperties extends Properties {
     }
 
     public String getDbDataSource() {
-        return getProperty(ODEConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/jdbc/ode-ds");
+        return getProperty(ODEConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/env/jdbc/ode-ds");
     }
 
     public String getDbEmbeddedName(){
