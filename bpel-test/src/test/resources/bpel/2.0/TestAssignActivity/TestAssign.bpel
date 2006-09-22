@@ -56,6 +56,10 @@
                 <to variable="intVar"/>
             </copy>
             <copy>
+                <from>$intVar + number('2')</from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
                 <from variable="myVar" part="TestPart"/>
                 <to variable="strVar"/>
             </copy>
@@ -64,15 +68,11 @@
                 <to variable="myVar" part="TestPart"/>
             </copy>
             <copy>
-                <from>concat($strVar,' World')"</from>
-                <to>$otherMsgVar.TestPart</to>
-            </copy>
-            <copy>
                 <from variable="myVar" part="TestPart"/>
                 <to>$otherMsgVar.TestPart</to>
             </copy>
         </assign>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
-               operation="testAssign" variable="myVar"/>
+               operation="testAssign" variable="otherMsgVar"/>
     </sequence>
 </process>
