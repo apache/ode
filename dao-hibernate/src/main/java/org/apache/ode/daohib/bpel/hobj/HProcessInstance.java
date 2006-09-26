@@ -42,6 +42,7 @@ public class HProcessInstance extends HObject {
     private Collection<HScope> _scopes = new HashSet<HScope>();
 
     private Collection<HCorrelationSet> _csets = new HashSet<HCorrelationSet>();
+    private Collection<HMessageExchange> _msgEx = new HashSet<HMessageExchange>();
 
     /** Events belonging to this instance. */
     private Collection<HBpelEvent> _events = new HashSet<HBpelEvent>();
@@ -197,6 +198,19 @@ public class HProcessInstance extends HObject {
 
     public void setCorrelationSets(Collection<HCorrelationSet> csets) {
         _csets = csets;
+    }
+
+    /**
+     * @hibernate.bag lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="INSTANCE"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
+     */
+    public Collection<HMessageExchange> getMessageExchanges() {
+        return _msgEx;
+    }
+
+    public void setMessageExchanges(Collection<HMessageExchange> msgEx) {
+        _msgEx = msgEx;
     }
 
     /**
