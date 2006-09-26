@@ -101,8 +101,11 @@ public class BPELTest extends TestCase {
 	public void testFaultHandlers() throws Exception {
 		go("target/test-classes/bpel/2.0/TestFaultHandlers");
 	}
-    public void testAssignActivity() throws Exception {
-        go("target/test-classes/bpel/2.0/TestAssignActivity");
+    public void testAssignActivity1() throws Exception {
+        go("target/test-classes/bpel/2.0/TestAssignActivity1");
+    }
+    public void testAssignActivity2() throws Exception {
+        go("target/test-classes/bpel/2.0/TestAssignActivity2");
     }
     
     /** These tests compile however they fail at runtime */
