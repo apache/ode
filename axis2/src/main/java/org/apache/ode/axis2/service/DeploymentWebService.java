@@ -115,6 +115,9 @@ public class DeploymentWebService {
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
                         _service.deploy(dest);
+                        File deployedMarker = new File(_deployPath, namePart.getText() + ".deployed");
+                        deployedMarker.createNewFile();
+
                         // Telling the poller what we deployed so that it doesn't try to deploy it again
                         _poller.markAsDeployed(dest);
                         __log.info("Deployment of artifact " + dest.getName() + " successful.");
@@ -138,7 +141,11 @@ public class DeploymentWebService {
                         // files in there. The poller shouldn't pick them up so we're asking
                         // it to hold on for a while.
                         _poller.hold();
+                        
                         boolean result = _service.undeploy(deploymentDir);
+                        File deployedMarker = new File(_deployPath, elmtStr + ".deployed");
+                        deployedMarker.delete();
+
                         OMElement response = factory.createOMElement("response", depns);
                         response.setText("" + result);
                         sendResponse(factory, messageContext, "undeployResponse", response);
