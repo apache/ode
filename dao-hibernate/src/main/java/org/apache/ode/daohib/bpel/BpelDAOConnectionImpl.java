@@ -168,14 +168,15 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     static Iterator<HProcess> _processQuery(Session session, ProcessFilter filter) {
         Criteria crit = session.createCriteria(HProcess.class);
 
-        // Filtering using an example object
-        HProcess exampleProcess = new HProcess();
-        crit.add(Example.create(exampleProcess).ignoreCase().enableLike().excludeZeroes()
-                .excludeProperty("retired").excludeProperty("active").excludeProperty("version"));
         // TODO Implement process status filtering when status will exist
 
         // TODO separate localname and namespace to provide proper querying
         if (filter != null) {
+            // Filtering using an example object
+            HProcess exampleProcess = new HProcess();
+            crit.add(Example.create(exampleProcess).ignoreCase().enableLike().excludeZeroes()
+                    .excludeProperty("retired").excludeProperty("active").excludeProperty("version"));
+
             if (filter.getNameFilter() != null) {
                 exampleProcess.setTypeName(filter.getNameFilter().replaceAll("\\*", "%"));
             }
