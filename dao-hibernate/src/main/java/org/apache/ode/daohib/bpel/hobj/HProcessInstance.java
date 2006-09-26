@@ -70,7 +70,7 @@ public class HProcessInstance extends HObject {
     private long _seq;
 
     /**
-     * 
+     *
      */
     public HProcessInstance() {
         super();
@@ -198,19 +198,6 @@ public class HProcessInstance extends HObject {
 
     public void setCorrelationSets(Collection<HCorrelationSet> csets) {
         _csets = csets;
-    }
-
-    /**
-     * @hibernate.bag lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="INSTANCE"
-     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
-     */
-    public Collection<HMessageExchange> getMessageExchanges() {
-        return _msgEx;
-    }
-
-    public void setMessageExchanges(Collection<HMessageExchange> msgEx) {
-        _msgEx = msgEx;
     }
 
     /**
