@@ -667,7 +667,7 @@ class ProcessAndInstanceManagementImpl
             }
         }
 
-        if (custom.includeEndpoints()) {
+        if (custom.includeEndpoints() && proc.isActive()) {
             TEndpointReferences eprs = info.addNewEndpoints();
             OProcess oprocess = _engine.getOProcess(proc.getProcessId());
             if (oprocess == null) throw new InvalidRequestException("ProcessNotActive: " + proc.getProcessId());
