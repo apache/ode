@@ -203,7 +203,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="INSTANCE"
+     * @hibernate.many-to-one column="PIID"
      */
     public HProcessInstance getInstance() {
         return _instance;
