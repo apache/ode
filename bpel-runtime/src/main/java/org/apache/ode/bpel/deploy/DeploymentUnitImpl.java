@@ -193,6 +193,11 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return (int) (_name.hashCode() + _lastModified);
     }
 
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DeploymentUnitImpl)) return false;
+        return ((DeploymentUnitImpl)obj).getDeployDir().getAbsolutePath().equals(getDeployDir().getAbsolutePath());
+    }
+
     public File getDeployDir() {
         return _duDirectory;
     }
@@ -255,9 +260,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return ret;
     }
 
-    public Set<QName> getProcessNames() {
-        
-        loadProcessDefinitions();
+    public Set<QName> getProcessNames() {        
+        if (_processes == null) loadProcessDefinitions();
         return _processes.keySet();
     }
 
