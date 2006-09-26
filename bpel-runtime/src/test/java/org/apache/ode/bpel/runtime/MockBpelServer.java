@@ -183,6 +183,7 @@ class MockBpelServer {
   public void shutdown() throws Exception {
     _server.stop();
     _scheduler.stop();
+    _scheduler.shutdown();
     _jotm.stop();
   }
 
@@ -378,6 +379,7 @@ class MockBpelServer {
     }
     public void start() { _quartz.start(); }
     public void stop() { _quartz.stop(); }
+    public void shutdown() { _quartz.shutdown(); }
   }
 
   private class ExecutorServiceWrapper extends AbstractExecutorService {

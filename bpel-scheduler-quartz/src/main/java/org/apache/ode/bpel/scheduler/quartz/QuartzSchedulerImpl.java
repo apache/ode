@@ -143,9 +143,14 @@ public class QuartzSchedulerImpl implements Scheduler {
     
   }
   
-  public void shutdown() throws Exception {
-    _quartz.shutdown();
-    __instanceMap.remove(_id);
+  public void shutdown() {
+    try {
+      _quartz.shutdown();
+    } catch (Exception except) {
+      throw new RuntimeException(except);
+    } finally {
+      __instanceMap.remove(_id);
+    }
   }
 
   public String schedulePersistedJob(Map<String, Object> detail, Date when)
