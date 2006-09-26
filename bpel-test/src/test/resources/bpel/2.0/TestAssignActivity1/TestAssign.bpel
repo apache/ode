@@ -64,13 +64,20 @@
                 <to variable="strVar"/>
             </copy>
             <copy>
-                <from>concat($strVar,' World', $intVar)"</from>
+                <from>concat($strVar,' World', $intVar)</from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
             <copy>
                 <from variable="myVar" part="TestPart"/>
+                <to variable="otherMsgVar" part="TestPart"/>
+            </copy>
+            
+<!--          
+            <copy>
+                <from variable="myVar" part="TestPart"/>
                 <to>$otherMsgVar.TestPart</to>
             </copy>
+-->   
         </assign>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
