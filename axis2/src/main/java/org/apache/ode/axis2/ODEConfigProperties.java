@@ -43,6 +43,7 @@ public class ODEConfigProperties extends Properties {
     private static final String PROP_POOL_MAX = "ode-axis2.db.pool.max";
     private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
     private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
+    private static final String PROP_WORKING_DIR = "ode-axis2.working.dir";
 
     private File _installDir;
 
@@ -123,6 +124,10 @@ public class ODEConfigProperties extends Properties {
 
     public int getConnectorPort() {
         return Integer.valueOf(getProperty(ODEConfigProperties.PROP_CONNECTOR_PORT,"2099"));
+    }
+
+    public String getWorkingDir() {
+        return getProperty(ODEConfigProperties.PROP_WORKING_DIR);
     }
 
 }

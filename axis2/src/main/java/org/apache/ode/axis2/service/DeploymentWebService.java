@@ -66,8 +66,8 @@ public class DeploymentWebService {
     private DeploymentPoller _poller;
 
     public void enableService(AxisConfiguration axisConfig, BpelServer server,
-                              DeploymentPoller poller, String rootpath) {
-        _deployPath = new File(rootpath, "processes");
+                              DeploymentPoller poller, String rootpath, String workPath) {
+        _deployPath = new File(workPath, "processes");
         _service = server.getDeploymentService();
 
         Definition def;
