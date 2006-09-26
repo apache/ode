@@ -76,4 +76,6 @@ public interface Scheduler {
   void start();
   
   void stop();
+
+  void shutdown();
 }
