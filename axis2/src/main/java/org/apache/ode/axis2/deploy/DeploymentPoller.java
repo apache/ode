@@ -142,6 +142,7 @@ public class DeploymentPoller {
 
             if (!deployDir.exists()) {
                 _odeServer.getBpelServer().undeploy(deployDir);
+                m.delete();
             }
         }
 

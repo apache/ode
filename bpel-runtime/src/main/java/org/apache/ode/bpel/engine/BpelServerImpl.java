@@ -168,7 +168,7 @@ public class BpelServerImpl implements BpelServer {
                     du = deploymentUnit;
             }
             if (du == null) {
-                __log.warn("Couldn't deploy " + file.getName() + ", package was not found.");
+                __log.warn("Couldn't undeploy " + file.getName() + ", package was not found.");
                 return false;
             }
 
