@@ -80,6 +80,7 @@ public class ODEServer {
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
     private File _appRoot;
+    private File _workRoot;
 
     private BpelServerImpl _server;
     private ODEConfigProperties _odeConfig;
@@ -103,6 +104,10 @@ public class ODEServer {
         __log.debug("Loading properties");
         _odeConfig = new ODEConfigProperties(_appRoot);
         _odeConfig.load();
+
+        String wdir = _odeConfig.getWorkingDir();
+        if (wdir == null) _workRoot = _appRoot;
+        else _workRoot = new File(wdir.trim());
 
         __log.debug("Initializing transaction manager");
         initTxMgr();
@@ -128,11 +133,12 @@ public class ODEServer {
         __log.debug("Initializing JCA adapter.");
         initConnector();
 
-        File deploymentDir = new File(_appRoot, "processes");
+        File deploymentDir = new File(_workRoot, "processes");
         _poller = new DeploymentPoller(deploymentDir, this);
 
         new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
-        new DeploymentWebService().enableService(_axisConfig, _server, _poller, _appRoot.getAbsolutePath());
+        new DeploymentWebService().enableService(_axisConfig, _server, _poller,
+                _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
 
         _poller.start();
         __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
@@ -333,7 +339,7 @@ public class ODEServer {
     private void initEmbeddedDb() throws ServletException {
         __log.info("Using DataSource Derby");
 
-        String url = "jdbc:derby:" + _appRoot + "/" + _odeConfig.getDbEmbeddedName();
+        String url = "jdbc:derby:" + _workRoot + "/" + _odeConfig.getDbEmbeddedName();
 
         __log.debug("creating Minerva pool for " + url);
 
