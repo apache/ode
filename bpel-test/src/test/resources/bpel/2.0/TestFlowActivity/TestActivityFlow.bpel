@@ -5,7 +5,7 @@
 	xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
  xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
 	xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
- name="TestFlowActivityProcess"
+ name="TestActivityFlow"
 	targetNamespace="http://ode/bpel/unit-test/testFlowActivity"
  suppressJoinFailure="yes"
 	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
