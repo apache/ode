@@ -32,7 +32,7 @@ public class Messages extends MessageBundle {
 
   public String msgOdeInstallErrorCfgReadError(File configFile) {
     return format(
-        "Error installing ODE component: config file {0} could not be read!", configFile);
+        "Error installing ODE component: config file {0} could not be read.", configFile);
   }
 
   public String msgOdeInstalled(String dir) {
@@ -40,7 +40,7 @@ public class Messages extends MessageBundle {
   }
 
   public String msgOdeInitHibernatePropertiesNotFound(File expected) {
-    return format("Hibernate configuration file \"{0}\" not foun, defaults will be used.!", expected);
+    return format("Hibernate configuration file \"{0}\" not found, defaults will be used.", expected);
   }
 
   public String msgOdeUsingExternalDb(String dbDataSource) {
@@ -119,18 +119,18 @@ public class Messages extends MessageBundle {
     return format("Couldn't find any port in service {0} having <wsdl:binding> and <soapbind:binding>", sericeName);
   }
 
-  /** Port {0} has multiple <soapbind:binding> elements! */
+  /** Port {0} has multiple <soapbind:binding> elements */
   public String msgMultipleSoapBindingsForPort(String portName) {
-    return format("Port {0} has multiple <soapbind:binding> elements!", portName);
+    return format("Port {0} has multiple <soapbind:binding> elements", portName);
   }
 
   /**
    * Attempted to import WSDL for namespace {0} from multiple locations:
-   * definitions from {1} will be ignored!
+   * definitions from {1} will be ignored
    */
   public String msgDuplicateWSDLImport(String tns, String location) {
     return format("Attempted to import WSDL for namespace {0} from"
-        + " multiple locations: definitions from {1} will be ignored!", tns, location);
+        + " multiple locations: definitions from {1} will be ignored", tns, location);
   }
 
   /** The WSDL for namespace "{0}" could not be found in "{1}". */

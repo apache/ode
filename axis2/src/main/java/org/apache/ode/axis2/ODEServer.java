@@ -402,7 +402,7 @@ public class ODEServer {
                 throw new ServletException(errmsg, e);
             }
         } else {
-            __log.warn(__msgs
+            __log.info(__msgs
                     .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
         }
 
