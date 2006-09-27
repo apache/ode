@@ -7,9 +7,9 @@
 	xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
  name="TestActivityFlow"
 	targetNamespace="http://ode/bpel/unit-test/testFlowActivity"
- suppressJoinFailure="yes"
-	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-	expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+ suppressJoinFailure="yes">
+ 
+ <!-- Test Flow using XPath 10 -->
  
 	<import location="TestActivityFlow.wsdl"
 		namespace="http://ode/bpel/unit-test/testFlowActivity.wsdl"
