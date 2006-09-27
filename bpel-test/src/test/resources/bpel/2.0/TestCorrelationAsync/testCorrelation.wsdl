@@ -1,9 +1,9 @@
 
 <wsdl:definitions 
-  targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
-  xmlns:tns="http://ode/bpel/unit-test/testCorrelation.wsdl"
-  xmlns:typens="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
-  xmlns="http://ode/bpel/unit-test/testCorrelation.wsdl"
+  targetNamespace="http://ode/bpel/unit-test/testCorrelationAsync.wsdl"
+  xmlns:tns="http://ode/bpel/unit-test/testCorrelationAsync.wsdl"
+  xmlns:typens="http://ode/bpel/unit-test/testCorrelationAsync.wsdl.types"
+  xmlns="http://ode/bpel/unit-test/testCorrelationAsync.wsdl"
   xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
@@ -14,7 +14,7 @@
   <!-- type defs -->
   <wsdl:types>
     <xsd:schema
-      targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
+      targetNamespace="http://ode/bpel/unit-test/testCorrelationAsync.wsdl.types"
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
       <xsd:complexType name="testMessage">
@@ -37,14 +37,15 @@
     <wsdl:part name="replyText" type="xsd:string"/>
   </wsdl:message>
 
- 
+   <!-- portType supported by the test2 process -->
+
   <wsdl:portType name="testCorrelationPT">
     <wsdl:operation name="request">
       <wsdl:input message="requestMessage"/>
+      <wsdl:output message="replyMessage"/>
     </wsdl:operation>
     <wsdl:operation name="continue">
       <wsdl:input message="requestMessage"/>
-      <wsdl:output message="replyMessage"/>
     </wsdl:operation>
   </wsdl:portType>
   
