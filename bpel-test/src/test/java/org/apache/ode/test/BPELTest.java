@@ -95,8 +95,13 @@ public class BPELTest extends TestCase {
 	public void testHelloWorld2() throws Exception {
 		go("target/test-classes/bpel/2.0/HelloWorld2");
 	}
-	public void testFlowActivity() throws Exception {
-		go("target/test-classes/bpel/2.0/TestFlowActivity");
+	public void testFlowActivity1() throws Exception {
+		// Test Flow with XPath20
+		go("target/test-classes/bpel/2.0/TestFlowActivity1");
+	}
+	public void testFlowActivity2() throws Exception {
+		// Test Flow with XPath10
+		go("target/test-classes/bpel/2.0/TestFlowActivity2");
 	}
 	public void testFaultHandlers() throws Exception {
 		go("target/test-classes/bpel/2.0/TestFaultHandlers");
