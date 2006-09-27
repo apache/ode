@@ -84,8 +84,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 			
 			currentResponse = myRoleMex.getResponse();
 			
-			String resp = DOMUtils.domToString(getCurrentResponse().getMessage());
-			System.out.println(resp);
+			
+			//String resp = DOMUtils.domToString(getCurrentResponse().getMessage());
+			//System.out.println(resp);
 
 		}
 		

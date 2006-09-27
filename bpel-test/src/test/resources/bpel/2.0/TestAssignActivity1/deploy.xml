@@ -18,8 +18,8 @@
   -->
 
 <deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd"
-	xmlns:pns="http://ode/bpel/unit-test"
-	xmlns:wns="http://ode/bpel/unit-test.wsdl">
+  xmlns:pns="http://ode/bpel/unit-testAssign1"
+  xmlns:wns="http://ode/bpel/unit-testAssign1.wsdl">
 
 
 	<process name="pns:TestAssign">

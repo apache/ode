@@ -1,6 +1,6 @@
 <deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
-	xmlns:pns="http://ode/bpel/unit-test/testFlowActivity" 
-	xmlns:wns="http://ode/bpel/unit-test/testFlowActivity.wsdl">
+	xmlns:pns="http://ode/bpel/unit-test/testFlowActivity2" 
+	xmlns:wns="http://ode/bpel/unit-test/testFlowActivity2.wsdl">
 
 
 	<process name="pns:TestActivityFlow">
