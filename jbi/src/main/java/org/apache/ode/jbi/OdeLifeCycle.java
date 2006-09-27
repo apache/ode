@@ -297,16 +297,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
       try {
         fis = new FileInputStream(hibernatePropFile);
         properties.load(new BufferedInputStream(fis));
-      } catch (IOException e) {    // TODO Auto-generated method stub
-        
-
+      } catch (IOException e) {
         String errmsg = __msgs
             .msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
         __log.error(errmsg, e);
         throw new JBIException(errmsg, e);
       }
     } else {
-      __log.warn(__msgs
+      __log.info(__msgs
           .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
     }
 
