@@ -417,7 +417,8 @@ public class ODEServer {
 
         _server = new BpelServerImpl();
         _server.setAutoActivate(true);
-
+        File deploymentDir = new File(_workRoot, "processes");
+        _server.setDeployDir(deploymentDir.getAbsolutePath());
     
         _executorService = Executors.newCachedThreadPool();
         _scheduler = new QuartzSchedulerImpl();
