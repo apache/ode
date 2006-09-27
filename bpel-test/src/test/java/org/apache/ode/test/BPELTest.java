@@ -137,9 +137,6 @@ public class BPELTest extends TestCase {
 					if ( !responsePattern.equals("ASYNC"))  
 						assertTrue(false);
 					break;
-				case ONE_WAY:
-					if ( !responsePattern.equals("ONE_WAY"))
-						assertTrue(false);
 				case COMPLETED_OK:
 					if ( !responsePattern.equals("COMPLETED_OK")) 
 						testResponsePattern(mexContext.getCurrentResponse(),responsePattern);
@@ -161,7 +158,7 @@ public class BPELTest extends TestCase {
 	
 	private void testResponsePattern(Message response, String responsePattern){
 		String resp = DOMUtils.domToString(response.getMessage());
-		//System.out.println(resp);
+		System.out.println(resp);
 		assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
 	}
 
