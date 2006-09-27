@@ -46,6 +46,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -136,15 +138,27 @@ public class DeploymentPoller {
         }
 
         // Removing deployments that disappeared
-        for (File m :_deployDir.listFiles(_deployedFilter)) {
-            File deployDir = new File(m.getParentFile(),m.getName().substring(0,m.getName().length()
-                    - ".deployed".length()));
-
-            if (!deployDir.exists()) {
-                _odeServer.getBpelServer().undeploy(deployDir);
-                m.delete();
+        List<String> deployed = _odeServer.getBpelServer().getDeploymentsList();
+        for (String s : deployed) {
+            if (s != null) {
+                File deployDir = new File(_deployDir, s);
+                if (!deployDir.exists()) {
+                    boolean undeploy = _odeServer.getBpelServer().undeploy(deployDir);
+                    File marker = new File(_deployDir, s + ".deployed");
+                    marker.delete();
+                    if (undeploy) __log.info("Successfully undeployed " + s);
+                }
             }
         }
+//        for (File m :_deployDir.listFiles(_deployedFilter)) {
+//            File deployDir = new File(m.getParentFile(),m.getName().substring(0,m.getName().length()
+//                    - ".deployed".length()));
+//
+//            if (!deployDir.exists()) {
+//                _odeServer.getBpelServer().undeploy(deployDir);
+//                m.delete();
+//            }
+//        }
 
      }
 

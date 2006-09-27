@@ -102,7 +102,9 @@ public class ODEServer {
         TempFileManager.setWorkingDirectory(_appRoot);
 
         __log.debug("Loading properties");
-        _odeConfig = new ODEConfigProperties(_appRoot);
+        String confDir = System.getProperty("org.apache.ode.configDir");
+        if (confDir == null) _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
+        else _odeConfig = new ODEConfigProperties(new File(confDir));
         _odeConfig.load();
 
         String wdir = _odeConfig.getWorkingDir();
@@ -388,7 +390,10 @@ public class ODEServer {
             throw new ServletException(errmsg,ex);
         }
 
-        File hibernatePropFile = new File(_appRoot, "conf" + File.separatorChar + "hibernate.properties");
+        File hibernatePropFile;
+        String confDir = System.getProperty("org.apache.ode.configDir");
+        if (confDir != null) hibernatePropFile = new File(confDir, "hibernate.properties");
+        else hibernatePropFile = new File(_appRoot, "conf" + File.separatorChar + "hibernate.properties");
 
         if (hibernatePropFile.exists()) {
             FileInputStream fis;
