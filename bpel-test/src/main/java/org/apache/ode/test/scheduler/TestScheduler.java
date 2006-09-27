@@ -54,4 +54,6 @@ public class TestScheduler implements Scheduler {
 	public void stop() {
 	}
 
+  public void shutdown() {
+  }
 }
