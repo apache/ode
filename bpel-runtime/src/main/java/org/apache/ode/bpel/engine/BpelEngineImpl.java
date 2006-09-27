@@ -62,13 +62,17 @@ public class BpelEngineImpl implements BpelEngine {
     private Random _random = new Random(System.currentTimeMillis());
     
     private static double _delayMean = 0;
+    
     static {
         try {
             _delayMean = Double.valueOf(System.getenv("ODE_DEBUG_TX_DELAY"));
             __log.info("Stochastic debugging delay activated. Delay (Mean)=" + _delayMean + "ms.");
         } catch (Throwable t) {
-            __log.error("Could not read ODE_DEBUG_TX_DELAY environment variable! Assuming 0 (mean) delay");
-            
+            if (__log.isDebugEnabled()) {
+                __log.debug("Could not read ODE_DEBUG_TX_DELAY environment variable; assuming 0 (mean) delay", t);
+            } else {
+                __log.info("Could not read ODE_DEBUG_TX_DELAY environment variable; assuming 0 (mean) delay");
+            }
         }
     }
 
