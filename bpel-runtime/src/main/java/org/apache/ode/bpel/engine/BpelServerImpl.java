@@ -836,4 +836,8 @@ public class BpelServerImpl implements BpelServer {
     	_deploymentManager = dm;
     }
 
+    public void setDeployDir(String deployDir) {
+        this._deployDir = deployDir;
+    }
+
 }
