@@ -48,7 +48,7 @@ public class ODEConfigProperties extends Properties {
     private File _installDir;
 
     public ODEConfigProperties(File installRoot) {
-        _installDir = new File(installRoot, "conf");
+        _installDir = installRoot;
     }
 
     public void load() throws ServletException {
