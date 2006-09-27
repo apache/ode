@@ -59,7 +59,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     public DeploymentUnitImpl createDeploymentUnit(File deploymentUnitDirectory) {
         read();
-        
         _rwLock.writeLock().lock();
         try {
             DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
@@ -73,12 +72,10 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     public void remove(DeploymentUnitImpl du) {
         read();
-        
         _rwLock.writeLock().lock();
         try {
             if (!_knownDeployments.remove(du))
                 return;
-
             write();
             rm(du.getDeployDir());
         } finally {
@@ -88,7 +85,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     public Collection<DeploymentUnitImpl> getDeploymentUnits() {
         read();
-        
         _rwLock.writeLock().lock();
         try {
             return new ArrayList<DeploymentUnitImpl>(_knownDeployments);
@@ -117,7 +113,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
      * 
      */
     private void read() {
-
         _rwLock.writeLock().lock();
         try {
             if (!_deployStateFile.exists()) {
@@ -126,14 +121,13 @@ public class DeploymentManagerImpl implements DeploymentManager {
             }
 
             if (_deployStateFile.lastModified() > _lastRead) {
-                
                 LineNumberReader reader = new LineNumberReader(new FileReader(_deployStateFile));
                 _knownDeployments.clear();
                 try {
                     String lin;
                     while ((lin = reader.readLine()) != null) {
                         try {
-                        _knownDeployments.add(new DeploymentUnitImpl(new File(lin)));
+                        _knownDeployments.add(new DeploymentUnitImpl(new File(_deployStateFile.getParentFile(), lin)));
                         } catch (Exception ex) {
                             __log.debug("Failed to load DU (skipping): " + lin,ex);
                             ; // skip it. 
@@ -144,7 +138,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
                 } finally {
                     reader.close();
                 }
-
             }
         } catch (IOException ioex) {
             throw new RuntimeException(ioex);
@@ -163,7 +156,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
             PrintWriter writer = new PrintWriter(_deployStateFile);
             try {
                 for (DeploymentUnitImpl du : _knownDeployments) {
-                    writer.println(du.getDeployDir().toString());
+                    writer.println(du.getDeployDir().getName());
                 }
             } finally {
                 writer.close();
