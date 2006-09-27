@@ -107,8 +107,10 @@ public class BPELTest extends TestCase {
 			 * 
 			 * Where N is a monotonic integer beginning with 1.
 			 * 
-			 * If no response is expected use:
-			 * responseN=null
+			 * If a specific MEP is expected in lieu of a response message use:
+			 * responseN=ASYNC
+			 * responseN=ONE_WAY
+			 * responseN=COMPLETED_OK
 			 * 
 			 */
 			
@@ -128,16 +130,19 @@ public class BPELTest extends TestCase {
 				
 				switch (mex.getStatus()) {
 				case RESPONSE:
-					Message response = mex.getResponse();
-					String resp = DOMUtils.domToString(response.getMessage());
-					System.out.println(resp);
-					assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
+					testResponsePattern(mex.getResponse(),responsePattern);
 					// TODO: test for response fault
 					break;
-				case ASYNC:
-					// TODO: handle Async
-					if ( !responsePattern.equals("null")) 
+				case ASYNC: 
+					if ( !responsePattern.equals("ASYNC"))  
 						assertTrue(false);
+					break;
+				case ONE_WAY:
+					if ( !responsePattern.equals("ONE_WAY"))
+						assertTrue(false);
+				case COMPLETED_OK:
+					if ( !responsePattern.equals("COMPLETED_OK")) 
+						testResponsePattern(mexContext.getCurrentResponse(),responsePattern);
 					break;
 				case FAULT:
 					// TODO: handle Fault
@@ -152,6 +157,12 @@ public class BPELTest extends TestCase {
 			propsFileCnt++;
 			testPropsFile = new File(deployDir+"/test"+propsFileCnt+".properties");
 		}
+	}
+	
+	private void testResponsePattern(Message response, String responsePattern){
+		String resp = DOMUtils.domToString(response.getMessage());
+		//System.out.println(resp);
+		assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
 	}
 
 	public void testHelloWorld2() throws Exception {
@@ -179,6 +190,9 @@ public class BPELTest extends TestCase {
     }
 	public void testCorrelation() throws Exception {
 		go("target/test-classes/bpel/2.0/testCorrelation");
+	}
+	public void testCorrelationAsync() throws Exception {
+		go("target/test-classes/bpel/2.0/testCorrelationAsync");
 	}
     
     /** These tests compile however they fail at runtime */
