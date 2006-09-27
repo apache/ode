@@ -395,7 +395,8 @@ public class BpelServerImpl implements BpelServer {
             }
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
-            if (_deploymentManager == null ) _deploymentManager = new DeploymentManagerImpl(new File(_deployDir, "ode-deployed.dat"));
+            if (_deploymentManager == null )
+                _deploymentManager = new DeploymentManagerImpl(new File(_deployDir));
             _initialized = true;
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -838,6 +839,11 @@ public class BpelServerImpl implements BpelServer {
 
     public void setDeployDir(String deployDir) {
         this._deployDir = deployDir;
+    }
+
+
+    public List<String> getDeploymentsList() {
+        return new ArrayList<String>(_deploymentManager.getDeploymentsList());
     }
 
 }

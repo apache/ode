@@ -25,6 +25,8 @@ import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
@@ -40,17 +42,20 @@ import org.apache.commons.logging.LogFactory;
 public class DeploymentManagerImpl implements DeploymentManager {
 
     private static final Log __log = LogFactory.getLog(DeploymentManagerImpl.class);
+    private File _deployDir;
     private File _deployStateFile;
 
     private ArrayList<DeploymentUnitImpl> _knownDeployments = new ArrayList<DeploymentUnitImpl>();
+    private HashSet<String> _deploymentsList = new HashSet<String>();
 
     /** Lock to prevent clobbering of the file. */
     private ReentrantReadWriteLock _rwLock = new ReentrantReadWriteLock();
 
     private long _lastRead = 0;
 
-    public DeploymentManagerImpl(File deployStateFile) {
-        _deployStateFile = deployStateFile;
+    public DeploymentManagerImpl(File deployDir) {
+        _deployDir = deployDir;
+        _deployStateFile = new File(deployDir.getParentFile(), "ode-deployed.dat");
     }
 
     public DeploymentUnitImpl createDeploymentUnit(String location) {
@@ -61,6 +66,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
         read();
         _rwLock.writeLock().lock();
         try {
+            _deploymentsList.add(deploymentUnitDirectory.getName());
             DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
             _knownDeployments.add(du);
             write();
@@ -71,11 +77,12 @@ public class DeploymentManagerImpl implements DeploymentManager {
     }
 
     public void remove(DeploymentUnitImpl du) {
-        read();
+//        read();
         _rwLock.writeLock().lock();
         try {
             if (!_knownDeployments.remove(du))
                 return;
+            _deploymentsList.remove(du.getDeployDir().getName());
             write();
             rm(du.getDeployDir());
         } finally {
@@ -126,14 +133,14 @@ public class DeploymentManagerImpl implements DeploymentManager {
                 try {
                     String lin;
                     while ((lin = reader.readLine()) != null) {
+                        _deploymentsList.add(lin);
                         try {
-                        _knownDeployments.add(new DeploymentUnitImpl(new File(_deployStateFile.getParentFile(), lin)));
+                            _knownDeployments.add(new DeploymentUnitImpl(new File(_deployDir, lin)));
                         } catch (Exception ex) {
                             __log.debug("Failed to load DU (skipping): " + lin,ex);
-                            ; // skip it. 
                         }
                     }
-                    
+
                     _lastRead = _deployStateFile.lastModified();
                 } finally {
                     reader.close();
@@ -167,5 +174,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
         } finally {
             _rwLock.writeLock().unlock();
         }
+    }
+
+    public Set<String> getDeploymentsList() {
+        return _deploymentsList;
     }
 }
