@@ -44,6 +44,8 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -59,6 +61,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	// Probe Service is a simple concatination service
 	private QName probePT = new QName("http://ode/bpel/unit-test/ProbeService.wsdl","probeMessagePT");
+	private Message currentResponse;
 	
 	public void invokePartner(PartnerRoleMessageExchange mex)
 			throws ContextException {
@@ -73,7 +76,21 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	public void onAsyncReply(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
+		
 
+		Status mStat = myRoleMex.getStatus();
+		
+		if ( mStat == Status.RESPONSE ) {
+			
+			currentResponse = myRoleMex.getResponse();
+			
+			String resp = DOMUtils.domToString(getCurrentResponse().getMessage());
+			System.out.println(resp);
+
+		}
+		
+		myRoleMex.complete();
+		
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {
@@ -93,6 +110,14 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		
 		
 
+	}
+	
+	public Message getCurrentResponse() {
+		return currentResponse;
+	}
+	
+	public void clearCurrentResponse() {
+		currentResponse = null;
 	}
 
 }

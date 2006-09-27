@@ -1,13 +1,14 @@
-<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2004/03/business-process/ ../xsd/wsbpel_main-2005-12-22.xsd"
-	xmlns:tns="http://ode/bpel/unit-test/testCorrelation"
-	xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl"
-	xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
-	xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	name="TestCorrelationProcess"
-	targetNamespace="http://ode/bpel/unit-test/testCorrelation"
-	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-	expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-	suppressJoinFailure="yes">
+<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2004/03/business-process/ ../../../../../../../bpel-schemas/src/main/resources/wsbpel_main-draft-Apr-29-2006.xsd"
+ xmlns:tns="http://ode/bpel/unit-test/testCorrelation"
+ xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+ xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl"
+ xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+ name="TestCorrelationProcess"
+ targetNamespace="http://ode/bpel/unit-test/testCorrelation"
+ queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ suppressJoinFailure="yes">
 	
 	<import location="testCorrelation.wsdl"
 		namespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
@@ -93,6 +94,6 @@
 				<to variable="reply" part="replyText"/>
 			</copy>
 		</assign>
-		<reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="request" variable="reply"> </reply>
+		<reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="continue" variable="reply"> </reply>
 	</sequence>
 </process>
