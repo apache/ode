@@ -1,0 +1,15 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test/TestInstantiatingPick" 
+	xmlns:wns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl">
+
+
+	<process name="pns:TestInstantiatingPick">
+		<active>true</active>
+		<provide partnerLink="request1">
+			<service name="wns:testInstPick1Service" port="wns:testInstPick1Port"/>
+		</provide>
+		<provide partnerLink="request2">
+			<service name="wns:testInstPick2Service" port="wns:testInstPick2Port"/>
+		</provide>
+	</process>
+</deploy>
