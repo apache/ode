@@ -168,7 +168,10 @@ public class BpelServerImpl implements BpelServer {
                     du = deploymentUnit;
             }
             if (du == null) {
-                __log.warn("Couldn't undeploy " + file.getName() + ", package was not found.");
+                if (file.exists())
+                    __log.warn("Couldn't undeploy " + file.getName() + ", package was not found.");
+                else if (__log.isDebugEnabled())
+                    __log.debug("Couldn't undeploy " + file.getName() + ", package was not found.");
                 return false;
             }
 
@@ -396,7 +399,8 @@ public class BpelServerImpl implements BpelServer {
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
             if (_deploymentManager == null )
-                _deploymentManager = new DeploymentManagerImpl(new File(_deployDir));
+                _deploymentManager = new DeploymentManagerImpl(
+                        _deployDir != null ? new File(_deployDir) : new File(""));
             _initialized = true;
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -643,9 +647,7 @@ public class BpelServerImpl implements BpelServer {
                             + type + " when deploying process " + processDD.getName() + " in "
                             + deploymentUnitDirectory);
                 try {
-
                     deploy(processDD.getName(), du, oprocess, du.getDocRegistry().getDefinitions(), processDD);
-
                     deployed.add(processDD.getName());
                 } catch (Throwable e) {
                     String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
