@@ -15,6 +15,7 @@
     <copy todir="${maven.project.build.directory}/scratch" flatten="true">
       <fileSet refid="dependency.derby"/>
     </copy>
+    <delete dir="${maven.project.build.directory}/test-classes/derby-db"/>
     <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
            dest="${maven.project.build.directory}/test-classes/derby-db"/>
   </target>
