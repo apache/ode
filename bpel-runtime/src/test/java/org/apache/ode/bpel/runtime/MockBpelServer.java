@@ -81,9 +81,8 @@ class MockBpelServer {
   Jotm                      _jotm;
   MinervaPool               _minervaPool;
   DataSource                _dataSource;
-  Scheduler                 _scheduler;
+  SchedulerWrapper          _scheduler;
   BpelDAOConnectionFactory  _daoCF;
-  int                       _scheduled;
   EndpointReferenceContext  _eprContext;
   MessageExchangeContext    _mexContext;
   BindingContext            _bindContext;
@@ -108,6 +107,7 @@ class MockBpelServer {
       _server.setEndpointReferenceContext(createEndpointReferenceContext());
       _server.setMessageExchangeContext(createMessageExchangeContext());
       _server.setBindingContext(createBindingContext());
+      _server.setDeployDir("processes");
       _server.init();
       _server.start();
     } catch (Exception except) {
@@ -171,11 +171,13 @@ class MockBpelServer {
 
   public void waitForBlocking() {
     try {
-      // TODO: change this to lock on an object.
-      while (_scheduled > 0) {
-        Thread.sleep(5);
-        if (_scheduled == 0)
+      long delay = 1000;
+      while (true) {
+        // Be warned: ugly hack and not safe for slow CPUs.
+        long cutoff = System.currentTimeMillis() - delay;
+        if (_scheduler._nextSchedule < cutoff)
           break;
+        Thread.sleep(delay);
       }
     } catch (InterruptedException except) { }
   }
@@ -343,9 +345,10 @@ class MockBpelServer {
     }
   }
 
-    QuartzSchedulerImpl _quartz;
   private class SchedulerWrapper implements Scheduler {
 
+    QuartzSchedulerImpl _quartz;
+    long                _nextSchedule;
 
     SchedulerWrapper(BpelServer server, TransactionManager txManager, DataSource dataSource) {
       ExecutorService executorService = new ExecutorServiceWrapper();
@@ -359,19 +362,18 @@ class MockBpelServer {
 
     public String schedulePersistedJob(Map<String,Object>jobDetail,Date when) throws ContextException {
       String jobId = _quartz.schedulePersistedJob(jobDetail, when);
-      ++_scheduled;
+      _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
       return jobId;
     }
   
     public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail, Date when) throws ContextException {
       String jobId = _quartz.scheduleVolatileJob(transacted, jobDetail, when);
-      ++_scheduled;
+      _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
       return jobId;
     }
   
     public void cancelJob(String jobId) throws ContextException {
       _quartz.cancelJob(jobId);
-      --_scheduled;
     }
   
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
@@ -386,7 +388,6 @@ class MockBpelServer {
     private ExecutorService _service = Executors.newCachedThreadPool();
     public void execute(Runnable command) {
       _service.execute(command);
-      --_scheduled;
     }
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
       return _service.awaitTermination(timeout, unit);
