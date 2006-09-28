@@ -54,7 +54,7 @@ public interface MessageExchange {
         ASYNC,
 
         /** The one way request has been sent to the server. */
-        ONE_WAY,
+        // ONE_WAY, - supported as ASYNC + getMessageExchangePatter() - See JIRA ODE-54
 
         /** Processing the response received from the "server". */
         RESPONSE,
