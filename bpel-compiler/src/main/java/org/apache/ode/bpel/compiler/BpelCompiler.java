@@ -274,12 +274,7 @@ abstract class BpelCompiler implements CompilerContext {
     public OMessageVarType resolveMessageType(QName messageType) {
         OMessageVarType msgType = _oprocess.messageTypes.get(messageType);
         if (msgType == null) {
-            Definition4BPEL def = _wsdlRegistry.getDefinition(messageType.getNamespaceURI());
-            if (def == null) {
-                throw new CompilationException(__cmsgs.errNoWsdlDefinitionForNamespace(messageType.getNamespaceURI()));
-            }
-
-            Message msg = def.getMessage(messageType);
+            Message msg = _wsdlRegistry.getMessage(messageType);
             if (msg == null) {
                 throw new CompilationException(__cmsgs.errUndeclaredMessage(messageType.getLocalPart(), messageType.getNamespaceURI()));
             }
