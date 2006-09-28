@@ -117,7 +117,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
      * compilation, whether a cbp file exists or not.
      */
     private void compileProcesses(boolean force) {
-        File[] bpels = _duDirectory.listFiles(_bpelFilter);
+        ArrayList<File> bpels = listFilesRecursively(_duDirectory, _bpelFilter);
         for (File bpel : bpels) {
             File compiled = new File(bpel.getParentFile(), bpel.getName().substring(0,bpel.getName().length()-".bpel".length()) + ".cbp");
             if (compiled.exists() && !force) {
@@ -149,7 +149,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         }
         if (_processes == null || force) {
             _processes = new HashMap<QName, OProcess>();
-            File[] cbps = _duDirectory.listFiles(_cbpFilter);
+            ArrayList<File> cbps = listFilesRecursively(_duDirectory, _cbpFilter);
             for (File file : cbps) {
                 OProcess oprocess = loadProcess(file);
                 _processes.put(new QName(oprocess.targetNamespace, oprocess.getName()), oprocess);
@@ -239,7 +239,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
             WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
             WSDLReader r = wsdlFactory.newWSDLReader();
 
-            File[] wsdls = _duDirectory.listFiles(_wsdlFilter);
+            ArrayList<File> wsdls = listFilesRecursively(_duDirectory, _wsdlFilter);
             for (File file : wsdls) {
                 try {
                     _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
@@ -286,5 +286,21 @@ public class DeploymentUnitImpl implements DeploymentUnit {
 
     public void refresh() {
         loadProcessDefinitions(true);
+    }
+
+    private ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
+        ArrayList<File> result = new ArrayList<File>();
+        // Filtrating the files we're interested in in the current directory
+        File[] select = root.listFiles(filter);
+        for (File file : select) {
+            result.add(file);
+        }
+        // Then we can check the directories
+        File[] all = root.listFiles();
+        for (File file : all) {
+            if (file.isDirectory())
+                result.addAll(listFilesRecursively(file, filter));
+        }
+        return result;
     }
 }
