@@ -194,7 +194,7 @@ public class DeploymentWebService {
                 while((entry = zis.getNextEntry()) != null) {
                     if(entry.isDirectory()) {
                         __log.debug("Extracting directory: " + entry.getName());
-                        new File(dest, entry.getName()).mkdir();
+                        new File(_deployPath, entry.getName()).mkdir();
                         continue;
                     }
                     __log.debug("Extracting file: " + entry.getName());
@@ -203,8 +203,8 @@ public class DeploymentWebService {
                 }
                 zis.close();
             } catch (IOException e) {
-                throw new AxisFault("Couldn't open attached deployment package (should be a zip containing the " +
-                        "deployment directory).", e);
+                throw new AxisFault("Couldn't open attached deployment package (should be a zip directly " +
+                        "including a deploy.xml descriptor, all resources being absolute to that root path).", e);
             }
         }
 
