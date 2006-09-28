@@ -54,6 +54,7 @@ import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
+import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ArrayUtils;
 import org.apache.ode.utils.ObjectPrinter;
@@ -146,6 +147,14 @@ public class BpelProcess {
 
     public String toString() {
         return "BpelProcess[" + _pid + " in " + _du + "]";
+    }
+
+    public void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, String action, FaultData fault) {
+      if (__log.isDebugEnabled())
+        __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action );
+
+      BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
+      processInstance.recoverActivity(channel, action, fault);
     }
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {

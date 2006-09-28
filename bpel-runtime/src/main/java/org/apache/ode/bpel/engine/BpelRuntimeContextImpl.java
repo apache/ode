@@ -1155,18 +1155,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
-                // ActivityRecoveryChannel channel = importChannel(channel,
-                // ActivityRecoveryChannel.class);
-                ActivityRecoveryChannel channel = null;
+                ActivityRecoveryChannel recovery = importChannel(channel, ActivityRecoveryChannel.class);
                 if ("cancel".equals(action))
-                    channel.cancel();
+                    recovery.cancel();
                 else if ("retry".equals(action))
-                    channel.retry();
+                    recovery.retry();
                 else if ("fault".equals(action))
-                    channel.fault(fault);
+                    recovery.fault(fault);
             }
         });
-        _dao.deleteActivityRecovery(channel);
+        //_dao.deleteActivityRecovery(channel);
+        execute();
     }
 
     /**
