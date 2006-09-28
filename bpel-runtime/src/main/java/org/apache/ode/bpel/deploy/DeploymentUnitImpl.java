@@ -106,6 +106,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
             throw new IllegalArgumentException("Directory " + dir + " does not contain a deploy.xml file!");
 
         _lastModified = _descriptorFile.lastModified();
+
+        refresh();
     }
 
     
@@ -114,12 +116,13 @@ public class DeploymentUnitImpl implements DeploymentUnit {
      * If we don't, starts compilation. The force parameter just forces
      * compilation, whether a cbp file exists or not.
      */
-    private void compileProcesses() {
+    private void compileProcesses(boolean force) {
         File[] bpels = _duDirectory.listFiles(_bpelFilter);
         for (File bpel : bpels) {
             File compiled = new File(bpel.getParentFile(), bpel.getName().substring(0,bpel.getName().length()-".bpel".length()) + ".cbp");
-            if (compiled.exists())
+            if (compiled.exists() && !force) {
                 continue;
+            }
             compile(bpel);
         }
     }
@@ -136,15 +139,15 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         }
     }
 
-    private void loadProcessDefinitions() {
+    private void loadProcessDefinitions(boolean force) {
         try {
-            compileProcesses();
+            compileProcesses(force);
         } catch (CompilationException e) {
             // No retry on compilation error, we just forget about it
             _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
             throw new BpelEngineException("Compilation failure!");
         }
-        if (_processes == null) {
+        if (_processes == null || force) {
             _processes = new HashMap<QName, OProcess>();
             File[] cbps = _duDirectory.listFiles(_cbpFilter);
             for (File file : cbps) {
@@ -225,7 +228,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     }
 
     public HashMap<QName, OProcess> getProcesses() {
-        loadProcessDefinitions();
+        loadProcessDefinitions(false);
         return _processes;
     }
 
@@ -261,7 +264,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     }
 
     public Set<QName> getProcessNames() {        
-        if (_processes == null) loadProcessDefinitions();
+        if (_processes == null) loadProcessDefinitions(false);
         return _processes.keySet();
     }
 
@@ -279,5 +282,9 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         }
 
         return _processInfo.get(pid);
+    }
+
+    public void refresh() {
+        loadProcessDefinitions(true);
     }
 }
