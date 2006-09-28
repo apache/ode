@@ -102,26 +102,32 @@ public class ExternalService implements PartnerRoleChannel {
                         return serviceClient.sendReceive(payload);
                     }
                 });
-                OMElement reply = null;
+                OMElement reply;
                 try {
                     reply = freply.get();
 
-                    final Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
-                    Element responseElmt = OMUtils.toDOM(reply);
-                    responseElmt = SOAPUtils.unwrap(responseElmt, _definition,
-                            odeMex.getOperation().getOutput().getMessage(), _serviceName);
-                    __log.debug("Received synchronous response for MEX " + odeMex);
-                    __log.debug("Message: " + DOMUtils.domToString(responseElmt));
-                    response.setMessage(responseElmt);
-                    odeMex.reply(response);
+                    if (reply == null) {
+                        String errmsg = "Received empty (null) reply for ODE mex " + odeMex;
+                        __log.error(errmsg);
+                        odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                    } else {
+                        Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
+                        Element responseElmt = OMUtils.toDOM(reply);
+                        responseElmt = SOAPUtils.unwrap(responseElmt, _definition,
+                                odeMex.getOperation().getOutput().getMessage(), _serviceName);
+                        __log.debug("Received synchronous response for MEX " + odeMex);
+                        __log.debug("Message: " + DOMUtils.domToString(responseElmt));
+                        response.setMessage(responseElmt);
+                        odeMex.reply(response);
+                    }
                 } catch (Exception e) {
-                    __log.error("We've been interrupted while waiting for reply to MEX " + odeMex + "!!!");
                     String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
                     __log.error(errmsg, e);
                     odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
                 }
-            } else
+            } else /** one-way case **/ {
                 serviceClient.fireAndForget(payload);
+            }
         } catch (AxisFault axisFault) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
             __log.error(errmsg, axisFault);
