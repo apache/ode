@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<process name="InvokeFailureAndRecovery"
+         targetNamespace="http://ode.apache.org/bpel/unit-test" 
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode.apache.org/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ext="http://ode.apache.org/activityRecovery">
+
+  <import location="services.wsdl"
+          namespace="http://ode.apache.org/bpel/unit-test"
+          importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+  <partnerLinks>
+    <partnerLink name="instantiatingPartnerLink" 
+                 partnerLinkType="tns:InstantiatingPartnerLinkType" 
+                 myRole="me"/>
+    <partnerLink name="failingPartnerLink" 
+                 partnerLinkType="tns:FailingPartnerLinkType" 
+                 partnerRole="partner" initializePartnerRole="yes"/>
+  </partnerLinks>
+    
+  <variables>
+    <variable name="request" messageType="tns:Request"/>
+    <variable name="response" messageType="tns:Response"/>
+  </variables>
+
+  <sequence>   
+    <receive name="start"
+             partnerLink="instantiatingPartnerLink"
+             portType="tns:InstantiatingPortType"
+             operation="instantiate"
+             variable="request"
+             createInstance="yes"/>
+    <invoke  name="invoke"
+             partnerLink="failingPartnerLink"
+             portType="tns:FailingPortType"
+             operation="invoke"
+             inputVariable="request"
+             outputVariable="response">
+      <ext:failureHandling>
+        <ext:retryFor>2</ext:retryFor>
+        <ext:retryDelay>0</ext:retryDelay>
+      </ext:failureHandling>
+    </invoke>
+  </sequence>
+
+</process>
