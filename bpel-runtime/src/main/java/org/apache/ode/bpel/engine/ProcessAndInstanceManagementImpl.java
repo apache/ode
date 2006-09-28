@@ -74,14 +74,12 @@ class ProcessAndInstanceManagementImpl
     protected BpelEngineImpl _engine;
     protected BpelServerImpl _server;
     protected BpelDatabase _db;
-    private DebuggerSupport _debugSupport;
 
     public ProcessAndInstanceManagementImpl(BpelDatabase db, BpelEngineImpl engine, BpelServerImpl server) {
         _db = db;
         _engine = engine;
         _server = server;
     }
-
 
     public ProcessInfoListDocument listProcessesCustom(String filter, String orderKeys, final ProcessInfoCustomizer custom) {
         ProcessInfoListDocument ret = ProcessInfoListDocument.Factory.newInstance();
@@ -293,7 +291,7 @@ class ProcessAndInstanceManagementImpl
         // We need debugger support in order to resume (since we have to force
         // a reduction. If one is not available the getDebugger() method should
         // throw a ProcessingException
-        _debugSupport.resume(iid);
+        getDebugger(iid).resume(iid);
 
         return genInstanceInfoDocument(iid);
     }
@@ -440,14 +438,12 @@ class ProcessAndInstanceManagementImpl
      * @throws ManagementException
      */
     protected final DebuggerSupport getDebugger(QName procid) throws ManagementException {
-        if (_debugSupport == null)
-            throw new ProcessingException("DebugSupport required for debugger operation.");
 
         BpelProcess process = _engine._activeProcesses.get(procid);
         if (process == null)
             throw new InvalidRequestException("The process \"" + procid + "\" is available." );
 
-        return _debugSupport;
+        return process._debugger;
     }
 
 
