@@ -65,8 +65,11 @@ public class BpelEngineImpl implements BpelEngine {
     
     static {
         try {
-            _delayMean = Double.valueOf(System.getenv("ODE_DEBUG_TX_DELAY"));
-            __log.info("Stochastic debugging delay activated. Delay (Mean)=" + _delayMean + "ms.");
+            String delay = System.getenv("ODE_DEBUG_TX_DELAY");
+            if (delay != null && delay.length() > 0) {
+                _delayMean = Double.valueOf(delay);
+                __log.info("Stochastic debugging delay activated. Delay (Mean)=" + _delayMean + "ms.");
+            }
         } catch (Throwable t) {
             if (__log.isDebugEnabled()) {
                 __log.debug("Could not read ODE_DEBUG_TX_DELAY environment variable; assuming 0 (mean) delay", t);
