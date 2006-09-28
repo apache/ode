@@ -626,6 +626,8 @@ public class BpelServerImpl implements BpelServer {
      * Deploys a process.
      */
     public Collection<QName> deploy(File deploymentUnitDirectory) {
+        // Undeploy everything
+        undeploy(deploymentUnitDirectory);
 
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
 
