@@ -45,7 +45,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
     private File _deployDir;
     private File _deployStateFile;
 
-    private ArrayList<DeploymentUnitImpl> _knownDeployments = new ArrayList<DeploymentUnitImpl>();
+    private HashSet<DeploymentUnitImpl> _knownDeployments = new HashSet<DeploymentUnitImpl>();
     private HashSet<String> _deploymentsList = new HashSet<String>();
 
     /** Lock to prevent clobbering of the file. */
