@@ -248,4 +248,13 @@ public interface InstanceManagement {
      */
     Collection<Long> delete(String filter);
 
+    /**
+     * Performs an activity recovery action.
+     * @param iid instance id (process)
+     * @param aiid instance id (activity)
+     * @param action recovery action (e.g. retry, fault)
+     * @return post-change instance information
+    */
+    InstanceInfoDocument recoverActivity(Long iid, Long aid, String action);
+
 }
