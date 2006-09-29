@@ -200,8 +200,10 @@ public class DeploymentWebService {
                         continue;
                     }
                     __log.debug("Extracting file: " + entry.getName());
+                    File destFile = new File(dest, entry.getName());
+                    if (!destFile.getParentFile().exists()) destFile.getParentFile().mkdirs();
                     copyInputStream(zis, new BufferedOutputStream(
-                            new FileOutputStream(new File(dest, entry.getName()))));
+                            new FileOutputStream(destFile)));
                 }
                 zis.close();
             } catch (IOException e) {
