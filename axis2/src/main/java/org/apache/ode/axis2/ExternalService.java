@@ -84,6 +84,9 @@ public class ExternalService implements PartnerRoleChannel {
             __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
             __log.debug("Message: " + payload);
             options.setTo(axisEPR);
+            String soapAction = SOAPUtils.getSoapAction(_definition, _serviceName, _portName,
+                    odeMex.getOperationName());
+            options.setAction(soapAction);
 
             ConfigurationContext ctx = new ConfigurationContext(_axisConfig);
             final ServiceClient serviceClient = new ServiceClient(ctx, null);
