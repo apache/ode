@@ -20,6 +20,7 @@
 package org.apache.ode.bpel.compiler;
 
 import java.net.URI;
+import java.io.File;
 
 /**
  * Simple wrapper for XSLT location.
@@ -37,5 +38,5 @@ public interface XsltFinder {
    * @param uri of the xslt sheet.
    * @return the sheet content
    */
-  public String loadXsltSheet(URI uri);
+  public String loadXsltSheet(File importFrom, URI uri);
 }

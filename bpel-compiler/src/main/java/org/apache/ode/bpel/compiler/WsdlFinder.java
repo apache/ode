@@ -22,6 +22,7 @@ import org.apache.ode.bom.wsdl.Definition4BPEL;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -46,7 +47,7 @@ public interface WsdlFinder {
    * @return the definition
    * @throws WSDLException if one occurs while reading the WSDL or its imports.
    */
-  Definition4BPEL loadDefinition(WSDLReader f, URI uri) throws WSDLException;
+  Definition4BPEL loadDefinition(WSDLReader f, File importFrom, URI uri) throws WSDLException;
 
   InputStream openResource(URI uri) throws MalformedURLException, IOException;
 }
