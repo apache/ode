@@ -43,6 +43,8 @@ import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * A non-persistent implementation of the
@@ -50,27 +52,35 @@ import java.util.Collection;
  */
 
 public class DeploymentManagerImpl implements DeploymentManager {
-	
+
     private ArrayList<DeploymentUnitImpl> _knownDeployments = new ArrayList<DeploymentUnitImpl>();
 
-    
-	public DeploymentUnitImpl createDeploymentUnit(String location) {
-        return createDeploymentUnit(new File(location));
-	}
 
-	public DeploymentUnitImpl createDeploymentUnit(File deploymentUnitDirectory) {
+    public DeploymentUnitImpl createDeploymentUnit(String location) {
+        return createDeploymentUnit(new File(location));
+    }
+
+    public DeploymentUnitImpl createDeploymentUnit(File deploymentUnitDirectory) {
         DeploymentUnitImpl du = new DeploymentUnitImpl(deploymentUnitDirectory);
         _knownDeployments.add(du);
         return du;
-	}
+    }
 
-	public Collection<DeploymentUnitImpl> getDeploymentUnits() {
+    public Collection<DeploymentUnitImpl> getDeploymentUnits() {
         return new ArrayList<DeploymentUnitImpl>(_knownDeployments);
-	}
+    }
 
-	public void remove(DeploymentUnitImpl du) {
+    public void remove(DeploymentUnitImpl du) {
         _knownDeployments.remove(du);
 
-	}
+    }
+
+    public Set<String> getDeploymentsList() {
+        HashSet<String> depls = new HashSet<String>();
+        for (DeploymentUnitImpl unit : _knownDeployments) {
+            depls.add(unit.getDeployDir().getName());
+        }
+        return depls;
+    }
 
 }
