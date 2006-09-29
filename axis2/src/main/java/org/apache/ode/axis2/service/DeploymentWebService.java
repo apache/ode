@@ -205,8 +205,7 @@ public class DeploymentWebService {
                 }
                 zis.close();
             } catch (IOException e) {
-                throw new AxisFault("Couldn't open attached deployment package (should be a zip directly " +
-                        "including a deploy.xml descriptor, all resources being absolute to that root path).", e);
+                throw new AxisFault("An error occured on deployment.", e);
             }
         }
 
