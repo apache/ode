@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.io.File;
 
 
 /**
@@ -108,14 +109,11 @@ abstract class BpelCompiler implements CompilerContext {
         setWsdlFinder(null);
     }
 
-    public void addWsdlImport(URI wsdlImport) {
+    public void addWsdlImport(File importFrom, URI wsdlImport) {
 
         try {
             WSDLReader r = _wsdlFactory.newWSDLReader();
-            // TODO ODE-107 Make URI resolution relative
-            // to BPEL process URI : _processDef.getSource();
-
-            _wsdlRegistry.addDefinition(_wsdlFinder.loadDefinition(r,wsdlImport));
+            _wsdlRegistry.addDefinition(_wsdlFinder.loadDefinition(r, importFrom, wsdlImport));
             if (__log.isDebugEnabled())
                 __log.debug("Added WSDL Definition: " + wsdlImport);
         } catch (CompilationException ce) {
@@ -485,7 +483,7 @@ abstract class BpelCompiler implements CompilerContext {
     /**
      * Compile a process.
      */
-    public OProcess compile(final Process process) throws CompilationException {
+    public OProcess compile(File bpelFile, final Process process) throws CompilationException {
         _processDef = process;
         _generatedDate = new Date();
         _structureStack.clear();
@@ -521,7 +519,7 @@ abstract class BpelCompiler implements CompilerContext {
         // by the 1.1 parser.
         for (Import imprt : _processDef.getImports()) {
             try {
-                compile(imprt);
+                compile(bpelFile, imprt);
             } catch (CompilationException bce) {
                 // We try to recover from import problems by continuing
                 recoveredFromError(imprt, bce);
@@ -640,13 +638,13 @@ abstract class BpelCompiler implements CompilerContext {
      *
      * @param imprt BOM representation of the import
      */
-    private void compile(Import imprt) {
+    private void compile(File bpelFile, Import imprt) {
         try {
             if (imprt.getImportType() == null)
                 throw new CompilationException(__cmsgs.errUnspecifiedImportType().setSource(imprt));
 
             if (Import.IMPORTTYPE_WSDL11.equals(imprt.getImportType())) {
-                addWsdlImport(imprt.getLocation());
+                addWsdlImport(bpelFile, imprt.getLocation());
             } else if (Import.IMPORTTYPE_XMLSCHEMA10.equals(imprt.getImportType())) {
                 addXsdImport(imprt.getLocation());
             } else
@@ -1325,7 +1323,7 @@ abstract class BpelCompiler implements CompilerContext {
         } catch (URISyntaxException e) {
             throw new CompilationException(__cmsgs.errInvalidDocXsltUri(docStrUri));
         }
-        String sheetBody = _xsltFinder.loadXsltSheet(docUri);
+        String sheetBody = _xsltFinder.loadXsltSheet(new File(_processDef.getSource()), docUri);
         if (sheetBody == null) {
             throw new CompilationException(__cmsgs.errCantFindXslt(docStrUri));
         }
