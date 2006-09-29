@@ -57,7 +57,9 @@ public class DefaultWsdlFinder implements WsdlFinder {
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
         String strUri = uri.getPath();
-        return new FileInputStream(new File(_suDir, strUri));
+        if (strUri == null) return null;
+        if (new File(strUri).exists()) return new FileInputStream(strUri);
+        else return new FileInputStream(new File(_suDir, strUri));
     }
 
 }
