@@ -111,6 +111,8 @@ public class DeploymentWebService {
                         // it to hold on for a while.
                         _poller.hold();
                         File dest = new File(_deployPath, namePart.getText());
+                        _service.undeploy(dest);
+
                         dest.mkdir();
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
