@@ -26,24 +26,41 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Resolves references inide the deployment unit.
  */
 public class DocumentEntityResolver implements XMLEntityResolver {
 
-  private File _docRoot;
+    private File _docRoot;
 
-  public DocumentEntityResolver(File docRoot) {
-    _docRoot = docRoot;
-  }
+    public DocumentEntityResolver(File docRoot) {
+        _docRoot = docRoot;
+    }
 
-  public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
-    XMLInputSource src = new XMLInputSource(resourceIdentifier);
-    String resourceName = resourceIdentifier.getLiteralSystemId();
-    if (resourceName.indexOf("/") >= 0)
-      resourceName = resourceName.substring(resourceName.indexOf("/") + 1, resourceName.length());
-    src.setByteStream(new File(_docRoot, resourceName).toURL().openStream());
-    return src;
-  }
+    public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
+        XMLInputSource src = new XMLInputSource(resourceIdentifier);
+        String resourceName = resourceIdentifier.getLiteralSystemId();
+        String base;
+        try {
+            base = new URI(resourceIdentifier.getBaseSystemId()).toURL().getFile();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Base system id incorrect, parser error", e);
+        }
+
+        System.out.println("1 " + resourceName);
+        System.out.println("11 " + base);
+        System.out.println("2 " + resourceIdentifier.getBaseSystemId());
+        System.out.println("3 " + resourceIdentifier.getExpandedSystemId());
+        System.out.println("4 " + resourceIdentifier.getLiteralSystemId());
+        System.out.println("5 " + resourceIdentifier.getPublicId());
+
+        if (new File(new File(base).getParent(), resourceName).exists())
+            src.setByteStream(new File(new File(base).getParent(), resourceName).toURL().openStream());
+        else src.setByteStream(new File(_docRoot, resourceName).toURL().openStream());
+
+        return src;
+    }
 }

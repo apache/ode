@@ -171,6 +171,9 @@ public class DocumentRegistry {
             // Add new schemas to our list.
             _schemas.putAll(capture);
           } catch (XsdException xsde) {
+              System.out.println("+++++++++++++++++++++++++++++++++");
+              xsde.printStackTrace();
+              System.out.println("+++++++++++++++++++++++++++++++++");
             __log.debug("captureSchemas: capture failed for " + docuri, xsde);
 
             LinkedList<XsdException> exceptions = new LinkedList<XsdException>();
