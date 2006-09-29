@@ -196,7 +196,7 @@ public class DeploymentWebService {
                 while((entry = zis.getNextEntry()) != null) {
                     if(entry.isDirectory()) {
                         __log.debug("Extracting directory: " + entry.getName());
-                        new File(_deployPath, entry.getName()).mkdir();
+                        new File(dest, entry.getName()).mkdir();
                         continue;
                     }
                     __log.debug("Extracting file: " + entry.getName());
