@@ -47,12 +47,14 @@ public class DefaultWsdlFinder implements WsdlFinder {
         _suDir = new File(u);
     }
 
-    public Definition4BPEL loadDefinition(WSDLReader r, URI uri) throws WSDLException {
+    public Definition4BPEL loadDefinition(WSDLReader r, File importFrom, URI uri) throws WSDLException {
         // Eliminating whatever path has been provided, we always look into our SU
         // deployment directory.
         String strUri = uri.toString();
-//        String filename = strUri.substring(strUri.lastIndexOf("/"), strUri.length());
-        return (Definition4BPEL) r.readWSDL(new File(_suDir, strUri).getPath());
+        // Allowing both relative or absolute
+        if (!strUri.startsWith("/"))
+            return (Definition4BPEL) r.readWSDL(new File(importFrom.getParent(), strUri).getPath());
+        else return (Definition4BPEL) r.readWSDL(new File(_suDir, strUri).getPath());
     }
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {

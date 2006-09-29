@@ -35,29 +35,35 @@ public class DefaultXsltFinder implements XsltFinder {
     private File _suDir;
 
     public DefaultXsltFinder() {
-      _suDir = new File(".");
+        _suDir = new File(".");
     }
 
     public DefaultXsltFinder(File suDir) {
-      _suDir = suDir;
+        _suDir = suDir;
     }
 
     public void setBaseURI(URI u) {
-      _suDir = new File(u);
+        _suDir = new File(u);
     }
 
-    public String loadXsltSheet(URI uri) {
-      // Eliminating whatever path has been provided, we always look into our SU
-      // deployment directory.
-      String strUri = uri.toString();
-//      String filename = strUri.substring(strUri.lastIndexOf("/"), strUri.length());
-      try {
-        return new String(StreamUtils.read(new FileInputStream(new File(_suDir, strUri))));
-      } catch (IOException e) {
-        if (DefaultXsltFinder.__log.isDebugEnabled())
-          DefaultXsltFinder.__log.debug("error obtaining resource '" + uri + "' from repository.", e);
-        return null;
-      }
+    public String loadXsltSheet(File importFrom, URI uri) {
+        // Eliminating whatever path has been provided, we always look into our SU
+        // deployment directory.
+        String strUri = uri.toString();
+
+        File xslFile;
+        if (new File(importFrom.getParent(), strUri).exists())
+            xslFile = new File(importFrom.getParent(), strUri);
+        else
+            xslFile = new File(_suDir, strUri);
+
+        try {
+            return new String(StreamUtils.read(new FileInputStream(xslFile)));
+        } catch (IOException e) {
+            if (DefaultXsltFinder.__log.isDebugEnabled())
+                DefaultXsltFinder.__log.debug("error obtaining resource '" + uri + "' from repository.", e);
+            return null;
+        }
     }
 
 }
