@@ -247,7 +247,7 @@ public class BpelC {
         compiler.setCompileListener(clistener);
         compiler.setWsdlFinder(wf);
         if (_bpel11wsdl != null) {
-          compiler.addWsdlImport(_bpel11wsdl);
+          compiler.addWsdlImport(_bpelFile, _bpel11wsdl);
         } else {
           CompilationMessage cmsg = __cmsgs.errBpel11RequiresWsdl();
           logCompilationMessage(cmsg);
@@ -264,7 +264,7 @@ public class BpelC {
 
     OProcess oprocess;
     try {
-      oprocess = compiler.compile(process);
+      oprocess = compiler.compile(_bpelFile, process);
     }
     catch (CompilationException cex) {
       this.invalidate();
