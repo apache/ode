@@ -673,7 +673,6 @@ public class BpelServerImpl implements BpelServer {
                     }
                 }
 
-                _deploymentManager.remove(du);
                 throw failed;
             }
 
