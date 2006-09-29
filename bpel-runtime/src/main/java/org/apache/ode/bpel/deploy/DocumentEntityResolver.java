@@ -50,13 +50,6 @@ public class DocumentEntityResolver implements XMLEntityResolver {
             throw new RuntimeException("Base system id incorrect, parser error", e);
         }
 
-        System.out.println("1 " + resourceName);
-        System.out.println("11 " + base);
-        System.out.println("2 " + resourceIdentifier.getBaseSystemId());
-        System.out.println("3 " + resourceIdentifier.getExpandedSystemId());
-        System.out.println("4 " + resourceIdentifier.getLiteralSystemId());
-        System.out.println("5 " + resourceIdentifier.getPublicId());
-
         if (new File(new File(base).getParent(), resourceName).exists())
             src.setByteStream(new File(new File(base).getParent(), resourceName).toURL().openStream());
         else src.setByteStream(new File(_docRoot, resourceName).toURL().openStream());
