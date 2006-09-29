@@ -167,13 +167,7 @@ public class BpelServerImpl implements BpelServer {
                 if (deploymentUnit.getDeployDir().getName().equals(file.getName()))
                     du = deploymentUnit;
             }
-            if (du == null) {
-                if (file.exists())
-                    __log.warn("Couldn't undeploy " + file.getName() + ", package was not found.");
-                else if (__log.isDebugEnabled())
-                    __log.debug("Couldn't undeploy " + file.getName() + ", package was not found.");
-                return false;
-            }
+            if (du == null) return false;
 
             boolean success = true;
             for (QName pName : du.getProcessNames()) {
@@ -626,14 +620,21 @@ public class BpelServerImpl implements BpelServer {
      * Deploys a process.
      */
     public Collection<QName> deploy(File deploymentUnitDirectory) {
-        // Undeploy everything
-        undeploy(deploymentUnitDirectory);
-
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
 
         _mngmtLock.writeLock().lock();
         try {
             DeploymentUnitImpl du = _deploymentManager.createDeploymentUnit(deploymentUnitDirectory);
+
+            // Checking first that the same process isn't deployed elsewhere
+            for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
+                if (_deploymentUnits.get(processDD.getName()) != null) {
+                    String duName = _deploymentUnits.get(processDD.getName()).getDeployDir().getName();
+                    if (!duName.equals(deploymentUnitDirectory.getName()))
+                        throw new BpelEngineException("Process " + processDD.getName() + " is already deployed in " +
+                                duName + "");
+                }
+            }
 
             ArrayList<QName> deployed = new ArrayList<QName>();
             BpelEngineException failed = null;
