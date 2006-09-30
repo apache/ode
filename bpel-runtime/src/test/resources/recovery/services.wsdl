@@ -55,24 +55,36 @@
     </operation>
   </binding>
 
-  <service name="InstantiatingService">
-    <port name="soap" binding="tns:InstantiatingBinding">
-      <soap:address location="http://localhost/pxe/soap/InvokeFailureAndRecovery"/>
-    </port>
-  </service>
-
   <service name="FailingService">
     <port name="soap" binding="tns:FailingBinding">
       <soap:address location="http://localhost/FailingEndpoint"/>
     </port>
   </service>
 
-  <plnk:partnerLinkType name="InstantiatingPartnerLinkType">
-    <plnk:role name="me" portType="tns:InstantiatingPortType"/>
-  </plnk:partnerLinkType>
+  <service name="FailureToRecovery">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToRecovery"/>
+    </port>
+  </service>
+
+  <service name="FailureToFault">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToFault"/>
+    </port>
+  </service>
+
+  <service name="FailureInheritence">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureInheritence"/>
+    </port>
+  </service>
 
   <plnk:partnerLinkType name="FailingPartnerLinkType">
     <plnk:role name="partner" portType="tns:FailingPortType"/>
+  </plnk:partnerLinkType>
+
+  <plnk:partnerLinkType name="InstantiatingPartnerLinkType">
+    <plnk:role name="me" portType="tns:InstantiatingPortType"/>
   </plnk:partnerLinkType>
 
 </definitions>

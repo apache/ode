@@ -831,6 +831,7 @@ class ProcessAndInstanceManagementImpl
                     cal.setTime(recovery.getDateTime());
                     failure.setDtFailure(cal);
                     failure.setActions(recovery.getActions());
+                    failure.setRetries(recovery.getRetries());
                     ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
                   }
                 }

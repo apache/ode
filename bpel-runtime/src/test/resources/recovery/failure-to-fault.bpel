@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<process name="InvokeFailureAndRecovery"
+<process name="FailureToFault"
          targetNamespace="http://ode.apache.org/bpel/unit-test" 
          xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
          xmlns:tns="http://ode.apache.org/bpel/unit-test"
@@ -38,8 +38,7 @@
              inputVariable="request"
              outputVariable="response">
       <ext:failureHandling>
-        <ext:retryFor>2</ext:retryFor>
-        <ext:retryDelay>0</ext:retryDelay>
+        <ext:faultOnFailure>true</ext:faultOnFailure>
       </ext:failureHandling>
     </invoke>
   </sequence>

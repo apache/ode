@@ -57,10 +57,10 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     return _self.getDateTime();
   }
 
-  public Element getData() {
-    if (_self.getData() == null) return null;
+  public Element getDetails() {
+    if (_self.getDetails() == null) return null;
     try {
-      return DOMUtils.stringToDOM(_self.getData().getText());
+      return DOMUtils.stringToDOM(_self.getDetails().getText());
     } catch (SAXException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
