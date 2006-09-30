@@ -1063,6 +1063,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return _getPartnerResponse(mexId).getType();
     }
 
+    public String getPartnerFaultExplanation(String mexId) {
+        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        return dao != null ? dao.getFaultExplanation() : null;
+    }
+
     private MessageDAO _getPartnerResponse(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
         if (dao == null) {
@@ -1138,12 +1143,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-            Date dateTime, Element data, String[] actions, int retries) {
+            Date dateTime, Element details, String[] actions, int retries) {
         if (reason == null)
             reason = "Unspecified";
         if (dateTime == null)
             dateTime = new Date();
-        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, data, actions, retries);
+        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, details, actions, retries);
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {

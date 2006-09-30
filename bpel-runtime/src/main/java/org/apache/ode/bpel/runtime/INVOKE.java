@@ -53,6 +53,9 @@ public class INVOKE extends ACTIVITY {
   private Date    _lastFailure;
   // Reason for last failure.
   private String  _failureReason;
+  // Data associated with failure.
+  private Element _failureData;
+
 
   public INVOKE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     super(self, scopeFrame, linkFrame);
@@ -159,7 +162,7 @@ public class INVOKE extends ACTIVITY {
             // because there is no fault, instead we'll re-incarnate the invoke
             // and either retry or indicate failure condition.
             // admin to resume the process.
-            INVOKE.this.retryOrFailure(null);
+            INVOKE.this.retryOrFailure(getBpelRuntimeContext().getPartnerFaultExplanation(mexId), null);
           }
         });
       }
@@ -189,9 +192,10 @@ public class INVOKE extends ACTIVITY {
     return (Element) outboundMsg;
   }
 
-  private void retryOrFailure(String reason) {
+  private void retryOrFailure(String reason, Element data) {
     _lastFailure = new Date();
     _failureReason = reason;
+    _failureData = data;
 
     if (_self.getFailureHandling().faultOnFailure) {
       // No attempt to retry or enter activity recovery state, simply fault.
@@ -229,7 +233,7 @@ public class INVOKE extends ACTIVITY {
   private void requireRecovery() {
     sendEvent(new ActivityFailureEvent(_failureReason));
     final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
-    getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, null,
+    getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, _failureData,
       new String[] { "retry", "cancel", "fault" }, _invoked - 1);
     object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
       public void retry() {

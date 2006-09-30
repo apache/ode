@@ -40,6 +40,7 @@ class FlowGenerator extends DefaultActivityGenerator {
   private static final FlowGeneratorMessages __cmsgs = MessageBundle.getMessages(FlowGeneratorMessages.class);
 
   public void compile(OActivity output, Activity src) {
+    handleDefaultExtensibility(output, src);
     FlowActivity flowAct = (FlowActivity)src;
     OFlow oflow = (OFlow) output;
     compileLinkDecls(oflow, flowAct);

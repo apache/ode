@@ -35,7 +35,7 @@ public class HActivityRecovery extends HObject {
   private String      _channel;
   private String      _reason;
   private Date        _dateTime;
-  private HLargeData  _data;
+  private HLargeData  _details;
   private String      _actions;
   private int         _retries;
 
@@ -100,12 +100,12 @@ public class HActivityRecovery extends HObject {
   /**
    * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
    */
-  public HLargeData getData() {
-    return _data;
+  public HLargeData getDetails() {
+    return _details;
   }
 
-  public void setData(HLargeData data) {
-    _data = data;
+  public void setDetails(HLargeData details) {
+    _details = details;
   }
 
   /**
