@@ -33,7 +33,7 @@ public interface ActivityRecoveryDAO {
 
   String getReason();
 
-  Element getData();
+  Element getDetails();
 
   Date getDateTime();
 

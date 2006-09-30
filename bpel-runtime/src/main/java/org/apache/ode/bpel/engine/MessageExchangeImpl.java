@@ -196,10 +196,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
         getDAO().setResponse(((MessageImpl)outputMessage)._dao);
     }
 
-    void setFailure(FailureType type, String description, Element details) throws BpelEngineException {
+    void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
         setStatus(Status.FAILURE);
-//    getDAO().setFailureMessage(description);
-//    getDAO().setFailureDetails(details);
+        getDAO().setFaultExplanation(reason);
     }
 
     void setStatus(Status status) {

@@ -34,6 +34,7 @@ import org.apache.ode.bpel.o.OXslSheet;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.util.List;
+import java.util.Iterator;
 
 
 /**
@@ -113,4 +114,7 @@ public interface CompilerContext {
     void compile(OActivity context, Runnable run);
 
     public boolean isPartnerLinkAssigned(String plink);
+
+    List<OActivity> getActivityStack();
+
 }

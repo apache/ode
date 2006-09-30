@@ -46,6 +46,7 @@ public class ForEachGenerator extends DefaultActivityGenerator {
   }
 
   public void compile(OActivity output, Activity src) {
+    handleDefaultExtensibility(output, src);
     if (__log.isDebugEnabled()) __log.debug("Compiling ForEach activity.");
     OForEach oforEach = (OForEach) output;
     ForEachActivity forEach = (ForEachActivity) src;

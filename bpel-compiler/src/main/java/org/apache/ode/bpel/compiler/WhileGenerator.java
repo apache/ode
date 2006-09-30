@@ -33,6 +33,7 @@ class WhileGenerator extends DefaultActivityGenerator {
   }
 
   public void compile(OActivity output, Activity srcx)  {
+    handleDefaultExtensibility(output, srcx);
     OWhile owhile = (OWhile) output;
     WhileActivity src = (WhileActivity)srcx;
     owhile.whileCondition = _context.compileExpr(src.getCondition());

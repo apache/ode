@@ -1384,6 +1384,7 @@ abstract class BpelCompiler implements CompilerContext {
 
         throw new CompilationException(__cmsgs.errUnknownActivity(actClass.getName()).setSource(source));
     }
+
     protected void registerActivityCompiler(Class defClass, ActivityGenerator generator) {
         if (__log.isDebugEnabled()) {
             __log.debug("Adding compiler for nodes class \"" + defClass.getName()
@@ -1418,6 +1419,12 @@ abstract class BpelCompiler implements CompilerContext {
 
     protected void registerExpressionLanguage(String expLangUri, ExpressionCompiler expressionCompiler) {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);
+    }
+
+    public List<OActivity> getActivityStack() {
+      ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);
+      Collections.reverse(rval);
+      return rval;
     }
 
     private static class StructureStack {

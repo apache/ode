@@ -366,7 +366,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     recovery.setRetries(retries);
     if (data != null) {
       HLargeData ld = new HLargeData(DOMUtils.domToString(data));
-      recovery.setData(ld);
+      recovery.setDetails(ld);
       getSession().save(ld);
     }
     String list = actions[0];
