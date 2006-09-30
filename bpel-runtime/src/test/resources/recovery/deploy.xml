@@ -3,10 +3,40 @@
         xmlns:pns="http://ode.apache.org/bpel/unit-test"
         xmlns:wns="http://ode.apache.org/bpel/unit-test">
 
-  <process name="pns:InvokeFailureAndRecovery">
+  <process name="pns:FailureToRecovery">
     <active>true</active>
     <provide partnerLink="instantiatingPartnerLink">
-      <service name="wns:InstantiatingService" port="soap"/>
+      <service name="wns:FailureToRecovery" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureToFault">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToFault" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureNoRetry">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureNoRetry" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureInheritence">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureInheritence" port="soap"/>
     </provide>
     <invoke partnerLink="failingPartnerLink">
       <service name="wns:FailingService" port="soap"/>

@@ -316,17 +316,17 @@ import java.util.Set;
     private long    _activityId;
     private String  _channel;
     private String  _reason;
-    private Element _data;
+    private Element _details;
     private Date    _dateTime;
     private String  _actions;
     private int     _retries;
 
     ActivityRecoveryDAOImpl(String channel, long activityId, String reason, Date dateTime,
-                            Element data, String[] actions, int retries) {
+                            Element details, String[] actions, int retries) {
       _activityId = activityId;
       _channel = channel;
       _reason = reason;
-      _data = data;
+      _details = details;
       _dateTime = dateTime;
       _actions = actions[0];
       for (int i = 1; i < actions.length; ++i)
@@ -346,8 +346,8 @@ import java.util.Set;
       return _reason;
     }
 
-    public Element getData() {
-      return _data;
+    public Element getDetails() {
+      return _details;
     }
 
     public Date getDateTime() {

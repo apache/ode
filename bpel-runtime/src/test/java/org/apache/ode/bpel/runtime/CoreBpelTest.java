@@ -400,4 +400,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public void recoverActivity(final String channel, final String action, final FaultData fault) {
     }
 
+    public String getPartnerFaultExplanation(String mexid) {
+      return null;
+    }
+
 }

@@ -237,6 +237,8 @@ public interface BpelRuntimeContext {
 
   QName getPartnerFault(String mexId);
 
+  String getPartnerFaultExplanation(String mexId);
+
   QName getPartnerResponseType(String mexId);
 
   Node getPartData(Element message, Part part);
@@ -244,7 +246,7 @@ public interface BpelRuntimeContext {
   Element getSourceEPR(String mexId);
 
   void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-                                   Date dateTime, Element data, String[] actions, int retries);
+                                   Date dateTime, Element details, String[] actions, int retries);
 
   void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
 

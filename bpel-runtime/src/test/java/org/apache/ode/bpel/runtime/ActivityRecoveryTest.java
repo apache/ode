@@ -54,47 +54,62 @@ import org.w3c.dom.Element;
 public class ActivityRecoveryTest extends TestCase {
 
   static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
+  static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
   int                   _invoked;
   int                   _failFor;
   MockBpelServer        _server;
   BpelManagementFacade  _management;
 
-
   public void testSuccessfulInvoke() throws Exception { 
-    execute(null, 0);
+    execute("FailureToRecovery", 0);
     assertCompleted(true, 1, null);
   }
 
   public void testInvokeAndRetry() throws Exception {
-    execute(null, 2);
+    execute("FailureToRecovery", 2);
     assertCompleted(true, 3, null);
   }
 
   public void testRetryRecoveryAction() throws Exception {
-    execute(null, 4);
-    assertRecovery();
+    execute("FailureToRecovery", 4);
+    assertRecovery(3, ACTIONS);
     recover("retry");
-    assertRecovery();
+    assertRecovery(4, ACTIONS);
     recover("retry");
     assertCompleted(true, 5, null);
   }
 
   public void testCancelRecoveryAction() throws Exception {
-    execute(null, 4);
-    assertRecovery();
+    execute("FailureToRecovery", 4);
+    assertRecovery(3, ACTIONS);
     recover("retry");
-    assertRecovery();
+    assertRecovery(4, ACTIONS);
     recover("cancel");
     assertCompleted(true, 4, null);
   }
 
   public void testFaultRecoveryAction() throws Exception {
-    execute(null, 4);
-    assertRecovery();
+    execute("FailureToRecovery", 4);
+    assertRecovery(3, ACTIONS);
     recover("retry");
-    assertRecovery();
+    assertRecovery(4, ACTIONS);
     recover("fault");
     assertCompleted(false, 4, FailureHandling.FAILURE_FAULT_NAME);
+  }
+
+  public void testImmediateFailure() throws Exception {
+    execute("FailureNoRetry", 1);
+    assertRecovery(1, ACTIONS);
+  }
+
+  public void testImmediateFault() throws Exception {
+    execute("FailureToFault", 2);
+    assertCompleted(false, 1, FailureHandling.FAILURE_FAULT_NAME);
+  }
+
+  public void testInheritence() throws Exception {
+    execute("FailureInheritence", 2);
+    assertCompleted(true, 3, null);
   }
 
   protected void setUp() throws Exception {
@@ -133,7 +148,7 @@ public class ActivityRecoveryTest extends TestCase {
   protected void execute(String process, int failFor) throws Exception {
     _failFor = failFor;
     _server.getBpelManagementFacade().delete(null);
-    _server.invoke(new QName(NAMESPACE, "InstantiatingService"), "instantiate",
+    _server.invoke(new QName(NAMESPACE, process), "instantiate",
                    DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
     _server.waitForBlocking();
   }
@@ -162,14 +177,24 @@ public class ActivityRecoveryTest extends TestCase {
   /**
    * Asserts that the process has one activity in the recovery state.
    */
-  protected void assertRecovery() {
+  protected void assertRecovery(int invoked, String[] actions) {
     // Test in aggregate to see how many activities we have in this state.
     TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
     TInstanceInfo.Failures failures = instance.getFailures();
     assertTrue(failures != null && failures.getCount() == 1);
     // Look for individual activities inside the process instance.
     TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
-    assertTrue(getRecoveriesInScope(instance, null, null).size() == 1);
+    ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+    assertTrue(recoveries.size() == 1);
+    TActivityInfo.Failure failure = recoveries.get(0).getFailure();
+    assertTrue(failure.getRetries() == invoked - 1);
+    assertTrue(failure.getReason().equals("Bang"));
+    assertTrue(failure.getDtFailure().getTime().getTime() / 100000 == System.currentTimeMillis() / 100000);
+    java.util.HashSet<String> actionSet = new java.util.HashSet<String>();
+    for (String action : failure.getActions().split(" "))
+      actionSet.add(action);
+    for (String action : actions)
+      assertTrue(actionSet.remove(action));
   }
 
   /**
