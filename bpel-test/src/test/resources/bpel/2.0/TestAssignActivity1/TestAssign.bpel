@@ -76,10 +76,6 @@
                 <from variable="myVar" part="TestPart"/>
                 <to variable="otherMsgVar" part="TestPart"/>
             </copy>
-            <copy>
-                <from variable="myVar" part="TestPart"/>
-                <to>$otherMsgVar.TestPart</to>
-            </copy>
         </assign>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
