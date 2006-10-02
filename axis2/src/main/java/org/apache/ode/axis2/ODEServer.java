@@ -35,6 +35,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.bpel.xsl.XslTransformHandler;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
@@ -58,6 +59,7 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -123,6 +125,8 @@ public class ODEServer {
 
         __log.debug("Initializing BPEL server.");
         initBpelServer();
+
+        initXslt();
 
         try {
             _server.start();
@@ -441,6 +445,10 @@ public class ODEServer {
         _server.init();
     }
 
+    private void initXslt() {
+        TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+        XslTransformHandler.getInstance().setTransformerFactory(trsf);
+    }
 
     @SuppressWarnings("unchecked")
     private <T> T lookupInJndi(String objName) throws Exception {
