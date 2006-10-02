@@ -191,7 +191,10 @@ public class BPELTest extends TestCase {
 	public void testCorrelationAsync() throws Exception {
 		go("target/test-classes/bpel/2.0/testCorrelationAsync");
 	}
-    
+    public void testXslTransform() throws Exception {
+        go("target/test-classes/bpel/2.0/TestXslTransform");
+    }
+
     /** These tests compile however they fail at runtime */
   
 //	public void testCompensationHandlers() throws Exception {
