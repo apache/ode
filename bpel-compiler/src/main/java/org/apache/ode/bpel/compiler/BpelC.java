@@ -363,10 +363,7 @@ public class BpelC {
   }
 
   private void initializeXslEngine(BpelCompiler compiler) {
-    System.setProperty("javax.xml.transform.TransformerFactory",
-            "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-
-    TransformerFactory trsf = TransformerFactory.newInstance();
+    TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
     XslTransformHandler.getInstance().setTransformerFactory(trsf);
 
     XslCompilationErrorListener xe = new XslCompilationErrorListener(compiler);
