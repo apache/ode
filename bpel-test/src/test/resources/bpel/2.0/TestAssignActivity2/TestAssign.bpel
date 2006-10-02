@@ -48,37 +48,18 @@
 
         <assign name="assign1">
             <copy>
-                <from>2 + 1</from>
-                <to variable="intVar"/>
-            </copy>
-            <copy>
-                <from>$intVar + 1</from>
-                <to variable="intVar"/>
-            </copy>
-            <copy>
-                <from>$intVar + number('2')</from>
-                <to variable="intVar"/>
-            </copy>
-            <copy>
                 <from variable="myVar" part="TestPart"/>
                 <to variable="strVar"/>
             </copy>
             <copy>
-                <from>concat($strVar,' World', $intVar)</from>
+                <from>concat($strVar,' World')</from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
-<!--
             <copy>
                 <from variable="myVar" part="TestPart"/>
-                <to variable="otherMsgVar" part="TestPart"/>
-            </copy>
--->            
-         
-            <copy>
-                <from variable="myVar" part="TestPart"/>
+                <!--to variable="otherMsgVar" part="TestPart"/-->
                 <to>$otherMsgVar.TestPart</to>
             </copy>
-  
         </assign>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
