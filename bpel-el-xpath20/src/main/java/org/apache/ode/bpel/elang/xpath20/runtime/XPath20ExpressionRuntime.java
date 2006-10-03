@@ -175,8 +175,11 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             // Extracting the real cause from all this wrapping isn't a simple task
             Throwable cause = e.getCause() != null ? e.getCause() : e;
             if (cause instanceof DynamicError) {
-                cause = ((DynamicError)cause).getException();
-                if (cause.getCause() != null) cause = cause.getCause();
+                Throwable th = ((DynamicError)cause).getException();
+                if (th != null) {
+                    cause = th;
+                    if (cause.getCause() != null) cause = cause.getCause();
+                }
             }
             throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
         } catch (WrappedResolverException wre) {
