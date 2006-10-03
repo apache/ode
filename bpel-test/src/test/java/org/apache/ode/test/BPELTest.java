@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
@@ -133,9 +134,19 @@ public class BPELTest extends TestCase {
 					testResponsePattern(mex.getResponse(),responsePattern);
 					// TODO: test for response fault
 					break;
-				case ASYNC: 
-					if ( !responsePattern.equals("ASYNC"))  
-						assertTrue(false);
+				case ASYNC:
+
+					switch (mex.getMessageExchangePattern()) {
+					case REQUEST_ONLY:
+						if ( !responsePattern.equals("ASYNC"))  
+							assertTrue(false);
+						break;
+					case REQUEST_RESPONSE:
+						testResponsePattern(mexContext.getCurrentResponse(),responsePattern);
+					default:
+						break;
+					}
+
 					break;
 				case COMPLETED_OK:
 					if ( !responsePattern.equals("COMPLETED_OK")) 
@@ -158,9 +169,14 @@ public class BPELTest extends TestCase {
 	}
 	
 	private void testResponsePattern(Message response, String responsePattern){
-		String resp = DOMUtils.domToString(response.getMessage());
-		System.out.println(resp);
-		assertTrue(Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches());
+		String resp = ( response == null ) ? "null" : DOMUtils.domToString(response.getMessage());
+		boolean testValue = Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches();
+		
+		if ( !testValue ) {
+			System.out.println("=> Expected Response Pattern >> " + responsePattern);
+		    System.out.println("=> Acutal Response >> " + resp);
+		}
+		assertTrue(testValue);
 	}
 
 	public void testHelloWorld2() throws Exception {
@@ -194,6 +210,9 @@ public class BPELTest extends TestCase {
 	}
     public void testXslTransform() throws Exception {
         go("target/test-classes/bpel/2.0/TestXslTransform");
+    }
+    public void testStaticPick() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestStaticPick");
     }
 
     /** These tests compile however they fail at runtime */
