@@ -39,6 +39,12 @@ public class XPathMessages extends CompilationMessageBundle {
         functionName);
   }
 
+  /** Error compiling XSL Sheet "{0}" : {1}. */
+  public CompilationMessage errXslCompilation(String xslName, String error) {
+    return super.formatCompilationMessage("Error compiling XSL Sheet \"{0}\" : {1}",
+        xslName, error);
+  }
+
   /** Attempt to use an unrecognized BPEL function "{0}". */
   public CompilationMessage errUnknownBpelFunction(String functionName) {
     return super.formatCompilationMessage(

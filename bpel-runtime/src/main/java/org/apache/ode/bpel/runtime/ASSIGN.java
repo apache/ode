@@ -196,6 +196,7 @@ class ASSIGN extends ACTIVITY {
                         .getMessage());
                 if (__log.isDebugEnabled())
                     __log.debug(from + ": " + msg);
+                if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
                 throw new FaultException(
                         getOAsssign().getOwner().constants.qnSelectionFailure,
                         msg);
