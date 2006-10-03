@@ -26,6 +26,7 @@ import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
+import org.apache.ode.utils.fs.FileUtils;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 
 import java.net.URI;
@@ -190,7 +191,7 @@ class WSDLRegistry {
                     Map<URI, byte[]> capture = null;
                     URI docuri;
                     try {
-                        docuri = new URI(def.getDocumentBaseURI());
+                        docuri = new URI(FileUtils.encodePath(def.getDocumentBaseURI()));
                     } catch (URISyntaxException e) {
                         // This is really quite unexpected..
                         __log.fatal("Internal Error: WSDL Base URI is invalid.",e);

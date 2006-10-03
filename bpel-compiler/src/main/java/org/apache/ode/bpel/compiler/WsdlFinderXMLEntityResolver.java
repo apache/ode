@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.fs.FileUtils;
 
 import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
@@ -62,7 +63,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             if (resourceIdentifier.getExpandedSystemId() == null)
                 location = new URI(resourceIdentifier.getNamespace());
             else
-                location = new URI(resourceIdentifier.getExpandedSystemId());
+                location = new URI(FileUtils.encodePath(resourceIdentifier.getExpandedSystemId()));
         } catch (URISyntaxException e) {
             __log.debug("resolveEntity: URI syntax error", e);
             throw new IOException(e.getMessage());

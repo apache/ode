@@ -19,6 +19,7 @@
 package org.apache.ode.utils.xsd;
 
 import org.apache.ode.utils.StreamUtils;
+import org.apache.ode.utils.fs.FileUtils;
 import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
@@ -86,8 +87,8 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
 
     try {
       URI systemId = new URI(
-          resourceIdentifier.getExpandedSystemId() == null ? resourceIdentifier
-              .getNamespace() : resourceIdentifier.getExpandedSystemId());
+          FileUtils.encodePath(resourceIdentifier.getExpandedSystemId() == null ? resourceIdentifier
+              .getNamespace() : resourceIdentifier.getExpandedSystemId()));
 
       _capture.put(systemId, data);
     } catch (URISyntaxException use) {
