@@ -176,6 +176,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (WrappedResolverException wre) {
             wre.printStackTrace();
             throw (FaultException)wre.getCause();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new EvaluationException("Error while executing an XPath expression: ", t);
         }
 
     }

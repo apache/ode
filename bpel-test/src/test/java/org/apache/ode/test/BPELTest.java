@@ -143,7 +143,8 @@ public class BPELTest extends TestCase {
 					break;
 				case FAULT:
 					// TODO: handle Fault
-					assertTrue(false);
+                    System.out.println("=> " + mex.getFaultExplanation());
+                    assertTrue(false);
 					break;
 				default:
 					assertTrue(false);

@@ -96,7 +96,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                     throw new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + variableName.getLocalPart());
                 if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple) 
                 	return getSimpleContent(variableNode,((OXsdTypeVarType)variable.type).xsdType);
-                if (part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
+                if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
                 	return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
 
                 // Saxon expects a nodelist, everything else will result in a wrong result...
@@ -125,7 +125,9 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     		return Double.valueOf(text);
     	} catch (NumberFormatException e) { }
         // Remember: always a node set
-        return simpleNode.getParentNode().getChildNodes();
+        if (simpleNode.getParentNode() != null)
+            return simpleNode.getParentNode().getChildNodes();
+        else return text;
     }
 
 }
