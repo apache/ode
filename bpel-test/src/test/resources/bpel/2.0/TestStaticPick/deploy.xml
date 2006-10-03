@@ -1,0 +1,18 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test/TestStaticPick" 
+	xmlns:wns="http://ode/bpel/unit-test/TestStaticPick.wsdl">
+
+
+	<process name="pns:TestStaticPick">
+		<active>true</active>
+		<provide partnerLink="request1">
+			<service name="wns:TestStaticPick1Service" port="wns:TestStaticPick1Port"/>
+		</provide>
+		<provide partnerLink="request2">
+			<service name="wns:TestStaticPick2Service" port="wns:TestStaticPick2Port"/>
+		</provide>
+		<provide partnerLink="request3">
+			<service name="wns:TestStaticPick3Service" port="wns:TestStaticPick3Port"/>
+		</provide>
+	</process>
+</deploy>
