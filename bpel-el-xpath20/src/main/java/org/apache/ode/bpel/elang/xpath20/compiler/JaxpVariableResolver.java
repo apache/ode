@@ -30,6 +30,8 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
@@ -109,7 +111,11 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 return 0;
             if (typeName.getLocalPart().equals("boolean"))
                 return Boolean.TRUE;
+            if (typeName.getLocalPart().equals("string"))
+                return "";
         }
-        return "";
+        Document doc = DOMUtils.newDocument();
+        doc.appendChild(doc.createElement("empty"));
+        return doc.getDocumentElement();
     }
 }
