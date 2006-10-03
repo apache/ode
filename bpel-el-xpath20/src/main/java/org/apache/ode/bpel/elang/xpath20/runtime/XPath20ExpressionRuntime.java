@@ -30,6 +30,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import net.sf.saxon.xpath.XPathEvaluator;
+import net.sf.saxon.trans.DynamicError;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,7 +172,12 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                         + " - type=" + evalResult.getClass().getName());
             return evalResult;
         } catch (XPathExpressionException e) {
+            // Extracting the real cause from all this wrapping isn't a simple task
             Throwable cause = e.getCause() != null ? e.getCause() : e;
+            if (cause instanceof DynamicError) {
+                cause = ((DynamicError)cause).getException();
+                if (cause.getCause() != null) cause = cause.getCause();
+            }
             throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
         } catch (WrappedResolverException wre) {
             wre.printStackTrace();

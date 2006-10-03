@@ -164,13 +164,12 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 XslTransformHandler.getInstance().parseXSLSheet(xslSheet.uri, xslSheet.sheetBody,
                         new XslCompileUriResolver(_cctx, _out));
             } catch (Exception e) {
-                throw new CompilationException(
-                        __msgs.errInvalidNumberOfArguments(xslUri));
+                throw new CompilationException(__msgs.errXslCompilation(xslUri, e.toString()));
             }
 
             _out.xslSheets.put(xslSheet.uri, xslSheet);
             return "";
         }
-
     }
+
 }

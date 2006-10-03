@@ -37,6 +37,7 @@ import org.apache.ode.bpel.xsl.XslTransformHandler;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
@@ -222,15 +223,26 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 for (int idx = 2; idx < args.size(); idx+=2) {
                     QName keyQName = _oxpath.namespaceCtx.derefQName((String) args.get(idx));
                     Object paramElmt;
-                    if (args.get(idx + 1) instanceof NodeWrapper)
-                        paramElmt = ((NodeWrapper)args.get(1)).getUnderlyingNode();
-                    else paramElmt = args.get(1);
+                    if (args.get(idx + 1) instanceof NodeWrapper) {
+                        Element tmpElmt = (Element) ((NodeWrapper)args.get(1)).getUnderlyingNode();
+                        Document paramDoc = DOMUtils.newDocument();
+                        paramDoc.appendChild(paramDoc.importNode(tmpElmt, true));
+                        paramElmt = paramDoc;
+                        if (__log.isDebugEnabled())
+                            __log.debug("Passing parameter " + keyQName + " " + DOMUtils.domToString(paramDoc));
+                    } else paramElmt = args.get(1);
 
                     parametersMap.put(keyQName, paramElmt);
                 }
             }
 
-            DOMSource source = new DOMSource(varElmt);
+            if (__log.isDebugEnabled())
+                __log.debug("Executing XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt));
+
+            Document varDoc = DOMUtils.newDocument();
+            varDoc.appendChild(varDoc.importNode(varElmt, true));
+
+            DOMSource source = new DOMSource(varDoc);
             // Using a StreamResult as a DOMResult doesn't behaves properly when the result
             // of the transformation is just a string.
             StringWriter writerResult = new StringWriter();
@@ -255,9 +267,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 try {
                     return DOMUtils.stringToDOM(output).getChildNodes();
                 } catch (SAXException e) {
-                    throw new XPathFunctionException(e);
+                    throw new XPathFunctionException("Parsing the result of the XSL sheet " + args.get(0) +
+                            " didn't produce a parsable XML result: " + output);
                 } catch (IOException e) {
                     throw new XPathFunctionException(e);
+                } catch (Exception e) {
+                    throw new XPathFunctionException("Parsing the result of the XSL sheet " + args.get(0) +
+                            " didn't produce a parsable XML result: " + output);
                 }
             } else {
                 return output;
