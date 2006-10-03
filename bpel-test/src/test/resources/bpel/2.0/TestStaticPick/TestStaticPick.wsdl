@@ -1,0 +1,90 @@
+
+<wsdl:definitions 
+   targetNamespace="http://ode/bpel/unit-test/TestStaticPick.wsdl"
+   xmlns:tns="http://ode/bpel/unit-test/TestStaticPick.wsdl"
+   xmlns="http://ode/bpel/unit-test/TestStaticPick.wsdl"
+   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/">
+
+
+   <wsdl:message name="requestMessage">
+      <wsdl:part name="requestID" type="xsd:string"/>
+      <wsdl:part name="requestText" type="xsd:string"/>
+   </wsdl:message>
+   
+   <wsdl:message name="replyMessage">
+      <wsdl:part name="replyID" type="xsd:string"/>
+      <wsdl:part name="replyText" type="xsd:string"/>
+   </wsdl:message>
+
+
+   <wsdl:portType name="TestStaticPick1PT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+
+   <wsdl:portType name="TestStaticPick2PT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+
+   <wsdl:portType name="TestStaticPick3PT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+   
+   <wsdl:binding name="TestStaticPick1Binding" type="tns:TestStaticPick1PT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="TestStaticPick1Service">
+      <wsdl:port name="TestStaticPick1Port" binding="tns:TestStaticPick1Binding">
+      </wsdl:port>
+   </wsdl:service>
+   
+   <wsdl:binding name="TestStaticPick2Binding" type="tns:TestStaticPick2PT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="TestStaticPick2Service">
+      <wsdl:port name="TestStaticPick2Port" binding="tns:TestStaticPick2Binding">
+      </wsdl:port>
+   </wsdl:service>
+   
+   <wsdl:binding name="TestStaticPick3Binding" type="tns:TestStaticPick3PT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="TestStaticPick3Service">
+      <wsdl:port name="TestStaticPick3Port" binding="tns:TestStaticPick3Binding">
+      </wsdl:port>
+   </wsdl:service>
+
+   <plnk:partnerLinkType name="TestStaticPick1Request">
+      <plnk:role name="TestStaticPick1Service" portType="TestStaticPick1PT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="TestStaticPick2Request">
+      <plnk:role name="TestStaticPick2Service" portType="TestStaticPick2PT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="TestStaticPick3Request">
+      <plnk:role name="TestStaticPick3Service" portType="TestStaticPick3PT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="probeRequest">
+	  <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+   </plnk:partnerLinkType>
+
+   <bpws:property name="testProbeID" type="xsd:string"/>
+   <bpws:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
+
+</wsdl:definitions>
