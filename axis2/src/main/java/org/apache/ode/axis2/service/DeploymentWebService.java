@@ -73,6 +73,8 @@ public class DeploymentWebService {
         Definition def;
         try {
             WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
+            wsdlReader.setFeature("javax.wsdl.verbose", false);
+
             def = wsdlReader.readWSDL(rootpath + "/deploy.wsdl");
             AxisService deployService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/deployapi", "DeploymentService"),
