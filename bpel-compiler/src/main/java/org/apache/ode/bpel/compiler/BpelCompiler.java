@@ -37,6 +37,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.ode.utils.fs.FileUtils;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Message;
@@ -1319,7 +1320,7 @@ abstract class BpelCompiler implements CompilerContext {
     public OXslSheet compileXslt(String docStrUri) throws CompilationException {
         URI docUri;
         try {
-            docUri = new URI(docStrUri);
+            docUri = new URI(FileUtils.encodePath(docStrUri));
         } catch (URISyntaxException e) {
             throw new CompilationException(__cmsgs.errInvalidDocXsltUri(docStrUri));
         }

@@ -23,6 +23,7 @@ import org.apache.ode.bom.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.capi.CompilationMessage;
 import org.apache.ode.bpel.capi.CompileListener;
+import org.apache.ode.utils.fs.FileUtils;
 import org.xml.sax.InputSource;
 
 import javax.wsdl.WSDLException;
