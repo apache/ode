@@ -52,6 +52,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.saxon.dom.NodeWrapper;
+
 /**
  * @author mriou <mriou at apache dot org>
  */
@@ -184,7 +186,9 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
                 } else {
-                    varElmt = (Element) args.get(1);
+                    if (args.get(1) instanceof NodeWrapper)
+                        varElmt = (Element) ((NodeWrapper)args.get(1)).getUnderlyingNode();
+                    else varElmt = (Element) args.get(1);
                 }
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
@@ -217,7 +221,12 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 parametersMap = new HashMap<QName, Object>();
                 for (int idx = 2; idx < args.size(); idx+=2) {
                     QName keyQName = _oxpath.namespaceCtx.derefQName((String) args.get(idx));
-                    parametersMap.put(keyQName, args.get(idx + 1));
+                    Object paramElmt;
+                    if (args.get(idx + 1) instanceof NodeWrapper)
+                        paramElmt = ((NodeWrapper)args.get(1)).getUnderlyingNode();
+                    else paramElmt = args.get(1);
+
+                    parametersMap.put(keyQName, paramElmt);
                 }
             }
 
@@ -238,11 +247,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             writerResult.flush();
 
             String output = writerResult.toString();
+            if (__log.isDebugEnabled())
+                __log.debug("Returned by XSL Sheet: " + output);
             // I'm not really proud of that but hey, it does the job and I don't think there's
             // any other easy way.
             if (output.startsWith("<?xml")) {
                 try {
-                    return DOMUtils.stringToDOM(writerResult.toString());
+                    return DOMUtils.stringToDOM(output).getChildNodes();
                 } catch (SAXException e) {
                     throw new XPathFunctionException(e);
                 } catch (IOException e) {
