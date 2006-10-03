@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.ode.utils.fs.FileUtils;
+
 /**
  * Resolves references inide the deployment unit.
  */
@@ -45,7 +47,7 @@ public class DocumentEntityResolver implements XMLEntityResolver {
         String resourceName = resourceIdentifier.getLiteralSystemId();
         String base;
         try {
-            base = new URI(resourceIdentifier.getBaseSystemId()).toURL().getFile();
+            base = new URI(FileUtils.encodePath(resourceIdentifier.getBaseSystemId())).toURL().getFile();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Base system id incorrect, parser error", e);
         }

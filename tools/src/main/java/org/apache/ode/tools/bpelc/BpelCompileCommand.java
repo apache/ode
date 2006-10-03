@@ -27,6 +27,7 @@ import org.apache.ode.tools.Command;
 import org.apache.ode.tools.CommandContext;
 import org.apache.ode.tools.ExecutionException;
 import org.apache.ode.utils.SystemUtils;
+import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import java.io.File;
@@ -95,7 +96,7 @@ public class BpelCompileCommand implements Command {
 
     if (_wsdlUri != null) {
       try {
-        u = new URI(_wsdlUri);
+        u = new URI(FileUtils.encodePath(_wsdlUri));
       }
       catch (URISyntaxException use) {
         throw new ExecutionException(__msgs.msgInvalidWsdlUrl(_wsdlUri));
