@@ -118,6 +118,12 @@ public class DeploymentWebService {
                         dest.mkdir();
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
+                        // Check that we have a deploy.xml
+                        File deployXml = new File(dest, "deploy.xml");
+                        if (!deployXml.exists())
+                            throw new AxisFault("The deployment doesn't appear to contain a deployment " +
+                                    "descriptor in its root directory named deploy.xml, aborting.");
+
                         _service.deploy(dest);
                         File deployedMarker = new File(_deployPath, namePart.getText() + ".deployed");
                         deployedMarker.createNewFile();
