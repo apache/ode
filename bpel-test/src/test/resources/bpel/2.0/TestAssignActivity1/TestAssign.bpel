@@ -49,6 +49,10 @@
 
         <assign name="assign1">
             <copy>
+                <from>"blah"</from>
+                <to>$strVar</to>
+            </copy>
+            <copy>
                 <from>$ode:pid</from>
                 <to variable="strVar"/>
             </copy>
@@ -61,7 +65,7 @@
                 <to variable="intVar"/>
             </copy>
             <copy>
-                <from>$intVar + number('2')</from>
+                <from>abs($intVar + number('2'))</from>
                 <to variable="intVar"/>
             </copy>
             <copy>
