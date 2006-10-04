@@ -8,11 +8,5 @@
 		<provide partnerLink="request1">
 			<service name="wns:TestStaticPick1Service" port="wns:TestStaticPick1Port"/>
 		</provide>
-		<provide partnerLink="request2">
-			<service name="wns:TestStaticPick2Service" port="wns:TestStaticPick2Port"/>
-		</provide>
-		<provide partnerLink="request3">
-			<service name="wns:TestStaticPick3Service" port="wns:TestStaticPick3Port"/>
-		</provide>
 	</process>
 </deploy>

@@ -22,8 +22,6 @@
 
   <partnerLinks>
   	<partnerLink name="request1" partnerLinkType="wns:TestStaticPick1Request" myRole="TestStaticPick1Service"/>
-  	<partnerLink name="request2" partnerLinkType="wns:TestStaticPick2Request" myRole="TestStaticPick2Service"/>
-  	<partnerLink name="request3" partnerLinkType="wns:TestStaticPick3Request" myRole="TestStaticPick3Service"/>
   	<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
   </partnerLinks>
 
@@ -45,6 +43,9 @@
 	    	portType="wns:TestStaticPick1PT" 
 	             operation="request" variable="request"
 	             createInstance="yes">
+	    	<correlations>
+	    		<correlation set="testCorr1" initiate="yes"/>
+	    	</correlations>
 	    </receive>
 
 	    <assign name="assign1">
@@ -76,8 +77,11 @@
        </invoke>
 
 	    <pick name="testPick">
-			<onMessage partnerLink="request2"
-				portType="wns:TestStaticPick2PT" operation="request" variable="request">
+			<onMessage partnerLink="request1"
+				portType="wns:TestStaticPick1PT" operation="continue1" variable="request">
+				<correlations>
+					<correlation set="testCorr1"/>
+				</correlations>
 				<sequence>
 	  	  				<assign>
 	      				<copy>
@@ -122,14 +126,17 @@
 	      				</copy>
 	  				</assign> 
 	    
-					<reply name="reply" partnerLink="request2" portType="wns:TestStaticPick2PT" 
-	           				operation="request" variable="reply"> 
+					<reply name="reply" partnerLink="request1" portType="wns:TestStaticPick1PT" 
+	           				operation="continue1" variable="reply"> 
 	  				</reply>
 
 				</sequence>
 			</onMessage>
-			<onMessage partnerLink="request3"
-				portType="wns:TestStaticPick3PT" operation="request" variable="request">
+			<onMessage partnerLink="request1"
+				portType="wns:TestStaticPick1PT" operation="continue2" variable="request">
+				<correlations>
+					<correlation set="testCorr1"/>
+				</correlations>
 				<sequence>
 	  	  				<assign>
 	      				<copy>
@@ -173,8 +180,8 @@
 	      				</copy>
 	  				</assign> 
 	    
-					<reply name="reply" partnerLink="request3" portType="wns:TestStaticPick3PT" 
-	           				operation="request" variable="reply"> 
+					<reply name="reply" partnerLink="request1" portType="wns:TestStaticPick1PT" 
+	           				operation="continue2" variable="reply"> 
 	  				</reply>
 
 				</sequence>
