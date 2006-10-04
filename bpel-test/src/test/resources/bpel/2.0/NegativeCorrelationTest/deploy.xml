@@ -18,14 +18,14 @@
 -->
 
 <deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
-	xmlns:pns="http://ode/bpel/unit-test/TestStaticPick" 
-	xmlns:wns="http://ode/bpel/unit-test/TestStaticPick.wsdl">
+	xmlns:pns="http://ode/bpel/unit-test/NegativeCorrelationTest" 
+	xmlns:wns="http://ode/bpel/unit-test/NegativeCorrelationTest.wsdl">
 
 
-	<process name="pns:TestStaticPick">
+	<process name="pns:NegativeCorrelationTest">
 		<active>true</active>
 		<provide partnerLink="request1">
-			<service name="wns:TestStaticPick1Service" port="wns:TestStaticPick1Port"/>
+			<service name="wns:NegativeCorrelationTestService" port="wns:NegativeCorrelationTestPort"/>
 		</provide>
 	</process>
 </deploy>
