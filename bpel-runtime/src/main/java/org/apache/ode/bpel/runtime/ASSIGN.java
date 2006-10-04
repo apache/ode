@@ -482,6 +482,11 @@ class ASSIGN extends ACTIVITY {
 
                 // Append a new text node.
                 lvaluePtr.appendChild(d.createTextNode(rvalue));
+
+                // If lvalue is a text, removing all lvaluePtr children had just removed it
+                // so we need to rebuild it as a child of lvaluePtr
+                if (lvalue instanceof Text)
+                    lvalue = lvaluePtr.getFirstChild();
                 break;
 
             case Node.TEXT_NODE:
