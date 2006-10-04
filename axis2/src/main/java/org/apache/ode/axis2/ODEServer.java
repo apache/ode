@@ -227,6 +227,7 @@ public class ODEServer {
     }
 
     public void destroyService(QName serviceName) {
+        __log.debug("Destroying service " + serviceName);
         try {
             _axisConfig.removeService(serviceName.getLocalPart());
         } catch (AxisFault axisFault) {
