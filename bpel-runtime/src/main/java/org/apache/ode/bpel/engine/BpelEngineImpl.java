@@ -165,6 +165,9 @@ public class BpelEngineImpl implements BpelEngine {
     boolean unregisterProcess(QName process) {
         BpelProcess p = _activeProcesses.remove(process);
         if (p != null) {
+            if (__log.isDebugEnabled())
+                __log.debug("Deactivating process " + p.getPID());
+
             p.deactivate();
             while (_serviceMap.values().remove(p))
                 ;
