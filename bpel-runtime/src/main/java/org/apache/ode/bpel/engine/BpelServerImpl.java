@@ -278,6 +278,9 @@ public class BpelServerImpl implements BpelServer {
             if (_engine != null)
                 _engine.unregisterProcess(process);
 
+            if (__log.isDebugEnabled())
+                __log.debug("Unregistering process " + process);
+
             // Delete it from the database.
             boolean found = _db.exec(new BpelDatabase.Callable<Boolean>() {
                 public Boolean run(BpelDAOConnection conn) throws Exception {
