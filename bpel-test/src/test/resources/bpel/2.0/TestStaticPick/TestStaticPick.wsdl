@@ -25,24 +25,23 @@
       <wsdl:operation name="request">
          <wsdl:input message="requestMessage"/>
       </wsdl:operation>
-   </wsdl:portType>
-
-   <wsdl:portType name="TestStaticPick2PT">
-      <wsdl:operation name="request">
+      <wsdl:operation name="continue1">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+      <wsdl:operation name="continue2">
          <wsdl:input message="requestMessage"/>
          <wsdl:output message="replyMessage"/>
       </wsdl:operation>
    </wsdl:portType>
 
-   <wsdl:portType name="TestStaticPick3PT">
-      <wsdl:operation name="request">
-         <wsdl:input message="requestMessage"/>
-         <wsdl:output message="replyMessage"/>
-      </wsdl:operation>
-   </wsdl:portType>
    
    <wsdl:binding name="TestStaticPick1Binding" type="tns:TestStaticPick1PT">
       <wsdl:operation name="request">
+      </wsdl:operation>
+      <wsdl:operation name="continue1">
+      </wsdl:operation>
+      <wsdl:operation name="continue2">
       </wsdl:operation>
    </wsdl:binding>
    <wsdl:service name="TestStaticPick1Service">
@@ -50,34 +49,8 @@
       </wsdl:port>
    </wsdl:service>
    
-   <wsdl:binding name="TestStaticPick2Binding" type="tns:TestStaticPick2PT">
-      <wsdl:operation name="request">
-      </wsdl:operation>
-   </wsdl:binding>
-   <wsdl:service name="TestStaticPick2Service">
-      <wsdl:port name="TestStaticPick2Port" binding="tns:TestStaticPick2Binding">
-      </wsdl:port>
-   </wsdl:service>
-   
-   <wsdl:binding name="TestStaticPick3Binding" type="tns:TestStaticPick3PT">
-      <wsdl:operation name="request">
-      </wsdl:operation>
-   </wsdl:binding>
-   <wsdl:service name="TestStaticPick3Service">
-      <wsdl:port name="TestStaticPick3Port" binding="tns:TestStaticPick3Binding">
-      </wsdl:port>
-   </wsdl:service>
-
    <plnk:partnerLinkType name="TestStaticPick1Request">
       <plnk:role name="TestStaticPick1Service" portType="TestStaticPick1PT"/>
-   </plnk:partnerLinkType>
-
-   <plnk:partnerLinkType name="TestStaticPick2Request">
-      <plnk:role name="TestStaticPick2Service" portType="TestStaticPick2PT"/>
-   </plnk:partnerLinkType>
-
-   <plnk:partnerLinkType name="TestStaticPick3Request">
-      <plnk:role name="TestStaticPick3Service" portType="TestStaticPick3PT"/>
    </plnk:partnerLinkType>
 
    <plnk:partnerLinkType name="probeRequest">
