@@ -21,6 +21,7 @@ package org.apache.ode.test;
 import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
@@ -95,7 +96,6 @@ public class BPELTest extends TestCase {
 			String operation = testProps.getProperty("operation");
 	
 			MyRoleMessageExchange mex = server.getEngine().createMessageExchange("",serviceId,operation);
-	
 	
 			/**
 			 * Each property file must contain at least one 
@@ -214,6 +214,32 @@ public class BPELTest extends TestCase {
     public void testStaticPick() throws Exception {
     	go("target/test-classes/bpel/2.0/TestStaticPick");
     }
+    public void testStaticOnMessage() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestStaticOnMessage");
+    }
+	
+	  public void testNegativeCorrelation() throws Exception {
+		/**
+		 * This test contains invalid BPEL. There is an instantiating
+		 * <receive> and a subsequent <pick> that does not define a correlation
+		 * key. The BPEL compiler should throw an exception indicating
+		 * the BPEL code error ( verify with spec.
+		 * 
+		 */
+	    go("target/test-classes/bpel/2.0/NegativeCorrelationTest");
+      }
+	  public void testNegativeInitialization() throws Exception {
+			/**
+			 * This test contains invalid BPEL. There is an instantiating
+			 * <receive> within a <scope> that contains eventhandlers
+			 * that use the correlation set found on the receive. The BPEL
+			 * compiler should through an exception indicating
+			 * the BPEL code error ( verify with spec ) or at runtime
+			 * a clear initialization exception should be thrown.
+			 * 
+			 */
+		    go("target/test-classes/bpel/2.0/NegativeInitializationTest");
+	   }
 
     /** These tests compile however they fail at runtime */
   
