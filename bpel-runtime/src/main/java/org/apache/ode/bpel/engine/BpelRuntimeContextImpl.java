@@ -950,7 +950,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                             dao.setProperty(property.name.toString(), val);
                         }
                     } catch (FaultException e) {
-                         __log.error("Error attempting to extract property '" + property.toString() + "'", e);
+                        // This will fail as we're basically trying to extract properties on all
+                        // received messages for optimization purposes.
+                         __log.debug("Couldn't extract property '" + property.toString()
+                                 + "' in property pre-extraction.", e);
                     }
                 }
             }
