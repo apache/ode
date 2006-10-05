@@ -26,18 +26,18 @@ import java.io.Serializable;
  */
 public class FailureHandling implements Serializable {
   
-  public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";
-  public static final QName FAILURE_FAULT_NAME  = new QName(EXTENSION_NS_URI, "failure");
-  public static final QName FAILURE_EXT_ELEMENT = new QName(EXTENSION_NS_URI, "failureHandling");
+    public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";
+    public static final QName FAILURE_FAULT_NAME  = new QName(EXTENSION_NS_URI, "activityFailure");
+    public static final QName FAILURE_EXT_ELEMENT = new QName(EXTENSION_NS_URI, "failureHandling");
 
-  // Number of times to retry the activity if failure occurs.
-  // Defaults to zero.
-  public Integer retryFor;
+    // Number of times to retry the activity if failure occurs.
+    // Defaults to zero.
+    public int retryFor;
 
-  // Time delay between retries of the activity, in seconds.
-  public Integer retryDelay;
+    // Time delay between retries of the activity, in seconds.
+    public int retryDelay;
 
-  // If true, fault when failure occurs, otherwise, enter activity recovery state.
-  public Boolean faultOnFailure;
+    // If true, fault when failure occurs, otherwise, enter activity recovery state.
+    public boolean faultOnFailure;
 
 }
