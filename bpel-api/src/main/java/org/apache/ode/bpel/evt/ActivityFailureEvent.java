@@ -23,22 +23,22 @@ package org.apache.ode.bpel.evt;
  */
 public class ActivityFailureEvent extends ActivityEvent {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  private String _reason;
+    private String _reason;
 
-  public ActivityFailureEvent() { 
-  }
-  
-  public ActivityFailureEvent(String reason) { 
-    _reason = reason;
-  }
+    public ActivityFailureEvent() { 
+    }
+    
+    public ActivityFailureEvent(String reason) { 
+      _reason = reason;
+    }
 
-  public String getFailureReason() {
-    return _reason;
-  }
+    public String getFailureReason() {
+      return _reason;
+    }
 
-  public void setFailureReason(String reason) {
-    _reason = reason;
-  }
+    public void setFailureReason(String reason) {
+      _reason = reason;
+    }
 }

@@ -314,29 +314,29 @@ class ProcessAndInstanceManagementImpl
     }
 
     public InstanceInfoDocument recoverActivity(final Long iid, final Long aid, final String action) {
-      try {
-        QName processId = _db.exec(new BpelDatabase.Callable<QName>() {
-          public QName run(BpelDAOConnection conn) throws Exception {
-            ProcessInstanceDAO instance = conn.getInstance(iid);
-            if (instance == null)
-              return null;
-            for (ActivityRecoveryDAO recovery: instance.getActivityRecoveries()) {
-              if (recovery.getActivityId() == aid) {
-                BpelProcess process = _engine._activeProcesses.get(instance.getProcess().getProcessId());
-                if (process != null) {
-                  process.recoverActivity(instance, recovery.getChannel(), action, null);
-                  break;
+        try {
+            QName processId = _db.exec(new BpelDatabase.Callable<QName>() {
+                public QName run(BpelDAOConnection conn) throws Exception {
+                    ProcessInstanceDAO instance = conn.getInstance(iid);
+                    if (instance == null)
+                        return null;
+                    for (ActivityRecoveryDAO recovery: instance.getActivityRecoveries()) {
+                        if (recovery.getActivityId() == aid) {
+                            BpelProcess process = _engine._activeProcesses.get(instance.getProcess().getProcessId());
+                            if (process != null) {
+                                process.recoverActivity(instance, recovery.getChannel(), aid, action, null);
+                                break;
+                            }
+                        }
+                    }
+                    return instance.getProcess().getProcessId();
                 }
-              }
-            }
-            return instance.getProcess().getProcessId();
-          }
-        });
-      } catch (Exception e) {
-        __log.error("DbError",e);
-        throw new ProcessingException("DbError", e);
-      }
-      return genInstanceInfoDocument(iid);
+            });
+        } catch (Exception e) {
+            __log.error("DbError",e);
+            throw new ProcessingException("DbError", e);
+        }
+        return genInstanceInfoDocument(iid);
     }
 
     public Collection<Long> delete(String filter) {
