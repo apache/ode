@@ -190,7 +190,10 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "getProcessPackageResponse", response);
                 } else unknown = true;
             } catch (Throwable t) {
-                throw new AxisFault("Invocation of operation " + operation + " failed!", t);
+                // Trying to extract a meaningful message
+                Throwable source = t;
+                while (source.getCause() != null && source.getCause() != source) source = source.getCause();
+                throw new AxisFault("Invocation of operation " + operation + " failed: " + source.toString(), t);
             }
             if (unknown) throw new AxisFault("Unknown operation: '"
                     + messageContext.getAxisOperation().getName() + "'");
