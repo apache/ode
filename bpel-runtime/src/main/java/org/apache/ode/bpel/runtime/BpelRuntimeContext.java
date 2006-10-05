@@ -250,7 +250,7 @@ public interface BpelRuntimeContext {
 
   void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
 
-  void recoverActivity(final String channel, final String action, final FaultData fault);
+  void recoverActivity(String channel, long activityId, String action, FaultData fault);
 
   String getSourceSessionId(String mexId);
 }
