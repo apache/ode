@@ -53,187 +53,187 @@ import org.w3c.dom.Element;
  */
 public class ActivityRecoveryTest extends TestCase {
 
-  static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
-  static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
-  int                   _invoked;
-  int                   _failFor;
-  MockBpelServer        _server;
-  BpelManagementFacade  _management;
+    static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
+    static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
+    int                   _invoked;
+    int                   _failFor;
+    MockBpelServer        _server;
+    BpelManagementFacade  _management;
 
-  public void testSuccessfulInvoke() throws Exception { 
-    execute("FailureToRecovery", 0);
-    assertCompleted(true, 1, null);
-  }
+    public void testSuccessfulInvoke() throws Exception { 
+        execute("FailureToRecovery", 0);
+        assertCompleted(true, 1, null);
+    }
 
-  public void testInvokeAndRetry() throws Exception {
-    execute("FailureToRecovery", 2);
-    assertCompleted(true, 3, null);
-  }
+    public void testInvokeAndRetry() throws Exception {
+        execute("FailureToRecovery", 2);
+        assertCompleted(true, 3, null);
+    }
 
-  public void testRetryRecoveryAction() throws Exception {
-    execute("FailureToRecovery", 4);
-    assertRecovery(3, ACTIONS);
-    recover("retry");
-    assertRecovery(4, ACTIONS);
-    recover("retry");
-    assertCompleted(true, 5, null);
-  }
+    public void testRetryRecoveryAction() throws Exception {
+        execute("FailureToRecovery", 4);
+        assertRecovery(3, ACTIONS);
+        recover("retry");
+        assertRecovery(4, ACTIONS);
+        recover("retry");
+        assertCompleted(true, 5, null);
+    }
 
-  public void testCancelRecoveryAction() throws Exception {
-    execute("FailureToRecovery", 4);
-    assertRecovery(3, ACTIONS);
-    recover("retry");
-    assertRecovery(4, ACTIONS);
-    recover("cancel");
-    assertCompleted(true, 4, null);
-  }
+    public void testCancelRecoveryAction() throws Exception {
+        execute("FailureToRecovery", 4);
+        assertRecovery(3, ACTIONS);
+        recover("retry");
+        assertRecovery(4, ACTIONS);
+        recover("cancel");
+        assertCompleted(true, 4, null);
+    }
 
-  public void testFaultRecoveryAction() throws Exception {
-    execute("FailureToRecovery", 4);
-    assertRecovery(3, ACTIONS);
-    recover("retry");
-    assertRecovery(4, ACTIONS);
-    recover("fault");
-    assertCompleted(false, 4, FailureHandling.FAILURE_FAULT_NAME);
-  }
+    public void testFaultRecoveryAction() throws Exception {
+        execute("FailureToRecovery", 4);
+        assertRecovery(3, ACTIONS);
+        recover("retry");
+        assertRecovery(4, ACTIONS);
+        recover("fault");
+        assertCompleted(false, 4, FailureHandling.FAILURE_FAULT_NAME);
+    }
 
-  public void testImmediateFailure() throws Exception {
-    execute("FailureNoRetry", 1);
-    assertRecovery(1, ACTIONS);
-  }
+    public void testImmediateFailure() throws Exception {
+        execute("FailureNoRetry", 1);
+        assertRecovery(1, ACTIONS);
+    }
 
-  public void testImmediateFault() throws Exception {
-    execute("FailureToFault", 2);
-    assertCompleted(false, 1, FailureHandling.FAILURE_FAULT_NAME);
-  }
+    public void testImmediateFault() throws Exception {
+        execute("FailureToFault", 2);
+        assertCompleted(false, 1, FailureHandling.FAILURE_FAULT_NAME);
+    }
 
-  public void testInheritence() throws Exception {
-    execute("FailureInheritence", 2);
-    assertCompleted(true, 3, null);
-  }
+    public void testInheritence() throws Exception {
+        execute("FailureInheritence", 2);
+        assertCompleted(true, 3, null);
+    }
 
-  protected void setUp() throws Exception {
-    _server = new MockBpelServer() {
-      protected MessageExchangeContext createMessageExchangeContext() {
-        return new MessageExchangeContext() {
+    protected void setUp() throws Exception {
+        _server = new MockBpelServer() {
+            protected MessageExchangeContext createMessageExchangeContext() {
+                return new MessageExchangeContext() {
 
-          public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
-            ++_invoked;
-            if (_invoked > _failFor) {
-              Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
-              response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
-              mex.reply(response);
-            } else
-              mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "Bang", null);
-              //mex.replyWithFailure(FailureType, String, Element);
-          }
+                    public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
+                        ++_invoked;
+                        if (_invoked > _failFor) {
+                            Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
+                            response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
+                            mex.reply(response);
+                        } else
+                            mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
+                            //mex.replyWithFailure(FailureType, String, Element);
+                    }
 
-          public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
+                    public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
+                };
+            }
         };
-      }
-    };
-    _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
-    _management = _server.getBpelManagementFacade();
-  }
-
-  protected void tearDown() throws Exception {
-    _server.getBpelManagementFacade().delete(null);
-    _server.shutdown();
-  }
-
-  /**
-   * Call this to execute the process so it fails the specified number of times.
-   * Returns when the process has either completed, or waiting for recovery to happen.
-   */
-  protected void execute(String process, int failFor) throws Exception {
-    _failFor = failFor;
-    _server.getBpelManagementFacade().delete(null);
-    _server.invoke(new QName(NAMESPACE, process), "instantiate",
-                   DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
-    _server.waitForBlocking();
-  }
-
-  /**
-   * Asserts that the process has completed, successfully or not. If not,
-   * it is either terminated, or faulted with the specified fault name.
-   * This method also checks how many time the process invoked the service.
-   */
-  protected void assertCompleted(boolean successful, int invoked, QName faultName) {
-    assertTrue(_invoked == invoked);
-    TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-    TInstanceInfo.Failures failures = instance.getFailures();
-    assertTrue(failures == null || failures.getCount() == 0);
-    if (successful) {
-      assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
-    } else if (faultName == null) {
-      assertTrue(instance.getStatus() == TInstanceStatus.TERMINATED);
-    } else {
-      assertTrue(instance.getStatus() == TInstanceStatus.FAILED);
-      TFaultInfo faultInfo = instance.getFaultInfo();
-      assertTrue(faultInfo != null && faultInfo.getName().equals(faultName));
+        _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
+        _management = _server.getBpelManagementFacade();
     }
-  }
 
-  /**
-   * Asserts that the process has one activity in the recovery state.
-   */
-  protected void assertRecovery(int invoked, String[] actions) {
-    // Test in aggregate to see how many activities we have in this state.
-    TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-    TInstanceInfo.Failures failures = instance.getFailures();
-    assertTrue(failures != null && failures.getCount() == 1);
-    // Look for individual activities inside the process instance.
-    TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
-    ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
-    assertTrue(recoveries.size() == 1);
-    TActivityInfo.Failure failure = recoveries.get(0).getFailure();
-    assertTrue(failure.getRetries() == invoked - 1);
-    assertTrue(failure.getReason().equals("Bang"));
-    assertTrue(failure.getDtFailure().getTime().getTime() / 100000 == System.currentTimeMillis() / 100000);
-    java.util.HashSet<String> actionSet = new java.util.HashSet<String>();
-    for (String action : failure.getActions().split(" "))
-      actionSet.add(action);
-    for (String action : actions)
-      assertTrue(actionSet.remove(action));
-  }
-
-  /**
-   * Performs the specified recovery action. Also asserts that there is one
-   * recovery channel for the activity in question.
-   */
-  protected void recover(String action) {
-    TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-    ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
-    assertTrue(recoveries.size() == 1);
-    TActivityInfo activity = recoveries.get(0);
-    assertNotNull(activity);
-    _management.recoverActivity(Long.valueOf(instance.getIid()), Long.valueOf(activity.getAiid()), action);
-    _server.waitForBlocking();
-  }
-
-  protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,
-                                                          ArrayList<TActivityInfo> recoveries) {
-    if (instance == null)
-      instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-    if (scope == null)
-      scope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
-    if (recoveries == null)
-      recoveries = new ArrayList<TActivityInfo>();
-    TScopeInfo.Activities activities = scope.getActivities();
-    for (int i = 0; i < activities.sizeOfActivityInfoArray(); ++i) {
-      TActivityInfo activity = activities.getActivityInfoArray(i);
-      if (activity.getStatus() == TActivityStatus.FAILURE) {
-        assertNotNull(activity.getFailure());
-        recoveries.add(activity);
-      } else
-        assertNull(activity.getFailure());
+    protected void tearDown() throws Exception {
+        _server.getBpelManagementFacade().delete(null);
+        _server.shutdown();
     }
-    for (TScopeRef ref : scope.getChildren().getChildRefList()) {
-      TScopeInfo child = _server.getBpelManagementFacade().getScopeInfoWithActivity(ref.getSiid(), true).getScopeInfo();
-      if (child != null)
-        getRecoveriesInScope(instance, child, recoveries);
+
+    /**
+     * Call this to execute the process so it fails the specified number of times.
+     * Returns when the process has either completed, or waiting for recovery to happen.
+     */
+    protected void execute(String process, int failFor) throws Exception {
+        _failFor = failFor;
+        _server.getBpelManagementFacade().delete(null);
+        _server.invoke(new QName(NAMESPACE, process), "instantiate",
+                       DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
+        _server.waitForBlocking();
     }
-    return recoveries;
-  }
+
+    /**
+     * Asserts that the process has completed, successfully or not. If not,
+     * it is either terminated, or faulted with the specified fault name.
+     * This method also checks how many time the process invoked the service.
+     */
+    protected void assertCompleted(boolean successful, int invoked, QName faultName) {
+        assertTrue(_invoked == invoked);
+        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        TInstanceInfo.Failures failures = instance.getFailures();
+        assertTrue(failures == null || failures.getCount() == 0);
+        if (successful) {
+            assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
+        } else if (faultName == null) {
+            assertTrue(instance.getStatus() == TInstanceStatus.TERMINATED);
+        } else {
+            assertTrue(instance.getStatus() == TInstanceStatus.FAILED);
+            TFaultInfo faultInfo = instance.getFaultInfo();
+            assertTrue(faultInfo != null && faultInfo.getName().equals(faultName));
+        }
+    }
+
+    /**
+     * Asserts that the process has one activity in the recovery state.
+     */
+    protected void assertRecovery(int invoked, String[] actions) {
+        // Test in aggregate to see how many activities we have in this state.
+        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        TInstanceInfo.Failures failures = instance.getFailures();
+        assertTrue(failures != null && failures.getCount() == 1);
+        // Look for individual activities inside the process instance.
+        TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
+        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+        assertTrue(recoveries.size() == 1);
+        TActivityInfo.Failure failure = recoveries.get(0).getFailure();
+        assertTrue(failure.getRetries() == invoked - 1);
+        assertTrue(failure.getReason().equals("BangGoesInvoke"));
+        assertTrue(failure.getDtFailure().getTime().getTime() / 100000 == System.currentTimeMillis() / 100000);
+        java.util.HashSet<String> actionSet = new java.util.HashSet<String>();
+        for (String action : failure.getActions().split(" "))
+            actionSet.add(action);
+        for (String action : actions)
+            assertTrue(actionSet.remove(action));
+    }
+
+    /**
+     * Performs the specified recovery action. Also asserts that there is one
+     * recovery channel for the activity in question.
+     */
+    protected void recover(String action) {
+        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+        assertTrue(recoveries.size() == 1);
+        TActivityInfo activity = recoveries.get(0);
+        assertNotNull(activity);
+        _management.recoverActivity(Long.valueOf(instance.getIid()), Long.valueOf(activity.getAiid()), action);
+        _server.waitForBlocking();
+    }
+
+    protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,
+                                                            ArrayList<TActivityInfo> recoveries) {
+        if (instance == null)
+            instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        if (scope == null)
+            scope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
+        if (recoveries == null)
+            recoveries = new ArrayList<TActivityInfo>();
+        TScopeInfo.Activities activities = scope.getActivities();
+        for (int i = 0; i < activities.sizeOfActivityInfoArray(); ++i) {
+            TActivityInfo activity = activities.getActivityInfoArray(i);
+            if (activity.getStatus() == TActivityStatus.FAILURE) {
+                assertNotNull(activity.getFailure());
+                recoveries.add(activity);
+            } else
+                assertNull(activity.getFailure());
+        }
+        for (TScopeRef ref : scope.getChildren().getChildRefList()) {
+            TScopeInfo child = _server.getBpelManagementFacade().getScopeInfoWithActivity(ref.getSiid(), true).getScopeInfo();
+            if (child != null)
+                getRecoveriesInScope(instance, child, recoveries);
+        }
+        return recoveries;
+    }
 
 }

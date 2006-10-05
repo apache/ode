@@ -905,6 +905,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             responseChannel.onResponse();
             break;
         case FAILURE:
+            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAILURE);
             responseChannel.onFailure();
             break;
         }
@@ -1149,6 +1150,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             reason = "Unspecified";
         if (dateTime == null)
             dateTime = new Date();
+        __log.info("ActivityRecovery: Registering activity " + activityId + ", failure reason: " + reason);
         _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, details, actions, retries);
     }
 
@@ -1156,18 +1158,21 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.deleteActivityRecovery(channel.export());
     }
 
-    public void recoverActivity(final String channel, final String action, final FaultData fault) {
+    public void recoverActivity(final String channel, final long activityId, final String action, final FaultData fault) {
         vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
                 ActivityRecoveryChannel recovery = importChannel(channel, ActivityRecoveryChannel.class);
-                if ("cancel".equals(action))
-                    recovery.cancel();
-                else if ("retry".equals(action))
-                    recovery.retry();
-                else if ("fault".equals(action))
-                    recovery.fault(fault);
+                __log.info("ActivityRecovery: Recovering activity " + activityId + " with action " + action);
+                if (recovery != null) {
+                    if ("cancel".equals(action))
+                        recovery.cancel();
+                    else if ("retry".equals(action))
+                        recovery.retry();
+                    else if ("fault".equals(action))
+                        recovery.fault(fault);
+                }
             }
         });
         //_dao.deleteActivityRecovery(channel);

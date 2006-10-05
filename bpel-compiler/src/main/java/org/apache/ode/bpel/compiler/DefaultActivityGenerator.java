@@ -55,7 +55,7 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
         textValue = DOMUtils.getTextContent(element);
         if (textValue != null) {
           try {
-            output.failureHandling.retryFor = Integer.valueOf(textValue);
+            output.failureHandling.retryFor = Integer.parseInt(textValue);
             if (output.failureHandling.retryFor < 0)
               throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
           } catch (NumberFormatException except) {
@@ -68,7 +68,7 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
         textValue = DOMUtils.getTextContent(element);
         if (textValue != null) {
           try {
-            output.failureHandling.retryDelay = Integer.valueOf(textValue);
+            output.failureHandling.retryDelay = Integer.parseInt(textValue);
             if (output.failureHandling.retryDelay < 0)
               throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
           } catch (NumberFormatException except) {
@@ -80,7 +80,7 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
       if (element != null) {
         textValue = DOMUtils.getTextContent(element);
         if (textValue != null)
-          output.failureHandling.faultOnFailure = Boolean.valueOf(textValue);
+          output.failureHandling.faultOnFailure = Boolean.valueOf(textValue).booleanValue();
       }
     } else {
       for (OActivity parent : _context.getActivityStack()) {

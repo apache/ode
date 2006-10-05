@@ -149,12 +149,12 @@ public class BpelProcess {
         return "BpelProcess[" + _pid + " in " + _du + "]";
     }
 
-    public void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, String action, FaultData fault) {
-      if (__log.isDebugEnabled())
-        __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action );
+    public void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, long activityId, String action, FaultData fault) {
+        if (__log.isDebugEnabled())
+          __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action );
 
-      BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
-      processInstance.recoverActivity(channel, action, fault);
+        BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
+        processInstance.recoverActivity(channel, activityId, action, fault);
     }
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {

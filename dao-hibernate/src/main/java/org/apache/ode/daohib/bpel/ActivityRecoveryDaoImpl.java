@@ -34,50 +34,50 @@ import java.util.Date;
  */
 public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRecoveryDAO {
 
-  HActivityRecovery _self;
+    HActivityRecovery _self;
 
-  public ActivityRecoveryDaoImpl(SessionManager sm, HActivityRecovery recovery) {
-    super(sm, recovery);
-    _self = recovery;
-  }
-
-  public long getActivityId() {
-    return _self.getActivityId();
-  }
-
-  public String getChannel() {
-    return _self.getChannel();
-  }
-
-  public String getReason() {
-    return _self.getReason();
-  }
-
-  public Date getDateTime() {
-    return _self.getDateTime();
-  }
-
-  public Element getDetails() {
-    if (_self.getDetails() == null) return null;
-    try {
-      return DOMUtils.stringToDOM(_self.getDetails().getText());
-    } catch (SAXException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    public ActivityRecoveryDaoImpl(SessionManager sm, HActivityRecovery recovery) {
+        super(sm, recovery);
+        _self = recovery;
     }
-  }
 
-  public String getActions() {
-    return _self.getActions();
-  }
+    public long getActivityId() {
+        return _self.getActivityId();
+    }
 
-  public String[] getActionsList() {
-    return _self.getActions().split(" ");
-  }
+    public String getChannel() {
+        return _self.getChannel();
+    }
 
-  public int getRetries() {
-    return _self.getRetries();
-  }
+    public String getReason() {
+        return _self.getReason();
+    }
+
+    public Date getDateTime() {
+        return _self.getDateTime();
+    }
+
+    public Element getDetails() {
+        if (_self.getDetails() == null) return null;
+        try {
+            return DOMUtils.stringToDOM(_self.getDetails().getText());
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getActions() {
+        return _self.getActions();
+    }
+
+    public String[] getActionsList() {
+        return _self.getActions().split(" ");
+    }
+
+    public int getRetries() {
+        return _self.getRetries();
+    }
 
 }

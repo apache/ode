@@ -24,19 +24,19 @@ package org.apache.ode.bpel.runtime.channels;
  */
 public interface ActivityRecovery  {
 
-  /**
-   * Retry the activity.
-   */
-  void retry();
+    /**
+     * Retry the activity.
+     */
+    void retry();
 
-  /**
-   * Cancel (skip) the activity.
-   */
-  void cancel();
+    /**
+     * Cancel the activity (unsuccessful completion).
+     */
+    void cancel();
 
-  /**
-   * Fault the activity.
-   */
-  void fault(FaultData faultData);
+    /**
+     * Fault the activity. Fault data is optional.
+     */
+    void fault(FaultData faultData);
 
 }
