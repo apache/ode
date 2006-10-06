@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.capi;
 
 import org.apache.ode.bom.api.Activity;
+import org.apache.ode.bom.api.BpelObject;
 import org.apache.ode.bom.api.Expression;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
@@ -111,7 +112,7 @@ public interface CompilerContext {
 
     String getSourceLocation();
 
-    void compile(OActivity context, Runnable run);
+    void compile(OActivity context, BpelObject activity, Runnable run);
 
     public boolean isPartnerLinkAssigned(String plink);
 

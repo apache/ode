@@ -34,27 +34,26 @@ import java.util.Iterator;
 
 class SequenceGenerator extends DefaultActivityGenerator {
 
-  public OActivity newInstance(Activity src) {
-    return new OSequence(_context.getOProcess());
-  }
-
-  public void compile(OActivity output, Activity src)  {
-    handleDefaultExtensibility(output, src);
-    OSequence oseq = (OSequence) output;
-    compileChildren(oseq, (SequenceActivity) src);
-  }
-
-  protected void compileChildren(OSequence dest, CompositeActivity src) {
-    for (Iterator<Activity> i = src.getChildren().iterator(); i.hasNext();) {
-      Activity child = i.next();
-      try {
-        OActivity compiledChild = _context.compile(child);
-        dest.sequence.add(compiledChild);
-      }
-      catch (CompilationException ce) {
-        _context.recoveredFromError(child, ce);
-      }
+    public OActivity newInstance(Activity src) {
+        return new OSequence(_context.getOProcess());
     }
-  }
+
+    public void compile(OActivity output, Activity src)  {
+        OSequence oseq = (OSequence) output;
+        compileChildren(oseq, (SequenceActivity) src);
+    }
+
+    protected void compileChildren(OSequence dest, CompositeActivity src) {
+        for (Iterator<Activity> i = src.getChildren().iterator(); i.hasNext();) {
+            Activity child = i.next();
+            try {
+                OActivity compiledChild = _context.compile(child);
+                dest.sequence.add(compiledChild);
+            }
+            catch (CompilationException ce) {
+                _context.recoveredFromError(child, ce);
+            }
+        }
+    }
 
 }
