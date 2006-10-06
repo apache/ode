@@ -119,7 +119,7 @@ class StaticCheckTCase extends TestCase implements CompileListener, WsdlFinder {
   public void setBaseURI(URI u) {
   }
   
-  public Definition4BPEL loadDefinition(WSDLReader f, URI uri) throws WSDLException {
+  public Definition4BPEL loadDefinition(WSDLReader f, File importLoc, URI uri) throws WSDLException {
     InputStream is;
     try {
       is = getClass().getResource(uri.toASCIIString()).openStream();
