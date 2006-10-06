@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.fs.FileUtils;
 
 /**
  * A simple implementation of the
@@ -84,7 +85,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
                 return;
             _deploymentsList.remove(du.getDeployDir().getName());
             write();
-            rm(du.getDeployDir());
+            FileUtils.deepDelete(du.getDeployDir());
         } finally {
             _rwLock.writeLock().unlock();
         }
@@ -97,21 +98,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
             return new ArrayList<DeploymentUnitImpl>(_knownDeployments);
         } finally {
             _rwLock.writeLock().unlock();
-        }
-    }
-
-    /**
-     * Remove a file or directory, possibly recursively.
-     * 
-     * @param f
-     */
-    private void rm(File f) {
-        if (f.isDirectory()) {
-            for (File child : f.listFiles())
-                rm(child);
-            f.delete();
-        } else {
-            f.delete();
         }
     }
 
