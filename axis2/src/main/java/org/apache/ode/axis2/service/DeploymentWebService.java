@@ -38,6 +38,7 @@ import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.DeploymentService;
+import org.apache.ode.utils.fs.FileUtils;
 
 import javax.activation.DataHandler;
 import javax.wsdl.Definition;
@@ -112,8 +113,13 @@ public class DeploymentWebService {
                         // files in there. The poller shouldn't pick them up so we're asking
                         // it to hold on for a while.
                         _poller.hold();
+
+                        // Cleaning up if something existed previsouly
                         File dest = new File(_deployPath, namePart.getText());
                         _service.undeploy(dest);
+                        // If the previous deployment failed, there will still be something but
+                        // undeploy won't do anything
+                        FileUtils.deepDelete(dest);
 
                         dest.mkdir();
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
