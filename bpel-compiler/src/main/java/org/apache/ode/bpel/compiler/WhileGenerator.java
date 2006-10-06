@@ -28,15 +28,14 @@ import org.apache.ode.bpel.o.OWhile;
  * Generates code for <code>&lt;while&gt;</code> activities.
  */
 class WhileGenerator extends DefaultActivityGenerator {
-  public OActivity newInstance(Activity src) {
-    return new OWhile(_context.getOProcess());
-  }
+    public OActivity newInstance(Activity src) {
+        return new OWhile(_context.getOProcess());
+    }
 
-  public void compile(OActivity output, Activity srcx)  {
-    handleDefaultExtensibility(output, srcx);
-    OWhile owhile = (OWhile) output;
-    WhileActivity src = (WhileActivity)srcx;
-    owhile.whileCondition = _context.compileExpr(src.getCondition());
-    owhile.activity = _context.compile(src.getActivity());
-  }
+    public void compile(OActivity output, Activity srcx)  {
+        OWhile owhile = (OWhile) output;
+        WhileActivity src = (WhileActivity)srcx;
+        owhile.whileCondition = _context.compileExpr(src.getCondition());
+        owhile.activity = _context.compile(src.getActivity());
+    }
 }
