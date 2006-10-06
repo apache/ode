@@ -30,14 +30,14 @@ import org.apache.ode.bpel.o.OActivity;
  * into a <em>compiled</em> BPEL representation.
  */
 public interface ActivityGenerator {
-  public void setContext(CompilerContext context);
+    public void setContext(CompilerContext context);
 
-  /**
-   * Generate compiled representation for the given activity definition.
-   *
-   * @param src activity definition
-   */
-  public void compile(OActivity output, Activity src);
+    /**
+     * Generate compiled representation for the given activity definition.
+     *
+     * @param src activity definition
+     */
+    public void compile(OActivity output, Activity src);
 
-  public OActivity newInstance(Activity src);
+    public OActivity newInstance(Activity src);
 }
