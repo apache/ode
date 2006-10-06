@@ -67,5 +67,10 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-utils</artifactId>
         </dependency>
+        <dependency>
+            <scope>test</scope>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-scripts</artifactId>
+        </dependency>
     </dependencies>
 </project>
