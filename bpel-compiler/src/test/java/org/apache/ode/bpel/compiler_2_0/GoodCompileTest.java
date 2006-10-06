@@ -37,7 +37,7 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign7-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign8-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign9-2.0.bpel"));
-  //    suite.addTest(new GoodCompileTCase("/2.0/good/AsyncProcess/AsyncProcess2.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/AsyncProcess/AsyncProcess2.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/compensation/comp1-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/compensation/comp2-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/flow/flow2-2.0.bpel"));
