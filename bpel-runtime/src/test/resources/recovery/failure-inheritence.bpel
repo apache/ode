@@ -6,6 +6,10 @@
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:ext="http://ode.apache.org/activityRecovery">
 
+    <ext:failureHandling>
+      <ext:retryFor>2</ext:retryFor>
+      <ext:retryDelay>0</ext:retryDelay>
+    </ext:failureHandling>
   <import location="services.wsdl"
           namespace="http://ode.apache.org/bpel/unit-test"
           importType="http://schemas.xmlsoap.org/wsdl/"/>
@@ -25,10 +29,6 @@
   </variables>
 
   <sequence>   
-    <ext:failureHandling>
-      <ext:retryFor>2</ext:retryFor>
-      <ext:retryDelay>0</ext:retryDelay>
-    </ext:failureHandling>
     <receive name="start"
              partnerLink="instantiatingPartnerLink"
              portType="tns:InstantiatingPortType"

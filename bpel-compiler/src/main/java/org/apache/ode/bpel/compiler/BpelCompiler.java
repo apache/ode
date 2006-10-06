@@ -553,7 +553,7 @@ abstract class BpelCompiler implements CompilerContext {
         OScope procesScope = new OScope(_oprocess);
         procesScope.name = "__PROCESS_SCOPE:" + process.getName();
         procesScope.debugInfo = createDebugInfo(process, null);
-        _oprocess.procesScope = compile(procesScope, process, new Runnable() {
+        _oprocess.procesScope = compileScope(procesScope, process, new Runnable() {
             public void run() {
                 _structureStack.topScope().activity = compile(process.getRootActivity());
             }
@@ -694,14 +694,15 @@ abstract class BpelCompiler implements CompilerContext {
         final OScope oscope = new OScope(_oprocess);
         oscope.name = createName(source);
         oscope.debugInfo = createDebugInfo(source, "suppress join failure scope for " + source);
+        DefaultActivityGenerator.defaultExtensibilityElements(oscope, source, _structureStack.topActivity());
 
-        compile(oscope, new Runnable() {
+        compileScope(oscope, null, new Runnable() {
             public void run() {
                 oscope.activity = compileSLC(source);
                 final OCatch joinFailureCatch = new OCatch(_oprocess);
                 joinFailureCatch.name = "__suppressJoinFailureCatch:" + oscope.name;
                 joinFailureCatch.debugInfo = createDebugInfo(source, "suppress join failure catch for " + source);
-                compile(joinFailureCatch, new Runnable() {
+                compile(joinFailureCatch, null, new Runnable() {
                     public void run() {
                         joinFailureCatch.faultName = _oprocess.constants.qnJoinFailure;
                         joinFailureCatch.faultVariable = null;
@@ -730,7 +731,7 @@ abstract class BpelCompiler implements CompilerContext {
             final OScope implicitScope = new OScope(_oprocess);
             implicitScope.name = createName(source);
             implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
-            compile(implicitScope, slcsrc, new Runnable() {
+            compileScope(implicitScope, slcsrc, new Runnable() {
                 public void run() {
                     compileLinks(source);
                     if (source instanceof ScopeActivity)
@@ -753,7 +754,7 @@ abstract class BpelCompiler implements CompilerContext {
         oact.name = createName(source);
         oact.debugInfo = createDebugInfo(source,"Activity body for " + source);
         _compiledActivities.add(oact);
-        compile(oact, new Runnable() {
+        compile(oact, source, new Runnable() {
             public void run() {
                 if (doLinks)
                     compileLinks(source);
@@ -896,7 +897,8 @@ abstract class BpelCompiler implements CompilerContext {
         oscope.addCorrelationSet(ocset);
     }
 
-    public void compile(OActivity context, Runnable run) {
+    public void compile(OActivity context, BpelObject source, Runnable run) {
+        DefaultActivityGenerator.defaultExtensibilityElements(context, source, _structureStack.topActivity());
         _structureStack.push(context);
         try {
             run.run();
@@ -927,13 +929,13 @@ abstract class BpelCompiler implements CompilerContext {
         }
     }
 
-    private OScope compile(final OScope oscope, final Scope src, final Runnable init) {
+    private OScope compileScope(final OScope oscope, final Scope src, final Runnable init) {
         if (oscope.name == null)
             throw new IllegalArgumentException("Unnamed scope:" + src);
 
         oscope.debugInfo = createDebugInfo(src, src.toString());
 
-        compile(oscope, new Runnable() {
+        compile(oscope, src, new Runnable() {
             public void run() {
                 for (Iterator<Variable> i = src.getVariables().iterator();i.hasNext(); ) {
                     Variable var = i.next();
@@ -1068,7 +1070,7 @@ abstract class BpelCompiler implements CompilerContext {
         final OEventHandler.OEvent oevent = new OEventHandler.OEvent(_oprocess);
         oevent.name = "__eventHandler:";
         oevent.debugInfo = createDebugInfo(onEvent,null);
-        compile(oevent, new Runnable() {
+        compile(oevent, onEvent, new Runnable() {
             public void run() {
                 switch (_processDef.getBpelVersion()) {
                     case Process.BPEL_V110:
