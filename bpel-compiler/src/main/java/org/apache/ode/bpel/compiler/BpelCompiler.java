@@ -696,7 +696,7 @@ abstract class BpelCompiler implements CompilerContext {
         oscope.debugInfo = createDebugInfo(source, "suppress join failure scope for " + source);
         DefaultActivityGenerator.defaultExtensibilityElements(oscope, source, _structureStack.topActivity());
 
-        compileScope(oscope, null, new Runnable() {
+        compile(oscope, null, new Runnable() {
             public void run() {
                 oscope.activity = compileSLC(source);
                 final OCatch joinFailureCatch = new OCatch(_oprocess);
