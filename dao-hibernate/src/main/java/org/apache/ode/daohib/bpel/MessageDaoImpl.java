@@ -57,6 +57,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     HLargeData newdata = new HLargeData(DOMUtils.domToString(value));
     _session.save(newdata);
     _hself.setMessageData(newdata);
+    update();
   }
 
   public Element getData() {
