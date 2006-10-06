@@ -217,7 +217,9 @@ public class BPELTest extends TestCase {
     public void testStaticOnMessage() throws Exception {
     	go("target/test-classes/bpel/2.0/TestStaticOnMessage");
     }
-	
+    public void testDynamicPick() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestDynamicPick");
+    }	
 	  public void testNegativeCorrelation() throws Exception {
 		/**
 		 * This test contains invalid BPEL. There is an instantiating
