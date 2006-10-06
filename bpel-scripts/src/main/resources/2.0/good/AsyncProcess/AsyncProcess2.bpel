@@ -39,12 +39,12 @@
   	partnerLinkType="resp:AsyncCallerResponderLT"
     name="AsyncResponder"
   	myRole="Caller"
-  	partnerRole="Responder"/>
+  	partnerRole="Responder"
+    initializePartnerRole="yes" />
 
-    <partnerLink name="Client"
+  <partnerLink name="Client"
   	partnerLinkType="proc:ProcessCallerLT"
-    myRole="Process"
-    initializePartnerRole="no" />
+    myRole="Process"/>
  </partnerLinks>
 
  <variables>
