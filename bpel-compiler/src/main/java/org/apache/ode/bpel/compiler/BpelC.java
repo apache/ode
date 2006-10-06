@@ -199,6 +199,9 @@ public class BpelC {
    *           if one occurs while compiling.
    */
   public void compile(Process process) throws CompilationException, IOException {
+      if (process == null)
+          throw new NullPointerException("Attempt to compile NULL process.");
+      
     logCompilationMessage(__cmsgs.infCompilingProcess());
 
     BpelCompiler compiler;
