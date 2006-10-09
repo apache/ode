@@ -128,7 +128,9 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             __log.debug("Compiling expression " + xpathStr);
             XPathFactory xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
             xpf.setXPathFunctionResolver(new JaxpFunctionResolver(_compilerContext, out, source.getNamespaceContext(), Constants.BPEL20_NS));
-            xpf.setXPathVariableResolver(new JaxpVariableResolver(_compilerContext, out));
+            JaxpVariableResolver varResolver = new JaxpVariableResolver(_compilerContext, out);
+            xpf.setXPathVariableResolver(varResolver);
+
             XPath xpe = xpf.newXPath();
             xpe.setNamespaceContext(source.getNamespaceContext());
             XPathExpression expr = xpe.compile(xpathStr);
@@ -136,7 +138,16 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             // detect all possible mistakes. To do so we're using specific resolvers that always
             // return guessed appropriate values from variable types.
             expr.evaluate(DOMUtils.newDocument());
+
+            // Fishing for predicates
+            // TODO Clean that up
+            if (xpathStr.indexOf("[$") > 0) {
+                String rightStr = xpathStr.substring(xpathStr.indexOf("[$") + 2, xpathStr.length());
+                String varStr = rightStr.substring(0, rightStr.indexOf("]"));
+                varResolver.resolveVariable(new QName(null, varStr));
+            }
         } catch (XPathExpressionException e) {
+            System.out.println("Couldn't validate properly expression " + xpathStr);
             __log.info("Couldn't validate properly expression " + xpathStr);
 //            throw new CompilationException(__msgs.warnXPath20Syntax(xpathStr, e.getCause().toString()), e.getCause());
         } catch (WrappedResolverException wre) {
@@ -144,7 +155,6 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
             if (wre.getCause() instanceof CompilationException) throw (CompilationException)wre.getCause();
             throw wre;
         }
-
     }
 
     public Map<String, String> getProperties() {
