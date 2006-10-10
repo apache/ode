@@ -69,6 +69,7 @@
         <geronimoVersion>1.1</geronimoVersion>
         <jaxenVersion>1.1-beta-8</jaxenVersion>
         <jettyVersion>5.1.9</jettyVersion>
+        <jencksVersion>1.3</jencksVersion>
         <jasperVersion>4.2.20RC0</jasperVersion>
         <jotmVersion>2.0.10</jotmVersion>
         <junitVersion>3.8.1</junitVersion>
@@ -701,6 +702,11 @@
                 <version>${geronimoVersion}</version>
             </dependency>
             <dependency>
+                <groupId>geronimo</groupId>
+                <artifactId>geronimo-transaction</artifactId>
+                <version>${geronimoVersion}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.servicemix</groupId>
                 <artifactId>servicemix-jbi</artifactId>
                 <version>${servicemixVersion}</version>
@@ -751,6 +757,12 @@
                 <groupId>jencks</groupId>
                 <artifactId>xapool-without-pool</artifactId>
                 <version>${xapoolVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jencks</groupId>
+                <artifactId>jencks</artifactId>
+                <version>${jencksVersion}</version>
+                <classifier>all</classifier>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
