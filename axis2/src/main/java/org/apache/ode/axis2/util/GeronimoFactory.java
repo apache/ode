@@ -19,12 +19,16 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.geronimo.gbean.AbstractName;
 import org.apache.geronimo.kernel.Kernel;
 import org.apache.geronimo.kernel.KernelRegistry;
+import org.apache.geronimo.gbean.AbstractName;
 import org.apache.geronimo.kernel.repository.Artifact;
+import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
+import org.apache.geronimo.transaction.context.TransactionContextManager;
 import javax.transaction.TransactionManager;
-import java.util.HashMap;
+import javax.management.ObjectName;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GeronimoFactory {
 
@@ -33,13 +37,14 @@ public class GeronimoFactory {
 
     public TransactionManager getTransactionManager() {
         Kernel kernel = KernelRegistry.getSingleKernel(); 
-        HashMap map = new HashMap();
-        map.put("name", "TransactionManager");
-        map.put("j2eeType", "TransactionManager");
-        map.put("ServiceModule", "geronimo/j2ee-server/1.1/car");
-        AbstractName name = new AbstractName(Artifact.create("geronimo/j2ee-server/1.1/car"), map);
-        Object proxy = kernel.getProxyManager().createProxy(name, TransactionManager.class);
-        return (TransactionManager) proxy;
+        try {
+            TransactionContextManager ctxManager = (TransactionContextManager)kernel.getProxyManager().createProxy(
+                new AbstractName(new URI("geronimo/transaction/1.1/car?name=TransactionContextManager")),
+                TransactionContextManager.class);
+            return new GeronimoTransactionManager(ctxManager);
+        } catch (URISyntaxException except) {
+            throw new RuntimeException(except);
+        }
     }
 
 }
