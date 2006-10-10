@@ -34,6 +34,7 @@
 
     <properties>
         <vendor.name>Apache Software Foundation</vendor.name>
+        <maven.test.skip>true</maven.test.skip>
 
         <!--
           Default ODE properties, these properties may be referenced in resources and the
@@ -98,7 +99,7 @@
         |
     -->
     <modules>
-        <module>jbi-examples</module>
+        <!--<module>jbi-examples</module>-->
         <module>tools-bin</module>
 
         <module>axis2</module>
@@ -132,8 +133,8 @@
         <module>dao-hibernate-db-derby</module>
         <!-- <module>dao-memory</module> -->
 
-        <module>jbi</module>
-        <module>jbi-install</module>
+        <!--<module>jbi</module>-->
+        <!--<module>jbi-install</module>-->
 
         <module>jca-ra</module>
         <module>jca-rar</module>
@@ -145,7 +146,7 @@
         <module>bpel-scheduler-quartz</module>
 
         <module>distro-axis2</module>
-    	<module>distro-jbi</module>
+    	<!--<module>distro-jbi</module>-->
     </modules>
 
     <dependencies>
