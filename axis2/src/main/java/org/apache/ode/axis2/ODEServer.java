@@ -259,36 +259,14 @@ public class ODEServer {
     }
 
     private void initTxMgr() throws ServletException {
-        InitialContext ctx;
+        String txFactoryName = _odeConfig.getTxFactoryClass();
+        __log.debug("Initializing transaction manager using " + txFactoryName);
         try {
-            ctx = new InitialContext();
-        } catch (NamingException e) {
-            throw new ServletException("Couldn't find any JNDI to lookup.", e);
-        }
-        try {
-            // First try
-            _txMgr = (TransactionManager) ctx.lookup("javax.transaction.TransactionManager");
-        } catch (NamingException e) {
-            try {
-                // Second try
-                _txMgr = (TransactionManager) ctx.lookup("javax.transaction.TransactionManager");
-            } catch (NamingException ex) {
-                __log.info("Couldn't find a transaction manager, using the default (JOTM).");
-                // Giving up: couldn't find a proper transaction manager, fallback to Jotm.
-                try {
-                    Jotm jotm = new Jotm(true, false);
-                    jotm.getTransactionManager().setTransactionTimeout(30);
-                    _txMgr = jotm.getTransactionManager();
-                } catch (Exception e1) {
-                    throw new ServletException("Couldn't initialize a proper transaction manager!", e);
-                }
-            }
-        } finally {
-            try {
-                ctx.close();
-            } catch (NamingException e) {
-                __log.error(e);
-            }
+            Class txFactClass = Class.forName(txFactoryName);
+            Object txFact = txFactClass.newInstance();
+            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", null).invoke(txFact);
+        } catch (Exception e) {
+            throw new ServletException("Couldn't initialize a transaction manager!", e);
         }
     }
 
