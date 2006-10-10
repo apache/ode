@@ -34,7 +34,6 @@
 
     <properties>
         <vendor.name>Apache Software Foundation</vendor.name>
-        <maven.test.skip>true</maven.test.skip>
 
         <!--
           Default ODE properties, these properties may be referenced in resources and the
@@ -66,6 +65,7 @@
         <hibernateVersion>3.1.2</hibernateVersion>
         <hsqldbVersion>1.8.0.1</hsqldbVersion>
         <geronimoSpecsVersion>1.0</geronimoSpecsVersion>
+        <geronimoVersion>1.1</geronimoVersion>
         <jaxenVersion>1.1-beta-8</jaxenVersion>
         <jettyVersion>5.1.9</jettyVersion>
         <jasperVersion>4.2.20RC0</jasperVersion>
@@ -693,6 +693,11 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jsp_2.0_spec</artifactId>
                 <version>${geronimoSpecsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>geronimo</groupId>
+                <artifactId>geronimo-kernel</artifactId>
+                <version>${geronimoVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix</groupId>
