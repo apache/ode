@@ -38,10 +38,18 @@ public class GeronimoFactory {
     public TransactionManager getTransactionManager() {
         Kernel kernel = KernelRegistry.getSingleKernel(); 
         try {
+            // Using Jencks.
             TransactionContextManager ctxManager = (TransactionContextManager)kernel.getProxyManager().createProxy(
-                new AbstractName(new URI("geronimo/transaction/1.1/car?name=TransactionContextManager")),
+                new AbstractName(new URI("geronimo/j2ee-server/1.1/car?ServiceModule=geronimo/j2ee-server/1.1/car,j2eeType=TransactionContextManager,name=TransactionContextManager")),
                 TransactionContextManager.class);
             return new GeronimoTransactionManager(ctxManager);
+/*
+            // Passing TransactionManager directly.
+            TransactionManager txManager = (TransactionManager)kernel.getProxyManager().createProxy(
+                new AbstractName(new URI("geronimo/j2ee-server/1.1/car?ServiceModule=geronimo/j2ee-server/1.1/car,j2eeType=TransactionManager,name=TransactionManager")),
+                TransactionManager.class);
+            return txManager;
+*/
         } catch (URISyntaxException except) {
             throw new RuntimeException(except);
         }
