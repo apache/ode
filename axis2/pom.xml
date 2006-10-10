@@ -106,6 +106,10 @@
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
         </dependency>
+        <dependency>
+            <groupId>geronimo</groupId>
+            <artifactId>geronimo-kernel</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>ws-commons</groupId>
