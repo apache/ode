@@ -106,8 +106,17 @@
             <artifactId>activation</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jencks</groupId>
+            <artifactId>jencks</artifactId>
+            <classifier>all</classifier>
+        </dependency>
+        <dependency>
             <groupId>geronimo</groupId>
             <artifactId>geronimo-kernel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>geronimo</groupId>
+            <artifactId>geronimo-transaction</artifactId>
         </dependency>
 
         <dependency>
