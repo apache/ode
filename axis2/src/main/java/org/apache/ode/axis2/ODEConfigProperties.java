@@ -35,11 +35,10 @@ public class ODEConfigProperties extends Properties {
     private static final Log __log = LogFactory.getLog(ODEConfigProperties.class);
     private static final Messages __msgs = Messages.getMessages(Messages.class);
     private static final String CONFIG_FILE_NAME = "ode-axis2.properties";
-    private static final String PROP_NAMESPACE = "ode-axis2.pidNamespace";
-    private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "ode-axis2.allowIncompleteDeployment";
     private static final String PROP_DB_MODE = "ode-axis2.db.mode";
     private static final String PROP_DB_EXTERNAL_DS = "ode-axis2.db.ext.dataSource";
     private static final String PROP_DB_EMBEDDED_NAME = "ode-axis2.db.emb.name";
+    private static final String PROP_TX_FACTORY_CLASS = "ode-axis2.tx.factory.class";
     private static final String PROP_POOL_MAX = "ode-axis2.db.pool.max";
     private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
     private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
@@ -128,6 +127,10 @@ public class ODEConfigProperties extends Properties {
 
     public String getWorkingDir() {
         return getProperty(ODEConfigProperties.PROP_WORKING_DIR);
+    }
+
+    public String getTxFactoryClass() {
+        return getProperty(ODEConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.axis2.util.JotmFactory");
     }
 
 }
