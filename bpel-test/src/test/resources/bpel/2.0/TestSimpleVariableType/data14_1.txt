@@ -1,0 +1,15 @@
+# Test BPEL simple XML type variable
+# Expected result: 
+# Part "replyID" value: Test14
+# Part "replyText" value: pass
+
+target.name.space=urn:sybase:bpel:test14Processing
+port.type=test14PT
+operation=request
+
+part1=str.requestID
+part2=str.requestText
+
+str.requestID=Test14
+str.requestText=Event Start Test14
+
