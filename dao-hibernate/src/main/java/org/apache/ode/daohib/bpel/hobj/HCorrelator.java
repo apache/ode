@@ -109,4 +109,8 @@ public class HCorrelator extends HObject {
         _selectors = selectors;
     }
 
+    @Override
+    public String toString() {
+        return "{HCorrelator process=" + _process.getProcessId() + ", cid=" + _correlatorId + "}";
+    }
 }
