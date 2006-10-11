@@ -364,7 +364,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKey);
 
             if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": ADDED ROUTE" + correlator.getCorrelatorId() + ": "
+                BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": ADDED ROUTE " + correlator.getCorrelatorId() + ": "
                         + selector.correlationKey + " --> " + _dao.getInstanceId());
             }
         }
