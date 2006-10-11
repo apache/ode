@@ -762,7 +762,6 @@
                 <groupId>org.jencks</groupId>
                 <artifactId>jencks</artifactId>
                 <version>${jencksVersion}</version>
-                <classifier>all</classifier>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
