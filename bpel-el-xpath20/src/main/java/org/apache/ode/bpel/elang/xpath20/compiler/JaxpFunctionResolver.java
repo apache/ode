@@ -103,6 +103,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (params.size() < 1 || params.size() > 3)
                 throw new CompilationException(
                         __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEDATA));
+
             String varname = (String)params.get(0);
             String partname = params.size() > 1 ? (String)params.get(1) : null;
             String locationstr = params.size() > 2 ? (String)params.get(2) : null;

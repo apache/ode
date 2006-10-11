@@ -41,6 +41,8 @@
         <variable name="otherMsgVar" messageType="test:TestAssignMessage"/>
         <variable name="strVar" type="xsd:string"/>
         <variable name="intVar" type="xsd:int"/>
+        <variable name="intVar2" type="xsd:int"/>
+        <variable name="boolVar" type="xsd:boolean"/>
     </variables>
 
     <sequence>
@@ -61,8 +63,20 @@
                 <to variable="intVar"/>
             </copy>
             <copy>
+                <from>$intVar</from>
+                <to>$intVar2</to>
+            </copy>
+            <copy>
+                <from>bpws:getVariableData('intVar')</from>
+                <to>$intVar2</to>
+            </copy>
+            <copy>
                 <from>$intVar + 1</from>
                 <to variable="intVar"/>
+            </copy>
+            <copy>
+                <from>$intVar = 4</from>
+                <to variable="boolVar"/>
             </copy>
             <copy>
                 <from>abs($intVar + number('2'))</from>
@@ -73,7 +87,7 @@
                 <to variable="strVar"/>
             </copy>
             <copy>
-                <from>concat($strVar,' World', $intVar)</from>
+                <from>concat($strVar,' World', $intVar, $boolVar,  $intVar2)</from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
             <copy>
