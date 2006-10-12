@@ -72,12 +72,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
   }
 
   public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
-    for (Iterator<MessageRouteDaoImpl> i = _routes.iterator(); i.hasNext();) {
-      MessageRouteDaoImpl we = i.next();
-      if ((we._groupId.equals(routeGroupId) || routeGroupId == null) && we._instance == target) {
-        i.remove();
-      }
-    }
+    ((ProcessInstanceDaoImpl)target).removeRoutes(routeGroupId);
   }
 
   public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] keys) {
@@ -99,6 +94,15 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
     _routes.add(mr);
   }
 
+  void _removeRoutes(String routeGroupId, ProcessInstanceDaoImpl target) {
+      for (Iterator<MessageRouteDaoImpl> i = _routes.iterator(); i.hasNext();) {
+          MessageRouteDaoImpl we = i.next();
+          if ((we._groupId.equals(routeGroupId) || routeGroupId == null) && we._instance == target) {
+            i.remove();
+          }
+        }
+
+  }
   /**
    * @see java.lang.Object#toString()
    */
