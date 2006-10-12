@@ -100,7 +100,7 @@
         |
     -->
     <modules>
-        <!--<module>jbi-examples</module>-->
+        <module>jbi-examples</module>
         <module>tools-bin</module>
 
         <module>axis2</module>
@@ -128,14 +128,14 @@
         <module>bpel-ql</module>
         <module>bpel-connector</module>
         <module>bpel-epr</module>
-        <!--module>bpel-test</module-->
+        <module>bpel-test</module>
 
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
-        <!-- <module>dao-memory</module> -->
+        <!-- module>dao-memory</module -->
 
-        <!--<module>jbi</module>-->
-        <!--<module>jbi-install</module>-->
+        <module>jbi</module>
+        <module>jbi-install</module>
 
         <module>jca-ra</module>
         <module>jca-rar</module>
@@ -147,7 +147,7 @@
         <module>bpel-scheduler-quartz</module>
 
         <module>distro-axis2</module>
-    	<!--<module>distro-jbi</module>-->
+    	<module>distro-jbi</module>
     </modules>
 
     <dependencies>
