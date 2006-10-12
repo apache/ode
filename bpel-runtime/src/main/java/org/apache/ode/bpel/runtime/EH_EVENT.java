@@ -213,9 +213,31 @@ class EH_EVENT extends BpelJacobRunnable {
 
 
                         public void onRequestRcvd(int selectorIdx, String mexId) {
+                            // The receipt of the message causes a new scope to be created:
+                            ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
+                                    getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, _oevent),
+                                    _scopeFrame,
+                                    _comps,
+                                    _fault);
+                            
+                            if (_oevent.variable != null) { 
+                                Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
+                                
+                                if (msgEl != null) {
+                                    try {
+                                      getBpelRuntimeContext().initializeVariable(ehScopeFrame.resolve(
+                                              _oevent.variable),msgEl);
+                                    } catch (Exception ex) {
+                                      __log.fatal(ex);
+                                      throw new InvalidProcessException(ex);
+                                    }
+                                }
+                            }
+
+                            
                             Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
                             try {
-                                getBpelRuntimeContext().initializeVariable(_scopeFrame.resolve(_oevent.variable),msgEl);
+                                getBpelRuntimeContext().initializeVariable(ehScopeFrame.resolve(_oevent.variable),msgEl);
                             } catch (Exception ex) {
                                 __log.error(ex);
                                 throw new InvalidProcessException(ex);
@@ -223,23 +245,23 @@ class EH_EVENT extends BpelJacobRunnable {
 
                             try {
                                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
-                                    initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(_oevent.variable));
+                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
 
                                 if (_oevent.partnerLink.hasPartnerRole()) {
                                     // Trying to initialize partner epr based on a message-provided epr/session.
-                                    if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
+                                    if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(ehScopeFrame
                                             .resolve(_oevent.partnerLink))) {
                                         Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                         if (fromEpr != null) {
                                             getBpelRuntimeContext().writeEndpointReference(
-                                                    _scopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
+                                                    ehScopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
                                         }
                                     }
 
                                     String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
                                     if (partnersSessionId != null)
-                                        getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oevent.partnerLink),
+                                        getBpelRuntimeContext().initializePartnersSessionId(ehScopeFrame.resolve(_oevent.partnerLink),
                                                 partnersSessionId);
                                 }
 
@@ -256,17 +278,26 @@ class EH_EVENT extends BpelJacobRunnable {
                                 return;
                             }
 
+
+                            
                             // activate 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
                             ActivityInfo child = new ActivityInfo(genMonotonic(),
                                     _oevent.activity,
                                     newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+
+                            
                             _active.add(child);
+
+                            LinkFrame lf = new LinkFrame(null);
+
+                            instance(new SCOPE(child,ehScopeFrame, lf));
+                            
                             // If we previously terminated the other activiites, then we do the same
                             // here; this is easier then undoing the receive.
                             if (_childrenTerminated)
                                 replication(child.self).terminate();
-                            instance(createChild(child,_scopeFrame, new LinkFrame(null)));
+                           
 
                             if (_terminated || _stopped || _fault != null)
                                 instance(new WAITING(null));
