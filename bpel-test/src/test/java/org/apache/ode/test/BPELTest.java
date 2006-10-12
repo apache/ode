@@ -203,10 +203,10 @@ public class BPELTest extends TestCase {
         go("target/test-classes/bpel/2.0/TestInstantiatingPick");
     }
 	public void testCorrelation() throws Exception {
-		go("target/test-classes/bpel/2.0/testCorrelation");
+		go("target/test-classes/bpel/2.0/TestCorrelation");
 	}
 	public void testCorrelationAsync() throws Exception {
-		go("target/test-classes/bpel/2.0/testCorrelationAsync");
+		go("target/test-classes/bpel/2.0/TestCorrelationAsync");
 	}
     public void testXslTransform() throws Exception {
         go("target/test-classes/bpel/2.0/TestXslTransform");
