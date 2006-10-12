@@ -37,18 +37,19 @@ import org.apache.geronimo.kernel.repository.Artifact;
 import org.apache.geronimo.kernel.repository.Repository;
 import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
 import org.apache.geronimo.transaction.context.TransactionContextManager;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class GeronimoFactory {
 
-    static final Logger LOGGER = Logger.getLogger(GeronimoFactory.class);
-    
+    private static final Log __log = LogFactory.getLog(GeronimoFactory.class);
+
     /* Public no-arg contructor is required */
     public GeronimoFactory() {
     }
 
     public TransactionManager getTransactionManager() {
-        Kernel kernel = KernelRegistry.getSingleKernel(); 
+        Kernel kernel = KernelRegistry.getSingleKernel();
         TransactionContextManager ctxManager = null;
 
         try {
@@ -74,8 +75,8 @@ public class GeronimoFactory {
             } catch (MalformedURLException except) {
                 throw new RuntimeException("Invalid URL for jencks: " + f, except);
             }
-        }            
-            
+        }
+
         // Use Jenck to wrap TransactionContextManager back to TransactionManager
         return new GeronimoTransactionManager(ctxManager);
     }
