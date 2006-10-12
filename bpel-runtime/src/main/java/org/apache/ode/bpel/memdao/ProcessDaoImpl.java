@@ -7,6 +7,7 @@ package org.apache.ode.bpel.memdao;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +36,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     private QName _processId;
     private QName _type;
-    private final Map<String, CorrelatorDAO> _correlators = new ConcurrentHashMap<String, CorrelatorDAO>();
+    final Map<String, CorrelatorDaoImpl> _correlators = new ConcurrentHashMap<String, CorrelatorDaoImpl>();
     protected final Map<Long, ProcessInstanceDAO> _instances = new ConcurrentHashMap<Long, ProcessInstanceDAO>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
@@ -72,9 +73,18 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public Collection<CorrelatorDAO> getCorrelators() {
-        return _correlators.values();
-    }
+        // Note: _correlators.values() is a Collection<CorrealatorDaoImpl>. We can't just return this object
+        // since Collection<CorrelatorDAO> is /not/ assignment compatible with Collection<CorrelatorDaoImpl>. 
+        // However, a immutable Collection<CorrelationDAO> is assignment compatible with Collection<CorrelatorDaoImpl>,
+        // but.... we need to introduce some ambiguity into the type hierarchy so that Java will infer the correct type.
+        
+        // Make an ambiguous collection.
+        Collection<? extends CorrelatorDAO> foo =  _correlators.values();
 
+        // In order to get a collection of the super-type from a sub-type we must make the collection read-only. 
+        return Collections.unmodifiableCollection(foo);
+    }
+    
     public void removeRoutes(String routeId, ProcessInstanceDAO target) {
         for (CorrelatorDAO correlatorDAO : _correlators.values()) {
             correlatorDAO.removeRoutes(routeId, target);
@@ -212,4 +222,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 	public int getNumInstances() {
 		return _instances.size();
 	}
+
+    public ProcessInstanceDAO getInstanceWithLock(Long iid) {
+      return getInstance(iid);
+    }
 }
