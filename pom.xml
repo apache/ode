@@ -252,9 +252,9 @@
             <url>http://pxe.intalio.org/public/maven2</url>
         </repository>
         <repository>
-            <id>apache-snapshot</id>
-            <name>Apache Snapshot Repository</name>
-            <url>http://people.apache.org/maven-snapshot-repository</url>
+            <id>apache-incubator</id>
+            <name>Apache Incubator Repository</name>
+            <url>http://people.apache.org/repo/m2-incubating-repository</url>
         </repository>
         <repository>
             <id>central</id>
@@ -300,6 +300,11 @@
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache-incubator</id>
+            <name>Apache Incubator Repository</name>
+            <url>http://people.apache.org/repo/m2-incubating-repository</url>
         </pluginRepository>
     </pluginRepositories>
 
