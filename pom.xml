@@ -135,7 +135,6 @@
         <!-- module>dao-memory</module -->
 
         <module>jbi</module>
-        <module>jbi-install</module>
 
         <module>jca-ra</module>
         <module>jca-rar</module>
