@@ -38,6 +38,10 @@
                 <to variable="otherVar" part="TestPart"/>
             </copy>
             <copy>
+                <from>'Xsl'</from>
+                <to>$otherVar.TestPart</to>
+            </copy>
+            <copy>
                 <from>
                     bpws:doXslTransform("HelloXslWorld.xsl", $myVar.TestPart, 'middle', $otherVar.TestPart)
                 </from>
