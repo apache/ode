@@ -224,13 +224,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     QName keyQName = _oxpath.namespaceCtx.derefQName((String) args.get(idx));
                     Object paramElmt;
                     if (args.get(idx + 1) instanceof NodeWrapper) {
-                        Element tmpElmt = (Element) ((NodeWrapper)args.get(1)).getUnderlyingNode();
+                        Element tmpElmt = (Element) ((NodeWrapper)args.get(idx + 1)).getUnderlyingNode();
                         Document paramDoc = DOMUtils.newDocument();
                         paramDoc.appendChild(paramDoc.importNode(tmpElmt, true));
                         paramElmt = paramDoc;
                         if (__log.isDebugEnabled())
                             __log.debug("Passing parameter " + keyQName + " " + DOMUtils.domToString(paramDoc));
-                    } else paramElmt = args.get(1);
+                    } else paramElmt = args.get(idx + 1);
 
                     parametersMap.put(keyQName, paramElmt);
                 }
