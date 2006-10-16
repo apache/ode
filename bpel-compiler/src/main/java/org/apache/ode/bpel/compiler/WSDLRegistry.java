@@ -234,6 +234,7 @@ class WSDLRegistry {
 
     public Property getProperty(QName name) {
         ArrayList<Definition4BPEL> defs = _definitions.get(name.getNamespaceURI());
+        if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
             if (definition4BPEL != null && definition4BPEL.getProperty(name) != null)
                 return definition4BPEL.getProperty(name);
@@ -243,6 +244,7 @@ class WSDLRegistry {
 
     public PropertyAlias getPropertyAlias(QName propertyName, QName messageType) {
         ArrayList<Definition4BPEL> defs = _definitions.get(propertyName.getNamespaceURI());
+        if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
             if (definition4BPEL != null && definition4BPEL.getPropertyAlias(propertyName, messageType) != null)
                 return definition4BPEL.getPropertyAlias(propertyName, messageType);
@@ -252,6 +254,7 @@ class WSDLRegistry {
 
     public PartnerLinkType getPartnerLinkType(QName partnerLinkType) {
         ArrayList<Definition4BPEL> defs = _definitions.get(partnerLinkType.getNamespaceURI());
+        if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
             if (definition4BPEL != null && definition4BPEL.getPartnerLinkType(partnerLinkType) != null)
                 return definition4BPEL.getPartnerLinkType(partnerLinkType);
@@ -261,6 +264,7 @@ class WSDLRegistry {
 
     public PortType getPortType(QName portType) {
         ArrayList<Definition4BPEL> defs = _definitions.get(portType.getNamespaceURI());
+        if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
             if (definition4BPEL != null && definition4BPEL.getPortType(portType) != null)
                 return definition4BPEL.getPortType(portType);
@@ -270,6 +274,7 @@ class WSDLRegistry {
 
     public Message getMessage(QName msgType) {
         ArrayList<Definition4BPEL> defs = _definitions.get(msgType.getNamespaceURI());
+        if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
             if (definition4BPEL != null && definition4BPEL.getMessage(msgType) != null)
                 return definition4BPEL.getMessage(msgType);
