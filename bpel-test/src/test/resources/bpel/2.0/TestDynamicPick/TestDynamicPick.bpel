@@ -99,7 +99,7 @@
 		<assign>
 			<copy>
 				<from>
-					<literal>!CDATA[[process complete]]</literal>
+					<literal><![CDATA[process complete]]></literal>
 				</from>
 				<to variable="probeInput" part="probeName"/>
 			</copy>
