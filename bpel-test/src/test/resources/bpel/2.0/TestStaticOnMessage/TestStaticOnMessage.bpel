@@ -83,7 +83,7 @@
 	  	  			<assign>
 	      				<copy>
 	      					<from>
-	      						<literal><![CDATA[TestStaticOnMessage3PT]]></literal>
+	      						<literal><![CDATA[received event on TestStaticOnMessage3PT]]></literal>
 	      					</from>
 	        				<to variable="probeInput" part="probeName"/>
 	      				</copy>
