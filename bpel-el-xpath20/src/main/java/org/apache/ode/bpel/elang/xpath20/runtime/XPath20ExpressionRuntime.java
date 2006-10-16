@@ -96,7 +96,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
     public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-        List result = null;
+        List result;
         Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
         if (someRes instanceof List) {
             result = (List) someRes;
@@ -118,6 +118,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                 if (val.getNodeType() == Node.DOCUMENT_NODE) val = ((Document)val).getDocumentElement();
                 result.add(val);
             }
+        } else {
+            result = null;
         }
 
         return result;

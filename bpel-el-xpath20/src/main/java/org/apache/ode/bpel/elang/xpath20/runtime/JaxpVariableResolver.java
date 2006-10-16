@@ -34,6 +34,7 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
@@ -99,12 +100,10 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
                 	return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
 
-                // Saxon expects a nodelist, everything else will result in a wrong result...
-                //Document doc = DOMUtils.newDocument();
-                //doc.appendChild(doc.importNode(variableNode, true));
-                //return doc.getChildNodes();
-                	
-                return variableNode.getChildNodes();
+                
+                // Saxon expects a node list, this nodelist should contain exactly one item, the attribute
+                // value
+                return new SingletonNodeList(variableNode);
                 
             }catch(FaultException e){
                 throw new WrappedResolverException(e);
@@ -130,4 +129,23 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         else return text;
     }
 
+    
+    private static class SingletonNodeList implements NodeList {
+        private Node _node;
+        
+        SingletonNodeList(Node node) {
+            _node = node;
+        }
+        
+        public Node item(int index) {
+            if (index != 0)
+                throw new IndexOutOfBoundsException(""+index);
+            return _node;
+        }
+
+        public int getLength() {
+            return 1;
+        }
+        
+    }
 }

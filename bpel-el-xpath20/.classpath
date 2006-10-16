@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -29,5 +30,7 @@
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon/8.7/saxon-8.7.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon-dom/8.7/saxon-dom-8.7.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon-xpath/8.7/saxon-xpath-8.7.jar"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
