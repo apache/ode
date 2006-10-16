@@ -37,9 +37,6 @@ public class OElementVarType extends OVarType {
 	public Node newInstance(Document doc) {
 		Element el = doc.createElementNS(elementType.getNamespaceURI(),
 				elementType.getLocalPart());
-        // Pre-filling the element with an empty node to avoid an empty nodeset
-        // when selecting the element child nodes
-        el.appendChild(doc.createElement("empty"));        
         return el;
 	}
 }
