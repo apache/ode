@@ -1,7 +1,7 @@
 <assembly>
     <id></id>
     <formats>
-        <format>tar.gz</format>
+        <format>zip</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
     <fileSets>
@@ -47,13 +47,11 @@
         </dependencySet>
         <dependencySet>
             <scope>runtime</scope>
-            <outputDirectory/>
-            <outputFileNameMapping>${groupId}.${extension}</outputFileNameMapping>
+            <outputDirectory>jbi-component</outputDirectory>
             <includes>
-                <include>org.apache.ode:ode-jbi-install</include>
+                <include>org.apache.ode:ode-jbi</include>
             </includes>
         </dependencySet>
-
         <dependencySet>
             <scope>runtime</scope>
             <outputDirectory>lib</outputDirectory>
@@ -72,4 +70,5 @@
             </includes>
         </dependencySet>
     </dependencySets>
+
 </assembly>
