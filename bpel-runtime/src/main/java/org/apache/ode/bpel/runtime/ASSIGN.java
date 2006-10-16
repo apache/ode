@@ -392,7 +392,7 @@ class ASSIGN extends ACTIVITY {
 
                 if (rvalue.getNodeType() == Node.ELEMENT_NODE
                         && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
-                    replaceElement((Element) lvaluePtr, (Element) rvalue,
+                    lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
                             ocopy.keepSrcElementName);
                 } else {
                     lvalue = replaceContent(lvalue, lvaluePtr, rvalue
@@ -441,24 +441,26 @@ class ASSIGN extends ACTIVITY {
         getBpelRuntimeContext().writeEndpointReference(plval, (Element)rvalue);
     }
 
-    private void replaceElement(Element dest, Element src,
+    private Element replaceElement(Element lval, Element ptr, Element src,
                                 boolean keepSrcElement) {
-        Document doc = dest.getOwnerDocument();
-        Node parent = dest.getParentNode();
+        Document doc = ptr.getOwnerDocument();
+        Node parent = ptr.getParentNode();
         if (keepSrcElement) {
-            Node replacement = doc.importNode(src, true);
-            parent.replaceChild(replacement, dest);
-        } else {
-            Element replacement = doc.createElementNS(dest.getNamespaceURI(), dest
-                    .getLocalName());
-            NodeList nl = src.getChildNodes();
-            for (int i = 0; i < nl.getLength(); ++i)
-                replacement.appendChild(doc.importNode(nl.item(i), true));
-            NamedNodeMap attrs = src.getAttributes();
-            for (int i = 0; i < attrs.getLength(); ++i)
-                replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
-            parent.replaceChild(replacement, dest);
-        }
+            Element replacement = (Element)doc.importNode(src, true);
+            parent.replaceChild(replacement, ptr);
+            return (lval == ptr) ? replacement :  lval; 
+        } 
+    
+        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr
+                .getLocalName());
+        NodeList nl = src.getChildNodes();
+        for (int i = 0; i < nl.getLength(); ++i)
+            replacement.appendChild(doc.importNode(nl.item(i), true));
+        NamedNodeMap attrs = src.getAttributes();
+        for (int i = 0; i < attrs.getLength(); ++i)
+            replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
+        parent.replaceChild(replacement, ptr);
+        return (lval == ptr) ? replacement :  lval; 
     }
 
     /**
