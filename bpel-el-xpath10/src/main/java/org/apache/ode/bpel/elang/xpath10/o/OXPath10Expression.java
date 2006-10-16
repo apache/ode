@@ -37,18 +37,18 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 	private static final long serialVersionUID = -1L;
 
   /** Map from query name to variable declaration. */
-  public final Map<String, OScope.Variable> vars =
+  public HashMap<String, OScope.Variable> vars =
     new HashMap<String, OScope.Variable>();
 
-  public final Map<String, OProcess.OProperty> properties =
+  public final HashMap<String, OProcess.OProperty> properties =
     new HashMap<String, OProcess.OProperty>();
 
-  public final Map<String, OLink> links = new HashMap<String,OLink>();
+  public final HashMap<String, OLink> links = new HashMap<String,OLink>();
 
-  public final Map<URI,OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
+  public final HashMap<URI,OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
 
   /** Map getVariableData invocation signature to compiled objects. */
-  private final Map<SigGetVariableData,OSigGetVariableData> _getVariableDataSigs =
+  private final HashMap<SigGetVariableData,OSigGetVariableData> _getVariableDataSigs =
     new HashMap<SigGetVariableData,OSigGetVariableData>();
 
   public String xpath;
