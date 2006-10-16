@@ -59,8 +59,59 @@
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-		</dependency>		
-	</dependencies>
+		</dependency>
+
+        <!-- The following dependencies are "provided" to avoid classloading issues in ServiceMix -->
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xmlParserAPIs</artifactId>
+            <scope>provided</scope>
+            <version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+            <scope>provided</scope>
+            <version>1.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+            <scope>provided</scope>
+            <version>2.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-qname_1.1_spec</artifactId>
+            <scope>provided</scope>
+            <version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+            <scope>provided</scope>
+            <version>2.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>xmlbeans</groupId>
+			<artifactId>xmlpublic</artifactId>
+            <scope>provided</scope>
+            <version>2.1.0</version>
+		</dependency>
+        
+        <!-- The following dependencies are "provided" to reduce size/footprint when deploying to ServiceMix -->
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+            <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbytools</artifactId>
+            <version>${derbyVersion}</version>
+            <scope>provided</scope>
+		</dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -95,6 +146,8 @@
 				<version>3.0-incubating</version>
 				<extensions>true</extensions>
 				<configuration>
+                     <name>OdeBpelEngine</name>
+                     <componentClassLoaderDelegation>self-first</componentClassLoaderDelegation>
 					<type>service-engine</type>
 					<component>
 						org.apache.ode.jbi.OdeComponent
