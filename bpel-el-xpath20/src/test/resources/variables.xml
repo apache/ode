@@ -1,0 +1,47 @@
+<variables>
+	<elementVar name="emptyVar"  xmlns:tns="http://foobar" >
+					<tns:ApplicationData>
+						<tns:empty/>
+                    </tns:ApplicationData>
+	</elementVar>
+
+   <elementVar name="reallyEmptyVar"  xmlns:tns="http://foobar" >
+					<tns:ApplicationData/>
+	</elementVar>
+	
+	<elementVar name="foo"  xmlns:tns="http://foobar" >
+					<tns:ApplicationData>
+                             <tns:ApplicationInfo>
+                                 <tns:senderId>string</tns:senderId>
+                                 <tns:senderName>string</tns:senderName>
+                                 <tns:applicationId>string</tns:applicationId>
+                                 <tns:applicationName>string</tns:applicationName>
+                                 <tns:applicationType>string</tns:applicationType>
+                                 <tns:applicationDate>string</tns:applicationDate>
+                                 <tns:applicationFee>string</tns:applicationFee>
+                                 <tns:comments>string</tns:comments>
+                             </tns:ApplicationInfo>
+                             <tns:AllocationInfo>
+                                 <tns:allocateApplication>boolean</tns:allocateApplication>
+                                 <tns:allocateTo>string</tns:allocateTo>
+                             </tns:AllocationInfo>
+                             <tns:AssessmentManagerInfo>
+                                 <tns:comments>string</tns:comments>
+                                 <tns:acceptApplication>boolean</tns:acceptApplication>
+                                 <tns:pathIndicators>
+                                     <tns:dasps>boolean</tns:dasps>
+                                     <tns:code>boolean</tns:code>
+                                     <tns:impact>boolean</tns:impact>
+                                     <tns:referralAgency>boolean</tns:referralAgency>
+                                     <tns:referralRequired>boolean</tns:referralRequired>
+                                 </tns:pathIndicators>
+                            </tns:AssessmentManagerInfo>
+                             <tns:PaymentInfo>
+                                 <tns:invoiceNumber>string</tns:invoiceNumber>
+                                 <tns:paymentMade>boolean</tns:paymentMade>
+                                 <tns:receiptNumber>string</tns:receiptNumber>
+                             </tns:PaymentInfo>
+                         </tns:ApplicationData>
+
+	</elementVar>
+</variables>

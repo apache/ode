@@ -43,9 +43,6 @@ public class OXsdTypeVarType extends OVarType {
             return doc.createTextNode("");
         else {
             Element el = doc.createElement("xsd-complex-type-wrapper");
-            // Pre-filling the wrapper element with an empty node to avoid an empty nodeset
-            // when selecting the element child nodes
-            el.appendChild(doc.createElement("empty"));
             return el;
         }
     }
