@@ -192,7 +192,9 @@ public class INVOKE extends ACTIVITY {
         _failureReason = reason;
         _failureData = data;
 
-        if (_self.getFailureHandling().faultOnFailure) {
+        FailureHandling failureHandling = _oinvoke.getFailureHandling();
+
+        if (failureHandling != null && failureHandling.faultOnFailure) {
             // No attempt to retry or enter activity recovery state, simply fault.
             if (__log.isDebugEnabled())
                 __log.debug("ActivityRecovery: Invoke activity " + _self.aId + " faulting on failure");
@@ -201,14 +203,15 @@ public class INVOKE extends ACTIVITY {
             return;
         }
         // If maximum number of retries, enter activity recovery state.  
-        if (_invoked > _self.getFailureHandling().retryFor) {
+        if (failureHandling == null || _invoked > failureHandling.retryFor) {
             requireRecovery();
             return;
         }
         
         if (__log.isDebugEnabled())
             __log.debug("ActivityRecovery: Retrying invoke activity " + _self.aId);
-        Date future = new Date(new Date().getTime() + (_self.getFailureHandling().retryDelay * 1000));
+        Date future = new Date(new Date().getTime() + 
+            (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
         final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
         getBpelRuntimeContext().registerTimer(timerChannel, future);
         object(false, new TimerResponseChannelListener(timerChannel) {
