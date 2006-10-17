@@ -155,7 +155,6 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
 //                varResolver.resolveVariable(new QName(null, varStr));
 //            }
         } catch (XPathExpressionException e) {
-            System.out.println("Couldn't validate properly expression " + xpathStr);
             __log.info("Couldn't validate properly expression " + xpathStr);
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null) throw new CompilationException(wre._compilationMsg, wre);
