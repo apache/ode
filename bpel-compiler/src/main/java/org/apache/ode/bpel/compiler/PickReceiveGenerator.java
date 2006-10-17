@@ -42,7 +42,7 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
     protected static final PickGeneratorMessages __cmsgs = MessageBundle.getMessages(PickGeneratorMessages.class);
 
     public OActivity newInstance(Activity src) {
-        return new OPickReceive(_context.getOProcess());
+        return new OPickReceive(_context.getOProcess(), _context.getCurrent());
     }
 
     /**

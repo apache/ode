@@ -550,7 +550,7 @@ abstract class BpelCompiler implements CompilerContext {
             }
         }
 
-        OScope procesScope = new OScope(_oprocess);
+        OScope procesScope = new OScope(_oprocess, null);
         procesScope.name = "__PROCESS_SCOPE:" + process.getName();
         procesScope.debugInfo = createDebugInfo(process, null);
         _oprocess.procesScope = compileScope(procesScope, process, new Runnable() {
@@ -691,7 +691,7 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     private OActivity compileSJF(final Activity source) {
-        final OScope oscope = new OScope(_oprocess);
+        final OScope oscope = new OScope(_oprocess, getCurrent());
         oscope.name = createName(source);
         oscope.debugInfo = createDebugInfo(source, "suppress join failure scope for " + source);
         DefaultActivityGenerator.defaultExtensibilityElements(oscope, source, _structureStack.topActivity());
@@ -699,7 +699,7 @@ abstract class BpelCompiler implements CompilerContext {
         compile(oscope, null, new Runnable() {
             public void run() {
                 oscope.activity = compileSLC(source);
-                final OCatch joinFailureCatch = new OCatch(_oprocess);
+                final OCatch joinFailureCatch = new OCatch(_oprocess, getCurrent());
                 joinFailureCatch.name = "__suppressJoinFailureCatch:" + oscope.name;
                 joinFailureCatch.debugInfo = createDebugInfo(source, "suppress join failure catch for " + source);
                 compile(joinFailureCatch, null, new Runnable() {
@@ -719,7 +719,7 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     private OCompensate createDefaultCompensateActivity(BpelObject source, String desc) {
-        OCompensate activity = new OCompensate(_oprocess);
+        OCompensate activity = new OCompensate(_oprocess, getCurrent());
         activity.name = "__autoGenCompensate:" + _structureStack.topScope().name;
         activity.debugInfo = createDebugInfo(source, desc);
         return activity;
@@ -728,7 +728,7 @@ abstract class BpelCompiler implements CompilerContext {
     public OActivity compileSLC(final Activity source) {
         final ScopeLikeConstruct slcsrc =  source instanceof ScopeLikeConstruct ? (ScopeLikeConstruct) source : null;
         if (slcsrc != null) {
-            final OScope implicitScope = new OScope(_oprocess);
+            final OScope implicitScope = new OScope(_oprocess, getCurrent());
             implicitScope.name = createName(source);
             implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
             compileScope(implicitScope, slcsrc, new Runnable() {
@@ -896,6 +896,10 @@ abstract class BpelCompiler implements CompilerContext {
             ocset.properties.add(resolveProperty(setprops[j]));
         oscope.addCorrelationSet(ocset);
     }
+
+public OActivity getCurrent() {
+    return _structureStack.topActivity();
+}
 
     public void compile(OActivity context, BpelObject source, Runnable run) {
         DefaultActivityGenerator.defaultExtensibilityElements(context, source, _structureStack.topActivity());
@@ -1067,7 +1071,7 @@ abstract class BpelCompiler implements CompilerContext {
         final OScope oscope = _structureStack.topScope();
         assert oscope.eventHandler != null;
 
-        final OEventHandler.OEvent oevent = new OEventHandler.OEvent(_oprocess);
+        final OEventHandler.OEvent oevent = new OEventHandler.OEvent(_oprocess, oscope);
         oevent.name = "__eventHandler:";
         oevent.debugInfo = createDebugInfo(onEvent,null);
         compile(oevent, onEvent, new Runnable() {
@@ -1201,7 +1205,7 @@ abstract class BpelCompiler implements CompilerContext {
 
     private void compile(TerminationHandler terminationHandler) {
         OScope oscope = _structureStack.topScope();
-        oscope.terminationHandler = new OTerminationHandler(_oprocess);
+        oscope.terminationHandler = new OTerminationHandler(_oprocess, oscope);
         oscope.terminationHandler.name = "__terminationHandler:"  + oscope.name;
         oscope.terminationHandler.debugInfo = createDebugInfo(terminationHandler, null);
         if (terminationHandler == null) {
@@ -1218,7 +1222,7 @@ abstract class BpelCompiler implements CompilerContext {
 
     private void compile(CompensationHandler compensationHandler) {
         OScope oscope = _structureStack.topScope();
-        oscope.compensationHandler = new OCompensationHandler(_oprocess);
+        oscope.compensationHandler = new OCompensationHandler(_oprocess, oscope);
         oscope.compensationHandler.name = "__compenationHandler_" + oscope.name;
         oscope.compensationHandler.debugInfo = createDebugInfo(compensationHandler,null);
         if (compensationHandler == null) {
@@ -1240,14 +1244,14 @@ abstract class BpelCompiler implements CompilerContext {
         if (fh == null) {
             // The default fault handler compensates all child activities
             // AND then rethrows the fault!
-            final OCatch defaultCatch = new OCatch(_oprocess);
+            final OCatch defaultCatch = new OCatch(_oprocess, oscope);
             defaultCatch.name = "__defaultFaultHandler:" + oscope.name;
             defaultCatch.faultName = null;  // catch any fault
             defaultCatch.faultVariable = null;
-            OSequence sequence = new OSequence(_oprocess);
+            OSequence sequence = new OSequence(_oprocess, defaultCatch);
             sequence.name = "__defaultFaultHandler_sequence:" + oscope.name;
             sequence.debugInfo = createDebugInfo(fh, "Auto-generated sequence activity.");
-            ORethrow rethrow = new ORethrow(_oprocess);
+            ORethrow rethrow = new ORethrow(_oprocess, sequence);
             rethrow.name = "__defaultFaultHandler_rethrow:" + oscope.name;
             rethrow.debugInfo = createDebugInfo(fh, "Auto-generated re-throw activity.");
             sequence.sequence.add(createDefaultCompensateActivity(fh, "Default compensation handler for " + oscope));
@@ -1266,7 +1270,7 @@ abstract class BpelCompiler implements CompilerContext {
 
                 for (int i = 0; i < catches.length; i++) {
                     final Catch catchSrc = catches[i];
-                    final OCatch ctch = new OCatch(_oprocess);
+                    final OCatch ctch = new OCatch(_oprocess, oscope);
                     ctch.debugInfo = createDebugInfo(catchSrc, catchSrc.toString());
                     ctch.name = "__catch#" +i + ":" +_structureStack.topScope().name;
                     ctch.faultName = catchSrc.getFaultName();

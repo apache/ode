@@ -23,8 +23,9 @@ package org.apache.ode.bpel.o;
  */
 public class OTerminate extends OActivity {
   
-  static final long serialVersionUID = -1L  ;
-  public OTerminate(OProcess owner) {
-    super(owner);
-  }
+    static final long serialVersionUID = -1L  ;
+
+    public OTerminate(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

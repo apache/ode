@@ -34,21 +34,21 @@ import javax.wsdl.xml.WSDLReader;
  */
 public interface WsdlFinder {
   
-  /**
-   * Set the base URL to compose relative URLs against.
-   * @param base the base URL to resolve against or <code>null</code> if none exists.
-   */
-  void setBaseURI(URI base);
-  
-  /**
-   * Resolve a URI to a definition with BPEL-specific additions.
-   * @param f the WSDLReader to use.
-   * @param uri the URI of the definition
-   * @return the definition
-   * @throws WSDLException if one occurs while reading the WSDL or its imports.
-   */
-  Definition4BPEL loadDefinition(WSDLReader f, File importFrom, URI uri) throws WSDLException;
+    /**
+     * Set the base URL to compose relative URLs against.
+     * @param base the base URL to resolve against or <code>null</code> if none exists.
+     */
+    void setBaseURI(URI base);
+    
+    /**
+     * Resolve a URI to a definition with BPEL-specific additions.
+     * @param f the WSDLReader to use.
+     * @param uri the URI of the definition
+     * @return the definition
+     * @throws WSDLException if one occurs while reading the WSDL or its imports.
+     */
+    Definition4BPEL loadDefinition(WSDLReader f, File importFrom, URI uri) throws WSDLException;
 
-  InputStream openResource(URI uri) throws MalformedURLException, IOException;
+    InputStream openResource(URI uri) throws MalformedURLException, IOException;
 }
 

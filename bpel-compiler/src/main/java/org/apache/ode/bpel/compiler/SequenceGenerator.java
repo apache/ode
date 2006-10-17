@@ -35,7 +35,7 @@ import java.util.Iterator;
 class SequenceGenerator extends DefaultActivityGenerator {
 
     public OActivity newInstance(Activity src) {
-        return new OSequence(_context.getOProcess());
+        return new OSequence(_context.getOProcess(), _context.getCurrent());
     }
 
     public void compile(OActivity output, Activity src)  {

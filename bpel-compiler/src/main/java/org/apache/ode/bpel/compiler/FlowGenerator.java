@@ -64,7 +64,7 @@ class FlowGenerator extends DefaultActivityGenerator {
     }
 
     public OActivity newInstance(Activity src) {
-        return new OFlow(_context.getOProcess());
+        return new OFlow(_context.getOProcess(), _context.getCurrent());
     }
 
     private void compileLinkDecls(OFlow oflow, FlowActivity flowAct) {

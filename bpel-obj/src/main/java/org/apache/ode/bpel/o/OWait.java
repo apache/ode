@@ -23,25 +23,25 @@ package org.apache.ode.bpel.o;
  */
 public class OWait extends OActivity {
   
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  public OExpression forExpression;
-  public OExpression untilExpression;
+    public OExpression forExpression;
+    public OExpression untilExpression;
 
-  public OWait(OProcess owner) {
-    super(owner);
-  }
+    public OWait(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 
-  /**
-	 * Is wait a duration?
-	 * @return
-	 */
-	public boolean hasFor() { return forExpression != null; }
-	
-	/**
-	 * Is wait an until? 
-	 * @return
-	 */
-	public boolean hasUntil() { return untilExpression != null; }
+    /**
+     * Is wait a duration?
+     * @return
+     */
+    public boolean hasFor() { return forExpression != null; }
+    
+    /**
+     * Is wait an until? 
+     * @return
+     */
+    public boolean hasUntil() { return untilExpression != null; }
 
 }

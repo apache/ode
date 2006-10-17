@@ -24,9 +24,9 @@ import org.apache.ode.bpel.capi.CompilationMessageBundle;
 
 public class WaitGeneratorMessages extends CompilationMessageBundle {
 
-  /** Must specify exactly one "for" or "until" expression. */
-  public CompilationMessage errWaitMustDefineForOrUntilDuration() {
-    return this.formatCompilationMessage("Must specify exactly one \"for\" or \"until\" expression.");
-  }
+    /** Must specify exactly one "for" or "until" expression. */
+    public CompilationMessage errWaitMustDefineForOrUntilDuration() {
+        return this.formatCompilationMessage("Must specify exactly one \"for\" or \"until\" expression.");
+    }
 
 }

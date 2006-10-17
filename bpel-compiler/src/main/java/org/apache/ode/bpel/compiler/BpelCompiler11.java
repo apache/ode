@@ -28,36 +28,36 @@ import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL1
  */
 public class BpelCompiler11 extends BpelCompiler {
 
-  /** URI for the XPath 1.0 expression language. */
-  public static final String EXPLANG_XPATH = "http://www.w3.org/TR/1999/REC-xpath-19991116";
+    /** URI for the XPath 1.0 expression language. */
+    public static final String EXPLANG_XPATH = "http://www.w3.org/TR/1999/REC-xpath-19991116";
 
-  public BpelCompiler11() {
-    super((WSDLFactory4BPEL) WSDLFactoryBPEL11.newInstance());
+    public BpelCompiler11() {
+        super((WSDLFactory4BPEL) WSDLFactoryBPEL11.newInstance());
 
-    registerActivityCompiler(EmptyActivity.class, new EmptyGenerator());
-    registerActivityCompiler(CompensateActivity.class, new CompensateGenerator());
-    registerActivityCompiler(FlowActivity.class, new FlowGenerator());
-    registerActivityCompiler(SequenceActivity.class, new SequenceGenerator());
-    registerActivityCompiler(AssignActivity.class, new AssignGenerator());
-    registerActivityCompiler(ThrowActivity.class, new ThrowGenerator());
-    registerActivityCompiler(WhileActivity.class, new WhileGenerator());
-    registerActivityCompiler(SwitchActivity.class, new SwitchGenerator());
-    registerActivityCompiler(PickActivity.class, new PickGenerator());
-    registerActivityCompiler(ReplyActivity.class, new ReplyGenerator());
-    registerActivityCompiler(ReceiveActivity.class, new ReceiveGenerator());
-    registerActivityCompiler(InvokeActivity.class, new InvokeGenerator());
-    registerActivityCompiler(WaitActivity.class, new WaitGenerator());
-    registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
+        registerActivityCompiler(EmptyActivity.class, new EmptyGenerator());
+        registerActivityCompiler(CompensateActivity.class, new CompensateGenerator());
+        registerActivityCompiler(FlowActivity.class, new FlowGenerator());
+        registerActivityCompiler(SequenceActivity.class, new SequenceGenerator());
+        registerActivityCompiler(AssignActivity.class, new AssignGenerator());
+        registerActivityCompiler(ThrowActivity.class, new ThrowGenerator());
+        registerActivityCompiler(WhileActivity.class, new WhileGenerator());
+        registerActivityCompiler(SwitchActivity.class, new SwitchGenerator());
+        registerActivityCompiler(PickActivity.class, new PickGenerator());
+        registerActivityCompiler(ReplyActivity.class, new ReplyGenerator());
+        registerActivityCompiler(ReceiveActivity.class, new ReceiveGenerator());
+        registerActivityCompiler(InvokeActivity.class, new InvokeGenerator());
+        registerActivityCompiler(WaitActivity.class, new WaitGenerator());
+        registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
 
-    registerExpressionLanguage(EXPLANG_XPATH, new XPath10ExpressionCompilerBPEL11());
-  }
+        registerExpressionLanguage(EXPLANG_XPATH, new XPath10ExpressionCompilerBPEL11());
+    }
 
-  protected String getBpwsNamespace() {
-    return Constants.NS_BPEL4WS_2003_03;
-  }
+    protected String getBpwsNamespace() {
+        return Constants.NS_BPEL4WS_2003_03;
+    }
 
-  protected String getDefaultExpressionLanguage() {
-    return EXPLANG_XPATH;
-  }
+    protected String getDefaultExpressionLanguage() {
+        return EXPLANG_XPATH;
+    }
 
 }

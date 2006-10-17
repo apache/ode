@@ -28,25 +28,25 @@ import javax.wsdl.Operation;
  */
 public class OInvoke extends OActivity {
   
-  static final long serialVersionUID = -1L  ;
-  public OPartnerLink partnerLink;
-  public OScope.Variable inputVar;
-  public OScope.Variable outputVar;
-  public Operation operation;
+    static final long serialVersionUID = -1L  ;
+    public OPartnerLink partnerLink;
+    public OScope.Variable inputVar;
+    public OScope.Variable outputVar;
+    public Operation operation;
 
-  /** Correlation sets initialized on the input message. */
-  public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
+    /** Correlation sets initialized on the input message. */
+    public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
 
-  /** Correlation sets initialized on the input message. */
-  public final List <OScope.CorrelationSet> initCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
+    /** Correlation sets initialized on the input message. */
+    public final List <OScope.CorrelationSet> initCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
 
-  /** Correlation sets asserted on input. */
-  public final List <OScope.CorrelationSet> assertCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
+    /** Correlation sets asserted on input. */
+    public final List <OScope.CorrelationSet> assertCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
 
-  /** Correlation sets asserted on output. */
-  public final List<OScope.CorrelationSet> assertCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
+    /** Correlation sets asserted on output. */
+    public final List<OScope.CorrelationSet> assertCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
 
-  public OInvoke(OProcess owner) {
-    super(owner);
-  }
+    public OInvoke(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }
