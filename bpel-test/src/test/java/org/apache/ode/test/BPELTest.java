@@ -20,6 +20,7 @@ package org.apache.ode.test;
 
 import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -84,7 +85,14 @@ public class BPELTest extends TestCase {
 			}
 		}
 		
-		server.getDeploymentService().deploy(new File(deployDir));
+		try {
+			server.getDeploymentService().deploy(new File(deployDir));
+		} catch (BpelEngineException bpelE) {
+			Properties testProps = new Properties();
+			testProps.load(testPropsFile.toURL().openStream());
+			String responsePattern = testProps.getProperty("response1");
+			testResponsePattern(bpelE.getMessage(),responsePattern);
+		}
 		
 		while ( testPropsFile.exists() ) {
 		
@@ -157,6 +165,21 @@ public class BPELTest extends TestCase {
                     System.out.println("=> " + mex.getFaultExplanation());
                     assertTrue(false);
 					break;
+				case COMPLETED_FAILURE:
+					// TODO: handle Failure
+					System.out.println("=> " + mex.getFaultExplanation());
+					assertTrue(false);
+					break;
+				case COMPLETED_FAULT:
+					// TODO: handle Failure
+					System.out.println("=> " + mex.getFaultExplanation());
+					assertTrue(false);
+					break;
+				case FAILURE:
+					// TODO: handle Faulure
+					System.out.println("=> " + mex.getFaultExplanation());
+					assertTrue(false);
+					break;
 				default:
 					assertTrue(false);
 					break;
@@ -170,13 +193,17 @@ public class BPELTest extends TestCase {
 	
 	private void testResponsePattern(Message response, String responsePattern){
 		String resp = ( response == null ) ? "null" : DOMUtils.domToString(response.getMessage());
+		testResponsePattern(resp,responsePattern);
+	}
+	
+	private void testResponsePattern(String resp, String responsePattern){
 		boolean testValue = Pattern.compile(responsePattern,Pattern.DOTALL).matcher(resp).matches();
 		
 		if ( !testValue ) {
 			System.out.println("=> Expected Response Pattern >> " + responsePattern);
 		    System.out.println("=> Acutal Response >> " + resp);
 		}
-		assertTrue(testValue);
+		assertTrue(testValue);		
 	}
 
 	public void testHelloWorld2() throws Exception {
@@ -230,13 +257,24 @@ public class BPELTest extends TestCase {
     	go("target/test-classes/bpel/2.0/TestFaultWithVariable");
     }
     
+    public void testNegativeTargetNS1() throws Exception {
+    	/**
+    	 * Test for an invalid targetNamespace has been entered into
+    	 * the WSDL.
+    	 * 
+    	 * See JIRA ODE-67
+    	 */
+    	go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
+    }
     
 	  public void testNegativeCorrelation() throws Exception {
 		/**
 		 * This test contains invalid BPEL. There is an instantiating
 		 * <receive> and a subsequent <pick> that does not define a correlation
 		 * key. The BPEL compiler should throw an exception indicating
-		 * the BPEL code error ( verify with spec.
+		 * the BPEL code error ( verify with spec ).
+		 * 
+		 * See JIRA ODE-64
 		 * 
 		 */
 	    go("target/test-classes/bpel/2.0/NegativeCorrelationTest");
@@ -244,11 +282,15 @@ public class BPELTest extends TestCase {
 	  public void testNegativeInitialization() throws Exception {
 			/**
 			 * This test contains invalid BPEL. There is an instantiating
-			 * <receive> within a <scope> that contains eventhandlers
-			 * that use the correlation set found on the receive. The BPEL
-			 * compiler should through an exception indicating
-			 * the BPEL code error ( verify with spec ) or at runtime
+			 * <receive> within a <scope>. The <scope> contains eventhandlers
+			 * that reference the correlation set found on the receive. The BPEL
+			 * compiler should throw an exception indicating
+			 * the BPEL error ( verify with spec ) or at runtime
 			 * a clear initialization exception should be thrown.
+			 * 
+			 * See JIRA ODE-61.
+			 * 
+			 * The message exchange should return with a Fault/Failure.
 			 * 
 			 */
 		    go("target/test-classes/bpel/2.0/NegativeInitializationTest");
