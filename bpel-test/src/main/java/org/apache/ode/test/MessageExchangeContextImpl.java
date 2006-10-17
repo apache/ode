@@ -38,6 +38,8 @@
 
 package org.apache.ode.test;
 
+import java.io.IOException;
+
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
@@ -47,6 +49,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 
@@ -58,9 +61,14 @@ import javax.xml.namespace.QName;
  *
  */
 public class MessageExchangeContextImpl implements MessageExchangeContext {
+	
+	private static final String PROBE_NS = "http://ode/bpel/unit-test/ProbeService.wsdl";
+	private static final String FAULT_NS = "http://ode/bpel/unit-test/FaultService.wsdl";
 
 	// Probe Service is a simple concatination service
-	private QName probePT = new QName("http://ode/bpel/unit-test/ProbeService.wsdl","probeMessagePT");
+	private static final QName probePT = new QName(PROBE_NS,"probeMessagePT");
+	private static final QName faultPT = new QName(FAULT_NS,"faultMessagePT");
+	
 	private Message currentResponse;
 	
 	public void invokePartner(PartnerRoleMessageExchange mex)
@@ -71,6 +79,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 			invokeProbeService(mex);
 		}
 		
+		if (calledPT.equals(faultPT)) {
+			invokeFaultService(mex);
+		}
 
 	}
 
@@ -108,8 +119,54 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
             response.setMessage(msg.getMessage());
 			prmx.reply(response);
 		}
+	}
+	
+	private void invokeFaultService(PartnerRoleMessageExchange prmx) {
+		QName errorMsgType = new QName(FAULT_NS,"errorMessage");
+		QName responseMsgType = new QName(FAULT_NS,"faultMessage");
+		Message faultMsg = prmx.createMessage(errorMsgType);
+		Message responseMsg = prmx.createMessage(responseMsgType);
+
+		String ind1 = prmx.getRequest().getPart("faultIndicator1").getTextContent();
+		String ind2 = prmx.getRequest().getPart("faultIndicator2").getTextContent();
+		String inputData = prmx.getRequest().getPart("faultData").getTextContent();
+		
+		StringBuffer faultData = new StringBuffer("<message><errorID>FA-1</errorID><errorText>");
+		faultData.append(inputData);
+		faultData.append("</errorText></message>");
+		
+		StringBuffer responseData = new StringBuffer("<message><faultName>FA-NoFault</faultName><faultData>");
+		responseData.append(inputData);
+		responseData.append("</faultData></message>");
 		
 		
+		Element faultResponse = null;
+		Element response = null;
+		try {
+			faultResponse = DOMUtils.stringToDOM(faultData.toString());
+			response = DOMUtils.stringToDOM(responseData.toString());
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		// TODO: Question - how does one set parts that are of a simple xsd type?
+		faultMsg.setMessage(faultResponse);
+		responseMsg.setMessage(response);
+		
+		if ( ind1.equals("yes")){
+			prmx.replyWithFault("FaultMessage1", faultMsg);
+		} else {
+			if ( ind2.equals("yes")){
+				prmx.replyWithFault("FaultMessage2", faultMsg);
+			} else {
+				prmx.reply(responseMsg);
+			}
+		}
 
 	}
 	
