@@ -27,32 +27,32 @@ import java.util.Map;
  * Information about the source that was used to create a compiled object.
  */
 public class DebugInfo implements Serializable {
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  /** Source file / resource name. */
-  public final String sourceURI;
+    /** Source file / resource name. */
+    public final String sourceURI;
 
-  /** Source line number (start). */
-  public final int startLine;
+    /** Source line number (start). */
+    public final int startLine;
 
-  /** Source line number (end). */
-  public final int endLine;
+    /** Source line number (end). */
+    public final int endLine;
 
-  public String description;
+    public String description;
 
-  public HashMap<QName, Object> extensibilityElements = new HashMap<QName, Object>();
+    public HashMap<QName, Object> extensibilityElements = new HashMap<QName, Object>();
 
-  public DebugInfo(String sourceURI, int startLine, int endLine, Map<QName, Object> extElmt) {
-    this.sourceURI = sourceURI;
-    this.startLine = startLine;
-    this.endLine = endLine;
-    if (extElmt != null && extElmt.size() > 0) {
-      this.extensibilityElements = new HashMap<QName, Object>(extElmt);
+    public DebugInfo(String sourceURI, int startLine, int endLine, Map<QName, Object> extElmt) {
+        this.sourceURI = sourceURI;
+        this.startLine = startLine;
+        this.endLine = endLine;
+        if (extElmt != null && extElmt.size() > 0) {
+            this.extensibilityElements = new HashMap<QName, Object>(extElmt);
+        }
     }
-  }
 
-  public DebugInfo(String sourceURI, int line, Map<QName, Object> extElmt) {
-    this(sourceURI, line, line, extElmt);
-  }
+    public DebugInfo(String sourceURI, int line, Map<QName, Object> extElmt) {
+        this(sourceURI, line, line, extElmt);
+    }
 
 }

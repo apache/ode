@@ -19,27 +19,27 @@
 package org.apache.ode.bpel.o;
 
 public class OConstantExpression extends OExpression {
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  private Object _val;
+    private Object _val;
 
-  public OConstantExpression(OProcess owner, Object val) {
-    super(owner);
-    setVal(val);
-  }
+    public OConstantExpression(OProcess owner, Object val) {
+        super(owner);
+        setVal(val);
+    }
 
-  public Object getVal() {
-    return _val;
-  }
+    public Object getVal() {
+        return _val;
+    }
 
-  public void setVal(Object val) {
-    if (val == null)
-      throw new IllegalArgumentException("OConstatExpression cannot be null.");
+    public void setVal(Object val) {
+        if (val == null)
+          throw new IllegalArgumentException("OConstatExpression cannot be null.");
 
-    this._val = val;
-  }
+        this._val = val;
+    }
 
-  public String toString() {
-    return "{OConstantExpression " + _val  + "}";
-  }
+    public String toString() {
+        return "{OConstantExpression " + _val  + "}";
+    }
 }

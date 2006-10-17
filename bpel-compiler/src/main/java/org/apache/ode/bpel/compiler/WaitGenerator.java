@@ -31,24 +31,23 @@ import org.apache.ode.utils.msg.MessageBundle;
  */
 class WaitGenerator extends DefaultActivityGenerator {
 
-  private WaitGeneratorMessages _msgs = MessageBundle.getMessages(WaitGeneratorMessages.class);
+    private WaitGeneratorMessages _msgs = MessageBundle.getMessages(WaitGeneratorMessages.class);
 
-  public OActivity newInstance(Activity src) {
-    return new OWait(_context.getOProcess());
-  }
+    public OActivity newInstance(Activity src) {
+        return new OWait(_context.getOProcess(), _context.getCurrent());
+    }
 
-  public void compile(OActivity output, Activity src) {
-    WaitActivity waitDef = (WaitActivity)src;
-    OWait owait = (OWait)output;
-    if (waitDef.getFor() != null && waitDef.getUntil() == null) {
-      owait.forExpression = _context.compileExpr(waitDef.getFor());
+    public void compile(OActivity output, Activity src) {
+        WaitActivity waitDef = (WaitActivity)src;
+        OWait owait = (OWait)output;
+        if (waitDef.getFor() != null && waitDef.getUntil() == null) {
+            owait.forExpression = _context.compileExpr(waitDef.getFor());
+        }
+        else if (waitDef.getFor() == null && waitDef.getUntil() != null) {
+            owait.untilExpression = _context.compileExpr(waitDef.getUntil());
+        }
+        else {
+            throw new CompilationException(_msgs.errWaitMustDefineForOrUntilDuration().setSource(waitDef));
+        }
     }
-    else if (waitDef.getFor() == null && waitDef.getUntil() != null) {
-      owait.untilExpression = _context.compileExpr(waitDef.getUntil());
-    }
-    else {
-      throw new CompilationException(_msgs.errWaitMustDefineForOrUntilDuration().setSource(
-          waitDef));
-    }
-  }
 }

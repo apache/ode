@@ -26,13 +26,13 @@ import java.net.URI;
  */
 public class OXslSheet extends OBase {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  public URI uri;
-  public String sheetBody;
+    public URI uri;
+    public String sheetBody;
 
-  public OXslSheet(OProcess owner) {
-    super(owner);
-  }
+    public OXslSheet(OProcess owner) {
+        super(owner);
+    }
 
 }

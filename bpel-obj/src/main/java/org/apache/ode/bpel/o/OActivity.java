@@ -28,30 +28,36 @@ import java.util.Set;
  * Compiled represnetation of a BPEL activity.
  */
 public abstract class OActivity extends OAgent {
-  static final long serialVersionUID = -1L  ;
-  
-  public OExpression joinCondition;
-  public final Set<OLink>sourceLinks = new HashSet<OLink>();
-  public final Set<OLink>targetLinks = new HashSet<OLink>();
-  public String name;
-  public FailureHandling failureHandling;
+    static final long serialVersionUID = -1L  ;
+    
+    public OExpression joinCondition;
+    public final Set<OLink>sourceLinks = new HashSet<OLink>();
+    public final Set<OLink>targetLinks = new HashSet<OLink>();
+    public String name;
+    public FailureHandling failureHandling;
+    public OActivity parent;
 
-  public String getType() {
-    return ObjectPrinter.getShortClassName(getClass());
-  }
-
-  public OActivity(OProcess owner) {
-    super(owner);
-  }
-
-  public String toString() {
-    StringBuffer buf = new StringBuffer(super.toString());
-    if (name != null) {
-      buf.append('-');
-      buf.append(name);
+    public String getType() {
+        return ObjectPrinter.getShortClassName(getClass());
     }
 
-    return buf.toString();
-  }
+    public OActivity(OProcess owner, OActivity parent) {
+        super(owner);
+        this.parent = parent;
+    }
+
+    public OActivity getParent() {
+      return parent;
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer(super.toString());
+        if (name != null) {
+            buf.append('-');
+            buf.append(name);
+        }
+
+        return buf.toString();
+    }
 
 }

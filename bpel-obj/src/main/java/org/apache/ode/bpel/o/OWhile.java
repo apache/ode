@@ -23,13 +23,13 @@ package org.apache.ode.bpel.o;
  */
 public class OWhile extends OActivity {
 
-  static final long serialVersionUID = -1L  ;
-  /** The while condition. */
-  public OExpression whileCondition;
+    static final long serialVersionUID = -1L  ;
+    /** The while condition. */
+    public OExpression whileCondition;
 
-  public OActivity activity;
+    public OActivity activity;
 
-  public OWhile(OProcess owner) {
-    super(owner);
-  }
+    public OWhile(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

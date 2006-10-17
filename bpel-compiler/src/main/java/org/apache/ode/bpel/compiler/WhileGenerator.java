@@ -29,7 +29,7 @@ import org.apache.ode.bpel.o.OWhile;
  */
 class WhileGenerator extends DefaultActivityGenerator {
     public OActivity newInstance(Activity src) {
-        return new OWhile(_context.getOProcess());
+        return new OWhile(_context.getOProcess(), _context.getCurrent());
     }
 
     public void compile(OActivity output, Activity srcx)  {
