@@ -34,8 +34,8 @@ public abstract class OActivity extends OAgent {
     public final Set<OLink>sourceLinks = new HashSet<OLink>();
     public final Set<OLink>targetLinks = new HashSet<OLink>();
     public String name;
-    public FailureHandling failureHandling;
-    public OActivity parent;
+    private FailureHandling failureHandling;
+    private OActivity parent;
 
     public String getType() {
         return ObjectPrinter.getShortClassName(getClass());
@@ -47,7 +47,23 @@ public abstract class OActivity extends OAgent {
     }
 
     public OActivity getParent() {
-      return parent;
+        return this.parent;
+    }
+
+    public FailureHandling getFailureHandling() {
+        FailureHandling handling = this.failureHandling;
+        if (handling == null) {
+            OActivity parent = this.parent;
+            while (parent != null && handling == null) {
+                handling = parent.failureHandling;
+                parent = parent.parent;
+            } 
+        }
+        return handling;
+    }
+
+    public void setFailureHandling(FailureHandling failureHandling) {
+        this.failureHandling = failureHandling;
     }
 
     public String toString() {

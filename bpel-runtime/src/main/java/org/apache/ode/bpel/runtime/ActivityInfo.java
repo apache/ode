@@ -62,10 +62,4 @@ class ActivityInfo implements Serializable {
         return (int)aId;
     }
 
-    public FailureHandling getFailureHandling() {
-        FailureHandling failure = o.failureHandling;
-        if (failure == null)
-            failure = new FailureHandling();
-        return failure;
-    }
 }
