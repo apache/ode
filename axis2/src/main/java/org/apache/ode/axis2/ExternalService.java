@@ -87,6 +87,7 @@ public class ExternalService implements PartnerRoleChannel {
             String soapAction = SOAPUtils.getSoapAction(_definition, _serviceName, _portName,
                     odeMex.getOperationName());
             options.setAction(soapAction);
+            options.setTimeOutInMilliSeconds(60000);
 
             ConfigurationContext ctx = new ConfigurationContext(_axisConfig);
             final ServiceClient serviceClient = new ServiceClient(ctx, null);
