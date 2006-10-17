@@ -219,7 +219,18 @@ public class BPELTest extends TestCase {
     }
     public void testDynamicPick() throws Exception {
     	go("target/test-classes/bpel/2.0/TestDynamicPick");
-    }	
+    }
+    public void testSimpleTypeParts() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestSimpleTypeParts");
+    }
+    public void testSimpleVariableType() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestSimpleVariableType");
+    }
+    public void testFaultWithVariable() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestFaultWithVariable");
+    }
+    
+    
 	  public void testNegativeCorrelation() throws Exception {
 		/**
 		 * This test contains invalid BPEL. There is an instantiating
