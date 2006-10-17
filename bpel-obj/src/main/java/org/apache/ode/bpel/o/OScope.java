@@ -89,15 +89,36 @@ public class OScope extends OActivity {
     }
 
     public Variable getVisibleVariable(String varName) {
-        // TODO: implement
-        assert false;
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        OActivity current = this;
+        Variable variable;
+        while (current != null) {
+            if (current instanceof OScope) {
+                variable = ((OScope)current).getLocalVariable(varName);
+                if (variable != null)
+                    return variable;
+            }
+            current = current.getParent();
+        }
+        return null;
     }
 
     public OPartnerLink getLocalPartnerLink(String name) {
         return partnerLinks.get(name);
     }
 
+    public OPartnerLink getVisiblePartnerLink(String name) {
+        OActivity current = this;
+        OPartnerLink plink;
+        while (current != null) {
+            if (current instanceof OScope) {
+                plink = ((OScope)current).getLocalPartnerLink(name);
+                if (plink != null)
+                    return plink;
+            }
+            current = current.getParent();
+        }
+        return null;
+    }
 
     public void addCorrelationSet(CorrelationSet ocset) {
         correlationSets.put(ocset.name, ocset);
