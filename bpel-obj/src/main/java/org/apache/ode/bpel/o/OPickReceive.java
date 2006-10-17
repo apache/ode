@@ -31,51 +31,51 @@ import javax.wsdl.Operation;
  * between the two.
  */
 public class OPickReceive extends OActivity{
-  static final long serialVersionUID = -1L  ;
-	public final List<OnMessage> onMessages  = new ArrayList<OnMessage>();
-  public final List<OnAlarm> onAlarms = new ArrayList<OnAlarm>();
-
-  public boolean createInstanceFlag;
-
-  public OPickReceive(OProcess owner) {
-    super(owner);
-  }
-
-  public static class OnAlarm extends OBase {
     static final long serialVersionUID = -1L  ;
-		public OActivity activity;
-    public OExpression forExpr;
-    public OExpression untilExpr;
+    public final List<OnMessage> onMessages  = new ArrayList<OnMessage>();
+    public final List<OnAlarm> onAlarms = new ArrayList<OnAlarm>();
 
-    public OnAlarm(OProcess owner) {
-      super(owner);
+    public boolean createInstanceFlag;
+
+    public OPickReceive(OProcess owner, OActivity parent) {
+        super(owner, parent);
     }
-	}
-	
-	public static class OnMessage extends OBase {
+
+    public static class OnAlarm extends OBase {
+        static final long serialVersionUID = -1L  ;
+        public OActivity activity;
+        public OExpression forExpr;
+        public OExpression untilExpr;
+
+        public OnAlarm(OProcess owner) {
+            super(owner);
+        }
+    }
     
-    static final long serialVersionUID = -1L  ;
-    
-    /** Correlations to initialize. */
-    public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
+    public static class OnMessage extends OBase {
+      
+        static final long serialVersionUID = -1L  ;
+        
+        /** Correlations to initialize. */
+        public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
-    /** Correlation set to match on. */
-    public OScope.CorrelationSet matchCorrelation;
+        /** Correlation set to match on. */
+        public OScope.CorrelationSet matchCorrelation;
 
-    public OPartnerLink partnerLink;
-    public Operation operation;
-    public OScope.Variable variable;
-    public OActivity activity;
+        public OPartnerLink partnerLink;
+        public Operation operation;
+        public OScope.Variable variable;
+        public OActivity activity;
 
-    /** OASIS addition for disambiguating receives (optional). */
-    public String messageExchangeId = "";
+        /** OASIS addition for disambiguating receives (optional). */
+        public String messageExchangeId = "";
 
-    public OnMessage(OProcess owner) {
-      super(owner);
+        public OnMessage(OProcess owner) {
+            super(owner);
+        }
+
+        public String getCorrelatorId() {
+            return partnerLink.getId() + "." + operation.getName();
+        }
     }
-
-    public String getCorrelatorId() {
-      return partnerLink.getId() + "." + operation.getName();
-    }
-  }
 }

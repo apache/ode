@@ -29,15 +29,15 @@ import org.apache.ode.bpel.o.OThrow;
  */
 class ThrowGenerator extends DefaultActivityGenerator {
 
-  public OActivity newInstance(Activity src) {
-    return new OThrow(_context.getOProcess());
-  }
+    public OActivity newInstance(Activity src) {
+        return new OThrow(_context.getOProcess(), _context.getCurrent());
+    }
 
-  public void compile(OActivity output, Activity src) {
-    ThrowActivity throwDef = (ThrowActivity)src;
-    OThrow othrow = (OThrow) output;
-    othrow.faultName = throwDef.getFaultName();
-    if(throwDef.getFaultVariable() != null)
-    	othrow.faultVariable = _context.resolveVariable(throwDef.getFaultVariable());
-  }
+    public void compile(OActivity output, Activity src) {
+        ThrowActivity throwDef = (ThrowActivity)src;
+        OThrow othrow = (OThrow) output;
+        othrow.faultName = throwDef.getFaultName();
+        if(throwDef.getFaultVariable() != null)
+            othrow.faultVariable = _context.resolveVariable(throwDef.getFaultVariable());
+    }
 }

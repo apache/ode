@@ -46,7 +46,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
     private static final InvokeGeneratorMessages __imsgs = MessageBundle.getMessages(InvokeGeneratorMessages.class);
 
     public OActivity newInstance(Activity src) {
-        return new OInvoke(_context.getOProcess());
+        return new OInvoke(_context.getOProcess(), _context.getCurrent());
     }
 
     public void compile(OActivity output, Activity srcx)  {

@@ -24,10 +24,10 @@ import org.apache.ode.bpel.o.ORethrow;
 
 class RethrowGenerator extends DefaultActivityGenerator {
 
-  public void compile(OActivity output, Activity src) {
-  }
+    public void compile(OActivity output, Activity src) {
+    }
 
-  public OActivity newInstance(Activity src) {
-    return new ORethrow(_context.getOProcess());
-  }
+    public OActivity newInstance(Activity src) {
+        return new ORethrow(_context.getOProcess(), _context.getCurrent());
+    }
 }

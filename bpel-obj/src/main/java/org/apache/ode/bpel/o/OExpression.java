@@ -23,17 +23,17 @@ package org.apache.ode.bpel.o;
  * dependent on the compiler implementation.
  */
 public abstract class OExpression extends OBase {
-  static final long serialVersionUID = -1L  ;
-  
-  public OExpressionLanguage expressionLanguage;
+    static final long serialVersionUID = -1L  ;
+    
+    public OExpressionLanguage expressionLanguage;
 
-  public OExpression(OProcess owner) {
-    super(owner);
-  }
+    public OExpression(OProcess owner) {
+        super(owner);
+    }
 
-  /** Get the expression language used to generate this expression. */
-  public OExpressionLanguage getExpressionLanguage() {
-    return expressionLanguage;
+    /** Get the expression language used to generate this expression. */
+    public OExpressionLanguage getExpressionLanguage() {
+        return expressionLanguage;
     }
 
 }

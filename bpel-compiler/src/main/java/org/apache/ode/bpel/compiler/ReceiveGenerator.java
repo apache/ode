@@ -40,7 +40,7 @@ class ReceiveGenerator extends PickReceiveGenerator {
             rcvDef.getCreateInstance(),
             rcvDef.getCorrelations());
 
-    onMessage.activity = new OEmpty(_context.getOProcess());
+    onMessage.activity = new OEmpty(_context.getOProcess(), opick);
     opick.onMessages.add(onMessage);
   }
 

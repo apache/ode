@@ -32,159 +32,159 @@ import javax.wsdl.Operation;
  */
 public class OProcess extends OBase {
   
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  /** BPEL version. */
-  public final String version;
+    /** BPEL version. */
+    public final String version;
 
-  /** Various constants that are needed at runtime. */
-  public OConstants constants;
+    /** Various constants that are needed at runtime. */
+    public OConstants constants;
 
-  /** Universally Unique Identifier */
-  public String uuid;
+    /** Universally Unique Identifier */
+    public String uuid;
 
-  /** Namespace of the process. */
-  public String targetNamespace;
+    /** Namespace of the process. */
+    public String targetNamespace;
 
-  /** Name of the process. */
-  public String processName;
+    /** Name of the process. */
+    public String processName;
 
-  /** ProcessImpl-level scope. */
-  public OScope procesScope;
+    /** ProcessImpl-level scope. */
+    public OScope procesScope;
 
-  /** All partner links in the process. */
-  public final Set<OPartnerLink> allPartnerLinks = new HashSet<OPartnerLink>();
+    /** All partner links in the process. */
+    public final Set<OPartnerLink> allPartnerLinks = new HashSet<OPartnerLink>();
 
-  public final List<OProperty> properties = new ArrayList<OProperty>();
-
-
-  /** Date process was compiled. */
-  public Date compileDate;
-
-  int _childIdCounter = 0;
-
-  List<OBase> _children = new ArrayList<OBase>();
-  
-  public final HashSet<OExpressionLanguage> expressionLanguages = new HashSet<OExpressionLanguage>();
-
-  public final HashMap<QName, OMessageVarType> messageTypes = new HashMap<QName, OMessageVarType>();
-
-  public final HashMap<QName, OElementVarType> elementTypes = new HashMap<QName, OElementVarType>();
-
-  public final HashMap<QName, OXsdTypeVarType> xsdTypes = new HashMap<QName, OXsdTypeVarType>();
-
-  public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
-
-  public OProcess(String bpelVersion) {
-    super(null);
-    this.version = bpelVersion;
-  }
-
-  public OBase getChild(final int id) {
-    return CollectionsX.find_if(_children, new MemberOfFunction<OBase>() {
-      public boolean isMember(OBase o) {
-        return o.getId() == id;
-      }
-    });
-  }
-
-  public List<OBase> getChildren() {
-    return _children;
-  }
-
-  public OScope getScope(String scopeName) {
-    throw new UnsupportedOperationException();
-  }
+    public final List<OProperty> properties = new ArrayList<OProperty>();
 
 
-  public Set<OPartnerLink> getAllPartnerLinks() {
-    return Collections.unmodifiableSet(allPartnerLinks);
-  }
+    /** Date process was compiled. */
+    public Date compileDate;
 
-  public OPartnerLink getPartnerLink(String name) {
-    for (OPartnerLink partnerLink : allPartnerLinks) {
-      if (partnerLink.getName().equals(name)) return partnerLink;
+    int _childIdCounter = 0;
+
+    List<OBase> _children = new ArrayList<OBase>();
+    
+    public final HashSet<OExpressionLanguage> expressionLanguages = new HashSet<OExpressionLanguage>();
+
+    public final HashMap<QName, OMessageVarType> messageTypes = new HashMap<QName, OMessageVarType>();
+
+    public final HashMap<QName, OElementVarType> elementTypes = new HashMap<QName, OElementVarType>();
+
+    public final HashMap<QName, OXsdTypeVarType> xsdTypes = new HashMap<QName, OXsdTypeVarType>();
+
+    public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
+
+    public OProcess(String bpelVersion) {
+        super(null);
+        this.version = bpelVersion;
     }
-    return null;
-  }
 
-  public String getName() {
-    return processName;
-  }
+    public OBase getChild(final int id) {
+        return CollectionsX.find_if(_children, new MemberOfFunction<OBase>() {
+            public boolean isMember(OBase o) {
+                return o.getId() == id;
+            }
+        });
+    }
 
-  public Collection getExpressionLanguages() {
-    throw new UnsupportedOperationException(); // TODO: implement me!
-  }
+    public List<OBase> getChildren() {
+        return _children;
+    }
 
-  public List<String> getCorrelators() {
-    // MOVED from ProcessSchemaGenerator
-    List<String> correlators = new ArrayList<String>();
+    public OScope getScope(String scopeName) {
+        throw new UnsupportedOperationException();
+    }
 
-    for (OPartnerLink plink : getAllPartnerLinks()) {
-      if (plink.hasMyRole()) {
-        for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
-          Operation op = (Operation)opI.next();
-          correlators.add(plink.getId() + "." + op.getName());
+
+    public Set<OPartnerLink> getAllPartnerLinks() {
+        return Collections.unmodifiableSet(allPartnerLinks);
+    }
+
+    public OPartnerLink getPartnerLink(String name) {
+        for (OPartnerLink partnerLink : allPartnerLinks) {
+            if (partnerLink.getName().equals(name)) return partnerLink;
         }
-      }
+        return null;
+    }
+
+    public String getName() {
+        return processName;
+    }
+
+    public Collection getExpressionLanguages() {
+        throw new UnsupportedOperationException(); // TODO: implement me!
+    }
+
+    public List<String> getCorrelators() {
+        // MOVED from ProcessSchemaGenerator
+        List<String> correlators = new ArrayList<String>();
+
+        for (OPartnerLink plink : getAllPartnerLinks()) {
+            if (plink.hasMyRole()) {
+                for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
+                    Operation op = (Operation)opI.next();
+                    correlators.add(plink.getId() + "." + op.getName());
+                }
+            }
+        }
+        
+        return correlators;
     }
     
-    return correlators;
-  }
-  
-  public static class OProperty extends OBase {
-    
-    static final long serialVersionUID = -1L  ;
-    public final List<OPropertyAlias> aliases = new ArrayList<OPropertyAlias>();
-    public QName name;
+    public static class OProperty extends OBase {
+      
+        static final long serialVersionUID = -1L  ;
+        public final List<OPropertyAlias> aliases = new ArrayList<OPropertyAlias>();
+        public QName name;
 
-    public OProperty(OProcess process) { super(process); }
+        public OProperty(OProcess process) { super(process); }
 
-    public OPropertyAlias getAlias(OVarType messageType) {
-      for (OPropertyAlias aliase : aliases)
-        if (aliase.varType.equals(messageType))
-          return aliase;
-      return null;
+        public OPropertyAlias getAlias(OVarType messageType) {
+            for (OPropertyAlias aliase : aliases)
+                if (aliase.varType.equals(messageType))
+                    return aliase;
+            return null;
+        }
+
+        public String toString() {
+            return "{OProperty " + name + "}";
+        }
     }
 
-    public String toString() {
-      return "{OProperty " + name + "}";
+    public static class OPropertyAlias extends OBase {
+      
+        static final long serialVersionUID = -1L  ;
+
+        public OVarType varType;
+
+        /** For BPEL 1.1 */
+        public OMessageVarType.Part part;
+
+        public OExpression location;
+
+        public OPropertyAlias(OProcess owner) {super(owner); }
+
+        public String toString() {
+            return "{OPropertyAlias " + getDescription() +  "}";
+        }
+
+        public String getDescription() {
+            StringBuffer buf = new StringBuffer(varType.toString());
+            buf.append('[');
+            buf.append(part != null ? part.name : "");
+            if (location != null) {
+                buf.append("][");
+                buf.append(location.toString());
+            }
+            buf.append(']');
+            return buf.toString();
+        }
+      
     }
-  }
 
-  public static class OPropertyAlias extends OBase {
-    
-    static final long serialVersionUID = -1L  ;
-
-    public OVarType varType;
-
-    /** For BPEL 1.1 */
-    public OMessageVarType.Part part;
-
-    public OExpression location;
-
-    public OPropertyAlias(OProcess owner) {super(owner); }
-
-    public String toString() {
-      return "{OPropertyAlias " + getDescription() +  "}";
+    public QName getQName() {
+        return new QName(targetNamespace, processName);
     }
-
-    public String getDescription() {
-      StringBuffer buf = new StringBuffer(varType.toString());
-      buf.append('[');
-      buf.append(part != null ? part.name : "");
-      if (location != null) {
-        buf.append("][");
-        buf.append(location.toString());
-      }
-      buf.append(']');
-      return buf.toString();
-    }
-    
-  }
-
-  public QName getQName() {
-    return new QName(targetNamespace, processName);
-  }
 
 }

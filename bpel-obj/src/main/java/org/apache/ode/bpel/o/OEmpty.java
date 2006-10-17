@@ -20,9 +20,9 @@ package org.apache.ode.bpel.o;
 
 public class OEmpty extends OActivity {
 
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  public OEmpty(OProcess owner) {
-    super(owner);
-  }
+    public OEmpty(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

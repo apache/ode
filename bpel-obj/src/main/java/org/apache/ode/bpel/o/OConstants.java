@@ -26,25 +26,25 @@ import javax.xml.namespace.QName;
  */
 public class OConstants extends OBase {
 
-  private static final long serialVersionUID = 1L;
-	public QName qnMissingRequest;
-  public QName qnMissingReply;
-  public QName qnUninitializedVariable;
-  public QName qnConflictingReceive;
-  public QName qnSelectionFailure;
-  public QName qnMismatchedAssignmentFailure;
-  public QName qnJoinFailure;
-  public QName qnForcedTermination;
-  public QName qnCorrelationViolation;
-  public QName qnXsltInvalidSource;
-  public QName qnSubLanguageExecutionFault;
-  public QName qnUninitializedPartnerRole;
-  public QName qnForEachCounterError;
-  public QName qnInvalidBranchCondition;
+    private static final long serialVersionUID = 1L;
+    public QName qnMissingRequest;
+    public QName qnMissingReply;
+    public QName qnUninitializedVariable;
+    public QName qnConflictingReceive;
+    public QName qnSelectionFailure;
+    public QName qnMismatchedAssignmentFailure;
+    public QName qnJoinFailure;
+    public QName qnForcedTermination;
+    public QName qnCorrelationViolation;
+    public QName qnXsltInvalidSource;
+    public QName qnSubLanguageExecutionFault;
+    public QName qnUninitializedPartnerRole;
+    public QName qnForEachCounterError;
+    public QName qnInvalidBranchCondition;
 
 
-  public OConstants(OProcess owner) {
-    super(owner);
-  }
+    public OConstants(OProcess owner) {
+        super(owner);
+    }
 
 }
