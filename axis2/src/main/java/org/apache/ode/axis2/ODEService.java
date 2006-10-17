@@ -352,18 +352,7 @@ public class ODEService {
      * @return XML representation of the EPR
      */
     public static Element genEPRfromWSDL(Definition wsdlDef, QName name, String portName) {
-        System.out.println("SERVICE NAME: " + name);
-        System.out.println("SERVICE PORT: " + portName);
-
-        for (Object s : wsdlDef.getServices().values()) {
-            System.out.println("Found service " + ((Service)s).getQName());
-            for (Object p : ((Service) s).getPorts().values()) {
-                System.out.println("Found port " + ((Port)p).getName());
-            }
-        }
-
         Service serviceDef = wsdlDef.getService(name);
-        System.out.println("Service def " + serviceDef);
         if (serviceDef != null) {
             Port portDef = serviceDef.getPort(portName);
             if (portDef != null) {
