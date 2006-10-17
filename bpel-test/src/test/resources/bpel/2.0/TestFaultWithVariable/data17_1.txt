@@ -1,0 +1,19 @@
+# Test BPEL fault handlers with a faultVariable
+# Expected result = Event Start Test17.1 -> caught FaultMessage -> fault text one -> process complete
+
+# Note the prefix on the part name identifies the message type ( xml = xml data; str = string data )
+
+target.name.space=urn:sybase:bpel:test17Processing
+port.type=test17PT
+operation=request
+
+part1=str.requestID
+part2=str.requestText
+part3=str.faultIndicator1
+part4=str.faultIndicator2
+
+str.requestID=Start Test17.1
+str.requestText=Event Start Test17.1
+str.faultIndicator1=no
+str.faultIndicator2=no
+
