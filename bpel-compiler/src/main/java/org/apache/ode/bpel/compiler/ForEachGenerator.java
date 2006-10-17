@@ -42,7 +42,7 @@ public class ForEachGenerator extends DefaultActivityGenerator {
     private static final ForEachGeneratorMessages __cmsgs = MessageBundle.getMessages(ForEachGeneratorMessages.class);
 
     public OActivity newInstance(Activity src) {
-        return new OForEach(_context.getOProcess());
+        return new OForEach(_context.getOProcess(), _context.getCurrent());
     }
 
     public void compile(OActivity output, Activity src) {

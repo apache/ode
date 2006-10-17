@@ -26,11 +26,11 @@ import java.util.ArrayList;
  * Compiled representation of the BPEL <code>&lt;sequence&gt;</code> activity.
  */
 public class OSequence extends OActivity {
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  public final List<OActivity> sequence = new ArrayList<OActivity>();
+    public final List<OActivity> sequence = new ArrayList<OActivity>();
 
-  public OSequence(OProcess owner) {
-    super(owner);
-  }
+    public OSequence(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

@@ -20,9 +20,9 @@ package org.apache.ode.bpel.o;
 
 public class ORethrow extends OActivity {
 
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  public ORethrow(OProcess owner) {
-    super(owner);
-  }
+    public ORethrow(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

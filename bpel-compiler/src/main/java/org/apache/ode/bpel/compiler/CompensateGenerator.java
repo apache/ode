@@ -29,12 +29,12 @@ import org.apache.ode.bpel.o.OCompensate;
  */
 class CompensateGenerator extends DefaultActivityGenerator {
 
-  public void compile(OActivity output, Activity src) {
-    CompensateActivity compSrc = (CompensateActivity) src;
-    ((OCompensate)output).compensatedScope = _context.resolveCompensatableScope(compSrc.getScopeToCompensate());
-  }
+    public void compile(OActivity output, Activity src) {
+        CompensateActivity compSrc = (CompensateActivity) src;
+        ((OCompensate)output).compensatedScope = _context.resolveCompensatableScope(compSrc.getScopeToCompensate());
+    }
 
-  public OActivity newInstance(Activity src) {
-    return new OCompensate(_context.getOProcess());
-  }
+    public OActivity newInstance(Activity src) {
+        return new OCompensate(_context.getOProcess(), _context.getCurrent());
+    }
 }

@@ -28,23 +28,23 @@ import java.util.Set;
 /**
  */
 public class OFlow extends OActivity {
-  static final long serialVersionUID = -1L  ;
+    static final long serialVersionUID = -1L  ;
 
-  /** Links delcared within this activity. */
-  public final Set<OLink> localLinks = new HashSet<OLink>();
+    /** Links delcared within this activity. */
+    public final Set<OLink> localLinks = new HashSet<OLink>();
 
-  public final Set<OActivity> parallelActivities = new HashSet<OActivity>();
+    public final Set<OActivity> parallelActivities = new HashSet<OActivity>();
 
-  public OFlow(OProcess owner) {
-    super(owner);
-  }
+    public OFlow(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 
-  public OLink getLocalLink(final String linkName) {
-    return CollectionsX.find_if(localLinks, new MemberOfFunction<OLink>() {
-      public boolean isMember(OLink o) {
-        return o.name.equals(linkName);
-      }
-    });
-  }
+    public OLink getLocalLink(final String linkName) {
+        return CollectionsX.find_if(localLinks, new MemberOfFunction<OLink>() {
+            public boolean isMember(OLink o) {
+                return o.name.equals(linkName);
+            }
+        });
+    }
 
 }

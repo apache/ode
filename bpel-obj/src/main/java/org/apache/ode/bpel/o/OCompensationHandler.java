@@ -20,7 +20,7 @@ package org.apache.ode.bpel.o;
 
 public class OCompensationHandler extends OScope {
 
-  public OCompensationHandler(OProcess owner) {
-    super(owner);
-  }
+    public OCompensationHandler(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }

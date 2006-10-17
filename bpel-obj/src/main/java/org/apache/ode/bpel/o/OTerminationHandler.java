@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.o;
 
 public class OTerminationHandler extends OScope {
-  public OTerminationHandler(OProcess owner) {
-    super(owner);
-  }
+    public OTerminationHandler(OProcess owner, OActivity parent) {
+        super(owner, parent);
+    }
 }
