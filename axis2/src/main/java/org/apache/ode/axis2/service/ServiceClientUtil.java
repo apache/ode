@@ -45,9 +45,23 @@ public class ServiceClientUtil {
      * @throws AxisFault when a problem occured during the call
      */
     public OMElement send(OMElement msg, String url) throws AxisFault {
+        return send(msg, url, Options.DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    /**
+     * Sends the provided message to an Axis2 deployed service allowing to set a
+     * specific timeout (in ms).
+     * @param msg the message OMElement that will be included in the body
+     * @param url to send the message to
+     * @param timeout in milliseconds
+     * @return the response message
+     * @throws AxisFault when a problem occured during the call
+     */
+    public OMElement send(OMElement msg, String url, long timeout) throws AxisFault {
         Options options = new Options();
         EndpointReference target = new EndpointReference(url);
         options.setTo(target);
+        options.setTimeOutInMilliSeconds(timeout);
 
         ServiceClient serviceClient = new ServiceClient();
         serviceClient.setOptions(options);
