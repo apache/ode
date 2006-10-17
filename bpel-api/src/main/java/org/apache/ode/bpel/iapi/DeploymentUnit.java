@@ -51,11 +51,11 @@ public interface DeploymentUnit {
      * Get a WSDL definition from the deployment directory for the given
      * namespace.
      * 
-     * @param namespaceURI
+     * @param name
      *            WSDL targetNamespace
      * @return corresponding WSDL document
      */
-    Definition getDefinitionForNamespace(String namespaceURI);
+    Definition getDefinitionForService(QName name);
 
     /**
      * Get a collection of all the WSDL definitions in the deployment directory.

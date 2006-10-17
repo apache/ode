@@ -251,8 +251,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return _docRegistry;
     }
 
-    public Definition getDefinitionForNamespace(String namespaceURI) {
-        return getDocRegistry().getDefinition(namespaceURI);
+    public Definition getDefinitionForService(QName name) {
+        return getDocRegistry().getDefinition(name);
     }
 
     public Collection<Definition> getDefinitions() {
