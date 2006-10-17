@@ -19,17 +19,21 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axis2.AxisFault;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.AxisFault;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 /**
  * Utility methods to convert from/to AxiOM and DOM.
@@ -37,6 +41,7 @@ import java.io.ByteArrayOutputStream;
 public class OMUtils {
 
     public static Element toDOM(OMElement element) throws AxisFault {
+        copyParentNamespaces(element);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             element.serialize(baos);
@@ -79,4 +84,36 @@ public class OMUtils {
         return qname;
     }
 
+    /**
+     * Copy namespaces found on parent elements on the element itself.
+     * This is useful when detaching an element from its parent to maintain
+     * namespace context.
+     */
+    public static void copyParentNamespaces(OMElement target) {
+        if (target.getParent() instanceof OMElement) {
+            HashSet<String> declaredNS = new HashSet<String>();
+            Iterator iter = target.getAllDeclaredNamespaces();
+            while (iter.hasNext()) {
+                OMNamespace ns = (OMNamespace) iter.next();
+                declaredNS.add(ns.getPrefix());
+            }
+            copyParentNamespaces(target, (OMElement) target.getParent(), declaredNS);
+        }
+    }
+    
+    private static void copyParentNamespaces(OMElement target, OMElement parent, HashSet<String> declaredNS) {
+        Iterator iter = parent.getAllDeclaredNamespaces();
+        while (iter.hasNext()) {
+            OMNamespace ns = (OMNamespace) iter.next();
+            // do not override local namespace mappings
+            if (!ns.getPrefix().equals("") && !declaredNS.contains(ns.getPrefix())) {
+                target.declareNamespace(ns.getName(), ns.getPrefix());
+                declaredNS.add(ns.getPrefix());
+            }
+        }
+        // recurse
+        if (parent.getParent() instanceof OMElement) {
+            copyParentNamespaces(target, (OMElement) parent.getParent(), declaredNS);
+        }
+    }        
 }
