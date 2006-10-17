@@ -66,8 +66,8 @@ public class BindingContextImpl implements BindingContext {
     public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
             PortType portType) {
         try {
-            ODEService svc = _server.createService(deploymentUnit.getDefinitionForNamespace(myRoleEndpoint.serviceName
-                    .getNamespaceURI()), myRoleEndpoint.serviceName, myRoleEndpoint.portName);
+            ODEService svc = _server.createService(deploymentUnit.getDefinitionForService(myRoleEndpoint.serviceName)
+                    , myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {
             throw new ContextException("Could not activate endpoint for service " + myRoleEndpoint.serviceName
@@ -84,7 +84,7 @@ public class BindingContextImpl implements BindingContext {
         // NOTE: This implementation assumes that the initial value of the
         // partner role determines the binding.
         return _server.createExternalService(deploymentUnit
-                .getDefinitionForNamespace(initialPartnerEndpoint.serviceName.getNamespaceURI()),
+                .getDefinitionForService(initialPartnerEndpoint.serviceName),
                 initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 
