@@ -41,53 +41,52 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
         _context = context;
     }
 
-    static void defaultExtensibilityElements(OActivity output, BpelObject src, OActivity parent) {
-        failureHandlinExtensibilityElement(output, src, parent);
+    static void defaultExtensibilityElements(OActivity output, BpelObject src) {
+        if (src != null) {
+            failureHandlinExtensibilityElement(output, src);
+        }
     }
 
-    static private void failureHandlinExtensibilityElement(OActivity output, BpelObject src, OActivity parent) {
-        if (parent != null && parent.failureHandling != null)
-            output.failureHandling = parent.failureHandling;
-        if (src != null) {
-            // Failure handling extensibility element.
-            Element failure = (Element) src.getExtensibilityElements().get(FailureHandling.FAILURE_EXT_ELEMENT);
-            if (failure != null) {
-                output.failureHandling = new FailureHandling();
-                String textValue;
-                Element element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryFor"));
-                if (element != null) {
-                    textValue = DOMUtils.getTextContent(element);
-                    if (textValue != null) {
-                        try {
-                            output.failureHandling.retryFor = Integer.parseInt(textValue);
-                            if (output.failureHandling.retryFor < 0)
-                                throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                        } catch (NumberFormatException except) {
+    static private void failureHandlinExtensibilityElement(OActivity output, BpelObject src) {
+        // Failure handling extensibility element.
+        Element failure = (Element) src.getExtensibilityElements().get(FailureHandling.FAILURE_EXT_ELEMENT);
+        if (failure != null) {
+            FailureHandling failureHandling = new FailureHandling();
+            output.setFailureHandling(failureHandling);
+            String textValue;
+            Element element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryFor"));
+            if (element != null) {
+                textValue = DOMUtils.getTextContent(element);
+                if (textValue != null) {
+                    try {
+                        failureHandling.retryFor = Integer.parseInt(textValue);
+                        if (failureHandling.retryFor < 0)
                             throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                        }
+                    } catch (NumberFormatException except) {
+                        throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
                     }
-                }
-                element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryDelay"));
-                if (element != null) {
-                    textValue = DOMUtils.getTextContent(element);
-                    if (textValue != null) {
-                        try {
-                            output.failureHandling.retryDelay = Integer.parseInt(textValue);
-                            if (output.failureHandling.retryDelay < 0)
-                                throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                        } catch (NumberFormatException except) {
-                            throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                        }
-                    }
-                }
-                element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "faultOnFailure"));
-                if (element != null) {
-                    textValue = DOMUtils.getTextContent(element);
-                    if (textValue != null)
-                        output.failureHandling.faultOnFailure = Boolean.valueOf(textValue).booleanValue();
                 }
             }
-        }  
+            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryDelay"));
+            if (element != null) {
+                textValue = DOMUtils.getTextContent(element);
+                if (textValue != null) {
+                    try {
+                        failureHandling.retryDelay = Integer.parseInt(textValue);
+                        if (failureHandling.retryDelay < 0)
+                            throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
+                    } catch (NumberFormatException except) {
+                        throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
+                    }
+                }
+            }
+            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "faultOnFailure"));
+            if (element != null) {
+                textValue = DOMUtils.getTextContent(element);
+                if (textValue != null)
+                    failureHandling.faultOnFailure = Boolean.valueOf(textValue).booleanValue();
+            }
+        }
     }
 
 }

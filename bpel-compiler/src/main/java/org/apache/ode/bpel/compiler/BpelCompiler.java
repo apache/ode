@@ -694,7 +694,7 @@ abstract class BpelCompiler implements CompilerContext {
         final OScope oscope = new OScope(_oprocess, getCurrent());
         oscope.name = createName(source);
         oscope.debugInfo = createDebugInfo(source, "suppress join failure scope for " + source);
-        DefaultActivityGenerator.defaultExtensibilityElements(oscope, source, _structureStack.topActivity());
+        DefaultActivityGenerator.defaultExtensibilityElements(oscope, source);
 
         compile(oscope, null, new Runnable() {
             public void run() {
@@ -902,7 +902,7 @@ public OActivity getCurrent() {
 }
 
     public void compile(OActivity context, BpelObject source, Runnable run) {
-        DefaultActivityGenerator.defaultExtensibilityElements(context, source, _structureStack.topActivity());
+        DefaultActivityGenerator.defaultExtensibilityElements(context, source);
         _structureStack.push(context);
         try {
             run.run();
