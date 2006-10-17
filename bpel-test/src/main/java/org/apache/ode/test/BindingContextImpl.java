@@ -58,8 +58,7 @@ public class BindingContextImpl implements BindingContext {
 		final Document doc = DOMUtils.newDocument();
 		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());
-        serviceref.setNodeValue(deploymentUnit.getDefinitionForNamespace(myRoleEndpoint.serviceName
-                .getNamespaceURI()) +":" +
+        serviceref.setNodeValue(deploymentUnit.getDefinitionForService(myRoleEndpoint.serviceName) +":" +
                 myRoleEndpoint.serviceName +":" +
                 myRoleEndpoint.portName);
         doc.appendChild(serviceref);
