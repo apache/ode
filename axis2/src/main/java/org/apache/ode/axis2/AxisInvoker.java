@@ -68,8 +68,10 @@ public class AxisInvoker {
 
       Options options = new Options();
       EndpointReference axisEPR = new EndpointReference(((MutableEndpoint)odeMex.getEndpointReference()).getUrl());
-      __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
-      __log.debug("Message: " + payload);
+      if (__log.isDebugEnabled()) {
+        __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
+        __log.debug("Message: " + payload);
+      }
       options.setTo(axisEPR);
 
       final ServiceClient serviceClient = new ServiceClient();
@@ -95,8 +97,10 @@ public class AxisInvoker {
 
         final Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
         Element responseElmt = OMUtils.toDOM(reply);
-        __log.debug("Received synchronous response for MEX " + odeMex);
-        __log.debug("Message: " + DOMUtils.domToString(responseElmt));
+        if (__log.isDebugEnabled()) {
+          __log.debug("Received synchronous response for MEX " + odeMex);
+          __log.debug("Message: " + DOMUtils.domToString(responseElmt));
+        }
         response.setMessage(OMUtils.toDOM(reply));
         odeMex.reply(response);
       } else
