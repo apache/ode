@@ -118,4 +118,6 @@ public interface CompilerContext {
 
     List<OActivity> getActivityStack();
 
+    OActivity getCurrent();
+
 }
