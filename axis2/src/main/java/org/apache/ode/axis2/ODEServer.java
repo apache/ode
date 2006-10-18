@@ -201,6 +201,11 @@ public class ODEServer {
                 def, serviceName, portName);
         ODEService odeService = new ODEService(axisService, def, serviceName, portName,
                 _server, _txMgr);
+        if (_odeConfig.isReplicateEmptyNS()) {
+            __log.debug("Setting service with empty namespace replication");
+            odeService.setReplicateEmptyNS(true);
+        }
+
         _services.put(serviceName, portName, odeService);
 
         // Setting our new service on the receiver, the same receiver handles all
@@ -221,6 +226,10 @@ public class ODEServer {
             return extService;
 
         extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
+        if (_odeConfig.isReplicateEmptyNS()) {
+            __log.debug("Setting external service with empty namespace replication");
+            extService.setReplicateEmptyNS(true);
+        }
         _externalServices.put(serviceName, portName, extService);
         __log.debug("Created external service " + serviceName);
         return extService;
@@ -252,10 +261,6 @@ public class ODEServer {
 
     public ExternalService getExternalService(QName serviceName, String portName) {
         return (ExternalService) _externalServices.get(serviceName, portName);
-    }
-
-    public AxisInvoker createInvoker() {
-        return new AxisInvoker(_executorService);
     }
 
     private void initTxMgr() throws ServletException {

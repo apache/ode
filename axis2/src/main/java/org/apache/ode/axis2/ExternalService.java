@@ -60,6 +60,7 @@ public class ExternalService implements PartnerRoleChannel {
     private QName _serviceName;
     private String _portName;
     private AxisConfiguration _axisConfig;
+    private boolean _isReplicateEmptyNS = false;
 
     public ExternalService(Definition definition, QName serviceName,
                            String portName, ExecutorService executorService, AxisConfiguration axisConfig) {
@@ -77,7 +78,7 @@ public class ExternalService implements PartnerRoleChannel {
             Element msgContent = SOAPUtils.wrap(odeMex.getRequest().getMessage(), _definition, _serviceName,
                     odeMex.getOperation(), odeMex.getOperation().getInput().getMessage());
 
-            final OMElement payload = OMUtils.toOM(msgContent);
+            final OMElement payload = OMUtils.toOM(msgContent, _isReplicateEmptyNS);
 
             Options options = new Options();
             EndpointReference axisEPR = new EndpointReference(((MutableEndpoint)odeMex.getEndpointReference()).getUrl());
@@ -182,5 +183,9 @@ public class ExternalService implements PartnerRoleChannel {
 
     public void close() {
         // TODO Auto-generated method stub
+    }
+
+    public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
+        _isReplicateEmptyNS = isReplicateEmptyNS;
     }
 }
