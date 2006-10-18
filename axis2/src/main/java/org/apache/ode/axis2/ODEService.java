@@ -61,24 +61,17 @@ import java.util.Map;
 public class ODEService {
 
     private static final Log __log = LogFactory.getLog(ODEService.class);
-
     private static final int TIMEOUT = 2 * 60 * 1000;
 
     private AxisService _axisService;
-
     private BpelServer _server;
-
     private TransactionManager _txManager;
-
     private Definition _wsdlDef;
-
     private QName _serviceName;
-
     private String _portName;
-
     private Map<String, ResponseCallback> _waitingCallbacks;
-
     private WSAEndpoint _serviceRef;
+    private boolean _isReplicateEmptyNS = false;
 
     public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server,
                       TransactionManager txManager) {
@@ -235,14 +228,15 @@ public class ODEService {
         switch (mex.getStatus()) {
             case FAULT:
                 throw new AxisFault(mex.getResponse().getType(), mex.getFaultExplanation(), null, null,
-                        mex.getFaultResponse().getMessage() == null ? null : OMUtils.toOM(mex.getFaultResponse().getMessage()));
+                        mex.getFaultResponse().getMessage() == null ? null :
+                                OMUtils.toOM(mex.getFaultResponse().getMessage(), _isReplicateEmptyNS));
             case ASYNC:
             case RESPONSE:
                 Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
                         .getOperation(), mex.getOperation().getOutput().getMessage());
                 if (__log.isDebugEnabled()) __log.debug("Received response message " +
                         DOMUtils.domToString(response));
-                msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response));
+                msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response, _isReplicateEmptyNS));
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:
@@ -335,8 +329,7 @@ public class ODEService {
     /**
      * Return the service-ref element that will be used to represent this
      * endpoint.
-     * 
-     * @return
+     * @return my service endpoint
      */
     public EndpointReference getMyServiceRef() {
         return _serviceRef;
@@ -404,4 +397,7 @@ public class ODEService {
         return EndpointFactory.createEndpoint(doc.getDocumentElement());
     }
 
+    public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
+        _isReplicateEmptyNS = isReplicateEmptyNS;
+    }
 }

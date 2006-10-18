@@ -30,10 +30,13 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 /**
  * Utility methods to convert from/to AxiOM and DOM.
@@ -52,14 +55,16 @@ public class OMUtils {
         }
     }
 
-    public static OMElement toOM(Element element) throws AxisFault {
+    public static OMElement toOM(Element element, boolean replicateEmptyNS) throws AxisFault {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             DOMUtils.serialize(element, baos);
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(bais);
             StAXOMBuilder builder = new StAXOMBuilder(parser);
-            return builder.getDocumentElement();
+            OMElement result =  builder.getDocumentElement();
+            if (replicateEmptyNS) reproduceEmptyNS(element, element, result);
+            return result;
         } catch (Exception e) {
             throw new AxisFault("Unable to read Axis input message.", e);
         }
@@ -85,6 +90,39 @@ public class OMUtils {
     }
 
     /**
+     * Translation from DOM to AXIOM loses empty namespace definitions. So if you have something
+     * like:
+     * <pre>
+     *   <foo xmlns="ns:foo">
+     *     <bar xmlns="">
+     *   </pr:foo>
+     * </pre>
+     * After translation bar will be in the same namespace as foo. This is due to Woodstox (the
+     * stax parser behind AXIOM) that considers xmlns="" as being a null namespace, hence it is
+     * ignored.
+     * @param root
+     * @param elmt
+     * @param omelmt
+     */
+    private static void reproduceEmptyNS(Element root, Element elmt, OMElement omelmt) {
+        if (root.getNamespaceURI() != null && elmt.getNamespaceURI() == null) {
+            OMAttribute emptynsa = omelmt.getOMFactory().createOMAttribute("xmlns", null, "");
+            omelmt.addAttribute(emptynsa);
+        }
+
+        NodeList children = elmt.getChildNodes();
+        Iterator omchildren = omelmt.getChildElements();
+        for (int m = 0; m < children.getLength(); m++) {
+            Node child = children.item(m);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                OMElement omchild = (OMElement) omchildren.next();
+                reproduceEmptyNS(root, (Element) child, omchild);
+            }
+        }
+
+    }
+
+    /**
      * Copy namespaces found on parent elements on the element itself.
      * This is useful when detaching an element from its parent to maintain
      * namespace context.
@@ -100,7 +138,7 @@ public class OMUtils {
             copyParentNamespaces(target, (OMElement) target.getParent(), declaredNS);
         }
     }
-    
+
     private static void copyParentNamespaces(OMElement target, OMElement parent, HashSet<String> declaredNS) {
         Iterator iter = parent.getAllDeclaredNamespaces();
         while (iter.hasNext()) {
@@ -115,5 +153,5 @@ public class OMUtils {
         if (parent.getParent() instanceof OMElement) {
             copyParentNamespaces(target, (OMElement) parent.getParent(), declaredNS);
         }
-    }        
+    }
 }
