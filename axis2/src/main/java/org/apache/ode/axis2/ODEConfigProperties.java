@@ -43,6 +43,7 @@ public class ODEConfigProperties extends Properties {
     private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
     private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
     private static final String PROP_WORKING_DIR = "ode-axis2.working.dir";
+    private static final String PROP_REPLICATE_EMPTYNS = "ode-axis2.message.replicate.emptyns";
 
     private File _installDir;
 
@@ -131,6 +132,10 @@ public class ODEConfigProperties extends Properties {
 
     public String getTxFactoryClass() {
         return getProperty(ODEConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.axis2.util.JotmFactory");
+    }
+
+    public boolean isReplicateEmptyNS() {
+        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_REPLICATE_EMPTYNS, "false"));
     }
 
 }
