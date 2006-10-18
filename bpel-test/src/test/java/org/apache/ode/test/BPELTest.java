@@ -58,6 +58,15 @@ public class BPELTest extends TestCase {
 	protected void tearDown() throws Exception {
 		server.stop();
 	}
+
+  private void negative(String deployDir) throws Exception {
+      try {
+          go(deployDir);
+      } catch (junit.framework.AssertionFailedError ex) {
+          return;
+      }
+      fail("Expecting test to fail");
+  }
 	
 	private void go(String deployDir) throws Exception {
 		
@@ -264,7 +273,7 @@ public class BPELTest extends TestCase {
     	 * 
     	 * See JIRA ODE-67
     	 */
-    	go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
+    	negative("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
     }
     
 	  public void testNegativeCorrelation() throws Exception {
@@ -277,7 +286,7 @@ public class BPELTest extends TestCase {
 		 * See JIRA ODE-64
 		 * 
 		 */
-	    go("target/test-classes/bpel/2.0/NegativeCorrelationTest");
+	    negative("target/test-classes/bpel/2.0/NegativeCorrelationTest");
       }
 	  public void testNegativeInitialization() throws Exception {
 			/**
@@ -293,7 +302,7 @@ public class BPELTest extends TestCase {
 			 * The message exchange should return with a Fault/Failure.
 			 * 
 			 */
-		    go("target/test-classes/bpel/2.0/NegativeInitializationTest");
+		    negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
 	   }
 
     /** These tests compile however they fail at runtime */
