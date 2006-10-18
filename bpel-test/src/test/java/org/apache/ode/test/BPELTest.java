@@ -304,6 +304,10 @@ public class BPELTest extends TestCase {
 			 */
 		    negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
 	   }
+	
+	public void testSubTreeAssign() throws Exception {
+		go("target/test-classes/bpel/2.0/TestSubTreeAssign");
+	}
 
     /** These tests compile however they fail at runtime */
   
