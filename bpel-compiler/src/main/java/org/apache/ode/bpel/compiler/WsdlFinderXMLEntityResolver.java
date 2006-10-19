@@ -19,8 +19,12 @@
 package org.apache.ode.bpel.compiler;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +49,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
     private boolean _failIfNotFound = true;
 
     private WsdlFinder _wsdlFinder;
+    private HashMap<String,String> _internalResources = new HashMap<String, String>();
 
     public WsdlFinderXMLEntityResolver(WsdlFinder finder) {
         _wsdlFinder = finder;
@@ -73,10 +78,15 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             __log.debug("resolveEntity: Expecting to find " + resourceIdentifier.getNamespace()
                     + " at " + location);
 
+        if (_internalResources.get(location.toString()) != null) {
+            src.setByteStream(new ByteArrayInputStream(_internalResources.get(location.toString()).getBytes()));
+            return src;
+        }
+
         try {
             src.setByteStream(_wsdlFinder.openResource(location));
         } catch (IOException ioex) {
-            __log.debug("resolveEntity: IOExcepption opening " + location,ioex);
+            __log.debug("resolveEntity: IOException opening " + location,ioex);
 
             if (_failIfNotFound) {
                 __log.debug("resolveEntity: failIfNotFound set, rethrowing...");
@@ -88,6 +98,10 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         }
 
         return src;
+    }
+
+    public void addInternalResource(String ns, String source) {
+        _internalResources.put(ns, source);
     }
 
 }

@@ -89,22 +89,6 @@ public class DocumentRegistry {
         return _definitions.toArray(new Definition4BPEL[_definitions.size()]);
     }
 
-
-    /**
-     * Get the schema model (XML Schema).
-     *
-     * @return schema model
-     */
-    public SchemaModel getSchemaModel() {
-        if (_model == null) {
-            _model = SchemaModelImpl.newModel(_schemas);
-        }
-
-        assert _model != null;
-
-        return _model;
-    }
-
     /**
      * Adds a WSDL definition for use in resolving MessageType, PortType,
      * Operation and BPEL properties and property aliases
@@ -121,59 +105,9 @@ public class DocumentRegistry {
 
         _definitions.add(def);
 
-        captureSchemas(def);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void captureSchemas(Definition def) throws CompilationException {
-        assert def != null;
-
-        if (__log.isDebugEnabled())
-            __log.debug("Processing XSD schemas in " + def.getDocumentBaseURI());
-
-        Types types = def.getTypes();
-
-        if (types != null) {
-            for (ExtensibilityElement ee : ((List<ExtensibilityElement>) def.getTypes().getExtensibilityElements())) {
-                if (ee instanceof XMLSchemaType) {
-                    String schema = ((XMLSchemaType) ee).getXMLSchema();
-                    Map<URI, byte[]> capture;
-                    URI docuri;
-                    try {
-                        docuri = new URI(def.getDocumentBaseURI());
-                    } catch (URISyntaxException e) {
-                        // This is really quite unexpected..
-                        __log.fatal("Internal Error: WSDL Base URI is invalid.", e);
-                        throw new RuntimeException(e);
-                    }
-
-                    try {
-                        capture = XSUtils.captureSchema(docuri, schema, _resolver);
-
-                        // Add new schemas to our list.
-                        _schemas.putAll(capture);
-                    } catch (XsdException xsde) {
-                        System.out.println("+++++++++++++++++++++++++++++++++");
-                        xsde.printStackTrace();
-                        System.out.println("+++++++++++++++++++++++++++++++++");
-                        __log.debug("captureSchemas: capture failed for " + docuri, xsde);
-
-                        LinkedList<XsdException> exceptions = new LinkedList<XsdException>();
-                        while (xsde != null) {
-                            exceptions.addFirst(xsde);
-                            xsde = xsde.getPrevious();
-                        }
-
-                        if (exceptions.size() > 0) {
-                            throw new BpelEngineException(
-                                    __msgs.errSchemaError(exceptions.get(0).getDetailMessage()));
-                        }
-                    }
-                    // invalidate model
-                    _model = null;
-                }
-            }
-        }
+        // For now the schemas are never used at runtime. Check the compiler if this needs to be
+        // put back in.
+//        captureSchemas(def);
     }
 
 }

@@ -27,11 +27,14 @@ import org.apache.ode.utils.xsd.SchemaModelImpl;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.fs.FileUtils;
+import org.apache.ode.utils.DOMUtils;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.io.StringReader;
+import java.io.IOException;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -39,6 +42,9 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
 
 
 /**
@@ -56,7 +62,7 @@ class WSDLRegistry {
 
     private SchemaModel _model;
 
-    private XMLEntityResolver _resolver;
+    private WsdlFinderXMLEntityResolver _resolver;
     private CompilerContext _ctx;
 
 
@@ -204,6 +210,14 @@ class WSDLRegistry {
                         // Add new schemas to our list.
                         _schemas.putAll(capture);
 
+                        try {
+                            Document doc = DOMUtils.parse(new InputSource(new StringReader(schema)));
+                            String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
+                            if (schemaTargetNS != null && schemaTargetNS.length() > 0)
+                                _resolver.addInternalResource(schemaTargetNS, schema);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
+                        }
                     } catch (XsdException xsde) {
                         __log.debug("captureSchemas: capture failed for " + docuri,xsde);
 
