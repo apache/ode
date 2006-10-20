@@ -390,15 +390,6 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
     }
 
     /**
-     * The partner role of partner link {0} is used in invoke activity but is
-     * neither initialized nor assigned.
-     */
-    public CompilationMessage errUninitializedPartnerLinkInInvoke(String plink) {
-        return this.formatCompilationMessage("The partner role of partner link {0} is used in invoke activity but is " +
-                "neither initialized (initializePartnerRole=no) nor assigned.", plink);
-    }
-
-    /**
      * Deployment descriptor is invalid: {0}
      */
     public CompilationMessage errInvalidDeploymentDescriptor(String message) {

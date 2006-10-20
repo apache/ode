@@ -79,11 +79,12 @@ class InvokeGenerator extends DefaultActivityGenerator {
         if (oinvoke.outputVar != null)
             doCorrelations(src.getCorrelations(Correlation.CORRPATTERN_IN), oinvoke.outputVar, oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
 
-        if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
-            if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {
-                throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
-            }
-        }
+//        Partner link could be initialized with magic session in a previous receive.
+//        if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
+//            if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {
+//                throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
+//            }
+//        }
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var, Collection<OScope.CorrelationSet> assertCorrelations, Collection<OScope.CorrelationSet> initCorrelations) {
