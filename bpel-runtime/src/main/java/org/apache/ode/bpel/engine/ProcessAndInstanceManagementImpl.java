@@ -24,14 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessPropertyDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -836,6 +829,22 @@ class ProcessAndInstanceManagementImpl
                   }
                 }
                 activities.addNewActivityInfo().set(ai.getActivityInfo());
+            }
+        }
+
+        Collection<PartnerLinkDAO> plinks = scope.getPartnerLinks();
+        if (plinks.size() > 0) {
+            TEndpointReferences refs = scopeInfo.addNewEndpoints();
+            for (PartnerLinkDAO plink : plinks) {
+                if (plink.getPartnerRoleName() != null && plink.getPartnerRoleName().length() > 0) {
+                    TEndpointReferences.EndpointRef ref = refs.addNewEndpointRef();
+                    ref.setPartnerLink(plink.getPartnerLinkName());
+                    ref.setPartnerRole(plink.getPartnerRoleName());
+                    if (plink.getPartnerEPR() != null) {
+                        Document eprNodeDoc = ref.getDomNode().getOwnerDocument();
+                        ref.getDomNode().appendChild(eprNodeDoc.importNode(plink.getPartnerEPR(), true));
+                    }
+                }
             }
         }
     }
