@@ -54,7 +54,7 @@
   </wsdl:types>
 
   <wsdl:message name="requestMessage1">
-     <part name="requestMessageData" type="types1:testMessage"/>
+     <wsdl:part name="requestMessageData" type="types1:testMessage"/>
   </wsdl:message>
    
   <wsdl:message name="replyMessage1">
