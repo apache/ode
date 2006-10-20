@@ -118,6 +118,7 @@ class ASSIGN extends ACTIVITY {
                             "temporary-simple-type-wrapper");
                     doc.appendChild(tempwrapper);
                     tempwrapper.appendChild(val);
+                    val = tempwrapper;
                 } else
                     doc.appendChild(val);
                 lval = getBpelRuntimeContext().initializeVariable(lvar, val);
@@ -448,7 +449,7 @@ class ASSIGN extends ACTIVITY {
         if (keepSrcElement) {
             Element replacement = (Element)doc.importNode(src, true);
             parent.replaceChild(replacement, ptr);
-            return (lval == ptr) ? replacement :  lval; 
+            return (lval == ptr) ? replacement :  lval;
         } 
     
         Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr
@@ -460,7 +461,7 @@ class ASSIGN extends ACTIVITY {
         for (int i = 0; i < attrs.getLength(); ++i)
             replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
         parent.replaceChild(replacement, ptr);
-        return (lval == ptr) ? replacement :  lval; 
+        return (lval == ptr) ? replacement :  lval;
     }
 
     /**
