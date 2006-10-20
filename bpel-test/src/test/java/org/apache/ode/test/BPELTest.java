@@ -101,6 +101,7 @@ public class BPELTest extends TestCase {
 			testProps.load(testPropsFile.toURL().openStream());
 			String responsePattern = testProps.getProperty("response1");
 			testResponsePattern(bpelE.getMessage(),responsePattern);
+			return;
 		}
 		
 		while ( testPropsFile.exists() ) {
@@ -265,6 +266,15 @@ public class BPELTest extends TestCase {
     public void testFaultWithVariable() throws Exception {
     	go("target/test-classes/bpel/2.0/TestFaultWithVariable");
     }
+    public void testXPathNamespace1() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestXPathNamespace1");
+    }
+    public void testXPathNamespace2() throws Exception {
+    	go("target/test-classes/bpel/2.0/TestXPathNamespace2");
+    }
+	public void testSubTreeAssign() throws Exception {
+		go("target/test-classes/bpel/2.0/TestSubTreeAssign");
+	}
     
     public void testNegativeTargetNS1() throws Exception {
     	/**
@@ -272,8 +282,13 @@ public class BPELTest extends TestCase {
     	 * the WSDL.
     	 * 
     	 * See JIRA ODE-67
+    	 * 
+    	 * Test for a specific exception message.
+    	 * 
     	 */
-    	negative("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
+    	
+    	
+    	go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
     }
     
 	  public void testNegativeCorrelation() throws Exception {
@@ -305,9 +320,7 @@ public class BPELTest extends TestCase {
 		    negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
 	   }
 	
-	public void testSubTreeAssign() throws Exception {
-		go("target/test-classes/bpel/2.0/TestSubTreeAssign");
-	}
+
 
     /** These tests compile however they fail at runtime */
   
