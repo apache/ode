@@ -184,7 +184,7 @@ class PICK extends ACTIVITY {
                             // Trying to initialize partner epr based on a message-provided epr/session.
 
                             if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
-                                    .resolve(onMessage.partnerLink))) {
+                                    .resolve(onMessage.partnerLink)) || !onMessage.partnerLink.initializePartnerRole) {
 
                                 Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                 if (fromEpr != null) {

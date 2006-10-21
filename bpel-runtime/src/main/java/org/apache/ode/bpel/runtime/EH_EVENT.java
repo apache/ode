@@ -251,7 +251,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                 if (_oevent.partnerLink.hasPartnerRole()) {
                                     // Trying to initialize partner epr based on a message-provided epr/session.
                                     if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(ehScopeFrame
-                                            .resolve(_oevent.partnerLink))) {
+                                            .resolve(_oevent.partnerLink)) || !_oevent.partnerLink.initializePartnerRole) {
                                         Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                         if (fromEpr != null) {
                                             getBpelRuntimeContext().writeEndpointReference(
