@@ -84,11 +84,11 @@ class ProcessDDInitializer {
                 throw new BpelEngineException(msg);
             }
             // TODO Handle non initialize partner roles that just provide a binding
-            if (!pLink.initializePartnerRole && _oprocess.version.equals(Namespaces.WS_BPEL_20_NS)) {
-                String msg = ProcessDDInitializer.__msgs.msgDDNoInitiliazePartnerRole(invoke.getPartnerLink());
-                ProcessDDInitializer.__log.error(msg);
-                throw new BpelEngineException(msg);
-            }
+//            if (!pLink.initializePartnerRole && _oprocess.version.equals(Namespaces.WS_BPEL_20_NS)) {
+//                String msg = ProcessDDInitializer.__msgs.msgDDNoInitiliazePartnerRole(invoke.getPartnerLink());
+//                ProcessDDInitializer.__log.error(msg);
+//                throw new BpelEngineException(msg);
+//            }
         }
     }
 
