@@ -122,7 +122,7 @@ public class INVOKE extends ACTIVITY {
                             if (_oinvoke.partnerLink.hasPartnerRole()) {
                                 // Trying to initialize partner epr based on a message-provided epr/session.
                                 if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
-                                        .resolve(_oinvoke.partnerLink))) {
+                                        .resolve(_oinvoke.partnerLink)) || !_oinvoke.partnerLink.initializePartnerRole) {
                     
                                     Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                     if (fromEpr != null) {
