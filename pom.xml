@@ -86,6 +86,7 @@
         <springVersion>1.2.6</springVersion>
         <derbyVersion>10.1.2.1</derbyVersion>
         <quartzVersion>1.5.1</quartzVersion>
+        <xstreamVersion>1.2</xstreamVersion>
 
         <!--
         | Build number used by the intalio:release plugin
@@ -799,7 +800,11 @@
                         <groupId>xmlbeans</groupId>
                     </exclusion>
                 </exclusions>
-
+            </dependency>
+            <dependency>
+                <groupId>xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstreamVersion}</version>
             </dependency>
 
             <dependency>
