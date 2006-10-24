@@ -50,7 +50,7 @@ public class Process extends Scope {
      * Get the BPEL version of this process.
      */
     public Version getBpelVersion() {
-        return Version.BPEL20;
+        return is11() ? Version.BPEL11 : Version.BPEL20;
     }
 
     /**
