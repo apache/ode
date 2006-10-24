@@ -47,10 +47,11 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Catch;
 import org.apache.ode.bpel.compiler.bom.CompensationHandler;
-import org.apache.ode.bpel.compiler.bom.Constants;
 import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
@@ -543,10 +544,10 @@ abstract class BpelCompiler implements CompilerContext {
         String bpelVersionUri = null;
         switch(process.getBpelVersion()){
             case BPEL11:
-                bpelVersionUri = Constants.NS_BPEL4WS_2003_03;
+                bpelVersionUri = Bpel11QNames.NS_BPEL4WS_2003_03;
                 break;
             case BPEL20:
-                bpelVersionUri = Constants.NS_WSBPEL_2004_03;
+                bpelVersionUri = Bpel20QNames.NS_WSBPEL2_0;
                 break;
             default:
                 throw new IllegalStateException("Bad bpel version: " + process.getBpelVersion());

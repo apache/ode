@@ -18,15 +18,14 @@
  */
 package org.apache.ode.bpel.compiler.wsdl;
 
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
-import org.apache.ode.bpel.compiler.bom.Constants;
-
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 
 /**
  * Factory for {@link WSDLFactory} objects that are pre-configured to handle

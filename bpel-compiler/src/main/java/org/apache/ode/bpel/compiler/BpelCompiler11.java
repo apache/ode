@@ -21,7 +21,6 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
 import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
-import org.apache.ode.bpel.compiler.bom.Constants;
 import org.apache.ode.bpel.compiler.bom.EmptyActivity;
 import org.apache.ode.bpel.compiler.bom.FlowActivity;
 import org.apache.ode.bpel.compiler.bom.IfActivity;

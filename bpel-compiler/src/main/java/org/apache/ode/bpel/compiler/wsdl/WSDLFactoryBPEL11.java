@@ -26,7 +26,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
-import org.apache.ode.bpel.compiler.bom.Constants;
 
 /**
  * Factory for {@link WSDLFactory} objects that are pre-configured to handle
