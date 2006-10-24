@@ -35,6 +35,10 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-utils</artifactId>
         </dependency>
+        <dependency>
+            <groupId>xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
