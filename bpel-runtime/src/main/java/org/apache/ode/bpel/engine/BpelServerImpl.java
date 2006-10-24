@@ -36,7 +36,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;

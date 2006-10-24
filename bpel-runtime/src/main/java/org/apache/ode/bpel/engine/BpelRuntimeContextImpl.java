@@ -112,7 +112,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private BpelProcess _bpelProcess;
 
     /** Five second maximum for continous execution. */
-    private long _maxReductionTimeMs = 20000;
+    private long _maxReductionTimeMs = 2000000;
 
     public BpelRuntimeContextImpl(BpelProcess bpelProcess, ProcessInstanceDAO dao, PROCESS PROCESS,
             MyRoleMessageExchangeImpl instantiatingMessageExchange) {

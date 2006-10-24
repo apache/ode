@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.Correlation;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OProcess;
@@ -84,7 +84,8 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
             OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {
-            case Correlation.INITIATE_NO:
+            case UNSET:
+            case NO:
                 if (createInstance)
                     throw new CompilationException(__cmsgsGeneral.errUseOfUninitializedCorrelationSet(correlation
                             .getCorrelationSet()));
@@ -94,11 +95,11 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 onMessage.matchCorrelation = cset;
                 onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                 break;
-            case Correlation.INITIATE_YES:
+            case YES:
                 onMessage.initCorrelations.add(cset);
                 onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                 break;
-            case Correlation.INITIATE_RENDEZVOUS:
+            case JOIN:
                 if (createInstance) {
                     onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                     onMessage.initCorrelations.add(cset);
@@ -109,6 +110,8 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 }
                 break;
 
+                default:
+                    throw new AssertionError("Unexpected value for correlation set enumeration!");
             }
 
             for (OProcess.OProperty property : cset.properties) {

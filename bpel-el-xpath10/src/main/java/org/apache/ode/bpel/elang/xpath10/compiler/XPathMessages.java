@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompilationMessageBundle;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;
 
 /**
  * Compilation messages related to XPath 1.0 expressions.

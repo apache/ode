@@ -45,7 +45,6 @@ import org.apache.derby.jdbc.EmbeddedDriver;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.bpel.xsl.XslTransformHandler;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
@@ -127,8 +126,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
             __log.debug("Starting JCA connector.");
             initConnector();
-
-            initXslt();
 
             _suManager = new OdeSUManager(_ode);
             _initSuccess = true;
@@ -331,11 +328,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 __log.error("Failed to initialize JCA connector.",e);
             }
         }
-    }
-
-    private void initXslt() {
-        TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
-        XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
 
 

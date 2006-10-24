@@ -38,10 +38,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-bom</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-obj</artifactId>
         </dependency>
         <dependency>

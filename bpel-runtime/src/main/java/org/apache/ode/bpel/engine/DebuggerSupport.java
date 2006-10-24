@@ -202,7 +202,6 @@ class DebuggerSupport {
       //
       if(evt instanceof ProcessCompletionEvent ||
         evt instanceof ProcessTerminationEvent) {
-        __log.debug("onEvent(" + evt.getProcessInstanceId() + ") Cleaning up step indicator and instance breakpoints");
         _step.remove(evt.getProcessInstanceId());
         _instanceBreakPoints.remove(evt.getProcessInstanceId());
         return;
@@ -210,13 +209,11 @@ class DebuggerSupport {
 
       boolean suspend = checkStep(evt);
       if (!suspend) {
-        __log.debug("onEvent(" + evt.getProcessInstanceId() + ") Checking global breakpoints");
       	suspend = checkBreakPoints(evt, _globalBreakPoints);
       }
       if (!suspend){
       	Breakpoint[] bp = _instanceBreakPoints.get(evt.getProcessInstanceId());
         if(bp != null) {
-          __log.debug("onEvent(" + evt.getProcessInstanceId() + ") Checking instance breakpoints");
           suspend = checkBreakPoints(evt, bp);
         }
       }
@@ -249,9 +246,6 @@ class DebuggerSupport {
   
   private boolean checkStep(ProcessInstanceEvent event){
   	Long pid = event.getProcessInstanceId();
-    __log.debug("checkStep(" + event.getProcessInstanceId() + ") Event is type " + event.getClass().getName());
-    if(_step.contains(pid))
-    __log.debug("checkStep(" + event.getProcessInstanceId() + ") Step indication found");
     return (_step.contains(pid) 
        && (event instanceof ActivityExecStartEvent
          || event instanceof ScopeCompletionEvent));

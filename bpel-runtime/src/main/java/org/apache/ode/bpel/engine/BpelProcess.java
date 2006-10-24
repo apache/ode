@@ -18,9 +18,24 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.api.CorrelationSet;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.InvalidMessageException;
@@ -32,16 +47,15 @@ import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.DeploymentUnit;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OBase;
@@ -63,22 +77,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point into the runtime of a BPEL process.

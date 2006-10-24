@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactoryBPEL11;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
 import org.apache.ode.utils.xsd.SchemaModel;
 
 import java.net.URL;
