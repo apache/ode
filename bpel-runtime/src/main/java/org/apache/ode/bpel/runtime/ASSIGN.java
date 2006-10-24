@@ -501,6 +501,8 @@ class ASSIGN extends ACTIVITY {
                 // A little kludge, let our caller know that the root
                 // element has changed. (used for assignment to a simple
                 // typed variable)
+                if (lvalue.getNodeType() == Node.ELEMENT_NODE && lvalue.getFirstChild().getNodeType() == Node.TEXT_NODE)
+                    lvalue = lvalue.getFirstChild();
                 if (lvalue.getNodeType() == Node.TEXT_NODE && ((Text) lvalue).getWholeText().equals(
                         ((Text) lvaluePtr).getWholeText()))
                     lvalue = lvaluePtr = newval;
