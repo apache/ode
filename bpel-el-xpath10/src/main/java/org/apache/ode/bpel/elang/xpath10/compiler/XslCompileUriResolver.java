@@ -19,7 +19,7 @@
 
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bpel.capi.CompilerContext;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OXslSheet;
 

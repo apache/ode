@@ -19,10 +19,10 @@
 
 package org.apache.ode.tools.bpelc;
 
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompileListener;
 import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.tools.Command;
 import org.apache.ode.tools.CommandContext;
 import org.apache.ode.tools.ExecutionException;

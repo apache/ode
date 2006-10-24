@@ -18,13 +18,13 @@
  */
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
 
 import org.jaxen.JaxenException;
 
 
 /**
- * Jaxen-compliant wrapper for {@link org.apache.ode.bpel.capi.CompilationException}.
+ * Jaxen-compliant wrapper for {@link org.apache.ode.bpel.compiler.api.CompilationException}.
  */
 class CompilationExceptionWrapper extends JaxenException {
 

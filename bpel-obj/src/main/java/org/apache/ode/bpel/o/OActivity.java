@@ -34,7 +34,7 @@ public abstract class OActivity extends OAgent {
     public final Set<OLink>sourceLinks = new HashSet<OLink>();
     public final Set<OLink>targetLinks = new HashSet<OLink>();
     public String name;
-    private FailureHandling failureHandling;
+    public FailureHandling failureHandling;
     private OActivity parent;
 
     public String getType() {

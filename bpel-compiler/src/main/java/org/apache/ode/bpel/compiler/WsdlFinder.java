@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -71,8 +71,11 @@
   <scope name="scopeOne">
   	<eventHandlers>
 
-  		<onEvent partnerLink="request1" messageType="wns:requestMessage"
-				portType="wns:TestStaticOnMessage1PT" operation="event1" variable="request">
+  		<onEvent partnerLink="request1" 
+  			    messageType="wns:requestMessage"
+				portType="wns:TestStaticOnMessage1PT" 
+				operation="event1" 
+				variable="request">
 
   			<correlations>
   				<correlation set="testCorr1"/>

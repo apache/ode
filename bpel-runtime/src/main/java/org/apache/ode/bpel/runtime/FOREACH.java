@@ -22,7 +22,6 @@ package org.apache.ode.bpel.runtime;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OForEach;
@@ -184,10 +183,7 @@ public class FOREACH extends ACTIVITY {
                     evaluateAsNumber(condition, getEvaluationContext()).intValue();
         } catch (EvaluationException e) {
             String msg;
-            if (condition instanceof OXPath10Expression)
-                msg = "ForEach counter value " + ((OXPath10Expression)condition).xpath +
-                        " couldn't be evaluated as xs:unsignedInt.";
-            else msg = "ForEach counter value couldn't be evaluated as xs:unsignedInt.";
+            msg = "ForEach counter value couldn't be evaluated as xs:unsignedInt.";
             __log.error(msg, e);
             throw new FaultException(_oforEach.getOwner().constants.qnForEachCounterError,msg);
         }

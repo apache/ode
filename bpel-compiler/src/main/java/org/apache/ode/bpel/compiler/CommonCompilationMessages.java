@@ -19,11 +19,10 @@
 
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompilationMessageBundle;
-
-import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;
 
 /**
  * General compilation messages.
@@ -148,6 +147,11 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             + " the required type (either MessageType or ElementType).", varName);
     }
 
+    public CompilationMessage errVariableDeclInvalid(String variable) {
+        return this.formatCompilationMessage("Declaration of variable \"{0}\" specifies "
+                + " both a MessageType and an ElementType.", variable);
+    }
+
     /**
      * Declaration of variable "{0}" can specify either MessageType or
      * ElementType, but not both.
@@ -214,7 +218,7 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
     }
 
     /** Attempt to reference undeclared portType "{0}". */
-    public CompilationMessage errUndeclaredPortType(PortType portType) {
+    public CompilationMessage errUndeclaredPortType(QName portType) {
         return this.formatCompilationMessage("Attempt to reference undeclared portType \"{0}\".",
             portType);
     }

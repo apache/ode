@@ -18,14 +18,18 @@
  */
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xsl.XslCompilationErrorListener;
+import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
 
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
 
 /**
  * XPath 1.0 expression compiler for BPEL 2.0
@@ -36,24 +40,33 @@ public class XPath10ExpressionCompilerBPEL20 extends XPath10ExpressionCompilerIm
 
   public XPath10ExpressionCompilerBPEL20() {
     super(Constants.BPEL20_NS);
+    TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+    XslTransformHandler.getInstance().setTransformerFactory(trsf);
+
     _qnDoXslTransform = new QName(Constants.BPEL20_NS, "doXslTransform");
   }
 
   /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compileJoinCondition(java.lang.Object)
+   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
    */
   public OExpression compileJoinCondition(Object source) throws CompilationException {
     return _compile((Expression)source, true);
   }
 
+  @Override
+  public void setCompilerContext(CompilerContext ctx) {
+      super.setCompilerContext(ctx);
+      XslCompilationErrorListener xe = new XslCompilationErrorListener(ctx);
+      XslTransformHandler.getInstance().setXslCompilationErrorListener(xe);
+  }
   /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compile(java.lang.Object)
+   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
    */
   public OExpression compile(Object source) throws CompilationException {
     return _compile((Expression)source, false);
   }
   /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compileLValue(java.lang.Object)
+   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
    */
   public OLValueExpression compileLValue(Object source) throws CompilationException {
     return (OLValueExpression)_compile((Expression)source, false);

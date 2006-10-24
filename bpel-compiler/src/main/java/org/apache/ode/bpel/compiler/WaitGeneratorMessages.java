@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompilationMessageBundle;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;
 
 public class WaitGeneratorMessages extends CompilationMessageBundle {
 

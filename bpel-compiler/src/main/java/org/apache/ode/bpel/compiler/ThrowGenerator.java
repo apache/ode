@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.ThrowActivity;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.ThrowActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OThrow;
 
