@@ -622,13 +622,15 @@ class ProcessAndInstanceManagementImpl
         }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
-        File deployDir = _server.getDeploymentUnit(proc.getProcessId()).getDeployDir();
-        File files[] = deployDir.listFiles();
-        if (files != null)
-            genDocumentInfo(docinfo, deployDir, files,true);
-        else if (__log.isDebugEnabled())
-            __log.debug("fillProcessInfo: No files for " + deployDir + " !!!");
-
+        if (_server.getDeploymentUnit(proc.getProcessId()) != null) {
+            File deployDir = _server.getDeploymentUnit(proc.getProcessId()).getDeployDir();
+            File files[] = deployDir.listFiles();
+            if (files != null)
+                genDocumentInfo(docinfo, deployDir, files,true);
+            else if (__log.isDebugEnabled())
+                __log.debug("fillProcessInfo: No files for " + deployDir + " !!!");
+        }
+        
         if (custom.includeProcessProperties()) {
             TProcessProperties properties = info.addNewProperties();
             for (ProcessPropertyDAO processPropertyDAO : proc.getProperties()) {
