@@ -19,9 +19,9 @@
 package org.apache.ode.bpel.compiler_2_0;
 
 import junit.framework.TestCase;
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompileListener;
 import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.utils.StreamUtils;
 
 import java.io.ByteArrayOutputStream;

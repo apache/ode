@@ -10,10 +10,8 @@
 	<classpathentry kind="var" path="M2_REPO/commons-lang/commons-lang/2.1/commons-lang-2.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/jdom/jdom/1.0/jdom-1.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/ws-commons/axiom-impl/1.0/axiom-impl-1.0.jar"/>
-	<classpathentry kind="src" path="/ode-bpel-bom"/>
 	<classpathentry kind="var" path="M2_REPO/org/ccil/cowan/tagsoup/tagsoup/0.9.7/tagsoup-0.9.7.jar"/>
 	<classpathentry kind="var" path="M2_REPO/saxon/saxon/8.4/saxon-8.4.jar"/>
-	<classpathentry kind="src" path="/ode-bpel-parser"/>
 	<classpathentry kind="src" path="/ode-jacob"/>
 	<classpathentry kind="src" path="/ode-bpel-runtime"/>
 	<classpathentry kind="var" path="M2_REPO/woodstox/wstx/1.0.7/wstx-1.0.7.jar"/>

@@ -18,10 +18,10 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.CompositeActivity;
-import org.apache.ode.bom.api.SequenceActivity;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.CompositeActivity;
+import org.apache.ode.bpel.compiler.bom.SequenceActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OSequence;
 
@@ -44,8 +44,7 @@ class SequenceGenerator extends DefaultActivityGenerator {
     }
 
     protected void compileChildren(OSequence dest, CompositeActivity src) {
-        for (Iterator<Activity> i = src.getChildren().iterator(); i.hasNext();) {
-            Activity child = i.next();
+        for (Activity child : src.getActivities()) {
             try {
                 OActivity compiledChild = _context.compile(child);
                 dest.sequence.add(compiledChild);

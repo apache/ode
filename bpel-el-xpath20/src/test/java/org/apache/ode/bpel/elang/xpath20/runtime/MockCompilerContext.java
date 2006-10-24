@@ -8,11 +8,8 @@ import java.util.Map;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.BpelObject;
-import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
+import org.apache.ode.bpel.compiler.bom.*;
+import org.apache.ode.bpel.compiler.api.*;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
@@ -22,7 +19,6 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
@@ -30,6 +26,7 @@ import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
 import org.apache.ode.bpel.o.OScope.CorrelationSet;
 import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.utils.NSContext;
 
 public class MockCompilerContext implements CompilerContext {
     private OProcess _oprocess = new OProcess("20");
@@ -168,6 +165,14 @@ public class MockCompilerContext implements CompilerContext {
         OScope.Variable var = new OScope.Variable(getOProcess(),varType);
         var.name = name;
         _vars.put(name, var);
+    }
+    public OExpression compileExpr(String locationstr, NSContext nsContext) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    public OActivity getCurrent() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

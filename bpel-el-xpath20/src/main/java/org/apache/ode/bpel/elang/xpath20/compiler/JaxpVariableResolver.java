@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
 import org.apache.ode.bpel.o.OElementVarType;

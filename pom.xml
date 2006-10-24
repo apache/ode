@@ -114,10 +114,8 @@
 
         <module>bpel-scripts</module>
         <module>bpel-schemas</module>
-        <module>bpel-bom</module>
         <module>bpel-obj</module>
         <module>bpel-dd</module>
-        <module>bpel-parser</module>
         <module>bpel-api</module>
         <module>bpel-dao</module>
         <module>bpel-api-jca</module>
@@ -329,11 +327,6 @@
         <dependencies>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-bpel-bom</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -390,11 +383,6 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-obj</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-bpel-parser</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.ReceiveActivity;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.ReceiveActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OEmpty;
 import org.apache.ode.bpel.o.OPickReceive;
@@ -30,14 +30,14 @@ class ReceiveGenerator extends PickReceiveGenerator {
     OPickReceive opick = (OPickReceive) output;
     ReceiveActivity rcvDef = (ReceiveActivity) src;
 
-    opick.createInstanceFlag = rcvDef.getCreateInstance();
+    opick.createInstanceFlag = rcvDef.isCreateInstance();
     OPickReceive.OnMessage onMessage = compileOnMessage(
             rcvDef.getVariable(),
             rcvDef.getPartnerLink(),
             rcvDef.getOperation(),
             rcvDef.getMessageExchangeId(),
             rcvDef.getPortType(),
-            rcvDef.getCreateInstance(),
+            rcvDef.isCreateInstance(),
             rcvDef.getCorrelations());
 
     onMessage.activity = new OEmpty(_context.getOProcess(), opick);

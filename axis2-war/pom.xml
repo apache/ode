@@ -208,11 +208,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-bom</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-compiler</artifactId>
       <scope>runtime</scope>
     </dependency>
@@ -234,11 +229,6 @@
     <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-obj</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-parser</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>

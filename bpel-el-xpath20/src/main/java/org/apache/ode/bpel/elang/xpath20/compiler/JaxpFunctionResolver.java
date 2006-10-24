@@ -19,31 +19,26 @@
 
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
-import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bom.impl.nodes.ExpressionImpl;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
-import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
-import org.apache.ode.bpel.elang.xpath10.compiler.XslCompileUriResolver;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath20.Constants;
-import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.xsl.XslTransformHandler;
-import org.apache.ode.utils.NSContext;
-import org.apache.ode.utils.msg.MessageBundle;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
-import java.util.List;
+
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
+import org.apache.ode.bpel.elang.xpath10.compiler.XslCompileUriResolver;
+import org.apache.ode.bpel.elang.xpath20.Constants;
+import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
+import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -71,12 +66,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             throw new WrappedResolverException("Undeclared namespace for " + functionName);
         } else if (functionName.getNamespaceURI().equals(_bpelNS)) {
             String localName = functionName.getLocalPart();
-            if (Constants.EXT_FUNCTION_GETVARIABLEDATA.equals(localName)) {
-                return new GetVariableData();
-            } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(localName)) {
+            if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(localName)) {
                 return new GetVariableProperty();
-            } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(localName)) {
-                return new GetLinkStatus();
             } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(localName)) {
                 return new DoXslTransform();
             } else {
@@ -87,43 +78,6 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         return null;
     }
 
-    public class GetLinkStatus implements XPathFunction {
-        public Object evaluate(List params) throws XPathFunctionException {
-            if (params.size() != 1) {
-                throw  new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETLINKSTATUS));
-            }
-            OLink olink = _cctx.resolveLink((String) params.get(0));
-            _out.links.put(olink.name, olink);
-            return "";
-        }
-    }
-
-    public class GetVariableData implements XPathFunction {
-        public Object evaluate(List params) throws XPathFunctionException {
-            if (params.size() < 1 || params.size() > 3)
-                throw new CompilationException(
-                        __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEDATA));
-
-            String varname = (String)params.get(0);
-            String partname = params.size() > 1 ? (String)params.get(1) : null;
-            String locationstr = params.size() > 2 ? (String)params.get(2) : null;
-
-            OScope.Variable var = _cctx.resolveVariable(varname);
-            OMessageVarType.Part part = partname != null ? _cctx.resolvePart(var,partname) : null;
-            OExpression location = null;
-            if (locationstr != null) {
-                // Create a virtual expression node.
-                Expression vExpSrc = new ExpressionImpl(null);
-                vExpSrc.setNamespaceContext(_nsContext);
-                vExpSrc.setXPathString(locationstr);
-                location = _cctx.compileExpr(vExpSrc);
-            }
-
-            _out.addGetVariableDataSig(varname, partname, locationstr,
-                    new OXPath10Expression.OSigGetVariableData(_cctx.getOProcess(),var, part,location));
-            return "";
-        }
-    }
 
     public class GetVariableProperty implements XPathFunction {
         public Object evaluate(List params) throws XPathFunctionException {

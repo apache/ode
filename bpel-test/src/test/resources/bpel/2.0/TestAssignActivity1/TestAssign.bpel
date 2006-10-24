@@ -67,10 +67,6 @@
                 <to>$intVar2</to>
             </copy>
             <copy>
-                <from>bpws:getVariableData('intVar')</from>
-                <to>$intVar2</to>
-            </copy>
-            <copy>
                 <from>$intVar + 1</from>
                 <to variable="intVar"/>
             </copy>
