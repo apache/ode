@@ -140,7 +140,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.TERMINATE, TerminateActivity.class);
         _mappings.put(Bpel11QNames.FLOW, FlowActivity.class);
         _mappings.put(Bpel11QNames.SWITCH, IfActivity.class);
-        _mappings.put(Bpel11QNames.WHILE, WhileActivity.class);
+        _mappings.put(Bpel11QNames.WHILE, WhileActivity11.class);
         _mappings.put(Bpel11QNames.SEQUENCE, SequenceActivity.class);
         _mappings.put(Bpel11QNames.PICK, PickActivity.class);
         _mappings.put(Bpel11QNames.SCOPE, ScopeActivity.class);
@@ -158,7 +158,8 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.ONALARM, OnAlarm.class);
         _mappings.put(Bpel11QNames.ONMESSAGE, OnMessage.class);
         _mappings.put(Bpel11QNames.PLINKTYPE, PartnerLinkType.class);
-        _mappings.put(Bpel11QNames.PLINKROLE, PartnerLinkType.Role.class);
+        _mappings.put(Bpel11QNames.PLINKROLE, PartnerLinkType.Role11.class);
+        _mappings.put(Bpel11QNames.PORTTYPE, PartnerLinkType.Role11.PortType11.class);
         _mappings.put(Bpel11QNames.PROPALIAS, PropertyAlias.class);
         _mappings.put(Bpel11QNames.PROPERTY,  Property.class);
         _mappings.put(Bpel11QNames.VARIABLES, Variables.class);

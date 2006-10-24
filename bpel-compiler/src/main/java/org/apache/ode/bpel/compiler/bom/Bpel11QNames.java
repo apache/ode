@@ -106,6 +106,7 @@ public abstract class Bpel11QNames {
 
     public static final QName PLINKROLE = new QName(NS_BPEL4WS_PARTNERLINK_2003_05, "role");
 
+    public static final QName PORTTYPE = new QName(NS_BPEL4WS_PARTNERLINK_2003_05, "portType");
 
     private static QName newQName(String local) {
         return new QName(NS_BPEL4WS_2003_03, local);
