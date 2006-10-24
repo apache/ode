@@ -109,5 +109,41 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
         }
 
     }
+    
+    /**
+     * BPEL 1.1 nonsense.
+     * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
+     *
+     */
+    public static class Role11 extends Role {
+        private static final long serialVersionUID = -1L;
+
+        public Role11(Element el) {
+            super(el);
+        }
+
+        /**
+         * Get the WSDL portType of the role (i.e. the interface implemented by
+         * the object acting in the role).
+         * 
+         * @return role portType
+         */
+        public QName getPortType() {
+            PortType11 pt11 = getFirstChild(PortType11.class);
+            return pt11 == null ? null : pt11.getName();
+        }
+        
+        
+        public static class PortType11 extends BpelObject4WSDL {
+
+            public PortType11(Element el) {
+                super(el);
+            }
+
+            public QName getName() {
+                return getNamespaceContext().derefQName(getAttribute("name"));
+            }
+        }
+    }
 
 }

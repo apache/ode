@@ -37,4 +37,16 @@ public class From extends ToFrom {
         return getAsLiteralVal() != null;
     }
 
+    @Override
+    public Expression getAsExpression() {
+        // BPEL 1.1 fixups. In 1.1 the expression was an attribute not the child element.
+        if (is11()) {
+            String expr = getAttribute("expression" , null);
+            return expr == null  ? null : new Expression11(getElement(),getElement().getAttributeNode("expression"));
+        }
+        
+        return super.getAsExpression();
+    }
+
+    
 }
