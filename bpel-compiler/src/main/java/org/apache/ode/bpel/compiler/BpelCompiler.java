@@ -18,35 +18,7 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.api.*;
-import org.apache.ode.bom.api.Process;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bom.wsdl.PartnerLinkType;
-import org.apache.ode.bom.wsdl.Property;
-import org.apache.ode.bom.wsdl.PropertyAlias;
-import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilationMessage;
-import org.apache.ode.bpel.capi.CompileListener;
-import org.apache.ode.bpel.capi.CompilerContext;
-import org.apache.ode.bpel.capi.ExpressionCompiler;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.utils.stl.CollectionsX;
-import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.utils.stl.UnaryFunction;
-import org.apache.ode.utils.fs.FileUtils;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -57,7 +29,81 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.io.File;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.compiler.bom.Catch;
+import org.apache.ode.bpel.compiler.bom.CompensationHandler;
+import org.apache.ode.bpel.compiler.bom.Constants;
+import org.apache.ode.bpel.compiler.bom.Correlation;
+import org.apache.ode.bpel.compiler.bom.CorrelationSet;
+import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.FaultHandler;
+import org.apache.ode.bpel.compiler.bom.Import;
+import org.apache.ode.bpel.compiler.bom.LinkSource;
+import org.apache.ode.bpel.compiler.bom.LinkTarget;
+import org.apache.ode.bpel.compiler.bom.OnAlarm;
+import org.apache.ode.bpel.compiler.bom.OnEvent;
+import org.apache.ode.bpel.compiler.bom.PartnerLink;
+import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
+import org.apache.ode.bpel.compiler.bom.Process;
+import org.apache.ode.bpel.compiler.bom.Property;
+import org.apache.ode.bpel.compiler.bom.PropertyAlias;
+import org.apache.ode.bpel.compiler.bom.Scope;
+import org.apache.ode.bpel.compiler.bom.ScopeActivity;
+import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.compiler.bom.TerminationHandler;
+import org.apache.ode.bpel.compiler.bom.Variable;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.o.DebugInfo;
+import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OAssign;
+import org.apache.ode.bpel.o.OCatch;
+import org.apache.ode.bpel.o.OCompensate;
+import org.apache.ode.bpel.o.OCompensationHandler;
+import org.apache.ode.bpel.o.OConstantExpression;
+import org.apache.ode.bpel.o.OConstants;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OEventHandler;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.o.OFaultHandler;
+import org.apache.ode.bpel.o.OFlow;
+import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.ORethrow;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.o.OTerminationHandler;
+import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.apache.ode.utils.stl.MemberOfFunction;
+import org.apache.ode.utils.stl.UnaryFunction;
 
 
 /**
@@ -73,7 +119,7 @@ abstract class BpelCompiler implements CompilerContext {
     private static final CommonCompilationMessages __cmsgs =
             MessageBundle.getMessages(CommonCompilationMessages.class);
 
-    private org.apache.ode.bom.api.Process _processDef;
+    private org.apache.ode.bpel.compiler.bom.Process _processDef;
 
     private Date _generatedDate;
 
@@ -167,7 +213,7 @@ abstract class BpelCompiler implements CompilerContext {
     public PortType resolvePortType(final QName portTypeName) {
         PortType portType = _wsdlRegistry.getPortType(portTypeName);
         if (portType == null)
-            throw new CompilationException(__cmsgs.errUndeclaredPortType(portType));
+            throw new CompilationException(__cmsgs.errUndeclaredPortType(portTypeName));
         return portType;
     }
 
@@ -416,6 +462,11 @@ abstract class BpelCompiler implements CompilerContext {
         return compileExpr(expression, false, false);
     }
 
+    public OExpression compileExpr(String expr, NSContext nc) {
+        throw new UnsupportedOperationException("todo");
+        // TODO fix this for BPEL11
+    }
+
     private OExpression compileExpr(Expression expression, boolean isJoinCondition, boolean isLValue) {
         String expLang = getExpressionLanguage(expression);
         ExpressionCompiler ec = findExpLangCompiler(expLang);
@@ -491,10 +542,10 @@ abstract class BpelCompiler implements CompilerContext {
 
         String bpelVersionUri = null;
         switch(process.getBpelVersion()){
-            case Process.BPEL_V110:
+            case BPEL11:
                 bpelVersionUri = Constants.NS_BPEL4WS_2003_03;
                 break;
-            case Process.BPEL_V200:
+            case BPEL20:
                 bpelVersionUri = Constants.NS_WSBPEL_2004_03;
                 break;
             default:
@@ -528,11 +579,11 @@ abstract class BpelCompiler implements CompilerContext {
         }
 
         switch (_processDef.getSuppressJoinFailure()) {
-            case JoinFailureSuppressor.SUPJOINFAILURE_NO:
-            case JoinFailureSuppressor.SUPJOINFAILURE_NOTSET:
+            case NO:
+            case NOTSET:
                 _supressJoinFailure = false;
                 break;
-            case JoinFailureSuppressor.SUPJOINFAILURE_YES:
+            case YES:
                 _supressJoinFailure = true;
                 break;
         }
@@ -665,10 +716,10 @@ abstract class BpelCompiler implements CompilerContext {
 
         boolean previousSupressJoinFailure = _supressJoinFailure;
         switch (source.getSuppressJoinFailure()) {
-            case JoinFailureSuppressor.SUPJOINFAILURE_NO:
+            case NO:
                 _supressJoinFailure = false;
                 break;
-            case JoinFailureSuppressor.SUPJOINFAILURE_YES:
+            case YES:
                 _supressJoinFailure = true;
                 break;
         }
@@ -725,27 +776,34 @@ abstract class BpelCompiler implements CompilerContext {
         return activity;
     }
 
-    public OActivity compileSLC(final Activity source) {
-        final ScopeLikeConstruct slcsrc =  source instanceof ScopeLikeConstruct ? (ScopeLikeConstruct) source : null;
-        if (slcsrc != null) {
-            final OScope implicitScope = new OScope(_oprocess, getCurrent());
-            implicitScope.name = createName(source);
-            implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
-            compileScope(implicitScope, slcsrc, new Runnable() {
-                public void run() {
-                    compileLinks(source);
-                    if (source instanceof ScopeActivity)
-                        implicitScope.activity = compile(((ScopeActivity)source).getChildActivity());
-                    else
-                        implicitScope.activity = compileActivity(false, source);
-
+    public OScope compileSLC(final ScopeLikeActivity source, final OScope.Variable[] variables) {
+        final OScope implicitScope = new OScope(_oprocess, getCurrent());
+        implicitScope.name = createName(source);
+        implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
+        compileScope(implicitScope, source.getScope(), new Runnable() {
+            public void run() {
+                compileLinks(source);
+                for (OScope.Variable  v : variables) {
+                    v.declaringScope = implicitScope;
+                    implicitScope.addLocalVariable(v);
                 }
-            });
+                    
+                if (source instanceof ScopeActivity)
+                    implicitScope.activity = compile(((ScopeActivity)source).getChildActivity());
+                else
+                    implicitScope.activity = compileActivity(false, source);
 
-            return implicitScope;
-        } else {
-            return compileActivity(true, source);
-        }
+            }
+        });
+
+        return implicitScope;
+    }
+    
+    public OActivity compileSLC(final Activity source) {
+        if (source instanceof ScopeLikeActivity) 
+            return compileSLC((ScopeLikeActivity)source, new OScope.Variable[0]);
+
+        return compileActivity(true, source);
     }
 
     private OActivity compileActivity(final boolean doLinks, final Activity source) {
@@ -897,9 +955,9 @@ abstract class BpelCompiler implements CompilerContext {
         oscope.addCorrelationSet(ocset);
     }
 
-public OActivity getCurrent() {
-    return _structureStack.topActivity();
-}
+    public OActivity getCurrent() {
+        return _structureStack.topActivity();
+    }
 
     public void compile(OActivity context, BpelObject source, Runnable run) {
         DefaultActivityGenerator.defaultExtensibilityElements(context, source);
@@ -1077,20 +1135,20 @@ public OActivity getCurrent() {
         compile(oevent, onEvent, new Runnable() {
             public void run() {
                 switch (_processDef.getBpelVersion()) {
-                    case Process.BPEL_V110:
+                    case BPEL11:
                         oevent.variable = resolveMessageVariable(onEvent.getVariable());
                         break;
-                    case Process.BPEL_V200:
-                        if(onEvent.getMessageType() == null && onEvent.getElement() == null)
+                    case BPEL20:
+                        if(onEvent.getMessageType() == null && onEvent.getElementType() == null)
                             throw new CompilationException(__cmsgs.errVariableDeclMissingType(onEvent.getVariable()).setSource(onEvent));
-                        if(onEvent.getMessageType() != null && onEvent.getElement() != null)
-                            throw new CompilationException(__cmsgs.errVariableDeclMissingType(onEvent.getVariable()).setSource(onEvent));
+                        if(onEvent.getMessageType() != null && onEvent.getElementType() != null)
+                            throw new CompilationException(__cmsgs.errVariableDeclInvalid(onEvent.getVariable()).setSource(onEvent));
 
                         OVarType varType;
                         if(onEvent.getMessageType() != null)
                             varType = resolveMessageType(onEvent.getMessageType());
                         else if(onEvent.getElement() != null)
-                            varType = resolveElementType(onEvent.getElement());
+                            varType = resolveElementType(onEvent.getElementType());
                         else
                             throw new CompilationException(__cmsgs.errUnrecognizedVariableDeclaration(onEvent.getVariable()));
 
@@ -1111,21 +1169,21 @@ public OActivity getCurrent() {
                 if (onEvent.getPortType() != null && !onEvent.getPortType().equals(oevent.partnerLink.myRolePortType.getQName()))
                     throw new CompilationException(__cmsgs.errPortTypeMismatch(onEvent.getPortType(), oevent.partnerLink.myRolePortType.getQName()));
 
-                for (Iterator<Correlation> i = onEvent.getCorrelations(Correlation.CORRPATTERN_IN).iterator(); i.hasNext(); ) {
-                    Correlation correlation = i.next();
+                for (Correlation correlation : onEvent.getCorrelations()) {
                     OScope.CorrelationSet cset = resolveCorrelationSet(correlation.getCorrelationSet());
 
                     switch (correlation.getInitiate()) {
-                        case Correlation.INITIATE_NO:
+                        case UNSET:
+                        case NO:
                             if (oevent.matchCorrelation != null)
                                 throw new CompilationException(__cmsgs.errTODO("Matching multiple correlations sets."));
                             oevent.matchCorrelation = cset;
                             oevent.partnerLink.addCorrelationSetForOperation(oevent.operation,cset);
                             break;
-                        case Correlation.INITIATE_YES:
+                        case YES:
                             oevent.initCorrelations.add(cset);
                             break;
-                        case Correlation.INITIATE_RENDEZVOUS:
+                        case JOIN:
                             throw new CompilationException(__cmsgs.errTODO("Rendezvous."));
                     }
 
@@ -1170,7 +1228,7 @@ public OActivity getCurrent() {
     private void compile(final Variable src) {
         final OScope oscope = _structureStack.topScope();
 
-        if(src.getTypeName() == null)
+        if(src.getKind() == null)
             throw new CompilationException(__cmsgs.errVariableDeclMissingType(src.getName()).setSource(src));
 
         if (oscope.getLocalVariable(src.getName()) != null)
@@ -1178,14 +1236,14 @@ public OActivity getCurrent() {
 
 
         OVarType varType;
-        switch (src.getDeclerationType()) {
-            case Variable.TYPE_ELEMENT:
+        switch (src.getKind()) {
+            case ELEMENT:
                 varType = resolveElementType(src.getTypeName());
                 break;
-            case Variable.TYPE_MESSAGE:
+            case MESSAGE:
                 varType = resolveMessageType(src.getTypeName());
                 break;
-            case Variable.TYPE_SCHEMA:
+            case SCHEMA:
                 varType = resolveXsdType(src.getTypeName());
                 break;
             default:
@@ -1266,26 +1324,24 @@ public OActivity getCurrent() {
             _recoveryContextStack.push(oscope);
             try {
 
-                Catch[] catches = fh.getCatches();
-
-                for (int i = 0; i < catches.length; i++) {
-                    final Catch catchSrc = catches[i];
+                int i = 0;
+                for (final Catch catchSrc : fh.getCatches()) {
                     final OCatch ctch = new OCatch(_oprocess, oscope);
                     ctch.debugInfo = createDebugInfo(catchSrc, catchSrc.toString());
                     ctch.name = "__catch#" +i + ":" +_structureStack.topScope().name;
                     ctch.faultName = catchSrc.getFaultName();
-                    compile(ctch, catches[i], new  Runnable() {
+                    compile(ctch, catchSrc, new  Runnable() {
                         public void run() {
 
                             if (catchSrc.getFaultVariable() != null) {
                                 OScope.Variable faultVar;
                                 switch (_processDef.getBpelVersion()) {
-                                    case Process.BPEL_V110:
+                                    case BPEL11:
                                         faultVar = resolveVariable(catchSrc.getFaultVariable());
                                         if(!(faultVar.type instanceof OMessageVarType))
                                             throw new CompilationException(__cmsgs.errMessageVariableRequired(catchSrc.getFaultVariable()).setSource(catchSrc));
                                         break;
-                                    case Process.BPEL_V200:
+                                    case BPEL20:
                                         if(catchSrc.getFaultVariableMessageType() == null && catchSrc.getFaultVariableElementType() == null)
                                             throw new CompilationException(__cmsgs.errVariableDeclMissingType(catchSrc.getFaultVariable()).setSource(catchSrc));
                                         if(catchSrc.getFaultVariableMessageType() != null && catchSrc.getFaultVariableElementType() != null)
@@ -1315,6 +1371,7 @@ public OActivity getCurrent() {
                             _structureStack.topScope().activity = compile(catchSrc.getActivity());
                         }});
                     oscope.faultHandler.catchBlocks.add(ctch);
+                    ++i;
                 }
             } finally {
                 _recoveryContextStack.pop();
@@ -1426,6 +1483,11 @@ public OActivity getCurrent() {
 
     protected void registerExpressionLanguage(String expLangUri, ExpressionCompiler expressionCompiler) {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);
+    }
+
+    protected void registerExpressionLanguage(String expLangUri, String classname) throws Exception {
+        Class cls = Class.forName(classname);
+        registerExpressionLanguage(expLangUri,(ExpressionCompiler)cls.newInstance());
     }
 
     public List<OActivity> getActivityStack() {

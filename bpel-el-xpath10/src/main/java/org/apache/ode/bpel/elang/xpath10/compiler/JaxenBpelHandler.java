@@ -18,14 +18,21 @@
  */
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bom.impl.nodes.ExpressionImpl;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.xsl.XslTransformHandler;
+import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.jaxen.JaxenException;
@@ -33,9 +40,6 @@ import org.jaxen.JaxenHandler;
 import org.jaxen.expr.Expr;
 import org.jaxen.expr.FunctionCallExpr;
 import org.jaxen.expr.LiteralExpr;
-
-import javax.xml.namespace.QName;
-import java.util.List;
 
 
 /**
@@ -177,11 +181,7 @@ class JaxenBpelHandler extends JaxenHandler {
     OMessageVarType.Part part = partname != null ? _cctx.resolvePart(var,partname) : null;
     OExpression location = null;
     if (locationstr != null) {
-      // Create a virtual expression node.
-      Expression vExpSrc = new ExpressionImpl(null);
-      vExpSrc.setNamespaceContext(_nsContext);
-      vExpSrc.setXPathString(locationstr);
-      location = _cctx.compileExpr(vExpSrc);
+      location = _cctx.compileExpr(locationstr,_nsContext);
     }
 
     _out.addGetVariableDataSig(varname, partname, locationstr,

@@ -302,6 +302,7 @@ class ASSIGN extends ACTIVITY {
             case Node.TEXT_NODE:
             case Node.ATTRIBUTE_NODE:
             case Node.ELEMENT_NODE:
+            case Node.CDATA_SECTION_NODE:
                 break;
             default:
                 String msg = __msgs.msgInvalidRValue();

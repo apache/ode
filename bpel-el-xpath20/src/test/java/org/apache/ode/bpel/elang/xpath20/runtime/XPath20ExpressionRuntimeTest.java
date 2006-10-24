@@ -7,8 +7,8 @@ import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
-import org.apache.ode.bom.impl.nodes.ExpressionImpl;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
@@ -127,8 +127,11 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     
 
     private OXPath20ExpressionBPEL20 compile(String xpath) {
-        ExpressionImpl exp = new ExpressionImpl();
-        exp.setXPathString(xpath);
+        Document doc = DOMUtils.newDocument();
+        Element e = doc.createElement("expression");
+        doc.appendChild(e);
+        e.appendChild(doc.createTextNode(xpath));
+        Expression exp = new Expression(e);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
 }

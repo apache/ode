@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -39,6 +40,7 @@ import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath20.Constants;
 import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -72,6 +74,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     public void initialize(Map properties) throws ConfigurationException {
+        TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+        XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
 
     /**

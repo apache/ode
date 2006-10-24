@@ -31,8 +31,6 @@
 	<classpathentry kind="var" path="M2_REPO/com/ibm/icu/icu4j/2.6.1/icu4j-2.6.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/saxon/saxon-dom/8.4/saxon-dom-8.4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
-	<classpathentry kind="src" path="/ode-bpel-bom"/>
-	<classpathentry kind="src" path="/ode-bpel-parser"/>
 	<classpathentry kind="var" path="M2_REPO/org/ccil/cowan/tagsoup/tagsoup/0.9.7/tagsoup-0.9.7.jar"/>
 	<classpathentry kind="src" path="/ode-bpel-compiler"/>
 	<classpathentry kind="src" path="/ode-jacob"/>

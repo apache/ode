@@ -247,7 +247,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         List<HBpelEvent> hevents = crit.list();
         List<BpelEvent> ret = new ArrayList<BpelEvent>(hevents.size());
         try {
-            CollectionsX.transform(ret,hevents,new UnaryFunctionEx<HBpelEvent,BpelEvent>() {
+            CollectionsX.transformEx(ret,hevents,new UnaryFunctionEx<HBpelEvent,BpelEvent>() {
                 public BpelEvent apply(HBpelEvent x) throws Exception{
                     return (BpelEvent) SerializableUtils.toObject(x.getData().getBinary(),BpelEvent.class.getClassLoader());
                 }

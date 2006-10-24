@@ -18,17 +18,17 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.wsdl.Definition4BPEL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
+
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 
 
 public class DefaultWsdlFinder implements WsdlFinder {
@@ -54,14 +54,18 @@ public class DefaultWsdlFinder implements WsdlFinder {
         // Allowing both relative or absolute
         if (!strUri.startsWith("/"))
             return (Definition4BPEL) r.readWSDL(new File(importFrom.getParent(), strUri).getPath());
-        else return (Definition4BPEL) r.readWSDL(new File(_suDir, strUri).getPath());
+        
+        return (Definition4BPEL) r.readWSDL(new File(_suDir, strUri).getPath());
     }
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
         String strUri = uri.getPath();
-        if (strUri == null) return null;
-        if (new File(strUri).exists()) return new FileInputStream(strUri);
-        else return new FileInputStream(new File(_suDir, strUri));
+        if (strUri == null) 
+            return null;
+        if (new File(strUri).exists()) 
+            return new FileInputStream(strUri);
+        
+        return new FileInputStream(new File(_suDir, strUri));
     }
 
 }

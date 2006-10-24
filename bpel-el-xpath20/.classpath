@@ -12,7 +12,6 @@
 	<classpathentry kind="var" path="M2_REPO/commons-collections/commons-collections/3.1/commons-collections-3.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/jaxen/jaxen/1.1-beta-8/jaxen-1.1-beta-8.jar"/>
 	<classpathentry kind="var" path="M2_REPO/stax/stax-api/1.0/stax-api-1.0.jar"/>
-	<classpathentry kind="src" path="/ode-bpel-bom"/>
 	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.12/log4j-1.2.12.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xmlbeans/xbean/2.1.0/xbean-2.1.0.jar"/>
@@ -30,6 +29,7 @@
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon/8.7/saxon-8.7.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon-dom/8.7/saxon-dom-8.7.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/saxon/saxon-xpath/8.7/saxon-xpath-8.7.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ode-bpel-compiler"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="output" path="target/classes"/>

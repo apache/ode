@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.CompositeActivity;
-import org.apache.ode.bom.api.FlowActivity;
-import org.apache.ode.bom.api.Link;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.CompositeActivity;
+import org.apache.ode.bpel.compiler.bom.FlowActivity;
+import org.apache.ode.bpel.compiler.bom.Link;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLink;
@@ -63,21 +63,21 @@ class FlowGenerator extends DefaultActivityGenerator {
           }
     }
 
-    public OActivity newInstance(Activity src) {
-        return new OFlow(_context.getOProcess(), _context.getCurrent());
+
+  public OActivity newInstance(Activity src) {
+    return new OFlow(_context.getOProcess(),_context.getCurrent());
+  }
+
+  private void compileLinkDecls(OFlow oflow, FlowActivity flowAct) {
+    for (Link link : flowAct.getLinks()) {
+      OLink olink = new OLink(_context.getOProcess());
+      olink.name = link.getLinkName();
+      declareLink(oflow, olink);
     }
-
-    private void compileLinkDecls(OFlow oflow, FlowActivity flowAct) {
-        for (Iterator<Link> i = flowAct.getLinks().iterator(); i.hasNext(); ) {
-            Link link = i.next();
-            OLink olink = new OLink(_context.getOProcess());
-            olink.name = link.getLinkName();
-            declareLink(oflow, olink);
-        }
-    }
+  }
 
 
-    public void declareLink(final OFlow oflow, final OLink olink) throws CompilationException {
+    private void declareLink(final OFlow oflow, final OLink olink) throws CompilationException {
         if (CollectionsX.find_if(oflow.localLinks, new MemberOfFunction<OLink>() {
             public boolean isMember(OLink o) {
                 return o.name.equals(olink.name);
@@ -89,17 +89,16 @@ class FlowGenerator extends DefaultActivityGenerator {
         oflow.localLinks.add(olink);
     }
 
-    /**
-     */
-    protected void compileChildren(OFlow dest, CompositeActivity src) {
-        for (Iterator<Activity> i = src.getChildren().iterator(); i.hasNext();) {
-            Activity child = i.next();
-            try {
-                OActivity compiledChild = _context.compile(child);
-                dest.parallelActivities.add(compiledChild);
-            } catch (CompilationException ce) {
-                _context.recoveredFromError(child, ce);
-            }
-        }
+  /**
+   */
+  protected void compileChildren(OFlow dest, CompositeActivity src) {
+    for (Activity child : src.getActivities()){
+      try {
+        OActivity compiledChild = _context.compile(child);
+        dest.parallelActivities.add(compiledChild);
+      } catch (CompilationException ce) {
+        _context.recoveredFromError(child, ce);
+      }
     }
+  }
 }

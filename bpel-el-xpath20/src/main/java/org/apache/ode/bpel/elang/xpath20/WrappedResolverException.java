@@ -19,7 +19,7 @@
 
 package org.apache.ode.bpel.elang.xpath20;
 
-import org.apache.ode.bpel.capi.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
 
 /**
  * @author mriou <mriou at apache dot org>

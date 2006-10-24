@@ -61,7 +61,6 @@ public class OEventHandler extends OAgent {
         public OPartnerLink partnerLink;
         public Operation operation;
         public OScope.Variable variable;
-        public OActivity activity;
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";

@@ -21,13 +21,13 @@ package org.apache.ode.bpel.deploy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bom.wsdl.Definition4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bom.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.capi.CompilationException;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.DefaultWsdlFinder;
 import org.apache.ode.bpel.compiler.DefaultXsltFinder;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -75,6 +75,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     private File _descriptorFile;
 
     private HashMap<QName, TDeployment.Process> _processInfo;
+
+    private boolean _refreshed;
 
     private static final FileFilter _wsdlFilter = new FileFilter() {
         public boolean accept(File path) {
@@ -285,7 +287,10 @@ public class DeploymentUnitImpl implements DeploymentUnit {
     }
 
     public void refresh() {
-        loadProcessDefinitions(true);
+        if (!_refreshed) {
+            loadProcessDefinitions(true);
+            _refreshed = true;
+        }
     }
 
     private ArrayList<File> listFilesRecursively(File root, FileFilter filter) {

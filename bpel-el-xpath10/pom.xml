@@ -34,11 +34,11 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-bom</artifactId>
+            <artifactId>ode-bpel-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-api</artifactId>
+            <artifactId>ode-bpel-compiler</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -52,6 +52,22 @@
           <groupId>jaxen</groupId>
           <artifactId>jaxen</artifactId>
         </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon-xpath</artifactId>
+        </dependency>
+
+       <dependency>
+         <groupId>net.sf.saxon</groupId>
+         <artifactId>saxon-dom</artifactId>
+       </dependency>
+
 
     </dependencies>
 </project>

@@ -19,9 +19,9 @@
 
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.WaitActivity;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.WaitActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OWait;
 import org.apache.ode.utils.msg.MessageBundle;

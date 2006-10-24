@@ -18,16 +18,15 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.api.Activity;
-import org.apache.ode.bom.api.BpelObject;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.FailureHandling;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
-import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.utils.DOMUtils;
-
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
 /**
@@ -49,7 +48,7 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
 
     static private void failureHandlinExtensibilityElement(OActivity output, BpelObject src) {
         // Failure handling extensibility element.
-        Element failure = (Element) src.getExtensibilityElements().get(FailureHandling.FAILURE_EXT_ELEMENT);
+        Element failure = src.getExtensibilityElement(FailureHandling.FAILURE_EXT_ELEMENT);
         if (failure != null) {
             FailureHandling failureHandling = new FailureHandling();
             output.setFailureHandling(failureHandling);

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bom.api.Expression;
-import org.apache.ode.bpel.capi.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -33,7 +33,7 @@ public class XPath10ExpressionCompilerBPEL11 extends XPath10ExpressionCompilerIm
   }
   
   /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compileJoinCondition(java.lang.Object)
+   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
    */
   public OExpression compileJoinCondition(Object source) throws CompilationException {
   	return compile(source);
@@ -44,7 +44,7 @@ public class XPath10ExpressionCompilerBPEL11 extends XPath10ExpressionCompilerIm
   }
 
   /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compile(java.lang.Object)
+   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
    */
   public OExpression compile(Object source) throws CompilationException {
     Expression xpath = (Expression)source;

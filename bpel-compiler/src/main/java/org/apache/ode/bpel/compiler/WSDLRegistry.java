@@ -18,33 +18,42 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bom.wsdl.*;
-import org.apache.ode.bpel.capi.CompilationException;
-import org.apache.ode.bpel.capi.CompilerContext;
-import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.utils.xsd.SchemaModel;
-import org.apache.ode.utils.xsd.SchemaModelImpl;
-import org.apache.ode.utils.xsd.XSUtils;
-import org.apache.ode.utils.xsd.XsdException;
-import org.apache.ode.utils.fs.FileUtils;
-import org.apache.ode.utils.DOMUtils;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
-
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
-import java.io.StringReader;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import javax.wsdl.*;
+import javax.wsdl.Definition;
+import javax.wsdl.Import;
+import javax.wsdl.Message;
+import javax.wsdl.PortType;
+import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
+import org.apache.ode.bpel.compiler.bom.PropertyAlias;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.XMLSchemaType;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.xsd.SchemaModel;
+import org.apache.ode.utils.xsd.SchemaModelImpl;
+import org.apache.ode.utils.xsd.XSUtils;
+import org.apache.ode.utils.xsd.XsdException;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 
 /**
@@ -165,8 +174,8 @@ class WSDLRegistry {
                                     im.getLocationURI()).setSource(def.getDocumentBaseURI()));
                     if (_ctx == null)
                         throw ce;
-                    else
-                        _ctx.recoveredFromError(def.getDocumentBaseURI(), ce);
+
+                    _ctx.recoveredFromError(def.getDocumentBaseURI(), ce);
 
                     continue;
                 }
@@ -246,7 +255,7 @@ class WSDLRegistry {
         }
     }
 
-    public Property getProperty(QName name) {
+    public org.apache.ode.bpel.compiler.bom.Property getProperty(QName name) {
         ArrayList<Definition4BPEL> defs = _definitions.get(name.getNamespaceURI());
         if (defs == null) return null;
         for (Definition4BPEL definition4BPEL : defs) {
