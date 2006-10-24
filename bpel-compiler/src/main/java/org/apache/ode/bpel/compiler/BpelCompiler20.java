@@ -56,7 +56,7 @@ public class BpelCompiler20 extends BpelCompiler {
     }
 
     protected String getBpwsNamespace() {
-        return Constants.NS_WSBPEL_2004_03;
+        return Bpel20QNames.NS_WSBPEL2_0;
     }
 
     protected String getDefaultExpressionLanguage() {

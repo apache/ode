@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
+import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
 import org.apache.ode.bpel.compiler.bom.Constants;
 import org.apache.ode.bpel.compiler.bom.EmptyActivity;
@@ -67,7 +68,7 @@ public class BpelCompiler11 extends BpelCompiler {
 
 
     protected String getBpwsNamespace() {
-        return Constants.NS_BPEL4WS_2003_03;
+        return Bpel11QNames.NS_BPEL4WS_2003_03;
     }
 
     protected String getDefaultExpressionLanguage() {
