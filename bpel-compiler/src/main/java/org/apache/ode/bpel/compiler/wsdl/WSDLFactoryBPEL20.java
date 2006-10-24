@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.wsdl;
 
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Constants;
 
@@ -37,7 +38,7 @@ public class WSDLFactoryBPEL20 extends WSDLFactoryImpl implements WSDLFactory4BP
     private BpelExtensionSerializer _bs;
 
     public WSDLFactoryBPEL20() {
-        super(Constants.NS_WSBPEL_2004_03, Constants.NS_WSBPEL_PARTNERLINK_2004_03);
+        super(Bpel20QNames.NS_WSBPEL2_0, Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03);
         _bomf = BpelObjectFactory.getInstance();
         _bs = new BpelExtensionSerializer(_bomf);
     }
@@ -52,7 +53,7 @@ public class WSDLFactoryBPEL20 extends WSDLFactoryImpl implements WSDLFactory4BP
         extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "property"),_bs);
         extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "propertyAlias"), _bs);
         extRegistry.registerDeserializer(Types.class, XMLSchemaType.QNAME, new XMLSchemaTypeSerializer());
-        extRegistry.registerDeserializer(Definition.class, new QName(Constants.NS_WSBPEL_PARTNERLINK_2004_03,
+        extRegistry.registerDeserializer(Definition.class, new QName(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03,
                 "partnerLinkType"),_bs);
         return extRegistry;
 
