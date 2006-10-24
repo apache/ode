@@ -350,6 +350,8 @@ public class BpelC {
       throw new CompilationException(cmsg, e);
     }
 
+    assert process != null;
+    
     compile(process);
     this.invalidate();
   }

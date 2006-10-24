@@ -212,6 +212,9 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public PortType resolvePortType(final QName portTypeName) {
+        if (portTypeName == null)
+            throw new NullPointerException("Null portTypeName argument!");
+        
         PortType portType = _wsdlRegistry.getPortType(portTypeName);
         if (portType == null)
             throw new CompilationException(__cmsgs.errUndeclaredPortType(portTypeName));
@@ -537,6 +540,8 @@ abstract class BpelCompiler implements CompilerContext {
      * Compile a process.
      */
     public OProcess compile(File bpelFile, final Process process) throws CompilationException {
+        if (process == null)
+            throw new NullPointerException("Null process parameter");
         _processDef = process;
         _generatedDate = new Date();
         _structureStack.clear();

@@ -58,6 +58,10 @@ public class ToFrom extends BpelObject {
     }
     
     public Expression getAsExpression() {
+        // BPEL 1.1 will have an expression only for the /from/ nodes.
+        if (is11()) 
+            return null;
+        
         return new Expression(getElement());
     }
 
