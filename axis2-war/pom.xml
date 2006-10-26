@@ -218,11 +218,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-el-xpath10</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-el-xpath20</artifactId>
       <scope>runtime</scope>
     </dependency>

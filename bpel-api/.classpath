@@ -18,5 +18,6 @@
 	<classpathentry kind="var" path="M2_REPO/commons-pool/commons-pool/1.2/commons-pool-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xmlbeans/xmlpublic/2.1.0/xmlpublic-2.1.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.12/log4j-1.2.12.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ode-bpel-compiler"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
