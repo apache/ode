@@ -114,7 +114,7 @@ import org.apache.ode.utils.stl.UnaryFunction;
  */
 abstract class BpelCompiler implements CompilerContext {
     /** Class-severity logger. */
-    private static final Log __log = LogFactory.getLog(BpelCompiler.class);
+    protected static final Log __log = LogFactory.getLog(BpelCompiler.class);
 
     /** Standardized compiler messages. */
     private static final CommonCompilationMessages __cmsgs =

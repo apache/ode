@@ -257,7 +257,7 @@ public class BpelC {
         CompilationMessage cmsg = __cmsgs.errBpelParseErr();
         logCompilationMessage(cmsg);
         this.invalidate();
-        throw new CompilationException(cmsg);
+        throw new CompilationException(cmsg,ex);
     }
     
     OProcess oprocess;
