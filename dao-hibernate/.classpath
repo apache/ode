@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry output="target/test-classes" kind="src" path="src/test/java"/>
@@ -37,5 +38,6 @@
 	<classpathentry kind="var" path="M2_REPO/jaxen/jaxen/1.1-beta-8/jaxen-1.1-beta-8.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xmlbeans/xmlpublic/2.1.0/xmlpublic-2.1.0.jar"/>
 	<classpathentry kind="src" path="/ode-bpel-dao"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ode-bpel-api"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
