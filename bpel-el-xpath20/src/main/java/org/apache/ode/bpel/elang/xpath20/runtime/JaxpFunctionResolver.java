@@ -19,33 +19,6 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xpath10.runtime.XslRuntimeUriResolver;
-import org.apache.ode.bpel.elang.xpath20.Constants;
-import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionException;
-import javax.xml.xpath.XPathFunctionResolver;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -53,7 +26,34 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPathFunction;
+import javax.xml.xpath.XPathFunctionException;
+import javax.xml.xpath.XPathFunctionResolver;
+
 import net.sf.saxon.dom.NodeWrapper;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath20.Constants;
+import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
+import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.xsl.XslTransformHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  * @author mriou <mriou at apache dot org>
