@@ -25,16 +25,16 @@ import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
+import org.apache.ode.bpel.elang.xpath10.compiler.XslCompilationErrorListener;
 import org.apache.ode.bpel.elang.xpath20.Constants;
 import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime;
-import org.apache.ode.bpel.elang.xsl.XslCompilationErrorListener;
-import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
@@ -83,7 +83,7 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
     public void setCompilerContext(CompilerContext compilerContext) {
         _compilerContext = compilerContext;
         XslCompilationErrorListener xe = new XslCompilationErrorListener(compilerContext);
-        XslTransformHandler.getInstance().setXslCompilationErrorListener(xe);
+        XslTransformHandler.getInstance().setErrorListener(xe);
 
     }
 
