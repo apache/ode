@@ -8,8 +8,12 @@ import java.util.Map;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.compiler.bom.*;
-import org.apache.ode.bpel.compiler.api.*;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
@@ -174,5 +178,8 @@ public class MockCompilerContext implements CompilerContext {
         // TODO Auto-generated method stub
         return null;
     }
-
+    public OScope compileSLC(ScopeLikeActivity child, Variable[] variables) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
