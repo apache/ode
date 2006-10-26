@@ -72,6 +72,25 @@
             <artifactId>commons-collections</artifactId>
             <version>${commonsCollectionsVersion}</version>
         </dependency>
+       <dependency>
+          <groupId>jaxen</groupId>
+          <artifactId>jaxen</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon-xpath</artifactId>
+        </dependency>
+
+       <dependency>
+         <groupId>net.sf.saxon</groupId>
+         <artifactId>saxon-dom</artifactId>
+       </dependency>
 
         <dependency>
             <groupId>jotm</groupId>

@@ -49,11 +49,6 @@
 <!--
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-el-xpath10</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-el-xpath20</artifactId>
             <scope>test</scope>
         </dependency>
@@ -71,5 +66,25 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-scripts</artifactId>
         </dependency>
+       <dependency>
+          <groupId>jaxen</groupId>
+          <artifactId>jaxen</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon-xpath</artifactId>
+        </dependency>
+
+       <dependency>
+         <groupId>net.sf.saxon</groupId>
+         <artifactId>saxon-dom</artifactId>
+       </dependency>
+
     </dependencies>
 </project>

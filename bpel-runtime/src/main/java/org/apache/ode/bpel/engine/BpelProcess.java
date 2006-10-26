@@ -455,7 +455,7 @@ public class BpelProcess {
             // instance.
             if (messageRoute == null && isCreateInstnace) {
                 if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId + ": default routing failed, CREATING NEW INSTANCE");
+                    __log.debug("INPUTMSG: " + correlatorId + ": routing failed, CREATING NEW INSTANCE");
                 }
                 ProcessDAO processDAO = getProcessDAO();
                 if (processDAO.isRetired()) {
@@ -468,6 +468,7 @@ public class BpelProcess {
                 }
 
                 ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
+                
                 BpelRuntimeContextImpl instance = createRuntimeContext(newInstance, new PROCESS(_oprocess), mex);
 
                 // send process instance event

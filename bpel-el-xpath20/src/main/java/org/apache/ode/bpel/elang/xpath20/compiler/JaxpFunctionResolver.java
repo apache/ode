@@ -33,12 +33,12 @@ import org.apache.ode.bpel.elang.xpath10.compiler.XslCompileUriResolver;
 import org.apache.ode.bpel.elang.xpath20.Constants;
 import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xsl.XslTransformHandler;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 
 /**
  * @author mriou <mriou at apache dot org>
