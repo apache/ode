@@ -94,6 +94,11 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
     _routes.add(mr);
   }
 
+
+  public boolean checkRoute(CorrelationKey ckey) {
+      return true;
+  }
+
   void _removeRoutes(String routeGroupId, ProcessInstanceDaoImpl target) {
       for (Iterator<MessageRouteDaoImpl> i = _routes.iterator(); i.hasNext();) {
           MessageRouteDaoImpl we = i.next();
@@ -128,5 +133,4 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
       this.keys = keys;
     }
   }
-
 }
