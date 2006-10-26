@@ -20,6 +20,7 @@ package org.apache.ode.daohib.bpel;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +37,7 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.ArrayUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 
@@ -80,17 +82,29 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
         Query qry = getSession().createFilter(_hobj.getMessageCorrelations(), QRY_MESSAGE);
         qry.setString(0, key.toCanonicalString());
-        HCorrelatorMessage mcor = (HCorrelatorMessage) qry.uniqueResult();
+        
+        // We really should consider the possibility of multiple messages matching a criteria.
+        // When the message is handled, its not too convenient to attempt to determine if the
+        // received message conflicts with one already received.
 
-        if (mcor == null) {
-            __log.debug(hdr + "did not find a MESSAGE entry.");
-            return null;
+        Iterator mcors = qry.iterate();
+
+        try {
+            if (!mcors.hasNext()) {
+                __log.debug(hdr + "did not find a MESSAGE entry.");
+                return null;
+            }
+    
+            HCorrelatorMessage mcor = (HCorrelatorMessage) mcors.next();
+            
+            
+            __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
+            removeEntries(mcor.getMessageExchange());
+    
+            return new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
+        } finally {
+            Hibernate.close(mcors);
         }
-
-        __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
-        removeEntries(mcor.getMessageExchange());
-
-        return new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
     }
 
     public MessageRouteDAO findRoute(CorrelationKey key) {
@@ -111,8 +125,19 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             Query q = getSession().createFilter(_hobj.getSelectors(), FLTR_SELECTORS);
             q.setString(0, key == null ? null : key.toCanonicalString());
             q.setLockMode("this", LockMode.UPGRADE);
-    
-            HCorrelatorSelector selector = (HCorrelatorSelector) q.uniqueResult();
+
+            HCorrelatorSelector selector;
+            try {
+                selector = (HCorrelatorSelector) q.uniqueResult();
+            } catch (Exception ex) {
+                __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
+                
+                Iterator i = q.iterate();
+                if (i.hasNext())
+                    selector = (HCorrelatorSelector) i.next();
+                else selector = null;
+                Hibernate.close(i);
+            }
     
             __log.debug(hdr + "found " + selector);
             return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
@@ -160,7 +185,6 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
                 + correlationKey + "): ";
 
         __log.debug(hdr);
-
         HCorrelatorSelector hsel = new HCorrelatorSelector();
         hsel.setGroupId(routeGroupId);
         hsel.setIndex(idx);
@@ -175,6 +199,15 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         __log.debug(hdr + "saved " + hsel);
     }
 
+    public boolean checkRoute(CorrelationKey ckey) {
+
+        Query lockQry = getSession().createQuery(LOCK_SELECTORS);
+        lockQry.setString("ckey", ckey == null ? null : ckey.toCanonicalString());
+        lockQry.setEntity("corr",_hobj);
+        lockQry.setReadOnly(true);
+        return lockQry.list().isEmpty();
+        
+    }
     public String getCorrelatorId() {
         return _hobj.getCorrelatorId();
     }
