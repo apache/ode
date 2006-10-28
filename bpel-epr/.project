@@ -1,7 +1,12 @@
 <projectDescription>
   <name>ode-bpel-epr</name>
   <comment>Implementations of the EndpointReference interface.</comment>
-  <projects/>
+  <projects>
+    <project>ode-bpel-dd</project>
+    <project>ode-bpel-api</project>
+    <project>ode-bpel-obj</project>
+    <project>ode-utils</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
