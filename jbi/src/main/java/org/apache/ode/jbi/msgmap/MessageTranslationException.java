@@ -22,7 +22,9 @@ package org.apache.ode.jbi.msgmap;
  * Indicates an error translating ODE message to JBI message or vice versa.
  */
 public class MessageTranslationException extends Exception {
-	public MessageTranslationException(String msg) {
+  private static final long serialVersionUID = 2253489719406683994L;
+
+  public MessageTranslationException(String msg) {
 		super(msg);
 	}
 

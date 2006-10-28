@@ -45,6 +45,8 @@ import javax.sql.DataSource;
  * @version $Revision: 4 $
  */
 public class JDBCDataSource implements DataSource, Serializable, Referenceable {
+    private static final long serialVersionUID = -7067067533116086114L;
+    
     private transient ConnectionManager manager;
     private transient ManagedConnectionFactory factory;
     private transient PrintWriter logger;

@@ -22,6 +22,7 @@ package org.apache.ode.ql.tree.nodes;
 import java.util.Collection;
 
 public class Query implements Node {
+    private static final long serialVersionUID = -1889820969391077174L;
     private final Collection<Object> childs;
     private final OrderBy order;
     private Limit limit;

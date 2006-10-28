@@ -33,6 +33,8 @@ import java.io.Serializable;
  * @author Aaron Mulder ammulder@alumni.princeton.edu
  */
 public class PoolParameters implements Serializable {
+    private static final long serialVersionUID = -8599870255956439496L;
+    
     public final static String MIN_SIZE_KEY = "MinSize";
     public final static String MAX_SIZE_KEY = "MaxSize";
     public final static String BLOCKING_KEY = "Blocking";

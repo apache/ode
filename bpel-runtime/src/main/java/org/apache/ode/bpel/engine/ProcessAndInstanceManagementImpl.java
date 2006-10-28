@@ -309,7 +309,7 @@ class ProcessAndInstanceManagementImpl
 
     public InstanceInfoDocument recoverActivity(final Long iid, final Long aid, final String action) {
         try {
-            QName processId = _db.exec(new BpelDatabase.Callable<QName>() {
+            _db.exec(new BpelDatabase.Callable<QName>() {
                 public QName run(BpelDAOConnection conn) throws Exception {
                     ProcessInstanceDAO instance = conn.getInstance(iid);
                     if (instance == null)

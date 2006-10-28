@@ -46,6 +46,7 @@ import org.opentools.minerva.pool.ObjectPool;
  * @author Aaron Mulder ammulder@alumni.princeton.edu
  */
 public class XAConnectionManager extends BaseConnectionManager implements Serializable {
+    private static final long serialVersionUID = -7163773141441255690L;
 
     public XAConnectionManager() {
     }

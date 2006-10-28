@@ -43,6 +43,7 @@ import org.opentools.minerva.pool.ObjectPool;
  * @author Aaron Mulder ammulder@alumni.princeton.edu
  */
 public class NoTransConnectionManager extends BaseConnectionManager implements Serializable {
+    private static final long serialVersionUID = -571222360616189505L;
 
     public NoTransConnectionManager() {
     }

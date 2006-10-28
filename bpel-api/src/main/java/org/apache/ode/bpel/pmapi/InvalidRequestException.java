@@ -22,6 +22,7 @@ package org.apache.ode.bpel.pmapi;
  * Exception indicating an invalid request.
  */
 public class InvalidRequestException extends ManagementException {
+  private static final long serialVersionUID = -8255115220415194448L;
 
   public InvalidRequestException(String msg, Throwable cause) {
     super(msg, cause);

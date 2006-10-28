@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
-import javax.xml.validation.Schema;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,8 +46,6 @@ public class BpelObjectFactory {
     
     private final Map<QName, Class<? extends BpelObject>> _mappings = new HashMap<QName, Class<? extends BpelObject>>();
 
-    private Schema _bpelSchema;
-    
     private Class[] __CTOR = { Element.class };
 
     public BpelObjectFactory() {

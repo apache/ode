@@ -33,10 +33,7 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
 
   private static final Log __log = LogFactory.getLog(EndpointReferenceContextImpl.class);
 
-  private ODEServer _server;
-
   public EndpointReferenceContextImpl(ODEServer server) {
-    _server = server;
   }
 
   public EndpointReference resolveEndpointReference(Element element) {

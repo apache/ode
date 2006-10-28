@@ -25,6 +25,8 @@ import java.util.Set;
  * Base class for active BPEL agents.
  */
 public class OAgent extends OBase {
+  private static final long serialVersionUID = 6391205087340931483L;
+
   /** Links entering this agent. */
   public final Set<OLink> incomingLinks = new HashSet<OLink>();
 

@@ -25,6 +25,8 @@ import org.apache.ode.bpel.o.OScope;
  * using the {@link SCOPE} template. 
  */
 public class SCOPEACT extends ACTIVITY {
+  private static final long serialVersionUID = -4593029783757994939L;
+
   public SCOPEACT(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     super(self, scopeFrame, linkFrame);
   }

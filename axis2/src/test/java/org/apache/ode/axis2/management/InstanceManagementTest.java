@@ -104,6 +104,7 @@ public class InstanceManagementTest extends TestCase {
         // Hopefully this id won't exist
         OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {"65431"});
         try {
+            @SuppressWarnings("unused")
             OMElement result = sendToIM(root);
         } catch (AxisFault axisFault) {
             assert(axisFault.getCause().toString().indexOf("InstanceNotFoundException") > 0);

@@ -22,8 +22,9 @@ package org.apache.ode.ql.tree.nodes;
 import javax.xml.namespace.QName;
 
 public class Property implements Identifier {
+    private static final long serialVersionUID = -6249689910742825036L;
+    
     private final QName name;
-
     
     /**
      * @param name

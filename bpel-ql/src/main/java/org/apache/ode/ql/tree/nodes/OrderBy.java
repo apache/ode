@@ -22,8 +22,9 @@ package org.apache.ode.ql.tree.nodes;
 import java.util.Collection;
 
 public class OrderBy implements Node {
+    private static final long serialVersionUID = -5995328590580131666L;
+    
     private final Collection<OrderByElement> orders;
-
     
     /**
      * @param orders

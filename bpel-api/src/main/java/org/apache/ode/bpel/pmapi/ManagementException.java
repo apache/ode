@@ -22,6 +22,7 @@ package org.apache.ode.bpel.pmapi;
  * Exception thrown by the Process Management API to indicate errors.
  */
 public class ManagementException extends RuntimeException {
+  private static final long serialVersionUID = 7636295044932410650L;
 
   public ManagementException(String msg, Throwable cause) {
     super(msg, cause);

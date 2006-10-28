@@ -18,16 +18,16 @@
  */
 package org.apache.ode.bpel.compiler_2_0;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.ArrayList;
+
 import junit.framework.TestCase;
+
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.utils.StreamUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 
 
 /**
