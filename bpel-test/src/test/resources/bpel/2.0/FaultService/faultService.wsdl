@@ -40,6 +40,7 @@
          <wsdl:output name="FaultOutputMessage" message="tns:faultMessage"/>
          <wsdl:fault name="FaultMessage1" message="tns:errorMessage"/>
          <wsdl:fault name="FaultMessage2" message="tns:errorMessage"/>
+         <wsdl:fault name="UnknownFault" message="tns:errorMessage"/>
       </wsdl:operation>
    </wsdl:portType>
 
