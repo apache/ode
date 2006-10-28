@@ -31,7 +31,8 @@ import javax.servlet.ServletException;
  * deployment ourselves.
  */
 public class ODEAxisServlet extends AxisServlet {
-
+  private static final long serialVersionUID = 4898351526757154917L;
+  
   private ODEServer _odeServer;
 
   /**

@@ -19,6 +19,7 @@
 package org.apache.ode.tools;
 
 public class ExecutionException extends Exception {
+  private static final long serialVersionUID = -6272680054613414890L;
 
   public ExecutionException(String msg) {
     super(msg);

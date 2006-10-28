@@ -39,6 +39,7 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
   private static final Log __log = LogFactory.getLog(ODEMessageReceiver.class);
 
   private ODEService _service;
+  @SuppressWarnings("unused")
   private ExecutorService _executorService;
 
   public final void receive(final MessageContext msgContext) throws AxisFault {

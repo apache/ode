@@ -68,45 +68,4 @@ public class JacobCellTest extends TestCase {
     }
   }
 
-  private static class Compute extends JacobRunnable {
-    ValChannel _out;
-    int _x;
-
-    public Compute(int x, ValChannel out) {
-      _out = out;
-      _x = x;
-    }
-
-    public void run() {
-      int y = _x ^ _x;
-      _out.val(Integer.valueOf(y));
-    }
-  }
-
-  // TODO still needed?
-  private static class Foo extends JacobRunnable {
-    public void run() {
-      ValChannel print = newChannel(ValChannel.class);
-      instance(new Compute(1, print));
-      instance(new Compute(2, print));
-      instance(new Compute(2, print));
-      instance(new Print(print));
-    }
-  }
-
-  private static class Print extends JacobRunnable {
-    ValChannel _val;
-
-    public Print(ValChannel val) {
-      _val = val;
-    }
-
-    public void run() {
-      object(new ValChannelListener(_val) {
-          public void val(Object retVal) {
-            System.out.println(retVal);
-          }
-        });
-    }
-  }
 }

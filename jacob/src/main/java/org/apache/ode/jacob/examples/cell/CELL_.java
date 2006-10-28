@@ -41,6 +41,8 @@ public class CELL_<T> extends JacobRunnable {
     // INSTANTIATION{Cell(run,val)}
     // ==> run ? [ read(r)={...} & write(newVal)={...} ]
     object(new CellChannelListener(_self) {
+        private static final long serialVersionUID = 8883128084307471572L;
+
         public void read(Val r) {
           // COMMUNICATION{x & [read... & ... ] | x ! read}
           // ==> Cell(run, val) ...

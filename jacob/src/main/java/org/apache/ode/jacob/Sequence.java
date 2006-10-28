@@ -44,6 +44,8 @@ public abstract class Sequence extends JacobRunnable {
     } else {
       SynchChannel r = newChannel(SynchChannel.class);
       object(new SynchChannelListener(r) {
+          private static final long serialVersionUID = -6999108928780639603L;
+
           public void ret() {
             ++_step;
             instance(Sequence.this);

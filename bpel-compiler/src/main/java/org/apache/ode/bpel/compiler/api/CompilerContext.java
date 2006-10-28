@@ -25,7 +25,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.compiler.bom.ScopeActivity;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;

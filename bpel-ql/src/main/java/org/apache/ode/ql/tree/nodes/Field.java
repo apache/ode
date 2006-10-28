@@ -20,8 +20,9 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class Field implements Identifier {
+    private static final long serialVersionUID = -6349426426188324243L;
+    
     private final String name;
-
     
     /**
      * @param name

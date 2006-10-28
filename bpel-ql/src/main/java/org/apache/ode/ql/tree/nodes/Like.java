@@ -20,6 +20,7 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class Like extends IdentifierToValueCMP {
+    private static final long serialVersionUID = 5326597610659165414L;
 
     /**
      * @param identifier

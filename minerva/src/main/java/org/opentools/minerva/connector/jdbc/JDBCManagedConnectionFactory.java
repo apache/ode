@@ -52,6 +52,8 @@ import javax.resource.spi.security.PasswordCredential;
  * @version $Revision: 4 $
  */
 public class JDBCManagedConnectionFactory implements ManagedConnectionFactory {
+    private static final long serialVersionUID = 2366364114324427978L;
+    
     private String driver;
     private String url;
     private String username;

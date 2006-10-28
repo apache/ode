@@ -39,6 +39,7 @@ import javax.xml.namespace.QName;
  * Dispatches the service based on the information from the target endpoint URL.
  */
 public class ODEAxisDispatcher extends AbstractDispatcher {
+    private static final long serialVersionUID = 2809507126685915170L;
 
     private static MultiKeyMap _elmtToOperation = new MultiKeyMap();
 

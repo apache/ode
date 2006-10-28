@@ -22,6 +22,7 @@ package org.apache.ode.soap.mapping;
  * Indicates problem with a SOAP payload.
  */
 public class SoapFormatException extends Exception {
+  private static final long serialVersionUID = -1190708433903933046L;
 
   /** Constructor. */
 	public SoapFormatException(String reason){

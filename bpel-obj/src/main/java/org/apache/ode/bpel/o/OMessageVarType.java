@@ -32,6 +32,8 @@ import java.util.Map;
  * Message variable type.
  */
 public class OMessageVarType extends OVarType {
+    private static final long serialVersionUID = 256680050844726425L;
+    
     public QName messageType;
     public final Map<String, Part> parts = new HashMap<String,Part>();
 
@@ -66,6 +68,8 @@ public class OMessageVarType extends OVarType {
     }
 
     public static class Part extends OBase {
+        private static final long serialVersionUID = -2356665271228433779L;
+        
         public String name;
         public OVarType type;
 

@@ -22,7 +22,8 @@ package org.apache.ode.soap.mapping;
  * Indicates a problem with the SOAP WSDL binding.
  */
 public class SoapBindingException extends Exception {
-
+  private static final long serialVersionUID = 2119776415112240117L;
+  
   /** Internationalized, human-readable messsage. */
   private String _msg;
   private String _loc;

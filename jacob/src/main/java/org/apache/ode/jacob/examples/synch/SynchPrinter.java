@@ -33,12 +33,16 @@ import org.apache.ode.jacob.vpu.JacobVPU;
 public class SynchPrinter  {
 
   public static final class SystemPrinter extends JacobRunnable {
+    private static final long serialVersionUID = -8516348116865575605L;
+    
     private SynchPrintChannel self;
     public SystemPrinter(SynchPrintChannel self) {
       this.self = self;
     }
     public void run() {
       object(true, new SynchPrintChannelListener(self) {
+        private static final long serialVersionUID = -1990741944766989782L;
+
         public SynchChannel print(String msg) {
           System.out.println(msg);
           return null;
@@ -48,6 +52,8 @@ public class SynchPrinter  {
   }
 
   public static final class Tester extends JacobRunnable {
+    private static final long serialVersionUID = 7899682832271627464L;
+
     public void run() {
       final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
       instance(new SystemPrinter(p));

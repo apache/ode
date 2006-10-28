@@ -18,7 +18,6 @@ import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

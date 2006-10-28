@@ -21,9 +21,6 @@ package org.apache.ode.bpel.compiler.bom;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
 
 /**

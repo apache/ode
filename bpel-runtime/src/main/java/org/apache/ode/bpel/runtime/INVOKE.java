@@ -215,6 +215,7 @@ public class INVOKE extends ACTIVITY {
         final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
         getBpelRuntimeContext().registerTimer(timerChannel, future);
         object(false, new TimerResponseChannelListener(timerChannel) {
+          private static final long serialVersionUID = -261911108068231376L;
             public void onTimeout() {
                 instance(INVOKE.this);
             }
@@ -222,9 +223,12 @@ public class INVOKE extends ACTIVITY {
                 INVOKE.this.requireRecovery();
             }
         }.or(new TerminationChannelListener(_self.self) {
+            private static final long serialVersionUID = -4416795170896911290L;
+
             public void terminate() {
                 _self.parent.completed(null, CompensationHandler.emptySet());
                 object(new TimerResponseChannelListener(timerChannel) {
+                    private static final long serialVersionUID = 4822348066868313717L;
                     public void onTimeout() { }
                     public void onCancel() { }
                 });
@@ -240,6 +244,7 @@ public class INVOKE extends ACTIVITY {
         getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, _failureData,
             new String[] { "retry", "cancel", "fault" }, _invoked - 1);
         object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
+            private static final long serialVersionUID = 8397883882810521685L;
             public void retry() {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Retrying invoke activity " + _self.aId + " (user initiated)");
@@ -264,6 +269,8 @@ public class INVOKE extends ACTIVITY {
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
             }
         }.or(new TerminationChannelListener(_self.self) {
+            private static final long serialVersionUID = 2148587381204858397L;
+
             public void terminate() {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Cancelling invoke activity " + _self.aId + " (terminated by scope)");

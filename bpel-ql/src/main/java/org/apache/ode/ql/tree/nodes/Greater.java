@@ -20,6 +20,7 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class Greater extends IdentifierToValueCMP {
+    private static final long serialVersionUID = 3377082099238584486L;
 
     /**
      * @param identifier

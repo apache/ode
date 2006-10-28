@@ -18,23 +18,22 @@
  */
 package org.apache.ode.test;
 
+import java.io.File;
+import java.util.Properties;
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
+
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Properties;
-import java.util.regex.Pattern;
 
 public class BPELTest extends TestCase {
 	
