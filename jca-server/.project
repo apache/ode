@@ -1,7 +1,10 @@
 <projectDescription>
   <name>ode-jca-server</name>
   <comment>Server-side implementation of a JCA connector.</comment>
-  <projects/>
+  <projects>
+    <project>ode-utils</project>
+    <project>ode-jca-ra</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

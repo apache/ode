@@ -2,11 +2,10 @@
   <name>ode-bpel-api-jca</name>
   <comment>BPEL Connector APIs</comment>
   <projects>
-    <project>ode-bpel-bom</project>
-    <project>ode-bpel-api</project>
+    <project>ode-bpel-obj</project>
     <project>ode-bpel-dd</project>
     <project>ode-utils</project>
-    <project>ode-bpel-obj</project>
+    <project>ode-bpel-api</project>
   </projects>
   <buildSpec>
     <buildCommand>
