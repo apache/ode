@@ -165,7 +165,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 			if ( ind2.equals("yes")){
 				prmx.replyWithFault("FaultMessage2", faultMsg);
 			} else {
-				prmx.reply(responseMsg);
+				prmx.replyWithFault("UnKnownFault", faultMsg);
 			}
 		}
 
