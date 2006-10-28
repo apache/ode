@@ -2,19 +2,15 @@
   <name>ode-dao-hibernate</name>
   <comment/>
   <projects>
-    <project>ode-jacob</project>
-    <project>ode-utils</project>
-    <project>ode-bpel-api</project>
-    <project>ode-bpel-compiler</project>
     <project>ode-bpel-dd</project>
-    <project>ode-bpel-el-xpath10</project>
-    <project>ode-bpel-schemas</project>
-    <project>ode-bpel-el-xpath20</project>
-    <project>ode-bpel-parser</project>
-    <project>ode-bpel-bom</project>
-    <project>ode-bpel-ql</project>
     <project>ode-bpel-dao</project>
+    <project>ode-utils</project>
+    <project>ode-jacob</project>
+    <project>ode-bpel-ql</project>
     <project>ode-bpel-obj</project>
+    <project>ode-bpel-api</project>
+    <project>ode-bpel-schemas</project>
+    <project>ode-bpel-compiler</project>
   </projects>
   <buildSpec>
     <buildCommand>

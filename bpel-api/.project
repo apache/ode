@@ -3,7 +3,6 @@
   <comment>Various BPEL APIs used.</comment>
   <projects>
     <project>ode-bpel-obj</project>
-    <project>ode-bpel-bom</project>
     <project>ode-utils</project>
     <project>ode-bpel-dd</project>
   </projects>
