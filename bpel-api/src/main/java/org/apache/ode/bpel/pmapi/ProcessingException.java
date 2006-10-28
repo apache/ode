@@ -23,6 +23,7 @@ package org.apache.ode.bpel.pmapi;
  * completion of the requested operation.
  */
 public class ProcessingException extends ManagementException {
+  private static final long serialVersionUID = -2507144587500069418L;
 
   public ProcessingException(String msg, Throwable cause) {
     super(msg, cause);

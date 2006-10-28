@@ -112,9 +112,6 @@ public class BpelProcess {
 
     private DeploymentUnit _du;
 
-    /** WARNING - EXPERIMENTAL */
-    private InstanceLockManager _lockManager = new InstanceLockManager();
-
     public BpelProcess(QName pid, DeploymentUnit du, OProcess oprocess,
             Map<OPartnerLink, Endpoint> myRoleEndpointNames, Map<OPartnerLink, Endpoint> initialPartners,
             BpelEventListener debugger, ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,

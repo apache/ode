@@ -19,10 +19,7 @@
 package org.apache.ode.bpel.compiler.bom;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
@@ -135,6 +132,7 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
         
         
         public static class PortType11 extends BpelObject4WSDL {
+            private static final long serialVersionUID = 8174002706633806360L;
 
             public PortType11(Element el) {
                 super(el);

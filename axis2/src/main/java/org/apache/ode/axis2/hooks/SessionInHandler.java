@@ -38,7 +38,8 @@ import javax.xml.namespace.QName;
  * context.
  */
 public class SessionInHandler extends AbstractHandler {
-
+  private static final long serialVersionUID = -806564877582696569L;
+  
   private static final Log __log = LogFactory.getLog(SessionInHandler.class);
 
   public void invoke(MessageContext messageContext) throws AxisFault {

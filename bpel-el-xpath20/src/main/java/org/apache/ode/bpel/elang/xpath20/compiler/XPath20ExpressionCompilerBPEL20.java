@@ -18,6 +18,16 @@
  */
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.xpath.XPathExpressionException;
+
+import net.sf.saxon.xpath.XPathEvaluator;
+import net.sf.saxon.xpath.XPathFactoryImpl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -36,18 +46,6 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.util.HashMap;
-import java.util.Map;
-
-import net.sf.saxon.xpath.XPathEvaluator;
-import net.sf.saxon.xpath.XPathFactoryImpl;
 
 
 /**

@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.o;
 
 public class OCompensationHandler extends OScope {
+    private static final long serialVersionUID = -9208360082697192920L;
 
     public OCompensationHandler(OProcess owner, OActivity parent) {
         super(owner, parent);

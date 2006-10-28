@@ -19,6 +19,9 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathVariableResolver;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -29,15 +32,10 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathVariableResolver;
 
 /**
  * @author mriou <mriou at apache dot org>

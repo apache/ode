@@ -18,9 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.io.Serializable;
-
-import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;

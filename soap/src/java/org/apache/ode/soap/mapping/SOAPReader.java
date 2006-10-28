@@ -107,11 +107,8 @@ public class SOAPReader {
 
   /** Find doc-lit body part. */
   class DocLitBodyPart implements PartReader {
-    // TODO still required?
-    private String _partName;
 
     DocLitBodyPart(String partName) {
-      _partName = partName;
     }
 
     public Element readPart(SoapMessage soapMsg) {

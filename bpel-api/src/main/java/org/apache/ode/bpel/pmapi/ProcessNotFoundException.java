@@ -23,6 +23,7 @@ package org.apache.ode.bpel.pmapi;
  * not be found.
  */
 public class ProcessNotFoundException extends InvalidRequestException {
+  private static final long serialVersionUID = -2214405961229748111L;
 
   public ProcessNotFoundException(String msg) {
     super(msg);

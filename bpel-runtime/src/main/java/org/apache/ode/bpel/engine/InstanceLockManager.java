@@ -113,5 +113,7 @@ public class InstanceLockManager {
     }
     
     /** Exception class indicating a time-out occured while obtaining a lock. */
-    public static final class TimeoutException extends Exception { }
+    public static final class TimeoutException extends Exception {
+        private static final long serialVersionUID = 7247629086692580285L;
+    }
 }

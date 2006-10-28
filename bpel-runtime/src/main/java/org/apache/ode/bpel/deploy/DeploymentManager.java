@@ -20,8 +20,6 @@ package org.apache.ode.bpel.deploy;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.ode.bpel.iapi.DeploymentUnit;

@@ -18,10 +18,8 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;

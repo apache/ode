@@ -25,8 +25,6 @@ import org.apache.ode.bpel.compiler.bom.SequenceActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OSequence;
 
-import java.util.Iterator;
-
 
 /**
  * Generates code for <code>&lt;sequence&gt;</code> activities.

@@ -38,16 +38,15 @@
 
 package org.apache.ode.axis2.deploy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.ODEServer;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEServer;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -74,12 +73,6 @@ public class DeploymentPoller {
                 }).length == 1;
             } else
                 return false;
-        }
-    };
-
-    private static final FileFilter _deployedFilter = new FileFilter() {
-        public boolean accept(File path) {
-            return path.isFile() && path.getName().endsWith(".deployed");
         }
     };
 
