@@ -34,7 +34,9 @@ public interface WrappedFaultException {
 	 * extending its {@link UnresolvableVariableException} so we comply.
 	 */
 	static class JaxenUnresolvableException extends UnresolvableException implements WrappedFaultException{
-	  FaultException _cause;
+    private static final long serialVersionUID = 6266231885976155458L;
+    
+    FaultException _cause;
 	  public JaxenUnresolvableException(FaultException e) {
 	  	super("var");
 	    assert e != null;
@@ -52,7 +54,9 @@ public interface WrappedFaultException {
 	 * extending its {@link FunctionCallException} so we comply.
 	 */
 	static class JaxenFunctionException extends FunctionCallException implements WrappedFaultException{
-	  FaultException _cause;
+    private static final long serialVersionUID = -1915683768194623625L;
+    FaultException _cause;
+    
 	  public JaxenFunctionException(FaultException e) {
 	    super(e);
 	    assert e != null;

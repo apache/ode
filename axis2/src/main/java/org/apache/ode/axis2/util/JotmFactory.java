@@ -1,9 +1,8 @@
 package org.apache.ode.axis2.util;
 
-import org.objectweb.jotm.Jotm;
-
 import javax.transaction.TransactionManager;
-import javax.servlet.ServletException;
+
+import org.objectweb.jotm.Jotm;
 
 /**
  * @author mriou

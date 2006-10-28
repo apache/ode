@@ -625,6 +625,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static class ObjectFrame extends CommFrame implements Externalizable {
+        private static final long serialVersionUID = -7212430608484116919L;
+        
         ChannelListener _continuation;
 
         public ObjectFrame() {
@@ -648,6 +650,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static class MessageFrame extends CommFrame implements Externalizable {
+        private static final long serialVersionUID = -1112437852498126297L;
+
         String method;
 
         Object[] args;
@@ -793,6 +797,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
     }
 
+    @SuppressWarnings("unused")
     private XQXMLOutputStream createObjectOutputStream(Writer writer) throws IOException {
         final StatefulWriter statefulWriter = new StatefulWriter(new PrettyPrintWriter(writer));
         statefulWriter.startNode("object-stream", null);

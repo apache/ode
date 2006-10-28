@@ -22,6 +22,7 @@ package org.apache.ode.bpel.pmapi;
  * Exception indicating that the requested instance identifier could not be found.
  */
 public class InstanceNotFoundException extends InvalidRequestException {
+  private static final long serialVersionUID = -3535135881394994473L;
 
   public InstanceNotFoundException(String msg) {
     super(msg);

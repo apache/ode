@@ -37,12 +37,8 @@ import org.apache.geronimo.kernel.repository.Artifact;
 import org.apache.geronimo.kernel.repository.Repository;
 import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
 import org.apache.geronimo.transaction.context.TransactionContextManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class GeronimoFactory {
-
-    private static final Log __log = LogFactory.getLog(GeronimoFactory.class);
 
     /* Public no-arg contructor is required */
     public GeronimoFactory() {

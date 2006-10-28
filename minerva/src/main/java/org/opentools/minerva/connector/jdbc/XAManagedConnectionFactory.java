@@ -86,6 +86,8 @@ import javax.sql.XADataSource;
  * @version $Revision: 245 $
  */
 public class XAManagedConnectionFactory implements ManagedConnectionFactory {
+    private static final long serialVersionUID = 243112925271551140L;
+    
     private transient PrintWriter logger;
     private transient XADataSource source;
     private String username;

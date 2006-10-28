@@ -19,6 +19,8 @@
 package org.apache.ode.bpel.o;
 
 public class OTerminationHandler extends OScope {
+    private static final long serialVersionUID = -4632187173061412134L;
+
     public OTerminationHandler(OProcess owner, OActivity parent) {
         super(owner, parent);
     }

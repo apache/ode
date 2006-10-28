@@ -22,9 +22,10 @@ package org.apache.ode.ql.tree.nodes;
 import java.util.Collection;
 
 public class In implements LogicNode {
+    private static final long serialVersionUID = -5110159406556440523L;
+    
     private final Identifier identifier;
     private final Collection<Value> values;
-    
     
     /**
      * @param identifier

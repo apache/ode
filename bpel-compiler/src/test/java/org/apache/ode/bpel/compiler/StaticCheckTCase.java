@@ -18,17 +18,6 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import junit.framework.TestCase;
-
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
-import org.apache.ode.utils.fs.FileUtils;
-import org.xml.sax.InputSource;
-
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +29,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+
+import junit.framework.TestCase;
+
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.xml.sax.InputSource;
 
 
 /**

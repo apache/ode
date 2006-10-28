@@ -29,7 +29,6 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 

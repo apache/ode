@@ -37,6 +37,8 @@ import org.apache.ode.jacob.vpu.JacobVPU;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class Sieve extends JacobRunnable {
+  private static final long serialVersionUID = -1303509567096202776L;
+  
   private static int _cnt = 0;
   private static int _last = 0;
 
@@ -57,6 +59,8 @@ public class Sieve extends JacobRunnable {
    * </em></pre>
    */
   private static class Counter extends JacobRunnable {
+    private static final long serialVersionUID = 4739323750438991003L;
+    
     private NaturalNumberStreamChannel _out;
     private int _n;
 
@@ -67,6 +71,8 @@ public class Sieve extends JacobRunnable {
 
     public void run() {
       _out.val(_n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
+        private static final long serialVersionUID = -4336285925619915276L;
+
         public void ret() {
           instance(new Counter(_out, _n+1));
         }
@@ -85,6 +91,8 @@ public class Sieve extends JacobRunnable {
    *
    */
   private static final class Head extends JacobRunnable {
+    private static final long serialVersionUID = 1791641314141082728L;
+    
     NaturalNumberStreamChannel _in;
     NaturalNumberStreamChannel _primes;
 
@@ -95,8 +103,12 @@ public class Sieve extends JacobRunnable {
 
     public void run() {
       object(new NaturalNumberStreamChannelListener(_in) {
+        private static final long serialVersionUID = -2145752474431263689L;
+
         public void val(final int n, final SynchChannel ret) {
           _primes.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
+            private static final long serialVersionUID = -3009595654233593893L;
+
             public void ret() {
               NaturalNumberStreamChannel x = newChannel(NaturalNumberStreamChannel.class);
               instance(new PrimeFilter(n, _in, x));
@@ -110,12 +122,16 @@ public class Sieve extends JacobRunnable {
   }
 
   private static final class Print extends JacobRunnable {
+    private static final long serialVersionUID = -3134193737519487672L;
+    
     private NaturalNumberStreamChannel _in;
     public Print(NaturalNumberStreamChannel in) {
       _in = in;
     }
     public void run() {
       object(true, new NaturalNumberStreamChannelListener(_in){
+        private static final long serialVersionUID = 7671019806323866866L;
+
         public void val(int n, SynchChannel ret) {
           _cnt ++;
           _last = n;
@@ -135,6 +151,8 @@ public class Sieve extends JacobRunnable {
    * </em></prime>
    */
   private static class PrimeFilter extends JacobRunnable {
+    private static final long serialVersionUID = 1569523200422202448L;
+    
     private int _prime;
     private NaturalNumberStreamChannel _in;
     private NaturalNumberStreamChannel _out;
@@ -146,10 +164,14 @@ public class Sieve extends JacobRunnable {
     }
     public void run() {
        object(true, new NaturalNumberStreamChannelListener(_in) {
-         public void val(int n, final SynchChannel ret) {
+        private static final long serialVersionUID = 6625386475773075604L;
+
+        public void val(int n, final SynchChannel ret) {
            if (n % _prime != 0)
              _out.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
-               public void ret() {
+              private static final long serialVersionUID = 2523405590764193613L;
+
+              public void ret() {
                  ret.ret();
                }
              }));

@@ -33,6 +33,8 @@ import java.util.EventObject;
  * @author Aaron Mulder (ammulder@alumni.princeton.edu)
  */
 public class PoolEvent extends EventObject {
+    private static final long serialVersionUID = -2526855107747158099L;
+    
     /**
      * The object has been closed and should be returned to the pool.  Note this
      * is not a final sort of closing - the object must still be able to be

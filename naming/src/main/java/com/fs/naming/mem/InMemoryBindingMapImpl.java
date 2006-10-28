@@ -36,6 +36,8 @@ import javax.swing.event.EventListenerList;
 @SuppressWarnings("unchecked")
 public final class InMemoryBindingMapImpl
   extends java.rmi.server.UnicastRemoteObject implements BindingMap {
+  private static final long serialVersionUID = -7500098402877289337L;
+
   /** The path of this binding. */
   private String _name = "";
 

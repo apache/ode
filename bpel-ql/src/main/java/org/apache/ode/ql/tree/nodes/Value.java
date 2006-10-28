@@ -20,8 +20,9 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class Value<V> implements Node {
+    private static final long serialVersionUID = -533404312907890996L;
+    
     private V value;
-
 
     /**
      * @param value

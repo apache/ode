@@ -23,6 +23,7 @@ package org.apache.ode.utils.xsl;
  * Thrown when an XSL sheet wasn't parsed property or when the transformation fails.
  */
 public class XslTransformException extends RuntimeException {
+  private static final long serialVersionUID = 1277662310622757337L;
 
   public XslTransformException(String message) {
     super(message);

@@ -42,7 +42,6 @@ public class HProcessInstance extends HObject {
     private Collection<HScope> _scopes = new HashSet<HScope>();
 
     private Collection<HCorrelationSet> _csets = new HashSet<HCorrelationSet>();
-    private Collection<HMessageExchange> _msgEx = new HashSet<HMessageExchange>();
 
     /** Events belonging to this instance. */
     private Collection<HBpelEvent> _events = new HashSet<HBpelEvent>();

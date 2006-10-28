@@ -19,6 +19,25 @@
 
 package org.apache.ode.axis2;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -43,33 +62,7 @@ import org.apache.ode.utils.fs.TempFileManager;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
-import org.objectweb.jotm.Jotm;
 import org.opentools.minerva.MinervaPool;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.Name;
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.spi.ObjectFactory;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import javax.xml.transform.TransformerFactory;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle
@@ -267,7 +260,7 @@ public class ODEServer {
         try {
             Class txFactClass = Class.forName(txFactoryName);
             Object txFact = txFactClass.newInstance();
-            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", null).invoke(txFact);
+            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
         } catch (Exception e) {
             throw new ServletException("Couldn't initialize a transaction manager!", e);
         }
@@ -513,33 +506,4 @@ public class ODEServer {
                         "org.hibernate.dialect.DerbyDialect"));
     }
 
-    /**
-     * An {@link javax.naming.spi.ObjectFactory} implementation that can be used to bind the
-     * JOTM {@link javax.transaction.TransactionManager} implementation in JNDI.
-     */
-    private class JotmTransactionManagerFactory implements ObjectFactory {
-
-        public Object getObjectInstance(Object objref, Name name, Context ctx, Hashtable env) throws Exception {
-            Reference ref = (Reference) objref;
-            if (ref.getClassName().equals(TransactionManager.class.getName())) {
-                return _txMgr;
-            }
-            throw new RuntimeException("The reference class name \"" + ref.getClassName() + "\" is unknown.");
-        }
-    }
-
-    /**
-     * JNDI {@link ObjectFactory} implementation for Hibernate-based
-     * connection factory objects.
-     */
-    private class HibernateDaoObjectFactory implements ObjectFactory {
-
-        public Object getObjectInstance(Object objref, Name name, Context ctx, Hashtable env) throws Exception {
-            Reference ref = (Reference) objref;
-            if (ref.getClassName().equals(BpelDAOConnectionFactory.class.getName())) {
-                return _daoCF;
-            }
-            throw new RuntimeException("The reference class name \"" + ref.getClassName() + "\" is unknown.");
-        }
-    }
 }

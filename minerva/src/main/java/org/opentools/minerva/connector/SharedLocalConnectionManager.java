@@ -46,6 +46,8 @@ import org.opentools.minerva.pool.ObjectPool;
  */
 @SuppressWarnings("unchecked")
 public class SharedLocalConnectionManager extends BaseConnectionManager implements Serializable {
+    private static final long serialVersionUID = -2880654825235129911L;
+    
     // Instance variables
     private transient WeakHashMap txConnections;
 

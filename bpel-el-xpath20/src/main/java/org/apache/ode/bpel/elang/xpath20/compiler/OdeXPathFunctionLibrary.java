@@ -17,7 +17,8 @@ import java.util.ArrayList;
  * @author mriou <mriou at apache dot org>
  */
 public class OdeXPathFunctionLibrary extends net.sf.saxon.xpath.XPathFunctionLibrary {
-
+    private static final long serialVersionUID = -8885396864277163797L;
+    
     private JaxpFunctionResolver _funcResolver;
 
     public OdeXPathFunctionLibrary(JaxpFunctionResolver funcResolver) {

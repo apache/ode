@@ -18,12 +18,11 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.Serializable;
+
 import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.FailureHandling;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-
-import java.io.Serializable;
 
 class ActivityInfo implements Serializable {
 

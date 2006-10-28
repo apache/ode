@@ -20,6 +20,8 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class OrderByElement<ID extends Identifier> implements Node {
+    private static final long serialVersionUID = -3927580891987350265L;
+      
     protected final ID identifier;
     protected final OrderByType type;
     

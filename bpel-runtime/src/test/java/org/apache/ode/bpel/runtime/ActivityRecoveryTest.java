@@ -18,35 +18,30 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.engine.*;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-import org.apache.ode.bpel.pmapi.TInstanceInfo;
-import org.apache.ode.bpel.pmapi.TInstanceStatus;
-import org.apache.ode.bpel.pmapi.TFaultInfo;
-import org.apache.ode.bpel.pmapi.TScopeInfo;
-import org.apache.ode.bpel.pmapi.TScopeRef;
-import org.apache.ode.bpel.pmapi.TActivityInfo;
-import org.apache.ode.bpel.pmapi.TActivityStatus;
-import org.apache.ode.utils.DOMUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
-import java.util.List;
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
-import java.net.URI;
-import java.io.File;
-import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.pmapi.TActivityInfo;
+import org.apache.ode.bpel.pmapi.TActivityStatus;
+import org.apache.ode.bpel.pmapi.TFaultInfo;
+import org.apache.ode.bpel.pmapi.TInstanceInfo;
+import org.apache.ode.bpel.pmapi.TInstanceStatus;
+import org.apache.ode.bpel.pmapi.TScopeInfo;
+import org.apache.ode.bpel.pmapi.TScopeRef;
+import org.apache.ode.utils.DOMUtils;
 
 /**
  * Test core BPEL processing capabilities.
@@ -183,6 +178,7 @@ public class ActivityRecoveryTest extends TestCase {
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
         // Look for individual activities inside the process instance.
+        @SuppressWarnings("unused")
         TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
         assertTrue(recoveries.size() == 1);

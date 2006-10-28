@@ -22,6 +22,7 @@ package org.apache.ode.bpel.explang;
  * An expression evaluation exception.
  */
 public class EvaluationException extends Exception {
+  private static final long serialVersionUID = -1124751247812322329L;
 
   public EvaluationException(String message, Throwable e) {
     super(message, e);

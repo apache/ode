@@ -20,6 +20,7 @@
 package org.apache.ode.ql.tree.nodes;
 
 public class Equality extends IdentifierToValueCMP {
+    private static final long serialVersionUID = 8151616227509392901L;
 
     /**
      * @param identifier

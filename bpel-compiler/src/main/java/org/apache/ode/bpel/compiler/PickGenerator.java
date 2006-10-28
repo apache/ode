@@ -19,11 +19,12 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.bom.*;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.OnAlarm;
+import org.apache.ode.bpel.compiler.bom.OnMessage;
+import org.apache.ode.bpel.compiler.bom.PickActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OPickReceive;
-
-import java.util.Iterator;
 
 
 /**
