@@ -1,7 +1,9 @@
 <projectDescription>
   <name>ode-jca-ra</name>
   <comment/>
-  <projects/>
+  <projects>
+    <project>ode-utils</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
