@@ -223,13 +223,4 @@ public abstract class BPELTest extends TestCase {
 		assertTrue(testValue);
 	}
 
-	/** These tests compile however they fail at runtime */
-
-	// public void testCompensationHandlers() throws Exception {
-	// go("target/test-classes/bpel/2.0/TestCompensationHandlers");
-	// }
-	// public void testTimer() throws Exception {
-	// go("target/test-classes/bpel/2.0/TestTimer");
-	// }
-
 }
