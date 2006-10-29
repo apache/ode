@@ -17,5 +17,10 @@ public class BasicActivities20Tests extends BPELTest {
 
 		go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
 	}
+	
+	public void testTimer() throws Exception {
+	 go("target/test-classes/bpel/2.0/TestTimer");
+	}
+
 
 }
