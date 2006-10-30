@@ -20,41 +20,47 @@ package org.apache.ode.jacob.soup;
 
 /**
  * Base class for items we find in the {@link ExecutionQueue}.
- * <p>Created on Feb 17, 2004 at 3:44:24 PM.</p>
  * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class ExecutionQueueObject {
 
-  /** A unique idefntifer for this object in the soup (should only be set by soup). */
-  private Object _id;
+    /**
+     * A unique idefntifer for this object in the queue (should only be set by queue).
+     */
+    private Object _id;
 
-  /** A human-readable description of the object. */
-  private String _description;
+    /** 
+     * A human-readable description of the object.
+     */
+    private String _description;
 
-  public String getDescription() {
-    return _description;
-  }
+    public String getDescription() {
+        return _description;
+    }
 
-  public void setDescription(String description) {
-    if (_description != null)
-      throw new IllegalStateException("Description already set for " + this);
-    _description = description;
-  }
+    public void setDescription(String description) {
+        if (_description != null) {
+            throw new IllegalStateException("Description already set for " + this);
+        }
+        _description = description;
+    }
 
-  public void setId(Object id) {
-    if (_id != null)
-      throw new IllegalStateException("Object id already set for " + this);
-    _id = id;
-  }
+    public void setId(Object id) {
+        if (_id != null) {
+            throw new IllegalStateException("Object id already set for " + this);
+        }
+        _id = id;
+    }
 
-  public Object getId() {
-    return _id;
-  }
+    public Object getId() {
+        return _id;
+    }
 
-  public boolean equals(Object obj) {
-    if (_id == null || ((ExecutionQueueObject)obj)._id == null)
-      return this==obj;
-    return ((ExecutionQueueObject)obj)._id.equals(_id);
-  }
+    public boolean equals(Object obj) {
+        if (_id == null || ((ExecutionQueueObject) obj)._id == null) {
+            return this == obj;
+        }
+        return ((ExecutionQueueObject) obj)._id.equals(_id);
+    }
 }
