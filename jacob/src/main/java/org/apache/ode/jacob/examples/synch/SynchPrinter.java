@@ -25,60 +25,61 @@ import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
 /**
- * DOCUMENTME.
- * <p>Created on Mar 4, 2004 at 4:22:05 PM.</p>
+ * Example JACOB process illustrating the use of {@link SynchPrint} 
  * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public class SynchPrinter  {
+public class SynchPrinter {
 
-  public static final class SystemPrinter extends JacobRunnable {
-    private static final long serialVersionUID = -8516348116865575605L;
-    
-    private SynchPrintChannel self;
-    public SystemPrinter(SynchPrintChannel self) {
-      this.self = self;
-    }
-    public void run() {
-      object(true, new SynchPrintChannelListener(self) {
-        private static final long serialVersionUID = -1990741944766989782L;
+    public static final class SystemPrinter extends JacobRunnable {
+        private static final long serialVersionUID = -8516348116865575605L;
 
-        public SynchChannel print(String msg) {
-          System.out.println(msg);
-          return null;
+        private SynchPrintChannel _self;
+
+        public SystemPrinter(SynchPrintChannel self) {
+            _self = self;
         }
-      });
-    }
-  }
 
-  public static final class Tester extends JacobRunnable {
-    private static final long serialVersionUID = 7899682832271627464L;
+        public void run() {
+            object(true, new SynchPrintChannelListener(_self) {
+                private static final long serialVersionUID = -1990741944766989782L;
 
-    public void run() {
-      final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
-      instance(new SystemPrinter(p));
-      object(new SynchChannelListener(p.print("1")) {
-        public void ret() {
-          object(new SynchChannelListener(p.print("2")) {
-            public void ret() {
-              object(new SynchChannelListener(p.print("3")) {
-                public void ret() {
+                public SynchChannel print(String msg) {
+                    System.out.println(msg);
+                    return null; // SynchChannel automatically created by JacobVPU
                 }
-              });
-            }
-          });
+            });
         }
-      });
     }
-  }
 
-  public static void main(String args[]) {
-    JacobVPU vpu = new JacobVPU();
-    vpu.setContext(new ExecutionQueueImpl(null));
-    vpu.inject(new Tester());
-    while (vpu.execute()) {
-      // run
+    public static final class Tester extends JacobRunnable {
+        private static final long serialVersionUID = 7899682832271627464L;
+
+        public void run() {
+            final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
+            instance(new SystemPrinter(p));
+            object(new SynchChannelListener(p.print("1")) {
+                public void ret() {
+                    object(new SynchChannelListener(p.print("2")) {
+                        public void ret() {
+                            object(new SynchChannelListener(p.print("3")) {
+                                public void ret() {
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     }
-  }
+
+    public static void main(String args[]) {
+        JacobVPU vpu = new JacobVPU();
+        vpu.setContext(new ExecutionQueueImpl(null));
+        vpu.inject(new Tester());
+        while (vpu.execute()) {
+            // run
+        }
+    }
 
 }

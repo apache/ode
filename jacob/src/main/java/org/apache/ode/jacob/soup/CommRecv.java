@@ -21,38 +21,40 @@ package org.apache.ode.jacob.soup;
 import org.apache.ode.jacob.ChannelListener;
 
 /**
- * Persistent store representation of an object (i.e. channel read) waiting
- * for a message (i.e. channel write / method application). This class
- * maintains an opaque byte array which specifies the continuation (the exact
- * nature of this data is determined by the main JACOB VPU), as well as
- * information regarding which methods are supported by the object, and
- * whether the read is of a replicated variety.
+ * Persistent store representation of an object (i.e. channel read) waiting for
+ * a message (i.e. channel write / method application). This class maintains an
+ * opaque byte array which specifies the continuation (the exact nature of this
+ * data is determined by the main JACOB VPU), as well as information regarding
+ * which methods are supported by the object, and whether the read is of a
+ * replicated variety.
  */
 public class CommRecv extends Comm {
-  private ChannelListener _continuation;
+    private ChannelListener _continuation;
 
-  protected CommRecv() {}
+    protected CommRecv() {
+    }
 
-  public CommRecv(CommChannel chnl,  ChannelListener continuation) {
-    super(null, chnl);
-    _continuation = continuation;
-  }
+    public CommRecv(CommChannel chnl, ChannelListener continuation) {
+        super(null, chnl);
+        _continuation = continuation;
+    }
 
-  /**
-   * Get the continuation for this object (channel read). The continuation is
-   * what happens after a message is matched to the object. It is up to the
-   * JACOB VPU to determine what is placed here, but it will generally
-   * consist of some serialized representation of an appropriate ChannelListener object
-   * (see {@link ChannelListener}.
-   *
-   * @return byte array representing the serialized form of the continuation
-   */
-  public ChannelListener getContinuation() { return _continuation ;}
+    /**
+     * Get the continuation for this object (channel read). The continuation is
+     * what happens after a message is matched to the object. It is up to the
+     * JACOB VPU to determine what is placed here, but it will generally consist
+     * of some serialized representation of an appropriate ChannelListener
+     * object (see {@link ChannelListener}.
+     * 
+     * @return byte array representing the serialized form of the continuation
+     */
+    public ChannelListener getContinuation() {
+        return _continuation;
+    }
 
-  public String toString() {
-    StringBuffer buf = new StringBuffer(getChannel().toString());
-    buf.append(" ? ");
-    buf.append(_continuation.toString());
-    return buf.toString();
-  }
+    public String toString() {
+        StringBuffer buf = new StringBuffer(getChannel().toString());
+        buf.append(" ? ").append(_continuation.toString());
+        return buf.toString();
+    }
 }
