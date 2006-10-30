@@ -19,101 +19,81 @@
 
 package org.apache.ode.jacob;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.ArrayUtils;
-
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.apache.ode.utils.ArrayUtils;
 
 /**
  * Base class for process abstractions. An abstraction is a parameterized
  * process template, whose instantiation is termed a <em>concretion</em>.
  * Abstractions may define a set of bound channel names or other parameters
- * which are resolved at the time of the concretion. For example the
- * process term abstraction of a memory cell:
- * <code>Cell(s,v) := s ? { read(...) = ... & write(...) = ... }</code>
- * would be represented by the following Java class:
- * <code>
+ * which are resolved at the time of the concretion. For example the process
+ * term abstraction of a memory cell:
+ * <code>Cell(s,v) := s ? { read(...) = ... & write(...) = ... }</code> would
+ * be represented by the following Java class: <code>
  * <pre>
  * public class Cell extends JacobRunnable {
- *   private CellChannel s;
- *   private Object v;
- *   public Cell(CellChannel s, Object v) {
- *     this.s = s;
- *     this.v = v;
- *   }
- *   public void run() {
- *     object(new CellChannelListener(s) { read(...) {...}
- *                            write(...) {...} } );
- *   }
+ *     private CellChannel s;
+ * 
+ *     private Object v;
+ * 
+ *     public Cell(CellChannel s, Object v) {
+ *         this.s = s;
+ *         this.v = v;
+ *     }
+ * 
+ *     public void run() {
+ *      object(new CellChannelListener(s) { read(...) {...}
+ *                             write(...) {...} } );
+ *    }
  * }
  * </pre>
- * </code>
- * An example of the Java expression representing the concretion of this abstraction
- * would look like:
- * <code>
+ * </code> An example of the Java expression representing the concretion of this
+ * abstraction would look like: <code>
  * <pre>
- *   .
- *   .
- *   // (new c) Cell(c,v)
- *   Integer v = Integer.valueOf(0);
- *   CellChannel c = (CellChannel)newChannel(CellChanell.class);
- *   instance(new Cell(c, v));
- *   .
- *   .
+ *    .
+ *    .
+ *    // (new c) Cell(c,v)
+ *    Integer v = Integer.valueOf(0);
+ *    CellChannel c = (CellChannel)newChannel(CellChannel.class);
+ *    instance(new Cell(c, v));
+ *    .
+ *    .
  * </pre>
  * </code>
- *
+ * 
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
 public abstract class JacobRunnable extends JacobObject {
-  private static final Log __log = LogFactory.getLog(JacobRunnable.class);
-
-  private static final Set<Method> IMPLEMENTED_METHODS;
-  static {
-    try {
-      IMPLEMENTED_METHODS = Collections.singleton(JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY));
-    } catch (NoSuchMethodException e) {
-      throw new AssertionError(e);
+    private static final Set<Method> IMPLEMENTED_METHODS;
+    
+    static {
+        try {
+            Method m = JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY);
+            IMPLEMENTED_METHODS = Collections.singleton(m);
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
     }
-  }
 
-  public Set<Method> getImplementedMethods() {
-    return IMPLEMENTED_METHODS;
-  }
+    public Set<Method> getImplementedMethods() {
+        return IMPLEMENTED_METHODS;
+    }
 
-  /**
-   * <p>
-   * Peform the template reduction, i.e. do whatever it is that the
-   * templetized process does. This method may do some combination of in-line
-   * Java, and JACOB operations.
-   * </p>
-   * 
-   * <p>
-   * <em>Note that JACOB operations are performed in parallel, so the
-   * sequencing of JACOB operations is irrelevant</em>
-   * </p>
-   */
-  public abstract void run();
+    /**
+     * Peform the template reduction, i.e. do whatever it is that the
+     * templetized process does. This method may do some combination of in-line
+     * Java, and JACOB operations.
+     * <p>
+     * <em>Note that JACOB operations are performed in parallel, so the
+     * sequencing of JACOB operations is irrelevant</em>
+     */
+    public abstract void run();
 
-  /**
-   * Pretty print.
-   * @see Object#toString
-   */
-  public String toString() {
-    StringBuffer buf = new StringBuffer(getClassName());
-    buf.append("(...)");
+    public String toString() {
+        return getClassName() + "(...)";
+    }
 
-    return buf.toString();
-  }
-
-  /**
-   * @see JacobObject#log
-   */
-  protected Log log() {
-    return __log;
-  }
 }

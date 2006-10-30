@@ -21,8 +21,8 @@ package org.apache.ode.jacob.examples.cell;
 import org.apache.ode.jacob.Val;
 
 /**
- * Channel type for a cell. The channel allows reading of and setting the
- * values of a cell.
+ * Channel type for a cell. The channel allows reading of and setting the values of a cell.
+ * 
  * @jacob.kind
  */
 public interface Cell  {

@@ -21,54 +21,48 @@ package org.apache.ode.jacob.examples.cell;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.Val;
 
-
 /**
  * Cell process template Java representation. This class is equivalent to the
- * following process calculus expression: <code> Cell(self, val) = self ? [
- * read(r) = { Cell(self, val) | r ! val(val) } & write(newVal) = {
- * Cell(self, newVal) } ] </code>
+ * following process calculus expression: 
+ * <code> 
+ * Cell(self, val) = self ? [ read(r) = { Cell(self, val) | r ! val(val) } & write(newVal) = { Cell(self, newVal) } ] 
+ * </code>
  */
 public class CELL_<T> extends JacobRunnable {
-  private CellChannel _self;
-  private T _val;
+    private CellChannel _self;
 
-  public CELL_(CellChannel self, T val) {
-    _self = self;
-    _val = val;
-  }
+    private T _val;
 
-  public void run() {
-    // INSTANTIATION{Cell(run,val)}
-    // ==> run ? [ read(r)={...} & write(newVal)={...} ]
-    object(new CellChannelListener(_self) {
-        private static final long serialVersionUID = 8883128084307471572L;
+    public CELL_(CellChannel self, T val) {
+        _self = self;
+        _val = val;
+    }
 
-        public void read(Val r) {
-          // COMMUNICATION{x & [read... & ... ] | x ! read}
-          // ==> Cell(run, val) ...
-          instance(new CELL_<T>(_self, _val));
+    public void run() {
+        // INSTANTIATION{Cell(run,val)}
+        // ==> run ? [ read(r)={...} & write(newVal)={...} ]
+        object(new CellChannelListener(_self) {
+            private static final long serialVersionUID = 8883128084307471572L;
 
-          // ... | r ! val(val)
-          r.val(_val);
+            public void read(Val r) {
+                // COMMUNICATION{x & [read... & ... ] | x ! read} ==> Cell(run, val) ...
+                instance(new CELL_<T>(_self, _val));
 
-          // Note: sequential Java above translates to parallel proc calc expression!
-        }
+                // ... | r ! val(val)
+                r.val(_val);
 
-        @SuppressWarnings("unchecked")
-        public void write(Object newVal) {
-          // COMMUNICATION{x & [... & write...]
-          // ==> Cell(run, newVal)
-          instance(new CELL_(_self, newVal));
-        }
-      });
-  }
+                // Note: sequential Java above translates to parallel proc calc expression!
+            }
 
-  /**
-   * DOCUMENTME
-   *
-   * @return DOCUMENTME
-   */
-  public String toString() {
-    return "CellProcess[self=" + _self + ", val=" + _val + "]";
-  }
+            @SuppressWarnings("unchecked")
+            public void write(Object newVal) {
+                // COMMUNICATION{x & [... & write...] ==> Cell(run, newVal)
+                instance(new CELL_(_self, newVal));
+            }
+        });
+    }
+
+    public String toString() {
+        return "CellProcess[self=" + _self + ", val=" + _val + "]";
+    }
 }

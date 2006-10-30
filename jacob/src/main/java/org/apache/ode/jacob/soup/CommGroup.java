@@ -36,44 +36,44 @@ import java.util.List;
 
 public class CommGroup extends ExecutionQueueObject {
 
-  boolean _isReplicated;
-  List<Comm> _comms = new ArrayList<Comm>();
+    boolean _isReplicated;
 
-  public CommGroup(boolean replicated) {
-    _isReplicated = replicated;
-  }
+    List<Comm> _comms = new ArrayList<Comm>();
 
-  /**
-   * Read the value of the replication operator flag. CommRecv (channel reads)
-   * with the replication flag set are left in the queue indefinately.
-   * 
-   * @return true or false
-   */
-  public boolean isReplicated() {
-    return _isReplicated;
-  }
-
-  public void add(Comm comm) {
-    comm.setGroup(this);
-    _comms.add(comm);
-  }
-
-  public String toString() {
-    StringBuffer buf = new StringBuffer();
-    for (Iterator<Comm> i = _comms.iterator(); i.hasNext();) {
-      buf.append(i.next());
-      if (i.hasNext()) buf.append(" + ");
+    public CommGroup(boolean replicated) {
+        _isReplicated = replicated;
     }
 
-    return buf.toString();
-  }
+    /**
+     * Read the value of the replication operator flag. CommRecv (channel reads)
+     * with the replication flag set are left in the queue indefinately.
+     * 
+     * @return true or false
+     */
+    public boolean isReplicated() {
+        return _isReplicated;
+    }
 
-  public String getDescription() {
-    return toString();
-  }
+    public void add(Comm comm) {
+        comm.setGroup(this);
+        _comms.add(comm);
+    }
 
-  public Iterator<Comm> getElements() {
-    return _comms.iterator();
-  }
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        for (Comm c : _comms) {
+            buf.append(c).append(" + ");
+        }
+        buf.setLength(buf.length()-1);
+        return buf.toString();
+    }
+
+    public String getDescription() {
+        return toString();
+    }
+
+    public Iterator<Comm> getElements() {
+        return _comms.iterator();
+    }
 
 }

@@ -19,12 +19,13 @@
 package org.apache.ode.jacob;
 
 /**
- * DOCUMENTME.
- * <p>Created on Mar 4, 2004 at 11:18:56 AM.</p>
- *
- * @jacob.kind 
+ * Synch represents a synchronous invocation callback notification.
+ * <p>
+ * It is the only allowable return type (other than "void") for JACOB objects.
+ * 
+ * @jacob.kind
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public interface Synch  {
-  public void ret();
+public interface Synch {
+    public void ret();
 }
