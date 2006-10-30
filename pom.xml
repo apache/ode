@@ -247,11 +247,13 @@
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </repository>
+<!-- Repository is down;        
         <repository>
             <id>apache-incubator</id>
             <name>Apache Incubator Repository</name>
             <url>http://people.apache.org/repo/m2-incubating-repository</url>
         </repository>
+-->        
         <repository>
             <id>central</id>
             <name>Maven Repository Switchboard</name>
