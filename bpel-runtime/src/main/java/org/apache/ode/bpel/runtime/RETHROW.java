@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 
 
@@ -26,6 +28,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
  */
 class RETHROW extends ACTIVITY {
   private static final long serialVersionUID = -6433171659586530126L;
+  private static final Log __log = LogFactory.getLog(RETHROW.class);
 
   RETHROW(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     super(self, scopeFrame, linkFrame);
@@ -36,7 +39,7 @@ class RETHROW extends ACTIVITY {
     FaultData fault = _scopeFrame.getFault();
     if(fault == null){
       String msg = "Attempting to execute 'rethrow' activity with no visible fault in scope.";
-      log().error(msg);
+      __log.error(msg);
       throw new InvalidProcessException(msg); 
     }
 
