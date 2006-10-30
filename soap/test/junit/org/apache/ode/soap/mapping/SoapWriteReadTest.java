@@ -52,6 +52,7 @@ public class SoapWriteReadTest extends TestCase {
 
   protected void setUp() throws Exception {
     wsdlURL = getClass().getResource("SoapWriteReadTest.wsdl");
+    assertNotNull("SoapWriteReadTest.wsdl not found", wsdlURL);
     soapMsgURL = getClass().getResource("testRequest.soap");
     WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
     wsdlReader.setFeature("javax.wsdl.verbose", false);
