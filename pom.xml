@@ -140,7 +140,6 @@
 
         <module>naming</module>
         <module>tools</module>
-        <module>soap</module>
         <module>bpel-scheduler-quartz</module>
 
         <module>distro-axis2</module>
@@ -456,11 +455,6 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-tools</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-soap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
