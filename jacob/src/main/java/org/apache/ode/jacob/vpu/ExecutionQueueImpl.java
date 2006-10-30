@@ -61,8 +61,7 @@ import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 /**
- * A fast, in-memory {@link org.apache.ode.jacob.soup.ExecutionQueue}
- * implementation.
+ * A fast, in-memory {@link org.apache.ode.jacob.soup.ExecutionQueue} implementation.
  */
 public class ExecutionQueueImpl implements ExecutionQueue {
     /** Class-level logger. */
@@ -71,9 +70,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     private ClassLoader _classLoader;
 
     /**
-     * Cached set of enqueued {@link Continuation} objects (i.e. those reed
-     * using the
-     * {@link #enqueueReaction(org.apache.ode.jacob.soup.Continuation) method}).
+     * Cached set of enqueued {@link Continuation} objects (i.e. those read using
+     * {@link #enqueueReaction(org.apache.ode.jacob.soup.Continuation)}).
      * These reactions are "cached"--that is it is not sent directly to the DAO
      * layer--to minimize unnecessary serialization/deserialization of closures.
      * This is a pretty useful optimization, as most {@link Continuation}s are
@@ -310,13 +308,12 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
         // Write out the reactions.
         sos.writeInt(_reactions.size());
-        for (Iterator i = _reactions.iterator(); i.hasNext();) {
-            Continuation continuation = (Continuation) i.next();
-            sos.writeObject(continuation.getClosure());
-            sos.writeUTF(continuation.getMethod().getName());
-            sos.writeInt(continuation.getArgs() == null ? 0 : continuation.getArgs().length);
-            for (int j = 0; continuation.getArgs() != null && j < continuation.getArgs().length; ++j)
-                sos.writeObject(continuation.getArgs()[j]);
+        for (Continuation c : _reactions) {
+            sos.writeObject(c.getClosure());
+            sos.writeUTF(c.getMethod().getName());
+            sos.writeInt(c.getArgs() == null ? 0 : c.getArgs().length);
+            for (int j = 0; c.getArgs() != null && j < c.getArgs().length; ++j)
+                sos.writeObject(c.getArgs()[j]);
         }
 
         sos.writeInt(_channels.values().size());
@@ -366,15 +363,12 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         // If we have no reactions, but there are some channels that have
-        // external references,
-        // we are not done.
+        // external references, we are not done.
         for (Iterator<ChannelFrame> i = _channels.values().iterator(); i.hasNext();) {
             if (i.next().refCount > 0) {
                 return false;
             }
         }
-
-        // Otherwise, we are done.
         return true;
     }
 
@@ -418,55 +412,18 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             }
         }
 
-        // // Do some cleanup, if the channel is empty we can remove it from
-        // memory.
+        // Do some cleanup, if the channel is empty we can remove it from memory.
         // if (cframe != null && cframe.msgFrames.isEmpty() &&
         // cframe.objFrames.isEmpty() && cframe.refCount ==0)
         // _channels.values().remove(cframe);
     }
 
-    // TODO revisit: apparently dead wood
-    // private JacobObject cloneClosure(JacobObject closure) {
-    // long startTime = System.currentTimeMillis();
-    // try {
-    // ByteArrayOutputStream bos = new ByteArrayOutputStream(10000);
-    // ExecutionQueueOutputStream sos = new ExecutionQueueOutputStream(bos);
-    // sos.writeObject(closure);
-    // sos.close();
-    // long readStart = System.currentTimeMillis();
-    // ExecutionQueueInputStream cis = new ExecutionQueueInputStream(new
-    // ByteArrayInputStream(bos.toByteArray()));
-    // JacobObject ret = (JacobObject) cis.readObject();
-    // cis.close();
-    //
-    // long copyTime = System.currentTimeMillis() - startTime;
-    // long readTime = System.currentTimeMillis() - readStart;
-    // long copyBytes = bos.size();
-    //
-    // _statistics.cloneClosureBytes += copyBytes;
-    // _statistics.cloneClosureTimeMs += copyTime;
-    // _statistics.cloneClosureReadTimeMs += readTime;
-    // _statistics.cloneClousreCount++;
-    //
-    // if (__log.isDebugEnabled()) {
-    // __log.debug("cloneClosure(" + closure + "): serialized " + copyBytes + "
-    // bytes in " + copyTime+ "ms.");
-    // }
-    // return ret;
-    // } catch (Exception ex) {
-    // throw new RuntimeException("Internal Error in ExecutionQueueImpl.java",
-    // ex);
-    // }
-    // }
-
     /**
      * Verify that a {@link ExecutionQueueObject} is new, that is it has not
      * already been added to the soup.
      * 
-     * @param so
-     *            object to check.
-     * @throws IllegalArgumentException
-     *             in case the object is not new
+     * @param so object to check.
+     * @throws IllegalArgumentException in case the object is not new
      */
     private void verifyNew(ExecutionQueueObject so) throws IllegalArgumentException {
         if (so.getId() != null)

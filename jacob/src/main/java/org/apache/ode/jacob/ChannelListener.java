@@ -18,134 +18,98 @@
  */
 package org.apache.ode.jacob;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * Base-class for method-list objects. Method-lists objects should extends
- * this class <em>and</em> implement one <code>Channel</code> interface.
+ * Base-class for method-list objects. Method-lists objects should extends this
+ * class <em>and</em> implement one <code>Channel</code> interface.
  */
 public abstract class ChannelListener<CT extends Channel> extends JacobObject {
-  private static Log __log = LogFactory.getLog(ChannelListener.class);
+    private static Log __log = LogFactory.getLog(ChannelListener.class);
 
-  private transient Set<Method> _implementedMethods;
-  private transient CT _channel;
+    private transient Set<Method> _implementedMethods;
 
-  protected ChannelListener(CT channel)
-        throws IllegalStateException {
+    private transient CT _channel;
 
-    if (this.getClass()
-                  .getSuperclass()
-                  .getSuperclass() != ChannelListener.class) {
-      throw new IllegalStateException("Inheritence in ChannelListener classes not allowed!");
-    }
-
-    if (channel == null)
-      throw new IllegalArgumentException("Null channel!");
-    _channel = channel;
-
-  }
-
-  public CT getChannel() { return _channel; }
-
-  public void setChannel(CT channel) { _channel = channel; }
-
-  public Set<ChannelListener> or(ChannelListener other) {
-    HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
-    retval.add(this);
-    retval.add(other);
-    return retval;
-  }
-
-  public Set<ChannelListener> or(Set<ChannelListener> other) {
-    HashSet<ChannelListener> retval = new HashSet<ChannelListener>(other);
-    retval.add(this);
-    return retval;
-  }
-  /**
-   * DOCUMENTME
-   *
-   * @return DOCUMENTME
-   */
-  public Set<Method> getImplementedMethods() {
-    if (_implementedMethods == null) {
-    	Set<Method> implementedMethods = new HashSet<Method>();
-      getImplementedMethods(implementedMethods, getClass().getSuperclass()); 
-      _implementedMethods = Collections.unmodifiableSet(implementedMethods);
-    }
-
-    return _implementedMethods;
-  }
-  
-  private Set<Method> getImplementedMethods(Set<Method> methods, Class clazz){
-  	Class[] interfaces = clazz.getInterfaces();
-
-    for (int i = 0 ; i < interfaces.length; ++i) {
-      if (interfaces[i] != Channel.class) {
-      	Method[] allmethods = interfaces[i].getDeclaredMethods();
-
-        for (int j = 0; j < allmethods.length; ++j) {
-        	methods.add(allmethods[j]);
+    protected ChannelListener(CT channel) throws IllegalStateException {
+        if (this.getClass().getSuperclass().getSuperclass() != ChannelListener.class) {
+            throw new IllegalStateException("Inheritence in ChannelListener classes not allowed!");
         }
-        
-        getImplementedMethods(methods, interfaces[i]);
-      }
-    }
-  	return methods;
-  }
-
-  /**
-   * DOCUMENTME
-   *
-   * @param method DOCUMENTME
-   *
-   * @return DOCUMENTME
-   */
-  public Method getMethod(String method) {
-    for (Iterator<Method> i = getImplementedMethods().iterator();i.hasNext();) {
-      Method meth = i.next();
-      if (meth.getName().equals(method)) {
-        return meth;
-      }
-    }
-    
-    assert !_implementedMethods.contains(method);
-
-    throw new IllegalArgumentException("No such method: " + method + " in " +  _implementedMethods);
-
-  }
-
-  /**
-   * Get a description of the object for debugging purposes.
-   *
-   * @return human-readable description.
-   */
-  public String toString() {
-    StringBuffer buf = new StringBuffer(getClassName());
-    buf.append('{');
-    for (Iterator<Method> i = getImplementedMethods().iterator(); i.hasNext();) {
-      Method method = i.next();
-      buf.append(method.getName());
-      buf.append("()");
-
-      if (i.hasNext()) {
-        buf.append("&");
-      }
+        if (channel == null) {
+            throw new IllegalArgumentException("Null channel!");
+        }
+        _channel = channel;
     }
 
-    buf.append('}');
+    public CT getChannel() {
+        return _channel;
+    }
 
-    return buf.toString();
-  }
+    public void setChannel(CT channel) {
+        _channel = channel;
+    }
 
-  protected Log log() {
-    return __log;
-  }
+    public Set<ChannelListener> or(ChannelListener other) {
+        HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
+        retval.add(this);
+        retval.add(other);
+        return retval;
+    }
+
+    public Set<ChannelListener> or(Set<ChannelListener> other) {
+        HashSet<ChannelListener> retval = new HashSet<ChannelListener>(other);
+        retval.add(this);
+        return retval;
+    }
+
+    public Set<Method> getImplementedMethods() {
+        if (_implementedMethods == null) {
+            Set<Method> implementedMethods = new HashSet<Method>();
+            getImplementedMethods(implementedMethods, getClass().getSuperclass());
+            _implementedMethods = Collections.unmodifiableSet(implementedMethods);
+        }
+        return _implementedMethods;
+    }
+
+    private static Set<Method> getImplementedMethods(Set<Method> methods, Class clazz) {
+        Class[] interfaces = clazz.getInterfaces();
+        for (int i=0; i<interfaces.length; ++i) {
+            if (interfaces[i] != Channel.class) {
+                Method[] allmethods = interfaces[i].getDeclaredMethods();
+                for (int j=0; j<allmethods.length; ++j) {
+                    methods.add(allmethods[j]);
+                }
+                getImplementedMethods(methods, interfaces[i]);
+            }
+        }
+        return methods;
+    }
+
+    /**
+     * Get a description of the object for debugging purposes.
+     * 
+     * @return human-readable description.
+     */
+    public String toString() {
+        StringBuffer buf = new StringBuffer(getClassName());
+        buf.append('{');
+        for (Method m : getImplementedMethods()) {
+            buf.append(m.getName());
+            buf.append("()");
+            buf.append("&");
+        }
+        buf.setLength(buf.length()-1);
+        buf.append('}');
+        return buf.toString();
+    }
+
+    protected Log log() {
+        return __log;
+    }
 }
