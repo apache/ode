@@ -132,7 +132,7 @@ public class Scope extends JoinFailureSuppressor {
         BpelObject eventHandlers = getFirstChild(Bpel20QNames.EVENTHANDLERS);
         if (eventHandlers == null)
             return Collections.emptyList();
-        return getChildren(OnAlarm.class);
+        return eventHandlers.getChildren(OnAlarm.class);
     }
 
     /**
