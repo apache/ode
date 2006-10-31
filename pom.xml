@@ -35,10 +35,10 @@
     <properties>
         <vendor.name>Apache Software Foundation</vendor.name>
 
-        <!--
-        <maven.test.skip>true</maven.test.skip> 
-          Default ODE properties, these properties may be referenced in resources and the
-      like. -->
+        <!-- Disable test cases; not ready for everybody -->
+        <maven.test.skip>true</maven.test.skip>
+        
+        <!--  Default ODE properties, these properties may be referenced in resources and the like. -->
 
         <ode.default.http.port>8080</ode.default.http.port>
         <ode.default.rmi.port>2099</ode.default.rmi.port>
