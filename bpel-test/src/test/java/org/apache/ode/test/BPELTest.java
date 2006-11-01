@@ -27,18 +27,19 @@ import javax.xml.namespace.QName;
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.store.ProcessStoreImpl;
 import org.w3c.dom.Element;
+
+import java.util.Collection;
 
 public abstract class BPELTest extends TestCase {
 
 	private BpelServerImpl server;
-
+    private ProcessStore store;
 	private MessageExchangeContextImpl mexContext;
 
 	@Override
@@ -49,8 +50,9 @@ public abstract class BPELTest extends TestCase {
 		server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-		server.setDeploymentManager(new DeploymentManagerImpl());
-		server.init();
+        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl());
+        server.setProcessStore(store);
+        server.init();
 		server.start();
 	}
 
@@ -73,14 +75,14 @@ public abstract class BPELTest extends TestCase {
 		/**
 		 * The deploy directory must contain at least one "test.properties"
 		 * file.
-		 * 
+		 *
 		 * The test.properties file identifies the service, operation and
 		 * messages to be sent to the BPEL engine.
-		 * 
+		 *
 		 * The deploy directory may contain more than one file in the form of
 		 * "testN.properties" where N represents a monotonic integer beginning
 		 * with 1.
-		 * 
+		 *
 		 */
 
 		int propsFileCnt = 0;
@@ -96,8 +98,12 @@ public abstract class BPELTest extends TestCase {
 		}
 
 		try {
-			server.getDeploymentService().deploy(new File(deployDir));
-		} catch (BpelEngineException bpelE) {
+			Collection<QName> procs =  store.deploy(new File(deployDir));
+            for (QName procName : procs) {
+                server.load(procName, true);
+            }
+
+        } catch (BpelEngineException bpelE) {
 			Properties testProps = new Properties();
 			testProps.load(testPropsFile.toURL().openStream());
 			String responsePattern = testProps.getProperty("response1");
@@ -120,17 +126,17 @@ public abstract class BPELTest extends TestCase {
 			/**
 			 * Each property file must contain at least one request/response
 			 * property tuple.
-			 * 
+			 *
 			 * The request/response tuple should be in the form
-			 * 
+			 *
 			 * requestN=<message>some XML input message</message>
 			 * responseN=.*some response message.*
-			 * 
+			 *
 			 * Where N is a monotonic integer beginning with 1.
-			 * 
+			 *
 			 * If a specific MEP is expected in lieu of a response message use:
 			 * responseN=ASYNC responseN=ONE_WAY responseN=COMPLETED_OK
-			 * 
+			 *
 			 */
 
 			for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
@@ -205,7 +211,7 @@ public abstract class BPELTest extends TestCase {
 		}
 	}
 
-	private void testResponsePattern(Message response, String responsePattern) {
+    private void testResponsePattern(Message response, String responsePattern) {
 		String resp = (response == null) ? "null" : DOMUtils
 				.domToString(response.getMessage());
 		testResponsePattern(resp, responsePattern);

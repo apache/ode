@@ -37,8 +37,8 @@
  */
 package org.apache.ode.test;
 
-import org.apache.ode.bpel.deploy.DeploymentManager;
-import org.apache.ode.bpel.deploy.DeploymentUnitImpl;
+import org.apache.ode.store.deploy.DeploymentManager;
+import org.apache.ode.store.deploy.DeploymentUnitImpl;
 
 import java.io.File;
 import java.util.ArrayList;

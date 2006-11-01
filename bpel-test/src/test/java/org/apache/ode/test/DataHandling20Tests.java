@@ -12,10 +12,10 @@ public class DataHandling20Tests extends BPELTest {
 		go("target/test-classes/bpel/2.0/TestSubTreeAssign");
 	}
     public void testAssignActivity1() throws Exception {
-        go("target/test-classes/bpel/2.0/TestAssignActivity1");
+        go("src/test/resources/bpel/2.0/TestAssignActivity1");
     }
     public void testAssignActivity2() throws Exception {
-        go("target/test-classes/bpel/2.0/TestAssignActivity2");
+        go("src/test/resources/bpel/2.0/TestAssignActivity2");
     }
     public void testSimpleTypeParts() throws Exception {
     	go("target/test-classes/bpel/2.0/TestSimpleTypeParts");

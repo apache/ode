@@ -52,15 +52,12 @@ import javax.xml.namespace.QName;
 public class BindingContextImpl implements BindingContext {
 	
 
-	public EndpointReference activateMyRoleEndpoint(QName processId,
-			DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
+	public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
 			PortType portType) {
 		final Document doc = DOMUtils.newDocument();
 		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());
-        serviceref.setNodeValue(deploymentUnit.getDefinitionForService(myRoleEndpoint.serviceName) +":" +
-                myRoleEndpoint.serviceName +":" +
-                myRoleEndpoint.portName);
+        serviceref.setNodeValue(myRoleEndpoint.serviceName +":" +myRoleEndpoint.portName);
         doc.appendChild(serviceref);
         return new EndpointReference() {
             public Document toXML() {
@@ -73,8 +70,7 @@ public class BindingContextImpl implements BindingContext {
 
 	}
 
-	public PartnerRoleChannel createPartnerRoleChannel(QName processId,
-			DeploymentUnit deploymentUnit, PortType portType,
+	public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
 			Endpoint initialPartnerEndpoint) {
 		return new PartnerRoleChannelImpl();
 	}
