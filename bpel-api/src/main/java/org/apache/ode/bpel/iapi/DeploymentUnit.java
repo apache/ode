@@ -19,14 +19,14 @@
 
 package org.apache.ode.bpel.iapi;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Set;
+import org.apache.ode.bpel.dd.DeployDocument;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dd.DeployDocument;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides information about a deployment package.
@@ -70,5 +70,7 @@ public interface DeploymentUnit {
      * @return
      */
     Set<QName> getProcessNames();
+
+    List<File> allFiles();
 
 }

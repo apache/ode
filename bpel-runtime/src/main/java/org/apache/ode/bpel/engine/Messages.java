@@ -21,7 +21,6 @@ package org.apache.ode.bpel.engine;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
-
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
@@ -55,12 +54,12 @@ public class Messages extends MessageBundle {
     return format("Unkown EPR: {0}" , epr);
   }
 
-  String msgProcessUndeployed(QName process) {
-    return format("Process {0} has been undeployed." , process);
+  String msgProcessUnregistered(QName process) {
+    return format("Process {0} has been unregistered." , process);
   }
 
-  String msgProcessUndeployFailed(QName process) {
-    return format("Failed to undeploy process {0}! Check database for consistency!" , process);
+  String msgProcessUnregisterFailed(QName process) {
+    return format("Failed to unregister process {0}! Check database for consistency!" , process);
   }
 
   String msgProcessNotFound(QName pid) {

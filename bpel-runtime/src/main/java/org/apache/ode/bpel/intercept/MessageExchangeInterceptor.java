@@ -22,6 +22,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessStore;
 
 /**
  * Hook into the BPEL server that enables intercepting of message exchange
@@ -39,8 +40,8 @@ public interface MessageExchangeInterceptor {
      * @param mex
      *            message exchange
      */
-    void onBpelServerInvoked(MyRoleMessageExchange mex, InterceptorContext ic) 
-    	throws FailMessageExchangeException, FaultMessageExchangeException;
+    void onBpelServerInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
+        throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
      * Called when the BPEL server is invoked, after the message exchange has
@@ -50,7 +51,7 @@ public interface MessageExchangeInterceptor {
      *            message exchange
      */
     void onProcessInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
-    	throws FailMessageExchangeException, FaultMessageExchangeException;
+        throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
      * Called when the BPEL server is invoked, after the message exchange has
@@ -61,8 +62,8 @@ public interface MessageExchangeInterceptor {
      *            message exchange
      */
     void onNewInstanceInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
-    	throws FailMessageExchangeException, FaultMessageExchangeException;
-    
+        throws FailMessageExchangeException, FaultMessageExchangeException;
+
     /**
      * Called when the BPEL server is invoked, before any attempt to route the
      * message exchange to a process.
@@ -71,14 +72,16 @@ public interface MessageExchangeInterceptor {
      *            message exchange
      */
     void onPartnerInvoked(PartnerRoleMessageExchange mex, InterceptorContext ic)
-    	throws FailMessageExchangeException, FaultMessageExchangeException;
+        throws FailMessageExchangeException, FaultMessageExchangeException;
 
-    
+
     public interface InterceptorContext {
-    	
-    	BpelDAOConnection getConnection();
-    	
-    	ProcessDAO getProcessDAO();
-    	
+
+        BpelDAOConnection getConnection();
+
+        ProcessDAO getProcessDAO();
+
+        ProcessStore getProcessStore();
+
     }
 }

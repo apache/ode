@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -32,6 +30,8 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+
+import javax.xml.namespace.QName;
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
@@ -58,7 +58,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      *         <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), null);
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), null,
+                _engine._contexts.store);
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
             if (!processInterceptor(i, mex, ictx, invoker))

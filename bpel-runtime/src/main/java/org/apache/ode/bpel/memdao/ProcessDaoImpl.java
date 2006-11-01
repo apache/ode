@@ -5,27 +5,17 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.namespace.QName;
-
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessPropertyDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Node;
+import org.apache.ode.bpel.dao.*;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -41,11 +31,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
-    private final Date _deployDate = new Date();
-    private boolean _retired;
-    private boolean _active;
-    private byte[] _compiledProcess;
-    private MultiKeyMap _properties = new MultiKeyMap();
 
     public ProcessDaoImpl(BpelDAOConnectionImpl conn,
                           Map<QName, ProcessDaoImpl> store,
@@ -116,38 +101,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _instances.remove(instance.getInstanceId());
     }
 
-    public void setProperty(String name, String ns, Node content) {
-        if (content == null) {
-            _properties.remove(name, ns);
-        } else {
-            ProcessPropertyDAOImpl pp = new ProcessPropertyDAOImpl();
-            pp.setName(name);
-            pp.setNamespace(ns);
-            pp.setMixedContent(DOMUtils.domToString(content));
-            _properties.put(name, ns, pp);
-        }
-    }
-
-    public void setProperty(String name, String ns, String content) {
-        if (content == null) {
-            _properties.remove(name, ns);
-        } else {
-            ProcessPropertyDAOImpl pp = new ProcessPropertyDAOImpl();
-            pp.setName(name);
-            pp.setNamespace(ns);
-            pp.setSimpleContent(content);
-            _properties.put(name, ns, pp);
-        }
-    }
-
-    public Collection<ProcessPropertyDAO> getProperties() {
-        return _properties.values();
-    }
-
-    public Collection<PartnerLinkDAO> getDeployedEndpointReferences() {
-        return _plinks.values();
-    }
-
     public void delete() {
         _store.remove(_processId);
     }
@@ -160,42 +113,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         return "nobody";
     }
 
-    public Date getDeployDate() {
-        return _deployDate;
-    }
-
-    public boolean isRetired() {
-        return _retired;
-    }
-
-    public void setRetired(boolean retired) {
-        this._retired = retired;
-    }
-
     public QName getType() {
         return _type;
-    }
-
-    public PartnerLinkDAO addDeployedPartnerLink(int plinkModelId, String plinkName, String myRoleName, String partnerRoleName) {
-        PartnerLinkDAOImpl plink = new PartnerLinkDAOImpl();
-        plink.setPartnerLinkModelId(plinkModelId);
-        plink.setPartnerLinkName(plinkName);
-        plink.setMyRoleName(myRoleName);
-        plink.setPartnerRoleName(partnerRoleName);
-        _plinks.put(plinkModelId, plink);
-        return plink;
-    }
-
-    public PartnerLinkDAO getDeployedEndpointReference(int plinkModelId) {
-        return _plinks.get(plinkModelId);
-    }
-
-    public void setActive(boolean active) {
-        _active = active;
-    }
-
-    public boolean isActive() {
-        return _active;
     }
 
     public void addCorrelator(String correlator) {
@@ -203,17 +122,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _correlators.put(corr.getCorrelatorId(), corr);
     }
 
-    public void setCompiledProcess(byte[] cbp) {
-        _compiledProcess = cbp;
-    }
-
-    public byte[] getCompiledProcess() {
-        return _compiledProcess;
-    }
-
     /**
      * Nothing to do.
-     * @see org.apache.ode.bpel.dao.ProcessConfigurationDAO#update()
      */
     public void update() {
         //TODO Check requirement for persisting.

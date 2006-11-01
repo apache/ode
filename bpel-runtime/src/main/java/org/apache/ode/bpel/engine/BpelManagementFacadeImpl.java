@@ -22,18 +22,10 @@ import org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-import org.apache.ode.bpel.pmapi.EventInfoListDocument;
-import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
-import org.apache.ode.bpel.pmapi.InvalidRequestException;
-import org.apache.ode.bpel.pmapi.ManagementException;
-import org.apache.ode.bpel.pmapi.ProcessingException;
+import org.apache.ode.bpel.pmapi.*;
 import org.apache.ode.bpel.pmapi.TInstanceInfo.EventInfo;
 import org.apache.ode.bpel.runtime.breaks.ActivityBreakpointImpl;
 import org.apache.ode.utils.DOMUtils;
@@ -41,11 +33,7 @@ import org.apache.ode.utils.uuid.UUIDGen;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation of the instance/process management interaction. This class implements
@@ -56,8 +44,8 @@ class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         implements BpelManagementFacade {
     private static UUIDGen _uuidGen = new UUIDGen();
 
-    BpelManagementFacadeImpl(BpelDatabase db, BpelEngineImpl engine, BpelServerImpl server) {
-        super(db, engine, server);
+    BpelManagementFacadeImpl(BpelDatabase db, BpelEngineImpl engine, BpelServerImpl server, ProcessStore store) {
+        super(db, engine, server, store);
     }
 
     public short getState(final Long iid) throws ManagementException {

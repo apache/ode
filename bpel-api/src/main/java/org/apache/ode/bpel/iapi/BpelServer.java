@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+
+import javax.xml.namespace.QName;
 
 
 /**
@@ -107,33 +107,26 @@ public interface BpelServer {
 
     /**
      * Activate a process.
-     * @param pid process to activate
+     * @param pid process to load
      * @param sticky is this change sticky, i.e. will the process be activated
      *        on restart.
      * @throws BpelEngineException
      */
-    void activate(QName pid, boolean sticky) throws BpelEngineException;
+    void load(QName pid, boolean sticky) throws BpelEngineException;
 
     /**
      * Deactivate a process.
-     * @param pid process to deactivate
+     * @param pid process to unload
      * @param sticky whether the change is sticky, i.e. will the process be
      *        deactivated on restart
      * @throws BpelEngineException
      */
-    void deactivate(QName pid, boolean sticky) throws BpelEngineException;
+    void unload(QName pid, boolean sticky) throws BpelEngineException;
 
     /**
      * Get the BPEL management interface.
      * @return BPEL management interface
      */
     BpelManagementFacade getBpelManagementFacade();
-
-    /**
-     * Get the deployment service.
-     * @return deployment service
-     */
-    DeploymentService getDeploymentService();
-
 
 }

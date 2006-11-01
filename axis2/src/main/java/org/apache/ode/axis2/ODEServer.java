@@ -19,25 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -53,16 +34,36 @@ import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
 import org.opentools.minerva.MinervaPool;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle
@@ -77,6 +78,7 @@ public class ODEServer {
     private File _workRoot;
 
     private BpelServerImpl _server;
+    private ProcessStoreImpl _store;
     private ODEConfigProperties _odeConfig;
     private AxisConfiguration _axisConfig;
     private DataSource _datasource;
@@ -115,9 +117,11 @@ public class ODEServer {
         initHibernate();
         __log.debug("Hibernate started.");
 
+        __log.debug("Initializing BPEL process store.");
+        initProcessStore();
+
         __log.debug("Initializing BPEL server.");
         initBpelServer();
-
 
         try {
             _server.start();
@@ -134,7 +138,7 @@ public class ODEServer {
         _poller = new DeploymentPoller(deploymentDir, this);
 
         new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
-        new DeploymentWebService().enableService(_axisConfig, _server, _poller,
+        new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller,
                 _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
 
         _poller.start();
@@ -394,16 +398,16 @@ public class ODEServer {
         _daoCF = new BpelDAOConnectionFactoryImpl(sm);
     }
 
+    private void initProcessStore() {
+        _store = new ProcessStoreImpl(_workRoot, _datasource);
+    }
+
     private void initBpelServer() {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
-
         _server = new BpelServerImpl();
-        _server.setAutoActivate(true);
-        File deploymentDir = new File(_workRoot, "processes");
-        _server.setDeployDir(deploymentDir.getAbsolutePath());
-    
+
         _executorService = Executors.newCachedThreadPool();
         _scheduler = new QuartzSchedulerImpl();
         _scheduler.setBpelServer(_server);
@@ -415,8 +419,9 @@ public class ODEServer {
         _server.setDaoConnectionFactory(_daoCF);
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
-        _server.setBindingContext(new BindingContextImpl(this));
+        _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
+        _server.setProcessStore(_store);
         _server.init();
     }
 
@@ -477,6 +482,10 @@ public class ODEServer {
 
         return dialect;
 
+    }
+
+    public ProcessStore getProcessStore() {
+        return _store;
     }
 
     public BpelServerImpl getBpelServer() {
