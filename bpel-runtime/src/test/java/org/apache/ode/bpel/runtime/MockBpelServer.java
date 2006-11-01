@@ -18,16 +18,24 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.fs.naming.mem.InMemoryContextFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.daohib.DataSourceConnectionProvider;
+import org.apache.ode.daohib.HibernateTransactionManagerLookup;
+import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.hibernate.cfg.Environment;
+import org.objectweb.jotm.Jotm;
+import org.opentools.minerva.MinervaPool;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,42 +46,17 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.daohib.DataSourceConnectionProvider;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
-import org.hibernate.cfg.Environment;
-import org.objectweb.jotm.Jotm;
-import org.opentools.minerva.MinervaPool;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.fs.naming.mem.InMemoryContextFactory;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 class MockBpelServer {
 
-    BpelServerImpl            _server;
+    BpelServerImpl             _server;
+    ProcessStoreImpl           _store;
     TransactionManager        _txManager;
     Jotm                      _jotm;
     MinervaPool               _minervaPool;
@@ -93,6 +76,7 @@ class MockBpelServer {
             createDataSource();
             createDAOConnection();
             createScheduler();
+            _store = new ProcessStoreImpl(new File("."), _dataSource);
 
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
@@ -103,7 +87,6 @@ class MockBpelServer {
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
             _server.setBindingContext(createBindingContext());
-            _server.setDeployDir("processes");
             _server.init();
             _server.start();
         } catch (Exception except) {
@@ -114,9 +97,9 @@ class MockBpelServer {
     }
 
     public Collection<QName> deploy(File deploymentUnitDirectory) {
-        Collection<QName> pids = _server.deploy(deploymentUnitDirectory);
+        Collection<QName> pids = _store.deploy(deploymentUnitDirectory);
         for (QName pid: pids)
-            _server.activate(pid, true);
+            _server.load(pid, true);
         return pids;
     }
 
@@ -254,7 +237,7 @@ class MockBpelServer {
 
     protected BindingContext createBindingContext() {
         _bindContext = new BindingContext() {
-            public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint, PortType portType) {
+            public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint, PortType portType) {
                 final Document doc = DOMUtils.newDocument();
                 Element serviceRef = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                     EndpointReference.SERVICE_REF_QNAME.getLocalPart());
@@ -270,7 +253,7 @@ class MockBpelServer {
                 _activated.remove(myRoleEndpoint);
             }
 
-            public PartnerRoleChannel createPartnerRoleChannel(QName processId, DeploymentUnit deploymentUnit, PortType portType, 
+            public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
                                                                final Endpoint initialPartnerEndpoint) {
                 final EndpointReference epr = new EndpointReference() {
                     public Document toXML() {

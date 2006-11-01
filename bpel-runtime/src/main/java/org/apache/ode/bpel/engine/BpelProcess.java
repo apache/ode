@@ -18,22 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -47,23 +31,14 @@ import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.*;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
@@ -78,10 +53,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.*;
+
 /**
  * Entry point into the runtime of a BPEL process.
  * 
  * @author mszefler
+ * @author mriou <mriou at apache dot org>
  */
 public class BpelProcess {
     static final Log __log = LogFactory.getLog(BpelProcess.class);
@@ -110,18 +95,18 @@ public class BpelProcess {
     /** {@link MessageExchangeInterceptor}s registered for this process. */
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
 
-    private DeploymentUnit _du;
+    private ProcessStore _store;
 
-    public BpelProcess(QName pid, DeploymentUnit du, OProcess oprocess,
-            Map<OPartnerLink, Endpoint> myRoleEndpointNames, Map<OPartnerLink, Endpoint> initialPartners,
-            BpelEventListener debugger, ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,
-            List<MessageExchangeInterceptor> localMexInterceptors) {
+    public BpelProcess(QName pid, OProcess oprocess, Map<OPartnerLink, Endpoint> myRoleEndpointNames,
+                       Map<OPartnerLink, Endpoint> initialPartners, BpelEventListener debugger,
+                       ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry,
+                       List<MessageExchangeInterceptor> localMexInterceptors, ProcessStore store) {
         _pid = pid;
-        _du = du;
         _replacementMap = new ReplacementMapImpl(oprocess);
         _oprocess = oprocess;
         _expLangRuntimeRegistry = expLangRuntimeRegistry;
         _mexInterceptors.addAll(localMexInterceptors);
+        _store = store;
 
         for (OPartnerLink pl : _oprocess.getAllPartnerLinks()) {
             if (pl.hasMyRole()) {
@@ -141,7 +126,7 @@ public class BpelProcess {
     }
 
     public String toString() {
-        return "BpelProcess[" + _pid + " in " + _du + "]";
+        return "BpelProcess[" + _pid + "]";
     }
 
     public void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, long activityId, String action, FaultData fault) {
@@ -287,7 +272,8 @@ public class BpelProcess {
      *         <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO());
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(),
+                getProcessDAO(), _engine._contexts.store);
 
         for (MessageExchangeInterceptor i : _mexInterceptors)
             if (!mex.processInterceptor(i, mex, ictx, invoker))
@@ -342,8 +328,7 @@ public class BpelProcess {
         /**
          * Get the initial value of this role's EPR. This value is obtained from
          * the integration layer when the process is enabled on the server.
-         * 
-         * @return
+         * @return initial epr
          */
         EndpointReference getInitialEPR() {
             return _initialEPR;
@@ -455,7 +440,7 @@ public class BpelProcess {
                     __log.debug("INPUTMSG: " + correlatorId + ": routing failed, CREATING NEW INSTANCE");
                 }
                 ProcessDAO processDAO = getProcessDAO();
-                if (processDAO.isRetired()) {
+                if (!_store.getProcessConfiguration(_pid).isActive()) {
                     throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
                 }
 
@@ -638,7 +623,7 @@ public class BpelProcess {
     }
 
     /**
-     * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.io.Serializable)
+     * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public void handleWorkEvent(Map<String, Object> jobData) {
         ProcessInstanceDAO procInstance;
@@ -714,7 +699,7 @@ public class BpelProcess {
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (PartnerLinkMyRoleImpl myrole : _myRoles.values()) {
-            myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, _du, myrole._endpoint,
+            myrole._initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, myrole._endpoint,
                     myrole._plinkDef.myRolePortType);
 
             __log.debug("Activated " + _pid + " myrole " + myrole.getPartnerLinkName() + ": EPR is "
@@ -722,7 +707,7 @@ public class BpelProcess {
         }
 
         for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
-            PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid, _du,
+            PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid,
                     prole._plinkDef.partnerRolePortType, prole._initialPartner);
             prole._channel = channel;
             EndpointReference epr = channel.getInitialEndpointReference();

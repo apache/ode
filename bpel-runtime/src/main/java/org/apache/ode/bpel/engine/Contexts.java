@@ -19,16 +19,13 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the
@@ -45,6 +42,8 @@ class Contexts {
     BindingContext bindingContext;
 
     BpelDAOConnectionFactory dao;
+
+    ProcessStore store;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
     final List<MessageExchangeInterceptor >globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();

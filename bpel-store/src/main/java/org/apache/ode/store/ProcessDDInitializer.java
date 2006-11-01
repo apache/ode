@@ -1,40 +1,22 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-package org.apache.ode.bpel.engine;
+package org.apache.ode.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TProvide;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.store.dao.ProcessConfDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
 /**
  * Extracts and treats process deployment descriptors. The descriptor interacts
- * with the process deployment either by modifying the {@link org.apache.ode.bpel.dao.ProcessDAO}.
+ * with the process deployment by modifying the {@link org.apache.ode.store.dao.ProcessConfDAOHib}.
+ * @author mriou <mriou at apache dot org>
  */
 class ProcessDDInitializer {
 
@@ -51,12 +33,12 @@ class ProcessDDInitializer {
         _dd = dd;
     }
 
-    public void update(ProcessDAO processDAO) {
+    public void update(ProcessConfDAO processDAO) {
         handleEndpoints(processDAO);
         handleProperties(processDAO);
     }
 
-    private void handleEndpoints(ProcessDAO processDAO) {
+    private void handleEndpoints(ProcessConfDAO processDAO) {
         for (TProvide provide : _dd.getProvideList()) {
             OPartnerLink pLink = _oprocess.getPartnerLink(provide.getPartnerLink());
             if (pLink == null) {
@@ -91,7 +73,7 @@ class ProcessDDInitializer {
         }
     }
 
-    private void handleProperties(ProcessDAO processDAO) {
+    private void handleProperties(ProcessConfDAO processDAO) {
         if (_dd.getPropertyList().size() > 0) {
             for (TDeployment.Process.Property property : _dd.getPropertyList()) {
                 String textContent = DOMUtils.getTextContent(property.getDomNode());
@@ -108,17 +90,12 @@ class ProcessDDInitializer {
         }
     }
 
-
     public boolean exists() {
         return _dd != null;
     }
 
-    public void init(ProcessDAO newDao) {
-        newDao.setRetired(_dd.getRetired());
+    public void init(ProcessConfDAO newDao) {
         newDao.setActive(_dd.getActive() || !_dd.isSetActive());
-        for (String correlator : _oprocess.getCorrelators()) {
-            newDao.addCorrelator(correlator);
-        }
     }
 
 }

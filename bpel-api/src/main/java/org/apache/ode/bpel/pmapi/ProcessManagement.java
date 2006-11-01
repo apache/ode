@@ -97,7 +97,7 @@ public interface ProcessManagement {
 
   /**
    * Activate a process.
-   * @param pid identifier for the process to activate
+   * @param pid identifier for the process to load
    * @return {@link ProcessInfoDocument} reflecting the modification
     */
   ProcessInfoDocument activate(QName pid)

@@ -27,12 +27,14 @@ import org.apache.ode.bpel.common.ProcessFilter;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.*;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -40,18 +42,10 @@ import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implentation of the Process and InstanceManagement APIs.
@@ -67,12 +61,15 @@ class ProcessAndInstanceManagementImpl
     protected BpelEngineImpl _engine;
     protected BpelServerImpl _server;
     protected BpelDatabase _db;
+    protected ProcessStore _store;
     protected Calendar _calendar = Calendar.getInstance(); // Calendar is expensive to initialize so we cache and clone it
 
-    public ProcessAndInstanceManagementImpl(BpelDatabase db, BpelEngineImpl engine, BpelServerImpl server) {
+    public ProcessAndInstanceManagementImpl(BpelDatabase db, BpelEngineImpl engine,
+                                            BpelServerImpl server, ProcessStore store) {
         _db = db;
         _engine = engine;
         _server = server;
+        _store = store;
     }
 
     public ProcessInfoListDocument listProcessesCustom(String filter, String orderKeys, final ProcessInfoCustomizer custom) {
@@ -124,23 +121,10 @@ class ProcessAndInstanceManagementImpl
     public ProcessInfoDocument setRetired(final QName pid, final boolean retired)
             throws ManagementException {
         try {
-            _db.exec(new BpelDatabase.Callable<Object>() {
-                public Object run(BpelDAOConnection conn) throws Exception {
-                    ProcessDAO proc = conn.getProcess(pid);
-                    if (proc == null)
-                        throw new InvalidRequestException("ProcessNotFound:" + pid);
-                    proc.setRetired(retired);
-
-                    return null;
-                }
-            });
-        } catch (ManagementException me) {
-            throw me;
-        } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            _store.markActive(pid, !retired);
+        } catch (BpelEngineException e) {
+            throw new ProcessNotFoundException("ProcessNotFound:" + pid);
         }
-
         return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
     }
 
@@ -154,7 +138,7 @@ class ProcessAndInstanceManagementImpl
                     ProcessDAO proc = conn.getProcess(pid);
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-                    proc.setProperty(propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
+                    _store.setProperty(pid, propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
                     fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
                     return null;
                 }
@@ -179,7 +163,7 @@ class ProcessAndInstanceManagementImpl
                     ProcessDAO proc = conn.getProcess(pid);
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-                    proc.setProperty(propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
+                    _store.setProperty(pid, propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
                     fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
                     return null;
                 }
@@ -597,10 +581,11 @@ class ProcessAndInstanceManagementImpl
      * @param custom used to customize the quantity of information produced in the info
      */
     private void fillProcessInfo(TProcessInfo info, ProcessDAO proc, ProcessInfoCustomizer custom) {
+        ProcessConf pconf = _store.getProcessConfiguration(proc.getProcessId());
         info.setPid(proc.getProcessId().toString());
         // TODO: ACTIVE and RETIRED should be used separately.
         //Active process may be retired at the same time
-        if(proc.isRetired()) {
+        if(!pconf.isActive()) {
             info.setStatus(TProcessStatus.RETIRED);
         } else {
             info.setStatus(TProcessStatus.ACTIVE);
@@ -610,8 +595,8 @@ class ProcessAndInstanceManagementImpl
         definfo.setProcessName(proc.getType());
 
         TDeploymentInfo depinfo = info.addNewDeploymentInfo();
-        depinfo.setDeployDate(toCalendar(proc.getDeployDate()));
-        depinfo.setDeployer(proc.getDeployer());
+        depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
+        depinfo.setDeployer(pconf.getDeployer());
         if (custom.includeInstanceSummary()) {
             TInstanceSummary isum = info.addNewInstanceSummary();
             genInstanceSummaryEntry(isum.addNewInstances(),TInstanceStatus.ACTIVE, proc);
@@ -623,47 +608,27 @@ class ProcessAndInstanceManagementImpl
         }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
-        if (_server.getDeploymentUnit(proc.getProcessId()) != null) {
-            File deployDir = _server.getDeploymentUnit(proc.getProcessId()).getDeployDir();
-            File files[] = deployDir.listFiles();
-            if (files != null)
-                genDocumentInfo(docinfo, deployDir, files,true);
-            else if (__log.isDebugEnabled())
-                __log.debug("fillProcessInfo: No files for " + deployDir + " !!!");
-        }
-        
+        File files[] = pconf.getFiles();
+        if (files != null)
+            genDocumentInfo(docinfo, _store.getDeploymentDir(), files, true);
+        else if (__log.isDebugEnabled())
+            __log.debug("fillProcessInfo: No files for " + _store.getDeploymentDir() + " !!!");
+
         if (custom.includeProcessProperties()) {
             TProcessProperties properties = info.addNewProperties();
-            for (ProcessPropertyDAO processPropertyDAO : proc.getProperties()) {
+            for (Map.Entry<QName, Node> propEntry : pconf.getProperties().entrySet()) {
                 TProcessProperties.Property tprocProp = properties.addNewProperty();
-                tprocProp.setName(new QName(processPropertyDAO.getNamespace(),processPropertyDAO.getName()));
+                tprocProp.setName(new QName(propEntry.getKey().getNamespaceURI(), propEntry.getKey().getLocalPart()));
                 Node propNode = tprocProp.getDomNode();
-                if (processPropertyDAO.getSimpleContent() != null) {
-                    propNode.appendChild(propNode.getOwnerDocument()
-                            .createTextNode(processPropertyDAO.getSimpleContent()));
-                } else if (processPropertyDAO.getMixedContent() != null) {
-                    try {
-                        Node readNode = DOMUtils.stringToDOM(processPropertyDAO.getMixedContent());
-                        Document processInfoDoc = propNode.getOwnerDocument();
-                        Node node2append = processInfoDoc.importNode(readNode, true);
-                        propNode.appendChild(node2append);
-                    } catch (SAXException e) {
-                        __log.error("Mixed content stored in property " + processPropertyDAO.getName() +
-                                " for process " + proc.getProcessId() + " couldn't be converted to a DOM " +
-                                "document.", e);
-                    } catch (IOException e) {
-                        __log.error("Mixed content stored in property " + processPropertyDAO.getName() +
-                                " for process " + proc.getProcessId() + " couldn't be converted to a DOM " +
-                                "document.", e);
-                    }
-                }
+                Document processInfoDoc = propNode.getOwnerDocument();
+                Node node2append = processInfoDoc.importNode(propEntry.getValue(), true);
+                propNode.appendChild(node2append);
             }
         }
 
         OProcess oprocess = _engine.getOProcess(proc.getProcessId());
         if (custom.includeEndpoints() && oprocess != null) {
             TEndpointReferences eprs = info.addNewEndpoints();
-            if (oprocess == null) throw new InvalidRequestException("ProcessNotActive: " + proc.getProcessId());
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
                     EndpointReference pepr = _engine._activeProcesses.get(proc.getProcessId())

@@ -19,12 +19,13 @@
 
 package org.apache.ode.jbi;
 
-import java.io.File;
-
-import javax.jbi.management.DeploymentException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.jbi.management.DeploymentException;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.util.Collection;
 
 /**
  * Representation of a JBI service unit. A JBI service unit may actually consist
@@ -54,7 +55,11 @@ class OdeServiceUnit {
     public void deploy() throws DeploymentException {
 
         try {
-            _ode._server.deploy(_serviceUnitRootPath);
+            Collection<QName> deployed = _ode._store.deploy(_serviceUnitRootPath);
+            for (QName pqname : deployed) {
+                _ode._server.load(pqname, true);
+            }
+
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
             __log.error(errmsg, ex);
@@ -64,7 +69,11 @@ class OdeServiceUnit {
 
     public void undeploy() throws Exception {
         try {
-            _ode._server.undeploy(_serviceUnitRootPath);
+            Collection<QName> undeployed = _ode._store.undeploy(_serviceUnitRootPath);
+            for (QName pqname : undeployed) {
+                _ode._server.unload(pqname, true);
+            }
+
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessUndeploymentFailed(null);
             __log.error(errmsg, ex);
@@ -87,20 +96,20 @@ class OdeServiceUnit {
 //        Exception e = null;
 //        for (QName pid : _pids) {
 //            try {
-//                _ode._server.activate(pid, false);
+//                _ode._server.load(pid, false);
 //                activated.add(pid);
 //            } catch (Exception ex) {
 //                e = ex;
-//                __log.error("Unable to activate " + pid, ex);
+//                __log.error("Unable to load " + pid, ex);
 //                break;
 //            }
 //        }
 //        if (activated.size() != _pids.size()) {
 //            for (QName pid : activated)
 //                try {
-//                    _ode._server.deactivate(pid, true);
+//                    _ode._server.unload(pid, true);
 //                } catch (Exception ex) {
-//                    __log.error("Unable to deactivate " + pid, ex);
+//                    __log.error("Unable to unload " + pid, ex);
 //                }
 //        }
 //
@@ -111,9 +120,9 @@ class OdeServiceUnit {
     public void stop() throws Exception {
 //        for (QName pid : _pids) {
 //            try {
-//                _ode._server.deactivate(pid, true);
+//                _ode._server.unload(pid, true);
 //            } catch (Exception ex) {
-//                __log.error("Unable to deactivate " + pid, ex);
+//                __log.error("Unable to unload " + pid, ex);
 //            }
 //        }
     }

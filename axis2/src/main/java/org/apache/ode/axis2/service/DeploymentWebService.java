@@ -37,7 +37,7 @@ import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.DeploymentService;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
 
 import javax.activation.DataHandler;
@@ -46,12 +46,8 @@ import javax.wsdl.WSDLException;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -62,14 +58,16 @@ public class DeploymentWebService {
 
     private static final Log __log = LogFactory.getLog(DeploymentWebService.class);
 
-    private DeploymentService _service;
     private File _deployPath;
     private DeploymentPoller _poller;
+    private ProcessStore _store;
+    private BpelServer _server;
 
-    public void enableService(AxisConfiguration axisConfig, BpelServer server,
+    public void enableService(AxisConfiguration axisConfig, BpelServer server, ProcessStore store,
                               DeploymentPoller poller, String rootpath, String workPath) {
         _deployPath = new File(workPath, "processes");
-        _service = server.getDeploymentService();
+        _store = store;
+        _server = server;
 
         Definition def;
         try {
@@ -114,9 +112,9 @@ public class DeploymentWebService {
                         // it to hold on for a while.
                         _poller.hold();
 
-                        // Cleaning up if something existed previsouly
+                        // Cleaning up if something existed previously
                         File dest = new File(_deployPath, namePart.getText());
-                        _service.undeploy(dest);
+                        _store.undeploy(dest);
                         // If the previous deployment failed, there will still be something but
                         // undeploy won't do anything
                         FileUtils.deepDelete(dest);
@@ -130,7 +128,11 @@ public class DeploymentWebService {
                             throw new AxisFault("The deployment doesn't appear to contain a deployment " +
                                     "descriptor in its root directory named deploy.xml, aborting.");
 
-                        _service.deploy(dest);
+                        Collection<QName> deployed = _store.deploy(dest);
+                        for (QName pqname : deployed) {
+                            _server.load(pqname, true);
+                        }
+
                         File deployedMarker = new File(_deployPath, namePart.getText() + ".deployed");
                         deployedMarker.createNewFile();
 
@@ -157,20 +159,24 @@ public class DeploymentWebService {
                         // files in there. The poller shouldn't pick them up so we're asking
                         // it to hold on for a while.
                         _poller.hold();
-                        
-                        boolean result = _service.undeploy(deploymentDir);
+
+                        Collection<QName> undeployed = _store.undeploy(deploymentDir);
+                        for (QName pqname : undeployed) {
+                            _server.unload(pqname, true);
+                        }
+
                         File deployedMarker = new File(_deployPath, elmtStr + ".deployed");
                         deployedMarker.delete();
 
                         OMElement response = factory.createOMElement("response", depns);
-                        response.setText("" + result);
+                        response.setText("" + (undeployed.size() > 0));
                         sendResponse(factory, messageContext, "undeployResponse", response);
                         _poller.markAsUndeployed(deploymentDir);
                     } finally {
                         _poller.release();
                     }
                 } else if (operation.equals("listDeployedPackages")) {
-                    String[] packageNames = _service.listDeployedPackages();
+                    String[] packageNames = _store.listDeployedPackages();
                     OMElement response = factory.createOMElement("deployedPackages", depns);
                     for (String name : packageNames) {
                         OMElement nameElmt = factory.createOMElement("name", depns);
@@ -180,7 +186,7 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "listDeployedPackagesResponse", response);
                 } else if (operation.equals("listProcesses")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    QName[] processIds = _service.listProcesses(namePart.getText());
+                    QName[] processIds = _store.listProcesses(namePart.getText());
                     OMElement response = factory.createOMElement("processIds", depns);
                     for (QName qname : processIds) {
                         OMElement nameElmt = factory.createOMElement("id", depns);
@@ -190,7 +196,7 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "listProcessResponse", response);
                 } else if (operation.equals("getProcessPackage")) {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    String packageName = _service.getProcessPackage(OMUtils.getTextAsQName(qnamePart));
+                    String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getProcessPackage();
                     OMElement response = factory.createOMElement("packageName", depns);
                     response.setText(packageName);
                     sendResponse(factory, messageContext, "getProcessPackageResponse", response);

@@ -1,23 +1,4 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-package org.apache.ode.bpel.deploy;
+package org.apache.ode.store.deploy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,43 +20,27 @@ import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 /**
  * Container providing various functions on the deployment directory.
- * 
+ *
  * @author mriou
- * 
+ *
  * TODO Add a way to cause lazy methods to re-process stuff on disk.
  */
 public class DeploymentUnitImpl implements DeploymentUnit {
 
     private static Log __log = LogFactory.getLog(DeploymentUnitImpl.class);
 
-    private long _lastModified;
-
     private String _name;
-
     private File _duDirectory;
-
     private DocumentRegistry _docRegistry;
-
     private HashMap<QName, OProcess> _processes;
-
     private DeployDocument _dd;
-
     private File _descriptorFile;
-
     private HashMap<QName, TDeployment.Process> _processInfo;
-
     private boolean _refreshed;
 
     private static final FileFilter _wsdlFilter = new FileFilter() {
@@ -107,19 +72,17 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         if (!_descriptorFile.exists())
             throw new IllegalArgumentException("Directory " + dir + " does not contain a deploy.xml file!");
 
-        _lastModified = _descriptorFile.lastModified();
-
         refresh();
     }
 
-    
+
     /**
      * Checking for each BPEL file if we have a corresponding compiled process.
      * If we don't, starts compilation. The force parameter just forces
      * compilation, whether a cbp file exists or not.
      */
     private void compileProcesses(boolean force) {
-        ArrayList<File> bpels = listFilesRecursively(_duDirectory, _bpelFilter);
+        ArrayList<File> bpels = listFilesRecursively(_duDirectory, DeploymentUnitImpl._bpelFilter);
         for (File bpel : bpels) {
             File compiled = new File(bpel.getParentFile(), bpel.getName().substring(0,bpel.getName().length()-".bpel".length()) + ".cbp");
             if (compiled.exists() && !force) {
@@ -137,7 +100,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         try {
             bpelc.compile(bpelFile);
         } catch (IOException e) {
-            __log.error("Couldn't compile process file!", e);
+            DeploymentUnitImpl.__log.error("Couldn't compile process file!", e);
         }
     }
 
@@ -146,12 +109,11 @@ public class DeploymentUnitImpl implements DeploymentUnit {
             compileProcesses(force);
         } catch (CompilationException e) {
             // No retry on compilation error, we just forget about it
-            _lastModified = new File(_duDirectory, "deploy.xml").lastModified();
             throw new BpelEngineException("Compilation failure!");
         }
         if (_processes == null || force) {
             _processes = new HashMap<QName, OProcess>();
-            ArrayList<File> cbps = listFilesRecursively(_duDirectory, _cbpFilter);
+            ArrayList<File> cbps = listFilesRecursively(_duDirectory, DeploymentUnitImpl._cbpFilter);
             for (File file : cbps) {
                 OProcess oprocess = loadProcess(file);
                 _processes.put(new QName(oprocess.targetNamespace, oprocess.getName()), oprocess);
@@ -187,15 +149,8 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return f.getAbsolutePath().equals(new File(_duDirectory, "deploy.xml").getAbsolutePath());
     }
 
-    public boolean checkForUpdate() {
-        File deployXml = new File(_duDirectory, "deploy.xml");
-        if (!deployXml.exists())
-            return false;
-        return deployXml.lastModified() != _lastModified;
-    }
-
     public int hashCode() {
-        return (int) (_name.hashCode() + _lastModified);
+        return _name.hashCode();
     }
 
     public boolean equals(Object obj) {
@@ -205,14 +160,6 @@ public class DeploymentUnitImpl implements DeploymentUnit {
 
     public File getDeployDir() {
         return _duDirectory;
-    }
-
-    public void setLastModified(long lastModified) {
-        _lastModified = lastModified;
-    }
-
-    public long getLastModified() {
-        return _lastModified;
     }
 
     public DeployDocument getDeploymentDescriptor() {
@@ -241,7 +188,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
             WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
             WSDLReader r = wsdlFactory.newWSDLReader();
 
-            ArrayList<File> wsdls = listFilesRecursively(_duDirectory, _wsdlFilter);
+            ArrayList<File> wsdls = listFilesRecursively(_duDirectory, DeploymentUnitImpl._wsdlFilter);
             for (File file : wsdls) {
                 try {
                     _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
@@ -265,7 +212,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         return ret;
     }
 
-    public Set<QName> getProcessNames() {        
+    public Set<QName> getProcessNames() {
         if (_processes == null) loadProcessDefinitions(false);
         return _processes.keySet();
     }
@@ -293,9 +240,27 @@ public class DeploymentUnitImpl implements DeploymentUnit {
         }
     }
 
+    public List<File> allFiles() {
+        return allFiles(_duDirectory);
+    }
+
+    private List<File> allFiles(File dir) {
+        ArrayList<File> result = new ArrayList<File>();
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                result.addAll(allFiles(file));
+            }
+            if (file.isHidden()) continue;
+            if (file.isFile()) {
+                result.add(file);
+            }
+        }
+        return result;
+    }
+
     private ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
         ArrayList<File> result = new ArrayList<File>();
-        // Filtrating the files we're interested in in the current directory
+        // Filtering the files we're interested in in the current directory
         File[] select = root.listFiles(filter);
         for (File file : select) {
             result.add(file);

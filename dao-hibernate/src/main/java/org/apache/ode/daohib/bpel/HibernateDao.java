@@ -18,17 +18,16 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import java.io.Serializable;
-
-import org.hibernate.Session;
-
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.hobj.HObject;
+import org.hibernate.Session;
+
+import java.io.Serializable;
 
 /**
  * Base class for our DAO objects.
  */
-abstract class HibernateDao {
+public abstract class HibernateDao {
   protected final SessionManager _sm;
   protected final HObject _hobj;
 
