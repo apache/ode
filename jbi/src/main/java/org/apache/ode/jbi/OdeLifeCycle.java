@@ -19,25 +19,6 @@
 
 package org.apache.ode.jbi;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-
-import javax.jbi.JBIException;
-import javax.jbi.component.ComponentContext;
-import javax.jbi.component.ComponentLifeCycle;
-import javax.jbi.component.ServiceUnitManager;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -49,12 +30,31 @@ import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
+
+import javax.jbi.JBIException;
+import javax.jbi.component.ComponentContext;
+import javax.jbi.component.ComponentLifeCycle;
+import javax.jbi.component.ServiceUnitManager;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this
@@ -63,25 +63,16 @@ import org.opentools.minerva.MinervaPool.PoolType;
 public class OdeLifeCycle implements ComponentLifeCycle {
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
-
     private static final Messages __msgs = Messages.getMessages(Messages.class);
-
     private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
 
     private OdeSUManager _suManager = null;
-
     private boolean _initSuccess = false;
-
     private OdeContext _ode;
-
     private Receiver _receiver;
-
     private boolean _started;
-
     private boolean _needDerbyShutdown;
-
     private String _derbyUrl;
-
     private BpelServerConnector _connector;
 
     ServiceUnitManager getSUManager() {
@@ -244,9 +235,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
 
         _ode._server = new BpelServerImpl();
-        // We don't want the server to automatically activate deployed processes,
+        // We don't want the server to automatically load deployed processes,
         // we'll do that explcitly
-        _ode._server.setAutoActivate(true);
         _ode._eprContext = new EndpointReferenceContextImpl(_ode);
         _ode._mexContext = new MessageExchangeContextImpl(_ode);
         _ode._executorService = Executors.newCachedThreadPool();
@@ -258,11 +248,15 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
+        _ode._store = new ProcessStoreImpl(new File("."), _ode._dataSource);
+
         _ode._server.setDaoConnectionFactory(_ode._daocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
+        _ode._server.setProcessStore(_ode._store);
+
         _ode._server.init();
 
     }

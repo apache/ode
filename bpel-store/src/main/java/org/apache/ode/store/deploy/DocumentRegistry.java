@@ -1,46 +1,31 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-package org.apache.ode.bpel.deploy;
+package org.apache.ode.store.deploy;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
+import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.store.Messages;
+import org.apache.ode.utils.xsd.SchemaModel;
 
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
-
+import javax.xml.namespace.QName;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
 public class DocumentRegistry {
     private static final Log __log = LogFactory.getLog(DocumentRegistry.class);
+    private static final Messages __msgs = Messages.getMessages(Messages.class);
 
     private final ArrayList<Definition4BPEL> _definitions = new ArrayList<Definition4BPEL>();
     private final Map<URI, byte[]> _schemas = new HashMap<URI,byte[]>();
+
+    private SchemaModel _model;
+    private XMLEntityResolver _resolver;
 
     public DocumentRegistry(XMLEntityResolver resolver) {
         // bogus schema to force schema creation
@@ -50,6 +35,7 @@ public class DocumentRegistry {
                         + "<xsd:simpleType name=\"__bogusType__\">"
                         + "<xsd:restriction base=\"xsd:normalizedString\"/>"
                         + "</xsd:simpleType>" + "</xsd:schema>").getBytes());
+        _resolver = resolver;
     }
 
 
@@ -84,8 +70,8 @@ public class DocumentRegistry {
         if (def == null)
             throw new NullPointerException("def=null");
 
-        if (__log.isDebugEnabled()) {
-            __log.debug("addDefinition(" + def.getTargetNamespace() + " from " + def.getDocumentBaseURI() + ")");
+        if (DocumentRegistry.__log.isDebugEnabled()) {
+            DocumentRegistry.__log.debug("addDefinition(" + def.getTargetNamespace() + " from " + def.getDocumentBaseURI() + ")");
         }
 
         _definitions.add(def);

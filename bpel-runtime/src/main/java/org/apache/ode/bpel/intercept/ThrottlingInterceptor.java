@@ -18,12 +18,12 @@
  */
 package org.apache.ode.bpel.intercept;
 
-import java.util.Collection;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.ProcessPropertyDAO;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import java.util.Map;
 
 /**
  * An example of a  simple interceptor providing a "throttling"  capability - that is an 
@@ -32,38 +32,37 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
  * @author Maciej Szefler
  */
 public class ThrottlingInterceptor extends NoOpInterceptor {
-	/** Name of process property that control the maximum number of instances. */
-	private static final QName PROP_MAX_INSTANCES = new QName("urn:org.apache.ode.bpel.intercept", "maxInstances");
+    /** Name of process property that control the maximum number of instances. */
+    private static final QName PROP_MAX_INSTANCES = new QName("urn:org.apache.ode.bpel.intercept", "maxInstances");
 
-	@Override
-	public void onNewInstanceInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException {
-		int maxInstances;
-		try {
-			maxInstances = Integer.valueOf(getSimpleProperty(PROP_MAX_INSTANCES, ic));
-		} catch (Exception ex) {
-			return;
-		}
-		
-		if (ic.getProcessDAO().getNumInstances() >= maxInstances)
-			throw new FailMessageExchangeException("Too many instances.");
-	}
+    @Override
+    public void onNewInstanceInvoked(MyRoleMessageExchange mex,
+                                     InterceptorContext ic) throws FailMessageExchangeException {
+        int maxInstances;
+        try {
+            maxInstances = Integer.valueOf(getSimpleProperty(PROP_MAX_INSTANCES, ic));
+        } catch (Exception ex) {
+            return;
+        }
 
-	
-	/**
-	 * Get the value of a simple process property
-	 * @param propertyName name of the property
-	 * @param ic interceptor context
-	 * @return value of the property, or <code>null</code> if not set
-	 */
-	private String getSimpleProperty(QName propertyName, InterceptorContext ic) {
-		Collection<ProcessPropertyDAO> props = ic.getProcessDAO().getProperties();
-		for (ProcessPropertyDAO prop : props) {
-			QName pQname = new QName(prop.getNamespace(), prop.getName());
-			if (pQname.equals(propertyName))
-				return prop.getSimpleContent();
-		}
-		
-		return null;
-	}
+        if (ic.getProcessDAO().getNumInstances() >= maxInstances)
+            throw new FailMessageExchangeException("Too many instances.");
+    }
+
+
+    /**
+     * Get the value of a simple process property
+     * @param propertyName name of the property
+     * @param ic interceptor context
+     * @return value of the property, or <code>null</code> if not set
+     */
+    private String getSimpleProperty(QName propertyName, InterceptorContext ic) {
+        Map<QName, Node> props =  ic.getProcessStore().getProcessConfiguration(
+                ic.getProcessDAO().getProcessId()).getProperties();
+        for (Map.Entry<QName, Node> prop : props.entrySet()) {
+            if (prop.getKey().equals(propertyName))
+                return ((Text)prop.getValue()).getWholeText();
+        }
+        return null;
+    }
 }

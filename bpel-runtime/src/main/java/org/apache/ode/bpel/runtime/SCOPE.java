@@ -22,33 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.runtime.channels.*;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * An active scope.
@@ -253,12 +234,12 @@ class SCOPE extends ACTIVITY {
             linksNeedingDPE.addAll(i.next().outgoingLinks);
 
         // We're done with the main work, if we were terminated, we will
-        // need to activate the termination handler:
+        // need to load the termination handler:
         if (_terminated) {
 //          throw new UnsupportedOperationException("termination handler todo ");
         }
 
-        // else-if we have a fault, we will need to activate the fault handler.
+        // else-if we have a fault, we will need to load the fault handler.
         else if (_fault != null) {
 
           sendEvent(new ScopeFaultEvent(_fault.getFaultName(), _fault.getFaultLineNo(),_fault.getExplanation()));

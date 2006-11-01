@@ -21,22 +21,20 @@ package org.apache.ode.daohib;
 import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.uuid.UUID;
+import org.hibernate.HibernateException;
+import org.hibernate.MappingException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
-import org.hibernate.HibernateException;
-import org.hibernate.MappingException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 /**
  * Manages hibernate sessions, and their association with 
@@ -89,7 +87,6 @@ public class SessionManager {
   public static final Configuration getDefaultConfiguration() throws MappingException {
     return new Configuration()
             .addClass(HProcess.class)
-            .addClass(HProcessProperty.class)
             .addClass(HProcessInstance.class)
             .addClass(HCorrelator.class)
             .addClass(HCorrelatorMessage.class)

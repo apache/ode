@@ -38,15 +38,16 @@
 
 package org.apache.ode.axis2.deploy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEServer;
+
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.ODEServer;
+import java.util.Collection;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -123,7 +124,10 @@ public class DeploymentPoller {
                 continue;
             }
             try {
-                _odeServer.getBpelServer().deploy(file);
+                Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
+                for (QName pqname : deployed) {
+                    _odeServer.getBpelServer().load(pqname, true);
+                }
                 __log.info("Deployment of artifact " + file.getName() + " successful.");
             } catch (Exception e) {
                 __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
@@ -131,28 +135,21 @@ public class DeploymentPoller {
         }
 
         // Removing deployments that disappeared
-        List<String> deployed = _odeServer.getBpelServer().getDeploymentsList();
+        String[] deployed = _odeServer.getProcessStore().listDeployedPackages();
         for (String s : deployed) {
             if (s != null) {
                 File deployDir = new File(_deployDir, s);
                 if (!deployDir.exists()) {
-                    boolean undeploy = _odeServer.getBpelServer().undeploy(deployDir);
+                    Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
+                    for (QName pqname : undeployed) {
+                        _odeServer.getBpelServer().unload(pqname, true);
+                    }
                     File marker = new File(_deployDir, s + ".deployed");
                     marker.delete();
-                    if (undeploy) __log.info("Successfully undeployed " + s);
+                    if (undeployed.size() > 0) __log.info("Successfully undeployed " + s);
                 }
             }
         }
-//        for (File m :_deployDir.listFiles(_deployedFilter)) {
-//            File deployDir = new File(m.getParentFile(),m.getName().substring(0,m.getName().length()
-//                    - ".deployed".length()));
-//
-//            if (!deployDir.exists()) {
-//                _odeServer.getBpelServer().undeploy(deployDir);
-//                m.delete();
-//            }
-//        }
-
      }
 
 

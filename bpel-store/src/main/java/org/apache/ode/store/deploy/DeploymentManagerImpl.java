@@ -1,44 +1,22 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-package org.apache.ode.bpel.deploy;
+package org.apache.ode.store.deploy;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.PrintWriter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.fs.FileUtils;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.fs.FileUtils;
-
 /**
  * A simple implementation of the
- * {@link org.apache.ode.bpel.deploy.DeploymentManager} interface.
- * 
+ * {@link org.apache.ode.store.deploy.DeploymentManager} interface.
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
- * 
+ *
  */
 public class DeploymentManagerImpl implements DeploymentManager {
 
@@ -103,7 +81,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     /**
      * Read the file containing list of deployment units from disk.
-     * 
+     *
      */
     private void read() {
         _rwLock.writeLock().lock();
@@ -123,7 +101,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
                         try {
                             _knownDeployments.add(new DeploymentUnitImpl(new File(_deployDir, lin)));
                         } catch (Exception ex) {
-                            __log.debug("Failed to load DU (skipping): " + lin,ex);
+                            DeploymentManagerImpl.__log.debug("Failed to load DU (skipping): " + lin,ex);
                         }
                     }
 
@@ -141,7 +119,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     /**
      * Write the file containing the list of deployment units to disk.
-     * 
+     *
      */
     private void write() {
         _rwLock.writeLock().lock();

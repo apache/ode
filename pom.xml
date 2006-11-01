@@ -113,6 +113,7 @@
 
         <module>jacob</module>
 
+        <module>bpel-store</module>
         <module>bpel-scripts</module>
         <module>bpel-schemas</module>
         <module>bpel-obj</module>
@@ -247,7 +248,7 @@
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </repository>
-<!-- Repository is down;        
+<!-- Repository is down;
         <repository>
             <id>apache-incubator</id>
             <name>Apache Incubator Repository</name>
@@ -259,12 +260,12 @@
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
-<!--        <repository>
+        <repository>
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
         </repository>
-        <repository>
+<!--        <repository>
             <id>apache</id>
             <name>Apache Repository</name>
             <url>http://cvs.apache.org/repository</url>
@@ -299,11 +300,11 @@
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
         </pluginRepository>
-        <pluginRepository>
+        <!--pluginRepository>
             <id>apache-incubator</id>
             <name>Apache Incubator Repository</name>
             <url>http://people.apache.org/repo/m2-incubating-repository</url>
-        </pluginRepository>
+        </pluginRepository-->
     </pluginRepositories>
 
 
@@ -384,6 +385,11 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-scripts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ode</groupId>
+                <artifactId>ode-bpel-store</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

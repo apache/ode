@@ -18,18 +18,13 @@
  */
 package org.apache.ode.jbi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.*;
+
 import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 
 /**
  * JBI Implementation of ODE's {@link org.apache.ode.bpel.iapi.BindingContext}
@@ -47,7 +42,7 @@ class BindingContextImpl implements BindingContext {
         _ode = ode;
     }
 
-    public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
+    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
             PortType portType) {
         try {
             return _ode.activateEndpoint(processId, myRoleEndpoint);
@@ -67,8 +62,8 @@ class BindingContextImpl implements BindingContext {
         }
     }
 
-    public PartnerRoleChannel createPartnerRoleChannel(QName processId, DeploymentUnit deploymentUnit,
-            PortType portType, Endpoint initialPartnerEndpoint) {
+    public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
+            Endpoint initialPartnerEndpoint) {
         
         if (initialPartnerEndpoint != null) {
             ServiceEndpoint se = _ode.getContext().getEndpoint(initialPartnerEndpoint.serviceName,initialPartnerEndpoint.portName);
