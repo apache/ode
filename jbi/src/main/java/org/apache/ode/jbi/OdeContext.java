@@ -18,12 +18,15 @@
  */
 package org.apache.ode.jbi;
 
-import java.util.ArrayList;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.w3c.dom.Document;
 
 import javax.jbi.component.ComponentContext;
 import javax.jbi.messaging.DeliveryChannel;
@@ -32,15 +35,11 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.w3c.dom.Document;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
@@ -83,6 +82,8 @@ final class OdeContext {
     OdeConfigProperties _config;
 
     DataSource _dataSource;
+
+    ProcessStore _store;
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();

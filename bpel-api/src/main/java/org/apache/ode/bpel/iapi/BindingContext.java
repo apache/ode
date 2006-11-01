@@ -37,8 +37,6 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import java.io.File;
-
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
@@ -57,19 +55,18 @@ public interface BindingContext {
      * layer that the BPEL engine is interested in receiving requests for the
      * given endpoint and that the IL should establish the communication mechanisms
      * that would make this happen. 
-     * @param processId TODO
-     * @param deployDir TODO
+     * @param processId
      * @param myRoleEndpoint endpoint identifer (service qname + port)
      * @param portType port type of the endpoint
      * @returns an endpoint reference in XML  format.
      */
-    EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint, PortType portType);
+    EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint, PortType portType);
 
     /**
      * Deactivate a "myRole" endpoint. This is a notification to the integration layer
      * that the BPEL engine is no longer interested in receiving requests for the
      * given endpoint and that the IL should tear down any communication mechanisms
-     * created in {@link #activateMyRoleEndpoint(QName, File, Endpoint, PortType)}.
+     * created in {@link #activateMyRoleEndpoint(QName, Endpoint, PortType)}.
      * @param myRoleEndpoint
      */
     void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint);
@@ -78,13 +75,12 @@ public interface BindingContext {
      * Create a communication channel for communicating with a partner. A default or
      * initial value for the partner endpoint may be given. 
      * @param processId process identifier of the process requesting this channel
-     * @param deployDir TODO
      * @param portType type of the port 
      * @param initialPartnerEndpoint endpoint identifer (service qname + port) of the partner
      *                               that we will communicate with on the link by default (i.e.
      *                               if the partner link is not assigned to)
      */
-    PartnerRoleChannel createPartnerRoleChannel(QName processId, DeploymentUnit deploymentUnit, PortType portType, 
+    PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
             Endpoint initialPartnerEndpoint);
     
     

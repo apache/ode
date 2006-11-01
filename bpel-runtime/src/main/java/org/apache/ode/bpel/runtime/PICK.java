@@ -210,7 +210,7 @@ class PICK extends ACTIVITY {
                         return;
                     }
 
-                    // activate 'onMessage' activity
+                    // load 'onMessage' activity
                     // Because we are done with all the DPE, we can simply re-use our control
                     // channels for the child.
                     ActivityInfo child = new ActivityInfo(genMonotonic(), onMessage.activity, _self.self, _self.parent);

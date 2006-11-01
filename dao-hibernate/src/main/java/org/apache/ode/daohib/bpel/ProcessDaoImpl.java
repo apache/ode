@@ -20,28 +20,20 @@ package org.apache.ode.daohib.bpel;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessPropertyDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
-import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
-import org.apache.ode.daohib.bpel.hobj.HProcessProperty;
-import org.apache.ode.daohib.hobj.HLargeData;
-import org.apache.ode.utils.DOMUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -127,81 +119,8 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         // nothing to do here (yet?)
     }
 
-    /**
-     * @see org.apache.ode.bpel.dao.ProcessDAO#instanceCompleted(ProcessInstanceDAO)
-     */
-    public void setProperty(String name, String ns, Node content) {
-        setProperty(name, ns, DOMUtils.domToStringLevel2(content), false);
-    }
-    /**
-     * @see org.apache.ode.bpel.dao.ProcessDAO#instanceCompleted(ProcessInstanceDAO)
-     */
-    public void setProperty(String name, String ns, String content) {
-        setProperty(name, ns, content, true);
-    }
-
-    private void setProperty(String name, String ns, String content, boolean simple) {
-        HProcessProperty existingProperty = getProperty(name, ns);
-        if (existingProperty == null) {
-            HProcessProperty property = new HProcessProperty();
-            property.setName(name);
-            property.setNamespace(ns);
-            if (simple) property.setSimpleContent(content);
-            else property.setMixedContent(content);
-            _process.getProperties().add(property);
-            property.setProcess(_process);
-            getSession().save(property);
-        } else {
-            if (content == null) {
-                getSession().delete(existingProperty);
-                _process.getProperties().remove(existingProperty);
-            } else {
-                if (simple) existingProperty.setSimpleContent(content);
-                else existingProperty.setMixedContent(content);
-                getSession().save(existingProperty);
-            }
-        }
-    }
-
-    private HProcessProperty getProperty(String name, String ns) {
-        HProcessProperty existingProperty = null;
-        for (HProcessProperty hproperty : _process.getProperties()) {
-            if (hproperty.getName().equals(name) && hproperty.getNamespace().equals(ns))
-                existingProperty = hproperty;
-        }
-        return existingProperty;
-    }
-
-    /**
-     * @see org.apache.ode.bpel.dao.ProcessDAO#instanceCompleted(ProcessInstanceDAO)
-     */
-    public Collection<ProcessPropertyDAO> getProperties() {
-        ArrayList<ProcessPropertyDAO> propDAOs =
-                new ArrayList<ProcessPropertyDAO>(_process.getProperties().size());
-        for (HProcessProperty hproperty : _process.getProperties()) {
-            propDAOs.add(new ProcessPropertyDAOImpl(_sm, hproperty));
-        }
-        return propDAOs;
-    }
-
-    public Collection<PartnerLinkDAO> getDeployedEndpointReferences() {
-        ArrayList<PartnerLinkDAO> eprDAOs = new ArrayList<PartnerLinkDAO>(_process.getDeploymentPartnerLinks().size());
-        for (HPartnerLink hepr : _process.getDeploymentPartnerLinks()) {
-            eprDAOs.add(new PartnerLinkDAOImpl(_sm, hepr));
-        }
-        return eprDAOs;
-    }
-
     public void delete() {
         getSession().delete(_process);
-    }
-
-    public String getDeployer() {
-        return _process.getDeployer();
-    }
-
-    public Date getDeployDate() {
-        return _process.getDeployDate();
     }
 
     public QName getType() {
@@ -212,33 +131,6 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return _process.getVersion();
     }
 
-    /**
-     * @see org.apache.ode.daohib.bpel.hobj.HProcess#isRetired()
-     */
-    public boolean isRetired() {
-        return _process.isRetired();
-    }
-
-    /**
-     * @see org.apache.ode.daohib.bpel.hobj.HProcess#setRetired(boolean)
-     */
-    public void setRetired(boolean retired) {
-        _process.setRetired(retired);
-        update();
-    }
-
-
-    public void setActive(boolean active) {
-        _process.setActive(active);
-        update();
-
-
-    }
-
-    public boolean isActive() {
-        return _process.isActive();
-    }
-
     public void addCorrelator(String corrid) {
         HCorrelator correlator = new HCorrelator();
         correlator.setCorrelatorId(corrid);
@@ -247,43 +139,6 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         _process.getCorrelators().add(correlator);
         getSession().save(correlator);
         getSession().saveOrUpdate(_process);
-    }
-
-    public void setCompiledProcess(byte[] cbp) {
-        if (_process.getCompiledProcess() != null)
-            getSession().delete(_process.getCompiledProcess());
-        HLargeData x = new HLargeData(cbp);
-        getSession().save(x);
-        _process.setCompiledProcess(x);
-    }
-
-    public byte[] getCompiledProcess() {
-        HLargeData x = _process.getCompiledProcess();
-        return x == null ? null : x.getBinary();
-    }
-
-    public PartnerLinkDAO getDeployedEndpointReference(int plinkModelId) {
-        Query q  = getSession().createFilter(_process.getDeploymentPartnerLinks(), QRY_EPR);
-        q.setInteger(0,plinkModelId);
-        HPartnerLink hepr = (HPartnerLink) q.uniqueResult();
-        if (hepr == null)
-            return null;
-        return new PartnerLinkDAOImpl(_sm,hepr);
-    }
-
-    public PartnerLinkDAO addDeployedPartnerLink(int plinkModelId, String plinkName,
-                                                 String myRoleName,
-                                                 String partnerRoleName) {
-        HPartnerLink hepr = new HPartnerLink();
-        hepr.setModelId(plinkModelId);
-        hepr.setLinkName(plinkName);
-        hepr.setMyRole(myRoleName);
-        hepr.setPartnerRole(partnerRoleName);
-        hepr.setProcess(_process);
-        _process.getDeploymentPartnerLinks().add(hepr);
-        getSession().save(hepr);
-        update();
-        return new PartnerLinkDAOImpl(_sm,hepr);
     }
 
 	public int getNumInstances() {

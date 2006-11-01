@@ -39,9 +39,6 @@ public class HProcess extends HObject{
     /** Instances of this BPEL process. */
     private Collection<HProcessInstance> _instances = new HashSet<HProcessInstance>();
 
-    /** {@link HProcessProperty}s for this process. */
-    private Set<HProcessProperty> _properties = new HashSet<HProcessProperty>();
-
     /** Events belonging to this BPEL process. */
     private Collection<HBpelEvent> _events = new HashSet<HBpelEvent>();
 
@@ -128,24 +125,6 @@ public class HProcess extends HObject{
 
     public void setInstances(Collection<HProcessInstance> instances) {
         _instances = instances;
-    }
-
-    /**
-     * @hibernate.set
-     *  lazy="true"
-     *  inverse="true"
-     *  cascade="delete"
-     * @hibernate.collection-key
-     *  column="PROCESS_ID"
-     * @hibernate.collection-one-to-many
-     *   class="org.apache.ode.daohib.bpel.hobj.HProcessProperty"
-     */
-    public Set<HProcessProperty> getProperties() {
-        return _properties;
-    }
-
-    public void setProperties(Set<HProcessProperty> properties) {
-        _properties = properties;
     }
 
     /**
@@ -294,15 +273,6 @@ public class HProcess extends HObject{
 
     public void setActive(boolean active) {
         _active = active;
-    }
-
-    /** @hibernate.many-to-one column="CBP" */
-    public HLargeData getCompiledProcess() {
-        return _compiledProcess;
-    }
-
-    public void setCompiledProcess(HLargeData compiledProcess) {
-        _compiledProcess = compiledProcess;
     }
 
 }

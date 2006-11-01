@@ -39,12 +39,7 @@
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.DeploymentUnit;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.*;
 
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
@@ -58,15 +53,17 @@ import javax.xml.namespace.QName;
  */
 public class BindingContextImpl implements BindingContext {
     private ODEServer _server;
+    private ProcessStore _store;
 
-    public BindingContextImpl(ODEServer server) {
+    public BindingContextImpl(ODEServer server, ProcessStore store) {
         _server = server;
+        _store = store;
     }
 
-    public EndpointReference activateMyRoleEndpoint(QName processId, DeploymentUnit deploymentUnit, Endpoint myRoleEndpoint,
+    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
             PortType portType) {
         try {
-            ODEService svc = _server.createService(deploymentUnit.getDefinitionForService(myRoleEndpoint.serviceName)
+            ODEService svc = _server.createService(_store.getDefinitionForService(processId, myRoleEndpoint.serviceName)
                     , myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {
@@ -79,12 +76,12 @@ public class BindingContextImpl implements BindingContext {
         _server.destroyService(myRoleEndpoint.serviceName);
     }
 
-    public PartnerRoleChannel createPartnerRoleChannel(QName processId, DeploymentUnit deploymentUnit,
-            PortType portType, Endpoint initialPartnerEndpoint) {
+    public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
+                                                       Endpoint initialPartnerEndpoint) {
         // NOTE: This implementation assumes that the initial value of the
         // partner role determines the binding.
-        return _server.createExternalService(deploymentUnit
-                .getDefinitionForService(initialPartnerEndpoint.serviceName),
+        return _server.createExternalService(_store
+                .getDefinitionForService(processId, initialPartnerEndpoint.serviceName),
                 initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 

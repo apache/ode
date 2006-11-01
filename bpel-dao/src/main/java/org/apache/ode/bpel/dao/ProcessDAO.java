@@ -18,13 +18,10 @@
  */
 package org.apache.ode.bpel.dao;
 
-import java.util.Collection;
-import java.util.Date;
+import org.apache.ode.bpel.common.CorrelationKey;
 
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.common.CorrelationKey;
-import org.w3c.dom.Node;
+import java.util.Collection;
 
 
 /**
@@ -44,19 +41,6 @@ public interface ProcessDAO {
      * @return qualified BPEL process name.
      */
     QName getType();
-
-
-    /**
-     * Get the name of the user that deployed the proces.s
-     * @return name of deploying user.
-     */
-    String getDeployer();
-
-    /**
-     * Get the date when the process was deployed.
-     * @return deployment date.
-     */
-    Date getDeployDate();
 
     /**
      * Get the process version
@@ -109,51 +93,12 @@ public interface ProcessDAO {
     void instanceCompleted(ProcessInstanceDAO instance);
 
     /**
-     * Adds a named property on the process providing its value as
-     * and XML Node.
-     * @param name of the property
-     * @param ns namespace of the property
-     * @param content value of the property
-     */
-    void setProperty(String name, String ns, Node content);
-
-    /**
-     * Adds a named property on the process providing its value as
-     * a simple type (handled as a simple string).
-     * @param name of the property
-     * @param ns namespace of the property
-     * @param content value of the property
-     */
-    void setProperty(String name, String ns, String content);
-
-    /**
-     * Gets the properties for the process.
-     * @return collection of {@link ProcessPropertyDAO}
-     */
-    Collection<ProcessPropertyDAO> getProperties();
-
-
-    /**
      * Remove the process from the database (along with any instance,
      * variable data, etc...).
      */
     void delete();
 
-
-    public boolean isRetired();
-
-    public void setRetired(boolean retired);
-
-    void setActive(boolean active);
-
-    boolean isActive();
-
     void addCorrelator(String correlator);
 
-    void setCompiledProcess(byte[] cbp);
-
-    byte[] getCompiledProcess();
-
 	int getNumInstances();
-
 }
