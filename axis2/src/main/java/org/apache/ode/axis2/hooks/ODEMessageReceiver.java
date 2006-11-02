@@ -19,7 +19,6 @@
 
 package org.apache.ode.axis2.hooks;
 
-import org.apache.ode.axis2.ODEService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
@@ -28,6 +27,7 @@ import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEService;
 
 import java.util.concurrent.ExecutorService;
 
@@ -61,15 +61,15 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
       engine.send(outMsgContext);
     } else {
       // No response expected, this thread doesn't need us
-//      _executorService.submit(new Runnable() {
-//        public void run() {
-//          try {
+      _executorService.submit(new Runnable() {
+        public void run() {
+          try {
             invokeBusinessLogic(msgContext, null);
-//          } catch (AxisFault axisFault) {
-//            __log.error("Error processing in-only message.", axisFault);
-//          }
-//        }
-//      });
+          } catch (AxisFault axisFault) {
+            __log.error("Error processing in-only message.", axisFault);
+          }
+        }
+      });
     }
   }
 
