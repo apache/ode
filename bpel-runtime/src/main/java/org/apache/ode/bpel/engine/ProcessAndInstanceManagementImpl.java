@@ -789,7 +789,7 @@ class ProcessAndInstanceManagementImpl
                     TActivityInfo.Failure failure = ai.getActivityInfo().addNewFailure();
                     failure.setReason(recovery.getReason());
                     Calendar cal = (Calendar) _calendar.clone();
-                    cal.setTime(recovery.getDateTime());
+                    cal.setTime(recovery.getDateTime() != null ? recovery.getDateTime() : new Date());
                     failure.setDtFailure(cal);
                     failure.setActions(recovery.getActions());
                     failure.setRetries(recovery.getRetries());
