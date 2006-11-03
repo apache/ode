@@ -26,6 +26,8 @@
 
     <property name="derby.target.sql" value="${target.dir}/derby.sql" />
     <property name="mysql.target.sql" value="${target.dir}/mysql.sql" />
+    <property name="sqls.target.sql" value="${target.dir}/sqlserver.sql" />
+    <property name="postgres.target.sql" value="${target.dir}/postgres.sql" />
 
     <target name="db" depends="depset, tarball" />
 
@@ -83,6 +85,12 @@
         <concat destfile="${mysql.target.sql}" append="true">
             <fileset file="${src.sql.dir}/tables_mysql_innodb.sql" />
         </concat>
+        <concat destfile="${sqls.target.sql}" append="true">
+            <fileset file="${src.sql.dir}/tables_sqlserver.sql" />
+        </concat>
+        <concat destfile="${postgres.target.sql}" append="true">
+            <fileset file="${src.sql.dir}/tables_postgres.sql" />
+        </concat>
     </target>
 
     <target name="schemaexport" >
@@ -109,6 +117,28 @@
                       drop="no"
                       create="yes"
                       output="${mysql.target.sql}">
+            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
+                <include name="**/*.hbm.xml"/>
+            </fileset>
+        </schemaexport>
+        <schemaexport properties="${src.sql.dir}/ode.sqlserver.properties"
+                      quiet="yes"
+                      text="yes"
+                      delimiter=";"
+                      drop="no"
+                      create="yes"
+                      output="${sqls.target.sql}">
+            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
+                <include name="**/*.hbm.xml"/>
+            </fileset>
+        </schemaexport>
+        <schemaexport properties="${src.sql.dir}/ode.postgres.properties"
+                      quiet="yes"
+                      text="yes"
+                      delimiter=";"
+                      drop="no"
+                      create="yes"
+                      output="${postgres.target.sql}">
             <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
                 <include name="**/*.hbm.xml"/>
             </fileset>
