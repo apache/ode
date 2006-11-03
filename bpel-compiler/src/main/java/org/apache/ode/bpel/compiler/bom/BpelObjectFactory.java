@@ -120,6 +120,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.EVENTHANDLERS, BpelObject.class);
         _mappings.put(Bpel20QNames.TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.SOURCES,Sources.class);
+        _mappings.put(Bpel20QNames.RDF_LABEL,RdfLabel.class);
         
 
         //

@@ -29,6 +29,8 @@ public abstract class Bpel20QNames {
     public static final String NS_WSBPEL2_0 = "http://schemas.xmlsoap.org/ws/2004/03/business-process/";
 
     public static final String NS_WSBPEL_PARTNERLINK_2004_03 = "http://schemas.xmlsoap.org/ws/2004/03/partner-link/";
+    
+    public static final String NS_RDF = "http://www.w3.org/2000/01/rdf-schema#";
 
     public static final QName PROCESS = newQName("process");
 
@@ -169,6 +171,10 @@ public abstract class Bpel20QNames {
     public static final QName PLINKTYPE = new QName(NS_WSBPEL_PARTNERLINK_2004_03, "partnerLinkType");
 
     public static final QName PLINKROLE = new QName(NS_WSBPEL_PARTNERLINK_2004_03, "role");
+    
+    /** Not part of BPEL, but handy to have. */
+    public static final QName RDF_LABEL = new QName(NS_RDF, "label");
+    
 
     private static QName newQName(String localname) {
         return new QName(NS_WSBPEL2_0, localname);
