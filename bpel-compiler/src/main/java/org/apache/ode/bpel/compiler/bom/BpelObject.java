@@ -51,11 +51,13 @@ public class BpelObject {
     private final NSContext _nsContext;
 
     private List<BpelObject> _children = null;
+    
 
     public BpelObject(Element el) {
         _element = el;
         _type = new QName(el.getNamespaceURI(), el.getLocalName());
         _nsContext = new NSContext();
+        
         initNSContext(el);
     }
 
@@ -98,9 +100,22 @@ public class BpelObject {
      *         or Element)
      */
     public Map<QName, Object> getExtensibilityElements() {
-        // TODO: implement
-        return new HashMap<QName, Object>();
-
+        // We consider anything that is not in the namespace of this element to be an
+        // extensibility element/attribute. 
+        HashMap<QName, Object> ee = new HashMap<QName,Object>();
+        for (BpelObject child  :getChildren()) {
+            if (child.getType().getNamespaceURI() != null && !child.getType().getNamespaceURI().equals(getType().getNamespaceURI()))
+                ee.put(child.getType(), child.getElement());
+        }
+        
+        NamedNodeMap nnm = getElement().getAttributes();
+        for (int i = 0; i < nnm.getLength(); ++i) {
+            Node n = nnm.item(i);
+            if (n.getNamespaceURI() != null && !n.getNamespaceURI().equals(getType().getNamespaceURI()))
+                ee.put(new QName(n.getNamespaceURI(), n.getLocalName()), n.getTextContent());
+        }
+        return ee;
+        
     }
 
 
@@ -116,7 +131,7 @@ public class BpelObject {
      * Is this a BPEL 1.1 object?
      * @return
      */
-    protected boolean is11() {
+    public boolean is11() {
         return getType().getNamespaceURI() != null && 
             (getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_2003_03)
                     || getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05)); 
