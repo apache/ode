@@ -62,7 +62,7 @@ class ProcessAndInstanceManagementImpl
     protected BpelServerImpl _server;
     protected BpelDatabase _db;
     protected ProcessStore _store;
-    protected Calendar _calendar = Calendar.getInstance(); // Calendar is expensive to initialize so we cache and clone it
+    protected Calendar _calendar = Calendar.getInstance(); // Calendar can be expensive to initialize so we cache and clone it
 
     public ProcessAndInstanceManagementImpl(BpelDatabase db, BpelEngineImpl engine,
                                             BpelServerImpl server, ProcessStore store) {
@@ -710,8 +710,6 @@ class ProcessAndInstanceManagementImpl
 
         ProcessInstanceDAO.EventsFirstLastCountTuple flc = instance.getEventsFirstLastCount();
         TInstanceInfo.EventInfo eventInfo = info.addNewEventInfo();
-        Calendar first = (Calendar) _calendar.clone();
-        Calendar last = (Calendar) _calendar.clone();
 
         // Setting valued correlation properties
         if (!instance.getCorrelationSets().isEmpty()) {
@@ -726,19 +724,14 @@ class ProcessAndInstanceManagementImpl
             }
         }
 
-        last.setTime(flc.last);
-        first.setTime(flc.first);
-
-        eventInfo.setFirstDtime(first);
-        eventInfo.setLastDtime(last);
+        eventInfo.setFirstDtime(toCalendar(flc.first));
+        eventInfo.setLastDtime(toCalendar(flc.last));
         eventInfo.setCount(flc.count);
 
         if (instance.getActivityFailureCount() > 0) {
           TInstanceInfo.Failures failures = info.addNewFailures();
-          Calendar failureDt = (Calendar) _calendar.clone();
-          failureDt.setTime(instance.getActivityFailureDateTime());
+          failures.setDtFailure(toCalendar(instance.getActivityFailureDateTime()));
           failures.setCount(instance.getActivityFailureCount());
-          failures.setDtFailure(failureDt);
         }
     }
 
@@ -788,9 +781,7 @@ class ProcessAndInstanceManagementImpl
                   if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
                     TActivityInfo.Failure failure = ai.getActivityInfo().addNewFailure();
                     failure.setReason(recovery.getReason());
-                    Calendar cal = (Calendar) _calendar.clone();
-                    cal.setTime(recovery.getDateTime() != null ? recovery.getDateTime() : new Date());
-                    failure.setDtFailure(cal);
+                    failure.setDtFailure(toCalendar(recovery.getDateTime()));
                     failure.setActions(recovery.getActions());
                     failure.setRetries(recovery.getRetries());
                     ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
@@ -840,9 +831,7 @@ class ProcessAndInstanceManagementImpl
         info.setName(BpelEvent.eventName(event));
         info.setType(event.getType().toString());
         info.setLineNumber(event.getLineNo());
-        Calendar c = (Calendar) _calendar.clone();
-        c.setTime(event.getTimestamp());
-        info.setTimestamp(c);
+        info.setTimestamp(toCalendar(event.getTimestamp()));
         if (event instanceof ActivityEvent) {
             info.setActivityName(((ActivityEvent)event).getActivityName());
             info.setActivityId(((ActivityEvent)event).getActivityId());
