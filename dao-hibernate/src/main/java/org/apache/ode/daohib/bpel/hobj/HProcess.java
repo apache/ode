@@ -18,13 +18,12 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-import org.apache.ode.daohib.hobj.HLargeData;
-import org.apache.ode.daohib.hobj.HObject;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.ode.daohib.hobj.HObject;
 
 /**
  * Hibernate table representing a BPEL process (<em>not</em> a process instance).
@@ -70,8 +69,6 @@ public class HProcess extends HObject{
     private boolean _retired;
 
     private boolean _active;
-
-    private HLargeData _compiledProcess;
 
     /**
      * @hibernate.set
