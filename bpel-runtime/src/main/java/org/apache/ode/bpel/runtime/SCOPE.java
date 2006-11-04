@@ -236,11 +236,10 @@ class SCOPE extends ACTIVITY {
         // We're done with the main work, if we were terminated, we will
         // need to load the termination handler:
         if (_terminated) {
-//          throw new UnsupportedOperationException("termination handler todo ");
-        }
-
-        // else-if we have a fault, we will need to load the fault handler.
-        else if (_fault != null) {
+            __log.debug("Scope: " + _oscope + " was terminated.");
+            // ??? Should we forward
+            _self.parent.completed(null,_compensations);
+        } else if (_fault != null) {
 
           sendEvent(new ScopeFaultEvent(_fault.getFaultName(), _fault.getFaultLineNo(),_fault.getExplanation()));
 
