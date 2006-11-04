@@ -43,7 +43,6 @@ import java.util.Iterator;
  */
 class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
-    private static final String QRY_EPR = "where this.modelId =  ?";
 
     private HProcess _process;
 
