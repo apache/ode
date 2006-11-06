@@ -192,10 +192,8 @@ public class ODEServer {
             AxisService service = ((ODEService)_services.get(serviceName, portName)).getAxisService();
             _axisConfig.removeService(service.getName());
         }
-        AxisService axisService = ODEAxisService.createService(_axisConfig,
-                def, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, def, serviceName, portName,
-                _server, _txMgr);
+        AxisService axisService = ODEAxisService.createService(_axisConfig, def, serviceName, portName);
+        ODEService odeService = new ODEService(axisService, def, serviceName, portName, _server, _txMgr);
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting service with empty namespace replication");
             odeService.setReplicateEmptyNS(true);
