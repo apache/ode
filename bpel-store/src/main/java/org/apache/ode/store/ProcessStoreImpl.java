@@ -46,17 +46,17 @@ public class ProcessStoreImpl implements ProcessStore {
     private File _appDir;
     private ConfStoreConnection _conn;
 
-    public ProcessStoreImpl(File appDir, DataSource ds) {
-        this(appDir, ds, new DeploymentManagerImpl(new File(appDir, "processes")));
+    public ProcessStoreImpl(File appDir, DataSource ds, boolean transactional) {
+        this(appDir, ds, new DeploymentManagerImpl(new File(appDir, "processes")), transactional);
     }
 
     // Both appdir and datasource could be null
-    public ProcessStoreImpl(File appDir, DataSource ds, DeploymentManager deployer) {
+    public ProcessStoreImpl(File appDir, DataSource ds, DeploymentManager deployer, boolean transactional) {
         _deploymentManager = deployer;
         _appDir = appDir;
         _ds = ds;
         // TODO in-memory if no datasource given
-        if (_ds != null) _conn = new ConfStoreConnectionHib(_ds, appDir);
+        if (_ds != null) _conn = new ConfStoreConnectionHib(_ds, appDir, transactional);
         else _conn = new ConfStoreConnectionInMem();
 
         reloadDeploymentUnits();
@@ -463,6 +463,42 @@ public class ProcessStoreImpl implements ProcessStore {
         } finally {
             _mngmtLock.writeLock().unlock();
         }
+    }
+
+    public List<String> getEventsSettings(QName processId, List<String> scopeNames) {
+        List<String> result = null;
+        TDeployment.Process processInfo = getProcessInfo(processId);
+        TProcessEvents processEvents = processInfo.getProcessEvents();
+        if (processEvents == null || processEvents.getGenerate().equals(TProcessEvents.Generate.ALL)) {
+            result = new ArrayList<String>(1);
+            result.add("all");
+            return result;
+        }
+
+        if (processEvents.getEnableEventList() != null) result = processEvents.getEnableEventList();
+        if (processEvents.getScopeEventsList() != null && scopeNames != null) {
+            List<String> scopeEvents = processScopeEvents(scopeNames, processEvents.getScopeEventsList());
+            if (scopeEvents != null) {
+                result = scopeEvents;
+            }
+        }
+
+        if (result == null) {
+            return new ArrayList<String>(1);
+        } else {
+            return result;
+        }
+    }
+
+    private List<String> processScopeEvents(List<String> scopeNames, List<TScopeEvents> scopeEventsList) {
+        for (String scopeName : scopeNames) {
+            for (TScopeEvents scopeEvents : scopeEventsList) {
+                if (scopeEvents.getName().equals(scopeName)) {
+                    return scopeEvents.getEnableEventList();
+                }
+            }
+        }
+        return null;
     }
 
     private ProcessConf buildConf(ProcessConfDAO dao) {

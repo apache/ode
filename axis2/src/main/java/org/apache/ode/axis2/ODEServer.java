@@ -397,7 +397,7 @@ public class ODEServer {
     }
 
     private void initProcessStore() {
-        _store = new ProcessStoreImpl(_workRoot, _datasource);
+        _store = new ProcessStoreImpl(_workRoot, _datasource, true);
     }
 
     private void initBpelServer() {
