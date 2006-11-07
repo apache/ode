@@ -19,6 +19,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
 
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,11 +40,11 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
 
     private static DataSource _ds;
     private final SessionFactory _sessionFactory;
-    private boolean _transactional = false;
+    private TransactionManager _txMgr = null;
 
-    public ConfStoreConnectionHib(DataSource _ds, File appRoot, boolean transactional) {
+    public ConfStoreConnectionHib(DataSource _ds, File appRoot, TransactionManager txMgr) {
         org.apache.ode.store.dao.ConfStoreConnectionHib._ds = _ds;
-        _transactional = transactional;
+        _txMgr = txMgr;
         Properties properties = new Properties();
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
@@ -214,13 +215,15 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
      * @return callable result
      */
     public <T> T exec(final Callable<T> callable) throws Exception {
+        boolean txStarted = _txMgr != null && _txMgr.getTransaction() != null;
+        System.out.println("### " + _txMgr.getTransaction());
         try {
-            if (!_transactional) _sessionFactory.getCurrentSession().beginTransaction();
+            if (!txStarted) _sessionFactory.getCurrentSession().beginTransaction();
             T result =  callable.run();
-            if (!_transactional) _sessionFactory.getCurrentSession().getTransaction().commit();
+            if (!txStarted) _sessionFactory.getCurrentSession().getTransaction().commit();
             return result;
         } catch (Exception e) {
-            if (!_transactional) _sessionFactory.getCurrentSession().getTransaction().rollback();
+            if (!txStarted) _sessionFactory.getCurrentSession().getTransaction().rollback();
             throw e;
         }
     }
