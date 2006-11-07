@@ -27,9 +27,7 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.evt.CorrelationMatchEvent;
-import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
-import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
+import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
@@ -460,7 +458,7 @@ public class BpelProcess {
                 evt.setOperation(operation.getName());
                 evt.setMexId(mex.getMessageExchangeId());
                 _debugger.onEvent(evt);
-                newInstance.insertBpelEvent(evt);
+                saveEvent(evt, newInstance);
                 mex.setCorrelationStatus(CorrelationStatus.CREATE_INSTANCE);
                 mex.getDAO().setInstance(newInstance);
 
@@ -496,7 +494,7 @@ public class BpelProcess {
 
                 _debugger.onEvent(evt);
                 // store event
-                instanceDao.insertBpelEvent(evt);
+                saveEvent(evt, instanceDao);
                 
                 // EXPERIMENTAL -- LOCK
                 //instanceDao.lock();
@@ -755,5 +753,31 @@ public class BpelProcess {
         if (prole == null)
             throw new IllegalStateException("Unknown partner link " + partnerLink);
         return prole._channel;
+    }
+
+    public void saveEvent(ProcessInstanceEvent event) {
+        boolean enabled = false;
+        List<String> scopeNames = null;
+        if (event instanceof ScopeEvent) {
+            scopeNames = ((ScopeEvent)event).getParentScopesNames();
+        }
+        List<String> eventTypes = _store.getEventsSettings(_pid, scopeNames);
+        if (eventTypes.size() == 1 && eventTypes.get(0).equals("all"))
+            enabled = true;
+        else {
+            for (String eventType : eventTypes) {
+                if (eventType.equals(event.getType().toString()))
+                    enabled = true;
+            }
+        }
+        System.out.println("#### EVENT OF TYPE " + event + " GENERATE : " + enabled);
+        if (enabled) {
+            ProcessInstanceDAO instanceDao = getProcessDAO().getInstance(event.getProcessInstanceId());
+            saveEvent(event, instanceDao);
+        }
+    }
+
+    void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
+        instanceDao.insertBpelEvent(event);
     }
 }

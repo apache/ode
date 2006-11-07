@@ -39,9 +39,11 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
 
     private static DataSource _ds;
     private final SessionFactory _sessionFactory;
+    private boolean _transactional = false;
 
-    public ConfStoreConnectionHib(DataSource _ds, File appRoot) {
+    public ConfStoreConnectionHib(DataSource _ds, File appRoot, boolean transactional) {
         org.apache.ode.store.dao.ConfStoreConnectionHib._ds = _ds;
+        _transactional = transactional;
         Properties properties = new Properties();
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
@@ -213,12 +215,12 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
      */
     public <T> T exec(final Callable<T> callable) throws Exception {
         try {
-            _sessionFactory.getCurrentSession().beginTransaction();
+            if (!_transactional) _sessionFactory.getCurrentSession().beginTransaction();
             T result =  callable.run();
-            _sessionFactory.getCurrentSession().getTransaction().commit();
+            if (!_transactional) _sessionFactory.getCurrentSession().getTransaction().commit();
             return result;
         } catch (Exception e) {
-            _sessionFactory.getCurrentSession().getTransaction().rollback();
+            if (!_transactional) _sessionFactory.getCurrentSession().getTransaction().rollback();
             throw e;
         }
     }

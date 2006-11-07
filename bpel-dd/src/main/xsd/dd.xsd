@@ -23,115 +23,148 @@
            xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
            elementFormDefault="qualified">
 
-  <xs:element name="deploy" id="deploy" type="dd:tDeployment"/>
+    <xs:element name="deploy" id="deploy" type="dd:tDeployment"/>
 
-  <xs:complexType name="tDeployment">
-    <xs:sequence>
+    <xs:complexType name="tDeployment">
+        <xs:sequence>
 
-      <xs:element name="process"  minOccurs="0" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:sequence>
+            <xs:element name="process"  minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
 
-            <xs:element name="active" minOccurs="0" maxOccurs="1" type="xs:boolean"
-                        default="true">
-              <xs:annotation>
-                <xs:documentation> Active flag, if set process will be activated once
-                  deployed. </xs:documentation>
-              </xs:annotation>
+                        <xs:element name="active" minOccurs="0" maxOccurs="1" type="xs:boolean"
+                                    default="true">
+                            <xs:annotation>
+                                <xs:documentation> Active flag, if set process will be activated once
+                                    deployed. </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="retired" minOccurs="0" maxOccurs="1" type="xs:boolean"
+                                    default="false">
+                            <xs:annotation>
+                                <xs:documentation> Retired flag, if set process will be retired once
+                                    deployed. </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element name="property"  minOccurs="0" maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    A user-defined property that will be attached to a process upon
+                                    deployment.
+                                </xs:documentation>
+                            </xs:annotation>
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+                                </xs:sequence>
+                                <xs:attribute name="name" type="xs:QName" use="required"/>
+                            </xs:complexType>
+                        </xs:element>
+
+                        <xs:element name="process-events" minOccurs="0" maxOccurs="1" type="dd:tProcessEvents"/>
+
+                        <xs:element name="provide"  minOccurs="0" maxOccurs="unbounded" type="dd:tProvide"/>
+                        <xs:element name="invoke"  minOccurs="0" maxOccurs="unbounded" type="dd:tInvoke"/>
+
+                        <xs:element name="mex-interceptors" minOccurs="0" maxOccurs="1" >
+                            <xs:annotation>
+                                <xs:documentation>
+                                    List of message exchange interceptors that should be registered for this process.
+                                </xs:documentation>
+                            </xs:annotation>
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="mex-interceptor" minOccurs="0" maxOccurs="unbounded" type="dd:tMexInterceptor" />
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name="type" minOccurs="0" maxOccurs="1"  type="xs:QName">
+                            <xs:annotation>
+                                <xs:documentation> Process type -- indicates which process defintion should be used
+                                    for the process.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                    </xs:sequence>
+
+                    <xs:attribute name="name" type="xs:QName" use="required"/>
+
+                </xs:complexType>
             </xs:element>
-            <xs:element name="retired" minOccurs="0" maxOccurs="1" type="xs:boolean"
-                        default="false">
-              <xs:annotation>
-                <xs:documentation> Retired flag, if set process will be retired once
-                  deployed. </xs:documentation>
-              </xs:annotation>
-            </xs:element>
 
-            <xs:element name="property"  minOccurs="0" maxOccurs="unbounded">
-              <xs:annotation>
-                <xs:documentation>
-                  A user-defined property that will be attached to a process upon
-                  deployment.
-                </xs:documentation>
-              </xs:annotation>
-              <xs:complexType>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="tProvide">
+        <xs:sequence>
+            <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
+        </xs:sequence>
+        <xs:attribute name="partnerLink" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="tInvoke">
+        <xs:choice>
+            <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
+            <xs:element name="binding" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:QName" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+        <xs:attribute name="partnerLink" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="tService">
+        <xs:sequence>
+            <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:QName" use="required"/>
+        <xs:attribute name="port" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="tMexInterceptor" >
+        <xs:annotation>
+            <xs:documentation>
+                Message exchange interceptor configuration.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:sequence>
+            <xs:element name="class-name" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="tEnableEventList">
+        <xs:sequence>
+            <xs:element name="enable-event" minOccurs="1" maxOccurs="unbounded" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="tScopeEvents">
+        <xs:complexContent>
+            <xs:extension base="dd:tEnableEventList">
+                <xs:attribute name="name" use="required" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="tProcessEvents">
+        <xs:complexContent>
+            <xs:extension base="dd:tEnableEventList">
                 <xs:sequence>
-                  <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+                    <xs:element name="scope-events" minOccurs="1" maxOccurs="unbounded" type="dd:tScopeEvents"/>
                 </xs:sequence>
-                <xs:attribute name="name" type="xs:QName" use="required"/>
-              </xs:complexType>
-            </xs:element>
-
-            <xs:element name="provide"  minOccurs="0" maxOccurs="unbounded" type="dd:tProvide"/>
-            <xs:element name="invoke"  minOccurs="0" maxOccurs="unbounded" type="dd:tInvoke"/>
-
-		  <xs:element name="mex-interceptors" minOccurs="0" maxOccurs="1" >
-		    <xs:annotation>
-    	        <xs:documentation>
-   		         	List of message exchange interceptors that should be registered for this process. 
-  	          </xs:documentation>
-  	       </xs:annotation>
-		     <xs:complexType>
-		       <xs:sequence>
-		         <xs:element name="mex-interceptor" minOccurs="0" maxOccurs="unbounded" type="dd:tMexInterceptor" />
-		       </xs:sequence>
-		     </xs:complexType>
-		  </xs:element>
-	      <xs:element name="type" minOccurs="0" maxOccurs="1"  type="xs:QName">
-              <xs:annotation>
-                <xs:documentation> Process type -- indicates which process defintion should be used
-                for the process.</xs:documentation>
-              </xs:annotation>
-		    </xs:element>
-
-          </xs:sequence>
-
-          <xs:attribute name="name" type="xs:QName" use="required"/>
-          
-        </xs:complexType>
-      </xs:element>
-
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="tProvide">
-    <xs:sequence>
-      <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
-    </xs:sequence>
-    <xs:attribute name="partnerLink" type="xs:string" use="required"/>
-  </xs:complexType>
-
-  <xs:complexType name="tInvoke">
-    <xs:choice>
-      <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
-      <xs:element name="binding" minOccurs="1" maxOccurs="1">
-        <xs:complexType>
-          <xs:attribute name="name" type="xs:QName" use="required"/>
-        </xs:complexType>
-      </xs:element>
-    </xs:choice>
-    <xs:attribute name="partnerLink" type="xs:string" use="required"/>
-  </xs:complexType>
-
-  <xs:complexType name="tService">
-    <xs:sequence>
-      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:QName" use="required"/>
-    <xs:attribute name="port" type="xs:NCName" use="required"/>
-  </xs:complexType>
-  
-  <xs:complexType name="tMexInterceptor" >    
-  	<xs:annotation>
-    	<xs:documentation>
-            Message exchange interceptor configuration.
-        </xs:documentation>
-     </xs:annotation>
-  
-     <xs:sequence>
-        <xs:element name="class-name" type="xs:string" />
-     </xs:sequence>
-  </xs:complexType>
-    
+                <xs:attribute name="generate" use="optional">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="all"/>
+                            <xs:enumeration value="noneDESer"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
 </xs:schema>
