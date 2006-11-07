@@ -18,23 +18,23 @@
  */
 package org.apache.ode.test;
 
-import java.io.File;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
-
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.store.ProcessStoreImpl;
 import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.Collection;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 public abstract class BPELTest extends TestCase {
 
@@ -50,7 +50,7 @@ public abstract class BPELTest extends TestCase {
 		server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl());
+        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl(), false);
         server.setProcessStore(store);
         server.init();
 		server.start();

@@ -248,7 +248,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(new File("."), _ode._dataSource);
+        _ode._store = new ProcessStoreImpl(new File("."), _ode._dataSource, true);
 
         _ode._server.setDaoConnectionFactory(_ode._daocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
