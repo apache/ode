@@ -17,6 +17,7 @@ import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.criterion.Expression;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
+import org.hibernate.transaction.TransactionManagerLookup;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
@@ -40,14 +41,20 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
 
     private static DataSource _ds;
     private final SessionFactory _sessionFactory;
-    private TransactionManager _txMgr = null;
+    private static TransactionManager _txMgr = null;
 
     public ConfStoreConnectionHib(DataSource _ds, File appRoot, TransactionManager txMgr) {
         org.apache.ode.store.dao.ConfStoreConnectionHib._ds = _ds;
         _txMgr = txMgr;
         Properties properties = new Properties();
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+        if (_txMgr != null) {
+            properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
+                    HibernateTransactionManagerLookup.class.getName());
+            properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
+        } else {
+            properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+        }
 
         try {
             properties.put(Environment.DIALECT, guessDialect(_ds));
@@ -186,6 +193,22 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
         }
     }
 
+    public static class HibernateTransactionManagerLookup implements TransactionManagerLookup {
+        /** Constructor. */
+        public HibernateTransactionManagerLookup() {
+            super();
+        }
+
+        public TransactionManager getTransactionManager(Properties props)
+                throws HibernateException {
+            return _txMgr;
+        }
+
+        public String getUserTransactionName() {
+            return null;
+        }
+    }
+
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
     private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
 
@@ -216,13 +239,24 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
      */
     public <T> T exec(final Callable<T> callable) throws Exception {
         boolean txStarted = _txMgr != null && _txMgr.getTransaction() != null;
+        if (_txMgr.getTransaction() != null) System.out.println("### " + _txMgr.getTransaction().getStatus());
         try {
-            if (!txStarted) _sessionFactory.getCurrentSession().beginTransaction();
+            if (!txStarted) {
+                if (_txMgr == null) _sessionFactory.getCurrentSession().beginTransaction();
+                else _txMgr.begin();
+            }
+
             T result =  callable.run();
-            if (!txStarted) _sessionFactory.getCurrentSession().getTransaction().commit();
+            if (!txStarted) {
+                if (_txMgr == null) _sessionFactory.getCurrentSession().getTransaction().commit();
+                else _txMgr.commit();
+            }
             return result;
         } catch (Exception e) {
-            if (!txStarted) _sessionFactory.getCurrentSession().getTransaction().rollback();
+            if (!txStarted) {
+                if (_txMgr == null) _sessionFactory.getCurrentSession().getTransaction().rollback();
+                else _txMgr.rollback();
+            }
             throw e;
         }
     }
