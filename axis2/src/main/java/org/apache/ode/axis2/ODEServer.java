@@ -260,7 +260,7 @@ public class ODEServer {
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
         try {
-            Class txFactClass = Class.forName(txFactoryName);
+            Class txFactClass = this.getClass().getClassLoader().loadClass(txFactoryName);
             Object txFact = txFactClass.newInstance();
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
         } catch (Exception e) {
@@ -397,7 +397,7 @@ public class ODEServer {
     }
 
     private void initProcessStore() {
-        _store = new ProcessStoreImpl(_workRoot, _datasource, true);
+        _store = new ProcessStoreImpl(_workRoot, _datasource, _txMgr);
     }
 
     private void initBpelServer() {

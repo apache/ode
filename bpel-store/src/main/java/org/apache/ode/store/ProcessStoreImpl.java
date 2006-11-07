@@ -17,6 +17,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
 
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -46,17 +47,17 @@ public class ProcessStoreImpl implements ProcessStore {
     private File _appDir;
     private ConfStoreConnection _conn;
 
-    public ProcessStoreImpl(File appDir, DataSource ds, boolean transactional) {
-        this(appDir, ds, new DeploymentManagerImpl(new File(appDir, "processes")), transactional);
+    public ProcessStoreImpl(File appDir, DataSource ds, TransactionManager txMgr) {
+        this(appDir, ds, new DeploymentManagerImpl(new File(appDir, "processes")), txMgr);
     }
 
     // Both appdir and datasource could be null
-    public ProcessStoreImpl(File appDir, DataSource ds, DeploymentManager deployer, boolean transactional) {
+    public ProcessStoreImpl(File appDir, DataSource ds, DeploymentManager deployer, TransactionManager txMgr) {
         _deploymentManager = deployer;
         _appDir = appDir;
         _ds = ds;
         // TODO in-memory if no datasource given
-        if (_ds != null) _conn = new ConfStoreConnectionHib(_ds, appDir, transactional);
+        if (_ds != null) _conn = new ConfStoreConnectionHib(_ds, appDir, txMgr);
         else _conn = new ConfStoreConnectionInMem();
 
         reloadDeploymentUnits();

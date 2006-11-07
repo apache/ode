@@ -330,6 +330,18 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>geronimo-spec</groupId>
+            <artifactId>geronimo-spec-jta</artifactId>
+            <version>1.0.1B-rc4</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>geronimo-spec</groupId>
+            <artifactId>geronimo-spec-j2ee-connector</artifactId>
+            <version>1.5-rc4</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>geronimo</groupId>
             <artifactId>geronimo-kernel</artifactId>
             <version>${geronimoVersion}</version>
