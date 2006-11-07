@@ -51,6 +51,11 @@
           <groupId>xmlbeans</groupId>
           <artifactId>xbean</artifactId>
         </dependency>
+        <dependency>
+            <groupId>geronimo-spec</groupId>
+            <artifactId>geronimo-spec-jta</artifactId>
+            <version>1.0.1B-rc4</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
