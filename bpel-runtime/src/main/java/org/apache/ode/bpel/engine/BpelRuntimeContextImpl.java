@@ -18,63 +18,23 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
-import org.apache.ode.bpel.evt.ProcessCompletionEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
-import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
-import org.apache.ode.bpel.evt.ProcessTerminationEvent;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.evt.*;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.BpelJacobRunnable;
-import org.apache.ode.bpel.runtime.BpelRuntimeContext;
-import org.apache.ode.bpel.runtime.CorrelationSetInstance;
-import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.bpel.runtime.PROCESS;
-import org.apache.ode.bpel.runtime.PartnerLinkInstance;
-import org.apache.ode.bpel.runtime.Selector;
-import org.apache.ode.bpel.runtime.VariableInstance;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.*;
+import org.apache.ode.bpel.runtime.channels.*;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -84,6 +44,12 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -921,7 +887,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         event.setProcessName(_dao.getProcess().getType());
         event.setProcessInstanceId(_dao.getInstanceId());
         _bpelProcess._debugger.onEvent(event);
-        _dao.insertBpelEvent(event);
+        _bpelProcess.saveEvent(event);
     }
 
     private void initVPU() {

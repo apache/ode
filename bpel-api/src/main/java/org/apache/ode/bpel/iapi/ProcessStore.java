@@ -98,4 +98,13 @@ public interface ProcessStore {
 
     void setProperty(QName processId, String name, String namespace, String value);
     void setProperty(QName processId, String name, String namespace, Node value);
+
+    /**
+     * Gets the event setting for an activity that would be in a given process
+     * and having the provided scope hierarchy.
+     * @param processId
+     * @param scopeNames names of parent scopes starting from the directly enclosing scope to the highest scope
+     * @return enable event types
+     */
+    List<String> getEventsSettings(QName processId, List<String> scopeNames);
 }
