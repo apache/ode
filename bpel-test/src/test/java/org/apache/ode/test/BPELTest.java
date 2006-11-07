@@ -50,7 +50,7 @@ public abstract class BPELTest extends TestCase {
 		server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl(), false);
+        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl(), null);
         server.setProcessStore(store);
         server.init();
 		server.start();
