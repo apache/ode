@@ -25,9 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Properties;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 public class ODEConfigProperties extends Properties {
 
@@ -135,7 +135,7 @@ public class ODEConfigProperties extends Properties {
     }
 
     public boolean isReplicateEmptyNS() {
-        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_REPLICATE_EMPTYNS, "false"));
+        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_REPLICATE_EMPTYNS, "true"));
     }
 
 }
