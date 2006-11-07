@@ -159,7 +159,7 @@
                     <xs:simpleType>
                         <xs:restriction base="xs:string">
                             <xs:enumeration value="all"/>
-                            <xs:enumeration value="noneDESer"/>
+                            <xs:enumeration value="none"/>
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
