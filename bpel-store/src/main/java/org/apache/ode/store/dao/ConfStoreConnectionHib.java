@@ -239,7 +239,6 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
      */
     public <T> T exec(final Callable<T> callable) throws Exception {
         boolean txStarted = _txMgr != null && _txMgr.getTransaction() != null;
-        if (_txMgr.getTransaction() != null) System.out.println("### " + _txMgr.getTransaction().getStatus());
         try {
             if (!txStarted) {
                 if (_txMgr == null) _sessionFactory.getCurrentSession().beginTransaction();
