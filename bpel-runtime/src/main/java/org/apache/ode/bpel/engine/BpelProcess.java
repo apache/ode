@@ -770,7 +770,6 @@ public class BpelProcess {
                     enabled = true;
             }
         }
-        System.out.println("#### EVENT OF TYPE " + event + " GENERATE : " + enabled);
         if (enabled) {
             ProcessInstanceDAO instanceDao = getProcessDAO().getInstance(event.getProcessInstanceId());
             saveEvent(event, instanceDao);
