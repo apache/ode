@@ -132,7 +132,7 @@
         <module>dao-hibernate-db-derby</module>
         <!-- module>dao-memory</module -->
 
-        <!--<module>jbi</module>-->
+        <module>jbi</module>
 
         <module>jca-ra</module>
         <module>jca-rar</module>
@@ -142,8 +142,8 @@
         <module>tools</module>
         <module>bpel-scheduler-quartz</module>
 
-        <!--<module>distro-axis2</module>-->
-    	<!--<module>distro-jbi</module>-->
+        <module>distro-axis2</module>
+    	<module>distro-jbi</module>
     </modules>
 
     <dependencies>
