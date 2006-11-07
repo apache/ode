@@ -470,7 +470,8 @@ public class ProcessStoreImpl implements ProcessStore {
         List<String> result = null;
         TDeployment.Process processInfo = getProcessInfo(processId);
         TProcessEvents processEvents = processInfo.getProcessEvents();
-        if (processEvents == null || processEvents.getGenerate().equals(TProcessEvents.Generate.ALL)) {
+        if (processEvents == null || (processEvents.getGenerate() != null
+                && processEvents.getGenerate().equals(TProcessEvents.Generate.ALL))) {
             result = new ArrayList<String>(1);
             result.add("all");
             return result;
