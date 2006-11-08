@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
@@ -192,13 +192,12 @@ public class INVOKE extends ACTIVITY {
         _failureReason = reason;
         _failureData = data;
 
-        FailureHandling failureHandling = _oinvoke.getFailureHandling();
-
+        OFailureHandling failureHandling = _oinvoke.getFailureHandling();
         if (failureHandling != null && failureHandling.faultOnFailure) {
             // No attempt to retry or enter activity recovery state, simply fault.
             if (__log.isDebugEnabled())
                 __log.debug("ActivityRecovery: Invoke activity " + _self.aId + " faulting on failure");
-            FaultData faultData = createFault(FailureHandling.FAILURE_FAULT_NAME, _oinvoke, reason);
+            FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oinvoke, reason);
             _self.parent.completed(faultData, CompensationHandler.emptySet());
             return;
         }
@@ -257,7 +256,7 @@ public class INVOKE extends ACTIVITY {
                     __log.debug("ActivityRecovery: Cancelling invoke activity " + _self.aId + " (user initiated)");
                 sendEvent(new ActivityRecoveryEvent("cancel"));
                 getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
-                _self.parent.completed(null, CompensationHandler.emptySet());
+                _self.parent.cancelled();
             }
             public void fault(FaultData faultData) {
                 if (__log.isDebugEnabled())
@@ -265,7 +264,7 @@ public class INVOKE extends ACTIVITY {
                 sendEvent(new ActivityRecoveryEvent("fault"));
                 getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
                 if (faultData == null)
-                  faultData = createFault(FailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
+                  faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
             }
         }.or(new TerminationChannelListener(_self.self) {

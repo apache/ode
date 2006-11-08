@@ -30,43 +30,47 @@ import org.apache.ode.jacob.SynchChannel;
 import java.util.Set;
 
 public class PROCESS extends BpelJacobRunnable {
-	private static final long serialVersionUID = 1L;
-	private OProcess _process;
+    private static final long serialVersionUID = 1L;
+    private OProcess _process;
 
-  public PROCESS(OProcess process) {
-    _process = process;
-  }
+    public PROCESS(OProcess process) {
+        _process = process;
+    }
 
-  public void run() {
-    BpelRuntimeContext ntive = getBpelRuntimeContext();
-    Long scopeInstanceId = ntive.createScopeInstance(null, _process.procesScope);
+    public void run() {
+        BpelRuntimeContext ntive = getBpelRuntimeContext();
+        Long scopeInstanceId = ntive.createScopeInstance(null, _process.procesScope);
 
-    ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
-    evt.setRootScopeId(scopeInstanceId);
-    evt.setScopeDeclarationId(_process.procesScope.getId());
-    ntive.sendEvent(evt);
+        ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
+        evt.setRootScopeId(scopeInstanceId);
+        evt.setScopeDeclarationId(_process.procesScope.getId());
+        ntive.sendEvent(evt);
 
-    ActivityInfo child = new ActivityInfo(genMonotonic(),
+        ActivityInfo child = new ActivityInfo(genMonotonic(),
             _process.procesScope,
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-    ScopeFrame processFrame = new ScopeFrame(_process.procesScope, scopeInstanceId, null, null);
-    instance(new SCOPE(child, processFrame, new LinkFrame(null)));
+        ScopeFrame processFrame = new ScopeFrame(_process.procesScope, scopeInstanceId, null, null);
+        instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-    object(new ParentScopeChannelListener(child.parent) {
-    private static final long serialVersionUID = -8564969578471906493L;
+        object(new ParentScopeChannelListener(child.parent) {
+            private static final long serialVersionUID = -8564969578471906493L;
 
-    public void compensate(OScope scope, SynchChannel ret) {
-        assert false;
-      }
+            public void compensate(OScope scope, SynchChannel ret) {
+                assert false;
+            }
 
-      public void completed(FaultData fault, Set<CompensationHandler> compensations) {
-        BpelRuntimeContext nativeAPI = (BpelRuntimeContext)getExtension(BpelRuntimeContext.class);
-        if (fault == null) {
-          nativeAPI.completedOk();
-        } else {
-          nativeAPI.completedFault(fault);
-        }
-      }});
-  }
+            public void completed(FaultData fault, Set<CompensationHandler> compensations) {
+                BpelRuntimeContext nativeAPI = (BpelRuntimeContext)getExtension(BpelRuntimeContext.class);
+                if (fault == null) {
+                    nativeAPI.completedOk();
+                } else {
+                    nativeAPI.completedFault(fault);
+                }
+            }
 
+            public void cancelled() {
+                this.completed(null, CompensationHandler.emptySet());
+            }
+        });
+    }
 }

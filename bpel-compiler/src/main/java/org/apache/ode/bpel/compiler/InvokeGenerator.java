@@ -29,7 +29,7 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.InvokeActivity;
-import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OProcess;
@@ -125,46 +125,6 @@ class InvokeGenerator extends DefaultActivityGenerator {
 //                throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
 //            }
 //        }
-
-        // Failure handling extensibility element.
-        Element failure = srcx.getExtensibilityElement(FailureHandling.FAILURE_EXT_ELEMENT);
-        if (failure != null) {
-            oinvoke.failureHandling = new FailureHandling();
-            String textValue;
-            Element element = DOMUtils
-                    .findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryFor"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null) {
-                    try {
-                        oinvoke.failureHandling.retryFor = Integer.valueOf(textValue);
-                        if (oinvoke.failureHandling.retryFor < 0)
-                            throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                    } catch (NumberFormatException except) {
-                        throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                    }
-                }
-            }
-            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryDelay"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null) {
-                    try {
-                        oinvoke.failureHandling.retryDelay = Integer.valueOf(textValue);
-                        if (oinvoke.failureHandling.retryDelay < 0)
-                            throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                    } catch (NumberFormatException except) {
-                        throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                    }
-                }
-            }
-            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "faultOnFailure"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null)
-                    oinvoke.failureHandling.faultOnFailure = Boolean.valueOf(textValue);
-            }
-        }
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var,

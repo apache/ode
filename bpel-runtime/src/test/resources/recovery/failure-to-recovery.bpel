@@ -13,7 +13,7 @@
   <partnerLinks>
     <partnerLink name="instantiatingPartnerLink" 
                  partnerLinkType="tns:InstantiatingPartnerLinkType" 
-                 myRole="me"/>
+                 myRole="me" partnerRole="partner" initializePartnerRole="yes"/>
     <partnerLink name="failingPartnerLink" 
                  partnerLinkType="tns:FailingPartnerLinkType" 
                  partnerRole="partner" initializePartnerRole="yes"/>
@@ -31,17 +31,34 @@
              operation="instantiate"
              variable="request"
              createInstance="yes"/>
-    <invoke  name="invoke"
-             partnerLink="failingPartnerLink"
-             portType="tns:FailingPortType"
-             operation="invoke"
-             inputVariable="request"
-             outputVariable="response">
-      <ext:failureHandling>
-        <ext:retryFor>2</ext:retryFor>
-        <ext:retryDelay>0</ext:retryDelay>
-      </ext:failureHandling>
-    </invoke>
+    <flow>
+      <links>
+        <link name="successfulInvoke"/>
+      </links>
+      <invoke name="invoke"
+              partnerLink="failingPartnerLink"
+              portType="tns:FailingPortType"
+              operation="invoke"
+              inputVariable="request"
+              outputVariable="response">
+        <sources>
+          <source linkName="successfulInvoke"/>
+        </sources>
+        <ext:failureHandling>
+          <ext:retryFor>2</ext:retryFor>
+          <ext:retryDelay>0</ext:retryDelay>
+        </ext:failureHandling>
+      </invoke>
+      <invoke name="response"
+              partnerLink="instantiatingPartnerLink"
+              portType="tns:ResponsePortType"
+              operation="respond"
+              inputVariable="response">
+        <targets>
+          <target linkName="successfulInvoke"/>
+        </targets>
+      </invoke>
+    </flow>
   </sequence>
 
 </process>

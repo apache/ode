@@ -23,8 +23,10 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
-import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
+import org.apache.ode.bpel.compiler.bom.FailureHandling;
 import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -48,44 +50,15 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
 
     static private void failureHandlinExtensibilityElement(OActivity output, BpelObject src) {
         // Failure handling extensibility element.
-        Element failure = src.getExtensibilityElement(FailureHandling.FAILURE_EXT_ELEMENT);
-        if (failure != null) {
-            FailureHandling failureHandling = new FailureHandling();
-            output.setFailureHandling(failureHandling);
-            String textValue;
-            Element element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryFor"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null) {
-                    try {
-                        failureHandling.retryFor = Integer.parseInt(textValue);
-                        if (failureHandling.retryFor < 0)
-                            throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                    } catch (NumberFormatException except) {
-                        throw new CompilationException(__cmsgs.errInvalidRetryForValue(textValue));
-                    }
-                }
-            }
-            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "retryDelay"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null) {
-                    try {
-                        failureHandling.retryDelay = Integer.parseInt(textValue);
-                        if (failureHandling.retryDelay < 0)
-                            throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                    } catch (NumberFormatException except) {
-                        throw new CompilationException(__cmsgs.errInvalidRetryDelayValue(textValue));
-                    }
-                }
-            }
-            element = DOMUtils.findChildByName(failure, new QName(FailureHandling.EXTENSION_NS_URI, "faultOnFailure"));
-            if (element != null) {
-                textValue = DOMUtils.getTextContent(element);
-                if (textValue != null)
-                    failureHandling.faultOnFailure = Boolean.valueOf(textValue).booleanValue();
-            }
-        }
+        Element element = src.getExtensibilityElement(ExtensibilityQNames.FAILURE_HANDLING);
+        if (element == null)
+            return;
+        FailureHandling extElement = new FailureHandling(element);
+        OFailureHandling obj = new OFailureHandling();
+        obj.retryFor = extElement.getRetryFor();
+        obj.retryDelay = extElement.getRetryDelay();
+        obj.faultOnFailure = extElement.getFaultOnFailure();
+        output.setFailureHandling(obj);
     }
 
 }
