@@ -109,7 +109,7 @@ public class DeploymentUnitImpl implements DeploymentUnit {
             compileProcesses(force);
         } catch (CompilationException e) {
             // No retry on compilation error, we just forget about it
-            throw new BpelEngineException("Compilation failure!");
+            throw new BpelEngineException("Compilation failure!", e);
         }
         if (_processes == null || force) {
             _processes = new HashMap<QName, OProcess>();
