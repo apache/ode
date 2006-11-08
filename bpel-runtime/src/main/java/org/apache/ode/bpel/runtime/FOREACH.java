@@ -156,6 +156,10 @@ public class FOREACH extends ACTIVITY {
                             }
                             instance(ACTIVE.this);
                         }
+
+                        public void cancelled() {
+                            completed(null, CompensationHandler.emptySet());
+                        }
                     });
                 }
                 object(false,mlSet);

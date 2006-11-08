@@ -173,7 +173,13 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.CORRELATIONS, Correlations.class);
         _mappings.put(Bpel11QNames.EVENTHANDLERS, BpelObject.class);
         
-        
+        //
+        // Extensibility Elements Mappings
+        //
+        _mappings.put(ExtensibilityQNames.FAILURE_HANDLING, FailureHandling.class);
+        _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_RETRY_FOR, FailureHandling.RetryFor.class);
+        _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_RETRY_DELAY, FailureHandling.RetryDelay.class);
+        _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_FAULT_ON, FailureHandling.FaultOnFailure.class);
     }
 
     public static BpelObjectFactory getInstance() {

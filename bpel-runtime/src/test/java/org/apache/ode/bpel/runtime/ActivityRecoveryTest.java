@@ -32,7 +32,7 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.o.FailureHandling;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
@@ -52,6 +52,7 @@ public class ActivityRecoveryTest extends TestCase {
     static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
     int                   _invoked;
     int                   _failFor;
+    boolean               _responseSent;
     MockBpelServer        _server;
     BpelManagementFacade  _management;
 
@@ -74,22 +75,22 @@ public class ActivityRecoveryTest extends TestCase {
         assertCompleted(true, 5, null);
     }
 
-    public void testCancelRecoveryAction() throws Exception {
-        execute("FailureToRecovery", 4);
-        assertRecovery(3, ACTIONS);
-        recover("retry");
-        assertRecovery(4, ACTIONS);
-        recover("cancel");
-        assertCompleted(true, 4, null);
-    }
-
     public void testFaultRecoveryAction() throws Exception {
         execute("FailureToRecovery", 4);
         assertRecovery(3, ACTIONS);
         recover("retry");
         assertRecovery(4, ACTIONS);
         recover("fault");
-        assertCompleted(false, 4, FailureHandling.FAILURE_FAULT_NAME);
+        assertCompleted(false, 4, OFailureHandling.FAILURE_FAULT_NAME);
+    }
+
+    public void testCancelRecoveryAction() throws Exception {
+        execute("FailureToCancel", 4);
+        assertRecovery(3, ACTIONS);
+        recover("retry");
+        assertRecovery(4, ACTIONS);
+        recover("cancel");
+        assertCompleted(true, 4, null);
     }
 
     public void testImmediateFailure() throws Exception {
@@ -99,7 +100,7 @@ public class ActivityRecoveryTest extends TestCase {
 
     public void testImmediateFault() throws Exception {
         execute("FailureToFault", 2);
-        assertCompleted(false, 1, FailureHandling.FAILURE_FAULT_NAME);
+        assertCompleted(false, 1, OFailureHandling.FAILURE_FAULT_NAME);
     }
 
     public void testInheritence() throws Exception {
@@ -113,14 +114,20 @@ public class ActivityRecoveryTest extends TestCase {
                 return new MessageExchangeContext() {
 
                     public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
-                        ++_invoked;
-                        if (_invoked > _failFor) {
-                            Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
-                            response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
-                            mex.reply(response);
-                        } else
-                            mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
-                            //mex.replyWithFailure(FailureType, String, Element);
+System.out.println("-- Invoke: " + mex.getOperation().getName());
+                        if (mex.getOperation().getName().equals("invoke")) {
+                            // Failing invocation.
+                            ++_invoked;
+                            if (_invoked > _failFor) {
+                                Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
+                                response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
+                                mex.reply(response);
+                            } else {
+System.out.println("-- Failed: " + _invoked);
+                                mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
+                            }
+                        } else if (mex.getOperation().getName().equals("respond"))
+                            _responseSent = true;
                     }
 
                     public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
@@ -129,6 +136,7 @@ public class ActivityRecoveryTest extends TestCase {
         };
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
         _management = _server.getBpelManagementFacade();
+System.out.println("-- Start test");
     }
 
     protected void tearDown() throws Exception {
@@ -158,11 +166,16 @@ public class ActivityRecoveryTest extends TestCase {
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
+System.out.println("-- Status: " + instance.getStatus());
+System.out.println("-- Fault: " + instance.getFaultInfo());
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
+            assertTrue(_responseSent);
         } else if (faultName == null) {
             assertTrue(instance.getStatus() == TInstanceStatus.TERMINATED);
+            assertFalse(_responseSent);
         } else {
+            assertFalse(_responseSent);
             assertTrue(instance.getStatus() == TInstanceStatus.FAILED);
             TFaultInfo faultInfo = instance.getFaultInfo();
             assertTrue(faultInfo != null && faultInfo.getName().equals(faultName));
@@ -175,8 +188,11 @@ public class ActivityRecoveryTest extends TestCase {
     protected void assertRecovery(int invoked, String[] actions) {
         // Test in aggregate to see how many activities we have in this state.
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        assertTrue(instance.getStatus() == TInstanceStatus.ACTIVE);
+        assertFalse(_responseSent);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
+System.out.println("-- Failures count: " + failures.getCount());
         // Look for individual activities inside the process instance.
         @SuppressWarnings("unused")
         TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();

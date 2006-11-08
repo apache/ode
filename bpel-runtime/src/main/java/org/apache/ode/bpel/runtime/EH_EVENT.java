@@ -196,6 +196,10 @@ class EH_EVENT extends BpelJacobRunnable {
 
                             instance(WAITING.this);
                         }
+
+                        public void cancelled() {
+                            this.completed(null, CompensationHandler.emptySet());
+                        }
                     });
                 }
 

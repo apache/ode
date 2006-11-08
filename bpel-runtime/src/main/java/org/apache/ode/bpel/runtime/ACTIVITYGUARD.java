@@ -71,7 +71,6 @@ class ACTIVITYGUARD extends ACTIVITY {
 
         if (_linkVals.keySet().containsAll(_oactivity.targetLinks)) {
             if (evaluateJoinCondition()) {
-
                 ActivityExecStartEvent aese = new ActivityExecStartEvent();
                 sendEvent(aese);
                 // intercept completion channel in order to execute transition conditions.
@@ -79,9 +78,10 @@ class ACTIVITYGUARD extends ACTIVITY {
                 instance(createActivity(activity));
                 instance(new TCONDINTERCEPT(activity.parent));
             } else {
-                // Join Failure.
-                _self.parent.completed(createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity),
-                        CompensationHandler.emptySet());
+                FaultData fault = null;
+                // TODO: need to check suppressJoinFailure
+                fault = createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity);
+                _self.parent.completed(fault, CompensationHandler.emptySet());
 
                 // Dead path activity.
                 dpe(_oactivity);
@@ -207,6 +207,12 @@ class ACTIVITYGUARD extends ACTIVITY {
                         }
                         _self.parent.completed(fault, compensations);
                     }
+                }
+
+                public void cancelled() {
+                    sendEvent(new ActivityExecEndEvent());
+                    dpe(_oactivity.sourceLinks);
+                    _self.parent.completed(null, CompensationHandler.emptySet());
                 }
             });
 

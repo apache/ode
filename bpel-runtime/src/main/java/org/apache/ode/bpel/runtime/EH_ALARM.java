@@ -223,6 +223,9 @@ class EH_ALARM extends BpelJacobRunnable {
                     }
                 }
 
+                public void cancelled() {
+                    this.completed(null, CompensationHandler.emptySet());
+                }
             }.or(new EventHandlerControlChannelListener(_cc) {
                 private static final long serialVersionUID = -3873619538789039424L;
 
