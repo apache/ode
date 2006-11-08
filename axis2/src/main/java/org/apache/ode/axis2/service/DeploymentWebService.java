@@ -114,7 +114,11 @@ public class DeploymentWebService {
 
                         // Cleaning up if something existed previously
                         File dest = new File(_deployPath, namePart.getText());
-                        _store.undeploy(dest);
+                        Collection<QName> undeployed = _store.undeploy(dest);
+                        for (QName pqname : undeployed) {
+                            _server.unload(pqname, true);
+                        }
+
                         // If the previous deployment failed, there will still be something but
                         // undeploy won't do anything
                         FileUtils.deepDelete(dest);
