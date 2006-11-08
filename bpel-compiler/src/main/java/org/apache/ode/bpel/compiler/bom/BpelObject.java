@@ -242,7 +242,19 @@ public class BpelObject {
         }
         
     }
-    
+   
+    public String getTextValue() { 
+        getElement().normalize();
+        for (Node n = getElement().getFirstChild(); n != null; n = n.getNextSibling())
+            switch (n.getNodeType()) {
+            case Node.TEXT_NODE:
+            case Node.ELEMENT_NODE:
+            case Node.CDATA_SECTION_NODE:
+                return n.getNodeValue();
+            }
+        return null;
+    }
+
     @Override
     public String toString() {
         return DOMUtils.domToString(_element);

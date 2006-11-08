@@ -76,17 +76,18 @@ class MockBpelServer {
             createDataSource();
             createDAOConnection();
             createScheduler();
-            _store = new ProcessStoreImpl(new File("."), null, null);
-
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
             _server.setDaoConnectionFactory(_daoCF);
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
+            //_store = new ProcessStoreImpl(new File("."), _dataSource, _txManager);
+            _store = new ProcessStoreImpl(new File("."), null, null);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
             _server.setBindingContext(createBindingContext());
+            _server.setProcessStore(_store);
             _server.init();
             _server.start();
         } catch (Exception except) {

@@ -34,4 +34,6 @@ public interface ParentScope {
 
   void completed(FaultData faultData, Set<CompensationHandler> compensations);
 
+  void cancelled();
+
 }

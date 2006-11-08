@@ -788,7 +788,6 @@ abstract class BpelCompiler implements CompilerContext {
         implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
         compileScope(implicitScope, source.getScope(), new Runnable() {
             public void run() {
-                compileLinks(source);
                 for (OScope.Variable  v : variables) {
                     v.declaringScope = implicitScope;
                     implicitScope.addLocalVariable(v);
@@ -797,7 +796,7 @@ abstract class BpelCompiler implements CompilerContext {
                 if (source instanceof ScopeActivity)
                     implicitScope.activity = compile(((ScopeActivity)source).getChildActivity());
                 else
-                    implicitScope.activity = compileActivity(false, source);
+                    implicitScope.activity = compileActivity(true, source);
 
             }
         });

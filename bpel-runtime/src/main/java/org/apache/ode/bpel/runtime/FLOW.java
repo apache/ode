@@ -38,109 +38,105 @@ import java.util.Iterator;
 import java.util.Set;
 
 class FLOW extends ACTIVITY {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private OFlow _oflow;
+    private OFlow _oflow;
 
-  private Set<ChildInfo> _children = new HashSet<ChildInfo>();
+    private Set<ChildInfo> _children = new HashSet<ChildInfo>();
 
-  public FLOW(ActivityInfo self, ScopeFrame frame, LinkFrame linkFrame) {
-    super(self,frame, linkFrame);
-    _oflow = (OFlow) self.o;
-  }
-  
-  public void run() {
-
-    LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
-    for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
-      OLink link = i.next();
-      LinkStatusChannel lsc = newChannel(LinkStatusChannel.class);
-      myLinkFrame.links.put(link,new LinkInfo(link,lsc,lsc));
+    public FLOW(ActivityInfo self, ScopeFrame frame, LinkFrame linkFrame) {
+        super(self,frame, linkFrame);
+        _oflow = (OFlow) self.o;
     }
-
-    for (Iterator<OActivity> i = _oflow.parallelActivities.iterator(); i.hasNext();) {
-      OActivity ochild = i.next();
-      ChildInfo childInfo = new ChildInfo(
-              new ActivityInfo(genMonotonic(),
-                      ochild,
-                      newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class)));
-      _children.add(childInfo);
-
-      instance(createChild(childInfo.activity,_scopeFrame, myLinkFrame));
-    }
-    instance(new ACTIVE());
-  }
-
-
-  private class ACTIVE extends BpelJacobRunnable {
-    private static final long serialVersionUID = -8494641460279049245L;
-    private FaultData _fault;
-    private HashSet<CompensationHandler> _compensations = new HashSet<CompensationHandler>();
-
+    
     public void run() {
-      Iterator<ChildInfo> active = active();
-      if (active.hasNext()) {
-        Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
-        mlSet.add(new TerminationChannelListener(_self.self) {
-        private static final long serialVersionUID = 2554750258974084466L;
-
-        public void terminate() {
-            for (Iterator<ChildInfo> i = active(); i.hasNext(); )
-              replication(i.next().activity.self).terminate();
-            instance(ACTIVE.this);
-          }
-
-        });
-
-
-        for (;active.hasNext();) {
-          final ChildInfo child = active.next();
-          mlSet.add(new ParentScopeChannelListener(child.activity.parent) {
-            private static final long serialVersionUID = -8027205709169238172L;
-
-            public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
-              child.completed = true;
-              _compensations.addAll(compensations);
-
-              // If we receive a fault, we request termination of all our activities
-              if (faultData != null && _fault == null) {
-                for (Iterator<ChildInfo> i = active(); i.hasNext(); )
-                  replication(i.next().activity.self).terminate();
-                _fault = faultData;
-              }
-              instance(ACTIVE.this);
-            }
-
-            public void compensate(OScope scope, SynchChannel ret) {
-              // Flow does not do compensations, forward these to parent.
-              _self.parent.compensate(scope, ret);
-              instance(ACTIVE.this);
-            }
-
-          });
+        LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
+        for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
+            OLink link = i.next();
+            LinkStatusChannel lsc = newChannel(LinkStatusChannel.class);
+            myLinkFrame.links.put(link,new LinkInfo(link,lsc,lsc));
         }
-        object(false,mlSet);
-      } else /** No More active children. */ {
-        // NOTE: we do not not have to do DPE here because all the children
-        // have been started, and are therefore expected to set the value of
-        // their outgoing links.
-        _self.parent.completed(_fault, _compensations);
-      }
 
+        for (Iterator<OActivity> i = _oflow.parallelActivities.iterator(); i.hasNext();) {
+            OActivity ochild = i.next();
+            ChildInfo childInfo = new ChildInfo(
+                new ActivityInfo(genMonotonic(), ochild,
+                                 newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class)));
+            _children.add(childInfo);
+
+            instance(createChild(childInfo.activity,_scopeFrame, myLinkFrame));
+        }
+        instance(new ACTIVE());
     }
-  }
 
-  public String toString() {
-    return "<T:Act:Flow:" + _oflow.name + ">";
-  }
+    private class ACTIVE extends BpelJacobRunnable {
+        private static final long serialVersionUID = -8494641460279049245L;
+        private FaultData _fault;
+        private HashSet<CompensationHandler> _compensations = new HashSet<CompensationHandler>();
 
+        public void run() {
+            Iterator<ChildInfo> active = active();
+            if (active.hasNext()) {
+                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
+                mlSet.add(new TerminationChannelListener(_self.self) {
+                    private static final long serialVersionUID = 2554750258974084466L;
 
-  private Iterator<ChildInfo> active() {
-    return new FilterIterator<ChildInfo>(_children.iterator(), new MemberOfFunction<ChildInfo>() {
-      public boolean isMember(ChildInfo childInfo) {
-        return !childInfo.completed;
-      }
-    });
-  }
+                    public void terminate() {
+                        for (Iterator<ChildInfo> i = active(); i.hasNext(); )
+                            replication(i.next().activity.self).terminate();
+                        instance(ACTIVE.this);
+                    }
+                });
+
+                for (;active.hasNext();) {
+                    final ChildInfo child = active.next();
+                    mlSet.add(new ParentScopeChannelListener(child.activity.parent) {
+                        private static final long serialVersionUID = -8027205709169238172L;
+
+                        public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
+                            child.completed = true;
+                            _compensations.addAll(compensations);
+
+                            // If we receive a fault, we request termination of all our activities
+                            if (faultData != null && _fault == null) {
+                                for (Iterator<ChildInfo> i = active(); i.hasNext(); )
+                                    replication(i.next().activity.self).terminate();
+                                _fault = faultData;
+                            }
+                            instance(ACTIVE.this);
+                        }
+
+                        public void compensate(OScope scope, SynchChannel ret) {
+                            // Flow does not do compensations, forward these to parent.
+                            _self.parent.compensate(scope, ret);
+                            instance(ACTIVE.this);
+                        }
+
+                        public void cancelled() {
+                            this.completed(null, CompensationHandler.emptySet());
+                        }
+                    });
+                }
+                object(false,mlSet);
+            } else /** No More active children. */ {
+                // NOTE: we do not not have to do DPE here because all the children
+                // have been started, and are therefore expected to set the value of
+                // their outgoing links.
+                _self.parent.completed(_fault, _compensations);
+            }
+        }
+    }
+
+    public String toString() {
+        return "<T:Act:Flow:" + _oflow.name + ">";
+    }
+
+    private Iterator<ChildInfo> active() {
+        return new FilterIterator<ChildInfo>(_children.iterator(), new MemberOfFunction<ChildInfo>() {
+            public boolean isMember(ChildInfo childInfo) {
+                return !childInfo.completed;
+            }
+        });
+    }
 
 }
