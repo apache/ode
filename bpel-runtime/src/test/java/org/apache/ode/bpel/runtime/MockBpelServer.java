@@ -76,7 +76,7 @@ class MockBpelServer {
             createDataSource();
             createDAOConnection();
             createScheduler();
-            _store = new ProcessStoreImpl(new File("."), _dataSource);
+            _store = new ProcessStoreImpl(new File("."), null, null);
 
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
