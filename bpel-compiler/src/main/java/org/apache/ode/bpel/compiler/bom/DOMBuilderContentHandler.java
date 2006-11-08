@@ -29,6 +29,7 @@ import com.sun.org.apache.xml.internal.utils.DOMBuilder;
 public class DOMBuilderContentHandler extends DOMBuilder {
     private Locator _locator;
 
+    private int _suppressLineNo = 0;
 
     public DOMBuilderContentHandler(Document doc) {
         super(doc);
@@ -37,7 +38,10 @@ public class DOMBuilderContentHandler extends DOMBuilder {
 
     @Override
     public void startElement(String ns, String localName, String name, Attributes atts) throws SAXException {
-        if (_locator != null) {
+        if (localName.equals("literal") || _suppressLineNo > 0)
+            ++_suppressLineNo;
+                
+        if (_locator != null && _suppressLineNo > 0) {
             AttributesImpl a = new AttributesImpl(atts);
             a.addAttribute(BpelObject.ATTR_LINENO.getNamespaceURI(), BpelObject.ATTR_LINENO.getLocalPart(),
                     "odebpelc:"+BpelObject.ATTR_LINENO.getLocalPart(), "CDATA", "" + _locator.getLineNumber());
@@ -46,6 +50,15 @@ public class DOMBuilderContentHandler extends DOMBuilder {
         super.startElement(ns, localName, name, atts);
     }
 
+
+    @Override
+    public void endElement(String ns, String localName, String name) throws SAXException {
+        if (_suppressLineNo > 0)
+            --_suppressLineNo;
+        
+        super.endElement(ns, localName, name);
+        
+    }
 
     @Override
     public void setDocumentLocator(Locator locator) {
