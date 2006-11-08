@@ -114,7 +114,6 @@ public class ActivityRecoveryTest extends TestCase {
                 return new MessageExchangeContext() {
 
                     public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
-System.out.println("-- Invoke: " + mex.getOperation().getName());
                         if (mex.getOperation().getName().equals("invoke")) {
                             // Failing invocation.
                             ++_invoked;
@@ -123,7 +122,6 @@ System.out.println("-- Invoke: " + mex.getOperation().getName());
                                 response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
                                 mex.reply(response);
                             } else {
-System.out.println("-- Failed: " + _invoked);
                                 mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
                             }
                         } else if (mex.getOperation().getName().equals("respond"))
@@ -136,7 +134,6 @@ System.out.println("-- Failed: " + _invoked);
         };
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
         _management = _server.getBpelManagementFacade();
-System.out.println("-- Start test");
     }
 
     protected void tearDown() throws Exception {
@@ -166,8 +163,6 @@ System.out.println("-- Start test");
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
-System.out.println("-- Status: " + instance.getStatus());
-System.out.println("-- Fault: " + instance.getFaultInfo());
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
             assertTrue(_responseSent);
@@ -192,7 +187,6 @@ System.out.println("-- Fault: " + instance.getFaultInfo());
         assertFalse(_responseSent);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
-System.out.println("-- Failures count: " + failures.getCount());
         // Look for individual activities inside the process instance.
         @SuppressWarnings("unused")
         TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
