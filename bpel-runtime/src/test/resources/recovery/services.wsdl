@@ -31,6 +31,11 @@
       <output message="tns:Response"/>
     </operation>
   </portType>
+  <portType name="ResponsePortType">
+    <operation name="respond">
+      <input message="tns:Response"/>
+    </operation>
+  </portType>
 
   <binding name="InstantiatingBinding" type="tns:InstantiatingPortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -55,6 +60,16 @@
     </operation>
   </binding>
 
+  <binding name="ResponseBinding" type="tns:ResponsePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="respond">
+      <soap:operation/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+  </binding>
+
   <service name="FailingService">
     <port name="soap" binding="tns:FailingBinding">
       <soap:address location="http://localhost/FailingEndpoint"/>
@@ -64,6 +79,12 @@
   <service name="FailureToRecovery">
     <port name="soap" binding="tns:InstantiatingBinding">
       <soap:address location="http://localhost/pxe/soap/FailureToRecovery"/>
+    </port>
+  </service>
+
+  <service name="FailureToCancel">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToCancel"/>
     </port>
   </service>
 
@@ -79,12 +100,19 @@
     </port>
   </service>
 
+  <service name="ResponseService">
+    <port name="soap" binding="tns:ResponseBinding">
+      <soap:address location="http://localhost/ResponseEndpoint"/>
+    </port>
+  </service>
+
   <plnk:partnerLinkType name="FailingPartnerLinkType">
     <plnk:role name="partner" portType="tns:FailingPortType"/>
   </plnk:partnerLinkType>
 
   <plnk:partnerLinkType name="InstantiatingPartnerLinkType">
     <plnk:role name="me" portType="tns:InstantiatingPortType"/>
+    <plnk:role name="partner" portType="tns:ResponsePortType"/>
   </plnk:partnerLinkType>
 
 </definitions>

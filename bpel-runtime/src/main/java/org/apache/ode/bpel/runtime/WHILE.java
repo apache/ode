@@ -92,8 +92,7 @@ class WHILE extends ACTIVITY {
      * @return <code>true</code> if the while condition is satisfied, <code>false</code> otherwise.
      * @throws FaultException in case of standard expression fault (e.g. selection failure)
      */
-    private boolean checkCondition()
-            throws FaultException {
+    private boolean checkCondition() throws FaultException {
         try {
             return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getOWhile().whileCondition,getEvaluationContext());
         } catch (EvaluationException e) {
@@ -135,6 +134,10 @@ class WHILE extends ACTIVITY {
                         _self.parent.completed(faultData, compensations);
                     else
                         instance(WHILE.this);
+                }
+
+                public void cancelled() {
+                    this.completed(null, CompensationHandler.emptySet());
                 }
             }));
         }
