@@ -236,7 +236,6 @@ public class ProcessStoreImpl implements ProcessStore {
             if (__log.isDebugEnabled())
                 __log.debug("Looking for active processes.");
 
-            // Delete it from the database.
             return _conn.exec(new ConfStoreConnection.Callable<Map<QName, byte[]>>() {
                 public Map<QName, byte[]> run() throws Exception {
                     List<ProcessConfDAO> procs = _conn.getActiveProcesses();
@@ -320,7 +319,6 @@ public class ProcessStoreImpl implements ProcessStore {
             if (__log.isDebugEnabled())
                 __log.debug("Setting property on process " + processId);
 
-            // Delete it from the database.
             _conn.exec(new ConfStoreConnection.Callable<Object>() {
                 public Object run() throws Exception {
                     ProcessConfDAO dao = _conn.getProcessConf(processId);
@@ -345,7 +343,6 @@ public class ProcessStoreImpl implements ProcessStore {
             if (__log.isDebugEnabled())
                 __log.debug("Setting property on process " + processId);
 
-            // Delete it from the database.
             return _conn.exec(new ConfStoreConnection.Callable<Boolean>() {
                 public Boolean run() throws Exception {
                     return _conn.getProcessConf(processId).isActive();
@@ -367,7 +364,6 @@ public class ProcessStoreImpl implements ProcessStore {
             if (__log.isDebugEnabled())
                 __log.debug("Setting property on process " + processId);
 
-            // Delete it from the database.
             return _conn.exec(new ConfStoreConnection.Callable<ProcessConf>() {
                 public ProcessConf run() throws Exception {
                     ProcessConfDAO confDAO = _conn.getProcessConf(processId);
