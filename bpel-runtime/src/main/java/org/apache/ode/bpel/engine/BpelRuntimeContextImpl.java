@@ -49,7 +49,10 @@ import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -227,7 +230,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             Selector[] selectors) throws FaultException {
         if (BpelProcess.__log.isTraceEnabled())
             BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select", new Object[] { "pickResponseChannel",
-                    pickResponseChannel, "timeout", timeout, "createInstance", Boolean.valueOf(createInstance),
+                    pickResponseChannel, "timeout", timeout, "createInstance", createInstance,
                     "selectors", selectors }));
 
         ProcessDAO processDao = _dao.getProcess();
@@ -246,8 +249,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         final String pickResponseChannelStr = pickResponseChannel.export();
 
         List<CorrelatorDAO> correlators = new ArrayList<CorrelatorDAO>(selectors.length);
-        for (int i = 0; i < selectors.length; ++i) {
-            Selector selector = selectors[i];
+        for (Selector selector : selectors) {
             String correlatorId = BpelProcess.genCorrelatorId(selector.plinkInstance.partnerLink, selector.opName);
             if (BpelProcess.__log.isDebugEnabled()) {
                 BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": USING CORRELATOR " + correlatorId);
@@ -591,6 +593,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setIID(_dao.getInstanceId());
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
+        we.setInMem(_bpelProcess.isInMemory());
         _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
@@ -600,8 +603,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setType(WorkEvent.Type.MATCHER);
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
-        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
-
+        we.setInMem(_bpelProcess.isInMemory());
+        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(false, we.getDetail(), new Date());
     }
 
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
@@ -746,6 +749,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     WorkEvent we = new WorkEvent();
                     we.setIID(_iid);
                     we.setType(WorkEvent.Type.RESUME);
+                    we.setInMem(_bpelProcess.isInMemory());
                     _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
@@ -875,7 +879,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             break;
         }
         sendEvent(evt);
-
     }
 
     /**
@@ -887,6 +890,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         event.setProcessName(_dao.getProcess().getType());
         event.setProcessInstanceId(_dao.getInstanceId());
         _bpelProcess._debugger.onEvent(event);
+
+        // notify the listeners
+        _bpelProcess._engine.fireEvent(event);
+
+        // saving
         _bpelProcess.saveEvent(event);
     }
 
@@ -904,9 +912,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     private void writeProperties(VariableInstance variable, Node value, XmlDataDAO dao) {
         if (variable.declaration.type instanceof OMessageVarType) {
-            for (Iterator<OProcess.OProperty> iter = variable.declaration.getOwner().properties.iterator(); iter
-                    .hasNext();) {
-                OProcess.OProperty property = iter.next();
+            for (OProcess.OProperty property : variable.declaration.getOwner().properties) {
                 OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
                 if (alias != null) {
                     try {
@@ -918,8 +924,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     } catch (FaultException e) {
                         // This will fail as we're basically trying to extract properties on all
                         // received messages for optimization purposes.
-                         __log.debug("Couldn't extract property '" + property.toString()
-                                 + "' in property pre-extraction.", e);
+                        __log.debug("Couldn't extract property '" + property.toString()
+                                + "' in property pre-extraction.", e);
                     }
                 }
             }

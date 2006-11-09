@@ -19,24 +19,13 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.utils.GUID;
+import org.quartz.*;
 import org.quartz.core.QuartzScheduler;
 import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.core.SchedulingContext;
@@ -46,10 +35,15 @@ import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.ThreadPool;
 import org.quartz.utils.DBConnectionManager;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.utils.GUID;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Base class that can be used to quickly implement a persistent scheduler.
@@ -174,6 +168,7 @@ public class QuartzSchedulerImpl implements Scheduler {
     jobDetail.setRequestsRecovery(true);
     Trigger trigger = new SimpleTrigger(jobDetail.getName() + ".trigger",
         org.quartz.Scheduler.DEFAULT_GROUP, when, null, 0, 0L);
+      trigger.setVolatility(volatil);
 
     try {
       _quartz.scheduleJob(jobDetail, trigger);
