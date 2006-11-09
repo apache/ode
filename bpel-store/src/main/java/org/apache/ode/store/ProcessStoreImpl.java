@@ -256,7 +256,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -330,7 +329,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -351,7 +349,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -373,7 +370,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -426,7 +422,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -455,7 +450,6 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            __log.error(__msgs.msgDbError(), ex);
             throw new BpelEngineException(ex);
         } finally {
             _mngmtLock.writeLock().unlock();
