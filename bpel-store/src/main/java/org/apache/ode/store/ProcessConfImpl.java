@@ -20,6 +20,7 @@ public class ProcessConfImpl implements ProcessConf {
     private String packageName;
     private Map<QName,Node> props;
     private boolean active;
+    private boolean inMemory;
 
     public Date getDeployDate() {
         return deployDate;
@@ -75,5 +76,13 @@ public class ProcessConfImpl implements ProcessConf {
 
     public void setProps(Map<QName, Node> props) {
         this.props = props;
+    }
+
+    public boolean isInMemory() {
+        return inMemory;
+    }
+
+    public void setInMemory(boolean inMemory) {
+        this.inMemory = inMemory;
     }
 }

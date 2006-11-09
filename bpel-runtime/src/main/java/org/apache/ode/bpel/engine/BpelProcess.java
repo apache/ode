@@ -94,6 +94,7 @@ public class BpelProcess {
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
 
     private ProcessStore _store;
+    private boolean _inMemory;
 
     public BpelProcess(QName pid, OProcess oprocess, Map<OPartnerLink, Endpoint> myRoleEndpointNames,
                        Map<OPartnerLink, Endpoint> initialPartners, BpelEventListener debugger,
@@ -105,6 +106,7 @@ public class BpelProcess {
         _expLangRuntimeRegistry = expLangRuntimeRegistry;
         _mexInterceptors.addAll(localMexInterceptors);
         _store = store;
+        _inMemory = store.getProcessConfiguration(_pid).isInMemory();
 
         for (OPartnerLink pl : _oprocess.getAllPartnerLinks()) {
             if (pl.hasMyRole()) {
@@ -674,7 +676,8 @@ public class BpelProcess {
     }
 
     ProcessDAO getProcessDAO() {
-        return _engine._contexts.dao.getConnection().getProcess(_pid);
+        if (_inMemory) return _engine._contexts.inMemDao.getConnection().getProcess(_pid);
+        else return _engine._contexts.dao.getConnection().getProcess(_pid);
     }
 
     static String genCorrelatorId(OPartnerLink plink, String opName) {
@@ -778,5 +781,9 @@ public class BpelProcess {
 
     void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
         instanceDao.insertBpelEvent(event);
+    }
+
+    public boolean isInMemory() {
+        return _inMemory;
     }
 }

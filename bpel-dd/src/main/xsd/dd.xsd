@@ -46,6 +46,13 @@
                                     deployed. </xs:documentation>
                             </xs:annotation>
                         </xs:element>
+                        <xs:element name="in-memory" minOccurs="0" maxOccurs="1" type="xs:boolean"
+                                    default="false">
+                            <xs:annotation>
+                                <xs:documentation>Should the process be persistent or only execute
+                                    in-memory.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
                         <xs:element name="property"  minOccurs="0" maxOccurs="unbounded">
                             <xs:annotation>

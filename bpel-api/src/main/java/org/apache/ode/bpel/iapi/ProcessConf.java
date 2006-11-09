@@ -29,4 +29,9 @@ public interface ProcessConf {
      * @return package name
      */
     String getProcessPackage();
+
+    /**
+     * @return true if the process should be executed only in-memory without being persisted
+     */
+    boolean isInMemory();
 }

@@ -47,7 +47,8 @@ public abstract class BPELTest extends TestCase {
 		server = new BpelServerImpl();
 		mexContext = new MessageExchangeContextImpl();
 		server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
-		server.setScheduler(new TestScheduler());
+        server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+        server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
         store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl(), null);
