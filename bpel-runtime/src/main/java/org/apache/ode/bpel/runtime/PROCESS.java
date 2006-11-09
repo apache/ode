@@ -21,6 +21,7 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
@@ -28,28 +29,29 @@ import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Set;
+import org.w3c.dom.Element;
 
 public class PROCESS extends BpelJacobRunnable {
     private static final long serialVersionUID = 1L;
-    private OProcess _process;
+    private OProcess _oprocess;
 
     public PROCESS(OProcess process) {
-        _process = process;
+        _oprocess = process;
     }
 
     public void run() {
         BpelRuntimeContext ntive = getBpelRuntimeContext();
-        Long scopeInstanceId = ntive.createScopeInstance(null, _process.procesScope);
+        Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
 
         ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
         evt.setRootScopeId(scopeInstanceId);
-        evt.setScopeDeclarationId(_process.procesScope.getId());
+        evt.setScopeDeclarationId(_oprocess.procesScope.getId());
         ntive.sendEvent(evt);
 
         ActivityInfo child = new ActivityInfo(genMonotonic(),
-            _process.procesScope,
+            _oprocess.procesScope,
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-        ScopeFrame processFrame = new ScopeFrame(_process.procesScope, scopeInstanceId, null, null);
+        ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
         object(new ParentScopeChannelListener(child.parent) {
@@ -70,6 +72,11 @@ public class PROCESS extends BpelJacobRunnable {
 
             public void cancelled() {
                 this.completed(null, CompensationHandler.emptySet());
+            }
+
+            public void failure(String reason, Element data) {
+                FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oprocess, reason);
+                this.completed(faultData, CompensationHandler.emptySet());
             }
         });
     }

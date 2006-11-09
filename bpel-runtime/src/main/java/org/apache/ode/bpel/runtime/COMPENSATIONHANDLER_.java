@@ -30,6 +30,7 @@ import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Iterator;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 /**
  * A scope that has completed succesfully, and may possibly have a compensation handler.
@@ -93,7 +94,11 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                     }
 
                     public void cancelled() {
-                        this.completed(null, CompensationHandler.emptySet());
+                        getChannel().cancelled();
+                    }
+
+                    public void failure(String reason, Element data) {
+                        getChannel().failure(reason, data);
                     }
                 });
             }

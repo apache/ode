@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 /**
  * Alarm event handler. This process template manages a single alarm event handler.
@@ -224,7 +225,11 @@ class EH_ALARM extends BpelJacobRunnable {
                 }
 
                 public void cancelled() {
-                    this.completed(null, CompensationHandler.emptySet());
+                    getChannel().cancelled();
+                }
+
+                public void failure(String reason, Element data) {
+                    getChannel().failure(reason, data);
                 }
             }.or(new EventHandlerControlChannelListener(_cc) {
                 private static final long serialVersionUID = -3873619538789039424L;

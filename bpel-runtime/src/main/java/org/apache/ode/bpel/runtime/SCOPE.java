@@ -30,6 +30,7 @@ import org.apache.ode.jacob.SynchChannel;
 import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.*;
+import org.w3c.dom.Element;
 
 /**
  * An active scope.
@@ -154,7 +155,6 @@ class SCOPE extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-
                         public void completed(FaultData flt, Set<CompensationHandler> compenstations) {
                               // Set the fault to the activity's choice, if and only if no previous fault
                               // has been detected (first fault wins).
@@ -172,7 +172,11 @@ class SCOPE extends ACTIVITY {
                         }
 
                         public void cancelled() {
-                            this.completed(null, CompensationHandler.emptySet());
+                            cancelledFromChild();
+                        }
+
+                        public void failure(String reason, Element data) {
+                            failureFromChild(reason, data);
                         }
                     });
                 }
@@ -213,7 +217,11 @@ class SCOPE extends ACTIVITY {
                         }
 
                         public void cancelled() {
-                            this.completed(null, CompensationHandler.emptySet());
+                            cancelledFromChild();
+                        }
+
+                        public void failure(String reason, Element data) {
+                            failureFromChild(reason, data);
                         }
                     });
                 }
@@ -311,7 +319,11 @@ class SCOPE extends ACTIVITY {
                             }
 
                             public void cancelled() {
-                                this.completed(null, CompensationHandler.emptySet());
+                                cancelledFromChild();
+                            }
+
+                            public void failure(String reason, Element data) {
+                                failureFromChild(reason, data);
                             }
                         });
                     }

@@ -22,6 +22,7 @@ import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.CompensationHandler;
 
+import org.w3c.dom.Element;
 import java.util.Set;
 
 /**
@@ -35,5 +36,7 @@ public interface ParentScope {
   void completed(FaultData faultData, Set<CompensationHandler> compensations);
 
   void cancelled();
+
+  void failure(String reason, Element data);
 
 }

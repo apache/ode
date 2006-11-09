@@ -42,6 +42,7 @@ import org.w3c.dom.Node;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 public class FOREACH extends ACTIVITY {
 
@@ -158,7 +159,11 @@ public class FOREACH extends ACTIVITY {
                         }
 
                         public void cancelled() {
-                            completed(null, CompensationHandler.emptySet());
+                            cancelledFromChild();
+                        }
+
+                        public void failure(String reason, Element data) {
+                            failureFromChild(reason, data);
                         }
                     });
                 }
