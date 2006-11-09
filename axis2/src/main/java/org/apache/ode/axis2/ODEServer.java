@@ -415,6 +415,7 @@ public class ODEServer {
         _scheduler.init();
 
         _server.setDaoConnectionFactory(_daoCF);
+        _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));

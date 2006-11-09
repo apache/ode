@@ -250,6 +250,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
         _ode._store = new ProcessStoreImpl(new File("."), _ode._dataSource, _ode.getTransactionManager());
 
+        _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());        
         _ode._server.setDaoConnectionFactory(_ode._daocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
         _ode._server.setMessageExchangeContext(_ode._mexContext);

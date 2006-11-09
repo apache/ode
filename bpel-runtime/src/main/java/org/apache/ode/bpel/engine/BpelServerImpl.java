@@ -131,14 +131,6 @@ public class BpelServerImpl implements BpelServer {
         _contexts.eventListeners.remove(listener);
     }
 
-    void fireEvent(BpelEvent event) {
-        // Note that the eventListeners list is a copy-on-write array, so need
-        // to mess with synchronization.
-        for (BpelEventListener l : _contexts.eventListeners) {
-            l.onEvent(event);
-        }
-    }
-
     public void stop() {
         _mngmtLock.writeLock().lock();
         try {
@@ -212,6 +204,10 @@ public class BpelServerImpl implements BpelServer {
      */
     public void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF) throws BpelEngineException {
         _contexts.dao = daoCF;
+    }
+
+    public void setInMemDaoConnectionFactory(BpelDAOConnectionFactory daoCF) {
+        _contexts.inMemDao = daoCF;
     }
 
     public void setBindingContext(BindingContext bc) {
@@ -397,21 +393,30 @@ public class BpelServerImpl implements BpelServer {
 
     private boolean checkProcessExistence(final QName pid, final OProcess oprocess) {
         try {
-            boolean existed = _db.exec(new BpelDatabase.Callable<Boolean>() {
-                public Boolean run(BpelDAOConnection conn) throws Exception {
-                    // Hack, but at least for now we need to ensure that we
-                    // are
-                    // the only process with this process id.
-                    ProcessDAO old = conn.getProcess(pid);
-                    if (old != null) return true;
-
-                    ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName());
-                    for (String correlator : oprocess.getCorrelators()) {
-                        newDao.addCorrelator(correlator);
-                    }
-                    return false;
+            boolean existed = true;
+            if (_contexts.store.getProcessConfiguration(pid).isInMemory()) {
+                existed = false;
+                ProcessDAO newDao = _contexts.inMemDao.getConnection().createProcess(pid, oprocess.getQName());
+                for (String correlator : oprocess.getCorrelators()) {
+                    newDao.addCorrelator(correlator);
                 }
-            });
+            } else {
+                existed = _db.exec(new BpelDatabase.Callable<Boolean>() {
+                    public Boolean run(BpelDAOConnection conn) throws Exception {
+                        // Hack, but at least for now we need to ensure that we
+                        // are
+                        // the only process with this process id.
+                        ProcessDAO old = conn.getProcess(pid);
+                        if (old != null) return true;
+
+                        ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName());
+                        for (String correlator : oprocess.getCorrelators()) {
+                            newDao.addCorrelator(correlator);
+                        }
+                        return false;
+                    }
+                });
+            }
             if (__log.isDebugEnabled()) {
                 if (existed) __log.debug("Process runtime already exist (" + pid + "), no need to create.");
                 else __log.debug("Created new process runtime " + pid);

@@ -42,6 +42,7 @@ class Contexts {
     BindingContext bindingContext;
 
     BpelDAOConnectionFactory dao;
+    BpelDAOConnectionFactory inMemDao;
 
     ProcessStore store;
 

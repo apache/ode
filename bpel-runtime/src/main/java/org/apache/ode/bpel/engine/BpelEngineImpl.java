@@ -19,27 +19,13 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
@@ -47,6 +33,11 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+import java.util.*;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server
@@ -96,8 +87,14 @@ public class BpelEngineImpl implements BpelEngine {
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation)
             throws BpelEngineException {
 
-        MessageExchangeDAO dao = _contexts.dao.getConnection().createMessageExchange(
-                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        BpelProcess target = route(targetService, null);
+
+        MessageExchangeDAO dao;
+        if (target == null || target.isInMemory()) {
+            dao = _contexts.inMemDao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        } else {
+            dao = _contexts.dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        }
         dao.setCorrelationId(clientKey);
         dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
         dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
@@ -106,7 +103,6 @@ public class BpelEngineImpl implements BpelEngine {
         dao.setOperation(operation);
         MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
 
-        BpelProcess target = route(targetService, null);
         if (target != null)
             target.initMyRoleMex(mex);
 
@@ -229,7 +225,12 @@ public class BpelEngineImpl implements BpelEngine {
     public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
         WorkEvent we = new WorkEvent(jobDetail);
 
-        ProcessInstanceDAO instance = _contexts.dao.getConnection().getInstance(we.getIID());
+        ProcessInstanceDAO instance;
+        if (we.isInMem())
+            instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
+        else
+            instance = _contexts.dao.getConnection().getInstance(we.getIID());
+
         if (instance == null) {
             __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
             // nothing we can do, this instance is not in the database, it will
@@ -264,6 +265,14 @@ public class BpelEngineImpl implements BpelEngine {
             ; // ignore
         } 
 
+    }
+
+    void fireEvent(BpelEvent event) {
+        // Note that the eventListeners list is a copy-on-write array, so need
+        // to mess with synchronization.
+        for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
+            l.onEvent(event);
+        }
     }
 
     public MessageExchange getMessageExchangeByClientKey(String clientKey) {

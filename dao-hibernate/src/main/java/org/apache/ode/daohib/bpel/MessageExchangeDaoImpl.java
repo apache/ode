@@ -19,11 +19,7 @@
 
 package org.apache.ode.daohib.bpel;
 
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
@@ -41,6 +37,11 @@ import java.util.Set;
 public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
 
     private HMessageExchange _hself;
+
+    // Used when provided process and instance aren't hibernate implementations. The relation
+    // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
+    private ProcessDAO _externalProcess;
+    private ProcessInstanceDAO _externalInstance;
 
     public MessageExchangeDaoImpl(SessionManager sm, HMessageExchange mex) {
         super(sm, mex);
@@ -234,22 +235,33 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public ProcessDAO getProcess() {
-        return _hself.getProcess() == null ? null : new ProcessDaoImpl(_sm, _hself.getProcess());
+        if (_externalProcess != null) return _externalProcess;
+        else return _hself.getProcess() == null ? null : new ProcessDaoImpl(_sm, _hself.getProcess());
     }
 
     public void setProcess(ProcessDAO process) {
-        _hself.setProcess(process == null ? null : (HProcess) ((ProcessDaoImpl) process).getHibernateObj());
-        update();
+        if (process == null || process instanceof ProcessDaoImpl) {
+            _hself.setProcess(process == null ? null : (HProcess) ((ProcessDaoImpl) process).getHibernateObj());
+            update();
+        } else {
+            _externalProcess = process;
+        }
     }
 
     public void setInstance(ProcessInstanceDAO instance) {
+        if (instance == null || instance instanceof ProcessInstanceDaoImpl) {
         _hself.setInstance(instance == null ? null : (HProcessInstance) ((ProcessInstanceDaoImpl) instance)
                 .getHibernateObj());
         update();
+        } else {
+            _externalInstance = instance;
+        }
+
     }
 
     public ProcessInstanceDAO getInstance() {
-        return _hself.getInstance() == null ? null : new ProcessInstanceDaoImpl(_sm, _hself.getInstance());
+        if (_externalInstance != null) return _externalInstance;
+        else return _hself.getInstance() == null ? null : new ProcessInstanceDaoImpl(_sm, _hself.getInstance());
     }
 
     public char getDirection() {
