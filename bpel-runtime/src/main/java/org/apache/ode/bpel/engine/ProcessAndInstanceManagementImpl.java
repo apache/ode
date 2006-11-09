@@ -88,8 +88,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception while listing processes",e);
         }
 
         return ret;
@@ -146,8 +145,7 @@ class ProcessAndInstanceManagementImpl
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception while setting process property",e);
         }
 
         return ret;
@@ -171,8 +169,7 @@ class ProcessAndInstanceManagementImpl
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception while setting process property",e);
         }
 
         return ret;
@@ -194,8 +191,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception while listing instances",e);
         }
 
         return ret;
@@ -311,8 +307,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError",e);
-            throw new ProcessingException("DbError", e);
+            throw new ProcessingException("Exception during activity recovery", e);
         }
         return genInstanceInfoDocument(iid);
     }
@@ -333,8 +328,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception during instance deletion",e);
         }
 
         return ret;
@@ -444,8 +438,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError",e);
-            throw new ProcessingException("DbError", e);
+            throw new ProcessingException("Exception during instance retrieval", e);
         }
 
         return getDebugger(processId);
@@ -463,8 +456,7 @@ class ProcessAndInstanceManagementImpl
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ManagementException("DbError",e);
+            throw new ManagementException("Exception during database operation", e);
         }
     }
 
@@ -481,8 +473,7 @@ class ProcessAndInstanceManagementImpl
             // Passthrough.
             throw me;
         } catch (Exception ex) {
-            __log.error("DbError", ex);
-            throw new ManagementException("DbError",ex);
+            throw new ManagementException("Exception during database operation",ex);
         }
     }
 
@@ -503,8 +494,7 @@ class ProcessAndInstanceManagementImpl
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("UnexpectedEx",e);
+            throw new ProcessingException("Exception while retrieving process information",e);
         }
 
         return ret;
@@ -944,8 +934,7 @@ class ProcessAndInstanceManagementImpl
                 }
             });
         } catch (Exception e) {
-            __log.error("DbError", e);
-            throw new ProcessingException("DbError",e);
+            throw new ProcessingException("Exception while querying instances",e);
         }
 
         return ret;
