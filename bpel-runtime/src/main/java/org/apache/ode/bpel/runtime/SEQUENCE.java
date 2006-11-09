@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 /**
  * Implementation of the BPEL &lt;sequence&gt; activity.
@@ -104,12 +105,16 @@ class SEQUENCE extends ACTIVITY {
                         ArrayList<OActivity> remaining = new ArrayList<OActivity>(_remaining);
                         remaining.remove(0);
                         instance(new SEQUENCE(_self, _scopeFrame, _linkFrame, remaining, comps));
-                  }
-              }
+                    }
+                }
 
-              public void cancelled() {
-                  this.completed(null, CompensationHandler.emptySet());
-              }
+                public void cancelled() {
+                    cancelledFromChild();
+                }
+
+                public void failure(String reason, Element data) {
+                    failureFromChild(reason, data);
+                }
             }));
         }
 

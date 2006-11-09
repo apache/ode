@@ -36,6 +36,7 @@ import org.apache.ode.utils.stl.MemberOfFunction;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 class FLOW extends ACTIVITY {
     private static final long serialVersionUID = 1L;
@@ -113,7 +114,11 @@ class FLOW extends ACTIVITY {
                         }
 
                         public void cancelled() {
-                            this.completed(null, CompensationHandler.emptySet());
+                            cancelledFromChild();
+                        }
+
+                        public void failure(String reason, Element data) {
+                            failureFromChild(reason, data);
                         }
                     });
                 }

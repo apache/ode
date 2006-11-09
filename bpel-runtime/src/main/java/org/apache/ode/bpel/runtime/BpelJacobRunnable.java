@@ -41,65 +41,66 @@ import javax.xml.namespace.QName;
  * @author Maciej Szefler
  */
 public abstract class BpelJacobRunnable extends JacobRunnable {
-  private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
+    private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
 
-  protected BpelRuntimeContext getBpelRuntimeContext() {
-    BpelRuntimeContext nativeApi = (BpelRuntimeContext) JacobVPU.activeJacobThread().getExtension(BpelRuntimeContext.class);
-    assert nativeApi != null;
-    return nativeApi;
-  }
-
-  protected Log log() {
-    return __log;
-  }
-  
-  protected final FaultData createFault(QName fault, Element faultMsg, OVarType faultType, OBase location){
-  	return new FaultData(fault, faultMsg, faultType, location);
-  }
-  
-	protected final FaultData createFault(QName fault, OBase location, String faultExplanation) {
-    return new FaultData(fault, location,faultExplanation);
-  }
-
-  protected final FaultData createFault(QName fault, OBase location){
-  	return createFault(fault, location, null);
-  }
-  
-
-  protected JacobRunnable createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
-    return new ACTIVITYGUARD(childInfo, scopeFrame, linkFrame);
-  }
-
-  protected void initializeCorrelation(CorrelationSetInstance cset, VariableInstance variable)
-          throws FaultException {
-    if (__log.isDebugEnabled()) {
-      __log.debug("Initializing correlation set " + cset.declaration.name);
-    }
-    // if correlation set is already initialized,
-    // then skip
-    if (getBpelRuntimeContext().isCorrelationInitialized(cset)) {
-      // if already set, we ignore
-      if (__log.isDebugEnabled()) {
-        __log.debug("OCorrelation set " + cset + " is already set: ignoring");
-      }
-
-      return;
+    protected BpelRuntimeContext getBpelRuntimeContext() {
+        BpelRuntimeContext nativeApi = (BpelRuntimeContext) JacobVPU.activeJacobThread().getExtension(BpelRuntimeContext.class);
+        assert nativeApi != null;
+        return nativeApi;
     }
 
-    String[] propNames = new String[cset.declaration.properties.size()];
-    String[] propValues = new String[cset.declaration.properties.size()];
-
-    for (int i = 0; i < cset.declaration.properties.size(); ++i) {
-      OProcess.OProperty property = cset.declaration.properties.get(i);
-      propValues[i] = getBpelRuntimeContext().readProperty(variable, property);
-      propNames[i] = property.name.toString();
+    protected Log log() {
+        return __log;
+    }
+    
+    protected final FaultData createFault(QName fault, Element faultMsg, OVarType faultType, OBase location){
+        return new FaultData(fault, faultMsg, faultType, location);
+    }
+    
+    protected final FaultData createFault(QName fault, OBase location, String faultExplanation) {
+        return new FaultData(fault, location,faultExplanation);
     }
 
-    CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
-    getBpelRuntimeContext().writeCorrelation(cset,ckeyVal);
-  }
-  
-  protected long genMonotonic() {
-    return getBpelRuntimeContext().genId();
-  }
+    protected final FaultData createFault(QName fault, OBase location){
+        return createFault(fault, location, null);
+    }
+    
+
+    protected JacobRunnable createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
+        return new ACTIVITYGUARD(childInfo, scopeFrame, linkFrame);
+    }
+
+    protected void initializeCorrelation(CorrelationSetInstance cset, VariableInstance variable)
+            throws FaultException {
+        if (__log.isDebugEnabled()) {
+          __log.debug("Initializing correlation set " + cset.declaration.name);
+        }
+        // if correlation set is already initialized,
+        // then skip
+        if (getBpelRuntimeContext().isCorrelationInitialized(cset)) {
+          // if already set, we ignore
+            if (__log.isDebugEnabled()) {
+                __log.debug("OCorrelation set " + cset + " is already set: ignoring");
+            }
+
+            return;
+        }
+
+        String[] propNames = new String[cset.declaration.properties.size()];
+        String[] propValues = new String[cset.declaration.properties.size()];
+
+        for (int i = 0; i < cset.declaration.properties.size(); ++i) {
+            OProcess.OProperty property = cset.declaration.properties.get(i);
+            propValues[i] = getBpelRuntimeContext().readProperty(variable, property);
+            propNames[i] = property.name.toString();
+        }
+
+        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
+        getBpelRuntimeContext().writeCorrelation(cset,ckeyVal);
+    }
+    
+    protected long genMonotonic() {
+        return getBpelRuntimeContext().genId();
+    }
+
 }
