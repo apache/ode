@@ -160,7 +160,7 @@ public class INVOKE extends ACTIVITY {
                         // because there is no fault, instead we'll re-incarnate the invoke
                         // and either retry or indicate failure condition.
                         // admin to resume the process.
-                        INVOKE.this.retryOrFailure(getBpelRuntimeContext().getPartnerFaultExplanation(mexId), null);
+                        _self.parent.failure(getBpelRuntimeContext().getPartnerFaultExplanation(mexId), null);
                     }
                 });
             }
