@@ -32,6 +32,7 @@ import org.w3c.dom.Node;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 /**
  * Message event handler.
@@ -198,7 +199,11 @@ class EH_EVENT extends BpelJacobRunnable {
                         }
 
                         public void cancelled() {
-                            this.completed(null, CompensationHandler.emptySet());
+                            getChannel().cancelled();
+                        }
+
+                        public void failure(String reason, Element data) {
+                            getChannel().failure(reason, data);
                         }
                     });
                 }

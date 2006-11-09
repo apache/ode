@@ -29,6 +29,8 @@ import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.jacob.IndexedObject;
 
+import org.w3c.dom.Element;
+
 /**
  * Base template for activities.
  */
@@ -98,6 +100,14 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
 
     protected EvaluationContext getEvaluationContext() {
         return new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext());
+    }
+
+    protected void cancelledFromChild() {
+        _self.parent.cancelled();
+    }
+
+    protected void failureFromChild(String reason, Element data) {
+        _self.parent.failure(reason, data);
     }
 
     private int getLineNo() {

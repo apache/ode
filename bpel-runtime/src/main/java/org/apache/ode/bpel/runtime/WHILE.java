@@ -33,6 +33,7 @@ import org.apache.ode.jacob.SynchChannel;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.w3c.dom.Element;
 
 /**
  * BPEL &lt;while&gt; activity
@@ -137,7 +138,11 @@ class WHILE extends ACTIVITY {
                 }
 
                 public void cancelled() {
-                    this.completed(null, CompensationHandler.emptySet());
+                    cancelledFromChild();
+                }
+
+                public void failure(String reason, Element data) {
+                    failureFromChild(reason, data);
                 }
             }));
         }

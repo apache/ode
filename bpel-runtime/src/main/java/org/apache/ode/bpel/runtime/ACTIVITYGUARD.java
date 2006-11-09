@@ -24,19 +24,29 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityEnabledEvent;
 import org.apache.ode.bpel.evt.ActivityExecEndEvent;
 import org.apache.ode.bpel.evt.ActivityExecStartEvent;
+import org.apache.ode.bpel.evt.ActivityFailureEvent;
+import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 
+import org.w3c.dom.Element;
+import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,6 +66,8 @@ class ACTIVITYGUARD extends ACTIVITY {
 
     /** Flag to prevent duplicate ActivityEnabledEvents */
     private boolean _firstTime = true;
+
+    private ActivityFailure _failure;
 
     public ACTIVITYGUARD(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
@@ -162,6 +174,12 @@ class ACTIVITYGUARD extends ACTIVITY {
         return createActivity(activity,_scopeFrame, _linkFrame);
     }
 
+    private void startGuardedActivity() {
+        ActivityInfo activity = new ActivityInfo(genMonotonic(),_self.o,_self.self, newChannel(ParentScopeChannel.class));
+        instance(createActivity(activity));
+        instance(new TCONDINTERCEPT(activity.parent));
+    }
+
 
     /**
      * Intercepts the
@@ -214,8 +232,105 @@ class ACTIVITYGUARD extends ACTIVITY {
                     dpe(_oactivity.sourceLinks);
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
+
+
+                public void failure(String reason, Element data) {
+                    if (_failure == null)
+                        _failure = new ActivityFailure();
+                    _failure.dateTime = new Date();
+                    _failure.reason = reason;
+                    _failure.data = data;
+
+                    OFailureHandling failureHandling = _oactivity.getFailureHandling();
+                    if (failureHandling != null && failureHandling.faultOnFailure) {
+                      // No attempt to retry or enter activity recovery state, simply fault.
+                        if (__log.isDebugEnabled())
+                            __log.debug("ActivityRecovery: Activity " + _self.aId + " faulting on failure");
+                        FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oactivity, reason);
+                        completed(faultData, CompensationHandler.emptySet());
+                        return;
+                    }
+                    // If maximum number of retries, enter activity recovery state.  
+                    if (failureHandling == null || _failure.retryCount >= failureHandling.retryFor) {
+                        requireRecovery();
+                        return;
+                    }
+        
+                    if (__log.isDebugEnabled())
+                        __log.debug("ActivityRecovery: Retrying activity " + _self.aId);
+                    Date future = new Date(new Date().getTime() + 
+                        (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
+                    final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
+                    getBpelRuntimeContext().registerTimer(timerChannel, future);
+                    object(false, new TimerResponseChannelListener(timerChannel) {
+                        private static final long serialVersionUID = -261911108068231376L;
+                            public void onTimeout() {
+                                ++_failure.retryCount;
+                                startGuardedActivity();
+                            }
+                            public void onCancel() {
+                                requireRecovery();
+                            }
+                    });
+                }
+
+                private void requireRecovery() {
+                    if (__log.isDebugEnabled())
+                        __log.debug("ActivityRecovery: Activity " + _self.aId + " requires recovery");
+                    sendEvent(new ActivityFailureEvent(_failure.reason));
+                    final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
+                    getBpelRuntimeContext().registerActivityForRecovery(
+                        recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
+                        new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
+                    object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
+                        private static final long serialVersionUID = 8397883882810521685L;
+                        public void retry() {
+                            if (__log.isDebugEnabled())
+                                __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
+                            sendEvent(new ActivityRecoveryEvent("retry"));
+                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            ++_failure.retryCount;
+                            startGuardedActivity();
+                        }
+                        public void cancel() {
+                            if (__log.isDebugEnabled())
+                                __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (user initiated)");
+                            sendEvent(new ActivityRecoveryEvent("cancel"));
+                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            cancelled();
+                        }
+                        public void fault(FaultData faultData) {
+                            if (__log.isDebugEnabled())
+                                __log.debug("ActivityRecovery: Faulting activity " + _self.aId + " (user initiated)");
+                            sendEvent(new ActivityRecoveryEvent("fault"));
+                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            if (faultData == null)
+                                faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failure.reason);
+                            completed(faultData, CompensationHandler.emptySet());
+                        }
+                    }.or(new TerminationChannelListener(_self.self) {
+                        private static final long serialVersionUID = 2148587381204858397L;
+
+                        public void terminate() {
+                            if (__log.isDebugEnabled())
+                                __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");
+                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            cancelled();
+                        }
+                    }));
+                }
             });
 
         }
     }
+
+    static class ActivityFailure implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        Date    dateTime;
+        String  reason;
+        Element data;
+        int     retryCount;
+    }
+    
 }
