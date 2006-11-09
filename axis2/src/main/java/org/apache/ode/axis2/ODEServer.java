@@ -34,6 +34,7 @@ import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
@@ -62,6 +63,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -421,10 +423,10 @@ public class ODEServer {
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
         _server.setProcessStore(_store);
+        registerEventListeners();
         _server.init();
     }
 
- 
     @SuppressWarnings("unchecked")
     private <T> T lookupInJndi(String objName) throws Exception {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
@@ -489,6 +491,22 @@ public class ODEServer {
 
     public BpelServerImpl getBpelServer() {
         return _server;
+    }
+
+    private void registerEventListeners() {
+        String listenersStr = _odeConfig.getEventListeners();
+        if (listenersStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String listenerCN = tokenizer.nextToken();
+                try {
+                    _server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be " +
+                            "loaded properly.");
+                }
+            }
+
+        }
     }
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";

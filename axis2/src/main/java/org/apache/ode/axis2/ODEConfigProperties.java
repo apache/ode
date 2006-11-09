@@ -44,6 +44,7 @@ public class ODEConfigProperties extends Properties {
     private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
     private static final String PROP_WORKING_DIR = "ode-axis2.working.dir";
     private static final String PROP_REPLICATE_EMPTYNS = "ode-axis2.message.replicate.emptyns";
+    private static final String PROP_EVENT_LISTENERS = "ode-axis2.event.listeners";
 
     private File _installDir;
 
@@ -136,6 +137,10 @@ public class ODEConfigProperties extends Properties {
 
     public boolean isReplicateEmptyNS() {
         return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_REPLICATE_EMPTYNS, "true"));
+    }
+
+    public String getEventListeners() {
+        return getProperty(PROP_EVENT_LISTENERS);
     }
 
 }
