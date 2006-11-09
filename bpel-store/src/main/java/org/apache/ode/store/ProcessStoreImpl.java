@@ -496,6 +496,7 @@ public class ProcessStoreImpl implements ProcessStore {
     private ProcessConf buildConf(ProcessConfDAO dao) {
         DeploymentUnit du = _deploymentUnits.get(dao.getProcessId());
         ProcessConfImpl conf = new ProcessConfImpl();
+        TDeployment.Process processInfo = getProcessInfo(dao.getProcessId());
         conf.setActive(dao.isActive());
         conf.setDeployDate(dao.getDeployDate());
         conf.setDeployer(dao.getDeployer());
@@ -503,6 +504,7 @@ public class ProcessStoreImpl implements ProcessStore {
         conf.setPackageName(du.getDeployDir().getName());
         conf.setProcessId(dao.getProcessId());
         conf.setProps(dao.getProperties());
+        conf.setInMemory(processInfo.isSetInMemory() && processInfo.getInMemory());
         return conf;
     }
 

@@ -19,10 +19,10 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.common.CorrelationKey;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.ode.bpel.common.CorrelationKey;
 
 /**
  * Wrapper around job detail map.
@@ -98,6 +98,14 @@ public class WorkEvent {
     
     public void setCorrelationKey(CorrelationKey ckey) {
         _jobDetail.put("ckey", ckey == null ? null : ckey.toCanonicalString());
+    }
+
+    public void setInMem(boolean inmem) {
+        _jobDetail.put("inmem", inmem);
+    }
+
+    public boolean isInMem() {
+        return (Boolean)_jobDetail.get("inmem");
     }
 }
 

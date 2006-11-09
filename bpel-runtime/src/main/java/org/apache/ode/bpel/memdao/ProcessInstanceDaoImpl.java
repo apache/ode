@@ -6,30 +6,13 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A very simple, in-memory implementation of the {@link ProcessInstanceDAO}
@@ -82,10 +65,6 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
         _jacobState = null;
         _instanceId = IdGen.newProcessId();
         _conn = conn;
-    }
-
-    public BpelDAOConnection getConnection() {
-        return _conn;
     }
 
     public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
@@ -313,7 +292,7 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
     }
 
     public void createActivityRecovery(String channel, long activityId, String reason, Date dateTime, Element data,
-            String[] actions, int retries) {
+                                       String[] actions, int retries) {
         _activityRecoveries
                 .put(channel, new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries));
         _failureCount = _activityRecoveries.size();
@@ -346,7 +325,7 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
         private int _retries;
 
         ActivityRecoveryDAOImpl(String channel, long activityId, String reason, Date dateTime, Element details, String[] actions,
-                int retries) {
+                                int retries) {
             _activityId = activityId;
             _channel = channel;
             _reason = reason;
@@ -395,7 +374,10 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
     void removeRoutes(String routeGroupId) {
         for (CorrelatorDaoImpl correlator : _processDao._correlators.values())
             correlator._removeRoutes(routeGroupId, this);
+    }
 
+    public BpelDAOConnection getConnection() {
+        return _conn;
     }
 
 }
