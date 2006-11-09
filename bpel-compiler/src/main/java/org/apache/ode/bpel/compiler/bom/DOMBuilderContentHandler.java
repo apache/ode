@@ -41,7 +41,7 @@ public class DOMBuilderContentHandler extends DOMBuilder {
         if (localName.equals("literal") || _suppressLineNo > 0)
             ++_suppressLineNo;
                 
-        if (_locator != null && _suppressLineNo > 0) {
+        if (_locator != null && _suppressLineNo == 0) {
             AttributesImpl a = new AttributesImpl(atts);
             a.addAttribute(BpelObject.ATTR_LINENO.getNamespaceURI(), BpelObject.ATTR_LINENO.getLocalPart(),
                     "odebpelc:"+BpelObject.ATTR_LINENO.getLocalPart(), "CDATA", "" + _locator.getLineNumber());
