@@ -84,10 +84,7 @@ public interface CompilerContext {
     OActivity compile(Activity child)
             throws CompilationException;
 
-    OActivity compileSLC(final Activity source)
-            throws CompilationException;
-
-    OScope compileSLC(ScopeLikeActivity child, Variable[] variables);
+    OScope compileSLC(ScopeLikeActivity child);
 
     OPartnerLink resolvePartnerLink(String name)
             throws CompilationException;
