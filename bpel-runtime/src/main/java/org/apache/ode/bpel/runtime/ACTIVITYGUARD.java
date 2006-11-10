@@ -90,10 +90,15 @@ class ACTIVITYGUARD extends ACTIVITY {
                 instance(createActivity(activity));
                 instance(new TCONDINTERCEPT(activity.parent));
             } else {
-                FaultData fault = null;
-                // TODO: need to check suppressJoinFailure
-                fault = createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity);
-                _self.parent.completed(fault, CompensationHandler.emptySet());
+                if (_oactivity.suppressJoinFailure) {
+                    _self.parent.completed(null, CompensationHandler.emptySet());
+                    if (__log.isDebugEnabled())
+                        __log.debug("Join condition false, suppress join failureon activity " + _self.aId);
+                } else {
+                    FaultData fault = null;
+                    fault = createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity);
+                    _self.parent.completed(fault, CompensationHandler.emptySet());
+                }
 
                 // Dead path activity.
                 dpe(_oactivity);

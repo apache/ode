@@ -31,6 +31,7 @@ public abstract class OActivity extends OAgent {
     static final long serialVersionUID = -1L  ;
     
     public OExpression joinCondition;
+    public boolean suppressJoinFailure;
     public final Set<OLink>sourceLinks = new HashSet<OLink>();
     public final Set<OLink>targetLinks = new HashSet<OLink>();
     public String name;

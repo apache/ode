@@ -66,9 +66,7 @@
                 partnerLink="instantiatingPartnerLink"
                 portType="tns:ResponsePortType"
                 operation="respond"
-                inputVariable="response"
-                suppressJoinFailure="yes">
-        </invoke>
+                inputVariable="response"/>
       </sequence>
     </flow>
   </sequence>
