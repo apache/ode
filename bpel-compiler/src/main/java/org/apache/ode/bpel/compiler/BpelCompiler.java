@@ -730,49 +730,19 @@ abstract class BpelCompiler implements CompilerContext {
                 break;
         }
 
-        OActivity ret;
+        OActivity compiled;
         try {
-            if (_supressJoinFailure)
-                ret = compileSJF(source);
-            else
-                ret = compileSLC(source);
+            compiled = (source instanceof ScopeLikeActivity)  ?
+                compileSLC((ScopeLikeActivity)source) :
+                compileActivity(source);
+            compiled.suppressJoinFailure = _supressJoinFailure;
         } finally {
             _supressJoinFailure = previousSupressJoinFailure;
         }
 
-
         if (__log.isDebugEnabled())
-            __log.debug("Compiled activity " + ret);
-
-        return ret;
-    }
-
-    private OActivity compileSJF(final Activity source) {
-        final OScope oscope = new OScope(_oprocess, getCurrent());
-        oscope.name = createName(source);
-        oscope.debugInfo = createDebugInfo(source, "suppress join failure scope for " + source);
-        DefaultActivityGenerator.defaultExtensibilityElements(oscope, source);
-
-        compile(oscope, null, new Runnable() {
-            public void run() {
-                oscope.activity = compileSLC(source);
-                final OCatch joinFailureCatch = new OCatch(_oprocess, getCurrent());
-                joinFailureCatch.name = "__suppressJoinFailureCatch:" + oscope.name;
-                joinFailureCatch.debugInfo = createDebugInfo(source, "suppress join failure catch for " + source);
-                compile(joinFailureCatch, null, new Runnable() {
-                    public void run() {
-                        joinFailureCatch.faultName = _oprocess.constants.qnJoinFailure;
-                        joinFailureCatch.faultVariable = null;
-                        joinFailureCatch.activity = createDefaultCompensateActivity(source, "Auto-generated compensation for suppress-join-failure handler for " + source);
-                    }
-                });
-
-                oscope.faultHandler = new OFaultHandler(_oprocess);
-                oscope.faultHandler.catchBlocks.add(joinFailureCatch);
-                compile((TerminationHandler) null);
-                compile((CompensationHandler)null);
-            }});
-        return oscope;
+            __log.debug("Compiled activity " + compiled);
+        return compiled;
     }
 
     private OCompensate createDefaultCompensateActivity(BpelObject source, String desc) {
@@ -782,36 +752,23 @@ abstract class BpelCompiler implements CompilerContext {
         return activity;
     }
 
-    public OScope compileSLC(final ScopeLikeActivity source, final OScope.Variable[] variables) {
+    public OScope compileSLC(final ScopeLikeActivity source) {
         final OScope implicitScope = new OScope(_oprocess, getCurrent());
         implicitScope.name = createName(source);
         implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
         compileScope(implicitScope, source.getScope(), new Runnable() {
             public void run() {
-                for (OScope.Variable  v : variables) {
-                    v.declaringScope = implicitScope;
-                    implicitScope.addLocalVariable(v);
-                }
-                    
                 if (source instanceof ScopeActivity)
                     implicitScope.activity = compile(((ScopeActivity)source).getChildActivity());
                 else
-                    implicitScope.activity = compileActivity(true, source);
-
+                    implicitScope.activity = compileActivity(source);
             }
         });
 
         return implicitScope;
     }
     
-    public OActivity compileSLC(final Activity source) {
-        if (source instanceof ScopeLikeActivity) 
-            return compileSLC((ScopeLikeActivity)source, new OScope.Variable[0]);
-
-        return compileActivity(true, source);
-    }
-
-    private OActivity compileActivity(final boolean doLinks, final Activity source) {
+    private OActivity compileActivity(final Activity source) {
         final ActivityGenerator actgen = findActivityGen(source);
         final OActivity oact = actgen.newInstance(source);
         oact.name = createName(source);
@@ -819,8 +776,7 @@ abstract class BpelCompiler implements CompilerContext {
         _compiledActivities.add(oact);
         compile(oact, source, new Runnable() {
             public void run() {
-                if (doLinks)
-                    compileLinks(source);
+                compileLinks(source);
                 actgen.compile(oact,source);
             }
         });
