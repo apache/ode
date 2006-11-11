@@ -733,8 +733,8 @@ abstract class BpelCompiler implements CompilerContext {
         OActivity compiled;
         try {
             compiled = (source instanceof ScopeLikeActivity)  ?
-                compileSLC((ScopeLikeActivity)source) :
-                compileActivity(source);
+                compileSLC((ScopeLikeActivity)source, new OScope.Variable[0]) :
+                compileActivity(true, source);
             compiled.suppressJoinFailure = _supressJoinFailure;
         } finally {
             _supressJoinFailure = previousSupressJoinFailure;
@@ -752,23 +752,29 @@ abstract class BpelCompiler implements CompilerContext {
         return activity;
     }
 
-    public OScope compileSLC(final ScopeLikeActivity source) {
+    public OScope compileSLC(final ScopeLikeActivity source, final OScope.Variable[] variables) {
         final OScope implicitScope = new OScope(_oprocess, getCurrent());
+        implicitScope.implicitScope = true;
         implicitScope.name = createName(source);
         implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
         compileScope(implicitScope, source.getScope(), new Runnable() {
             public void run() {
+                compileLinks(source);
+                for (OScope.Variable  v : variables) {
+                    v.declaringScope = implicitScope;
+                    implicitScope.addLocalVariable(v);
+                }
                 if (source instanceof ScopeActivity)
                     implicitScope.activity = compile(((ScopeActivity)source).getChildActivity());
                 else
-                    implicitScope.activity = compileActivity(source);
+                    implicitScope.activity = compileActivity(false, source);
             }
         });
 
         return implicitScope;
     }
     
-    private OActivity compileActivity(final Activity source) {
+    private OActivity compileActivity(final boolean doLinks, final Activity source) {
         final ActivityGenerator actgen = findActivityGen(source);
         final OActivity oact = actgen.newInstance(source);
         oact.name = createName(source);
@@ -776,7 +782,8 @@ abstract class BpelCompiler implements CompilerContext {
         _compiledActivities.add(oact);
         compile(oact, source, new Runnable() {
             public void run() {
-                compileLinks(source);
+                if (doLinks)
+                    compileLinks(source);
                 actgen.compile(oact,source);
             }
         });
