@@ -113,13 +113,8 @@ class FLOW extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void cancelled() {
-                            cancelledFromChild();
-                        }
-
-                        public void failure(String reason, Element data) {
-                            failureFromChild(reason, data);
-                        }
+                        public void cancelled() { }
+                        public void failure(String reason, Element data) { }
                     });
                 }
                 object(false,mlSet);

@@ -55,7 +55,7 @@ public class ActivityRecoveryTest extends TestCase {
     boolean               _responseSent;
     MockBpelServer        _server;
     BpelManagementFacade  _management;
-
+/*
     public void testSuccessfulInvoke() throws Exception { 
         execute("FailureToRecovery", 0);
         assertCompleted(true, 1, null);
@@ -83,7 +83,7 @@ public class ActivityRecoveryTest extends TestCase {
         recover("fault");
         assertCompleted(false, 4, OFailureHandling.FAILURE_FAULT_NAME);
     }
-
+*/
     public void testCancelRecoveryAction() throws Exception {
         execute("FailureToCancel", 4);
         assertRecovery(3, ACTIONS);
@@ -92,7 +92,7 @@ public class ActivityRecoveryTest extends TestCase {
         recover("cancel");
         assertCompleted(true, 4, null);
     }
-
+/*
     public void testImmediateFailure() throws Exception {
         execute("FailureNoRetry", 1);
         assertRecovery(1, ACTIONS);
@@ -107,7 +107,7 @@ public class ActivityRecoveryTest extends TestCase {
         execute("FailureInheritence", 2);
         assertCompleted(true, 3, null);
     }
-
+*/
     protected void setUp() throws Exception {
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
@@ -163,6 +163,7 @@ public class ActivityRecoveryTest extends TestCase {
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
+System.out.println(instance.getFaultInfo() != null ? instance.getFaultInfo().getName() : instance.getStatus());
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
             assertTrue(_responseSent);
