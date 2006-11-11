@@ -102,14 +102,6 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext());
     }
 
-    protected void cancelledFromChild() {
-        _self.parent.cancelled();
-    }
-
-    protected void failureFromChild(String reason, Element data) {
-        _self.parent.failure(reason, data);
-    }
-
     private int getLineNo() {
         if (_self.o.debugInfo != null && _self.o.debugInfo.startLine != -1) {
             return _self.o.debugInfo.startLine;

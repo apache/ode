@@ -172,12 +172,12 @@ class SCOPE extends ACTIVITY {
                         }
 
                         public void cancelled() {
-                            cancelledFromChild();
+                            if (_oscope.implicitScope)
+                                _self.parent.cancelled();
                         }
 
-                        public void failure(String reason, Element data) {
-                            failureFromChild(reason, data);
-                        }
+                        public void failure(String reason, Element data) { }
+
                     });
                 }
 
@@ -216,13 +216,8 @@ class SCOPE extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void cancelled() {
-                            cancelledFromChild();
-                        }
-
-                        public void failure(String reason, Element data) {
-                            failureFromChild(reason, data);
-                        }
+                        public void cancelled() { }
+                        public void failure(String reason, Element data) { }
                     });
                 }
                 object(false, mlSet);
@@ -318,13 +313,8 @@ class SCOPE extends ACTIVITY {
                                 _self.parent.completed(fault, CompensationHandler.emptySet());
                             }
 
-                            public void cancelled() {
-                                cancelledFromChild();
-                            }
-
-                            public void failure(String reason, Element data) {
-                                failureFromChild(reason, data);
-                            }
+                            public void cancelled() { }
+                            public void failure(String reason, Element data) { }
                         });
                     }
                 } else /* completed ok */ {
