@@ -58,6 +58,8 @@ public class OScope extends OActivity {
     /** The descendants of this scope that can be compensated from the FH/CH of this scope. */
     public final Set<OScope> compensatable = new HashSet<OScope>();
 
+    public boolean implicitScope;
+
     public OScope(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
