@@ -235,9 +235,10 @@ class ACTIVITYGUARD extends ACTIVITY {
                 public void cancelled() {
                     sendEvent(new ActivityExecEndEvent());
                     dpe(_oactivity.sourceLinks);
-                    _self.parent.completed(null, CompensationHandler.emptySet());
+                    _self.parent.cancelled();
+                    // Bubble up: for implicitScope.
+                    _self.parent.cancelled();
                 }
-
 
                 public void failure(String reason, Element data) {
                     if (_failure == null)

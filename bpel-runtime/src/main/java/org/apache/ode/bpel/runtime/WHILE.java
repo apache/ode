@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OWhile;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -137,13 +138,8 @@ class WHILE extends ACTIVITY {
                         instance(WHILE.this);
                 }
 
-                public void cancelled() {
-                    cancelledFromChild();
-                }
-
-                public void failure(String reason, Element data) {
-                    failureFromChild(reason, data);
-                }
+                public void cancelled() { }
+                public void failure(String reason, Element data) { }
             }));
         }
     }
