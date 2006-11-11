@@ -34,8 +34,9 @@
 
     <properties>
         <vendor.name>Apache Software Foundation</vendor.name>
-
+ 
         <!-- Disable test cases; not ready for everybody -->
+        <maven.test.skip>true</maven.test.skip>
         
         <!--  Default ODE properties, these properties may be referenced in resources and the like. -->
 
@@ -102,11 +103,9 @@
         <module>jbi-examples</module>
         <module>tools-bin</module>
 
-<!--
         <module>axis2</module>
         <module>axis2-war</module>
         <module>axis2-examples</module>
--->
 
         <module>utils</module>
         <module>minerva</module>
@@ -132,7 +131,9 @@
         <module>dao-hibernate</module>
         <module>dao-hibernate-db-derby</module>
         <!-- module>dao-memory</module -->
+
         <module>jbi</module>
+
         <module>jca-ra</module>
         <module>jca-rar</module>
         <module>jca-server</module>
@@ -140,6 +141,7 @@
         <module>naming</module>
         <module>tools</module>
         <module>bpel-scheduler-quartz</module>
+
         <module>distro-axis2</module>
     	<module>distro-jbi</module>
     </modules>
