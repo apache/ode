@@ -353,7 +353,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
         if (dataDAO.isNull()) {
-            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedVariable);
+            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedVariable, 
+                    "The variable " + variable.declaration.name + " isn't properly initialized.");
         }
 
         return dataDAO.get();
