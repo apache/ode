@@ -17,6 +17,7 @@ import org.apache.ode.utils.stl.UnaryFunction;
 
 import javax.xml.namespace.QName;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -26,16 +27,16 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
-    private static long counter = 0;
+    private static AtomicLong counter = new AtomicLong(0);
 
 
     BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store) {
         _store = store;
     }
 
-    private synchronized String getId() {
-        return Long.toString(counter++);
-    }
+//    private synchronized String getId() {
+//        return Long.toString(counter++);
+//    }
 
     public ProcessDAO getProcess(QName processId) {
         return _store.get(processId);
@@ -144,7 +145,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public MessageExchangeDAO createMessageExchange(char dir) {
-        String id = getId();
+        String id = Long.toString(counter.getAndIncrement());
         MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir,id);
         _mexStore.put(id,mex);
         return mex;
