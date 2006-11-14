@@ -231,7 +231,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public Map<QName, byte[]> getActiveProcesses() {
-        _mngmtLock.writeLock().lock();
+        _mngmtLock.readLock().lock();
         try {
             if (__log.isDebugEnabled())
                 __log.debug("Looking for active processes.");
@@ -242,13 +242,15 @@ public class ProcessStoreImpl implements ProcessStore {
                     HashMap<QName, byte[]> result = new HashMap<QName, byte[]>(procs.size());
                     for (ProcessConfDAO confDAO : procs) {
                         QName processId = confDAO.getProcessId();
+                        System.out.println("### Process " + processId + " is active.");
                         if (_deploymentUnits.get(processId) == null) {
                             __log.error("The process " + processId + " appears to exist in the database but no " +
                                     "deployment exists in the file system. Please undeploy it properly.");
                             continue;
                         }
                         OProcess oprocess = _deploymentUnits.get(processId).getProcesses().get(processId);
-                        result.put(confDAO.getProcessId(), serialize(oprocess));
+                        System.out.println("### Process " + processId + " has oprocess " + oprocess + " serializing to " + serialize(oprocess));
+                        result.put(processId, serialize(oprocess));
                     }
                     return result;
                 }
@@ -258,7 +260,7 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
         } finally {
-            _mngmtLock.writeLock().unlock();
+            _mngmtLock.readLock().unlock();
         }
     }
 
@@ -336,7 +338,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public boolean isActive(final QName processId) {
-        _mngmtLock.writeLock().lock();
+        _mngmtLock.readLock().lock();
         try {
             if (__log.isDebugEnabled())
                 __log.debug("Setting property on process " + processId);
@@ -351,12 +353,12 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
         } finally {
-            _mngmtLock.writeLock().unlock();
+            _mngmtLock.readLock().unlock();
         }
     }
 
     public ProcessConf getProcessConfiguration(final QName processId) {
-        _mngmtLock.writeLock().lock();
+        _mngmtLock.readLock().lock();
         try {
             if (__log.isDebugEnabled())
                 __log.debug("Setting property on process " + processId);
@@ -372,7 +374,7 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
         } finally {
-            _mngmtLock.writeLock().unlock();
+            _mngmtLock.readLock().unlock();
         }
     }
 
