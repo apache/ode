@@ -55,7 +55,7 @@ public class ActivityRecoveryTest extends TestCase {
     boolean               _responseSent;
     MockBpelServer        _server;
     BpelManagementFacade  _management;
-/*
+
     public void testSuccessfulInvoke() throws Exception { 
         execute("FailureToRecovery", 0);
         assertCompleted(true, 1, null);
@@ -83,7 +83,7 @@ public class ActivityRecoveryTest extends TestCase {
         recover("fault");
         assertCompleted(false, 4, OFailureHandling.FAILURE_FAULT_NAME);
     }
-*/
+
     public void testCancelRecoveryAction() throws Exception {
         execute("FailureToCancel", 4);
         assertRecovery(3, ACTIONS);
@@ -92,7 +92,7 @@ public class ActivityRecoveryTest extends TestCase {
         recover("cancel");
         assertCompleted(true, 4, null);
     }
-/*
+
     public void testImmediateFailure() throws Exception {
         execute("FailureNoRetry", 1);
         assertRecovery(1, ACTIONS);
@@ -107,7 +107,7 @@ public class ActivityRecoveryTest extends TestCase {
         execute("FailureInheritence", 2);
         assertCompleted(true, 3, null);
     }
-*/
+
     protected void setUp() throws Exception {
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
@@ -124,8 +124,9 @@ public class ActivityRecoveryTest extends TestCase {
                             } else {
                                 mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
                             }
-                        } else if (mex.getOperation().getName().equals("respond"))
-                            _responseSent = true;
+                        } else if (mex.getOperation().getName().equals("respond")) {
+                            _responseSent = true; 
+                        }
                     }
 
                     public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
@@ -163,7 +164,6 @@ public class ActivityRecoveryTest extends TestCase {
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         TInstanceInfo.Failures failures = instance.getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
-System.out.println(instance.getFaultInfo() != null ? instance.getFaultInfo().getName() : instance.getStatus());
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
             assertTrue(_responseSent);
@@ -196,7 +196,7 @@ System.out.println(instance.getFaultInfo() != null ? instance.getFaultInfo().get
         TActivityInfo.Failure failure = recoveries.get(0).getFailure();
         assertTrue(failure.getRetries() == invoked - 1);
         assertTrue(failure.getReason().equals("BangGoesInvoke"));
-        assertTrue(failure.getDtFailure().getTime().getTime() / 100000 == System.currentTimeMillis() / 100000);
+        assertTrue(failure.getDtFailure() != null);
         java.util.HashSet<String> actionSet = new java.util.HashSet<String>();
         for (String action : failure.getActions().split(" "))
             actionSet.add(action);

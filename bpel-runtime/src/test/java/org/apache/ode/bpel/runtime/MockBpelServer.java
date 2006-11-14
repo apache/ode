@@ -134,7 +134,7 @@ class MockBpelServer {
 
     public void waitForBlocking() {
         try {
-            long delay = 10000;
+            long delay = 1000;
             while (true) {
                 // Be warned: ugly hack and not safe for slow CPUs.
                 long cutoff = System.currentTimeMillis() - delay;
