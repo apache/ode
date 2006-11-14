@@ -105,7 +105,9 @@ public class WorkEvent {
     }
 
     public boolean isInMem() {
-        return _jobDetail != null && (Boolean)_jobDetail.get("inmem");
+        Boolean bool = (Boolean) _jobDetail.get("inmem");
+        if (bool == null) return false;
+        else return bool;
     }
 }
 
