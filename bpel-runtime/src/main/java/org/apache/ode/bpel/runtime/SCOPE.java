@@ -172,11 +172,18 @@ class SCOPE extends ACTIVITY {
                         }
 
                         public void cancelled() {
+                            // Implicit scope holds links of the enclosed activity,
+                            // they only get cancelled when we propagate upwards.
                             if (_oscope.implicitScope)
                                 _self.parent.cancelled();
+                            else
+                                completed(null, CompensationHandler.emptySet());
                         }
 
-                        public void failure(String reason, Element data) { }
+                        public void failure(String reason, Element data) {
+                            completed(createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, null),
+                                      CompensationHandler.emptySet());
+                        }
 
                     });
                 }
@@ -216,8 +223,8 @@ class SCOPE extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void cancelled() { }
-                        public void failure(String reason, Element data) { }
+                        public void cancelled() { completed(null, CompensationHandler.emptySet()); }
+                        public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
                     });
                 }
                 object(false, mlSet);
@@ -313,8 +320,8 @@ class SCOPE extends ACTIVITY {
                                 _self.parent.completed(fault, CompensationHandler.emptySet());
                             }
 
-                            public void cancelled() { }
-                            public void failure(String reason, Element data) { }
+                            public void cancelled() { completed(null, CompensationHandler.emptySet()); }
+                            public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
                         });
                     }
                 } else /* completed ok */ {

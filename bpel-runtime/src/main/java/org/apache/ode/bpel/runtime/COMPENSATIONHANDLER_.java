@@ -93,8 +93,8 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                         ret.ret();
                     }
 
-                    public void cancelled() { }
-                    public void failure(String reason, Element data) { }
+                    public void cancelled() { completed(null, CompensationHandler.emptySet()); }
+                    public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
                 });
             }
         });
