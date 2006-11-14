@@ -234,9 +234,9 @@ class ACTIVITYGUARD extends ACTIVITY {
 
                 public void cancelled() {
                     sendEvent(new ActivityExecEndEvent());
+                    dpe(_oactivity.outgoingLinks);
                     dpe(_oactivity.sourceLinks);
-                    _self.parent.cancelled();
-                    // Bubble up: for implicitScope.
+                    // Implicit scope can tell the difference between cancelled and completed.
                     _self.parent.cancelled();
                 }
 
@@ -256,7 +256,6 @@ class ACTIVITYGUARD extends ACTIVITY {
                         completed(faultData, CompensationHandler.emptySet());
                         return;
                     }
-                    // If maximum number of retries, enter activity recovery state.  
                     if (failureHandling == null || _failure.retryCount >= failureHandling.retryFor) {
                         requireRecovery();
                         return;
