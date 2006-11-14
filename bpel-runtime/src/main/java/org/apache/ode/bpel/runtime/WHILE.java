@@ -138,8 +138,8 @@ class WHILE extends ACTIVITY {
                         instance(WHILE.this);
                 }
 
-                public void cancelled() { }
-                public void failure(String reason, Element data) { }
+                public void cancelled() { completed(null, CompensationHandler.emptySet()); }
+                public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
             }));
         }
     }
