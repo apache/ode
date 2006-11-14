@@ -242,14 +242,12 @@ public class ProcessStoreImpl implements ProcessStore {
                     HashMap<QName, byte[]> result = new HashMap<QName, byte[]>(procs.size());
                     for (ProcessConfDAO confDAO : procs) {
                         QName processId = confDAO.getProcessId();
-                        System.out.println("### Process " + processId + " is active.");
                         if (_deploymentUnits.get(processId) == null) {
                             __log.error("The process " + processId + " appears to exist in the database but no " +
                                     "deployment exists in the file system. Please undeploy it properly.");
                             continue;
                         }
                         OProcess oprocess = _deploymentUnits.get(processId).getProcesses().get(processId);
-                        System.out.println("### Process " + processId + " has oprocess " + oprocess + " serializing to " + serialize(oprocess));
                         result.put(processId, serialize(oprocess));
                     }
                     return result;
