@@ -304,7 +304,7 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
         _failureCount = _activityRecoveries.size();
     }
 
-    public long genMonotonic() {
+    public synchronized long genMonotonic() {
         return ++_seq;
     }
 
