@@ -364,6 +364,9 @@ public class ProcessStoreImpl implements ProcessStore {
             return _conn.exec(new ConfStoreConnection.Callable<ProcessConf>() {
                 public ProcessConf run() throws Exception {
                     ProcessConfDAO confDAO = _conn.getProcessConf(processId);
+                    if (confDAO == null)
+                        throw new RuntimeException("Couldn't find process " + processId + " configuration in " +
+                                "the process store!");
                     return buildConf(confDAO);
                 }
             });
