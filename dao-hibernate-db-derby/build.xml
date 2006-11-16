@@ -28,6 +28,7 @@
     <property name="mysql.target.sql" value="${target.dir}/mysql.sql" />
     <property name="sqls.target.sql" value="${target.dir}/sqlserver.sql" />
     <property name="postgres.target.sql" value="${target.dir}/postgres.sql" />
+    <property name="hsql.target.sql" value="${target.dir}/hsql.sql" />
     <property name="firebird.target.sql" value="${target.dir}/firebird.sql" />
 
     <target name="db" depends="depset, tarball" />
@@ -92,6 +93,9 @@
         <concat destfile="${postgres.target.sql}" append="true">
             <fileset file="${src.sql.dir}/tables_postgres.sql" />
         </concat>
+        <concat destfile="${hsql.target.sql}" append="true">
+            <fileset file="${src.sql.dir}/tables_hsql.sql" />
+        </concat>
         <concat destfile="${firebird.target.sql}" append="true">
             <fileset file="${src.sql.dir}/tables_firebird.sql" />
         </concat>
@@ -147,6 +151,17 @@
                 <include name="**/*.hbm.xml"/>
             </fileset>
         </schemaexport>
+        <schemaexport properties="${src.sql.dir}/ode.hsql.properties"
+                      quiet="yes"
+                      text="yes"
+                      delimiter=";"
+                      drop="no"
+                      create="yes"
+                      output="${hsql.target.sql}">
+            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
+                <include name="**/*.hbm.xml"/>
+            </fileset>
+        </schemaexport>
         <schemaexport properties="${src.sql.dir}/ode.firebird.properties"
                       quiet="yes"
                       text="yes"
@@ -158,7 +173,7 @@
                 <include name="**/*.hbm.xml"/>
             </fileset>
         </schemaexport>
-    </target>
+;    </target>
 
 </project>
 
