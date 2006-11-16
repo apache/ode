@@ -37,6 +37,8 @@ import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
 import org.apache.ode.bpel.pmapi.TFaultInfo;
+import org.apache.ode.bpel.pmapi.TFailureInfo;
+import org.apache.ode.bpel.pmapi.TFailuresInfo;
 import org.apache.ode.bpel.pmapi.TInstanceInfo;
 import org.apache.ode.bpel.pmapi.TInstanceStatus;
 import org.apache.ode.bpel.pmapi.TScopeInfo;
@@ -55,6 +57,7 @@ public class ActivityRecoveryTest extends TestCase {
     boolean               _responseSent;
     MockBpelServer        _server;
     BpelManagementFacade  _management;
+    QName                 _processQName;
 
     public void testSuccessfulInvoke() throws Exception { 
         execute("FailureToRecovery", 0);
@@ -115,7 +118,7 @@ public class ActivityRecoveryTest extends TestCase {
 
                     public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
                         if (mex.getOperation().getName().equals("invoke")) {
-                            // Failing invocation.
+                            // First fail, then succeed, that's the nature of a test case.
                             ++_invoked;
                             if (_invoked > _failFor) {
                                 Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
@@ -125,6 +128,7 @@ public class ActivityRecoveryTest extends TestCase {
                                 mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
                             }
                         } else if (mex.getOperation().getName().equals("respond")) {
+                            // Happens when the process completes its last activity.
                             _responseSent = true; 
                         }
                     }
@@ -149,7 +153,8 @@ public class ActivityRecoveryTest extends TestCase {
     protected void execute(String process, int failFor) throws Exception {
         _failFor = failFor;
         _server.getBpelManagementFacade().delete(null);
-        _server.invoke(new QName(NAMESPACE, process), "instantiate",
+        _processQName = new QName(NAMESPACE, process);
+        _server.invoke(_processQName, "instantiate",
                        DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
     }
@@ -162,7 +167,10 @@ public class ActivityRecoveryTest extends TestCase {
     protected void assertCompleted(boolean successful, int invoked, QName faultName) {
         assertTrue(_invoked == invoked);
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-        TInstanceInfo.Failures failures = instance.getFailures();
+        // Process has completed, so no activities in the failure state.
+        TFailuresInfo failures = instance.getFailures();
+        assertTrue(failures == null || failures.getCount() == 0);
+        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
@@ -182,18 +190,21 @@ public class ActivityRecoveryTest extends TestCase {
      * Asserts that the process has one activity in the recovery state.
      */
     protected void assertRecovery(int invoked, String[] actions) {
-        // Test in aggregate to see how many activities we have in this state.
+        // Process is still active, none of the completed states.
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         assertTrue(instance.getStatus() == TInstanceStatus.ACTIVE);
         assertFalse(_responseSent);
-        TInstanceInfo.Failures failures = instance.getFailures();
+        // Tests here will only generate one failure.
+        TFailuresInfo failures = instance.getFailures();
+        assertTrue(failures != null && failures.getCount() == 1);
+        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
         // Look for individual activities inside the process instance.
         @SuppressWarnings("unused")
         TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
         assertTrue(recoveries.size() == 1);
-        TActivityInfo.Failure failure = recoveries.get(0).getFailure();
+        TFailureInfo failure = recoveries.get(0).getFailure();
         assertTrue(failure.getRetries() == invoked - 1);
         assertTrue(failure.getReason().equals("BangGoesInvoke"));
         assertTrue(failure.getDtFailure() != null);
