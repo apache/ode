@@ -323,6 +323,7 @@
                     <attribute name="count" type="xs:int" use="required"/>
                 </complexType>
             </element>
+            <element name="failures" type="pmapi:tFailuresInfo" minOccurs="0"/>
         </sequence>
     </complexType>
     <complexType name="tScopeInfo">
@@ -426,35 +427,38 @@
                         completed.</documentation>
                 </annotation>
             </element>
-            <element name="failure" minOccurs="0">
-                <complexType>
-                    <annotation>
-                        <documentation>Indicates activity is in the failure state and requires recovery.</documentation>
-                    </annotation>
-                    <sequence>
-                      <element name="dt-failure" type="xs:dateTime">
-                          <annotation>
-                              <documentation>The date/time when failure occurred.</documentation>
-                          </annotation>
-                      </element>
-                      <element name="retries" type="xs:int">
-                          <annotation>
-                              <documentation>Number of retries.</documentation>
-                          </annotation>
-                      </element>
-                      <element name="reason" type="xs:string">
-                          <annotation>
-                              <documentation>Reason for failure.</documentation>
-                          </annotation>
-                      </element>
-                      <element name="actions" type="xs:string">
-                          <annotation>
-                              <documentation>Allowed recovery actions (space separated list of action names).</documentation>
-                          </annotation>
-                      </element>
-                    </sequence>
-                </complexType>
+            <element name="failure" type="pmapi:tFailureInfo" minOccurs="0">
+                <annotation>
+                    <documentation>Indicates activity is in the failure state and requires recovery.</documentation>
+                </annotation>
             </element>
+        </sequence>
+    </complexType>
+    <complexType name="tFailureInfo">
+        <annotation>
+            <documentation>Indicates activity is in the failure state and requires recovery.</documentation>
+        </annotation>
+        <sequence>
+          <element name="dt-failure" type="xs:dateTime">
+              <annotation>
+                  <documentation>The date/time when failure occurred.</documentation>
+              </annotation>
+          </element>
+          <element name="retries" type="xs:int">
+              <annotation>
+                  <documentation>Number of retries.</documentation>
+              </annotation>
+          </element>
+          <element name="reason" type="xs:string">
+              <annotation>
+                  <documentation>Reason for failure.</documentation>
+              </annotation>
+          </element>
+          <element name="actions" type="xs:string">
+              <annotation>
+                  <documentation>Allowed recovery actions (space separated list of action names).</documentation>
+              </annotation>
+          </element>
         </sequence>
     </complexType>
     <complexType name="tVariableInfo">
@@ -564,26 +568,7 @@
                         instance failed. </documentation>
                 </annotation>
             </element>
-            <element name="failures" minOccurs="0">
-                <complexType>
-                    <annotation>
-                        <documentation>Indicates one or more activities are in the failure
-                            state and require recovery.</documentation>
-                    </annotation>
-                    <sequence>
-                        <element name="dt-failure" type="xs:dateTime">
-                            <annotation>
-                                <documentation>Date/time of last failure.</documentation>
-                            </annotation>
-                        </element>
-                        <element name="count" type="xs:int">
-                            <annotation>
-                                <documentation>Number of activities in failure state.</documentation>
-                            </annotation>
-                        </element>
-                    </sequence>
-                </complexType>
-            </element>
+            <element name="failures" type="pmapi:tFailuresInfo" minOccurs="0"/>
             <element name="myElement" type="string"/>
         </sequence>
     </complexType>
@@ -619,6 +604,24 @@
                         <any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
                     </sequence>
                 </complexType>
+            </element>
+        </sequence>
+    </complexType>
+    <complexType name="tFailuresInfo">
+        <annotation>
+            <documentation>Indicates one or more activities are in the failure
+                state and require recovery.</documentation>
+        </annotation>
+        <sequence>
+            <element name="dt-failure" type="xs:dateTime">
+                <annotation>
+                    <documentation>Date/time of last failure.</documentation>
+                </annotation>
+            </element>
+            <element name="count" type="xs:int">
+                <annotation>
+                    <documentation>Number of activities in failure state.</documentation>
+                </annotation>
             </element>
         </sequence>
     </complexType>
