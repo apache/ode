@@ -94,7 +94,7 @@
             <fileset file="${src.sql.dir}/tables_postgres.sql" />
         </concat>
         <concat destfile="${hsql.target.sql}" append="true">
-            <fileset file="${src.sql.dir}/tables_hsql.sql" />
+            <fileset file="${src.sql.dir}/tables_hsqldb.sql" />
         </concat>
         <concat destfile="${firebird.target.sql}" append="true">
             <fileset file="${src.sql.dir}/tables_firebird.sql" />
