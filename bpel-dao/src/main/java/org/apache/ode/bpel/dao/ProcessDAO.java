@@ -22,7 +22,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
-
+import java.util.Date;
 
 /**
  * BPEL process data access objects.  Contains  references to active process
@@ -100,5 +100,5 @@ public interface ProcessDAO {
 
     void addCorrelator(String correlator);
 
-	int getNumInstances();
+    int getNumInstances();
 }

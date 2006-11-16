@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.Date;
 
 /**
  * A very simple, in-memory implementation of the {@link ProcessDAO} interface.
@@ -129,11 +129,19 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         //TODO Check requirement for persisting.
     }
 
-	public int getNumInstances() {
-		return _instances.size();
-	}
+    public int getNumInstances() {
+        return _instances.size();
+    }
 
     public ProcessInstanceDAO getInstanceWithLock(Long iid) {
-      return getInstance(iid);
+        return getInstance(iid);
+    }
+
+    public int getActivityFailureCount() {
+        return 0;  
+    }
+
+    public Date getActivityFailureDateTime() {
+        return null;
     }
 }

@@ -595,6 +595,7 @@ class ProcessAndInstanceManagementImpl
             genInstanceSummaryEntry(isum.addNewInstances(),TInstanceStatus.FAILED, proc);
             genInstanceSummaryEntry(isum.addNewInstances(),TInstanceStatus.SUSPENDED, proc);
             genInstanceSummaryEntry(isum.addNewInstances(),TInstanceStatus.TERMINATED, proc);
+            getInstanceSummaryActivityFailure(isum, proc);
         }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
@@ -679,6 +680,29 @@ class ProcessAndInstanceManagementImpl
         instances.setCount(count);
     }
 
+    private void getInstanceSummaryActivityFailure(TInstanceSummary summary, ProcessDAO proc) {
+        String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString().toLowerCase();
+        InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus
+                +  " name=" + proc.getType().getLocalPart()
+                +  " namespace=" + proc.getType().getNamespaceURI());
+        int failureCount = 0;
+        Date lastFailureDt = null;
+        for (ProcessInstanceDAO instance : _db.getConnection().instanceQuery(instanceFilter)) {
+            int count = instance.getActivityFailureCount();
+            if (count > 0) {
+                failureCount += count;
+                Date failureDt = instance.getActivityFailureDateTime();
+                if (lastFailureDt == null || lastFailureDt.before(failureDt))
+                    lastFailureDt = failureDt;
+            }
+        }
+        if (failureCount > 0) {
+            TFailuresInfo failures = summary.addNewFailures();
+            failures.setDtFailure(toCalendar(lastFailureDt));
+            failures.setCount(failureCount);
+        }
+    }
+
     private void fillInstanceInfo(TInstanceInfo info, ProcessInstanceDAO instance) {
         info.setIid("" + instance.getInstanceId());
         // TODO: add process QName to instance-info schema
@@ -719,7 +743,7 @@ class ProcessAndInstanceManagementImpl
         eventInfo.setCount(flc.count);
 
         if (instance.getActivityFailureCount() > 0) {
-          TInstanceInfo.Failures failures = info.addNewFailures();
+          TFailuresInfo failures = info.addNewFailures();
           failures.setDtFailure(toCalendar(instance.getActivityFailureDateTime()));
           failures.setCount(instance.getActivityFailureCount());
         }
@@ -769,7 +793,7 @@ class ProcessAndInstanceManagementImpl
             for (ActivityInfoDocument ai : b.getActivities()) {
                 for (ActivityRecoveryDAO recovery : recoveries) {
                   if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
-                    TActivityInfo.Failure failure = ai.getActivityInfo().addNewFailure();
+                    TFailureInfo failure = ai.getActivityInfo().addNewFailure();
                     failure.setReason(recovery.getReason());
                     failure.setDtFailure(toCalendar(recovery.getDateTime()));
                     failure.setActions(recovery.getActions());
