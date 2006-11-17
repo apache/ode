@@ -164,6 +164,7 @@ public class ODEServer {
             _poller.stop();
             _poller = null;
         }
+        
         try {
             _server.stop();
         } catch (Throwable ex) {
@@ -367,14 +368,6 @@ public class ODEServer {
                 HibernateTransactionManagerLookup.class.getName());
 //        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
 
-        try {
-            properties.put(Environment.DIALECT, guessDialect(_datasource));
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-            __log.error(errmsg,ex);
-            throw new ServletException(errmsg,ex);
-        }
-
         File hibernatePropFile;
         String confDir = System.getProperty("org.apache.ode.configDir");
         if (confDir != null) hibernatePropFile = new File(confDir, "hibernate.properties");
@@ -386,16 +379,25 @@ public class ODEServer {
                 fis = new FileInputStream(hibernatePropFile);
                 properties.load(new BufferedInputStream(fis));
             } catch (IOException e) {
-                String errmsg = __msgs
-                        .msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
+                String errmsg = __msgs.msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
                 __log.error(errmsg, e);
                 throw new ServletException(errmsg, e);
             }
         } else {
-            __log.info(__msgs
-                    .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
+            __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
         }
 
+        // Guess Hibernate dialect if not specified in hibernate.properties
+        if (properties.get(Environment.DIALECT) == null) {
+            try {
+                properties.put(Environment.DIALECT, guessDialect(_datasource));
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
+                else __log.error(errmsg);
+            }
+        }
+        
         SessionManager sm = new SessionManager(properties, _datasource, _txMgr);
         _daoCF = new BpelDAOConnectionFactoryImpl(sm);
     }
