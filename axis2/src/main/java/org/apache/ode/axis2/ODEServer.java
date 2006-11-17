@@ -160,8 +160,10 @@ public class ODEServer {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
-        _poller.stop();
-        _poller = null;
+        if (_poller != null) {
+            _poller.stop();
+            _poller = null;
+        }
         try {
             _server.stop();
         } catch (Throwable ex) {
