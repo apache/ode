@@ -173,7 +173,7 @@
                 <include name="**/*.hbm.xml"/>
             </fileset>
         </schemaexport>
-;    </target>
+    </target>
 
 </project>
 
