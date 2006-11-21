@@ -29,8 +29,6 @@ import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.jacob.IndexedObject;
 
-import org.w3c.dom.Element;
-
 /**
  * Base template for activities.
  */
