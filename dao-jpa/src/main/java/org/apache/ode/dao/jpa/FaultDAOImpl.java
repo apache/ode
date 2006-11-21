@@ -22,6 +22,8 @@ package org.apache.ode.dao.jpa;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -37,7 +39,9 @@ import org.w3c.dom.Element;
 @Table(name="ODE_FAULT")
 public class FaultDAOImpl implements FaultDAO {
 
-	@Id @Column(name="FAULT_ID") private Long _id;
+	@Id @Column(name="FAULT_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Basic @Column(name="NAME") private QName _name;
 	@Basic @Column(name="MESSAGE") private String _explanation;
 	@Lob @Column(name="DATA") private String _data;

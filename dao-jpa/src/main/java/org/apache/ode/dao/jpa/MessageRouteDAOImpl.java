@@ -24,6 +24,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -37,7 +39,9 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 @Table(name="ODE_MESSAGE_ROUTE")
 public class MessageRouteDAOImpl implements MessageRouteDAO {
 	
-	@Id @Column(name="MESSAGE_ROUTE_ID") private Long _id;
+	@Id @Column(name="MESSAGE_ROUTE_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Basic @Column(name="GROUP_ID") private String _groupId;
 	@Basic @Column(name="INDEX") private int _index;
 	@Basic @Column(name="CORRELATION_KEY") private CorrelationKey _correlationKey;

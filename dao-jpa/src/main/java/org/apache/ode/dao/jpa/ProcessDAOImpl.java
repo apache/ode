@@ -8,6 +8,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -26,7 +28,9 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 @Table(name="ODE_PROCESS")
 public class ProcessDAOImpl implements ProcessDAO {
 	
-	@Id @Column(name="PROCESS_ID") private Long _id;
+	@Id @Column(name="PROCESS_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Basic @Column(name="NUMBER_OF_INSTANCES") private int _numInstances;
 	@Basic @Column(name="PROCESS_KEY") private QName _processKey;
 	@Basic @Column(name="PROCESS_TYPE") private QName _processType;

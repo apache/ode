@@ -28,6 +28,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -48,7 +50,9 @@ import org.apache.ode.bpel.evt.BpelEvent;
 @Table(name="ODE_SCOPE")
 public class ScopeDAOImpl implements ScopeDAO {
 	
-	@Id @Column(name="SCOPE_ID") private Long _scopeInstanceId;
+	@Id @Column(name="SCOPE_ID")
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _scopeInstanceId;
 	@Basic @Column(name="MODEL_ID") private int _modelId;
 	@Basic @Column(name="SCOPE_NAME") private String _name;
 	@Basic @Column(name="SCOPE_STATE") private String _scopeState;
