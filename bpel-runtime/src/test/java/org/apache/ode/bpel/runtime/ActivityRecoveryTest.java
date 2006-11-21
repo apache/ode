@@ -45,7 +45,7 @@ import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.utils.DOMUtils;
 
 /**
- * Test core BPEL processing capabilities.
+ * Test activity recovery and failure handling.
  */
 public class ActivityRecoveryTest extends TestCase {
 
