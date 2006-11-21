@@ -23,6 +23,8 @@ package org.apache.ode.dao.jpa;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -38,7 +40,9 @@ import org.w3c.dom.Element;
 @Table(name="ODE_PARTNER_LINK")
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	
-	@Id @Column(name="PARTNER_LINK_ID") private Long _id;
+	@Id @Column(name="PARTNER_LINK_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Lob @Column(name="MY_EPR") private String _myEPR;
 	@Transient private Element _myEPRElement;
 	@Basic @Column(name="MY_ROLE_NAME") private String _myRoleName;

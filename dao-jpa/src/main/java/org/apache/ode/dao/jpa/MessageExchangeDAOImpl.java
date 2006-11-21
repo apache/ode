@@ -32,6 +32,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -55,7 +57,9 @@ import org.w3c.dom.Element;
 @Table(name="ODE_MESSAGE_EXCHANGE")
 public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
-	@Id @Column(name="MESSAGE_EXCHANGE_ID") private Long _id;
+	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Basic @Column(name="CALLEE") private QName _callee;
 	@Basic @Column(name="CHANNEL") private String _channel;
 	@Basic @Column(name="CORRELATION_ID") private String _correlationId;

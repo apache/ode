@@ -27,6 +27,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -41,7 +43,9 @@ import org.apache.ode.bpel.dao.ScopeDAO;
 @Table(name="ODE_CORRELATION_SET")
 public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 
-	@Id @Column(name="CORRELATION_SET_ID") private Long _correlationSetId;
+	@Id @Column(name="CORRELATION_SET_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _correlationSetId;
 	@Basic @Column(name="NAME") private String _name;
 	@Basic @Column(name="PROPERTIES") private HashMap<QName,String> _props = new HashMap<QName,String>();
 	@Basic @Column(name="CORRELATION_KEY") private CorrelationKey _correlationKey;

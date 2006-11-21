@@ -13,6 +13,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -40,7 +42,9 @@ import org.w3c.dom.Element;
 @Table(name="ODE_PROCESS_INSTANCE")
 public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
-	@Id @Column(name="PROCESS_INSTANCE_ID") private Long _instanceId;
+	@Id @Column(name="PROCESS_INSTANCE_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _instanceId;
 	@Basic @Column(name="LAST_RECOVERY_DATE") private Date _lastRecovery;
 	@Basic @Column(name="LAST_ACTIVE_TIME") private Date _lastActive;
 	@Basic @Column(name="INSTANCE_STATE") private short _state;
