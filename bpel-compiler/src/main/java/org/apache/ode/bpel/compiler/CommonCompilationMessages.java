@@ -173,6 +173,11 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             className);
     }
 
+    /** Process has no root activity. */
+    public CompilationMessage errNoRootActivity() {
+        return this.formatCompilationMessage("Process has no root activity.");
+    }
+
     /** The expression language "{0}" is unrecognized. */
     public CompilationMessage errUnknownExpressionLanguage(String expressionLanguage) {
         return this.formatCompilationMessage("The expression language \"{0}\" is unrecognized.",

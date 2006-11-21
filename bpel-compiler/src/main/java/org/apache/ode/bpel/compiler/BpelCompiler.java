@@ -269,8 +269,7 @@ abstract class BpelCompiler implements CompilerContext {
 
     public OProcess.OProperty resolveProperty(QName name) {
 
-        for (Iterator<OProcess.OProperty> i = _oprocess.properties.iterator(); i.hasNext(); ) {
-            OProcess.OProperty prop = i.next();
+        for (OProcess.OProperty prop : _oprocess.properties) {
             if (prop.name.equals(name))
                 return prop;
         }
@@ -612,7 +611,10 @@ abstract class BpelCompiler implements CompilerContext {
         procesScope.debugInfo = createDebugInfo(process, null);
         _oprocess.procesScope = compileScope(procesScope, process, new Runnable() {
             public void run() {
-                _structureStack.topScope().activity = compile(process.getRootActivity());
+            	if (process.getRootActivity() == null) {
+                    throw new CompilationException(__cmsgs.errNoRootActivity());
+            	}            		
+	    		_structureStack.topScope().activity = compile(process.getRootActivity());
             }
         });
 
@@ -793,12 +795,12 @@ abstract class BpelCompiler implements CompilerContext {
 
     private void compileLinks(Activity source) {
         /*Source Links Fixup */
-        for (Iterator<LinkSource> i = source.getLinkSources().iterator(); i.hasNext(); )
-            compileLinkSource(i.next());
+        for (LinkSource ls : source.getLinkSources())
+            compileLinkSource(ls);
 
         /*Target Links Fixup*/
-        for (Iterator<LinkTarget> i = source.getLinkTargets().iterator(); i.hasNext(); )
-            compileLinkTarget(i.next());
+        for (LinkTarget lt : source.getLinkTargets())
+            compileLinkTarget(lt);
 
         _structureStack.topActivity().joinCondition = (source.getJoinCondition() == null || source.getLinkTargets().isEmpty())
                 ?  null
@@ -967,8 +969,7 @@ abstract class BpelCompiler implements CompilerContext {
 
         compile(oscope, src, new Runnable() {
             public void run() {
-                for (Iterator<Variable> i = src.getVariables().iterator();i.hasNext(); ) {
-                    Variable var = i.next();
+                for (Variable var : src.getVariables()) {
                     try {
                         compile(var);
                     } catch (CompilationException ce) {
@@ -976,8 +977,7 @@ abstract class BpelCompiler implements CompilerContext {
                     }
                 }
 
-                for (Iterator<CorrelationSet> i = src.getCorrelationSetDecls().iterator();i.hasNext();) {
-                    CorrelationSet cset = i.next();
+                for (CorrelationSet cset : src.getCorrelationSetDecls()) {
                     try {
                         compile(cset);
                     } catch (CompilationException ce) {
@@ -985,8 +985,7 @@ abstract class BpelCompiler implements CompilerContext {
                     }
                 }
 
-                for (Iterator<PartnerLink> i = src.getPartnerLinks().iterator();i.hasNext();) {
-                    PartnerLink plink = i.next();
+                for (PartnerLink plink : src.getPartnerLinks()) {
                     try {
                         compile(plink);
                     } catch (CompilationException ce) {
@@ -1001,8 +1000,7 @@ abstract class BpelCompiler implements CompilerContext {
                 }
 
 
-                for (Iterator<OnEvent> i = src.getEvents().iterator(); i.hasNext(); ){
-                    OnEvent onEvent = i.next();
+                for (OnEvent onEvent : src.getEvents()) {
                     try {
                         compile(onEvent);
                     } catch (CompilationException ce) {
@@ -1010,8 +1008,7 @@ abstract class BpelCompiler implements CompilerContext {
                     }
                 }
 
-                for (Iterator<OnAlarm> i = src.getAlarms().iterator(); i.hasNext(); ) {
-                    OnAlarm onAlarm = i.next();
+                for (OnAlarm onAlarm : src.getAlarms()) {
                     try {
                         compile(onAlarm);
                     } catch (CompilationException ce) {
@@ -1039,7 +1036,6 @@ abstract class BpelCompiler implements CompilerContext {
                 } catch (CompilationException bce) {
                     recoveredFromError(src.getTerminationHandler(), bce);
                 }
-
 
                 try {
                     compile(src.getFaultHandler());
@@ -1076,16 +1072,16 @@ abstract class BpelCompiler implements CompilerContext {
         oalarm.activity = compile(onAlarm.getActivity());
 
         // Check links crossing restrictions.
-        for (Iterator<OLink> i = oalarm.incomingLinks.iterator(); i.hasNext(); )
+        for (OLink link : oalarm.incomingLinks)
             try {
-                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(i.next().name).setSource(onAlarm));
+                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(link.name).setSource(onAlarm));
             } catch (CompilationException ce) {
                 recoveredFromError(onAlarm, ce);
             }
 
-        for (Iterator<OLink> i = oalarm.outgoingLinks.iterator(); i.hasNext(); )
+        for (OLink link : oalarm.outgoingLinks)
             try {
-                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(i.next().name).setSource(onAlarm));
+                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(link.name).setSource(onAlarm));
             } catch (CompilationException ce) {
                 recoveredFromError(onAlarm, ce);
             }
@@ -1155,8 +1151,7 @@ abstract class BpelCompiler implements CompilerContext {
                             throw new CompilationException(__cmsgs.errTODO("Rendezvous."));
                     }
 
-                    for (Iterator<OProcess.OProperty> j = cset.properties.iterator(); j.hasNext(); ) {
-                        OProcess.OProperty property = j.next();
+                    for (OProcess.OProperty property : cset.properties) {
                         // Force resolution of alias, to make sure that we have one for this variable-property pair.
                         resolvePropertyAlias(oevent.variable, property.name);
                     }
@@ -1167,16 +1162,16 @@ abstract class BpelCompiler implements CompilerContext {
             }});
 
         // Check links crossing restrictions.
-        for (Iterator<OLink> i = oevent.incomingLinks.iterator(); i.hasNext(); )
+        for (OLink link : oevent.incomingLinks)
             try {
-                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(i.next().name));
+                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(link.name));
             } catch (CompilationException ce) {
                 recoveredFromError(onEvent, ce);
             }
 
-        for (Iterator<OLink> i = oevent.outgoingLinks.iterator(); i.hasNext(); )
+        for (OLink link : oevent.outgoingLinks)
             try {
-                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(i.next().name));
+                throw new CompilationException(__cmsgs.errLinkCrossesEventHandlerBoundary(link.name));
             } catch (CompilationException ce) {
                 recoveredFromError(onEvent, ce);
             }
@@ -1404,8 +1399,7 @@ abstract class BpelCompiler implements CompilerContext {
 
         Class actClass = source.getClass();
 
-        for (Iterator<Map.Entry<Class,ActivityGenerator>> i = _actGenerators.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry<Class,ActivityGenerator> me = i.next();
+        for (Map.Entry<Class,ActivityGenerator> me : _actGenerators.entrySet()) {
             Class<?> cls = me.getKey();
             if (cls.isAssignableFrom(actClass)) {
                 ActivityGenerator gen = me.getValue();
