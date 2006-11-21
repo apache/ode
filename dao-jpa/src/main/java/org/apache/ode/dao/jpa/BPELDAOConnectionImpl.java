@@ -9,6 +9,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -30,6 +32,7 @@ import org.apache.ode.bpel.evt.BpelEvent;
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
 	@Id @Column(name="ROOT_ID")
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
 	
 	@OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})

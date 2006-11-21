@@ -26,6 +26,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -45,7 +47,9 @@ import org.w3c.dom.Text;
 @Table(name="ODE_XML_DATA")
 public class XmlDataDAOImpl implements XmlDataDAO {
 	
-	@Id @Column(name="XML_DATA_ID") private Long _id;
+	@Id @Column(name="XML_DATA_ID") 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long _id;
 	@Lob @Column(name="DATA") private String _data;
 	@Transient private Node _node;
 	@Basic @Column(name="IS_SIMPLE_TYPE") private boolean _isSimpleType;
