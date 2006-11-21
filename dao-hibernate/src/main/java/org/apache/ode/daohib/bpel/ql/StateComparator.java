@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.daohib.ql.instances;
+package org.apache.ode.daohib.bpel.ql;
 
 import java.util.Comparator;
 

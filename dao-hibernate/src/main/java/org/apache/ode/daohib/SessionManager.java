@@ -19,7 +19,6 @@
 package org.apache.ode.daohib;
 
 import org.apache.ode.daohib.bpel.hobj.*;
-import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.uuid.UUID;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;

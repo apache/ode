@@ -21,11 +21,11 @@ package org.apache.ode.daohib.bpel;
 
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
-import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
@@ -241,11 +241,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setProcess(ProcessDAO process) {
         if (process == null || process instanceof ProcessDaoImpl) {
-            _hself.setProcess(process == null ? null : (HProcess) ((ProcessDaoImpl) process).getHibernateObj());
-            update();
+        _hself.setProcess(process == null ? null : (HProcess) ((ProcessDaoImpl) process).getHibernateObj());
+        update();
         } else {
             _externalProcess = process;
-        }
+    }
     }
 
     public void setInstance(ProcessInstanceDAO instance) {
@@ -255,7 +255,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         update();
         } else {
             _externalInstance = instance;
-        }
+    }
 
     }
 

@@ -18,8 +18,6 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-import org.apache.ode.daohib.hobj.HLargeData;
-import org.apache.ode.daohib.hobj.HObject;
 
 /**
  * Hibernate-managed table for keeping track of messages.

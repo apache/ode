@@ -18,7 +18,6 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-import org.apache.ode.daohib.hobj.HObject;
 
 /**
  * Hibernate table for representing the pre-computed keys for a message

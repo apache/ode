@@ -19,7 +19,7 @@
 package org.apache.ode.daohib.bpel;
 
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.hobj.HObject;
+import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.hibernate.Session;
 
 import java.io.Serializable;
