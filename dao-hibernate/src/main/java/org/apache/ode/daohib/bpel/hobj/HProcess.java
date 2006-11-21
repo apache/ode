@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.ode.daohib.hobj.HObject;
 
 /**
  * Hibernate table representing a BPEL process (<em>not</em> a process instance).
