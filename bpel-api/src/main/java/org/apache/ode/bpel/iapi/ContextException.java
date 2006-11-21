@@ -20,16 +20,19 @@
 package org.apache.ode.bpel.iapi;
 
 /**
- * Exception thrown by the integration layer. 
- *
+ * Exception thrown by the integration layer.
+ * 
  */
 public class ContextException extends RuntimeException {
 
-  public ContextException() {
-    super();
-  }
-  public ContextException(String string, Exception ex) {
-    super(string,ex);
-  }
+	private static final long serialVersionUID = -3359898226556748371L;
+
+	public ContextException() {
+		super();
+	}
+
+	public ContextException(String string, Exception ex) {
+		super(string, ex);
+	}
 
 }
