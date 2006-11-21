@@ -151,7 +151,7 @@ public class HProcessConf {
     /**
      * The process status.
      * @hibernate.property
-     *    column="ACTIVE"
+     *    column="ACTIVE_"
      */
     public boolean isActive() {
         return _active;
