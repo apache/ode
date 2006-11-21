@@ -18,6 +18,7 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -69,6 +70,10 @@ public class HProcess extends HObject{
     private boolean _retired;
 
     private boolean _active;
+
+    private HLargeData _compiledProcess;
+
+    private String _guid;
 
     /**
      * @hibernate.set
@@ -259,4 +264,14 @@ public class HProcess extends HObject{
         _active = active;
     }
 
+    public void setGuid(String guid) {
+        _guid = guid;
+    }
+
+    /**
+     * @hibernate.property
+     */
+    public String getGuid() {
+        return _guid;
+    }
 }

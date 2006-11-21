@@ -18,7 +18,6 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-import org.apache.ode.daohib.hobj.HObject;
 
 /**
  * @hibernate.class table="BPEL_UNMATCHED" lazy="true"

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.daohib.hobj;
+package org.apache.ode.daohib.bpel.hobj;
 
 import java.util.Date;
 

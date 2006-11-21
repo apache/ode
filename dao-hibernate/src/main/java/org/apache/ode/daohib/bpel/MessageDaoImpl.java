@@ -28,8 +28,8 @@ import org.w3c.dom.Element;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
-import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.DOMUtils;
 
 public class MessageDaoImpl extends HibernateDao implements MessageDAO {

@@ -145,4 +145,8 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 		return _process.getInstances().size();
 	}
 
+    public String getGuid() {
+        return _process.getGuid();
+    }
+
 }
