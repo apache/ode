@@ -18,17 +18,12 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.compiler.bom.FailureHandling;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
 /**
@@ -36,7 +31,6 @@ import org.w3c.dom.Element;
  */
 abstract class DefaultActivityGenerator implements ActivityGenerator {
     protected CompilerContext _context;
-    private static final CommonCompilationMessages __cmsgs = MessageBundle.getMessages(CommonCompilationMessages.class);
 
     public void setContext(CompilerContext context) {
         _context = context;

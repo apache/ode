@@ -23,29 +23,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.InvokeActivity;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.w3c.dom.Element;
 
 /**
  * Generates code for <code>&lt;invoke&gt;</code> activities.
  */
 class InvokeGenerator extends DefaultActivityGenerator {
-
-    private static final CommonCompilationMessages __cmsgs = MessageBundle.getMessages(CommonCompilationMessages.class);
 
     private static final InvokeGeneratorMessages __imsgs = MessageBundle.getMessages(InvokeGeneratorMessages.class);
 

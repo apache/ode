@@ -22,18 +22,20 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 
 import org.jaxen.JaxenException;
 
-
 /**
- * Jaxen-compliant wrapper for {@link org.apache.ode.bpel.compiler.api.CompilationException}.
+ * Jaxen-compliant wrapper for
+ * {@link org.apache.ode.bpel.compiler.api.CompilationException}.
  */
 class CompilationExceptionWrapper extends JaxenException {
 
-  public CompilationExceptionWrapper(CompilationException cause) {
-    super(cause);
-    assert getCompilationException() != null;
-  }
+	private static final long serialVersionUID = -6918197147269316065L;
 
-  public CompilationException getCompilationException() {
-    return (CompilationException) getCause();
-  }
+	public CompilationExceptionWrapper(CompilationException cause) {
+		super(cause);
+		assert getCompilationException() != null;
+	}
+
+	public CompilationException getCompilationException() {
+		return (CompilationException) getCause();
+	}
 }
