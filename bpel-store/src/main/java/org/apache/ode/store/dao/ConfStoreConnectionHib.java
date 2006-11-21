@@ -43,8 +43,8 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
     private final SessionFactory _sessionFactory;
     private static TransactionManager _txMgr = null;
 
-    public ConfStoreConnectionHib(DataSource _ds, File appRoot, TransactionManager txMgr) {
-        org.apache.ode.store.dao.ConfStoreConnectionHib._ds = _ds;
+    public ConfStoreConnectionHib(DataSource dataSource, File appRoot, TransactionManager txMgr) {
+        _ds = dataSource;
         _txMgr = txMgr;
         Properties properties = new Properties();
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
@@ -54,14 +54,6 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
             properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
         } else {
             properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-        }
-
-        try {
-            properties.put(Environment.DIALECT, guessDialect(_ds));
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-            __log.error(errmsg,ex);
-            throw new BpelEngineException(errmsg,ex);
         }
 
         File hibernatePropFile;
@@ -82,6 +74,17 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
             }
         } else {
             __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
+        }
+        
+        // Guess Hibernate dialect if not specified in hibernate.properties
+        if (properties.get(Environment.DIALECT) == null) {
+            try {
+                properties.put(Environment.DIALECT, guessDialect(dataSource));
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
+                else __log.error(errmsg);
+            }
         }
 
         _sessionFactory = getDefaultConfiguration().setProperties(properties).buildSessionFactory();
