@@ -97,13 +97,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
     }
 
-    public ProcessDAO createProcess(QName pid, QName type, String guid) {
+    public ProcessDAO createProcess(QName pid, QName type) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());
         process.setTypeNamespace(type.getNamespaceURI());
         process.setDeployDate(new Date());
-        process.setGuid(guid);
+        process.setGuid("noguid");
         _session.save(process);
         return new ProcessDaoImpl(_sm, process);
     }
