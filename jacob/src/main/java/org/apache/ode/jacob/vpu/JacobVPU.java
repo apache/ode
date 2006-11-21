@@ -18,28 +18,19 @@
  */
 package org.apache.ode.jacob.vpu;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jacob.*;
+import org.apache.ode.jacob.soup.*;
+import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.msg.MessageBundle;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.ChannelListener;
-import org.apache.ode.jacob.JacobObject;
-import org.apache.ode.jacob.JacobRunnable;
-import org.apache.ode.jacob.JacobThread;
-import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.soup.CommChannel;
-import org.apache.ode.jacob.soup.CommGroup;
-import org.apache.ode.jacob.soup.CommRecv;
-import org.apache.ode.jacob.soup.CommSend;
-import org.apache.ode.jacob.soup.Continuation;
-import org.apache.ode.jacob.soup.ExecutionQueue;
-import org.apache.ode.utils.ArrayUtils;
-import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.utils.msg.MessageBundle;
+import java.util.Stack;
 
 /**
  * The JACOB Virtual Processing Unit ("VPU").
@@ -55,9 +46,9 @@ public final class JacobVPU {
     private static final JacobMessages __msgs = MessageBundle.getMessages(JacobMessages.class);
 
     /** 
-     * Thread-local for associating a thread with a VPU. 
+     * Thread-local for associating a thread with a VPU. Needs to be stored in a stack to allow reentrance.
      */
-    static final ThreadLocal<JacobThread> __activeJacobThread = new ThreadLocal<JacobThread>();
+    static final ThreadLocal<Stack<JacobThread>> __activeJacobThread = new ThreadLocal<Stack<JacobThread>>();
 
     private static final Method REDUCE_METHOD;
 
@@ -209,7 +200,7 @@ public final class JacobVPU {
      * Get the active Jacob thread, i.e. the one associated with the current Java thread.
      */
     public static JacobThread activeJacobThread() {
-        return __activeJacobThread.get();
+        return __activeJacobThread.get().peek();
     }
 
     /**
@@ -232,15 +223,15 @@ public final class JacobVPU {
         Method[] methods = kind.getMethods();
         boolean found = false;
 
-        for (int i = 0; i<methods.length; ++i) {
-            if (methods[i].getDeclaringClass() == Object.class) {
+        for (Method method : methods) {
+            if (method.getDeclaringClass() == Object.class) {
                 continue;
             }
             if (found) {
                 buf.append(" & ");
             }
-            buf.append(methods[i].getName()).append('(');
-            Class[] argTypes = methods[i].getParameterTypes();
+            buf.append(method.getName()).append('(');
+            Class[] argTypes = method.getParameterTypes();
             for (int j = 0; j < argTypes.length; ++j) {
                 if (j > 0) {
                     buf.append(", ");
@@ -443,7 +434,6 @@ public final class JacobVPU {
             assert _methodBody != null;
             assert _method != null;
             assert _method.getDeclaringClass().isAssignableFrom(_methodBody.getClass());
-            assert __activeJacobThread.get() == null;
 
             if (__log.isTraceEnabled()) {
                 String dbgMsg = _cycle + ": " + _source;
@@ -461,7 +451,7 @@ public final class JacobVPU {
                 args = _args;
                 synchChannel = null;
             }
-            __activeJacobThread.set(this);
+            stackThread();
             long ctime = System.currentTimeMillis();
             try {
                 _method.invoke(_methodBody, args);
@@ -481,15 +471,28 @@ public final class JacobVPU {
             } finally {
                 ctime = System.currentTimeMillis() - ctime;
                 _statistics.totalClientTimeMs += ctime;
-                __activeJacobThread.set(null);
+                unstackThread();
                 _prefix = null;
             }
-
-            assert __activeJacobThread.get() == null;
         }
 
         public String toString() {
             return "PT[ " + _methodBody + " ]";
+        }
+
+        private void stackThread() {
+            Stack<JacobThread> currStack = __activeJacobThread.get();
+            if (currStack == null) {
+                currStack = new Stack<JacobThread>();
+                __activeJacobThread.set(currStack);
+            }
+            currStack.push(this);
+        }
+
+        private JacobThread unstackThread() {
+            Stack<JacobThread> currStack = __activeJacobThread.get();
+            assert currStack != null;
+            return currStack.pop();
         }
     }
 
