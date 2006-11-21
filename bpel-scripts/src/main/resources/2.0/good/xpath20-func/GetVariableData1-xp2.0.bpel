@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -60,7 +61,7 @@ bpws:getVariableData(varname, partname) Test Case
 
       <copy>
         <from>
-        	bpws:getVariableData('var1','StringPart1')
+        	$var1.StringPart1
        	</from>
         <to variable="var1" part="StringPart2"/>
       </copy>
