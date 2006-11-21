@@ -23,12 +23,15 @@ import org.w3c.dom.Node;
 
 class BpelDocumentNavigator extends DocumentNavigator {
 
-  private Node _documentRoot;
-  BpelDocumentNavigator(Node docRoot) {
-    _documentRoot = docRoot;
-  }
+	private static final long serialVersionUID = 6819182571668269841L;
 
-  public Object getDocumentNode(Object contextNode) {
-	  return _documentRoot;
-  }
+	private Node _documentRoot;
+
+	BpelDocumentNavigator(Node docRoot) {
+		_documentRoot = docRoot;
+	}
+
+	public Object getDocumentNode(Object contextNode) {
+		return _documentRoot;
+	}
 }

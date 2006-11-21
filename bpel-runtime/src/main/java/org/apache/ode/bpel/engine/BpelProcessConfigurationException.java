@@ -22,7 +22,9 @@ package org.apache.ode.bpel.engine;
  * Exception indicating a problem with the BPEL process configuration.
  */
 class BpelProcessConfigurationException extends Exception {
-  public BpelProcessConfigurationException(String s) {
-    super(s);
-  }
+	private static final long serialVersionUID = 2556579467398008218L;
+
+	public BpelProcessConfigurationException(String s) {
+		super(s);
+	}
 }
