@@ -23,13 +23,13 @@ import java.util.Collection;
 
 public class Conjunction extends AbstractLogicExpr {
 
-    /**
+	private static final long serialVersionUID = -470480764480851402L;
+
+	/**
      * @param childs
      */
     public Conjunction(final Collection<LogicNode> childs) {
         super(childs);
     }
-
-
     
 }
