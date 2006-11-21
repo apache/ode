@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<process name="SameTransaction"
+         targetNamespace="http://ode.apache.org/bpel/unit-test" 
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode.apache.org/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <import location="services.wsdl"
+          namespace="http://ode.apache.org/bpel/unit-test"
+          importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+  <partnerLinks>
+    <partnerLink name="instantiatingPartnerLink" 
+                 partnerLinkType="tns:InstantiatingPartnerLinkType" 
+                 myRole="me" partnerRole="partner" initializePartnerRole="yes"/>
+    <partnerLink name="resourcePartnerLink" 
+                 partnerLinkType="tns:ResourcePartnerLinkType" 
+                 partnerRole="partner" initializePartnerRole="yes"/>
+  </partnerLinks>
+    
+  <variables>
+    <variable name="request" messageType="tns:Request"/>
+    <variable name="response" messageType="tns:Response"/>
+  </variables>
+
+  <sequence>   
+    <receive name="start"
+             partnerLink="instantiatingPartnerLink"
+             portType="tns:InstantiatingPortType"
+             operation="instantiate"
+             variable="request"
+             createInstance="yes"/>
+    <invoke name="invoke"
+            partnerLink="resourcePartnerLink"
+            portType="tns:ResourcePortType"
+            operation="invoke"
+            inputVariable="request"
+            outputVariable="response"/>
+    <invoke name="invoke"
+            partnerLink="resourcePartnerLink"
+            portType="tns:ResourcePortType"
+            operation="invoke"
+            inputVariable="request"
+            outputVariable="response"/>
+    <invoke name="response"
+            partnerLink="instantiatingPartnerLink"
+            portType="tns:ResponsePortType"
+            operation="respond"
+            inputVariable="response"/>
+  </sequence>
+
+</process>
