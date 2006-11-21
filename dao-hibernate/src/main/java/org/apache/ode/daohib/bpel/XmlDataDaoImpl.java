@@ -21,7 +21,7 @@ package org.apache.ode.daohib.bpel;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.hobj.HLargeData;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
 import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.apache.ode.utils.DOMUtils;

@@ -26,7 +26,7 @@ import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BaseDAOTest;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
-import org.apache.ode.daohib.ql.instances.HibernateInstancesQueryCompiler;
+import org.apache.ode.daohib.bpel.ql.HibernateInstancesQueryCompiler;
 import org.apache.ode.ql.eval.skel.CommandEvaluator;
 import org.apache.ode.ql.tree.Builder;
 import org.apache.ode.ql.tree.BuilderFactory;

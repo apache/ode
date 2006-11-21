@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.daohib.hobj;
+package org.apache.ode.daohib.bpel.hobj;
 
 /**
  * Used to store large data sets into a single table. When an HObject
@@ -47,8 +47,8 @@ public class HLargeData extends HObject {
    * @hibernate.property 
    *    type="binary"
    *     length="2G"
-   *
-   * @hibernate.column
+   * 
+   * @hibernate.column 
    *    name="BIN_DATA"
    *    sql-type="blob(2G)"
    */
