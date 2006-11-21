@@ -249,20 +249,7 @@ public class HProcess extends HObject{
     /**
      * The process status.
      * @hibernate.property
-     *    column="RETIRED"
-     */
-    public boolean isRetired() {
-        return _retired;
-    }
-
-    public void setRetired(boolean retired) {
-        this._retired = retired;
-    }
-
-    /**
-     * The process status.
-     * @hibernate.property
-     *    column="ACTIVE"
+     *    column="ACTIVE_"
      */
     public boolean isActive() {
         return _active;
