@@ -246,18 +246,30 @@
             <id>intalio</id>
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
+            <snapshots>
+               <enabled>false</enabled>
+               <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
 <!-- Repository is down;
         <repository>
             <id>apache-incubator</id>
             <name>Apache Incubator Repository</name>
             <url>http://people.apache.org/repo/m2-incubating-repository</url>
+            <snapshots>
+               <enabled>false</enabled>
+               <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
 -->        
         <repository>
             <id>central</id>
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+               <enabled>false</enabled>
+               <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
         <repository>
             <id>ibiblio</id>
@@ -269,12 +281,20 @@
             <name>Apache Repository</name>
             <url>http://cvs.apache.org/repository</url>
             <layout>legacy</layout>
+            <snapshots>
+               <enabled>false</enabled>
+               <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
         <repository>
             <id>ode</id>
             <name>Apache Ode Repository</name>
             <url>http://incubator.apache.org/ode/m2</url>
             <layout>legacy</layout>
+            <snapshots>
+               <enabled>false</enabled>
+               <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
 -->
     </repositories>
