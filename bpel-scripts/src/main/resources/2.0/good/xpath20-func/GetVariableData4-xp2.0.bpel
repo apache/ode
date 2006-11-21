@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -60,7 +61,7 @@ bpws:getVariableData(varname, partname,query) Test Case
     <assign name="assign1">
 
       <copy>
-        <from>bpws:getVariableData('var1','Complex1Part1','/test:Complex1/test:StringElement')</from>
+        <from>$var1.Complex1Part1/test:Complex1/test:StringElement</from>
         <to variable="var1" part="StringPart2"/>
       </copy>
     </assign>
