@@ -18,7 +18,6 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-import org.apache.ode.daohib.hobj.HObject;
 
 import java.util.HashSet;
 import java.util.Set;

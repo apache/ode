@@ -23,8 +23,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
-import org.apache.ode.daohib.hobj.HLargeData;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 

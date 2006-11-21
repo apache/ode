@@ -22,8 +22,6 @@ package org.apache.ode.daohib.bpel.hobj;
 
 import java.sql.Timestamp;
 
-import org.apache.ode.daohib.hobj.HObject;
-import org.apache.ode.daohib.hobj.HLargeData;
 
 /**
  * Row representation of a BPEL event. 

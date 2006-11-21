@@ -33,12 +33,12 @@ import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.bpel.hobj.HScope;
-import org.apache.ode.daohib.hobj.HLargeData;
-import org.apache.ode.daohib.ql.instances.HibernateInstancesQueryCompiler;
+import org.apache.ode.daohib.bpel.ql.HibernateInstancesQueryCompiler;
 import org.apache.ode.ql.eval.skel.CommandEvaluator;
 import org.apache.ode.ql.tree.Builder;
 import org.apache.ode.ql.tree.BuilderFactory;
@@ -97,12 +97,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
     }
 
-    public ProcessDAO createProcess(QName pid, QName type) {
+    public ProcessDAO createProcess(QName pid, QName type, String guid) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());
         process.setTypeNamespace(type.getNamespaceURI());
         process.setDeployDate(new Date());
+        process.setGuid(guid);
         _session.save(process);
         return new ProcessDaoImpl(_sm, process);
     }
