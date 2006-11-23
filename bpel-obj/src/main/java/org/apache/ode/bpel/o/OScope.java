@@ -60,6 +60,8 @@ public class OScope extends OActivity {
 
     public boolean implicitScope;
 
+    public boolean atomicScope;
+
     public OScope(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
@@ -124,6 +126,16 @@ public class OScope extends OActivity {
 
     public void addCorrelationSet(CorrelationSet ocset) {
         correlationSets.put(ocset.name, ocset);
+    }
+
+    public boolean isInAtomicScope() {
+        OActivity current = this;
+        while (current != null) {
+            if (current instanceof OScope && ((OScope)current).atomicScope)
+                return true;
+            current = current.getParent();
+        }
+        return false;
     }
 
     public String toString() {

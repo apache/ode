@@ -128,6 +128,7 @@ abstract class BpelCompiler implements CompilerContext {
             new HashMap<Class,ActivityGenerator>();
 
     private boolean _supressJoinFailure = false;
+    private boolean _atomicScope = false;
 
     /** Syntactic scope stack. */
     private StructureStack _structureStack = new StructureStack();
@@ -967,83 +968,95 @@ abstract class BpelCompiler implements CompilerContext {
 
         oscope.debugInfo = createDebugInfo(src, src.toString());
 
-        compile(oscope, src, new Runnable() {
-            public void run() {
-                for (Variable var : src.getVariables()) {
-                    try {
-                        compile(var);
-                    } catch (CompilationException ce) {
-                        recoveredFromError(var, ce);
-                    }
-                }
-
-                for (CorrelationSet cset : src.getCorrelationSetDecls()) {
-                    try {
-                        compile(cset);
-                    } catch (CompilationException ce) {
-                        recoveredFromError(cset, ce);
-                    }
-                }
-
-                for (PartnerLink plink : src.getPartnerLinks()) {
-                    try {
-                        compile(plink);
-                    } catch (CompilationException ce) {
-                        recoveredFromError(plink, ce);
-                    }
-                }
-
-
-                if (!src.getEvents().isEmpty() || !src.getAlarms().isEmpty()) {
-                    oscope.eventHandler = new OEventHandler(_oprocess);
-                    oscope.eventHandler.debugInfo = createDebugInfo(src,"Event Handler for " + src);
-                }
-
-
-                for (OnEvent onEvent : src.getEvents()) {
-                    try {
-                        compile(onEvent);
-                    } catch (CompilationException ce) {
-                        recoveredFromError(src, ce);
-                    }
-                }
-
-                for (OnAlarm onAlarm : src.getAlarms()) {
-                    try {
-                        compile(onAlarm);
-                    } catch (CompilationException ce) {
-                        recoveredFromError(src, ce);
+        boolean previousAtomicScope = _atomicScope;
+        if (src.getAtomicScope() != null) {
+            boolean newValue = src.getAtomicScope().booleanValue();
+            if (_atomicScope)
+                throw new CompilationException(__cmsgs.errAtomicScopeNesting(newValue));
+            else
+                oscope.atomicScope = _atomicScope = newValue;
+        }
+        try {
+            compile(oscope, src, new Runnable() {
+                public void run() {
+                    for (Variable var : src.getVariables()) {
+                        try {
+                            compile(var);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(var, ce);
+                        }
                     }
 
-                }
+                    for (CorrelationSet cset : src.getCorrelationSetDecls()) {
+                        try {
+                            compile(cset);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(cset, ce);
+                        }
+                    }
 
-                if (init != null)
-                    try {
-                        init.run();
-                    } catch (CompilationException ce) {
-                        recoveredFromError(src,ce);
+                    for (PartnerLink plink : src.getPartnerLinks()) {
+                        try {
+                            compile(plink);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(plink, ce);
+                        }
                     }
 
 
-                try {
-                    compile(src.getCompensationHandler());
-                } catch (CompilationException bce) {
-                    recoveredFromError(src.getCompensationHandler(), bce);
-                }
+                    if (!src.getEvents().isEmpty() || !src.getAlarms().isEmpty()) {
+                        oscope.eventHandler = new OEventHandler(_oprocess);
+                        oscope.eventHandler.debugInfo = createDebugInfo(src,"Event Handler for " + src);
+                    }
 
-                try {
-                    compile(src.getTerminationHandler());
-                } catch (CompilationException bce) {
-                    recoveredFromError(src.getTerminationHandler(), bce);
-                }
 
-                try {
-                    compile(src.getFaultHandler());
-                } catch (CompilationException bce) {
-                    recoveredFromError(src.getFaultHandler(), bce);
+                    for (OnEvent onEvent : src.getEvents()) {
+                        try {
+                            compile(onEvent);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(src, ce);
+                        }
+                    }
+
+                    for (OnAlarm onAlarm : src.getAlarms()) {
+                        try {
+                            compile(onAlarm);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(src, ce);
+                        }
+
+                    }
+
+                    if (init != null)
+                        try {
+                            init.run();
+                        } catch (CompilationException ce) {
+                            recoveredFromError(src,ce);
+                        }
+
+
+                    try {
+                        compile(src.getCompensationHandler());
+                    } catch (CompilationException bce) {
+                        recoveredFromError(src.getCompensationHandler(), bce);
+                    }
+
+                    try {
+                        compile(src.getTerminationHandler());
+                    } catch (CompilationException bce) {
+                        recoveredFromError(src.getTerminationHandler(), bce);
+                    }
+
+                    try {
+                        compile(src.getFaultHandler());
+                    } catch (CompilationException bce) {
+                        recoveredFromError(src.getFaultHandler(), bce);
+                    }
                 }
-            }
-        });
+            });
+        } finally {
+            _atomicScope = previousAtomicScope;
+        }
 
         return oscope;
     }
