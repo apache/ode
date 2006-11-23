@@ -418,4 +418,11 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
     public CompilationMessage errInvalidRetryDelayValue(String message) {
         return this.formatCompilationMessage("The retryDelay attribute must be a positive integer, found {0}", message);
     }
+
+    public CompilationMessage errAtomicScopeNesting(boolean atomic) {
+        if (atomic)
+            return this.formatCompilationMessage("Cannot nest atomic scopes inside each other.");
+        else
+            return this.formatCompilationMessage("A scope enclosed inside an atomic scope cannot declare itself as not atomic");
+    }
 }
