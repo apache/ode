@@ -151,6 +151,16 @@ public class Scope extends JoinFailureSuppressor {
         return false;
     }
 
+
+    public Boolean getAtomicScope() {
+        String value = getAttribute("atomic", null);
+        if ("yes".equals(value))
+            return Boolean.TRUE;
+        if ("no".equals(value))
+            return Boolean.FALSE;
+        return null;
+    }
+
     /**
      * Get a partnerLink declared in this scope.
      * 
