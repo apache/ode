@@ -19,54 +19,15 @@ create table BPEL_UNMATCHED (ID bigint not null auto_increment, MEX bigint not n
 create table BPEL_XML_DATA (ID bigint not null auto_increment, LDATA_ID bigint, NAME varchar(255) not null, SCOPE_ID bigint, PIID bigint, IS_SIMPLE_TYPE bit, INSERT_TIME datetime, MLOCK integer not null, primary key (ID));
 create table LARGE_DATA (ID bigint not null auto_increment, BIN_DATA blob, INSERT_TIME datetime, MLOCK integer not null, primary key (ID));
 create table VAR_PROPERTY (ID bigint not null auto_increment, XML_DATA_ID bigint, PROP_VALUE varchar(255), PROP_NAME varchar(255) not null, INSERT_TIME datetime, MLOCK integer not null, primary key (ID));
-alter table BPEL_ACTIVITY_RECOVERY add index FK94D24A7BEBD59315 (LDATA_ID), add constraint FK94D24A7BEBD59315 foreign key (LDATA_ID) references LARGE_DATA (ID);
-alter table BPEL_ACTIVITY_RECOVERY add index FK94D24A7BA821BBE1 (PIID), add constraint FK94D24A7BA821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_CORRELATION_PROP add index FK4EC9DDAA4D0B7982 (CORR_SET_ID), add constraint FK4EC9DDAA4D0B7982 foreign key (CORR_SET_ID) references BPEL_CORRELATION_SET (ID);
-alter table BPEL_CORRELATION_SET add index FKB838191BA821BBE1 (PIID), add constraint FKB838191BA821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_CORRELATION_SET add index FKB838191B6D49C363 (SCOPE_ID), add constraint FKB838191B6D49C363 foreign key (SCOPE_ID) references BPEL_SCOPE (ID);
-alter table BPEL_CORRELATION_SET add index FKB838191BE15A2343 (PROCESS_ID), add constraint FKB838191BE15A2343 foreign key (PROCESS_ID) references BPEL_PROCESS (ID);
+
 create index IDX_CORRELATOR_CID on BPEL_CORRELATOR (CID);
-alter table BPEL_CORRELATOR add index FKF50EFA33E15A2343 (PROCESS_ID), add constraint FKF50EFA33E15A2343 foreign key (PROCESS_ID) references BPEL_PROCESS (ID);
 create index IDX_BPEL_CORRELATOR_MESSAGE_CKEY on BPEL_CORRELATOR_MESSAGE_CKEY (CKEY);
-alter table BPEL_CORRELATOR_MESSAGE_CKEY add index FK8997F700EEFA7470 (CORRELATOR_MESSAGE_ID), add constraint FK8997F700EEFA7470 foreign key (CORRELATOR_MESSAGE_ID) references BPEL_UNMATCHED (ID);
-alter table BPEL_EVENT add index FKAA6D6730EBD59315 (LDATA_ID), add constraint FKAA6D6730EBD59315 foreign key (LDATA_ID) references LARGE_DATA (ID);
-alter table BPEL_EVENT add index FKAA6D6730A7EED251 (IID), add constraint FKAA6D6730A7EED251 foreign key (IID) references BPEL_INSTANCE (ID);
-alter table BPEL_EVENT add index FKAA6D6730C831CBE3 (PID), add constraint FKAA6D6730C831CBE3 foreign key (PID) references BPEL_PROCESS (ID);
-alter table BPEL_FAULT add index FKAA722EB8EBD59315 (LDATA_ID), add constraint FKAA722EB8EBD59315 foreign key (LDATA_ID) references LARGE_DATA (ID);
-alter table BPEL_INSTANCE add index FKE1DED41FDD43DBE1 (INSTANTIATING_CORRELATOR), add constraint FKE1DED41FDD43DBE1 foreign key (INSTANTIATING_CORRELATOR) references BPEL_CORRELATOR (ID);
-alter table BPEL_INSTANCE add index FKE1DED41F433A5462 (JACOB_STATE), add constraint FKE1DED41F433A5462 foreign key (JACOB_STATE) references LARGE_DATA (ID);
-alter table BPEL_INSTANCE add index FKE1DED41F1F3C9CB7 (FAULT), add constraint FKE1DED41F1F3C9CB7 foreign key (FAULT) references BPEL_FAULT (ID);
-alter table BPEL_INSTANCE add index FKE1DED41FE15A2343 (PROCESS_ID), add constraint FKE1DED41FE15A2343 foreign key (PROCESS_ID) references BPEL_PROCESS (ID);
-alter table BPEL_MESSAGE add index FK4FA7231DCA00A413 (MEX), add constraint FK4FA7231DCA00A413 foreign key (MEX) references BPEL_MESSAGE_EXCHANGE (ID);
-alter table BPEL_MESSAGE add index FK4FA7231DC3002ADB (DATA), add constraint FK4FA7231DC3002ADB foreign key (DATA) references LARGE_DATA (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD0561AB335E (LDATA_CEPR_ID), add constraint FKBDA6BD0561AB335E foreign key (LDATA_CEPR_ID) references LARGE_DATA (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD05BBA250D (PARTNERLINK), add constraint FKBDA6BD05BBA250D foreign key (PARTNERLINK) references BPEL_PLINK_VAL (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD05A821BBE1 (PIID), add constraint FKBDA6BD05A821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD059A69FCAD (LDATA_EPR_ID), add constraint FKBDA6BD059A69FCAD foreign key (LDATA_EPR_ID) references LARGE_DATA (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD05B5BD38C7 (PROCESS), add constraint FKBDA6BD05B5BD38C7 foreign key (PROCESS) references BPEL_PROCESS (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD05FF451031 (RESPONSE), add constraint FKBDA6BD05FF451031 foreign key (RESPONSE) references BPEL_MESSAGE (ID);
-alter table BPEL_MESSAGE_EXCHANGE add index FKBDA6BD0554DCEE7F (REQUEST), add constraint FKBDA6BD0554DCEE7F foreign key (REQUEST) references BPEL_MESSAGE (ID);
-alter table BPEL_MEX_PROPS add index FK203CAFC7CA00A413 (MEX), add constraint FK203CAFC7CA00A413 foreign key (MEX) references BPEL_MESSAGE_EXCHANGE (ID);
-alter table BPEL_PLINK_VAL add index FK7D71E742CA8FEABB (MYROLE_EPR), add constraint FK7D71E742CA8FEABB foreign key (MYROLE_EPR) references LARGE_DATA (ID);
-alter table BPEL_PLINK_VAL add index FK7D71E74290D95ED1 (SCOPE), add constraint FK7D71E74290D95ED1 foreign key (SCOPE) references BPEL_SCOPE (ID);
-alter table BPEL_PLINK_VAL add index FK7D71E742B5BD38C7 (PROCESS), add constraint FK7D71E742B5BD38C7 foreign key (PROCESS) references BPEL_PROCESS (ID);
-alter table BPEL_PLINK_VAL add index FK7D71E742AC89DDD7 (PARTNERROLE_EPR), add constraint FK7D71E742AC89DDD7 foreign key (PARTNERROLE_EPR) references LARGE_DATA (ID);
-alter table BPEL_PROCESS_PROPERTY add index FK4690A34F5F2D4DD4 (PROCESS_ID), add constraint FK4690A34F5F2D4DD4 foreign key (PROCESS_ID) references BPEL_PROCESS_CONF (ID);
-alter table BPEL_SCOPE add index FKAB2A32EAA821BBE1 (PIID), add constraint FKAB2A32EAA821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_SCOPE add index FKAB2A32EA42B20B58 (PARENT_SCOPE_ID), add constraint FKAB2A32EA42B20B58 foreign key (PARENT_SCOPE_ID) references BPEL_SCOPE (ID);
 create index IDX_SELECTOR_CORRELATOR on BPEL_SELECTORS (CORRELATOR);
 create index IDX_SELECTOR_CKEY on BPEL_SELECTORS (CORRELATION_KEY);
 create index IDX_SELECTOR_SELGRPID on BPEL_SELECTORS (SELGRPID);
-alter table BPEL_SELECTORS add index FKF1F83A0AA821BBE1 (PIID), add constraint FKF1F83A0AA821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_SELECTORS add index FKF1F83A0A875201C9 (CORRELATOR), add constraint FKF1F83A0A875201C9 foreign key (CORRELATOR) references BPEL_CORRELATOR (ID);
 create index IDX_UNMATCHED_CKEY on BPEL_UNMATCHED (CORRELATION_KEY);
 create index IDX_UNMATCHED_CORRELATOR on BPEL_UNMATCHED (CORRELATOR);
-alter table BPEL_UNMATCHED add index FKF0663E01CA00A413 (MEX), add constraint FKF0663E01CA00A413 foreign key (MEX) references BPEL_MESSAGE_EXCHANGE (ID);
-alter table BPEL_UNMATCHED add index FKF0663E01875201C9 (CORRELATOR), add constraint FKF0663E01875201C9 foreign key (CORRELATOR) references BPEL_CORRELATOR (ID);
-alter table BPEL_XML_DATA add index FKB7D47E7CEBD59315 (LDATA_ID), add constraint FKB7D47E7CEBD59315 foreign key (LDATA_ID) references LARGE_DATA (ID);
-alter table BPEL_XML_DATA add index FKB7D47E7CA821BBE1 (PIID), add constraint FKB7D47E7CA821BBE1 foreign key (PIID) references BPEL_INSTANCE (ID);
-alter table BPEL_XML_DATA add index FKB7D47E7C6D49C363 (SCOPE_ID), add constraint FKB7D47E7C6D49C363 foreign key (SCOPE_ID) references BPEL_SCOPE (ID);
-alter table VAR_PROPERTY add index FK9C1E2C0DA48E25F2 (XML_DATA_ID), add constraint FK9C1E2C0DA48E25F2 foreign key (XML_DATA_ID) references BPEL_XML_DATA (ID);
+
 #
 # In your Quartz properties file, you'll need to set 
 # org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate
