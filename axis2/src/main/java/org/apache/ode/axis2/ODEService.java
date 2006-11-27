@@ -31,11 +31,7 @@ import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
@@ -57,11 +53,12 @@ import java.util.Map;
 /**
  * A running service, encapsulates the Axis service, its receivers and our
  * receivers as well.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEService {
 
     private static final Log __log = LogFactory.getLog(ODEService.class);
-    private static final int TIMEOUT = 2 * 60 * 1000;
+    public static final int TIMEOUT = 2 * 60 * 1000;
 
     private AxisService _axisService;
     private BpelServer _server;
@@ -297,7 +294,7 @@ public class ODEService {
         return _axisService;
     }
 
-    class ResponseCallback {
+    static class ResponseCallback {
         private MyRoleMessageExchange _mmex;
 
         private boolean _timedout;
