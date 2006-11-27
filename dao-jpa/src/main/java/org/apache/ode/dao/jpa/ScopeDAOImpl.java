@@ -21,7 +21,9 @@ package org.apache.ode.dao.jpa;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -159,10 +161,16 @@ public class ScopeDAOImpl implements ScopeDAO {
 	}
 
 	public XmlDataDAO getVariable(String varName) {
+		XmlDataDAO ret = null;
+		
 		for (XmlDataDAO xmlElement : _variables) {
 			if ( xmlElement.getName().equals(varName)) return xmlElement;
 		}
-		return null;
+		
+		ret = new XmlDataDAOImpl(this,varName);
+		_variables.add(ret);
+		
+		return ret;
 	}
 
 	public Collection<XmlDataDAO> getVariables() {
