@@ -55,12 +55,18 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	@Basic @Column(name="IS_SIMPLE_TYPE") private boolean _isSimpleType;
 	@Basic @Column(name="IS_NULL") private boolean _isNull;
 	@Basic @Column(name="NAME") private String _name;
-	@Basic @Column(name="PROPERTIES") private Properties _props;
+	@Basic @Column(name="PROPERTIES") private Properties _props = new Properties();
 	@Version @Column(name="VERSION") private long _version;
 	
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="SCOPE_ID")
 	private ScopeDAOImpl _scope;
+	
+	public XmlDataDAOImpl() {}
+	public XmlDataDAOImpl(ScopeDAOImpl scope, String name){
+		_scope = scope;
+		_name = name;
+	}
 
 	public Node get() {
 		if ( _node == null && _data != null ) {
