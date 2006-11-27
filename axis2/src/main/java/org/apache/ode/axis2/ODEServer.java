@@ -70,6 +70,7 @@ import java.util.concurrent.Executors;
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle
  * management.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEServer {
 
@@ -423,7 +424,8 @@ public class ODEServer {
         _server.setDaoConnectionFactory(_daoCF);
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
-        _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
+        _server.setMessageExchangeContext(
+                new P2PMexContextImpl(this, new MessageExchangeContextImpl(this), _executorService, _txMgr));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
         _server.setProcessStore(_store);
