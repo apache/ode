@@ -49,6 +49,7 @@ import java.util.concurrent.Future;
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to
  * maintain the WSDL decription of used services.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ExternalService implements PartnerRoleChannel {
 
@@ -188,5 +189,13 @@ public class ExternalService implements PartnerRoleChannel {
 
     public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
         _isReplicateEmptyNS = isReplicateEmptyNS;
+    }
+
+    public String getPortName() {
+        return _portName;
+    }
+
+    public QName getServiceName() {
+        return _serviceName;
     }
 }
