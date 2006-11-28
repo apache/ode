@@ -42,6 +42,7 @@ import org.apache.ode.bpel.pmapi.TInstanceInfo;
 import org.apache.ode.bpel.pmapi.TInstanceStatus;
 import org.apache.ode.bpel.pmapi.TScopeInfo;
 import org.apache.ode.bpel.pmapi.TScopeRef;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.utils.DOMUtils;
 
 /**
