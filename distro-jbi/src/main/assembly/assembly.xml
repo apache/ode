@@ -29,8 +29,6 @@
                 <include>org.apache.ode:ode-bpel-compiler</include>
                 <include>org.apache.ode:ode-bpel-bom</include>
                 <include>org.apache.ode:ode-bpel-api</include>
-                <include>org.apache.ode:ode-bpel-el-xpath10</include>
-                <include>org.apache.ode:ode-bpel-el-xpath20</include>
                 <include>org.apache.ode:ode-bpel-obj</include>
                 <include>org.apache.ode:ode-bpel-parser</include>
                 <include>org.apache.ode:ode-bpel-schemas</include>

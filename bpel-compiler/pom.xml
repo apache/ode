@@ -46,13 +46,6 @@
             <artifactId>ode-bpel-schemas</artifactId>
         </dependency>
 
-<!--
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-el-xpath20</artifactId>
-            <scope>test</scope>
-        </dependency>
--->
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-obj</artifactId>

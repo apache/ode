@@ -102,7 +102,6 @@
     <modules>
         <module>jbi-examples</module>
         <module>tools-bin</module>
-
         <module>axis2</module>
         <module>axis2-war</module>
         <module>axis2-examples</module>
@@ -120,7 +119,6 @@
         <module>bpel-api</module>
         <module>bpel-dao</module>
         <module>bpel-api-jca</module>
-        <module>bpel-el-xpath20</module>
         <module>bpel-compiler</module>
         <module>bpel-runtime</module>
         <module>bpel-ql</module>
@@ -389,11 +387,6 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-dd</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-bpel-el-xpath20</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
