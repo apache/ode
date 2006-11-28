@@ -32,7 +32,6 @@ import org.apache.ode.bpel.evt.BpelEvent;
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
 	@Id @Column(name="ROOT_ID")
-	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
 	
 	@OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
@@ -46,6 +45,11 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
 	@OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
 	private Collection<ScopeDAOImpl> _scopes = new ArrayList<ScopeDAOImpl>();
+	
+	public BPELDAOConnectionImpl() {}
+	public BPELDAOConnectionImpl(Long id) {
+		_id = id;
+	}
 	
 	public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter,
 			BpelEventFilter efilter) {
@@ -81,6 +85,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	}
 	void addScope(ScopeDAOImpl scope) {
 		_scopes.add(scope);
+	}
+	public Long getID() {
+		return _id;
+	}
+	public void setID(Long id) {
+		_id = id;
 	}
 	
 	public ProcessInstanceDAO getInstance(Long iid) {
