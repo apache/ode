@@ -61,7 +61,7 @@
     <copy todir="${maven.project.build.directory}/resources/WEB-INF"
       file="${maven.project.build.directory}/../../axis2/src/main/wsdl/deploy.wsdl"/>
     <copy todir="${maven.project.build.directory}/resources/WEB-INF"
-      file="${maven.project.build.directory}/../../bpel-api/src/main/xsd/pmapi.xsd"/>
+      file="${maven.project.build.directory}/../../bpel-schemas/src/main/xsd/pmapi.xsd"/>
 
   </target>
 
