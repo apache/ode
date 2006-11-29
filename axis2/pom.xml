@@ -44,15 +44,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-dd</artifactId>
+            <artifactId>ode-bpel-schemas</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-minerva</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-naming</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -66,7 +62,6 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-store</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-connector</artifactId>
@@ -105,21 +100,25 @@
             <groupId>jotm</groupId>
             <artifactId>jotm</artifactId>
         </dependency>
+
+	<!-- The following are needed by JOTM -->
+        <dependency>
+             <groupId>org.apache.geronimo.specs</groupId>
+             <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+             <groupId>org.apache.geronimo.specs</groupId>
+             <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+             <scope>compile</scope>
+        </dependency>
+	<!-- ################################ -->
+
+
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>geronimo</groupId>
-            <artifactId>geronimo-kernel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>geronimo</groupId>
-            <artifactId>geronimo-transaction</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jencks</groupId>
-            <artifactId>jencks</artifactId>
         </dependency>
 
         <dependency>
