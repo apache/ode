@@ -58,8 +58,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      *         <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), null,
-                _engine._contexts.store);
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), 
+                mex._dao.getProcess(), null);
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
             if (!processInterceptor(i, mex, ictx, invoker))

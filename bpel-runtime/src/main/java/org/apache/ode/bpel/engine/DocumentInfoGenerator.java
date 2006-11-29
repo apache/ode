@@ -46,7 +46,7 @@ class DocumentInfoGenerator {
   }
   
   
-  DocumentInfoGenerator(File baseDir, File f) {
+  DocumentInfoGenerator(File f) {
     _file = f;
     
     recognize();

@@ -37,6 +37,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-schemas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-dao</artifactId>
         </dependency>
         <dependency>
@@ -129,11 +133,6 @@
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-naming</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-schemas</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

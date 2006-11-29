@@ -28,8 +28,10 @@ import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -52,23 +54,21 @@ import java.util.*;
  * 
  * TODO Pull up IM/PM methods from BpelManagementFacadeImpl
  */
-class ProcessAndInstanceManagementImpl
+public class ProcessAndInstanceManagementImpl
         implements InstanceManagement, ProcessManagement {
 
     protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
     protected static Log __log = LogFactory.getLog(BpelManagementFacadeImpl.class);
     protected static final ProcessStatusConverter __psc = new ProcessStatusConverter();
-    protected BpelEngineImpl _engine;
-    protected BpelServerImpl _server;
     protected BpelDatabase _db;
     protected ProcessStore _store;
     protected Calendar _calendar = Calendar.getInstance(); // Calendar can be expensive to initialize so we cache and clone it
+    protected BpelServerImpl _server;
 
-    public ProcessAndInstanceManagementImpl(BpelDatabase db, BpelEngineImpl engine,
-                                            BpelServerImpl server, ProcessStore store) {
-        _db = db;
-        _engine = engine;
-        _server = server;
+    public ProcessAndInstanceManagementImpl(BpelServer server,
+                                            ProcessStore store) {
+        _server = (BpelServerImpl) server;
+        _db = _server._db;
         _store = store;
     }
 
@@ -120,7 +120,7 @@ class ProcessAndInstanceManagementImpl
     public ProcessInfoDocument setRetired(final QName pid, final boolean retired)
             throws ManagementException {
         try {
-            _store.markActive(pid, !retired);
+            _store.setState(pid, retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
         } catch (BpelEngineException e) {
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
         }
@@ -137,7 +137,7 @@ class ProcessAndInstanceManagementImpl
                     ProcessDAO proc = conn.getProcess(pid);
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-                    _store.setProperty(pid, propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
+                    _store.setProperty(pid, propertyName, value);
                     fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
                     return null;
                 }
@@ -161,7 +161,7 @@ class ProcessAndInstanceManagementImpl
                     ProcessDAO proc = conn.getProcess(pid);
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
-                    _store.setProperty(pid, propertyName.getLocalPart(), propertyName.getNamespaceURI(), value);
+                    _store.setProperty(pid, propertyName, value);
                     fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
                     return null;
                 }
@@ -296,7 +296,7 @@ class ProcessAndInstanceManagementImpl
                         return null;
                     for (ActivityRecoveryDAO recovery: instance.getActivityRecoveries()) {
                         if (recovery.getActivityId() == aid) {
-                            BpelProcess process = _engine._activeProcesses.get(instance.getProcess().getProcessId());
+                            BpelProcess process = _server._engine._activeProcesses.get(instance.getProcess().getProcessId());
                             if (process != null) {
                                 process.recoverActivity(instance, recovery.getChannel(), aid, action, null);
                                 break;
@@ -377,7 +377,7 @@ class ProcessAndInstanceManagementImpl
     public ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids) {
         ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
         TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
-        OProcess oprocess = _engine.getOProcess(pid);
+        OProcess oprocess = _server._engine.getOProcess(pid);
 
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
@@ -411,7 +411,7 @@ class ProcessAndInstanceManagementImpl
      */
     protected final DebuggerSupport getDebugger(QName procid) throws ManagementException {
 
-        BpelProcess process = _engine._activeProcesses.get(procid);
+        BpelProcess process = _server._engine._activeProcesses.get(procid);
         if (process == null)
             throw new InvalidRequestException("The process \"" + procid + "\" is available." );
 
@@ -575,7 +575,7 @@ class ProcessAndInstanceManagementImpl
         info.setPid(proc.getProcessId().toString());
         // TODO: ACTIVE and RETIRED should be used separately.
         //Active process may be retired at the same time
-        if(!pconf.isActive()) {
+        if(pconf.getState() == ProcessState.RETIRED) {
             info.setStatus(TProcessStatus.RETIRED);
         } else {
             info.setStatus(TProcessStatus.ACTIVE);
@@ -599,11 +599,11 @@ class ProcessAndInstanceManagementImpl
         }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
-        File files[] = pconf.getFiles();
+        List<File> files = pconf.getFiles();
         if (files != null)
-            genDocumentInfo(docinfo, _store.getDeploymentDir(), files, true);
+            genDocumentInfo(docinfo, files.toArray(new File[files.size()]), true);
         else if (__log.isDebugEnabled())
-            __log.debug("fillProcessInfo: No files for " + _store.getDeploymentDir() + " !!!");
+            __log.debug("fillProcessInfo: No files for " + pconf.getProcessId() + " !!!");
 
         if (custom.includeProcessProperties()) {
             TProcessProperties properties = info.addNewProperties();
@@ -617,12 +617,12 @@ class ProcessAndInstanceManagementImpl
             }
         }
 
-        OProcess oprocess = _engine.getOProcess(proc.getProcessId());
+        OProcess oprocess = _server._engine.getOProcess(proc.getProcessId());
         if (custom.includeEndpoints() && oprocess != null) {
             TEndpointReferences eprs = info.addNewEndpoints();
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
-                    EndpointReference pepr = _engine._activeProcesses.get(proc.getProcessId())
+                    EndpointReference pepr = _server._engine._activeProcesses.get(proc.getProcessId())
                             .getInitialPartnerRoleEPR(oplink);
                     
                     if (pepr!= null) {
@@ -643,7 +643,7 @@ class ProcessAndInstanceManagementImpl
      * @param files files
      * @param recurse recurse down directories?
      */
-    private void genDocumentInfo(TProcessInfo.Documents docinfo,  File rootdir, File[] files,boolean recurse) {
+    private void genDocumentInfo(TProcessInfo.Documents docinfo,  File[] files,boolean recurse) {
         if (files == null)
             return;
         for (File f : files) {
@@ -652,15 +652,15 @@ class ProcessAndInstanceManagementImpl
 
             if (f.isDirectory()) {
                 if (recurse)
-                    genDocumentInfo(docinfo, rootdir, f.listFiles(), true);
+                    genDocumentInfo(docinfo, f.listFiles(), true);
             } else if (f.isFile()) {
-                genDocumentInfo(docinfo, rootdir, f);
+                genDocumentInfo(docinfo,f);
             }
         }
     }
 
-    private void genDocumentInfo(TProcessInfo.Documents docinfo, File rootDir, File f) {
-        DocumentInfoGenerator dig = new DocumentInfoGenerator(rootDir,f);
+    private void genDocumentInfo(TProcessInfo.Documents docinfo, File f) {
+        DocumentInfoGenerator dig = new DocumentInfoGenerator(f);
         if (dig.isRecognized() && dig.isVisible()) {
             TDocumentInfo doc = docinfo.addNewDocument();
 

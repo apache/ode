@@ -44,7 +44,6 @@ class Contexts {
     BpelDAOConnectionFactory dao;
     BpelDAOConnectionFactory inMemDao;
 
-    ProcessStore store;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
     final List<MessageExchangeInterceptor >globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
