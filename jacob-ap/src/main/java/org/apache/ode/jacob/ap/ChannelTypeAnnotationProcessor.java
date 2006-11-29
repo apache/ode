@@ -111,6 +111,11 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
         pw.println("    extends org.apache.ode.jacob.ChannelListener<" + c.getQualifiedName() + "Channel>" );
         pw.println("    implements " + c.getQualifiedName());
         pw.println("{");
+        pw.println();
+        pw.println("    private static final Log __log = LogFactory.getLog(" + c.getQualifiedName() + ".class);");
+        pw.println();
+        pw.println("    protected Log log() { return __log; } " );
+        pw.println();
         pw.println("    protected " + c.getSimpleName() + "ChannelListener(" + c.getQualifiedName() + "Channel channel) {");
         pw.println("       super(channel);");
         pw.println("    }");

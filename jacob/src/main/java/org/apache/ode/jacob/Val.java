@@ -18,10 +18,11 @@
  */
 package org.apache.ode.jacob;
 
+import org.apache.ode.jacob.ap.ChannelType;
 /**
  * Generic return-value channel type.
- * @jacob.kind
  */
+@ChannelType
 public interface Val {
   public void val(Object retVal);
 }
