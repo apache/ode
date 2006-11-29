@@ -1,33 +1,29 @@
-package org.apache.ode.store.deploy;
+package org.apache.ode.store;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
+import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.utils.xsd.SchemaModel;
 
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
+import javax.xml.namespace.QName;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
 public class DocumentRegistry {
     private static final Log __log = LogFactory.getLog(DocumentRegistry.class);
+    private static final Messages __msgs = Messages.getMessages(Messages.class);
 
     private final ArrayList<Definition4BPEL> _definitions = new ArrayList<Definition4BPEL>();
     private final Map<URI, byte[]> _schemas = new HashMap<URI,byte[]>();
 
-    @SuppressWarnings("unused")
     private SchemaModel _model;
-    
-    @SuppressWarnings("unused")
     private XMLEntityResolver _resolver;
 
     public DocumentRegistry(XMLEntityResolver resolver) {
