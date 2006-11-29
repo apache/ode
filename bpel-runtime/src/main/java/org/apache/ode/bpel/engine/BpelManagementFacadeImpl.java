@@ -23,6 +23,7 @@ import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.*;
@@ -40,12 +41,12 @@ import java.util.*;
  * the methods necessary to support process debugging. It also implements all the methods in the
  * newer Process/Instance Management interface (pmapi).
  */
-class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
+public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         implements BpelManagementFacade {
     private static UUIDGen _uuidGen = new UUIDGen();
 
-    BpelManagementFacadeImpl(BpelDatabase db, BpelEngineImpl engine, BpelServerImpl server, ProcessStore store) {
-        super(db, engine, server, store);
+    public BpelManagementFacadeImpl(BpelServer server, ProcessStore store) {
+        super(server, store);
     }
 
     public short getState(final Long iid) throws ManagementException {
@@ -182,10 +183,10 @@ class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
      * @param procid
      */
     public OProcess getProcessDef(String procid) throws ManagementException {
-        if (_engine == null)
+        if (_server._engine == null)
             throw new ProcessingException("ServiceProvider required for debugger operation.");
 
-        BpelProcess process = _engine._activeProcesses.get(QName.valueOf(procid));
+        BpelProcess process = _server._engine._activeProcesses.get(QName.valueOf(procid));
         if (process == null)
             throw new InvalidRequestException("The process \"" + procid + "\" is not available. Please make sure it is deployed and encompassing System is activated." );
 
