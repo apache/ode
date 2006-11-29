@@ -42,7 +42,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         _compiler = new XPath20ExpressionCompilerBPEL20();
         _compiler.setCompilerContext(_cc);
         
-        _vardoc = DOMUtils.parse(getClass().getResourceAsStream("/variables.xml"));
+        _vardoc = DOMUtils.parse(getClass().getResourceAsStream("/xpath20/variables.xml"));
         NodeList variables = _vardoc.getDocumentElement().getChildNodes();
         for (int i = 0; i < variables.getLength(); ++i) {
             Node n = variables.item(i);
@@ -127,7 +127,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
 
     private OXPath20ExpressionBPEL20 compile(String xpath) {
         Document doc = DOMUtils.newDocument();
-        Element e = doc.createElement("expression");
+        Element e = doc.createElementNS(null, "expression");
         doc.appendChild(e);
         e.appendChild(doc.createTextNode(xpath));
         Expression exp = new Expression(e);

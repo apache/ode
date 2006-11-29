@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20;
+package org.apache.ode.bpel.elang.xpath20.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 

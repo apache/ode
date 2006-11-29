@@ -36,10 +36,7 @@ import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.elang.xpath10.compiler.XslCompilationErrorListener;
-import org.apache.ode.bpel.elang.xpath20.Constants;
-import org.apache.ode.bpel.elang.xpath20.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
 import org.apache.ode.utils.DOMUtils;
@@ -73,7 +70,7 @@ public class XPath20ExpressionCompilerBPEL20 implements ExpressionCompiler {
 
     public XPath20ExpressionCompilerBPEL20() {
         super();
-        _properties.put("runtime-class", XPath20ExpressionRuntime.class.getName());
+        _properties.put("runtime-class", "org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime");
         TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
         XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
