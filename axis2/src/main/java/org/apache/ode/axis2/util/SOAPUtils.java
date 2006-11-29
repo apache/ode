@@ -125,7 +125,8 @@ public class SOAPUtils {
     return "";
   }
 
-  private static void copyParts(Element source, Element target, javax.wsdl.Message msgdef) {
+  @SuppressWarnings("unchecked")
+private static void copyParts(Element source, Element target, javax.wsdl.Message msgdef) {
     List<Part> expectedParts = msgdef.getOrderedParts(null);
 
     Element srcpart = DOMUtils.getFirstChildElement(source);

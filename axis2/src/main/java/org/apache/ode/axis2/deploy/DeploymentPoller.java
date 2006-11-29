@@ -123,11 +123,15 @@ public class DeploymentPoller {
                 __log.error("Error creating deployed marker file, " + file + " will not be deployed");
                 continue;
             }
+            
+            try {
+                _odeServer.getProcessStore().undeploy(file);
+            } catch (Exception ex) {
+                __log.error("Error undeploying " + file.getName());
+            }
+            
             try {
                 Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                for (QName pqname : deployed) {
-                    _odeServer.getBpelServer().load(pqname, true);
-                }
                 __log.info("Deployment of artifact " + file.getName() + " successful.");
             } catch (Exception e) {
                 __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
@@ -135,15 +139,12 @@ public class DeploymentPoller {
         }
 
         // Removing deployments that disappeared
-        String[] deployed = _odeServer.getProcessStore().listDeployedPackages();
+        Collection<String> deployed = _odeServer.getProcessStore().getPackages();
         for (String s : deployed) {
             if (s != null) {
                 File deployDir = new File(_deployDir, s);
                 if (!deployDir.exists()) {
                     Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
-                    for (QName pqname : undeployed) {
-                        _odeServer.getBpelServer().unload(pqname, true);
-                    }
                     File marker = new File(_deployDir, s + ".deployed");
                     marker.delete();
                     if (undeployed.size() > 0) __log.info("Successfully undeployed " + s);

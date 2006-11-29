@@ -36,6 +36,8 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
@@ -75,27 +77,40 @@ import java.util.concurrent.Executors;
 public class ODEServer {
 
     private static final Log __log = LogFactory.getLog(ODEServer.class);
+
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
     private File _appRoot;
+
     private File _workRoot;
 
     private BpelServerImpl _server;
+
     private ProcessStoreImpl _store;
+
     private ODEConfigProperties _odeConfig;
+
     private AxisConfiguration _axisConfig;
+
     private DataSource _datasource;
+
     private TransactionManager _txMgr;
+
     private BpelDAOConnectionFactory _daoCF;
+
     private ExecutorService _executorService;
+
     private QuartzSchedulerImpl _scheduler;
+
     private DeploymentPoller _poller;
 
     private MultiKeyMap _services = new MultiKeyMap();
+
     private MultiKeyMap _externalServices = new MultiKeyMap();
+
     private BpelServerConnector _connector;
 
-    public void init(ServletConfig config, AxisConfiguration axisConf)  throws ServletException {
+    public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         _axisConfig = axisConf;
         _appRoot = new File(config.getServletContext().getRealPath("/WEB-INF"));
         TempFileManager.setWorkingDirectory(_appRoot);
@@ -126,23 +141,26 @@ public class ODEServer {
         __log.debug("Initializing BPEL server.");
         initBpelServer();
 
+
         try {
             _server.start();
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeBpelServerStartFailure();
-            __log.error(errmsg,ex);
+            __log.error(errmsg, ex);
             throw new ServletException(errmsg, ex);
         }
 
+        _store.loadAll();
+        
         __log.debug("Initializing JCA adapter.");
         initConnector();
 
         File deploymentDir = new File(_workRoot, "processes");
         _poller = new DeploymentPoller(deploymentDir, this);
 
-        new ManagementService().enableService(_axisConfig, _server, _appRoot.getAbsolutePath());
-        new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller,
-                _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
+        new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+        new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
+                .getAbsolutePath());
 
         _poller.start();
         __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
@@ -154,7 +172,7 @@ public class ODEServer {
      * Shutdown the service engine. This performs cleanup before the BPE is
      * terminated. Once this method has been called, init() must be called before
      * the transformation engine can be started again with a call to start().
-     *
+     * 
      * @throws AxisFault if the engine is unable to shut down.
      */
     public void shutDown() throws AxisFault {
@@ -162,8 +180,8 @@ public class ODEServer {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
         if (_poller != null) {
-            _poller.stop();
-            _poller = null;
+        _poller.stop();
+        _poller = null;
         }
         
         try {
@@ -194,8 +212,8 @@ public class ODEServer {
     }
 
     public ODEService createService(Definition def, QName serviceName, String portName) throws AxisFault {
-        if (_services.get(serviceName, portName) != null){
-            AxisService service = ((ODEService)_services.get(serviceName, portName)).getAxisService();
+        if (_services.get(serviceName, portName) != null) {
+            AxisService service = ((ODEService) _services.get(serviceName, portName)).getAxisService();
             _axisConfig.removeService(service.getName());
         }
         AxisService axisService = ODEAxisService.createService(_axisConfig, def, serviceName, portName);
@@ -209,9 +227,9 @@ public class ODEServer {
 
         // Setting our new service on the receiver, the same receiver handles all
         // operations so the first one should fit them all
-        AxisOperation firstOp = (AxisOperation)axisService.getOperations().next();
-        ((ODEMessageReceiver)firstOp.getMessageReceiver()).setService(odeService);
-        ((ODEMessageReceiver)firstOp.getMessageReceiver()).setExecutorService(_executorService);
+        AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
+        ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
+        ((ODEMessageReceiver) firstOp.getMessageReceiver()).setExecutorService(_executorService);
 
         // We're public!
         _axisConfig.addService(axisService);
@@ -276,17 +294,17 @@ public class ODEServer {
 
     private void initDataSource() throws ServletException {
         switch (_odeConfig.getDbMode()) {
-            case EXTERNAL:
-                initExternalDb();
-                break;
-            case EMBEDDED:
-                initEmbeddedDb();
-                break;
-            case INTERNAL:
-                initInternalDb();
-                break;
-            default:
-                break;
+        case EXTERNAL:
+            initExternalDb();
+            break;
+        case EMBEDDED:
+            initEmbeddedDb();
+            break;
+        case INTERNAL:
+            initInternalDb();
+            break;
+        default:
+            break;
         }
     }
 
@@ -297,6 +315,7 @@ public class ODEServer {
         } else {
             _connector = new BpelServerConnector();
             _connector.setBpelServer(_server);
+            _connector.setProcessStore(_store);
             _connector.setPort(_odeConfig.getConnectorPort());
             _connector.setId("jcaServer");
             try {
@@ -313,8 +332,8 @@ public class ODEServer {
             __log.info(__msgs.msgOdeUsingExternalDb(_odeConfig.getDbDataSource()));
         } catch (Exception ex) {
             String msg = __msgs.msgOdeInitExternalDbFailed(_odeConfig.getDbDataSource());
-            __log.error(msg,ex);
-            throw new ServletException(msg,ex);
+            __log.error(msg, ex);
+            throw new ServletException(msg, ex);
         }
     }
 
@@ -348,17 +367,16 @@ public class ODEServer {
             minervaPool.start();
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
-            __log.error(errmsg,ex);
-            throw new ServletException(errmsg,ex);
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
         }
 
         _datasource = minervaPool.createDataSource();
     }
 
-
     /**
      * Initialize the Hibernate data store.
-     *
+     * 
      * @throws ServletException
      */
     private void initHibernate() throws ServletException {
@@ -367,7 +385,7 @@ public class ODEServer {
                 DataSourceConnectionProvider.class.getName());
         properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
                 HibernateTransactionManagerLookup.class.getName());
-//        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
+        // properties.put(Environment.SESSION_FACTORY_NAME, "jta");
 
         File hibernatePropFile;
         String confDir = System.getProperty("org.apache.ode.configDir");
@@ -404,7 +422,8 @@ public class ODEServer {
     }
 
     private void initProcessStore() {
-        _store = new ProcessStoreImpl(_workRoot, _datasource, _txMgr);
+        _store = new ProcessStoreImpl(_datasource);
+        _store.registerListener(new ProcessStoreListenerImpl());
     }
 
     private void initBpelServer() {
@@ -428,8 +447,6 @@ public class ODEServer {
                 new P2PMexContextImpl(this, new MessageExchangeContextImpl(this), _executorService, _txMgr));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
-        _server.setProcessStore(_store);
-        registerEventListeners();
         _server.init();
     }
 
@@ -498,8 +515,8 @@ public class ODEServer {
     public BpelServerImpl getBpelServer() {
         return _server;
     }
-
-    private void registerEventListeners() {
+ 	
+ 	private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
@@ -514,8 +531,26 @@ public class ODEServer {
 
         }
     }
+    private void handleEvent(ProcessStoreEvent pse) {
+        __log.debug("Process store event: " + pse);
+        switch (pse.type) {
+        case ACTVIATED:
+        case RETIRED:
+            // bounce the process
+            _server.unregister(pse.pid);
+            _server.register(_store.getProcessConfiguration(pse.pid));
+            break;
+        case DISABLED:
+        case UNDEPLOYED:
+            _server.unregister(pse.pid);
+            break;
+        default:
+            __log.debug("Ignoring store event: " + pse);
+        }
+    }
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
+
     private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
 
     static {
@@ -538,4 +573,11 @@ public class ODEServer {
                         "org.hibernate.dialect.DerbyDialect"));
     }
 
+    private class ProcessStoreListenerImpl implements ProcessStoreListener {
+
+        public void onProcessStoreEvent(ProcessStoreEvent event) {
+            handleEvent(event);
+        }
+
+    }
 }

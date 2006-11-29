@@ -17,6 +17,7 @@
  * under the License.
  */
 
+
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
@@ -41,11 +42,11 @@ public class BindingContextImpl implements BindingContext {
         _store = store;
     }
 
-    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint, PortType portType) {
+    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
+            PortType portType) {
         try {
-            ODEService svc = _server.createService(
-                _store.getDefinitionForService(processId, myRoleEndpoint.serviceName),
-                myRoleEndpoint.serviceName, myRoleEndpoint.portName);
+            ODEService svc = _server.createService(_store.getProcessConfiguration(processId).getDefinitionForService(myRoleEndpoint.serviceName)
+                    , myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {
             throw new ContextException("Could not activate endpoint for service " + myRoleEndpoint.serviceName
@@ -62,7 +63,7 @@ public class BindingContextImpl implements BindingContext {
         // NOTE: This implementation assumes that the initial value of the
         // partner role determines the binding.
         return _server.createExternalService(_store
-                .getDefinitionForService(processId, initialPartnerEndpoint.serviceName),
+                .getProcessConfiguration(processId).getDefinitionForService(initialPartnerEndpoint.serviceName),
                 initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 

@@ -19,6 +19,22 @@
 
 package org.apache.ode.axis2.service;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -35,27 +51,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
+import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Axis2 wrapper for process and instance management interfaces.
@@ -67,9 +70,10 @@ public class ManagementService {
     private ProcessManagement _processMgmt;
     private InstanceManagement _instanceMgmt;
 
-    public void enableService(AxisConfiguration axisConfig, BpelServer server, String rootpath) {
-        _processMgmt = server.getBpelManagementFacade();
-        _instanceMgmt = server.getBpelManagementFacade();
+    public void enableService(AxisConfiguration axisConfig, BpelServer server, ProcessStore _store, String rootpath) {
+        ProcessAndInstanceManagementImpl pm = new ProcessAndInstanceManagementImpl(server,_store);
+        _processMgmt = pm;
+        _instanceMgmt = pm;
 
         Definition def;
         try {
@@ -163,7 +167,7 @@ public class ManagementService {
         } else if (clazz.equals(Integer.TYPE) || clazz.equals(Integer.class)) {
             return Integer.parseInt(elmt.getText());
         } else if (clazz.isArray()) {
-            ArrayList alist = new ArrayList();
+            ArrayList<Object> alist = new ArrayList<Object>();
             Iterator children = elmt.getChildElements();
             Class targetClazz = clazz.getComponentType();
             while (children.hasNext())
