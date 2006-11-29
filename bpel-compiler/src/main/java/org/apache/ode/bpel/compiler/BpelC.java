@@ -284,8 +284,7 @@ public class BpelC {
     }
 
     try {
-      Serializer fileHeader = new Serializer(System.currentTimeMillis(), 1);
-      fileHeader.write(_outputStream);
+      Serializer fileHeader = new Serializer(System.currentTimeMillis());
       fileHeader.writeOProcess(oprocess, _outputStream);
 
 //      if (_bpelFile.toString().startsWith("file:") && _outputDir != null) {

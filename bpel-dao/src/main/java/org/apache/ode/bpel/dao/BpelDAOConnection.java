@@ -102,7 +102,7 @@ public interface BpelDAOConnection  {
   
   Collection<ProcessInstanceDAO> instanceQuery(String expression);
 
-  ProcessDAO createProcess(QName pid, QName type);
+  ProcessDAO createProcess(QName pid, QName type, String guid);
 
 
   /**
