@@ -19,6 +19,24 @@
 
 package org.apache.ode.axis2.service;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
@@ -39,17 +57,6 @@ import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.*;
-import java.util.Collection;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -116,7 +123,7 @@ public class DeploymentWebService {
                         File dest = new File(_deployPath, namePart.getText());
                         Collection<QName> undeployed = _store.undeploy(dest);
                         for (QName pqname : undeployed) {
-                            _server.unload(pqname, true);
+                            _server.unregister(pqname);
                         }
 
                         // If the previous deployment failed, there will still be something but
@@ -133,9 +140,6 @@ public class DeploymentWebService {
                                     "descriptor in its root directory named deploy.xml, aborting.");
 
                         Collection<QName> deployed = _store.deploy(dest);
-                        for (QName pqname : deployed) {
-                            _server.load(pqname, true);
-                        }
 
                         File deployedMarker = new File(_deployPath, namePart.getText() + ".deployed");
                         deployedMarker.createNewFile();
@@ -165,9 +169,6 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         Collection<QName> undeployed = _store.undeploy(deploymentDir);
-                        for (QName pqname : undeployed) {
-                            _server.unload(pqname, true);
-                        }
 
                         File deployedMarker = new File(_deployPath, elmtStr + ".deployed");
                         deployedMarker.delete();
@@ -180,7 +181,7 @@ public class DeploymentWebService {
                         _poller.release();
                     }
                 } else if (operation.equals("listDeployedPackages")) {
-                    String[] packageNames = _store.listDeployedPackages();
+                    Collection<String> packageNames = _store.getPackages();
                     OMElement response = factory.createOMElement("deployedPackages", depns);
                     for (String name : packageNames) {
                         OMElement nameElmt = factory.createOMElement("name", depns);
@@ -190,7 +191,7 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "listDeployedPackagesResponse", response);
                 } else if (operation.equals("listProcesses")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    QName[] processIds = _store.listProcesses(namePart.getText());
+                    List<QName> processIds = _store.listProcesses(namePart.getText());
                     OMElement response = factory.createOMElement("processIds", depns);
                     for (QName qname : processIds) {
                         OMElement nameElmt = factory.createOMElement("id", depns);
@@ -200,7 +201,7 @@ public class DeploymentWebService {
                     sendResponse(factory, messageContext, "listProcessResponse", response);
                 } else if (operation.equals("getProcessPackage")) {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getProcessPackage();
+                    String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getPackage();
                     OMElement response = factory.createOMElement("packageName", depns);
                     response.setText(packageName);
                     sendResponse(factory, messageContext, "getProcessPackageResponse", response);
