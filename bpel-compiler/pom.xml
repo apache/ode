@@ -36,15 +36,12 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-dd</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-schemas</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.ode</groupId>

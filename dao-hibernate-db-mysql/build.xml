@@ -25,12 +25,7 @@
     <property name="src.sql.dir" value="${basedir}/src/main/sql" />
 
     <property name="derby.target.sql" value="${target.dir}/derby.sql" />
-    <property name="derby.target.store.sql" value="${target.dir}/store.sql" />
-    <property name="derby.target.runtime.sql" value="${target.dir}/runtime.sql" />
-    <property name="sqls.target.sql" value="${target.dir}/sqlserver.sql" />
-    <property name="postgres.target.sql" value="${target.dir}/postgres.sql" />
-    <property name="hsql.target.sql" value="${target.dir}/hsql.sql" />
-    <property name="firebird.target.sql" value="${target.dir}/firebird.sql" />
+    <property name="mysql.target.sql" value="${target.dir}/mysql.sql" />
 
     <target name="db" depends="depset, tarball" />
 
@@ -82,22 +77,11 @@
         <antcall inheritRefs="true" target="schemaexport" />
 
         <!-- Append the QUARTZ tables -->
-        <concat destfile="${derby.target.sql}" append="false">
+        <concat destfile="${derby.target.sql}" append="true">
             <fileset file="${src.sql.dir}/tables_derby.sql" />
-            <fileset file="${derby.target.store.sql}" />
-            <fileset file="${derby.target.runtime.sql}" />
         </concat>
-        <concat destfile="${sqls.target.sql}" append="true">
-            <fileset file="${src.sql.dir}/tables_sqlserver.sql" />
-        </concat>
-        <concat destfile="${postgres.target.sql}" append="true">
-            <fileset file="${src.sql.dir}/tables_postgres.sql" />
-        </concat>
-        <concat destfile="${hsql.target.sql}" append="true">
-            <fileset file="${src.sql.dir}/tables_hsqldb.sql" />
-        </concat>
-        <concat destfile="${firebird.target.sql}" append="true">
-            <fileset file="${src.sql.dir}/tables_firebird.sql" />
+        <concat destfile="${mysql.target.sql}" append="true">
+            <fileset file="${src.sql.dir}/tables_mysql_innodb.sql" />
         </concat>
     </target>
 
@@ -113,63 +97,21 @@
                       delimiter=";"
                       drop="no"
                       create="yes"
-                      output="${derby.target.store.sql}">
+                      output="${derby.target.sql}">
+        <!--    <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
+                <include name="**/*.hbm.xml"/>
+            </fileset> -->
             <fileset dir="${basedir}/../bpel-store/target/generated-resources/xdoclet">
                 <include name="**/*.hbm.xml"/>
             </fileset> 
         </schemaexport>
-
-        <schemaexport properties="${src.sql.dir}/ode.derby.properties"
+        <schemaexport properties="${src.sql.dir}/ode.mysql.properties"
                       quiet="yes"
                       text="yes"
                       delimiter=";"
                       drop="no"
                       create="yes"
-                      output="${derby.target.runtime.sql}">
-        <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">  
-                <include name="**/*.hbm.xml"/>
-            </fileset> 
-        </schemaexport>
-        <schemaexport properties="${src.sql.dir}/ode.sqlserver.properties"
-                      quiet="yes"
-                      text="yes"
-                      delimiter=";"
-                      drop="no"
-                      create="yes"
-                      output="${sqls.target.sql}">
-            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
-                <include name="**/*.hbm.xml"/>
-            </fileset>
-        </schemaexport>
-        <schemaexport properties="${src.sql.dir}/ode.postgres.properties"
-                      quiet="yes"
-                      text="yes"
-                      delimiter=";"
-                      drop="no"
-                      create="yes"
-                      output="${postgres.target.sql}">
-            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
-                <include name="**/*.hbm.xml"/>
-            </fileset>
-        </schemaexport>
-        <schemaexport properties="${src.sql.dir}/ode.hsql.properties"
-                      quiet="yes"
-                      text="yes"
-                      delimiter=";"
-                      drop="no"
-                      create="yes"
-                      output="${hsql.target.sql}">
-            <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
-                <include name="**/*.hbm.xml"/>
-            </fileset>
-        </schemaexport>
-        <schemaexport properties="${src.sql.dir}/ode.firebird.properties"
-                      quiet="yes"
-                      text="yes"
-                      delimiter=";"
-                      drop="no"
-                      create="yes"
-                      output="${firebird.target.sql}">
+                      output="${mysql.target.sql}">
             <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
                 <include name="**/*.hbm.xml"/>
             </fileset>

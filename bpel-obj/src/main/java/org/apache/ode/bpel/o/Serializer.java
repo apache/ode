@@ -28,18 +28,15 @@ import javax.xml.namespace.QName;
  */
 public class Serializer  {
 
-    public static final byte[] MAGIC_NUMBER_BARFILE_PRE20040908 =
-            new byte[] { 0x50, 0x4b, 0x03, 0x04  };
-
     public static final byte[] MAGIC_NUMBER_OFH_20040908 =
             new byte[]  { 0x55, '5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x04, 0x09, 0x08  };
 
-    public static final byte[] MAGIC_NUMBER = MAGIC_NUMBER_OFH_20040908;
+    public static final byte[] MAGIC_NUMBER_OFH_20061101 =
+        new byte[]  { 0x55, '5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x06, 0x11, 0x01  };
+
+    public static final byte[] MAGIC_NUMBER = MAGIC_NUMBER_OFH_20061101;
 
     public static final short FORMAT_SERIALIZED_JAVA14 = 0x01;
-
-
-    public static final short FORMAT_OLD_BAR = 0x02;
 
     // START PERSISTED FIELDS
     public final byte[] magic = new byte[MAGIC_NUMBER.length];
@@ -50,18 +47,24 @@ public class Serializer  {
     /** Time of compilation (system local time). */
     public long compileTime;
 
-    /** Number of compiled processes in this file. */
-    public int numProcesses;
-    private InputStream _inputStream;
+    /** Deprecated, only one process per file.  */
+    public final int numProcesses = 1;
 
+    public InputStream _inputStream;
+
+    public String guid;
+
+    public OProcess _oprocess;
+
+    public QName type;
+    
 
   // END PERSISTED FIELDS
 
-    public Serializer(long compileTime, int numProcesses) {
+    public Serializer(long compileTime) {
         System.arraycopy(MAGIC_NUMBER, 0, magic, 0, MAGIC_NUMBER.length);
         this.format = FORMAT_SERIALIZED_JAVA14;
         this.compileTime  = compileTime;
-        this.numProcesses = numProcesses;
     }
 
     public Serializer() {}
@@ -76,45 +79,63 @@ public class Serializer  {
         byte[] magic = new byte[MAGIC_NUMBER.length];
         oin.read(magic, 0, magic.length);
 
-        // Check old (BAR-file) encoding scheme
-        if (Arrays.equals(MAGIC_NUMBER_BARFILE_PRE20040908, magic)) {
-            this.format = FORMAT_OLD_BAR;
-            this.compileTime = 0;
-            this.numProcesses = 1;
+        if (Arrays.equals(MAGIC_NUMBER_OFH_20040908, magic)) {
+            // Old format requires us to read the OModel to get the type and guid. 
+            this.format = oin.readShort();
+            this.compileTime = oin.readLong();
+            oin.readInt();
+            ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
+            try {
+                _oprocess = (OProcess) ois.readObject();
+            } catch (ClassNotFoundException e) {
+                throw new IOException("DataStream Error");
+            }
+            this.type  = new QName(_oprocess.targetNamespace, _oprocess.processName);
+            this.guid = "OLD-FORMAT-NO-GUID";
+            
             return;
         }
-
         // The current (most recent) scheme
         if (Arrays.equals(MAGIC_NUMBER, magic)) {
             this.format = oin.readShort();
             this.compileTime = oin.readLong();
-            this.numProcesses = oin.readInt();
+            this.guid = oin.readUTF();
+            String tns = oin.readUTF();
+            String name = oin.readUTF();
+            this.type = new QName(tns, name);
             return;
         }
 
         throw new IOException("Unrecognized file format (bad magic number).");
     }
-
-    public void write(OutputStream os) throws IOException {
-    
+ 
+    public void writeOProcess(OProcess process, OutputStream os) throws IOException {
         DataOutputStream out = new DataOutputStream(os);
 
         out.write(MAGIC_NUMBER);
         out.writeShort(format);
         out.writeLong(compileTime);
-        out.writeInt(numProcesses);
+        out.writeUTF(process.guid);
+        out.writeUTF(process.targetNamespace);
+        out.writeUTF(process.processName);
         out.flush();
-    }
-  
-    public void writeOProcess(OProcess process, OutputStream os) throws IOException{
         ObjectOutputStream oos = new CustomObjectOutputStream(os);
         oos.writeObject(process);
         oos.flush();
     }
 
     public OProcess readOProcess() throws IOException, ClassNotFoundException {
+        if (_oprocess != null)
+            return _oprocess;
+        
         ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
-        return (OProcess) ois.readObject();
+        try {
+            _oprocess = (OProcess) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("DataStream Error");
+        }
+            
+        return _oprocess;
     }
   
     static class CustomObjectOutputStream extends ObjectOutputStream {

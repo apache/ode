@@ -34,6 +34,8 @@ public class OProcess extends OBase {
   
     static final long serialVersionUID = -1L  ;
 
+    public String guid;
+    
     /** BPEL version. */
     public final String version;
 
