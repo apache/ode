@@ -19,24 +19,11 @@
 
 package org.apache.ode.bpel.iapi;
 
-/**
- * Exception thrown by the integration layer.
- * 
+/** 
+ * Process configuration store listener interface. 
  */
-public class ContextException extends RuntimeException {
-
-    private static final long serialVersionUID = -3359898226556748371L;
-
-    public ContextException() {
-        super();
-    }
-
-    public ContextException(String string) {
-        this(string, null);
-    }
-
-    public ContextException(String string, Throwable ex) {
-        super(string, ex);
-    }
+public interface ProcessStoreListener {
+    
+    public void onProcessStoreEvent(ProcessStoreEvent event);
 
 }

@@ -86,6 +86,7 @@
         <derbyVersion>10.1.2.1</derbyVersion>
         <quartzVersion>1.5.1</quartzVersion>
         <xstreamVersion>1.2</xstreamVersion>
+	<hsqlDbVersion>1.8.0.7</hsqlDbVersion>
 
         <!--
         | Build number used by the intalio:release plugin
@@ -111,11 +112,9 @@
 
         <module>jacob</module>
 
-        <module>bpel-store</module>
         <module>bpel-scripts</module>
         <module>bpel-schemas</module>
         <module>bpel-obj</module>
-        <module>bpel-dd</module>
         <module>bpel-api</module>
         <module>bpel-dao</module>
         <module>bpel-api-jca</module>
@@ -127,6 +126,7 @@
         <module>bpel-test</module>
 
         <module>dao-hibernate</module>
+        <module>bpel-store</module>
         <module>dao-hibernate-db-derby</module>
         <!-- module>dao-memory</module -->
 
@@ -386,11 +386,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-bpel-dd</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-obj</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -610,6 +605,12 @@
                 <groupId>jaxen</groupId>
                 <artifactId>jaxen</artifactId>
                 <version>${jaxenVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqlDbVersion}</version>
             </dependency>
 
             <!--

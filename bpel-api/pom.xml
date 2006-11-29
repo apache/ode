@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-dd</artifactId>
+            <artifactId>ode-bpel-schemas</artifactId>
         </dependency>
         
 	<dependency>
@@ -50,16 +50,6 @@
             <artifactId>wsdl4j</artifactId>
         </dependency>
 
-	<dependency>
-            <groupId>xmlbeans</groupId>
-            <artifactId>xbean</artifactId>
-        </dependency>
-	
-	<dependency>
-            <groupId>xmlbeans</groupId>
-            <artifactId>xmlpublic</artifactId>
-        </dependency>
-        
         <dependency>
           <groupId>stax</groupId>
           <artifactId>stax-api</artifactId>
@@ -67,30 +57,4 @@
 
 
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xmlbeans-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals><goal>xmlbeans</goal></goals>
-                        <configuration>
-                            <schemaDirectory>src/main/xsd</schemaDirectory>
-                            <javaSource>1.5</javaSource>
-                            <outputJar>${basedir}/target/xmlbeans.jar</outputJar>
-                            <xmlConfigs>
-                                <xmlConfig implementation="java.io.File">src/main/xsd/pmapi.xsdconfig</xmlConfig>
-                            </xmlConfigs>
-                            <!--staleFile>stale</staleFile-->
-                            <quiet>true</quiet>
-                            <failonerror>true</failonerror>
-							<outputJar>target/xmlbeans.jar</outputJar>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
