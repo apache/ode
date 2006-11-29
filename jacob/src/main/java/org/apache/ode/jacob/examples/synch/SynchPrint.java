@@ -19,14 +19,15 @@
 package org.apache.ode.jacob.examples.synch;
 
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * DOCUMENTME.
  * <p>Created on Mar 4, 2004 at 4:21:03 PM.</p>
  *
- * @jacob.kind
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
+@ChannelType
 public interface SynchPrint {
   public SynchChannel print(String msg);
 }
