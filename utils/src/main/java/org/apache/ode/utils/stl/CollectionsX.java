@@ -72,7 +72,7 @@ public class CollectionsX {
      * @return the first object in the collection (coll) which, satisfies the
      *         condition (f)
      */
-    public static <T> T find_if(Collection<T> coll, MemberOfFunction<T> f) {
+    public static <T> T find_if(Collection<T> coll, MemberOfFunction<? super T> f) {
         return find_if(coll.iterator(), f);
     }
 
@@ -90,7 +90,7 @@ public class CollectionsX {
      * @see #find_if(java.util.Collection,
      *      org.apache.ode.utils.stl.MemberOfFunction)
      */
-    public static <T> T find_if(Iterator<T> i, MemberOfFunction<T> f) {
+    public static <T> T find_if(Iterator<T> i, MemberOfFunction<? super T> f) {
         while (i.hasNext()) {
             T x = i.next();
 

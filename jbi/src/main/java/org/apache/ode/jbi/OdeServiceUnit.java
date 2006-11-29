@@ -25,7 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import javax.jbi.management.DeploymentException;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Representation of a JBI service unit. A JBI service unit may actually consist
@@ -45,6 +47,9 @@ class OdeServiceUnit {
     /** Our JBI indentifier. */
     private String _serviceUnitID;
 
+    private Collection<QName> _registered;
+    
+    
     /** Ctor. */
     OdeServiceUnit(OdeContext ode, String serviceUnitID, String serviceUnitRootPath) {
         _ode = ode;
@@ -55,11 +60,7 @@ class OdeServiceUnit {
     public void deploy() throws DeploymentException {
 
         try {
-            Collection<QName> deployed = _ode._store.deploy(_serviceUnitRootPath);
-            for (QName pqname : deployed) {
-                _ode._server.load(pqname, true);
-            }
-
+            _ode._store.deploy(_serviceUnitRootPath);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
             __log.error(errmsg, ex);
@@ -71,7 +72,7 @@ class OdeServiceUnit {
         try {
             Collection<QName> undeployed = _ode._store.undeploy(_serviceUnitRootPath);
             for (QName pqname : undeployed) {
-                _ode._server.unload(pqname, true);
+                _ode._server.unregister(pqname);
             }
 
         } catch (Exception ex) {
@@ -92,39 +93,41 @@ class OdeServiceUnit {
     }
 
     public void start() throws Exception {
-//        List<QName> activated = new ArrayList<QName>(_pids.size());
-//        Exception e = null;
-//        for (QName pid : _pids) {
-//            try {
-//                _ode._server.load(pid, false);
-//                activated.add(pid);
-//            } catch (Exception ex) {
-//                e = ex;
-//                __log.error("Unable to load " + pid, ex);
-//                break;
-//            }
-//        }
-//        if (activated.size() != _pids.size()) {
-//            for (QName pid : activated)
-//                try {
-//                    _ode._server.unload(pid, true);
-//                } catch (Exception ex) {
-//                    __log.error("Unable to unload " + pid, ex);
-//                }
-//        }
-//
-//        if (e != null)
-//            throw e;
+        List<QName> pids = _ode._store.listProcesses(_serviceUnitRootPath.getName());
+        Exception e = null;
+        for (QName pid : pids) {
+            try {
+                _ode._server.register(_ode._store.getProcessConfiguration(pid));
+                _registered.add(pid);
+            } catch (Exception ex) {
+                e = ex;
+                __log.error("Unable to load " + pid, ex);
+                break;
+            }
+        }
+        if (_registered.size() != pids.size()) {
+            for (QName pid : new ArrayList<QName>(_registered))
+                try {
+                    _ode._server.unregister(pid);
+                    _registered.remove(pid);
+                } catch (Exception ex) {
+                    __log.error("Unable to unload " + pid, ex);
+                }
+        }
+
+        if (e != null)
+            throw e;
     }
 
     public void stop() throws Exception {
-//        for (QName pid : _pids) {
-//            try {
-//                _ode._server.unload(pid, true);
-//            } catch (Exception ex) {
-//                __log.error("Unable to unload " + pid, ex);
-//            }
-//        }
+        for (QName pid : new ArrayList<QName>(_registered)) {
+            try {
+                _ode._server.unregister(pid);
+                _registered.remove(pid);
+            } catch (Exception ex) {
+                __log.error("Unable to unload " + pid, ex);
+            }
+        }
     }
 
 }

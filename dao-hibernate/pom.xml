@@ -77,8 +77,8 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <hibernatedoclet destdir="${project.build.directory}/generated-resources/xdoclet" excludedtags="@version,@author,@todo" force="false" verbose="false">
-                                    <hibernate version="3.0"/>
+                                <hibernatedoclet destdir="${basedir}/target/generated-resources/xdoclet" excludedtags="@version,@author,@todo" force="false" verbose="false"> 
+                                    <hibernate version="3.0" destdir="${basedir}/target/generated-resources/xdoclet" />
                                     <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
                                 </hibernatedoclet>
                             </tasks>
@@ -90,7 +90,7 @@
 
         <resources>
           <resource>
-            <directory>target/generated-resources/xdoclet</directory>
+            <directory>${basedir}/target/generated-resources/xdoclet</directory>
           </resource>
         </resources>
 

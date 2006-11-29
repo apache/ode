@@ -51,8 +51,7 @@ public abstract class BPELTest extends TestCase {
         server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-        store = new ProcessStoreImpl(null, null, new DeploymentManagerImpl(), null);
-        server.setProcessStore(store);
+        store = new ProcessStoreImpl();
         server.init();
 		server.start();
 	}
@@ -101,7 +100,7 @@ public abstract class BPELTest extends TestCase {
 		try {
 			Collection<QName> procs =  store.deploy(new File(deployDir));
             for (QName procName : procs) {
-                server.load(procName, true);
+                server.register(store.getProcessConfiguration(procName));
             }
 
         } catch (BpelEngineException bpelE) {
