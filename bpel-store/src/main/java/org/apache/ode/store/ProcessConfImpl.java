@@ -217,15 +217,29 @@ class ProcessConfImpl implements ProcessConf {
                 if (evtSet.contains(type)) return true;
             }
         }
+        Set<BpelEvent.TYPE> evtSet = _events.get(null);
+        if (evtSet != null) {
+            // Default filtering at the process level for some event types
+            if (evtSet.contains(type)) return true;
+        }
+
         return false;
     }
 
-
     private void initEventList() {
         TProcessEvents processEvents = _pinfo.getProcessEvents();
-        // No filtering, adding all events
-        if (processEvents == null
-                || (processEvents.getGenerate() != null && processEvents.getGenerate().equals(TProcessEvents.Generate.ALL))) {
+        // No filtering, using defaults
+        if (processEvents == null) {
+            HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
+            for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
+                if (!t.equals(BpelEvent.TYPE.scopeHandling) && !t.equals(BpelEvent.TYPE.dataHandling)) all.add(t);
+            }
+            _events.put(null,all);
+            return;
+        }
+
+        // Adding all events
+        if (processEvents.getGenerate() != null && processEvents.getGenerate().equals(TProcessEvents.Generate.ALL)) {
             HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
             for (BpelEvent.TYPE t : BpelEvent.TYPE.values())
                 all.add(t);
