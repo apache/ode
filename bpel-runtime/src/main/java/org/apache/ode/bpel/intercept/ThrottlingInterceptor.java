@@ -57,8 +57,7 @@ public class ThrottlingInterceptor extends NoOpInterceptor {
      * @return value of the property, or <code>null</code> if not set
      */
     private String getSimpleProperty(QName propertyName, InterceptorContext ic) {
-        Map<QName, Node> props =  ic.getProcessStore().getProcessConfiguration(
-                ic.getProcessDAO().getProcessId()).getProperties();
+        Map<QName, Node> props =  ic.getProcessConf().getProperties();
         for (Map.Entry<QName, Node> prop : props.entrySet()) {
             if (prop.getKey().equals(propertyName))
                 return ((Text)prop.getValue()).getWholeText();
