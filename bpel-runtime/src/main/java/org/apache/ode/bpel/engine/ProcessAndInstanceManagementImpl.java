@@ -685,21 +685,21 @@ class ProcessAndInstanceManagementImpl
         InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus
                 +  " name=" + proc.getType().getLocalPart()
                 +  " namespace=" + proc.getType().getNamespaceURI());
-        int failureCount = 0;
+        int failureInstances = 0;
         Date lastFailureDt = null;
         for (ProcessInstanceDAO instance : _db.getConnection().instanceQuery(instanceFilter)) {
             int count = instance.getActivityFailureCount();
             if (count > 0) {
-                failureCount += count;
+                ++failureInstances;
                 Date failureDt = instance.getActivityFailureDateTime();
                 if (lastFailureDt == null || lastFailureDt.before(failureDt))
                     lastFailureDt = failureDt;
             }
         }
-        if (failureCount > 0) {
+        if (failureInstances > 0) {
             TFailuresInfo failures = summary.addNewFailures();
             failures.setDtFailure(toCalendar(lastFailureDt));
-            failures.setCount(failureCount);
+            failures.setCount(failureInstances);
         }
     }
 

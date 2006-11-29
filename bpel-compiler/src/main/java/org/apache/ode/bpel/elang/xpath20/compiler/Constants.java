@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20;
+package org.apache.ode.bpel.elang.xpath20.compiler;
 
 /**
  * XPath-4-BPEL related constants.
