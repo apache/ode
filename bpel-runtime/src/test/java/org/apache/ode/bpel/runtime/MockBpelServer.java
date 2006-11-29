@@ -82,12 +82,11 @@ class MockBpelServer {
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
             //_store = new ProcessStoreImpl(new File("."), _dataSource, _txManager);
-            _store = new ProcessStoreImpl(new File("."), null, null);
+            _store = new ProcessStoreImpl();
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
             _server.setBindingContext(createBindingContext());
-            _server.setProcessStore(_store);
             _server.init();
             _server.start();
         } catch (Exception except) {
@@ -100,7 +99,7 @@ class MockBpelServer {
     public Collection<QName> deploy(File deploymentUnitDirectory) {
         Collection<QName> pids = _store.deploy(deploymentUnitDirectory);
         for (QName pid: pids)
-            _server.load(pid, true);
+            _server.register(_store.getProcessConfiguration(pid));
         return pids;
     }
 
@@ -124,9 +123,6 @@ class MockBpelServer {
         }
     }
 
-    public BpelManagementFacade getBpelManagementFacade() {
-        return _server.getBpelManagementFacade();
-    }
 
     public TransactionManager getTransactionManager() {
         return _txManager;

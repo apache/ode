@@ -32,13 +32,16 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
 
+    private String _guid;
+
     public ProcessDaoImpl(BpelDAOConnectionImpl conn,
                           Map<QName, ProcessDaoImpl> store,
-                          QName processId, QName type) {
+                          QName processId, QName type, String guid) {
         if (__log.isDebugEnabled()) {
             __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
         }
 
+        _guid = guid;
         _conn = conn;
         _store = store;
         _processId = processId;
@@ -143,5 +146,13 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     public Date getActivityFailureDateTime() {
         return null;
+    }
+
+    public String getGuid() {
+        return _guid;
+    }
+    
+    public void setGuid(String guid) {
+        _guid = guid;
     }
 }

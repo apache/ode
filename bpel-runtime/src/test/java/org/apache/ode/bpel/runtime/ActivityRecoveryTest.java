@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
+import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -138,11 +139,11 @@ public class ActivityRecoveryTest extends TestCase {
             }
         };
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
-        _management = _server.getBpelManagementFacade();
+        _management = new BpelManagementFacadeImpl(_server._server,_server._store);
     }
 
     protected void tearDown() throws Exception {
-        _server.getBpelManagementFacade().delete(null);
+        _management.delete(null);
         _server.shutdown();
     }
 
@@ -152,7 +153,7 @@ public class ActivityRecoveryTest extends TestCase {
      */
     protected void execute(String process, int failFor) throws Exception {
         _failFor = failFor;
-        _server.getBpelManagementFacade().delete(null);
+        _management.delete(null);
         _processQName = new QName(NAMESPACE, process);
         _server.invoke(_processQName, "instantiate",
                        DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
@@ -247,7 +248,7 @@ public class ActivityRecoveryTest extends TestCase {
                 assertNull(activity.getFailure());
         }
         for (TScopeRef ref : scope.getChildren().getChildRefList()) {
-            TScopeInfo child = _server.getBpelManagementFacade().getScopeInfoWithActivity(ref.getSiid(), true).getScopeInfo();
+            TScopeInfo child = _management.getScopeInfoWithActivity(ref.getSiid(), true).getScopeInfo();
             if (child != null)
                 getRecoveriesInScope(instance, child, recoveries);
         }
