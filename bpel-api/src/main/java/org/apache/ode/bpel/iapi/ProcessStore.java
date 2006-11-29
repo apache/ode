@@ -1,25 +1,38 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.bpel.iapi;
 
-import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
+import org.w3c.dom.Node;
+
 /**
  * @author mriou <mriou at apache dot org>
  */
 public interface ProcessStore {
-
-    /**
-     * Gets the directory where all processes are deployed.
-     * @return directory file
-     */
-    File getDeploymentDir();
-
     /**
      * Deploys a process from the filesystem.
      * @param deploymentUnitDirectory directory containing all deployment files
@@ -39,47 +52,20 @@ public interface ProcessStore {
      * to a directory name on the file system).
      * @return an array of package names
      */
-    String[] listDeployedPackages();
+    Collection<String> getPackages();
 
     /**
      * Lists all processe ids in a given package.
      * @return an array of process id QNames
      */
-    QName[] listProcesses(String packageName);
+    List<QName> listProcesses(String packageName);
 
     /**
-     * Get the list of all active processes known to the store.
-     * @return list of active processes qnames with their compiled definition
+     * Get the list of processes known to the store.
+     * @return list of  processes qnames with their compiled definition
      */
-    Map<QName, byte[]> getActiveProcesses();
+    List<QName> getProcesses();
 
-    /**
-     * Gets the list of endpoints a process should provide.
-     * @param processId
-     * @return map of partner link names and associated enpoints
-     */
-    Map<String, Endpoint> getProvideEndpoints(QName processId);
-
-    /**
-     * Gets the list of endpoints a process invokes.
-     * @param processId
-     * @return map of partner link names and associated enpoints
-     */
-    Map<String, Endpoint> getInvokeEndpoints(QName processId);
-
-    /**
-     * Marks a process as active or inactive
-     * @param processId
-     * @param status true for active, false for inactive
-     */
-    void markActive(QName processId, boolean status);
-
-    /**
-     * Gets the list of message interceptor class names configured on a process.
-     * @param processId
-     * @return list of interceptor class names
-     */
-    List<String> getMexInterceptors(QName processId);
 
     /**
      * Gets all the details of a process configuration (properties, deploy dates, ...)
@@ -88,23 +74,34 @@ public interface ProcessStore {
      */
     ProcessConf getProcessConfiguration(QName processId);
 
+   
     /**
-     * Gets the WSDL definition used in a process into which a service is defined.
-     * @param processId
-     * @param serviceName
-     * @return definition
+     * Register a configuration store listener.
+     * @param psl  {@link ProcessStoreListener} 
      */
-    Definition getDefinitionForService(QName processId, QName serviceName);
+    void registerListener(ProcessStoreListener psl);
+    
+    /**
+     * Unregister a configuration store listener.
+     * @param psl {@link ProcessStoreListener} 
+     */
+    void unregisterListener(ProcessStoreListener psl);
 
-    void setProperty(QName processId, String name, String namespace, String value);
-    void setProperty(QName processId, String name, String namespace, Node value);
 
     /**
-     * Gets the event setting for an activity that would be in a given process
-     * and having the provided scope hierarchy.
+     * Set a process property.
      * @param processId
-     * @param scopeNames names of parent scopes starting from the directly enclosing scope to the highest scope
-     * @return enable event types
+     * @param propName 
+     * @param value
      */
-    List<String> getEventsSettings(QName processId, List<String> scopeNames);
+    void setProperty(QName pid, QName propName, String value);
+    
+    void setProperty(QName pid, QName propName, Node value);
+    
+    /**
+     * Marks a process as active / retired or disabled
+     * @param processId
+     * @param status true for active, false for inactive
+     */
+    void setState(QName pid, ProcessState state);
 }
