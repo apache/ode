@@ -1,30 +1,8 @@
 package org.apache.ode.store;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.dd.TInvoke;
-import org.apache.ode.bpel.dd.TMexInterceptor;
-import org.apache.ode.bpel.dd.TProcessEvents;
-import org.apache.ode.bpel.dd.TProvide;
-import org.apache.ode.bpel.dd.TScopeEvents;
-import org.apache.ode.bpel.dd.TService;
+import org.apache.ode.bpel.dd.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -33,6 +11,14 @@ import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface. 
@@ -54,7 +40,7 @@ class ProcessConfImpl implements ProcessConf {
 
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
 
-    private final Map<List<String>, Set<BpelEvent.TYPE>> _events = new HashMap<List<String>, Set<BpelEvent.TYPE>>();
+    private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
 
     private final ArrayList<String> _mexi = new ArrayList<String>();
 
@@ -223,35 +209,50 @@ class ProcessConfImpl implements ProcessConf {
         return _pinfo.isSetInMemory() && _pinfo.getInMemory();
     }
 
-    public boolean isEventEnabled(List<String> scopeNames,BpelEvent.TYPE type) {
-        if (scopeNames == null)
-            scopeNames = Collections.emptyList();
-        
-        boolean enabled = false;
-        for (int i = 0; i < scopeNames.size();++i) {
-            List<String> sub = scopeNames.subList(0,i);
-            Set<BpelEvent.TYPE> x = _events.get(sub);
-            if (x != null)
-                enabled =  x.contains(type);
+    public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {
+        if (scopeNames == null) return false;
+        for (String scopeName : scopeNames) {
+            Set<BpelEvent.TYPE> evtSet = _events.get(scopeName);
+            if (evtSet != null) {
+                if (evtSet.contains(type)) return true;
+            }
         }
-        
-        return enabled;
+        return false;
     }
 
 
     private void initEventList() {
         TProcessEvents processEvents = _pinfo.getProcessEvents();
+        // No filtering, adding all events
         if (processEvents == null
                 || (processEvents.getGenerate() != null && processEvents.getGenerate().equals(TProcessEvents.Generate.ALL))) {
             HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
             for (BpelEvent.TYPE t : BpelEvent.TYPE.values())
                 all.add(t);
-            _events.put(Collections.<String>emptyList(),all);
+            _events.put(null,all);
+            return;
         } 
-        
-        // TODO: what is this logic supposed to do?
-        
-   
+
+        // Events filtered at the process level
+        if (processEvents.getEnableEventList() != null) {
+            List<String> enabled = processEvents.getEnableEventList();
+            HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
+            for (String enEvt : enabled) {
+                evtSet.add(BpelEvent.TYPE.valueOf(enEvt));
+            }
+            _events.put(null, evtSet);
+        }
+
+        // Events filtered at the scope level
+        if (processEvents.getScopeEventsList() != null) {
+            for (TScopeEvents tScopeEvents : processEvents.getScopeEventsList()) {
+                HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
+                for (String enEvt : tScopeEvents.getEnableEventList()) {
+                    evtSet.add(BpelEvent.TYPE.valueOf(enEvt));
+                }
+                _events.put(tScopeEvents.getName(), evtSet);
+            }
+        }
     }
-    
+
 }
