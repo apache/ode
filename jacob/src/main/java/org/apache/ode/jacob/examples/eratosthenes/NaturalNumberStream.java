@@ -19,6 +19,7 @@
 package org.apache.ode.jacob.examples.eratosthenes;
 
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * DOCUMENTME.
@@ -27,6 +28,7 @@ import org.apache.ode.jacob.SynchChannel;
  * @jacob.kind
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
+@ChannelType
 public interface NaturalNumberStream {
   public void val(int n, SynchChannel ret);
 }
