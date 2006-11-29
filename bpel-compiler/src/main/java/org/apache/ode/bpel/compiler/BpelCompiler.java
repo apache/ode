@@ -99,6 +99,7 @@ import org.apache.ode.bpel.o.OTerminationHandler;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -559,6 +560,7 @@ abstract class BpelCompiler implements CompilerContext {
         }
 
         _oprocess = new OProcess(bpelVersionUri);
+        _oprocess.guid = new GUID().toString();
         _oprocess.constants = makeConstants();
         _oprocess.debugInfo = createDebugInfo(process, "process");
         _oprocess.processName = _processDef.getName();
@@ -615,7 +617,7 @@ abstract class BpelCompiler implements CompilerContext {
             	if (process.getRootActivity() == null) {
                     throw new CompilationException(__cmsgs.errNoRootActivity());
             	}            		
-	    		_structureStack.topScope().activity = compile(process.getRootActivity());
+                _structureStack.topScope().activity = compile(process.getRootActivity());
             }
         });
 
@@ -977,83 +979,84 @@ abstract class BpelCompiler implements CompilerContext {
                 oscope.atomicScope = _atomicScope = newValue;
         }
         try {
-            compile(oscope, src, new Runnable() {
-                public void run() {
+        compile(oscope, src, new Runnable() {
+            public void run() {
                     for (Variable var : src.getVariables()) {
-                        try {
-                            compile(var);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(var, ce);
-                        }
+                    try {
+                        compile(var);
+                    } catch (CompilationException ce) {
+                        recoveredFromError(var, ce);
                     }
+                }
 
                     for (CorrelationSet cset : src.getCorrelationSetDecls()) {
-                        try {
-                            compile(cset);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(cset, ce);
-                        }
+                    try {
+                        compile(cset);
+                    } catch (CompilationException ce) {
+                        recoveredFromError(cset, ce);
                     }
+                }
 
                     for (PartnerLink plink : src.getPartnerLinks()) {
-                        try {
-                            compile(plink);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(plink, ce);
-                        }
+                    try {
+                        compile(plink);
+                    } catch (CompilationException ce) {
+                        recoveredFromError(plink, ce);
                     }
+                }
 
 
-                    if (!src.getEvents().isEmpty() || !src.getAlarms().isEmpty()) {
-                        oscope.eventHandler = new OEventHandler(_oprocess);
-                        oscope.eventHandler.debugInfo = createDebugInfo(src,"Event Handler for " + src);
-                    }
+                if (!src.getEvents().isEmpty() || !src.getAlarms().isEmpty()) {
+                    oscope.eventHandler = new OEventHandler(_oprocess);
+                    oscope.eventHandler.debugInfo = createDebugInfo(src,"Event Handler for " + src);
+                }
 
 
                     for (OnEvent onEvent : src.getEvents()) {
-                        try {
-                            compile(onEvent);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(src, ce);
-                        }
-                    }
-
-                    for (OnAlarm onAlarm : src.getAlarms()) {
-                        try {
-                            compile(onAlarm);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(src, ce);
-                        }
-
-                    }
-
-                    if (init != null)
-                        try {
-                            init.run();
-                        } catch (CompilationException ce) {
-                            recoveredFromError(src,ce);
-                        }
-
-
                     try {
-                        compile(src.getCompensationHandler());
-                    } catch (CompilationException bce) {
-                        recoveredFromError(src.getCompensationHandler(), bce);
-                    }
-
-                    try {
-                        compile(src.getTerminationHandler());
-                    } catch (CompilationException bce) {
-                        recoveredFromError(src.getTerminationHandler(), bce);
-                    }
-
-                    try {
-                        compile(src.getFaultHandler());
-                    } catch (CompilationException bce) {
-                        recoveredFromError(src.getFaultHandler(), bce);
+                        compile(onEvent);
+                    } catch (CompilationException ce) {
+                        recoveredFromError(src, ce);
                     }
                 }
-            });
+
+                    for (OnAlarm onAlarm : src.getAlarms()) {
+                    try {
+                        compile(onAlarm);
+                    } catch (CompilationException ce) {
+                        recoveredFromError(src, ce);
+                    }
+
+                }
+
+                if (init != null)
+                    try {
+                        init.run();
+                    } catch (CompilationException ce) {
+                        recoveredFromError(src,ce);
+                    }
+
+
+                try {
+                    compile(src.getCompensationHandler());
+                } catch (CompilationException bce) {
+                    recoveredFromError(src.getCompensationHandler(), bce);
+                }
+
+                try {
+                    compile(src.getTerminationHandler());
+                } catch (CompilationException bce) {
+                    recoveredFromError(src.getTerminationHandler(), bce);
+                }
+
+
+                try {
+                    compile(src.getFaultHandler());
+                } catch (CompilationException bce) {
+                    recoveredFromError(src.getFaultHandler(), bce);
+                }
+            }
+        });
         } finally {
             _atomicScope = previousAtomicScope;
         }

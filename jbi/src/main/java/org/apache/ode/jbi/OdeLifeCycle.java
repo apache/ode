@@ -248,7 +248,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(new File("."), _ode._dataSource, _ode.getTransactionManager());
+        _ode._store = new ProcessStoreImpl(_ode._dataSource);
+
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());        
         _ode._server.setDaoConnectionFactory(_ode._daocf);
@@ -256,7 +257,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
-        _ode._server.setProcessStore(_ode._store);
 
         _ode._server.init();
 
@@ -314,6 +314,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         } else {
             _connector = new BpelServerConnector();
             _connector.setBpelServer(_ode._server);
+            _connector.setProcessStore(_ode._store);
             _connector.setPort(_ode._config.getConnectorPort());
             _connector.setId(_ode._config.getConnectorName());
             try {

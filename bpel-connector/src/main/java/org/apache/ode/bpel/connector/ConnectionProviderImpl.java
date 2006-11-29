@@ -19,7 +19,9 @@
 
 package org.apache.ode.bpel.connector;
 
+import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.jca.server.ConnectionProvider;
 
@@ -31,9 +33,11 @@ import org.apache.ode.jca.server.ConnectionProvider;
 class ConnectionProviderImpl implements ConnectionProvider {
 
   private BpelServer _server;
+  private ProcessStore _store;
   
-  ConnectionProviderImpl(BpelServer server) {
+  ConnectionProviderImpl(BpelServer server, ProcessStore store) {
     _server = server;
+    _store = store;
   }
   
   public String [] getConnectionIntefaces() {
@@ -41,7 +45,7 @@ class ConnectionProviderImpl implements ConnectionProvider {
   }
 
   public Object createConnectionObject() {
-    return _server.getBpelManagementFacade();
+    return new BpelManagementFacadeImpl(_server, _store);
   }
 
   /**

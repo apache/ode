@@ -37,10 +37,6 @@
             <artifactId>ode-dao-hibernate</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-store</artifactId>
-        </dependency>
-        <dependency>
            <groupId>org.apache.derby</groupId>
            <artifactId>derbytools</artifactId>
            <version>${derbyVersion}</version>
