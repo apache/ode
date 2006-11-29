@@ -37,54 +37,35 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-superbia</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <artifactId>ode-jacob-ap</artifactId>
         </dependency>
         <dependency>
-            <groupId>xstream</groupId>
-            <artifactId>xstream</artifactId>
+           <groupId>xstream</groupId>  
+           <artifactId>xstream</artifactId>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>
             <!-- A bit of maven2 lunacy: add an extra source directory to 
                  the compile path; simple eh? -->
-            <plugin>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-superbia</artifactId>
-                <executions>
-		   <execution>
-                        <phase>generate-sources</phase> 
-                        <goals>
-                            <goal>msdp</goal>
-                        </goals> 
-                        <configuration>
-                           <sourcedir>src/generated/java</sourcedir>
-                        </configuration>
-                   </execution>
-                </executions>
-            </plugin>
+<plugin>
+  <groupId>org.apache.myfaces.tobago</groupId>
+  <artifactId>maven-apt-plugin</artifactId>
+  <executions>
+    <execution>
+      <phase>generate-sources</phase>
+      <configuration>
+        <generated>target/generated-sources/apt</generated>
+        <target>1.5</target>
+      </configuration>
+      <goals>
+        <goal>execute</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xdoclet-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>xdoclet</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <doclet destDir="${basedir}/src/generated/java" verbose="false">
-                                    <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
-                                    <template havingClassTag="jacob.kind" destinationFile="{0}ChannelListener.java" templateFile="${basedir}/src/xdt/org/apache/ode/jacob/ChannelListener.xdt"/>
-				    <template havingClassTag="jacob.kind" destinationFile="{0}Channel.java" templateFile="${basedir}/src/xdt/org/apache/ode/jacob/channel.xdt"/>
-                                </doclet>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>
