@@ -29,64 +29,56 @@ import java.util.Date;
  */
 public abstract class BpelEvent implements Serializable {
 
-  private Date _timestamp = new Date();
-  private int _lineNo = -1;
+    public enum TYPE {
+        dataHandling, activityLifecycle, scopeHandling, instanceLifecycle, correlation;
+    }
 
-  public int getLineNo() {
-    return _lineNo;
-  }
+    private Date _timestamp = new Date();
 
-  public void setLineNo(int lineNo) {
-    _lineNo = lineNo;
-  }
+    private int _lineNo = -1;
 
-  public Date getTimestamp() {
-    return _timestamp;
-  }
+    public int getLineNo() {
+        return _lineNo;
+    }
 
-  public void setTimestamp(Date tstamp) {
-    _timestamp = tstamp;
-  }
+    public void setLineNo(int lineNo) {
+        _lineNo = lineNo;
+    }
 
-  public String toString() {
-    StringBuilder sb = new StringBuilder("\n" + eventName(this) + ":");
+    public Date getTimestamp() {
+        return _timestamp;
+    }
 
-    Method[] methods = getClass().getMethods();
-    for (Method method : methods) {
-      if (method.getName().startsWith("get")
-              && method.getParameterTypes().length == 0) {
-        try {
-          String field = method.getName().substring(3);
-          Object value = method.invoke(this, ArrayUtils.EMPTY_OBJECT_ARRAY);
-          if (value == null) {
-            continue;
-          }
-          sb.append("\n\t")
-                  .append(field)
-                  .append(" = ")
-                  .append(value == null ? "null" : value.toString());
-        } catch (Exception e) {
-          // ignore
+    public void setTimestamp(Date tstamp) {
+        _timestamp = tstamp;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder("\n" + eventName(this) + ":");
+
+        Method[] methods = getClass().getMethods();
+        for (Method method : methods) {
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+                try {
+                    String field = method.getName().substring(3);
+                    Object value = method.invoke(this, ArrayUtils.EMPTY_OBJECT_ARRAY);
+                    if (value == null) {
+                        continue;
+                    }
+                    sb.append("\n\t").append(field).append(" = ").append(value == null ? "null" : value.toString());
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
-      }
+        return sb.toString();
     }
-    return sb.toString();
-  }
 
-  public static String eventName(BpelEvent event){
-    String name = event.getClass().getName();
-    return name.substring(name.lastIndexOf('.') + 1);
-  }
-
-  public enum TYPE {
-    dataHandling(1), activityLifecycle(2), scopeHandling(4), instanceLifecycle(8), correlation(16);
-
-    public int bitset = 0;
-    TYPE(int bitset) {
-      this.bitset = bitset;
+    public static String eventName(BpelEvent event) {
+        String name = event.getClass().getName();
+        return name.substring(name.lastIndexOf('.') + 1);
     }
-  }
 
-  public abstract TYPE getType();
+    public abstract TYPE getType();
 
 }
