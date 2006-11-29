@@ -1,4 +1,4 @@
-package org.apache.ode.store.deploy;
+package org.apache.ode.store;
 
 import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
 import com.sun.org.apache.xerces.internal.xni.XNIException;

@@ -1,11 +1,12 @@
 package org.apache.ode.store;
 
-import org.apache.ode.utils.msg.MessageBundle;
-
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * Message bundle used by the BPEL provider implementation.
@@ -18,8 +19,8 @@ public class Messages extends MessageBundle {
         return format("Unable to load compiled BPEL process.");
     }
 
-    String msgProcessDeployed(QName processId) {
-        return format("Process {0} deployed." , processId);
+    String msgProcessDeployed(Object dir, QName processId) {
+        return format("Process {1} deployed from \"{1}\"." , dir, processId);
     }
 
     /** A database error prevented the operation from succeeding. */
@@ -173,6 +174,19 @@ public class Messages extends MessageBundle {
 
     public String msgOdeInitHibernateDialectDetectFailed() {
       return format("Error detecting database dialect; Hibernate DAO could not be started.");
+    }
+
+    public String msgDeployFailDuplicateDU(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String msgDeployFailDuplicatePID(QName processId, String name) {
+        return format("Deploy failed; process \"{0}\" already deployed!",processId);
+    }
+
+    public String msgDeployFailedProcessNotFound(QName pid, String du) {
+        return format("Deploy failed; process \"{0}\" not found in deployment unit \"{1}\".",pid,du);
     }
     
 }

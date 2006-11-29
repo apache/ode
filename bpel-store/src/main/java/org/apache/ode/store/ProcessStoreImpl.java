@@ -1,544 +1,603 @@
 package org.apache.ode.store;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dd.*;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.store.dao.ConfStoreConnection;
-import org.apache.ode.store.dao.ConfStoreConnectionHib;
-import org.apache.ode.store.dao.ConfStoreConnectionInMem;
-import org.apache.ode.store.dao.ProcessConfDAO;
-import org.apache.ode.store.deploy.DeploymentManager;
-import org.apache.ode.store.deploy.DeploymentManagerImpl;
-import org.apache.ode.store.deploy.DeploymentUnitImpl;
-import org.apache.ode.utils.msg.MessageBundle;
-import org.w3c.dom.Node;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dd.DeployDocument;
+import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.dd.TDeployment.Process;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
+import org.apache.ode.store.hib.DbConfStoreConnectionFactory;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.hsqldb.jdbc.jdbcDataSource;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 /**
+ * <p>
+ * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of HSQL database.
+ * </p>
+ * 
+ * <p>
+ * The philsophy here is to keep things simple. Process store operations are relatively infrequent. Performance of the public
+ * methods is not a concern. However, note that the {@link org.apache.ode.bpel.iapi.ProcessConf} objects returned by the class are
+ * going to be used from within the engine runtime, and hence their performance needs to be very good. Similarly, these objects
+ * should be immutable so as not to confuse the engine.
+ * 
+ * Note the way that the database is used in this class, it is more akin to a recovery log, this is intentional: we want to start
+ * up, load stuff from the database and then pretty much forget about it when it comes to reads.
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
  * @author mriou <mriou at apache dot org>
  */
 public class ProcessStoreImpl implements ProcessStore {
 
     private static final Log __log = LogFactory.getLog(ProcessStoreImpl.class);
+
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
+    private final CopyOnWriteArrayList<ProcessStoreListener> _listeners = new CopyOnWriteArrayList<ProcessStoreListener>();
+
+    private Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
+
+    private Map<String, DeploymentUnitDir> _deploymentUnits = new HashMap<String, DeploymentUnitDir>();
+
+    /** Guards access to the _processes and _deploymentUnits */
+    private final ReadWriteLock _rw = new ReentrantReadWriteLock();
+
+    /** GUID used to create a unique in-memory db. */
+    private String _guid = new GUID().toString();
+
+    private DbConfStoreConnectionFactory _cf;
+
     /**
-     * Management lock for synchronizing management operations and preventing
-     * processing (transactions) from occuring while management operations are
-     * in progress.
+     * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
+     * time. We don't really care to parallelize these operations because: i) HSQL does not isolate transactions and we don't want
+     * to get confused ii) we're already serializing all the operations with a read/write lock. iii) we don't care about
+     * performance, these are infrequent operations.
      */
-    private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
+    private ExecutorService _executor = Executors.newSingleThreadExecutor();
 
-    private DataSource _ds;
-    private DeploymentManager _deploymentManager;
-    private Map<QName, DeploymentUnitImpl> _deploymentUnits = new HashMap<QName, DeploymentUnitImpl>();
-    private File _appDir;
-    private ConfStoreConnection _conn;
+    /**
+     * In-memory DataSource, or <code>null</code> if we are using a real DS. We need this to shutdown the DB.
+     */
+    private DataSource _inMemDs;
 
-    public ProcessStoreImpl(File appDir, DataSource ds, TransactionManager txMgr) {
-        this(appDir, ds, new DeploymentManagerImpl(new File(appDir, "processes")), txMgr);
+    public ProcessStoreImpl() {
+        this(null);
     }
 
-    // Both appdir and datasource could be null
-    public ProcessStoreImpl(File appDir, DataSource ds, DeploymentManager deployer, TransactionManager txMgr) {
-        _deploymentManager = deployer;
-        _appDir = appDir;
-        _ds = ds;
-        // TODO in-memory if no datasource given
-        if (_ds != null) _conn = new ConfStoreConnectionHib(_ds, appDir, txMgr);
-        else _conn = new ConfStoreConnectionInMem();
+    public ProcessStoreImpl(DataSource ds) {
+        if (ds != null) {
+            _cf = new DbConfStoreConnectionFactory(ds, false);
+        } else {
 
-        reloadDeploymentUnits();
+            // If the datasource is not provided, then we create a HSQL-based in-memory
+            // database. Makes testing a bit simpler.
+            jdbcDataSource hsqlds = new jdbcDataSource();
+            hsqlds.setDatabase("jdbc:hsqldb:mem:" + _guid);
+            hsqlds.setUser("sa");
+            hsqlds.setPassword("");
+            _cf = new DbConfStoreConnectionFactory(hsqlds, true);
+            _inMemDs = hsqlds;
+        }
+
     }
 
-    public File getDeploymentDir() {
-        return new File(_appDir, "processes");
+    public void shutdown() {
+        if (_inMemDs != null) {
+            try {
+                _inMemDs.getConnection().createStatement().execute("SHUTDOWN;");
+            } catch (SQLException e) {
+                __log.error("Error shutting down.", e);
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        // force a shutdown so that HSQL cleans up its mess.
+        try {
+            shutdown();
+        } catch (Throwable t) {
+            ; // we tried, no worries.
+        }
+        super.finalize();
     }
 
     /**
      * Deploys a process.
      */
-    public Collection<QName> deploy(File deploymentUnitDirectory) {
+    public Collection<QName> deploy(final File deploymentUnitDirectory) {
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
 
-        _mngmtLock.writeLock().lock();
+        final Date deployDate = new Date();
+
+        // Create the DU and compile/scan it before acquiring lock.
+        final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
+        du.compile();
+        du.scan();
+        DeployDocument dd = du.getDeploymentDescriptor();
+        final ArrayList<ProcessConfImpl> processes = new ArrayList<ProcessConfImpl>();
+        Collection<QName> deployed;
+
+        _rw.writeLock().lock();
+
         try {
-            DeploymentUnitImpl du = _deploymentManager.createDeploymentUnit(deploymentUnitDirectory);
-
-            // Checking first that the same process isn't deployed elsewhere
-            for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
-                if (_deploymentUnits.get(processDD.getName()) != null) {
-                    String duName = _deploymentUnits.get(processDD.getName()).getDeployDir().getName();
-                    if (!duName.equals(deploymentUnitDirectory.getName()))
-                        throw new BpelEngineException("Process " + processDD.getName() + " is already deployed in " +
-                                duName + "");
-                }
+            if (_deploymentUnits.containsKey(du.getName())) {
+                String errmsg = __msgs.msgDeployFailDuplicateDU(du.getName());
+                __log.error(errmsg);
+                throw new ContextException(errmsg);
             }
 
-            ArrayList<QName> deployed = new ArrayList<QName>();
-            BpelEngineException failed = null;
-            // Going trough each process declared in the dd
-            for (TDeployment.Process processDD : du.getDeploymentDescriptor().getDeploy().getProcessList()) {
-                // If a type is not specified, assume the process id is also the
-                // type.
-                QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
-                OProcess oprocess = du.getProcesses().get(type);
-                if (oprocess == null)
-                    throw new BpelEngineException("Could not find the compiled process definition for BPEL" + "type "
-                            + type + " when deploying process " + processDD.getName() + " in "
-                            + deploymentUnitDirectory);
-                try {
-                    deploy(processDD.getName(), du, oprocess, processDD);
-                    deployed.add(processDD.getName());
-                } catch (Throwable e) {
-                    String errmsg = __msgs.msgDeployFailed(processDD.getName(), deploymentUnitDirectory);
-                    __log.error(errmsg, e);
-                    failed = new BpelEngineException(errmsg, e);
-                    break;
-                }
-            }
-
-            // Roll back succesfull deployments if we failed.
-            if (failed != null) {
-                if (!deployed.isEmpty()) {
-                    __log.error(__msgs.msgDeployRollback(deploymentUnitDirectory));
-                    for (QName pid : deployed) {
-                        try {
-                            undeploy(pid);
-                        } catch (Throwable t) {
-                            __log.fatal("Unexpect error undeploying process " + pid, t);
-                        }
-                    }
-                }
-
-                throw failed;
-            }
-
-            return new HashSet<QName>(du.getProcesses().keySet());
-        } finally {
-            _mngmtLock.writeLock().unlock();
-        }
-    }
-
-    private void deploy(final QName processId, final DeploymentUnitImpl du,
-                        final OProcess oprocess, TDeployment.Process processDD) {
-
-        _mngmtLock.writeLock().lock();
-        try {
-            // First, make sure we are undeployed.
-            undeploy(processId);
-
-            final ProcessDDInitializer pi = new ProcessDDInitializer(oprocess, processDD);
-            try {
-                _conn.exec(new ConfStoreConnection.Callable<ProcessConfDAO>() {
-                    public ProcessConfDAO run() throws Exception {
-                        // Hack, but at least for now we need to ensure that we
-                        // are
-                        // the only process with this process id.
-                        ProcessConfDAO old = _conn.getProcessConf(processId);
-                        if (old != null) {
-                            String errmsg = __msgs.msgProcessDeployErrAlreadyDeployed(processId);
-                            __log.error(errmsg);
-                            throw new BpelEngineException(errmsg);
-                        }
-
-                        ProcessConfDAO newDao = _conn.createProcess(processId, oprocess.getQName());
-                        pi.init(newDao);
-                        pi.update(newDao);
-                        return newDao;
-                    }
-                });
-                __log.info(__msgs.msgProcessDeployed(processId));
-            } catch (BpelEngineException ex) {
-                throw ex;
-            } catch (Exception dce) {
-                __log.error("", dce);
-                throw new BpelEngineException("", dce);
-            }
-
-            _deploymentUnits.put(processDD.getName(), du);
-        } finally {
-            _mngmtLock.writeLock().unlock();
-        }
-    }
-
-    public Collection<QName> undeploy(File file) {
-        _mngmtLock.writeLock().lock();
-        try {
-            ArrayList<QName> undeployed = new ArrayList<QName>();
-            DeploymentUnitImpl du = null;
-            for (DeploymentUnitImpl deploymentUnit : new HashSet<DeploymentUnitImpl>(_deploymentUnits.values())) {
-                if (deploymentUnit.getDeployDir().getName().equals(file.getName()))
-                    du = deploymentUnit;
-            }
-            if (du == null) return undeployed;
-
-            for (QName pName : du.getProcessNames()) {
-                if (undeploy(pName)) undeployed.add(pName);
-            }
-
-            for (QName pname : du.getProcessNames()) {
-                _deploymentUnits.remove(pname);
-            }
-            _deploymentManager.remove(du);
-
-            return undeployed;
-        } finally {
-            _mngmtLock.writeLock().unlock();
-
-        }
-    }
-
-    public boolean undeploy(final QName process) {
-        _mngmtLock.writeLock().lock();
-        try {
-            if (__log.isDebugEnabled())
-                __log.debug("Unregistering process " + process);
-
-            // Delete it from the database.
-            boolean deleted = _conn.exec(new ConfStoreConnection.Callable<Boolean>() {
-                public Boolean run() throws Exception {
-                    ProcessConfDAO proc = _conn.getProcessConf(process);
-                    if (proc != null) {
-                        proc.delete();
-                        __log.info(__msgs.msgProcessUndeployed(process));
-                        return Boolean.TRUE;
-                    }
-                    return Boolean.FALSE;
-                }
-            });
-            return deleted;
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            __log.error(__msgs.msgProcessUndeployFailed(process), ex);
-            throw new BpelEngineException(ex);
-        } finally {
-            _mngmtLock.writeLock().unlock();
-        }
-    }
-
-    public Map<QName, byte[]> getActiveProcesses() {
-        _mngmtLock.readLock().lock();
-        try {
-            if (__log.isDebugEnabled())
-                __log.debug("Looking for active processes.");
-
-            return _conn.exec(new ConfStoreConnection.Callable<Map<QName, byte[]>>() {
-                public Map<QName, byte[]> run() throws Exception {
-                    List<ProcessConfDAO> procs = _conn.getActiveProcesses();
-                    HashMap<QName, byte[]> result = new HashMap<QName, byte[]>(procs.size());
-                    for (ProcessConfDAO confDAO : procs) {
-                        QName processId = confDAO.getProcessId();
-                        if (_deploymentUnits.get(processId) == null) {
-                            __log.error("The process " + processId + " appears to exist in the database but no " +
-                                    "deployment exists in the file system. Please undeploy it properly.");
-                            continue;
-                        }
-                        OProcess oprocess = _deploymentUnits.get(processId).getProcesses().get(processId);
-                        result.put(processId, serialize(oprocess));
-                    }
-                    return result;
-                }
-            });
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BpelEngineException(ex);
-        } finally {
-            _mngmtLock.readLock().unlock();
-        }
-    }
-
-    public Map<String, Endpoint> getInvokeEndpoints(QName processId) {
-        HashMap<String, Endpoint> partnerRoleIntialValues = new HashMap<String, Endpoint>();
-        TDeployment.Process processInfo = getProcessInfo(processId);
-        if (processInfo.getInvokeList() != null) {
-            for (TInvoke invoke : processInfo.getInvokeList()) {
-                String plinkName = invoke.getPartnerLink();
-                TService service = invoke.getService();
-                // NOTE: service can be null for partner links
-                if (service == null) continue;
-                __log.debug("Processing <invoke> element for process " + processId + ": partnerlink " + plinkName + " --> "
-                        + service);
-                partnerRoleIntialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
-            }
-        }
-        return partnerRoleIntialValues;
-    }
-
-    public Map<String, Endpoint> getProvideEndpoints(QName processId) {
-        HashMap<String, Endpoint> myRoleEndpoints = new HashMap<String, Endpoint>();
-        TDeployment.Process processInfo = getProcessInfo(processId);
-        if (processInfo.getProvideList() != null) {
-            for (TProvide provide : processInfo.getProvideList()) {
-                String plinkName = provide.getPartnerLink();
-                TService service = provide.getService();
-                if (service == null) {
-                    String errmsg = "Error in <provide> element for process " + processId + "; partnerlink " + plinkName
-                            + "did not identify an endpoint";
+            for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
+                if (_processes.containsKey(processDD.getName())) {
+                    String errmsg = __msgs.msgDeployFailDuplicatePID(processDD.getName(), du.getName());
                     __log.error(errmsg);
-                    throw new BpelEngineException(errmsg);
+                    throw new ContextException(errmsg);
                 }
-                __log.debug("Processing <provide> element for process " + processId + ": partnerlink " + plinkName + " --> "
-                        + service.getName() + " : " + service.getPort());
-                myRoleEndpoints.put(plinkName, new Endpoint(service.getName(), service.getPort()));
+
+                QName type = processDD.getType() != null ? processDD.getType() : processDD.getName();
+
+                CBPInfo cbpInfo = du.getCBPInfo(type);
+                if (cbpInfo == null) {
+                    String errmsg = __msgs.msgDeployFailedProcessNotFound(processDD.getName(), du.getName());
+                    __log.error(errmsg);
+                    throw new ContextException(errmsg);
+                }
+
+                // final OProcess oprocess = loadCBP(cbpInfo.cbp);
+                ProcessConfImpl pconf = new ProcessConfImpl(du, processDD, deployDate, calcInitialProperties(processDD),
+                        calcInitialState(processDD));
+                processes.add(pconf);
+
             }
+
+            _deploymentUnits.put(du.getName(),du);
+            
+            for (ProcessConfImpl process : processes) {
+                __log.info(__msgs.msgProcessDeployed(du.getDeployDir(), process.getProcessId()));
+                _processes.put(process.getProcessId(), process);
+
+            }
+
+        } finally {
+            _rw.writeLock().unlock();
         }
-        return myRoleEndpoints;
-    }
 
-    public String[] listDeployedPackages() {
-        HashSet<String> deployed = new HashSet<String>();
-        for (DeploymentUnitImpl unit : _deploymentUnits.values()) {
-            deployed.add(unit.getDeployDir().getName());
+        // Do the deployment in the DB. We need this so that we remember deployments across system shutdowns.
+        // We don't fail if there is a DB error, simply print some errors.
+        deployed = exec(new Callable<Collection<QName>>() {
+            public Collection<QName> call(ConfStoreConnection conn) {
+                // Check that this deployment unit is not deployed.
+                DeploymentUnitDAO dudao = conn.getDeploymentUnit(du.getName());
+                if (dudao != null) {
+                    String errmsg = "Database out of synch for DU " + du.getName();
+                    __log.warn(errmsg);
+                    dudao.delete();
+                }
+
+                dudao = conn.createDeploymentUnit(du.getName());
+                try {
+                    dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
+                } catch (IOException e1) {
+                    String errmsg = "Error getting canonical path for " + du.getName()
+                            + "; deployment unit will not be available after restart!";
+                    __log.error(errmsg);
+
+                }
+
+                ArrayList<QName> deployed = new ArrayList<QName>();
+                // Going trough each process declared in the dd
+                for (ProcessConfImpl pc : processes) {
+                    try {
+                        ProcessConfDAO newDao = dudao.createProcess(pc.getProcessId(), pc.getType());
+                        newDao.setState(pc.getState());
+                        for (Map.Entry<QName, Node> prop : pc.getProperties().entrySet()) {
+                            newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
+                        }
+                        deployed.add(pc.getProcessId());
+                    } catch (Throwable e) {
+                        String errmsg = "Error persisting deployment record for " + pc.getProcessId()
+                                + "; process will not be available after restart!";
+                        __log.error(errmsg, e);
+                    }
+                }
+
+                return deployed;
+
+            }
+
+        });
+
+        // We want the events to be fired outside of the bounds of the writelock.
+        for (ProcessConfImpl process : processes) {
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId()));
+            fireStateChange(process.getProcessId(), process.getState());
         }
-        return deployed.toArray(new String[0]);
+
+        return deployed;
+
     }
 
-    public QName[] listProcesses(String packageName) {
-        return _deploymentUnits.keySet().toArray(new QName[0]);
-    }
+    public Collection<QName> undeploy(final File dir) {
 
-    public void markActive(final QName processId, final boolean status) {
-        _mngmtLock.writeLock().lock();
         try {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting property on process " + processId);
+            exec(new Callable<Collection<QName>>() {
 
-            _conn.exec(new ConfStoreConnection.Callable<Object>() {
-                public Object run() throws Exception {
-                    ProcessConfDAO dao = _conn.getProcessConf(processId);
-                    if (dao != null)
-                        dao.setActive(status);
+                public Collection<QName> call(ConfStoreConnection conn) {
+                    DeploymentUnitDAO dudao = conn.getDeploymentUnit(dir.getName());
+                    if (dudao != null)
+                        dudao.delete();
                     return null;
                 }
+
             });
-        } catch (RuntimeException ex) {
-            throw ex;
         } catch (Exception ex) {
-            throw new BpelEngineException(ex);
+            __log.error("Error synchronizing with data store; " + dir.getName() + " may be reappear after restart!");
+        }
+        
+        Collection<QName> undeployed = Collections.emptyList();
+        _rw.writeLock().lock();
+        try {
+            DeploymentUnitDir du = _deploymentUnits.remove(dir.getName());
+            if (du != null) {
+                undeployed = du.getProcessNames();
+                _processes.keySet().removeAll(undeployed);
+            }
         } finally {
-            _mngmtLock.writeLock().unlock();
+            _rw.writeLock().unlock();
+        }
+
+        for (QName pn : undeployed) {
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn));
+            __log.info(__msgs.msgProcessUndeployed(pn));
+        }
+
+
+        return undeployed;
+    }
+
+    public Collection<String> getPackages() {
+        _rw.readLock().lock();
+        try {
+            return new ArrayList<String>(_deploymentUnits.keySet());
+        } finally {
+            _rw.readLock().unlock();
         }
     }
 
-    public boolean isActive(final QName processId) {
-        _mngmtLock.readLock().lock();
+    public List<QName> listProcesses(String packageName) {
+        _rw.readLock().lock();
         try {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting property on process " + processId);
-
-            return _conn.exec(new ConfStoreConnection.Callable<Boolean>() {
-                public Boolean run() throws Exception {
-                    return _conn.getProcessConf(processId).isActive();
-                }
-            });
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BpelEngineException(ex);
+            DeploymentUnitDir du = _deploymentUnits.get(packageName);
+            if (du == null)
+                return null;
+            return new ArrayList<QName>(du.getProcessNames());
         } finally {
-            _mngmtLock.readLock().unlock();
+            _rw.readLock().unlock();
         }
+    }
+
+    public void setState(final QName pid, final ProcessState state) {
+        __log.debug("Changing process state for " + pid + " to " + state);
+
+        final ProcessConfImpl pconf;
+
+        _rw.readLock().lock();
+        try {
+            pconf = _processes.get(pid);
+            if (pconf == null) {
+                String msg = __msgs.msgProcessNotFound(pid);
+                __log.info(msg);
+                throw new ContextException(msg);
+            }
+        } finally {
+            _rw.readLock().unlock();
+        }
+
+        final DeploymentUnitDir dudir = pconf.getDeploymentUnit();
+
+        // Update in the database.
+        ProcessState old = exec(new Callable<ProcessState>() {
+            public ProcessState call(ConfStoreConnection conn) {
+                DeploymentUnitDAO dudao = conn.getDeploymentUnit(dudir.getName());
+                if (dudao == null) {
+                    String errmsg = __msgs.msgProcessNotFound(pid);
+                    __log.error(errmsg);
+                    throw new ContextException(errmsg);
+                }
+
+                ProcessConfDAO dao = dudao.getProcess(pid);
+                if (dao == null) {
+                    String errmsg = __msgs.msgProcessNotFound(pid);
+                    __log.error(errmsg);
+                    throw new ContextException(errmsg);
+                }
+
+                ProcessState old = dao.getState();
+                dao.setState(state);
+                return old;
+            }
+        });
+
+        if (old != null && old != state)
+            fireStateChange(pid, state);
     }
 
     public ProcessConf getProcessConfiguration(final QName processId) {
-        _mngmtLock.readLock().lock();
+        _rw.readLock().lock();
         try {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting property on process " + processId);
-
-            return _conn.exec(new ConfStoreConnection.Callable<ProcessConf>() {
-                public ProcessConf run() throws Exception {
-                    ProcessConfDAO confDAO = _conn.getProcessConf(processId);
-                    if (confDAO == null)
-                        throw new RuntimeException("Couldn't find process " + processId + " configuration in " +
-                                "the process store!");
-                    return buildConf(confDAO);
-                }
-            });
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BpelEngineException(ex);
+            return _processes.get(processId);
         } finally {
-            _mngmtLock.readLock().unlock();
+            _rw.readLock().unlock();
         }
     }
 
-    public List<String> getMexInterceptors(QName processId) {
-        ArrayList<String> mexi = new ArrayList<String>();
-        TDeployment.Process processInfo = getProcessInfo(processId);
-        if (processInfo.getMexInterceptors() != null) {
-            for (TMexInterceptor mexInterceptor : processInfo.getMexInterceptors().getMexInterceptorList()) {
-                mexi.add(mexInterceptor.getClassName());
-            }
+    public void setProperty(final QName pid, final QName propName, final Node value) {
+        setProperty(pid, propName, DOMUtils.domToStringLevel2(value));
+    }
+
+    public void setProperty(final QName pid, final QName propName, final String value) {
+        if (__log.isDebugEnabled())
+            __log.debug("Setting property " + propName + " on process " + pid);
+
+        ProcessConfImpl pconf = _processes.get(pid);
+        if (pconf == null) {
+            String msg = __msgs.msgProcessNotFound(pid);
+            __log.info(msg);
+            throw new ContextException(msg);
         }
-        return mexi;
-    }
 
-    public Definition getDefinitionForService(QName processId, QName serviceName) {
-        DeploymentUnit du = _deploymentUnits.get(processId);
-        return du.getDefinitionForService(serviceName);
-    }
-
-    private TDeployment.Process getProcessInfo(QName pid) {
-        DeployDocument deployDoc = _deploymentUnits.get(pid).getDeploymentDescriptor();
-        for (TDeployment.Process procInfo : deployDoc.getDeploy().getProcessList()) {
-            if (procInfo.getName().equals(pid)) return procInfo;
-        }
-        throw new BpelEngineException("Process not found: " + pid);
-    }
-
-    public void setProperty(final QName processId, final String name, final String namespace, final Node value) {
-        _mngmtLock.writeLock().lock();
-        try {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting property on process " + processId);
-
-            // Delete it from the database.
-            _conn.exec(new ConfStoreConnection.Callable<Object>() {
-                public Object run() throws Exception {
-                    ProcessConfDAO proc = _conn.getProcessConf(processId);
-                    if (proc == null) {
-                        String msg = __msgs.msgProcessNotFound(processId);
-                        __log.info(msg);
-                        throw new BpelEngineException(msg);
-                    }
-                    proc.setProperty(name, namespace, value);
+        final DeploymentUnitDir dudir = pconf.getDeploymentUnit();
+        exec(new ProcessStoreImpl.Callable<Object>() {
+            public Object call(ConfStoreConnection conn) {
+                DeploymentUnitDAO dudao = conn.getDeploymentUnit(dudir.getName());
+                if (dudao == null)
                     return null;
-                }
-            });
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BpelEngineException(ex);
-        } finally {
-            _mngmtLock.writeLock().unlock();
-        }
-    }
-
-    public void setProperty(final QName processId, final String name, final String namespace, final String value) {
-        _mngmtLock.writeLock().lock();
-        try {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting property on process " + processId);
-
-            // Delete it from the database.
-            _conn.exec(new ConfStoreConnection.Callable<Object>() {
-                public Object run() throws Exception {
-                    ProcessConfDAO proc = _conn.getProcessConf(processId);
-                    if (proc == null) {
-                        String msg = __msgs.msgProcessNotFound(processId);
-                        __log.info(msg);
-                        throw new BpelEngineException(msg);
-                    }
-                    proc.setProperty(name, namespace, value);
+                ProcessConfDAO proc = dudao.getProcess(pid);
+                if (proc == null)
                     return null;
-                }
-            });
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BpelEngineException(ex);
+                proc.setProperty(propName, value);
+                return null;
+            }
+        });
+
+        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.PROPERTY_CHANGED, pid));
+    }
+
+    /**
+     * Load all the deployment units out of the store. Called on start-up.
+     * 
+     */
+    public void loadAll() {
+        exec(new Callable<Object>() {
+            public Object call(ConfStoreConnection conn) {
+                Collection<DeploymentUnitDAO> dus = conn.getDeploymentUnits();
+                for (DeploymentUnitDAO du : dus)
+                    try {
+                        load(du);
+                    } catch (Exception ex) {
+                        __log.error("Error loading DU from store: " + du.getName(), ex);
+                    }
+                return null;
+            }
+        });
+
+    }
+
+    public List<QName> getProcesses() {
+        _rw.readLock().lock();
+        try {
+            return new ArrayList<QName>(_processes.keySet());
         } finally {
-            _mngmtLock.writeLock().unlock();
+            _rw.readLock().unlock();
         }
     }
 
-    public List<String> getEventsSettings(QName processId, List<String> scopeNames) {
-        List<String> result = null;
-        TDeployment.Process processInfo = getProcessInfo(processId);
-        TProcessEvents processEvents = processInfo.getProcessEvents();
-        if (processEvents == null || (processEvents.getGenerate() != null
-                && processEvents.getGenerate().equals(TProcessEvents.Generate.ALL))) {
-            result = new ArrayList<String>(1);
-            result.add("all");
-            return result;
-        }
-
-        if (processEvents.getEnableEventList() != null) result = processEvents.getEnableEventList();
-        if (processEvents.getScopeEventsList() != null && scopeNames != null) {
-            List<String> scopeEvents = processScopeEvents(scopeNames, processEvents.getScopeEventsList());
-            if (scopeEvents != null) {
-                result = scopeEvents;
-            }
-        }
-
-        if (result == null) {
-            return new ArrayList<String>(1);
-        } else {
-            return result;
-        }
-    }
-
-    private List<String> processScopeEvents(List<String> scopeNames, List<TScopeEvents> scopeEventsList) {
-        for (String scopeName : scopeNames) {
-            for (TScopeEvents scopeEvents : scopeEventsList) {
-                if (scopeEvents.getName().equals(scopeName)) {
-                    return scopeEvents.getEnableEventList();
-                }
-            }
-        }
-        return null;
-    }
-
-    private ProcessConf buildConf(ProcessConfDAO dao) {
-        DeploymentUnit du = _deploymentUnits.get(dao.getProcessId());
-        ProcessConfImpl conf = new ProcessConfImpl();
-        TDeployment.Process processInfo = getProcessInfo(dao.getProcessId());
-        conf.setActive(dao.isActive());
-        conf.setDeployDate(dao.getDeployDate());
-        conf.setDeployer(dao.getDeployer());
-        conf.setFiles(du.allFiles().toArray(new File[0]));
-        conf.setPackageName(du.getDeployDir().getName());
-        conf.setProcessId(dao.getProcessId());
-        conf.setProps(dao.getProperties());
-        conf.setInMemory(processInfo.isSetInMemory() && processInfo.getInMemory());
-        return conf;
-    }
-
-    private void reloadDeploymentUnits() {
-        for (DeploymentUnitImpl du : _deploymentManager.getDeploymentUnits())
+    protected void fireEvent(ProcessStoreEvent pse) {
+        for (ProcessStoreListener psl : _listeners)
             try {
-                for (QName procName : du.getProcessNames()) {
-                    _deploymentUnits.put(procName, du);
-                }
-            } catch (Exception ex) {
-                String errmsg = "Error processing deployment unit " + du.getDeployDir()
-                        + "; some processes may not be loaded.";
-                __log.error(errmsg, ex);
+                psl.onProcessStoreEvent(pse);
+            } catch (Throwable t) {
+                __log.error("Exception in listener.", t);
             }
     }
 
-    private byte[] serialize(OProcess oprocess) {
-        Serializer serializer = new Serializer(oprocess.compileDate.getTime(), 1);
-        final byte[] bits;
+    private void fireStateChange(QName processId, ProcessState state) {
+        switch (state) {
+        case ACTIVE:
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId));
+            break;
+        case DISABLED:
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId));
+            break;
+        case RETIRED:
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId));
+            break;
+        }
+
+    }
+
+    public void registerListener(ProcessStoreListener psl) {
+        __log.debug("Registering listener " + psl);
+        _listeners.add(psl);
+    }
+
+    public void unregisterListener(ProcessStoreListener psl) {
+        __log.debug("Unregistering listener " + psl);
+        _listeners.remove(psl);
+    }
+
+    /**
+     * Execute database transactions in an isolated context.
+     * @param <T> return type
+     * @param callable transaction
+     * @return
+     */
+    synchronized <T> T exec(Callable<T> callable) {
+        // We want to submit db jobs to an executor to isolate
+        // them from the current thread,
+        Future<T> future = _executor.submit(callable);
         try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            serializer.write(bos);
-            serializer.writeOProcess(oprocess, bos);
-            bos.close();
-            bits = bos.toByteArray();
-            return bits;
-        } catch (Exception ex) {
-            String errmsg = "Error re-serializing CBP";
-            __log.fatal(errmsg, ex);
-            throw new BpelEngineException(errmsg, ex);
+            return future.get();
+        } catch (Exception e) {
+            throw new ContextException("DbError", e);
         }
     }
 
+    private ConfStoreConnection getConnection() {
+        return _cf.getConnection();
+    }
+
+    /**
+     * Create a property mapping based on the initial values in the deployment 
+     * descriptor.
+     * @param dd
+     * @return
+     */
+    private static Map<QName, Node> calcInitialProperties(TDeployment.Process dd) {
+        HashMap<QName, Node> ret = new HashMap<QName, Node>();
+        if (dd.getPropertyList().size() > 0) {
+            for (TDeployment.Process.Property property : dd.getPropertyList()) {
+                Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
+                if (elmtContent != null)
+                    ret.put(property.getName(), elmtContent);
+                else
+                    ret.put(property.getName(), property.getDomNode().getFirstChild());
+
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Figure out the initial process state from the state in the deployment descriptor. 
+     * @param dd deployment descriptor
+     * @return
+     */
+    private static ProcessState calcInitialState(TDeployment.Process dd) {
+        ProcessState state = ProcessState.DISABLED;
+
+        if (dd.isSetActive())
+            state = ProcessState.ACTIVE;
+        if (dd.isSetRetired())
+            state = ProcessState.RETIRED;
+
+        return state;
+    }
+
+    /**
+     * Load a deployment unit record stored in the db into memory.
+     * @param dudao
+     */
+    private void load(DeploymentUnitDAO dudao) {
+
+        __log.debug("Loading deployment unit record from db: " + dudao.getName());
+
+        File dudir = new File(dudao.getDeploymentUnitDir());
+        if (!dudir.exists())
+            throw new ContextException("Deployed directory " + dudir + " no longer there!");
+        DeploymentUnitDir dud = new DeploymentUnitDir(dudir);
+        dud.scan();
+
+        ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
+
+        _rw.writeLock().lock();
+        try {
+            // NOTE: we don't try to reload things here.
+            if (_deploymentUnits.containsKey(dudao.getName())) {
+                __log.debug("Skipping load of " + dudao.getName() + ", it is already loaded.");
+                return;
+            }
+
+            _deploymentUnits.put(dud.getName(),dud);
+            
+            for (ProcessConfDAO p : dudao.getProcesses()) {
+                Process pinfo = dud.getProcessDeployInfo(p.getPID());
+                if (pinfo == null) {
+                    __log.warn("Cannot load " + p.getPID() + "; cannot find descriptor.");
+                    continue;
+                }
+
+                Map<QName, Node> props = calcInitialProperties(pinfo);
+                // TODO: update the props based on the values in the DB.
+
+                ProcessConfImpl pconf = new ProcessConfImpl(dud, pinfo, dudao.getDeployDate(), props, p.getState());
+
+                _processes.put(pconf.getProcessId(), pconf);
+                loaded.add(pconf);
+            }
+
+        } finally {
+            _rw.writeLock().unlock();
+        }
+
+        // Fire the events outside of the lock
+        for (ProcessConfImpl p : loaded)
+            fireStateChange(p.getProcessId(), p.getState());
+
+    }
+
+    /**
+     * Wrapper for database transactions.
+     * @author Maciej Szefler
+     *
+     * @param <V> return type
+     */
+    abstract class Callable<V> implements java.util.concurrent.Callable<V> {
+        public V call() {
+            boolean success = false;
+            ConfStoreConnection conn = getConnection();
+            try {
+                conn.begin();
+                V r = call(conn);
+                conn.commit();
+                success = true;
+                return r;
+            } finally {
+                if (!success)
+                    try {
+                        conn.rollback();
+                    } catch (Exception ex) {
+                        __log.error("DbError", ex);
+                    }
+                try {
+                    conn.close();
+                } catch (Exception ex) {
+                    __log.error("DbError", ex);
+                }
+            }
+
+        }
+
+        abstract V call(ConfStoreConnection conn);
+    }
 }
