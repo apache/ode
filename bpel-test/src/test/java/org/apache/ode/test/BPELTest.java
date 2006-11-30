@@ -20,10 +20,7 @@ package org.apache.ode.test;
 
 import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
@@ -52,6 +49,13 @@ public abstract class BPELTest extends TestCase {
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
         store = new ProcessStoreImpl();
+        store.registerListener(new ProcessStoreListener() {
+            public void onProcessStoreEvent(ProcessStoreEvent event) {
+                // bounce the process
+                server.unregister(event.pid);
+                server.register(store.getProcessConfiguration(event.pid));
+            }
+        });
         server.init();
 		server.start();
 	}
