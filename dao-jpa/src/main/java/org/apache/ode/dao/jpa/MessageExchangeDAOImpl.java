@@ -158,7 +158,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public String getMessageExchangeId() {
-		return _messageExchangeId;
+		//return _messageExchangeId;
+		return _id.toString();
 	}
 
 	public String getOperation() {
