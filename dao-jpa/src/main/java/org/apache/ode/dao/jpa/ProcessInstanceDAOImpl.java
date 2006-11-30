@@ -72,10 +72,11 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	private CorrelatorDAOImpl _instantiatingCorrelator;
 	
 	public ProcessInstanceDAOImpl() {}
-	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, BPELDAOConnectionImpl connection) {
+	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process, BPELDAOConnectionImpl connection) {
 		_instantiatingCorrelator = correlator;
 		_connection = connection;
 		_connection.addInstance(this);
+		_process = process;
 	}
 	
 	public void createActivityRecovery(String channel, long activityId,
@@ -88,7 +89,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public ScopeDAO createScope(ScopeDAO parentScope, String name,
 			int scopeModelId) {
-		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,_connection);
+		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this,_connection);
 		_scopes.add(ret);
 		
 		_rootScope = (parentScope == null)?ret:_rootScope;
