@@ -82,12 +82,13 @@ public class ScopeDAOImpl implements ScopeDAO {
 	private BPELDAOConnectionImpl _connection;
 
 	public ScopeDAOImpl() {}
-	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, BPELDAOConnectionImpl connection) {
+	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi, BPELDAOConnectionImpl connection) {
 		_parentScope = parentScope;
 		_name = name;
 		_modelId = scopeModelId;
 		_connection = connection;
 		_connection.addScope(this);
+		_processInstance = pi;
 	}
 	
 	public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,

@@ -57,8 +57,9 @@ public class ProcessDAOImpl implements ProcessDAO {
 
 	public ProcessInstanceDAO createInstance(
 			CorrelatorDAO instantiatingCorrelator) {
-		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator,_connection);
+		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this,_connection);
 		_instances.add(inst);
+		_numInstances++;
 		
 		return inst;
 	}
