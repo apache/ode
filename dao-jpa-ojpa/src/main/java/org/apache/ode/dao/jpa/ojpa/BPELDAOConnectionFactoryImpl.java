@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -21,9 +22,15 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 	
 	public BpelDAOConnection getConnection() {
 		
+		List<BpelDAOConnection> conns = null;
+		
 		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x order by x._id asc");
 		
-		List<BpelDAOConnection> conns = (List<BpelDAOConnection>)q.getResultList();
+		try {
+			conns = (List<BpelDAOConnection>)q.getResultList();
+		} catch (NoResultException e) {
+			return new BPELDAOConnectionImpl(new Long(1));
+		}
 		
 		if ( conns.size() < 1 ) {
 			return new BPELDAOConnectionImpl(new Long(1));
@@ -33,11 +40,14 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 	}
 	
 	public BpelDAOConnection getConnection(Long connID) {
+		BpelDAOConnection conn = null;
 		
 		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x WHERE x._id = ?1");
 		q.setParameter(1, connID);
 		
-		BpelDAOConnection conn = (BpelDAOConnection)q.getSingleResult();
+		try {
+			conn = (BpelDAOConnection)q.getSingleResult();
+		} catch (NoResultException e){}
 		
 		if ( conn == null ) {
 			conn = new BPELDAOConnectionImpl(connID);
