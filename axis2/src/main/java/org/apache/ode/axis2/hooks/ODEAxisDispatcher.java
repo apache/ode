@@ -44,7 +44,7 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
     private static MultiKeyMap _elmtToOperation = new MultiKeyMap();
 
     /** Field NAME */
-    public static final QName NAME = new QName("http://www.apache.org/ode", "ODEAxisDispatcher");
+    public static final String NAME = "ODEAxisDispatcher";
     private static final Log log = LogFactory.getLog(ODEAxisDispatcher.class);
     QName operationName = null;
 

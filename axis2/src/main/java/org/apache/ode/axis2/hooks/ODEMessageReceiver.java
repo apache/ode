@@ -88,10 +88,10 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
 
   private boolean hasResponse(AxisOperation op) {
     switch(op.getAxisSpecifMEPConstant()) {
-      case AxisOperation.MEP_CONSTANT_IN_OUT: return true;
-      case AxisOperation.MEP_CONSTANT_OUT_ONLY: return true;
-      case AxisOperation.MEP_CONSTANT_OUT_OPTIONAL_IN: return true;
-      case AxisOperation.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
+      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_IN_OUT: return true;
+      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_ONLY: return true;
+      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_OPTIONAL_IN: return true;
+      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
       default: return false;
     }
   }
