@@ -22,7 +22,7 @@ package org.apache.ode.axis2.hooks;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.WSDL2AxisServiceBuilder;
+import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
 
@@ -47,12 +47,12 @@ public class ODEAxisService extends AxisService {
                                           QName wsdlServiceName, String portName) throws AxisFault {
     String serviceName = extractServiceName(wsdlDefinition, wsdlServiceName, portName);
 
-    WSDL2AxisServiceBuilder serviceBuilder =
-            new WSDL2AxisServiceBuilder(wsdlDefinition, wsdlServiceName, portName);
+    WSDL11ToAxisServiceBuilder serviceBuilder =
+            new WSDL11ToAxisServiceBuilder(wsdlDefinition, wsdlServiceName, portName);
     serviceBuilder.setServerSide(true);
     AxisService axisService = serviceBuilder.populateService();
     axisService.setName(serviceName);
-    axisService.setWsdlfound(true);
+    axisService.setWsdlFound(true);
     axisService.setClassLoader(axisConfig.getServiceClassLoader());
 
     // In doc/lit we need to declare a mapping between operations and message element names
@@ -72,11 +72,11 @@ public class ODEAxisService extends AxisService {
 
   public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
                              String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
-    WSDL2AxisServiceBuilder serviceBuilder =
-            new WSDL2AxisServiceBuilder(wsdlDef, serviceQName, port);
+    WSDL11ToAxisServiceBuilder serviceBuilder =
+            new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
     AxisService axisService = serviceBuilder.populateService();
     axisService.setName(axisName);
-    axisService.setWsdlfound(true);
+    axisService.setWsdlFound(true);
     axisService.setClassLoader(axisConfig.getServiceClassLoader());
     Iterator operations = axisService.getOperations();
     while (operations.hasNext()) {
