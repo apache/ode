@@ -100,7 +100,21 @@
             <artifactId>jotm</artifactId>
         </dependency>
 
-	<!-- The following are needed by JOTM -->
+        <!-- The following are needed for Geronimo transactions mgr lookup -->
+        <dependency>
+            <groupId>geronimo</groupId>
+            <artifactId>geronimo-kernel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>geronimo</groupId>
+            <artifactId>geronimo-transaction</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jencks</groupId>
+            <artifactId>jencks</artifactId>
+        </dependency>
+
+    <!-- The following are needed by JOTM -->
         <dependency>
              <groupId>org.apache.geronimo.specs</groupId>
              <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
