@@ -43,62 +43,63 @@ public class SessionOutHandler extends AbstractHandler {
     private static final long serialVersionUID = 1L;
     private static final Log __log = LogFactory.getLog(SessionOutHandler.class);
 
-    
-  public void invoke(MessageContext messageContext) throws AxisFault {
-    EndpointReference otargetSession = (EndpointReference) messageContext.getProperty("targetSessionEndpoint");
-    EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty("callbackSessionEndpoint");
-    if (otargetSession == null)
-      otargetSession = (EndpointReference) messageContext.getOptions().getProperty("targetSessionEndpoint");
-    if (ocallbackSession == null)
-      ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty("callbackSessionEndpoint");
 
-    if (otargetSession != null || ocallbackSession != null) {
-      SOAPHeader header = messageContext.getEnvelope().getHeader();
-      SOAPFactory factory = (SOAPFactory) messageContext.getEnvelope().getOMFactory();
-      OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.INTALIO_SESSION_NS, "intalio");
-      OMNamespace wsAddrNS = factory.createOMNamespace(Namespaces.WS_ADDRESSING_NS, "addr");
-      if (header == null) {
-        header = factory.createSOAPHeader(messageContext.getEnvelope());
-      }
-      if (otargetSession != null && otargetSession instanceof MutableEndpoint) {
-        
-        WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
+    public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
+        EndpointReference otargetSession = (EndpointReference) messageContext.getProperty("targetSessionEndpoint");
+        EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty("callbackSessionEndpoint");
+        if (otargetSession == null)
+            otargetSession = (EndpointReference) messageContext.getOptions().getProperty("targetSessionEndpoint");
+        if (ocallbackSession == null)
+            ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty("callbackSessionEndpoint");
 
-        OMElement to = factory.createOMElement("To", wsAddrNS);
-        header.addChild(to);
-        to.setText(targetEpr.getUrl());
+        if (otargetSession != null || ocallbackSession != null) {
+            SOAPHeader header = messageContext.getEnvelope().getHeader();
+            SOAPFactory factory = (SOAPFactory) messageContext.getEnvelope().getOMFactory();
+            OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.INTALIO_SESSION_NS, "intalio");
+            OMNamespace wsAddrNS = factory.createOMNamespace(Namespaces.WS_ADDRESSING_NS, "addr");
+            if (header == null) {
+                header = factory.createSOAPHeader(messageContext.getEnvelope());
+            }
+            if (otargetSession != null && otargetSession instanceof MutableEndpoint) {
 
-        String soapAction = (String) messageContext.getProperty("soapAction");
-        OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
-        header.addChild(wsaAction);
-        wsaAction.setText(soapAction);
+                WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
 
-        if (targetEpr.getSessionId() != null) {
-          OMElement session = factory.createOMElement("session", intalioSessNS);
-          header.addChild(session);
-          session.setText(targetEpr.getSessionId());
+                OMElement to = factory.createOMElement("To", wsAddrNS);
+                header.addChild(to);
+                to.setText(targetEpr.getUrl());
+
+                String soapAction = (String) messageContext.getProperty("soapAction");
+                OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
+                header.addChild(wsaAction);
+                wsaAction.setText(soapAction);
+
+                if (targetEpr.getSessionId() != null) {
+                    OMElement session = factory.createOMElement("session", intalioSessNS);
+                    header.addChild(session);
+                    session.setText(targetEpr.getSessionId());
+                }
+                __log.debug("Sending stateful TO epr in message header using session " + targetEpr.getSessionId());
+            }
+
+            if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
+                WSAEndpoint callbackEpr = EndpointFactory.convertToWSA((MutableEndpoint) ocallbackSession);
+                OMElement callback = factory.createOMElement("callback", intalioSessNS);
+                header.addChild(callback);
+                OMElement address = factory.createOMElement("Address", wsAddrNS);
+                callback.addChild(address);
+                address.setText(callbackEpr.getUrl());
+                if (callbackEpr.getSessionId() != null) {
+                    OMElement session = factory.createOMElement("session", intalioSessNS);
+                    session.setText(callbackEpr.getSessionId());
+                    callback.addChild(session);
+                }
+                __log.debug("Sending stateful FROM epr in message header using session " + callbackEpr.getSessionId());
+            }
+
+            __log.debug("Sending a message containing wsa endpoints in headers for session passing.");
+            __log.debug(messageContext.getEnvelope().toString());
+
         }
-        __log.debug("Sending stateful TO epr in message header using session " + targetEpr.getSessionId());
-      }
-      
-      if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
-        WSAEndpoint callbackEpr = EndpointFactory.convertToWSA((MutableEndpoint) ocallbackSession);
-        OMElement callback = factory.createOMElement("callback", intalioSessNS);
-        header.addChild(callback);
-        OMElement address = factory.createOMElement("Address", wsAddrNS);
-        callback.addChild(address);
-        address.setText(callbackEpr.getUrl());
-        if (callbackEpr.getSessionId() != null) {
-          OMElement session = factory.createOMElement("session", intalioSessNS);
-          session.setText(callbackEpr.getSessionId());
-          callback.addChild(session);
-        }
-        __log.debug("Sending stateful FROM epr in message header using session " + callbackEpr.getSessionId());
-      }
-
-      __log.debug("Sending a message containing wsa endpoints in headers for session passing.");
-      __log.debug(messageContext.getEnvelope().toString());
-
+        return InvocationResponse.CONTINUE;        
     }
-  }
 }

@@ -56,7 +56,8 @@
         <activationVersion>1.1</activationVersion>
         <antVersion>1.6.5</antVersion>
         <axisVersion>1.3</axisVersion>
-        <axis2Version>1.0</axis2Version>
+        <axis2Version>1.1</axis2Version>
+        <axiomVersion>1.2</axiomVersion>
         <commonsCodecVersion>1.3</commonsCodecVersion>
         <commonsCollectionsVersion>3.1</commonsCollectionsVersion>
         <commonsHttpClientVersion>3.0</commonsHttpClientVersion>
@@ -274,6 +275,12 @@
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
+        </repository>
+        <repository>
+            <id>ibiblio</id>
+            <name>ibiblio</name>
+            <url>http://www.ibiblio.org/maven</url>
+            <layout>legacy</layout>
         </repository>
 <!--        <repository>
             <id>apache</id>
@@ -526,19 +533,24 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>axis2</groupId>
+                <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2</artifactId>
                 <version>${axis2Version}</version>
             </dependency>
             <dependency>
-                <groupId>ws-commons</groupId>
+                <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
-                <version>${axis2Version}</version>
+                <version>${axiomVersion}</version>
             </dependency>
             <dependency>
-                <groupId>ws-commons</groupId>
+                <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-impl</artifactId>
-                <version>${axis2Version}</version>
+                <version>${axiomVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiomVersion}</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
