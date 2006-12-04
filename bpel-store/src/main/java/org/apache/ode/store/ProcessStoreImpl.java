@@ -12,6 +12,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.hsqldb.jdbc.jdbcDataSource;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -471,14 +472,17 @@ public class ProcessStoreImpl implements ProcessStore {
      * @param dd
      * @return
      */
-    private static Map<QName, Node> calcInitialProperties(TDeployment.Process dd) {
+    public static Map<QName, Node> calcInitialProperties(TDeployment.Process dd) {
         HashMap<QName, Node> ret = new HashMap<QName, Node>();
         if (dd.getPropertyList().size() > 0) {
             for (TDeployment.Process.Property property : dd.getPropertyList()) {
                 Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
-                if (elmtContent != null)
-                    ret.put(property.getName(), elmtContent);
-                else
+                if (elmtContent != null) {
+                    // We'll need DOM Level 3
+                    Document doc = DOMUtils.newDocument();
+                    doc.appendChild(doc.importNode(elmtContent, true));
+                    ret.put(property.getName(), doc.getDocumentElement());
+                } else
                     ret.put(property.getName(), property.getDomNode().getFirstChild());
 
             }
