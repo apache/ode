@@ -18,87 +18,15 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
-import org.apache.ode.bpel.compiler.bom.Activity;
-import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.compiler.bom.BpelObject;
-import org.apache.ode.bpel.compiler.bom.Catch;
-import org.apache.ode.bpel.compiler.bom.CompensationHandler;
-import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.compiler.bom.CorrelationSet;
-import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.compiler.bom.FaultHandler;
+import org.apache.ode.bpel.compiler.api.*;
+import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.bom.Import;
-import org.apache.ode.bpel.compiler.bom.LinkSource;
-import org.apache.ode.bpel.compiler.bom.LinkTarget;
-import org.apache.ode.bpel.compiler.bom.OnAlarm;
-import org.apache.ode.bpel.compiler.bom.OnEvent;
-import org.apache.ode.bpel.compiler.bom.PartnerLink;
-import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
 import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.compiler.bom.Property;
-import org.apache.ode.bpel.compiler.bom.PropertyAlias;
-import org.apache.ode.bpel.compiler.bom.Scope;
-import org.apache.ode.bpel.compiler.bom.ScopeActivity;
-import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.compiler.bom.TerminationHandler;
-import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.o.DebugInfo;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OCompensate;
-import org.apache.ode.bpel.o.OCompensationHandler;
-import org.apache.ode.bpel.o.OConstantExpression;
-import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.ORethrow;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.o.OTerminationHandler;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.o.*;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.fs.FileUtils;
@@ -106,6 +34,15 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.w3c.dom.Node;
+
+import javax.wsdl.*;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
 
 
 /**
@@ -153,6 +90,8 @@ abstract class BpelCompiler implements CompilerContext {
 
     private WSDLFactory4BPEL _wsdlFactory;
     private OExpressionLanguage _konstExprLang;
+
+    private Map<QName,Node> _customProcessProperties;
 
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
@@ -204,6 +143,10 @@ abstract class BpelCompiler implements CompilerContext {
         return _compileListener;
     }
 
+    public void setCustomProperties(Map<QName, Node> customProperties) {
+        _customProcessProperties = customProperties;
+    }
+
     /**
      * Get the process definition.
      *
@@ -216,7 +159,7 @@ abstract class BpelCompiler implements CompilerContext {
     public PortType resolvePortType(final QName portTypeName) {
         if (portTypeName == null)
             throw new NullPointerException("Null portTypeName argument!");
-        
+
         PortType portType = _wsdlRegistry.getPortType(portTypeName);
         if (portType == null)
             throw new CompilationException(__cmsgs.errUndeclaredPortType(portTypeName));
@@ -243,6 +186,10 @@ abstract class BpelCompiler implements CompilerContext {
             OScope.Variable var = i.next().getLocalVariable(varName);
             if (var != null)
                 return var;
+        }
+        // A "real" variable couldn't be found, checking if we're dealing with a process custom property
+        if (_customProcessProperties != null && _customProcessProperties.get(varName) != null) {
+
         }
         throw new CompilationException(__cmsgs.errUndeclaredVariable(varName));
     }
@@ -614,9 +561,23 @@ abstract class BpelCompiler implements CompilerContext {
         procesScope.debugInfo = createDebugInfo(process, null);
         _oprocess.procesScope = compileScope(procesScope, process, new Runnable() {
             public void run() {
-            	if (process.getRootActivity() == null) {
+                if (process.getRootActivity() == null) {
                     throw new CompilationException(__cmsgs.errNoRootActivity());
-            	}            		
+                }
+                // Process custom properties are created as variables associated with the top scope
+                if (_customProcessProperties != null) {
+                    for (Map.Entry<QName, Node> customVar : _customProcessProperties.entrySet()) {
+                        final OScope oscope = _structureStack.topScope();
+                        OVarType varType = new OConstantVarType(_oprocess, customVar.getValue());
+                        OScope.Variable ovar = new OScope.Variable(_oprocess, varType);
+                        ovar.name = customVar.getKey().getLocalPart();
+                        ovar.declaringScope = oscope;
+                        ovar.debugInfo = createDebugInfo(null, "Process custom property variable");
+                        oscope.addLocalVariable(ovar);
+                        if (__log.isDebugEnabled())
+                            __log.debug("Compiled custom property variable " + ovar);
+                    }
+                }
                 _structureStack.topScope().activity = compile(process.getRootActivity());
             }
         });
@@ -778,7 +739,7 @@ abstract class BpelCompiler implements CompilerContext {
 
         return implicitScope;
     }
-    
+
     private OActivity compileActivity(final boolean doLinks, final Activity source) {
         final ActivityGenerator actgen = findActivityGen(source);
         final OActivity oact = actgen.newInstance(source);
@@ -1213,7 +1174,6 @@ abstract class BpelCompiler implements CompilerContext {
         if (oscope.getLocalVariable(src.getName()) != null)
             throw new CompilationException(__cmsgs.errDuplicateVariableDecl(src.getName()).setSource(src));
 
-
         OVarType varType;
         switch (src.getKind()) {
             case ELEMENT:
@@ -1228,7 +1188,6 @@ abstract class BpelCompiler implements CompilerContext {
             default:
                 throw new CompilationException(__cmsgs.errUnrecognizedVariableDeclaration(src.getName()));
         }
-
 
         OScope.Variable ovar = new OScope.Variable(_oprocess, varType);
         ovar.name = src.getName();
@@ -1486,6 +1445,11 @@ abstract class BpelCompiler implements CompilerContext {
             return scopeStack.isEmpty() ? null : scopeStack.get(scopeStack.size() -1);
         }
 
+        public OScope rootScope() {
+            for (OActivity oActivity : _stack)
+                if (oActivity instanceof OScope) return (OScope) oActivity;
+            return null;
+        }
 
         public OActivity pop() {
             return _stack.pop();
