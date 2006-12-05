@@ -1,21 +1,5 @@
 package org.apache.ode.store;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
@@ -29,6 +13,14 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.o.Serializer;
+import org.w3c.dom.Node;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.*;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -43,7 +35,7 @@ class DeploymentUnitDir  {
     private String _name;
     private File _duDirectory;
     private File _descriptorFile;
-    
+
     private HashMap<QName, CBPInfo> _processes = new HashMap<QName,CBPInfo>();
     private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName,TDeployment.Process>();
 
@@ -119,11 +111,11 @@ class DeploymentUnitDir  {
         for (TDeployment.Process p : getDeploymentDescriptor().getDeploy().getProcessList()) {
             processInfo.put(p.getName(), p);
         }
-        
+
         _processInfo = processInfo;
 
     }
-    
+
     boolean isRemoved() {
         return !_duDirectory.exists();
     }
@@ -133,13 +125,13 @@ class DeploymentUnitDir  {
         bpelc.setOutputDirectory(_duDirectory);
         bpelc.setWsdlFinder(new DefaultWsdlFinder(_duDirectory));
         bpelc.setXsltFinder(new DefaultXsltFinder(_duDirectory));
+        bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         try {
             bpelc.compile(bpelFile);
         } catch (IOException e) {
             __log.error("Compile error in " + bpelFile, e);
         }
     }
-
 
     /**
      * Load the parsed and compiled BPEL process definition.
@@ -271,16 +263,30 @@ class DeploymentUnitDir  {
         return result;
     }
 
-    
+
     public final class CBPInfo {
         final QName processName;
         final String guid;
         final File cbp;
-        
+
         CBPInfo(QName processName, String guid, File cbp) {
             this.processName = processName;
             this.guid = guid;
             this.cbp = cbp;
         }
     }
+
+    private Map<String, Object> prepareCompileProperties(File bpelFile) {
+        List<Process> plist = getDeploymentDescriptor().getDeploy().getProcessList();
+        for (Process process : plist) {
+            if (bpelFile.getName().equals(process.getFileName())) {
+                Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(process);
+                Map<String, Object> result = new HashMap<String, Object>();
+                result.put(BpelC.PROCESS_CUSTOM_PROPERTIES, props);
+                return result;
+            }
+        }
+        return null;
+    }
+
 }
