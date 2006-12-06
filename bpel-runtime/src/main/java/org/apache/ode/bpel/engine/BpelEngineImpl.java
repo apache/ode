@@ -151,9 +151,6 @@ public class BpelEngineImpl implements BpelEngine {
             throw new BpelEngineException(errmsg);
         }
 
-        if (process != null)
-            mex.setProcess(process._oprocess);
-
         return mex;
     }
 
