@@ -184,7 +184,6 @@ public class BpelProcess {
         }
 
         mex.getDAO().setProcess(getProcessDAO());
-        mex.setProcess(_oprocess);
 
         if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
             __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
