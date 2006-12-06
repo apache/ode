@@ -56,7 +56,7 @@ public class FaultDAOImpl implements FaultDAO {
 		_explanation = explanation;
 		_lineNo = faultLineNo;
 		_activityId = activityId;
-		// TODO setFaultMessage(faultMessage);
+		_data = DOMUtils.domToString(faultMessage);
 	}
 	
 	public int getActivityId() {
