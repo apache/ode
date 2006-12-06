@@ -52,8 +52,10 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	@Lob @Column(name="EXECUTION_STATE") private byte[] _executionState;
 	@Basic @Column(name="SEQUENCE") private Long _sequence;
 	@Basic @Column(name="DATE_CREATED") private Date _dateCreated = new Date();
-	@Transient private ScopeDAO _rootScope;
 	
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+	@Column(name="ROOT_SCOPE_ID")
+	private ScopeDAOImpl _rootScope;
 	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,fetch=FetchType.LAZY,cascade={CascadeType.ALL})
