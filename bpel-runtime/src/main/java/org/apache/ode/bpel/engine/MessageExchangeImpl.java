@@ -27,7 +27,6 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
@@ -44,7 +43,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
     /** Process-Instance identifier.*/
     protected Long _iid;
 
-    protected OProcess _oprocess;
     protected PortType _portType;
     protected Operation _operation;
 
@@ -143,17 +141,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public PortType getPortType() {
         return _portType;
     }
-
-    /**
-     * Associate message exchange with a process.
-     * @param oprocess
-     */
-    void setProcess(OProcess oprocess) {
-        if (__log.isTraceEnabled())
-            __log.trace("Mex[" + getMessageExchangeId() + "].setProcess("+oprocess+")");
-        _oprocess = oprocess;
-    }
-
 
     /**
      * Update the pattern of this message exchange.
