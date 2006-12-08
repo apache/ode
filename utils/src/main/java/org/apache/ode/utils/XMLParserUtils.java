@@ -18,22 +18,20 @@
  */
 package org.apache.ode.utils;
 
-import com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl;
-import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
-import com.sun.org.apache.xerces.internal.parsers.SAXParser;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.xerces.jaxp.SAXParserFactoryImpl;
+import org.apache.xerces.parsers.DOMParser;
+import org.apache.xerces.parsers.SAXParser;
+import org.xml.sax.*;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.*;
 
 /**
  * A collection of utility methods for the Apache Xerces XML parser.
@@ -58,9 +56,9 @@ public class XMLParserUtils {
    */
   static {
     System.setProperty("javax.xml.parsers.SAXParserFactory", 
-        "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+        "org.apache.xerces.jaxp.SAXParserFactoryImpl");
     System.setProperty("javax.xml.parsers.DocumentBuilderFactory", 
-        "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl"); 
+        "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
   }
 
   /**

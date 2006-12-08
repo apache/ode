@@ -18,13 +18,12 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import org.apache.xml.utils.DOMBuilder;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
-
-import com.sun.org.apache.xml.internal.utils.DOMBuilder;
 
 public class DOMBuilderContentHandler extends DOMBuilder {
     private Locator _locator;
@@ -40,7 +39,7 @@ public class DOMBuilderContentHandler extends DOMBuilder {
     public void startElement(String ns, String localName, String name, Attributes atts) throws SAXException {
         if (localName.equals("literal") || _suppressLineNo > 0)
             ++_suppressLineNo;
-                
+
         if (_locator != null && _suppressLineNo == 0) {
             AttributesImpl a = new AttributesImpl(atts);
             a.addAttribute(BpelObject.ATTR_LINENO.getNamespaceURI(), BpelObject.ATTR_LINENO.getLocalPart(),

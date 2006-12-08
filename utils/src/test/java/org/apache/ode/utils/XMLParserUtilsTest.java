@@ -18,17 +18,15 @@
  */
 package org.apache.ode.utils;
 
-import org.apache.ode.utils.sax.FailOnErrorErrorHandler;
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import common.TestResources;
-
-import java.net.URL;
-
 import junit.framework.TestCase;
-
+import org.apache.ode.utils.sax.FailOnErrorErrorHandler;
+import org.apache.xerces.parsers.DOMParser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+
+import java.net.URL;
 
 public class XMLParserUtilsTest extends TestCase {
   
