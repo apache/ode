@@ -28,29 +28,34 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 		
 		try {
 			conns = (List<BpelDAOConnection>)q.getResultList();
+			
 		} catch (NoResultException e) {
-			return new BPELDAOConnectionImpl(new Long(1));
+			return new BPELDAOConnectionImpl(new Long(1),em);
 		}
 		
 		if ( conns.size() < 1 ) {
-			return new BPELDAOConnectionImpl(new Long(1));
+			return new BPELDAOConnectionImpl(new Long(1),em);
 		}
 		
-		return conns.get(conns.size()-1);
+		BPELDAOConnectionImpl conn = (BPELDAOConnectionImpl)conns.get(conns.size()-1);
+		conn.setEntityManger(em);
+		
+		return conn;
 	}
 	
 	public BpelDAOConnection getConnection(Long connID) {
-		BpelDAOConnection conn = null;
+		BPELDAOConnectionImpl conn = null;
 		
 		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x WHERE x._id = ?1");
 		q.setParameter(1, connID);
 		
 		try {
-			conn = (BpelDAOConnection)q.getSingleResult();
+			conn = (BPELDAOConnectionImpl)q.getSingleResult();
+			conn.setEntityManger(em);
 		} catch (NoResultException e){}
 		
 		if ( conn == null ) {
-			conn = new BPELDAOConnectionImpl(connID);
+			conn = new BPELDAOConnectionImpl(connID,em);
 		}
 		
 		return conn;
