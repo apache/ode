@@ -40,6 +40,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 	@Basic @Column(name="NUMBER_OF_INSTANCES") private int _numInstances;
 	@Basic @Column(name="PROCESS_KEY") private QName _processKey;
 	@Basic @Column(name="PROCESS_TYPE") private QName _processType;
+	@Basic @Column(name="GUID") private String _guid;
 	@Version @Column(name="VERSION") private int _version;
 	
 	@OneToMany(targetEntity=ProcessInstanceDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -51,10 +52,11 @@ public class ProcessDAOImpl implements ProcessDAO {
 	private BPELDAOConnectionImpl _connection;
 	
 	public ProcessDAOImpl() {}
-	public ProcessDAOImpl(QName key, QName type, BPELDAOConnectionImpl connection) {
+	public ProcessDAOImpl(QName key, QName type, String guid, BPELDAOConnectionImpl connection) {
 		_processKey = key;
 		_processType = type;
 		_connection = connection;
+		_guid = guid;
 	}
 	
 	public void addCorrelator(String correlator) {
@@ -122,7 +124,6 @@ public class ProcessDAOImpl implements ProcessDAO {
 
 	public void instanceCompleted(ProcessInstanceDAO instance) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public void removeRoutes(String routeId, ProcessInstanceDAO target) {
@@ -130,6 +131,9 @@ public class ProcessDAOImpl implements ProcessDAO {
             c.removeRoutes(routeId, target);
         }
 
+	}
+	public String getGuid() {
+		return _guid;
 	}
 
 }
