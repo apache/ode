@@ -116,7 +116,7 @@ public class InsertObjectTest extends TestCase {
 	private ProcessDAO createProcess(BpelDAOConnection conn, String pid, String type) {
 		ProcessDAO p = null;
 		
-		p = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type));
+		p = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1");
 		p.addCorrelator(CORRELATOR_ID1);
 		p.addCorrelator(CORRELATOR_ID2);
 		
