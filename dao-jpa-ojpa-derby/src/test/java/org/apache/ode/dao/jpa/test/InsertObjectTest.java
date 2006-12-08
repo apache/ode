@@ -56,6 +56,8 @@ public class InsertObjectTest extends TestCase {
 	}
 	
 	public void testStart() throws Exception {
+
+		em.getTransaction().begin();
 		
 		BPELDAOConnectionFactoryImpl factory = new BPELDAOConnectionFactoryImpl(em);
 		BpelDAOConnection conn = factory.getConnection();
@@ -64,10 +66,9 @@ public class InsertObjectTest extends TestCase {
 		ProcessInstanceDAO pi1 = createProcessInstance(p1, CORRELATOR_ID1);
 		
 		
-		em.getTransaction().begin();
 		em.persist(conn);
 				
-		em.flush();
+		//em.flush();
 		em.getTransaction().commit();
 		
 	}
