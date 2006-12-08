@@ -79,7 +79,7 @@ public class BpelProcess {
 
     DebuggerSupport _debugger;
 
-    OProcess _oprocess;
+    volatile OProcess _oprocess;
 
     final ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
 
