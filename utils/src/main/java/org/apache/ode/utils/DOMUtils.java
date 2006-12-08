@@ -18,8 +18,6 @@
  */
 package org.apache.ode.utils;
 
-import com.sun.org.apache.xerces.internal.dom.DOMOutputImpl;
-import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xml.internal.serialize.DOMSerializerImpl;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
@@ -30,6 +28,8 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.ode.utils.sax.LoggingErrorHandler;
+import org.apache.xerces.dom.DOMOutputImpl;
+import org.apache.xerces.impl.Constants;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

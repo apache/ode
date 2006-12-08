@@ -76,5 +76,9 @@
          <artifactId>saxon-dom</artifactId>
        </dependency>
 
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>xalan</artifactId>
+        </dependency>
     </dependencies>
 </project>
