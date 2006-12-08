@@ -8,12 +8,14 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.BpelEventFilter;
@@ -30,6 +32,8 @@ import org.apache.ode.bpel.evt.BpelEvent;
 @Entity
 @Table(name="ODE_ROOT")
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
+	
+	@Transient private EntityManager _em;
 
 	@Id @Column(name="ROOT_ID")
 	private Long _id;
@@ -47,8 +51,9 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	private Collection<ScopeDAOImpl> _scopes = new ArrayList<ScopeDAOImpl>();
 	
 	public BPELDAOConnectionImpl() {}
-	public BPELDAOConnectionImpl(Long id) {
+	public BPELDAOConnectionImpl(Long id, EntityManager em) {
 		_id = id;
+		_em = em;
 	}
 	
 	public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter,
@@ -64,7 +69,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	}
 
 	public void close() {
-		// TODO Auto-generated method stub
+		_em = null;
 
 	}
 
@@ -143,6 +148,14 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	public Collection<ProcessDAO> processQuery(ProcessFilter criteria) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	EntityManager getEntityManager() {
+		return _em;
+	}
+	
+	public void setEntityManger(EntityManager em) {
+		_em = em;
 	}
 
 }

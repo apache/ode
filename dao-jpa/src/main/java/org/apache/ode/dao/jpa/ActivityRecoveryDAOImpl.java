@@ -57,9 +57,12 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 		_reason = reason;
 		_dateTime = dateTime;
 		
-		// TODO: implement
-		//_details = data;
-		//_actions = action;
+		_details = DOMUtils.domToString(data);
+		
+        String alist = actions[0];
+        for (int i = 1; i < actions.length; ++i)
+            alist += " " + actions[i];
+		_actions = alist;
 		
 		_retries = retries;
 		
@@ -87,10 +90,12 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 
 	public Element getDetails() {
 		Element ret = null;
-		try {
-			ret = DOMUtils.stringToDOM(_details);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		if ( _details != null ) {
+			try {
+				ret = DOMUtils.stringToDOM(_details);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return ret;
 	}
