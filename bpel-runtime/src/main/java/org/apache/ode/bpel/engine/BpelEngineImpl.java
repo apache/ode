@@ -50,9 +50,11 @@ public class BpelEngineImpl implements BpelEngine {
     private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
     /** RNG, for delays */
     private Random _random = new Random(System.currentTimeMillis());
-    
+
     private static double _delayMean = 0;
-    
+    // Reaping
+    private static long _processMaxAge = 60*60*1000;
+
     static {
         try {
             String delay = System.getenv("ODE_DEBUG_TX_DELAY");
@@ -67,13 +69,28 @@ public class BpelEngineImpl implements BpelEngine {
                 __log.info("Could not read ODE_DEBUG_TX_DELAY environment variable; assuming 0 (mean) delay");
             }
         }
+        // TODO Clean this up and factorize engine configuration
+        try {
+            String processMaxAge = System.getenv("ODE_DEF_MAX_AGE");
+            if (processMaxAge != null && processMaxAge.length() > 0) {
+                _processMaxAge = Long.valueOf(processMaxAge);
+                __log.info("Process definition max age adjusted. Max age = " + _processMaxAge + "ms.");
+            }
+        } catch (Throwable t) {
+            if (__log.isDebugEnabled()) {
+                __log.debug("Could not read ODE_DEF_MAX_AGE environment variable; assuming " + _processMaxAge + " delay", t);
+            } else {
+                __log.info("Could not read ODE_DEF_MAX_AGE environment variable; assuming " + _processMaxAge + " delay");
+            }
+        }
     }
-
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** Active processes, keyed by process id. */
     final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
+
+    final HashMap<QName, Long> _processesLRU = new HashMap<QName, Long>();
 
     /** Mapping from myrole endpoint name to active process. */
     private final HashMap<Endpoint, BpelProcess> _serviceMap = new HashMap<Endpoint, BpelProcess>();
@@ -82,6 +99,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     public BpelEngineImpl(Contexts contexts) {
         _contexts = contexts;
+        new Thread(new ProcessDefReaper()).start();
     }
 
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation)
@@ -103,8 +121,10 @@ public class BpelEngineImpl implements BpelEngine {
         dao.setOperation(operation);
         MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
 
-        if (target != null)
+        if (target != null) {
             target.initMyRoleMex(mex);
+            refreshLRU(target._pid);
+        }
 
         return mex;
     }
@@ -119,36 +139,37 @@ public class BpelEngineImpl implements BpelEngine {
 
         MessageExchangeImpl mex;
         switch (mexdao.getDirection()) {
-        case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
-            if (process == null) {
-                String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
-                __log.error(errmsg);
-                // TODO: Perhaps we should define a checked exception for this
-                // condition.
+            case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
+                if (process == null) {
+                    String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
+                    __log.error(errmsg);
+                    // TODO: Perhaps we should define a checked exception for this
+                    // condition.
+                    throw new BpelEngineException(errmsg);
+                } else {
+                    refreshLRU(process._pid);
+                    OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                    PortType ptype = plink.partnerRolePortType;
+                    Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
+                    // TODO: recover Partner's EPR
+                    mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null,
+                            plink.hasMyRole() ? process.getInitialMyRoleEPR(plink) : null,
+                            process.getPartnerRoleChannel(plink));
+                }
+                break;
+            case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
+                mex = new MyRoleMessageExchangeImpl(this, mexdao);
+                if (process != null) {
+                    OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                    PortType ptype = plink.myRolePortType;
+                    Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+                    mex.setPortOp(ptype, op);
+                }
+                break;
+            default:
+                String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
+                __log.fatal(errmsg);
                 throw new BpelEngineException(errmsg);
-            } else {
-                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
-                PortType ptype = plink.partnerRolePortType;
-                Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
-                // TODO: recover Partner's EPR
-                mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null,
-                        plink.hasMyRole() ? process.getInitialMyRoleEPR(plink) : null,
-                        process.getPartnerRoleChannel(plink));
-            }
-            break;
-        case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-            mex = new MyRoleMessageExchangeImpl(this, mexdao);
-            if (process != null) {
-                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
-                PortType ptype = plink.myRolePortType;
-                Operation op = plink.getMyRoleOperation(mexdao.getOperation());
-                mex.setPortOp(ptype, op);
-            }
-            break;
-        default:
-            String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
-            __log.fatal(errmsg);
-            throw new BpelEngineException(errmsg);
         }
 
         return mex;
@@ -249,18 +270,19 @@ public class BpelEngineImpl implements BpelEngine {
         }
 
         assert process != null;
+        refreshLRU(process._pid);
         process.handleWorkEvent(jobDetail);
-        
+
         // Do a delay for debugging purposes.
         if (_delayMean != 0 )
-        try {
-            double u = _random.nextDouble();  // Uniform
-            long delay  = (long)(-Math.log(u)*_delayMean); // Exponential distribution with mean _delayMean
-            __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms." );
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            ; // ignore
-        } 
+            try {
+                double u = _random.nextDouble();  // Uniform
+                long delay  = (long)(-Math.log(u)*_delayMean); // Exponential distribution with mean _delayMean
+                __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms." );
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                ; // ignore
+            }
 
     }
 
@@ -279,11 +301,39 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Get the list of globally-registered message-exchange interceptors.
-     * 
-     * @return
+     * @return list
      */
     List<MessageExchangeInterceptor> getGlobalInterceptors() {
         return _contexts.globalIntereceptors;
     }
 
+    void refreshLRU(QName pid) {
+        synchronized(_processesLRU) {
+            _processesLRU.put(pid, System.currentTimeMillis());
+        }
+    }
+
+    private class ProcessDefReaper implements Runnable {
+        public void run() {
+            try {
+                while (true) {
+                    Thread.sleep(10000);
+                    for (BpelProcess process : _activeProcesses.values()) {
+                        Long lru;
+                        synchronized(_processesLRU) {
+                            lru = _processesLRU.get(process._pid);
+                        }
+                        if (lru != null && process._oprocess != null
+                                && System.currentTimeMillis() - lru > _processMaxAge) {
+                            process._oprocess = null;
+                            __log.debug("Process definition reaper cleaning " + process._pid);
+                        }
+                        Thread.sleep(10);
+                    }
+                }
+            } catch (InterruptedException e) {
+                __log.info(e);
+            }
+        }
+    }
 }

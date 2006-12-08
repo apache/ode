@@ -18,12 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.InputStream;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -31,21 +25,19 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
+
+import javax.xml.namespace.QName;
+import java.io.InputStream;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * <p>
@@ -393,7 +385,7 @@ public class BpelServerImpl implements BpelServer {
      *            input stream
      * @return process information from configuration database
      */
-    private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
+    static OProcess deserializeCompiledProcess(InputStream is) throws Exception {
 
         OProcess compiledProcess;
         Serializer ofh = new Serializer(is);
