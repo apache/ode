@@ -7,13 +7,17 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.namespace.QName;
 
@@ -27,6 +31,8 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 @Entity
 @Table(name="ODE_PROCESS")
 public class ProcessDAOImpl implements ProcessDAO {
+	@PersistenceUnit
+	private EntityManager em;
 	
 	@Id @Column(name="PROCESS_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -65,8 +71,9 @@ public class ProcessDAOImpl implements ProcessDAO {
 	}
 
 	public void delete() {
-		// TODO Auto-generated method stub
-
+		if ( _connection.getEntityManager() != null ) {
+			_connection.getEntityManager().remove(this);
+		}
 	}
 
 	public Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey) {
