@@ -50,7 +50,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	@Basic @Column(name="INSTANCE_STATE") private short _state;
 	@Basic @Column(name="PREVIOUS_STATE") private short _previousState;
 	@Lob @Column(name="EXECUTION_STATE") private byte[] _executionState;
-	@Basic @Column(name="SEQUENCE") private Long _sequence;
+	@Basic @Column(name="SEQUENCE") private long _sequence;
 	@Basic @Column(name="DATE_CREATED") private Date _dateCreated = new Date();
 	
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -84,6 +84,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	public void createActivityRecovery(String channel, long activityId,
 			String reason, Date dateTime, Element data, String[] actions,
 			int retries) {
+
 		ActivityRecoveryDAO ar = new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries);
 		_recoveries.add(ar);
 		_lastRecovery = dateTime;
@@ -100,7 +101,9 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	}
 
 	public void delete() {
-		// TODO Auto-generated method stub
+		if ( _connection.getEntityManager() != null ) {
+			_connection.getEntityManager().remove(this);
+		}
 
 	}
 
