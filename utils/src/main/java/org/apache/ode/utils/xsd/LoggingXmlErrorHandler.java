@@ -19,12 +19,11 @@
 
 package org.apache.ode.utils.xsd;
 
-import org.apache.ode.utils.msg.MessageBundle;
-import com.sun.org.apache.xerces.internal.xni.XNIException;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLParseException;
-
 import org.apache.commons.logging.Log;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLErrorHandler;
+import org.apache.xerces.xni.parser.XMLParseException;
 
 /**
  * Implementation of {@link LoggingXmlErrorHandler} that outputs messages to a

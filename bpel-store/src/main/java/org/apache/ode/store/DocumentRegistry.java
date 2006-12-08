@@ -1,11 +1,11 @@
 package org.apache.ode.store;
 
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.utils.xsd.SchemaModel;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
 
 import javax.xml.namespace.QName;
 import java.net.URI;

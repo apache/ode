@@ -368,6 +368,11 @@
             <artifactId>activation</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>xalan</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- ODE Database -->
         <dependency>

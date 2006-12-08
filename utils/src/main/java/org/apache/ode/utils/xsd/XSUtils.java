@@ -18,14 +18,17 @@
  */
 package org.apache.ode.utils.xsd;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.msg.MessageBundle;
-import com.sun.org.apache.xerces.internal.dom.DOMInputImpl;
-import com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
-import com.sun.org.apache.xerces.internal.xni.XNIException;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler;
-import com.sun.org.apache.xerces.internal.xni.parser.XMLParseException;
-import com.sun.org.apache.xerces.internal.xs.XSModel;
+import org.apache.xerces.dom.DOMInputImpl;
+import org.apache.xerces.impl.xs.XMLSchemaLoader;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.apache.xerces.xni.parser.XMLErrorHandler;
+import org.apache.xerces.xni.parser.XMLParseException;
+import org.apache.xerces.xs.XSModel;
+import org.w3c.dom.ls.LSInput;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -33,10 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.ls.LSInput;
 
 /**
  * Various utility methods related to XML Schema processing.
@@ -204,9 +203,6 @@ public class XSUtils {
       throw new XNIException("Unknown XSD error state; domain=" + domain + ", key=" +key);
     }
 
-    /**
-     * @see org.apache.xerces.xni.impl.XMLErrorHandler#fatalError(java.lang.String, java.lang.String, org.apache.xerces.xni.impl.XMLParseException)
-     */
     public void fatalError(String domain, String key, XMLParseException ex) throws XNIException {
       if (_log.isDebugEnabled())
         _log.debug("XSDErrorHandler.fatal: domain=" + domain + ", key=" + key,ex);
