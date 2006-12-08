@@ -79,7 +79,7 @@ public class BpelProcess {
 
     DebuggerSupport _debugger;
 
-    final OProcess _oprocess;
+    OProcess _oprocess;
 
     final ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
 
@@ -202,6 +202,7 @@ public class BpelProcess {
     }
 
     void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
+        reload();
         PartnerLinkMyRoleImpl target = null;
         for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
             if (endpoint.serviceName.equals(mex.getServiceName()))
@@ -640,6 +641,7 @@ public class BpelProcess {
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public void handleWorkEvent(Map<String, Object> jobData) {
+        reload();
         ProcessInstanceDAO procInstance;
 
         if (__log.isDebugEnabled()) {
@@ -790,5 +792,18 @@ public class BpelProcess {
 
     public boolean isInMemory() {
         return _pconf.isTransient();
+    }
+
+    private void reload() {
+        // Reload OProcess if it has been disposed
+        if (_oprocess == null) {
+            try {
+                _oprocess = BpelServerImpl.deserializeCompiledProcess(_pconf.getCBPInputStream());
+            } catch (Exception e) {
+                String errmsg = __msgs.msgProcessLoadError(_pconf.getProcessId());
+                __log.error(errmsg, e);
+                throw new BpelEngineException(errmsg, e);
+            }
+        }
     }
 }
