@@ -23,6 +23,7 @@ import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +32,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Manages receive/pick--reply matching.
+ * <p>
+ * Manages receive/pick--reply matching. Keeps track of active pick/receive activities (i.e. those that have been
+ * reached in the script) and their association with a message exchange (for those receive/picks that have received
+ * a message). The purpose of this class is to 1) enable matching a reply activity to the corresponding receive/pick
+ * activity and 2) allow us to fault out message exchanges that have not been replied to when they go out of scope.
+ * </p> 
+ * <p>
+ * Note, this class is only used for INBOUND synchronous (request-response) operations. None of this is necessary
+ * for asynchronous messages. 
+ * </p> 
  */
 class OutstandingRequestManager implements Serializable {
   private static final long serialVersionUID = -5556374398943757951L;
@@ -60,6 +70,12 @@ class OutstandingRequestManager implements Serializable {
     return -1;
   }
 
+  /**
+   * Register a receive/pick with the manager. This occurs when the receive/pick is encountered in the processing of 
+   * the BPEL script.   
+   * @param pickResponseChannel response channel associated with this receive/pick
+   * @param selectors selectors for this receive/pick
+   */
   void register(String pickResponseChannel, Selector selectors[]) {
     if (__log.isTraceEnabled()) {
       __log.trace(ObjectPrinter.stringifyMethodEnter("register", new Object[] {
@@ -92,6 +108,11 @@ class OutstandingRequestManager implements Serializable {
     _byChannel.put(pickResponseChannel, entry);
   }
 
+  /**
+   * Cancel a previous registration. 
+   * @see #register(String, Selector[])
+   * @param pickResponseChannel
+   */
   void cancel(String pickResponseChannel) {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("cancel", new Object[] {
@@ -104,6 +125,12 @@ class OutstandingRequestManager implements Serializable {
     }
   }
 
+  /**
+   * Associate a message exchange with a registered receive/pick. This happens when a message corresponding to the
+   * receive/pick is received by the system. 
+   * @param pickResponseChannel
+   * @param mexRef
+   */
   void associate(String pickResponseChannel, String mexRef) {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("associate", new Object[] {
@@ -127,6 +154,14 @@ class OutstandingRequestManager implements Serializable {
     entry.mexRef = mexRef;
   }
 
+  /**
+   * Release the registration. This method is called when the reply activity sends a reply corresponding to the
+   * registration.  
+   * @param plinkInstnace partner link 
+   * @param opName operation  
+   * @param mexId message exchange identifier IN THE BPEL SENSE OF THE TERM (i.e. a receive/reply disambiguator).
+   * @return message exchange identifier associated with the registration that matches the parameters
+   */
   public String release(PartnerLinkInstance plinkInstnace, String opName, String mexId) {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("release", new Object[] {
@@ -148,18 +183,24 @@ class OutstandingRequestManager implements Serializable {
     return entry.mexRef;
   }
 
+  /**
+   * "Release" all outstanding incoming messages exchanges. Makes the object forget about
+   * the previous registrations
+   * @return a list of message exchange identifiers for message exchanges that were begun (receive/pick got a message) 
+   *            but not yet completed (reply not yet sent) 
+   */
   public String[] releaseAll() {
     if (__log.isTraceEnabled())
       __log.trace(ObjectPrinter.stringifyMethodEnter("releaseAll", null) );
 
-    int idx = 0;
-    String[] mexRefs = new String[_byChannel.size()];
+    ArrayList<String> mexRefs = new ArrayList<String>();
     for (Entry entry : _byChannel.values()) {
-      mexRefs[idx++] = entry.mexRef;
+      if (entry.mexRef!=null)
+        mexRefs.add(entry.mexRef);
     }
     _byChannel.values().clear();
     _byRid.values().clear();
-    return mexRefs;
+    return (String[]) mexRefs.toArray();
   }
 
   public String toString() {
