@@ -151,7 +151,9 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 		//  Its not clear where the correlation set for the process is used
 		//  or populated.
 		
-		return null;
+		throw new UnsupportedOperationException();
+		
+		//return null;
 	}
 
 	public Set<CorrelationSetDAO> getCorrelationSets() {
@@ -159,7 +161,9 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 		
 		//  Its not clear where the correlation set for the process is used
 		//  or populated.
-		return new HashSet<CorrelationSetDAO>();
+		//return new HashSet<CorrelationSetDAO>();
+		
+		throw new UnsupportedOperationException();
 	}
 
 	public Date getCreateTime() {
