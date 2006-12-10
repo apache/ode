@@ -50,6 +50,7 @@ import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Element;
 
 
@@ -58,8 +59,7 @@ import org.w3c.dom.Element;
 public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Long _id;
+	private String _id;
 	@Basic @Column(name="CALLEE") private QName _callee;
 	@Basic @Column(name="CHANNEL") private String _channel;
 	@Basic @Column(name="CORRELATION_ID") private String _correlationId;
@@ -104,6 +104,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	public MessageExchangeDAOImpl(char direction, BPELDAOConnectionImpl connection){
 		_direction = direction;
 		_connection = connection;
+		_id = new UUID().toString();
 	}
 	
 	public MessageDAO createMessage(QName type) {
