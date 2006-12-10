@@ -59,13 +59,18 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter,
 			BpelEventFilter efilter) {
 		// TODO Auto-generated method stub
+		//return null;
+		//throw new UnsupportedOperationException();
+		System.out.println(ifilter.toString());
+		System.out.println(efilter.toString());
 		return null;
 	}
 
 	public List<Date> bpelEventTimelineQuery(InstanceFilter ifilter,
 			BpelEventFilter efilter) {
 		// TODO Auto-generated method stub
-		return null;
+		//return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public void close() {
@@ -132,22 +137,28 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	public void insertBpelEvent(BpelEvent event, ProcessDAO process,
 			ProcessInstanceDAO instance) {
 		// TODO Auto-generated method stub
-
+		//throw new UnsupportedOperationException();
+		System.out.println(event.toString());
+		System.out.println(process.toString());
+		System.out.println(instance.toString());
 	}
 
 	public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO: Auto-generated method stub
+		//return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
 		// TODO Auto-generated method stub
-		return null;
+		//return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public Collection<ProcessDAO> processQuery(ProcessFilter criteria) {
 		// TODO Auto-generated method stub
-		return null;
+		//return null;
+		throw new UnsupportedOperationException();
 	}
 	
 	EntityManager getEntityManager() {
