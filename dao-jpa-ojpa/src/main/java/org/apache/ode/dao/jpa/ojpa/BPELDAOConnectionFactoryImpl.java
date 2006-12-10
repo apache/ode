@@ -15,6 +15,7 @@ import org.apache.ode.dao.jpa.BPELDAOConnectionImpl;
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 
 	private EntityManager em;
+	private BPELDAOConnectionImpl conn;
 	
 	public BPELDAOConnectionFactoryImpl(EntityManager em) {
 		this.em = em;
@@ -22,43 +23,49 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 	
 	public BpelDAOConnection getConnection() {
 		
-		List<BpelDAOConnection> conns = null;
-		
-		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x order by x._id asc");
-		
-		try {
-			conns = (List<BpelDAOConnection>)q.getResultList();
+		if ( conn == null ) {
+			List<BpelDAOConnection> conns = null;
 			
-		} catch (NoResultException e) {
-			return new BPELDAOConnectionImpl(new Long(1),em);
+			Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x order by x._id asc");
+			
+			try {
+				conns = (List<BpelDAOConnection>)q.getResultList();
+				if ( conns.size() < 1 ) {
+					conn = new BPELDAOConnectionImpl(new Long(1),em);
+				} else {
+					conn = (BPELDAOConnectionImpl)conns.get(conns.size()-1);
+					conn.setEntityManger(em);
+				}
+				
+			} catch (NoResultException e) {
+				conn = new BPELDAOConnectionImpl(new Long(1),em);
+			}
 		}
-		
-		if ( conns.size() < 1 ) {
-			return new BPELDAOConnectionImpl(new Long(1),em);
-		}
-		
-		BPELDAOConnectionImpl conn = (BPELDAOConnectionImpl)conns.get(conns.size()-1);
-		conn.setEntityManger(em);
 		
 		return conn;
 	}
 	
 	public BpelDAOConnection getConnection(Long connID) {
-		BPELDAOConnectionImpl conn = null;
+		if ( conn != null && conn.getID().equals(connID) ) {
+			return conn;
+		}
+		
+		BPELDAOConnectionImpl tmpConn = null;
 		
 		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x WHERE x._id = ?1");
 		q.setParameter(1, connID);
 		
 		try {
-			conn = (BPELDAOConnectionImpl)q.getSingleResult();
-			conn.setEntityManger(em);
+			tmpConn = (BPELDAOConnectionImpl)q.getSingleResult();
+			tmpConn.setEntityManger(em);
 		} catch (NoResultException e){}
 		
-		if ( conn == null ) {
+		if ( tmpConn == null ) {
 			conn = new BPELDAOConnectionImpl(connID,em);
+			tmpConn = conn;
 		}
 		
-		return conn;
+		return tmpConn;
 	}
 	
 	public Long getConnectionId(BpelDAOConnection conn) {
