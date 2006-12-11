@@ -110,6 +110,8 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
+    private String _dbType;
+
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         _axisConfig = axisConf;
         _appRoot = new File(config.getServletContext().getRealPath("/WEB-INF"));
@@ -416,6 +418,12 @@ public class ODEServer {
                 else __log.error(errmsg);
             }
         }
+        if (properties.get(Environment.DIALECT) != null) {
+            String dialect = (String) properties.get(Environment.DIALECT);
+            if (dialect.equals("org.hibernate.dialect.SQLServerDialect"))
+                _dbType = "sqlserver";
+            else _dbType = "other";
+        }
         
         SessionManager sm = new SessionManager(properties, _datasource, _txMgr);
         _daoCF = new BpelDAOConnectionFactoryImpl(sm);
@@ -438,6 +446,7 @@ public class ODEServer {
         _scheduler.setExecutorService(_executorService, 20);
         _scheduler.setTransactionManager(_txMgr);
         _scheduler.setDataSource(_datasource);
+        if ("sqlserver".equals(_dbType)) _scheduler.setSqlServer(true);
         _scheduler.init();
 
         _server.setDaoConnectionFactory(_daoCF);
