@@ -74,6 +74,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private boolean _needDerbyShutdown;
     private String _derbyUrl;
     private BpelServerConnector _connector;
+    private String _dbType;
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -246,6 +247,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setTransactionManager((TransactionManager) _ode
                 .getContext().getTransactionManager());
         _ode._scheduler.setDataSource(_ode._dataSource);
+        if ("sqlserver".equals(_dbType)) _ode._scheduler.setSqlServer(true);
         _ode._scheduler.init();
 
         _ode._store = new ProcessStoreImpl(_ode._dataSource);
@@ -275,14 +277,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 HibernateTransactionManagerLookup.class.getName());
         properties.put(Environment.SESSION_FACTORY_NAME, "jta");
 
-        try {
-            properties.put(Environment.DIALECT, guessDialect(_ode._dataSource));
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-            __log.error(errmsg,ex);
-            throw new JBIException(errmsg,ex);
-        }
-
         File hibernatePropFile = new File(_ode.getContext().getInstallRoot()
                 + File.separatorChar + "hibernate.properties");
 
@@ -300,6 +294,23 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         } else {
             __log.info(__msgs
                     .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
+        }
+
+        // Guess Hibernate dialect if not specified in hibernate.properties
+        if (properties.get(Environment.DIALECT) == null) {
+            try {
+                properties.put(Environment.DIALECT, guessDialect(_ode._dataSource));
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
+                else __log.error(errmsg);
+            }
+        }
+        if (properties.get(Environment.DIALECT) != null) {
+            String dialect = (String) properties.get(Environment.DIALECT);
+            if (dialect.equals("org.hibernate.dialect.SQLServerDialect"))
+                _dbType = "sqlserver";
+            else _dbType = "other";
         }
 
         SessionManager sm = new SessionManager(properties, _ode._dataSource, _ode
