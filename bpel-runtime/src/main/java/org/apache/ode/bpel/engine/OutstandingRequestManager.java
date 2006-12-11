@@ -200,7 +200,7 @@ class OutstandingRequestManager implements Serializable {
     }
     _byChannel.values().clear();
     _byRid.values().clear();
-    return (String[]) mexRefs.toArray();
+    return (String[]) mexRefs.toArray(new String[]);
   }
 
   public String toString() {
