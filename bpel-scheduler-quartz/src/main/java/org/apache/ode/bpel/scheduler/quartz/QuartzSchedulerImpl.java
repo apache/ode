@@ -50,271 +50,277 @@ import java.util.concurrent.ExecutorService;
  */
 public class QuartzSchedulerImpl implements Scheduler {
 
-  protected final Log __log = LogFactory.getLog(getClass());
+    protected final Log __log = LogFactory.getLog(getClass());
 
-  private static final Map<String, QuartzSchedulerImpl> __instanceMap = Collections
-      .synchronizedMap(new HashMap<String, QuartzSchedulerImpl>());
+    private static final Map<String, QuartzSchedulerImpl> __instanceMap = Collections
+            .synchronizedMap(new HashMap<String, QuartzSchedulerImpl>());
 
-  protected BpelServer _server;
+    protected BpelServer _server;
 
-  private org.quartz.Scheduler _quartz;
+    private org.quartz.Scheduler _quartz;
 
-  private final String _id;
+    private final String _id;
 
-  private ExecutorService _executorSvc;
+    private ExecutorService _executorSvc;
 
-  private int _threads;
+    private int _threads;
 
-  private DataSource _managedDS;
+    private DataSource _managedDS;
 
-  private TransactionManager _txm;
+    private TransactionManager _txm;
 
-  
-  public QuartzSchedulerImpl() {
-    _id = "ODE";
-  }
+    private boolean isSqlServer = false;
 
-  public void setBpelServer(BpelServer server) {
-    _server = server;
-  }
-
-  public void setExecutorService(ExecutorService es, int threads) {
-    _executorSvc = es;
-    _threads = threads;
-  }
-
-  public void setDataSource(DataSource managedDs) {
-    _managedDS = managedDs;
-  }
-
-  public void setTransactionManager(TransactionManager txm) {
-    _txm = txm;
-  }
-
-  public void init() throws ContextException {
-    if (_server == null)
-      throw new NullPointerException("BpelServer not set!");
-    if (_executorSvc == null)
-      throw new NullPointerException("ExeuctorService not set!");
-    if (_managedDS == null)
-      throw new NullPointerException("Managed DataSource name not set!");
-    if (_txm == null)
-      throw new NullPointerException("TransactionManager not set!");
-      
-    DBConnectionManager.getInstance().addConnectionProvider("managed",
-        new DataSourceConnectionProvider(_managedDS));
-    JobStoreJTA jobStore = new JobStoreJTA(_txm);
-    jobStore.setDataSource("managed");
-    
-    try {
-      _quartz= createScheduler("ODEScheduler",_id,
-          new QuartzThreadPoolExecutorServiceImpl(_executorSvc, _threads),
-          jobStore);
-      _quartz.getSchedulerInstanceId();
-      __instanceMap.put(_id, this);
-    } catch (Exception ex) {
-      throw new ContextException(ex.getMessage(),ex);
-    }
-  }  
-  
-  public void start() {
-    if (_quartz == null)
-      throw new IllegalStateException("init() not called!");
-    
-    try {
-      _quartz.start();
-    } catch (SchedulerException e) {
-      throw new ContextException("Error starting Quartz.", e);
-    }
-  }
-  
-  public void stop() {
-    try {
-      _quartz.standby();
-    } catch (SchedulerException e) {
-      throw new ContextException("Error stopping Quartz.", e);
-    }
-    
-  }
-  
-  public void shutdown() {
-    try {
-      _quartz.shutdown();
-    } catch (Exception except) {
-      throw new RuntimeException(except);
-    } finally {
-      __instanceMap.remove(_id);
-    }
-  }
-
-  public String schedulePersistedJob(Map<String, Object> detail, Date when)
-      throws ContextException {
-    return schedule(detail, when, false, false);
-  }
-
-  protected String schedule(Map<String, Object> detail, Date when,
-      boolean volatil, boolean notx) {
-    if (when == null)
-      when = new Date();
-    JobDetail jobDetail = new JobDetail(new GUID().toString(), null,
-        JobImpl.class);
-    HashMap<String, Object> mcopy = new HashMap<String, Object>(detail);
-    mcopy.put("__scheduler", _id);
-
-    JobDataMap jdm = new JobDataMap(mcopy);
-    jobDetail.setJobDataMap(jdm);
-    jobDetail.setDurability(false);
-    jobDetail.setVolatility(volatil);
-    jobDetail.setRequestsRecovery(true);
-    Trigger trigger = new SimpleTrigger(jobDetail.getName() + ".trigger",
-        org.quartz.Scheduler.DEFAULT_GROUP, when, null, 0, 0L);
-      trigger.setVolatility(volatil);
-
-    try {
-      _quartz.scheduleJob(jobDetail, trigger);
-    } catch (SchedulerException e) {
-      String errmsg = "Quartz failure in schedulePersistentJob";
-      __log.error(errmsg, e);
-      throw new ContextException(errmsg, e);
-    }
-    return jobDetail.getName();
-  }
-
-  public String scheduleVolatileJob(boolean transacted,
-      Map<String, Object> detail, Date when) throws ContextException {
-    return schedule(detail, when, true, !transacted);
-  }
-
-  public void cancelJob(String jobId) throws ContextException {
-    try {
-      _quartz.deleteJob(jobId, jobId + ".trigger");
-    } catch (SchedulerException e) {
-      String errmsg = "Quartz failure in cancelJob";
-      __log.error(errmsg, e);
-      throw new ContextException(errmsg, e);
-    }
-  }
-
-  public <T> T execTransaction(Callable<T> transaction) throws Exception,
-      ContextException {
-
-    try {
-      begin();
-    } catch (Exception ex) {
-      String errmsg = "Failed to start transaction.";
-      __log.error(errmsg, ex);
-      throw new ContextException(errmsg, ex);
+    public QuartzSchedulerImpl() {
+        _id = "ODE";
     }
 
-    boolean success = false;
-    try {
-      T retval = transaction.call();
-      success = true;
-      return retval;
-    } finally {
-      if (success)
+    public void setBpelServer(BpelServer server) {
+        _server = server;
+    }
+
+    public void setExecutorService(ExecutorService es, int threads) {
+        _executorSvc = es;
+        _threads = threads;
+    }
+
+    public void setDataSource(DataSource managedDs) {
+        _managedDS = managedDs;
+    }
+
+    public void setTransactionManager(TransactionManager txm) {
+        _txm = txm;
+    }
+
+    public void init() throws ContextException {
+        if (_server == null)
+            throw new NullPointerException("BpelServer not set!");
+        if (_executorSvc == null)
+            throw new NullPointerException("ExeuctorService not set!");
+        if (_managedDS == null)
+            throw new NullPointerException("Managed DataSource name not set!");
+        if (_txm == null)
+            throw new NullPointerException("TransactionManager not set!");
+
+        DBConnectionManager.getInstance().addConnectionProvider("managed",
+                new DataSourceConnectionProvider(_managedDS));
+        JobStoreJTA jobStore = new JobStoreJTA(_txm);
+        jobStore.setDataSource("managed");
+
         try {
-          commit();
+            _quartz= createScheduler("ODEScheduler",_id,
+                    new QuartzThreadPoolExecutorServiceImpl(_executorSvc, _threads),
+                    jobStore);
+            _quartz.getSchedulerInstanceId();
+            __instanceMap.put(_id, this);
         } catch (Exception ex) {
-          String errmsg = "Failed to commit transaction.";
-          __log.error(errmsg, ex);
-          throw new ContextException(errmsg, ex);
-        }
-      else
-        try {
-          rollback();
-        } catch (Exception ex) {
-          String errmsg = "Failed to rollback transaction.";
-          __log.error(errmsg, ex);
-          throw new ContextException(errmsg, ex);
+            throw new ContextException(ex.getMessage(),ex);
         }
     }
-  }
 
-  protected void rollback() throws Exception {
-    try {
-      _txm.rollback();
-    } catch (Exception ex) {
-      __log.error("JTA ROLLBACK FAILED",ex);
-      throw ex;
+    public void start() {
+        if (_quartz == null)
+            throw new IllegalStateException("init() not called!");
+
+        try {
+            _quartz.start();
+        } catch (SchedulerException e) {
+            throw new ContextException("Error starting Quartz.", e);
+        }
     }
-  }
 
-  protected void commit() throws Exception {
-    try {    
-      _txm.commit();
-    } catch (Exception ex) {
-      __log.error("JTA COMMIT FAILED",ex);
-      throw ex;
+    public void stop() {
+        try {
+            _quartz.standby();
+        } catch (SchedulerException e) {
+            throw new ContextException("Error stopping Quartz.", e);
+        }
+
     }
-  }
 
-  protected void begin() throws Exception {
-    try {
-      _txm.begin();
-    } catch (Exception ex) {
-      __log.error("JTA BEGIN FAILED",ex);
-      throw ex;
+    public void shutdown() {
+        try {
+            _quartz.shutdown();
+        } catch (Exception except) {
+            throw new RuntimeException(except);
+        } finally {
+            __instanceMap.remove(_id);
+        }
     }
-  }
 
-  @SuppressWarnings("unchecked")
-  private void doExecute(JobExecutionContext jobcontext) {
-    _server.getEngine().onScheduledJob(jobcontext.getJobDetail().getName(),
-        jobcontext.getJobDetail().getJobDataMap());
-  }
+    public String schedulePersistedJob(Map<String, Object> detail, Date when)
+            throws ContextException {
+        return schedule(detail, when, false, false);
+    }
 
-  public static void execute(JobExecutionContext jobcontext) {
-    String schedulerGuid = jobcontext.getJobDetail().getJobDataMap().getString(
-        "__scheduler");
-    __instanceMap.get(schedulerGuid).doExecute(jobcontext);
-  }
+    protected String schedule(Map<String, Object> detail, Date when,
+                              boolean volatil, boolean notx) {
+        if (when == null)
+            when = new Date();
+        JobDetail jobDetail = new JobDetail(new GUID().toString(), null,
+                JobImpl.class);
+        HashMap<String, Object> mcopy = new HashMap<String, Object>(detail);
+        mcopy.put("__scheduler", _id);
 
-  /**
-   * Create a QUARTZ scheduler using JTA Job Shell. Unfortunately there is 
-   * no "easy" way to do this using the standard scheduler factory.
-   * @param schedulerName
-   * @param schedulerInstanceId
-   * @param threadPool
-   * @param jobStore
-   * @param rmiRegistryHost
-   * @param rmiRegistryPort
-   * @param idleWaitTime
-   * @param dbFailureRetryInterval
-   * @throws SchedulerException
-   */
-  private org.quartz.Scheduler createScheduler(String schedulerName, String schedulerInstanceId,
-      ThreadPool threadPool, JobStoreJTA jobStore)
-      throws SchedulerException {
+        JobDataMap jdm = new JobDataMap(mcopy);
+        jobDetail.setJobDataMap(jdm);
+        jobDetail.setDurability(false);
+        jobDetail.setVolatility(volatil);
+        jobDetail.setRequestsRecovery(true);
+        Trigger trigger = new SimpleTrigger(jobDetail.getName() + ".trigger",
+                org.quartz.Scheduler.DEFAULT_GROUP, when, null, 0, 0L);
+        trigger.setVolatility(volatil);
 
-    jobStore.setInstanceName(schedulerName);
-    jobStore.setInstanceId(schedulerInstanceId);
-    
-    JTAJobRunShellFactory jrsf = new JTAJobRunShellFactory(_txm);
+        try {
+            _quartz.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            String errmsg = "Quartz failure in schedulePersistentJob";
+            __log.error(errmsg, e);
+            throw new ContextException(errmsg, e);
+        }
+        return jobDetail.getName();
+    }
 
-    SchedulingContext schedCtxt = new SchedulingContext();
-    schedCtxt.setInstanceId(schedulerInstanceId);
+    public String scheduleVolatileJob(boolean transacted,
+                                      Map<String, Object> detail, Date when) throws ContextException {
+        return schedule(detail, when, true, !transacted);
+    }
 
-    QuartzSchedulerResources qrs = new QuartzSchedulerResources();
+    public void cancelJob(String jobId) throws ContextException {
+        try {
+            _quartz.deleteJob(jobId, jobId + ".trigger");
+        } catch (SchedulerException e) {
+            String errmsg = "Quartz failure in cancelJob";
+            __log.error(errmsg, e);
+            throw new ContextException(errmsg, e);
+        }
+    }
 
-    qrs.setName(schedulerName);
-    qrs.setInstanceId(schedulerInstanceId);
-    qrs.setJobRunShellFactory(jrsf);
-    qrs.setThreadPool(threadPool);
-    qrs.setJobStore(jobStore);
+    public <T> T execTransaction(Callable<T> transaction) throws Exception,
+            ContextException {
 
-    QuartzScheduler qs = new QuartzScheduler(qrs, schedCtxt, 0,0);
-        
+        try {
+            begin();
+        } catch (Exception ex) {
+            String errmsg = "Failed to start transaction.";
+            __log.error(errmsg, ex);
+            throw new ContextException(errmsg, ex);
+        }
 
-    ClassLoadHelper cch = new CascadingClassLoadHelper();
-    cch.initialize();
-    jobStore.initialize(cch, qs.getSchedulerSignaler());
-    StdScheduler scheduler = new StdScheduler(qs, schedCtxt);
-    jrsf.initialize(scheduler, schedCtxt);
-    SchedulerRepository schedRep = SchedulerRepository.getInstance();
-    qs.addNoGCObject(schedRep); 
-    schedRep.bind(scheduler);
-    return scheduler;
-  }
+        boolean success = false;
+        try {
+            T retval = transaction.call();
+            success = true;
+            return retval;
+        } finally {
+            if (success)
+                try {
+                    commit();
+                } catch (Exception ex) {
+                    String errmsg = "Failed to commit transaction.";
+                    __log.error(errmsg, ex);
+                    throw new ContextException(errmsg, ex);
+                }
+            else
+                try {
+                    rollback();
+                } catch (Exception ex) {
+                    String errmsg = "Failed to rollback transaction.";
+                    __log.error(errmsg, ex);
+                    throw new ContextException(errmsg, ex);
+                }
+        }
+    }
+
+    protected void rollback() throws Exception {
+        try {
+            _txm.rollback();
+        } catch (Exception ex) {
+            __log.error("JTA ROLLBACK FAILED",ex);
+            throw ex;
+        }
+    }
+
+    protected void commit() throws Exception {
+        try {
+            _txm.commit();
+        } catch (Exception ex) {
+            __log.error("JTA COMMIT FAILED",ex);
+            throw ex;
+        }
+    }
+
+    protected void begin() throws Exception {
+        try {
+            _txm.begin();
+        } catch (Exception ex) {
+            __log.error("JTA BEGIN FAILED",ex);
+            throw ex;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void doExecute(JobExecutionContext jobcontext) {
+        _server.getEngine().onScheduledJob(jobcontext.getJobDetail().getName(),
+                jobcontext.getJobDetail().getJobDataMap());
+    }
+
+    public static void execute(JobExecutionContext jobcontext) {
+        String schedulerGuid = jobcontext.getJobDetail().getJobDataMap().getString(
+                "__scheduler");
+        __instanceMap.get(schedulerGuid).doExecute(jobcontext);
+    }
+
+    /**
+     * Create a QUARTZ scheduler using JTA Job Shell. Unfortunately there is
+     * no "easy" way to do this using the standard scheduler factory.
+     * @param schedulerName
+     * @param schedulerInstanceId
+     * @param threadPool
+     * @param jobStore
+     * @param rmiRegistryHost
+     * @param rmiRegistryPort
+     * @param idleWaitTime
+     * @param dbFailureRetryInterval
+     * @throws SchedulerException
+     */
+    private org.quartz.Scheduler createScheduler(String schedulerName, String schedulerInstanceId,
+                                                 ThreadPool threadPool, JobStoreJTA jobStore)
+            throws SchedulerException {
+
+        jobStore.setInstanceName(schedulerName);
+        jobStore.setInstanceId(schedulerInstanceId);
+        if (isSqlServer)
+            jobStore.setSelectWithLockSQL("SELECT * FROM {0}LOCKS UPDLOCK WHERE LOCK_NAME = ?");
+
+        JTAJobRunShellFactory jrsf = new JTAJobRunShellFactory(_txm);
+
+        SchedulingContext schedCtxt = new SchedulingContext();
+        schedCtxt.setInstanceId(schedulerInstanceId);
+
+        QuartzSchedulerResources qrs = new QuartzSchedulerResources();
+
+        qrs.setName(schedulerName);
+        qrs.setInstanceId(schedulerInstanceId);
+        qrs.setJobRunShellFactory(jrsf);
+        qrs.setThreadPool(threadPool);
+        qrs.setJobStore(jobStore);
+
+        QuartzScheduler qs = new QuartzScheduler(qrs, schedCtxt, 0,0);
+
+        ClassLoadHelper cch = new CascadingClassLoadHelper();
+        cch.initialize();
+        jobStore.initialize(cch, qs.getSchedulerSignaler());
+        StdScheduler scheduler = new StdScheduler(qs, schedCtxt);
+        jrsf.initialize(scheduler, schedCtxt);
+        SchedulerRepository schedRep = SchedulerRepository.getInstance();
+        qs.addNoGCObject(schedRep);
+        schedRep.bind(scheduler);
+        return scheduler;
+    }
+
+    public void setSqlServer(boolean sqlServer) {
+        isSqlServer = sqlServer;
+    }
 
 }
