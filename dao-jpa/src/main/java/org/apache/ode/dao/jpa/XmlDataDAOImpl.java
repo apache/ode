@@ -53,7 +53,6 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	@Lob @Column(name="DATA") private String _data;
 	@Transient private Node _node;
 	@Basic @Column(name="IS_SIMPLE_TYPE") private boolean _isSimpleType;
-	@Basic @Column(name="IS_NULL") private boolean _isNull;
 	@Basic @Column(name="NAME") private String _name;
 	@Basic @Column(name="PROPERTIES") private Properties _props = new Properties();
 	@Version @Column(name="VERSION") private long _version;
@@ -105,7 +104,7 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	}
 
 	public boolean isNull() {
-		return _isNull;
+		return _data == null;
 	}
 
 	public void remove() {
