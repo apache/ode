@@ -232,7 +232,7 @@ class ProcessConfImpl implements ProcessConf {
         if (processEvents == null) {
             HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
             for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
-                if (!t.equals(BpelEvent.TYPE.scopeHandling) && !t.equals(BpelEvent.TYPE.dataHandling)) all.add(t);
+                if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
             }
             _events.put(null,all);
             return;
