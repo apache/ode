@@ -70,7 +70,6 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	@Transient private Element _eprElement;
 	@Basic @Column(name="FAULT") private String _fault;
 	@Basic @Column(name="FAULT_EXPLANATION") private String _faultExplanation;
-	@Basic @Column(name="MESSAGE_EXCHANGE_KEY") private String _messageExchangeId;
 	@Basic @Column(name="OPERATION") private String _operation;
 	@Basic @Column(name="PARTNER_LINK_MODEL_ID") private int _partnerLinkModelId;
 	@Basic @Column(name="PATTERN") private String _pattern;
@@ -108,7 +107,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 	
 	public MessageDAO createMessage(QName type) {
-		return new MessageDAOImpl(type,this);
+		MessageDAOImpl ret = new MessageDAOImpl(type,this);
+		return ret ;
 	}
 
 	public QName getCallee() {

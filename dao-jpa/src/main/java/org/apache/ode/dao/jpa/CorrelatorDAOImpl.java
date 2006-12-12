@@ -45,10 +45,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 @Table(name="ODE_CORRELATOR")
 public class CorrelatorDAOImpl implements CorrelatorDAO {
 	
-	@Id @Column(name="CORRELATOR_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Long _correlatorId;
-	@Basic @Column(name="CORRELATOR_KEY") private String _correlatorKey;
+	@Id @Column(name="CORRELATOR_KEY") private String _correlatorKey;
 	@OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
 	@OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -63,7 +60,9 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
 
 	public void addRoute(String routeGroupId, ProcessInstanceDAO target,
 			int index, CorrelationKey correlationKey) {
-		_routes.add(new MessageRouteDAOImpl(correlationKey,routeGroupId,index,(ProcessInstanceDAOImpl)target));
+		MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,routeGroupId,index,(ProcessInstanceDAOImpl)target);
+		
+		_routes.add(mr);
 	}
 
 	public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
