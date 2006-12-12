@@ -116,6 +116,10 @@ public class ScopeDAOImpl implements ScopeDAO {
 			// an explicit create pattern isn't used ( i.e. similar to
 			// PartnerLink creation )
 			ret = new CorrelationSetDAOImpl(this,corrSetName);
+			
+			// Persist the new correlation set to generate an ID
+			_connection.getEntityManager().persist(ret);
+			
 			_correlationSets.add(ret);
 		}
 		
