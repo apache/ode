@@ -231,7 +231,7 @@ class DebuggerSupport {
                         changeEvent.setProcessName(process.getType());
                         changeEvent.setProcessId(_db.getProcessId());
 
-                        _process.saveEvent(changeEvent, instance);
+                        _process.saveEvent(changeEvent);
                         onEvent(changeEvent);
                     }
                 } catch (Exception dce) {
