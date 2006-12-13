@@ -56,7 +56,7 @@ public class FaultDAOImpl implements FaultDAO {
 		_explanation = explanation;
 		_lineNo = faultLineNo;
 		_activityId = activityId;
-		_data = DOMUtils.domToString(faultMessage);
+		_data = (faultMessage == null)?null:DOMUtils.domToString(faultMessage);
 	}
 	
 	public int getActivityId() {
@@ -67,7 +67,7 @@ public class FaultDAOImpl implements FaultDAO {
 		Element ret = null;
 		
 		try {
-			ret = DOMUtils.stringToDOM(_data);
+			ret = (_data == null)?null:DOMUtils.stringToDOM(_data);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

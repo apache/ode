@@ -119,7 +119,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 
 	public ProcessInstanceDAO getInstance(Long iid) {
 		for (ProcessInstanceDAO pi : _instances) {
-			if ( pi.getInstanceId() == iid ) return pi;
+			if ( pi.getInstanceId().equals(iid) ) return pi;
 		}
 		return null;
 	}
@@ -148,7 +148,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 
 	public void removeRoutes(String routeId, ProcessInstanceDAO target) {
         for (CorrelatorDAO c : _correlators) {
-            c.removeRoutes(routeId, target);
+            ((CorrelatorDAOImpl)c).removeLocalRoutes(routeId, target);
         }
 
 	}
