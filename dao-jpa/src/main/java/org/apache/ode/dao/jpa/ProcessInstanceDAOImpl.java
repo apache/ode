@@ -231,7 +231,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public ScopeDAO getScope(Long scopeInstanceId) {
 		for (ScopeDAO sElement : _scopes) {
-			if ( sElement.getScopeInstanceId() == scopeInstanceId) return sElement;
+			if ( sElement.getScopeInstanceId().equals(scopeInstanceId)) return sElement;
 		}
 		return null;
 	}
@@ -296,6 +296,10 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 		_previousState = _state;
 		_state = state;
 
+	}
+	
+	void removeRoutes(String routeGroupId) {
+		_process.removeRoutes(routeGroupId, this);
 	}
 
 }
