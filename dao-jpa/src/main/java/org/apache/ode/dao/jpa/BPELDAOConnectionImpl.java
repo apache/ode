@@ -80,10 +80,10 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 			BpelEventFilter efilter) {
 		// TODO Auto-generated method stub
 		//return null;
-		//throw new UnsupportedOperationException();
-		System.out.println(ifilter.toString());
-		System.out.println(efilter.toString());
-		return null;
+		throw new UnsupportedOperationException();
+		//System.out.println(ifilter.toString());
+		//System.out.println(efilter.toString());
+		//return null;
 	}
 
 	public List<Date> bpelEventTimelineQuery(InstanceFilter ifilter,
@@ -127,7 +127,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	public ProcessInstanceDAO getInstance(Long iid) {
 		// TODO: may need a map or DB lookup here for performance
 		for (ProcessInstanceDAOImpl inst : _instances) {
-			if (inst.getInstanceId() == iid ) return inst;
+			if (inst.getInstanceId().equals(iid) ) return inst;
 		}
 		return null;
 	}
@@ -150,7 +150,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	public ScopeDAO getScope(Long siidl) {
 		// TODO: May need a map or DB lookup here for performance
 		for ( ScopeDAOImpl s : _scopes ) {
-			if ( s.getScopeInstanceId() == siidl ) return s;
+			if ( s.getScopeInstanceId().equals(siidl) ) return s;
 		}
 		return null;
 	}
@@ -159,9 +159,9 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 			ProcessInstanceDAO instance) {
 		// TODO Auto-generated method stub
 		//throw new UnsupportedOperationException();
-		System.out.println(event.toString());
-		System.out.println(process.toString());
-		System.out.println(instance.toString());
+		//System.out.println(event.toString());
+		//System.out.println(process.toString());
+		//System.out.println(instance.toString());
 	}
 
 	public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
@@ -195,6 +195,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 		
 		if ( _em != null ) {
 			_em.remove(p);
+			_em.flush();
 		}
 		
 	}
