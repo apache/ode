@@ -47,7 +47,7 @@ class OdeServiceUnit {
     /** Our JBI indentifier. */
     private String _serviceUnitID;
 
-    private Collection<QName> _registered;
+    private Collection<QName> _registered = new ArrayList<QName>();
     
     
     /** Ctor. */
