@@ -108,7 +108,7 @@ public class QuartzSchedulerImpl implements Scheduler {
         jobStore.setDataSource("managed");
 
         try {
-            _quartz = createScheduler("ODEScheduler", _id, new QuartzThreadPoolExecutorServiceImpl(_executorSvc,
+            _quartz = createScheduler(_id, _id, new QuartzThreadPoolExecutorServiceImpl(_executorSvc,
                     _threads), jobStore);
             _quartz.getSchedulerInstanceId();
             __instanceMap.put(_id, this);
@@ -131,11 +131,11 @@ public class QuartzSchedulerImpl implements Scheduler {
     public void shutdown() {
         try {
             _quartz.shutdown();
+            SchedulerRepository.getInstance().remove(_id);
         } catch (Exception except) {
             throw new RuntimeException(except);
         } finally {
             __instanceMap.remove(_id);
-            SchedulerRepository.getInstance().remove(_id);
         }
     }
 
