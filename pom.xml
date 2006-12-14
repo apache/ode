@@ -89,6 +89,9 @@
         <xstreamVersion>1.2</xstreamVersion>
         <xalanVersion>2.7.0</xalanVersion>
 	    <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
+        <openjpaVersion>0.9.6-incubating-SNAPSHOT</openjpaVersion>
+        <commonsDBCPVersion>1.2.1</commonsDBCPVersion>
+	  <persistenceAPIVersion>1.0</persistenceAPIVersion>
 
         <!--
         | Build number used by the intalio:release plugin
@@ -144,6 +147,10 @@
 
         <module>distro-axis2</module>
     	<module>distro-jbi</module>
+     <module>dao-jpa</module>
+      <module>dao-jpa-ojpa</module>
+      <module>dao-jpa-ojpa-derby</module>
+
     </modules>
 
     <dependencies>
@@ -230,6 +237,16 @@
                         <maxmemory>512</maxmemory>
                     </configuration>
                 </plugin>
+
+      		<plugin>
+        	   <groupId>org.apache.maven.plugins</groupId>
+        	   <artifactId>maven-eclipse-plugin</artifactId>
+		   <version>2.2</version>
+        	   <configuration>
+          		<useProjectReferences>true</useProjectReferences>
+        	   </configuration>
+      		</plugin>
+
             </plugins>
         </pluginManagement>
     </build>
@@ -282,6 +299,11 @@
             <url>http://www.ibiblio.org/maven</url>
             <layout>legacy</layout>
         </repository>
+        <repository>
+            <id>apache-snapshots</id>
+		<name>Apache Snapshot Repository</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+        </repository>     
 <!--        <repository>
             <id>apache</id>
             <name>Apache Repository</name>
@@ -861,6 +883,34 @@
                 <artifactId>derby</artifactId>
                 <version>${derbyVersion}</version>
             </dependency>
+
+  		<dependency>
+      		<groupId>org.apache.openjpa</groupId>
+			<artifactId>openjpa-all</artifactId>
+			<version>${openjpaVersion}</version>
+    		</dependency>
+    		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>${persistenceAPIVersion}</version>
+    		</dependency>
+    		<dependency>
+      		<groupId>commons-dbcp</groupId>
+      		<artifactId>commons-dbcp</artifactId>
+      		<version>${commonsDBCPVersion}</version>
+    		</dependency>
+
+            <dependency>
+		    <groupId>org.apache.ode</groupId>
+		    <artifactId>ode-dao-jpa</artifactId>
+		    <version>${project.version}</version>
+		</dependency>
+            <dependency>
+		    <groupId>org.apache.ode</groupId>
+		    <artifactId>ode-dao-jpa-ojpa</artifactId>
+		    <version>${project.version}</version>
+		</dependency>
+
 
         </dependencies>
     </dependencyManagement>
