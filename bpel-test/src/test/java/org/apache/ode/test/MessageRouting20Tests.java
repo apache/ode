@@ -2,31 +2,31 @@ package org.apache.ode.test;
 
 public class MessageRouting20Tests extends BPELTest {
 
-	public void testCorrelation() throws Exception {
+	public void testCorrelation() throws Throwable {
 		go("target/test-classes/bpel/2.0/TestCorrelation");
 	}
-	public void testCorrelation1() throws Exception {
+	public void testCorrelation1() throws Throwable {
 		go("target/test-classes/bpel/2.0/TestCorrelation1");
 	}
-	public void testCorrelationOpaque() throws Exception {
+	public void testCorrelationOpaque() throws Throwable {
 		go("target/test-classes/bpel/2.0/testCorrelationOpaque");
 	}
-	public void testCorrelationAsync() throws Exception {
+	public void testCorrelationAsync() throws Throwable {
 		go("target/test-classes/bpel/2.0/TestCorrelationAsync");
 	}
-    public void testDynamicPick() throws Exception {
+    public void testDynamicPick() throws Throwable {
     	go("target/test-classes/bpel/2.0/TestDynamicPick");
     }
-    public void testInstPick() throws Exception {
+    public void testInstPick() throws Throwable {
         go("target/test-classes/bpel/2.0/TestInstantiatingPick");
     }
-    public void testStaticOnMessage() throws Exception {
+    public void testStaticOnMessage() throws Throwable {
     	go("target/test-classes/bpel/2.0/TestStaticOnMessage");
     }
-    public void testStaticPick() throws Exception {
+    public void testStaticPick() throws Throwable {
     	go("target/test-classes/bpel/2.0/TestStaticPick");
     }
-	public void testNegativeCorrelation() throws Exception {
+	public void testNegativeCorrelation() throws Throwable {
 			/**
 			 * This test contains invalid BPEL. There is an instantiating
 			 * <receive> and a subsequent <pick> that does not define a correlation
@@ -38,7 +38,7 @@ public class MessageRouting20Tests extends BPELTest {
 			 */
 	   negative("target/test-classes/bpel/2.0/NegativeCorrelationTest");
 	}
-	  public void testNegativeInitialization() throws Exception {
+	  public void testNegativeInitialization() throws Throwable {
 			/**
 			 * This test contains invalid BPEL. There is an instantiating
 			 * <receive> within a <scope>. The <scope> contains eventhandlers

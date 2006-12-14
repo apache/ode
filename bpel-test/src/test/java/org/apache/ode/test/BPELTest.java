@@ -22,11 +22,15 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Collection;
@@ -38,12 +42,22 @@ public abstract class BPELTest extends TestCase {
 	private BpelServerImpl server;
     private ProcessStore store;
 	private MessageExchangeContextImpl mexContext;
+	private EntityManager em;
+	private EntityManagerFactory emf;
 
 	@Override
 	protected void setUp() throws Exception {
 		server = new BpelServerImpl();
 		mexContext = new MessageExchangeContextImpl();
-		server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+		
+		
+		if ( Boolean.getBoolean("org.apache.ode.test.persitent")) {
+			emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
+			em = emf.createEntityManager();
+			server.setDaoConnectionFactory(new org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl(em));
+		} else {
+			server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+		}
         server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
         server.setScheduler(new TestScheduler());
 		server.setBindingContext(new BindingContextImpl());
@@ -62,10 +76,12 @@ public abstract class BPELTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+		if ( em != null ) em.close();
+		if ( emf != null ) emf.close();
 		server.stop();
 	}
 
-	protected void negative(String deployDir) throws Exception {
+	protected void negative(String deployDir) throws Throwable {
 		try {
 			go(deployDir);
 		} catch (junit.framework.AssertionFailedError ex) {
@@ -74,7 +90,7 @@ public abstract class BPELTest extends TestCase {
 		fail("Expecting test to fail");
 	}
 
-	protected void go(String deployDir) throws Exception {
+	protected void go(String deployDir) throws Throwable {
 
 		/**
 		 * The deploy directory must contain at least one "test.properties"
@@ -101,6 +117,7 @@ public abstract class BPELTest extends TestCase {
 			}
 		}
 
+		if ( em != null ) em.getTransaction().begin();
 		try {
 			Collection<QName> procs =  store.deploy(new File(deployDir));
             for (QName procName : procs) {
@@ -113,10 +130,16 @@ public abstract class BPELTest extends TestCase {
 			String responsePattern = testProps.getProperty("response1");
 			testResponsePattern(bpelE.getMessage(), responsePattern);
 			return;
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			fail();
 		}
-
+		if ( em != null ) em.getTransaction().commit();
+        
 		while (testPropsFile.exists()) {
 
+			if ( em != null ) em.getTransaction().begin();
+			
 			Properties testProps = new Properties();
 			testProps.load(testPropsFile.toURL().openStream());
 
@@ -142,76 +165,82 @@ public abstract class BPELTest extends TestCase {
 			 * responseN=ASYNC responseN=ONE_WAY responseN=COMPLETED_OK
 			 *
 			 */
-
-			for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
-
-				String in = testProps.getProperty("request" + i);
-				String responsePattern = testProps.getProperty("response" + i);
-
-				mexContext.clearCurrentResponse();
-
-				Message request = mex.createMessage(null);
-
-				Element elem = DOMUtils.stringToDOM(in);
-				request.setMessage(elem);
-
-
-				mex.invoke(request);
-
-				switch (mex.getStatus()) {
-				case RESPONSE:
-					testResponsePattern(mex.getResponse(), responsePattern);
-					// TODO: test for response fault
-					break;
-				case ASYNC:
-
-					switch (mex.getMessageExchangePattern()) {
-					case REQUEST_ONLY:
-						if (!responsePattern.equals("ASYNC"))
-							assertTrue(false);
+			try {
+				for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
+	
+					String in = testProps.getProperty("request" + i);
+					String responsePattern = testProps.getProperty("response" + i);
+	
+					mexContext.clearCurrentResponse();
+	
+					Message request = mex.createMessage(null);
+	
+					Element elem = DOMUtils.stringToDOM(in);
+					request.setMessage(elem);
+	
+	
+					mex.invoke(request);
+	
+	
+					switch (mex.getStatus()) {
+					case RESPONSE:
+						testResponsePattern(mex.getResponse(), responsePattern);
+						// TODO: test for response fault
 						break;
-					case REQUEST_RESPONSE:
-						testResponsePattern(mexContext.getCurrentResponse(),
-								responsePattern);
+					case ASYNC:
+	
+						switch (mex.getMessageExchangePattern()) {
+						case REQUEST_ONLY:
+							if (!responsePattern.equals("ASYNC"))
+								fail();
+							break;
+						case REQUEST_RESPONSE:
+							testResponsePattern(mexContext.getCurrentResponse(),
+									responsePattern);
+						default:
+							break;
+						}
+	
+						break;
+					case COMPLETED_OK:
+						if (!responsePattern.equals("COMPLETED_OK"))
+							testResponsePattern(mexContext.getCurrentResponse(),
+									responsePattern);
+						break;
+					case FAULT:
+						// TODO: handle Fault
+						System.out.println("=> " + mex.getFaultExplanation());
+						fail();
+						break;
+					case COMPLETED_FAILURE:
+						// TODO: handle Failure
+						System.out.println("=> " + mex.getFaultExplanation());
+						fail();
+						break;
+					case COMPLETED_FAULT:
+						// TODO: handle Failure
+						System.out.println("=> " + mex.getFaultExplanation());
+						fail();
+						break;
+					case FAILURE:
+						// TODO: handle Faulure
+						System.out.println("=> " + mex.getFaultExplanation());
+						fail();
+						break;
 					default:
+						fail();
 						break;
 					}
-
-					break;
-				case COMPLETED_OK:
-					if (!responsePattern.equals("COMPLETED_OK"))
-						testResponsePattern(mexContext.getCurrentResponse(),
-								responsePattern);
-					break;
-				case FAULT:
-					// TODO: handle Fault
-					System.out.println("=> " + mex.getFaultExplanation());
-					assertTrue(false);
-					break;
-				case COMPLETED_FAILURE:
-					// TODO: handle Failure
-					System.out.println("=> " + mex.getFaultExplanation());
-					assertTrue(false);
-					break;
-				case COMPLETED_FAULT:
-					// TODO: handle Failure
-					System.out.println("=> " + mex.getFaultExplanation());
-					assertTrue(false);
-					break;
-				case FAILURE:
-					// TODO: handle Faulure
-					System.out.println("=> " + mex.getFaultExplanation());
-					assertTrue(false);
-					break;
-				default:
-					assertTrue(false);
-					break;
 				}
-
+			} catch ( Throwable e ) {
+				e.printStackTrace();
+				if ( em != null ) em.getTransaction().rollback();
+				throw e;
 			}
 			propsFileCnt++;
 			testPropsFile = new File(deployDir + "/test" + propsFileCnt
 					+ ".properties");
+			if ( em != null ) em.getTransaction().commit();
 		}
 	}
 

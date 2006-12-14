@@ -1,11 +1,11 @@
 package org.apache.ode.test;
 
 public class BasicActivities20Tests extends BPELTest {
-	public void testHelloWorld2() throws Exception {
+	public void testHelloWorld2() throws Throwable {
 		go("target/test-classes/bpel/2.0/HelloWorld2");
 	}
 
-	public void testNegativeTargetNS1() throws Exception {
+	public void testNegativeTargetNS1() throws Throwable {
 		/**
 		 * Test for an invalid targetNamespace has been entered into the WSDL.
 		 * 
@@ -18,7 +18,7 @@ public class BasicActivities20Tests extends BPELTest {
 		go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
 	}
 	
-	public void testTimer() throws Exception {
+	public void testTimer() throws Throwable {
 	 go("target/test-classes/bpel/2.0/TestTimer");
 	}
 
