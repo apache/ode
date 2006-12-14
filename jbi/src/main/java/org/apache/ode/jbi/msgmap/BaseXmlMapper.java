@@ -19,6 +19,8 @@
 
 package org.apache.ode.jbi.msgmap;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,7 +45,7 @@ public abstract class BaseXmlMapper {
     private TransformerFactory _transformerFactory;
 
     /** Cache of the parsed messages. */
-    private static WeakHashMap<Source, Document> __parsed = new WeakHashMap<Source, Document>();
+    private static Map<Source, Document> __parsed = Collections.synchronizedMap(new WeakHashMap<Source, Document>());
 
     protected BaseXmlMapper() {
         _transformerFactory = TransformerFactory.newInstance();
@@ -51,6 +53,9 @@ public abstract class BaseXmlMapper {
     }
 
     protected Element parse(Source content) throws MessageTranslationException {
+        
+        // Check for the message in the cache. note that we are using a synchronized map here,
+        // so that we are thread safe, although it is possible for the parse to happen twice. 
         Document parsed = __parsed.get(content);
         if (parsed != null)
             return parsed.getDocumentElement();
@@ -68,6 +73,7 @@ public abstract class BaseXmlMapper {
             DOMResult domresult = new DOMResult();
             txer.transform(content, domresult);
             parsed = (Document) domresult.getNode();
+            // Again, synchronized map... 
             __parsed.put(content, parsed);
             return parsed.getDocumentElement();
         } catch (TransformerException e) {
