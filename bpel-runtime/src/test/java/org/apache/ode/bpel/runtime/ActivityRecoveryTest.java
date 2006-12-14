@@ -145,6 +145,12 @@ public class ActivityRecoveryTest extends TestCase {
     protected void tearDown() throws Exception {
         _management.delete(null);
         _server.shutdown();
+        _server = null;
+        _failFor = 0;
+        _invoked = 0;
+        _management = null;
+        _responseSent = false;
+        _processQName = null;
     }
 
     /**
