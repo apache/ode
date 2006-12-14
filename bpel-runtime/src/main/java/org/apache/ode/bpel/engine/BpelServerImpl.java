@@ -41,15 +41,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * <p>
- * The BPEL server implementation. 
+ * The BPEL server implementation.
  * </p>
  * 
- * <p>This implementation is intended to be thread
- * safe. The key concurrency mechanism is a "management" read/write lock that
- * synchronizes all management operations (they require "write" access) and
- * prevents concurrent management operations and processing (processing requires
- * "read" access). Write access to the lock is scoped to the method, while read
- * access is scoped to a transaction.
+ * <p>
+ * This implementation is intended to be thread safe. The key concurrency
+ * mechanism is a "management" read/write lock that synchronizes all management
+ * operations (they require "write" access) and prevents concurrent management
+ * operations and processing (processing requires "read" access). Write access
+ * to the lock is scoped to the method, while read access is scoped to a
+ * transaction.
  * </p>
  * 
  * @author Maciej Szefler <mszefler at gmail dot com>
@@ -69,11 +70,9 @@ public class BpelServerImpl implements BpelServer {
     private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
 
     private enum State {
-        SHUTDOWN, 
-        INIT, 
-        RUNNING
+        SHUTDOWN, INIT, RUNNING
     }
-    
+
     private State _state = State.SHUTDOWN;
 
     private Contexts _contexts = new Contexts();
@@ -129,7 +128,7 @@ public class BpelServerImpl implements BpelServer {
                 __log.debug("stop() ignored -- already stopped");
                 return;
             }
-            
+
             __log.debug("BPEL SERVER STOPPING");
 
             _contexts.scheduler.stop();
@@ -172,7 +171,6 @@ public class BpelServerImpl implements BpelServer {
         _contexts.bindingContext = bc;
     }
 
-
     public void init() throws BpelEngineException {
         _mngmtLock.writeLock().lock();
         try {
@@ -180,7 +178,7 @@ public class BpelServerImpl implements BpelServer {
                 return;
 
             __log.debug("BPEL SERVER initializing ");
-            
+
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
             _state = State.INIT;
             _engine = new BpelEngineImpl(_contexts);
@@ -205,16 +203,15 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public BpelEngine getEngine() {
-        // TODO: acquire read lock and tie the release to the current transaction.
+        // TODO: acquire read lock and tie the release to the current
+        // transaction.
         return _engine;
     }
 
-  
-    
     public void register(ProcessConf conf) {
         if (conf == null)
             throw new NullPointerException("must specify non-null process configuration.");
-        
+
         __log.debug("register: " + conf.getProcessId());
 
         // Load the compiled process.
@@ -226,7 +223,6 @@ public class BpelServerImpl implements BpelServer {
             __log.error(errmsg, e);
             throw new BpelEngineException(errmsg, e);
         }
-        
 
         // Ok, IO out of the way, we will mod the server state, so need to get a
         // lock.
@@ -258,11 +254,10 @@ public class BpelServerImpl implements BpelServer {
                 }
             }
 
-
             // Create the processDAO if necessary.
             createProcessDAO(conf.getProcessId(), compiledProcess);
 
-            BpelProcess process = new BpelProcess(conf, compiledProcess, null,elangRegistry);
+            BpelProcess process = new BpelProcess(conf, compiledProcess, null, elangRegistry);
 
             _engine.registerProcess(process);
 
@@ -309,31 +304,70 @@ public class BpelServerImpl implements BpelServer {
     private void createProcessDAO(final QName pid, final OProcess oprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
         try {
-            _db.exec(new BpelDatabase.Callable<Object>() {
-                public Object run(BpelDAOConnection conn) throws Exception {
+            boolean create = _db.exec(new BpelDatabase.Callable<Boolean>() {
+                public Boolean run(BpelDAOConnection conn) throws Exception {
                     ProcessDAO old = conn.getProcess(pid);
-                    if (old != null) {
-                        __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-
-                        if (oprocess.guid != null)
-                            if (!old.getGuid().equals(oprocess.guid)) {
-                                // TODO: Versioning will need to handle this differently.
-                                String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid
-                                        + "; replacing.";
-                                __log.warn(errmsg);
-                                old.delete();
-                            } else
-                                return null;
-                        return null;
+                    if (old == null) {
+                        // we couldnt find the process, clearly we need to
+                        // create it
+                        return true;
                     }
 
-                    ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid);
-                    for (String correlator : oprocess.getCorrelators()) {
-                        newDao.addCorrelator(correlator);
+                    __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+
+                    if (oprocess.guid == null) {
+                        // No guid, old version assume its good
+                        return false;
                     }
-                    return null;
+
+                    if (old.getGuid().equals(oprocess.guid)) {
+                        // Guids match, no need to create
+                        return false;
+                    }
+
+                    // GUIDS dont match, delete and create new
+                    // TODO: Versioning will need to handle this differently.
+                    String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid
+                            + "; replacing.";
+                    __log.warn(errmsg);
+                    old.delete();
+
+                    return true;
+
                 }
             });
+
+            if (create)
+                _db.exec(new BpelDatabase.Callable<Object>() {
+                    public Object run(BpelDAOConnection conn) throws Exception {
+                        ProcessDAO old = conn.getProcess(pid);
+                        if (old != null) {
+                            __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+
+                            if (oprocess.guid != null) {
+                                if (!old.getGuid().equals(oprocess.guid)) {
+                                    // TODO: Versioning will need to handle this
+                                    // differently.
+                                    String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match "
+                                            + oprocess.guid + "; replacing.";
+                                    __log.warn(errmsg);
+                                    old.delete();
+                                } else {
+                                    return null;
+                                }
+                            } else {
+                                // no guid, consider compatible.
+                                return null;
+                            }
+                        }
+
+                        ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid);
+                        for (String correlator : oprocess.getCorrelators()) {
+                            newDao.addCorrelator(correlator);
+                        }
+                        return null;
+                    }
+                });
         } catch (BpelEngineException ex) {
             throw ex;
         } catch (Exception dce) {
@@ -393,7 +427,7 @@ public class BpelServerImpl implements BpelServer {
         return compiledProcess;
     }
 
-    /* TODO: We need to have a method of cleaning up old deployment data. */ 
+    /* TODO: We need to have a method of cleaning up old deployment data. */
     private boolean deleteProcessDAO(final QName pid) {
 
         try {
@@ -413,7 +447,7 @@ public class BpelServerImpl implements BpelServer {
             String errmsg = "DbError";
             __log.error(errmsg, ex);
             throw new BpelEngineException(errmsg, ex);
-        } 
+        }
 
     }
 }
