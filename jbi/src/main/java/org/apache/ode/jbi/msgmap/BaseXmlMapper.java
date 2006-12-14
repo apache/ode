@@ -36,51 +36,53 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public abstract class BaseXmlMapper {
-  protected Log __log = LogFactory.getLog(getClass());
-  private DocumentBuilderFactory _dbf;
-  private TransformerFactory _transformerFactory;
+    protected Log __log = LogFactory.getLog(getClass());
 
-  /** Cache of the parsed messages. */
-  private static WeakHashMap<Source,Document> __parsed = new WeakHashMap<Source,Document>();
+    private DocumentBuilderFactory _dbf;
 
-  protected BaseXmlMapper() {
-    _transformerFactory = TransformerFactory.newInstance();
-    _dbf = DocumentBuilderFactory.newInstance();
-  }
+    private TransformerFactory _transformerFactory;
 
-  protected Element parse(Source content) throws MessageTranslationException {
-    Document parsed = __parsed.get(content);
-    if (parsed != null)
-      return parsed.getDocumentElement();
-    
-    Transformer txer = null;
-    try {
-      txer = _transformerFactory.newTransformer();
-    } catch (TransformerConfigurationException e) {
-      String errmsg = "Transformer configuration error!";
-      __log.fatal(errmsg,e);
-      throw new Error(errmsg,e);
+    /** Cache of the parsed messages. */
+    private static WeakHashMap<Source, Document> __parsed = new WeakHashMap<Source, Document>();
+
+    protected BaseXmlMapper() {
+        _transformerFactory = TransformerFactory.newInstance();
+        _dbf = DocumentBuilderFactory.newInstance();
     }
 
-    try {
-      DOMResult domresult = new DOMResult();
-      txer.transform(content, domresult);
-      parsed = (Document) domresult.getNode();
-      __parsed.put(content,parsed);
-      return parsed.getDocumentElement();
-    } catch (TransformerException e) {
-      throw new MessageTranslationException("Transformer error!", e);
-    }
-  }
+    protected Element parse(Source content) throws MessageTranslationException {
+        Document parsed = __parsed.get(content);
+        if (parsed != null)
+            return parsed.getDocumentElement();
 
-  protected Document newDocument() {
-    try {
-      return _dbf.newDocumentBuilder().newDocument();
-    } catch (ParserConfigurationException e) {
-      String errmsg = "Parser configuration error!";
-      __log.fatal(errmsg,e);
-      throw new Error(errmsg,e);
+        Transformer txer = null;
+        try {
+            txer = _transformerFactory.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            String errmsg = "Transformer configuration error!";
+            __log.fatal(errmsg, e);
+            throw new Error(errmsg, e);
+        }
+
+        try {
+            DOMResult domresult = new DOMResult();
+            txer.transform(content, domresult);
+            parsed = (Document) domresult.getNode();
+            __parsed.put(content, parsed);
+            return parsed.getDocumentElement();
+        } catch (TransformerException e) {
+            throw new MessageTranslationException("Transformer error!", e);
+        }
     }
-  }
+
+    protected Document newDocument() {
+        try {
+            return _dbf.newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            String errmsg = "Parser configuration error!";
+            __log.fatal(errmsg, e);
+            throw new Error(errmsg, e);
+        }
+    }
 
 }
