@@ -111,6 +111,7 @@ public class ODEServer {
     private BpelServerConnector _connector;
 
     private String _dbType;
+    private String _dialect;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         _axisConfig = axisConf;
@@ -419,8 +420,8 @@ public class ODEServer {
             }
         }
         if (properties.get(Environment.DIALECT) != null) {
-            String dialect = (String) properties.get(Environment.DIALECT);
-            if (dialect.equals("org.hibernate.dialect.SQLServerDialect"))
+            _dialect = (String) properties.get(Environment.DIALECT);
+            if (_dialect.equals("org.hibernate.dialect.SQLServerDialect"))
                 _dbType = "sqlserver";
             else _dbType = "other";
         }
@@ -430,7 +431,7 @@ public class ODEServer {
     }
 
     private void initProcessStore() {
-        _store = new ProcessStoreImpl(_datasource);
+        _store = new ProcessStoreImpl(_datasource, _dialect);
         _store.registerListener(new ProcessStoreListenerImpl());
     }
 
