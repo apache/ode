@@ -1,33 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
-    <persistence-unit name="ode-unit-test">
-        <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-        <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
-        <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.FaultDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.MessageDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.MessageExchangeDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.MessageRouteDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.PartnerLinkDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.ProcessDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.ProcessInstanceDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
-
-        <properties>
-
-            <!-- Properties for a networked Derby connection -->
-            <property name="openjpa.ConnectionDriverName" value="org.apache.derby.jdbc.ClientDriver"/>
-            <property name="openjpa.ConnectionURL" value="jdbc:derby://localhost:1527/sample"/>
-            <property name="openjpa.ConnectionUserName" value="APP"/>
-            <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
-            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
-
-        </properties>
-    </persistence-unit>
-    <persistence-unit name="ode-unit-test-embedded">
+     <persistence-unit name="ode-unit-test-embedded">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
         <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
@@ -47,9 +20,13 @@
             <!-- Properties for an embedded Derby connection -->
             <property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp.BasicDataSource"/>
             <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
+            <!-- To validate DBSchema and create DDL at runtime - use this property. Currently the DDL is created at build time -->
+            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+
             <property name="openjpa.ConnectionProperties"
                 value="DriverClassName=org.apache.derby.jdbc.EmbeddedDriver,Url=jdbc:derby:target/database/openjpa-test-database;create=true,MaxActive=100,MaxWait=10000,TestOnBorrow=true"/>
 
         </properties>
     </persistence-unit>
 </persistence>
+
