@@ -31,7 +31,6 @@ import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
@@ -56,7 +55,6 @@ import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipFile;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this
@@ -65,26 +63,19 @@ import java.util.zip.ZipFile;
 public class OdeLifeCycle implements ComponentLifeCycle {
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
-
     private static final Messages __msgs = Messages.getMessages(Messages.class);
-
     private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
 
     private OdeSUManager _suManager = null;
-
     private boolean _initSuccess = false;
-
     private OdeContext _ode;
-
     private Receiver _receiver;
-
     private boolean _started;
-
     private boolean _needDerbyShutdown;
-
     private String _derbyUrl;
-
     private BpelServerConnector _connector;
+    private String _dbType;
+    private String _dialect;
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -104,8 +95,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode.setContext(context);
             _ode._consumer = new OdeConsumer(_ode);
 
-            if (_ode.getContext().getWorkspaceRoot() != null)
-                TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
+
+            TempFileManager.setWorkingDirectory(new File(_ode.getContext()
+                    .getWorkspaceRoot()));
 
             __log.debug("Loading properties.");
             initProperties();
@@ -137,7 +129,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
-    private void initMappers() throws JBIException {
+    private void initMappers() throws JBIException  {
         Class mapperClass;
         try {
             mapperClass = Class.forName(_ode._config.getMessageMapper());
@@ -161,17 +153,17 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     private void initDataSource() throws JBIException {
         switch (_ode._config.getDbMode()) {
-        case EXTERNAL:
-            initExternalDb();
-            break;
-        case EMBEDDED:
-            initEmbeddedDb();
-            break;
-        case INTERNAL:
-            initInternalDb();
-            break;
-        default:
-            break;
+            case EXTERNAL:
+                initExternalDb();
+                break;
+            case EMBEDDED:
+                initEmbeddedDb();
+                break;
+            case INTERNAL:
+                initInternalDb();
+                break;
+            default:
+                break;
         }
     }
 
@@ -181,8 +173,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.info(__msgs.msgOdeUsingExternalDb(_ode._config.getDbDataSource()));
         } catch (Exception ex) {
             String msg = __msgs.msgOdeInitExternalDbFailed(_ode._config.getDbDataSource());
-            __log.error(msg, ex);
-            throw new JBIException(msg, ex);
+            __log.error(msg,ex);
+            throw new JBIException(msg,ex);
         }
     }
 
@@ -196,15 +188,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private void initEmbeddedDb() throws JBIException {
         __log.info("Using DataSource Derby");
 
-        File dbDir = new File(_ode.getContext().getInstallRoot() + "/" + _ode._config.getDbEmbeddedName());
-
-        if (!dbDir.exists()) {
-            File tmpDir = new File(TempFileManager.getTemporaryDirectory("odeEmbeddedDb"), "data");
-            __log.warn(__msgs.msgOdeEmbeddedDbNotFoundUsingTemp(dbDir, tmpDir));
-            dbDir = tmpDir;
-        }
-
-        String url = "jdbc:derby:" + _ode.getContext().getInstallRoot() + "/" + _ode._config.getDbEmbeddedName();
+        String url =
+                "jdbc:derby:" + _ode.getContext().getInstallRoot() + "/"
+                        + _ode._config.getDbEmbeddedName();
 
         __log.debug("creating Minerva pool for " + url);
 
@@ -212,7 +198,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         minervaPool.setTransactionManager(_ode.getTransactionManager());
         minervaPool.getConnectionFactory().setConnectionURL(url);
         minervaPool.getConnectionFactory().setUserName("sa");
-        minervaPool.getConnectionFactory().setDriver(org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        minervaPool.getConnectionFactory().setDriver(
+                org.apache.derby.jdbc.EmbeddedDriver.class.getName());
 
         minervaPool.getPoolParams().maxSize = _ode._config.getPoolMaxSize();
         minervaPool.getPoolParams().minSize = _ode._config.getPoolMinSize();
@@ -223,8 +210,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             minervaPool.start();
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
-            __log.error(errmsg, ex);
-            throw new JBIException(errmsg, ex);
+            __log.error(errmsg,ex);
+            throw new JBIException(errmsg,ex);
         }
 
         _ode._dataSource = minervaPool.createDataSource();
@@ -234,11 +221,12 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     /**
      * Load the "ode-jbi.properties" file from the install directory.
-     * 
+     *
      * @throws JBIException
      */
     private void initProperties() throws JBIException {
-        OdeConfigProperties config = new OdeConfigProperties(_ode.getContext().getInstallRoot());
+        OdeConfigProperties config = new OdeConfigProperties(_ode.getContext()
+                .getInstallRoot());
         config.load();
         _ode._config = config;
     }
@@ -257,11 +245,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler = new QuartzSchedulerImpl();
         _ode._scheduler.setBpelServer(_ode._server);
         _ode._scheduler.setExecutorService(_ode._executorService, 20);
-        _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+        _ode._scheduler.setTransactionManager((TransactionManager) _ode
+                .getContext().getTransactionManager());
         _ode._scheduler.setDataSource(_ode._dataSource);
+        if ("sqlserver".equals(_dbType)) _ode._scheduler.setSqlServer(true);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource, _dialect);
+
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _ode._server.setDaoConnectionFactory(_ode._daocf);
@@ -276,25 +267,19 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     /**
      * Initialize the Hibernate data store.
-     * 
+     *
      * @throws JBIException
      */
     private void initHibernate() throws JBIException {
         Properties properties = new Properties();
-        properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
+        properties.put(Environment.CONNECTION_PROVIDER,
+                DataSourceConnectionProvider.class.getName());
+        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
+                HibernateTransactionManagerLookup.class.getName());
         properties.put(Environment.SESSION_FACTORY_NAME, "jta");
 
-        try {
-            properties.put(Environment.DIALECT, guessDialect(_ode._dataSource));
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-            __log.error(errmsg, ex);
-            throw new JBIException(errmsg, ex);
-        }
-
-        File hibernatePropFile = new File(_ode.getContext().getInstallRoot() + File.separatorChar
-                + "hibernate.properties");
+        File hibernatePropFile = new File(_ode.getContext().getInstallRoot()
+                + File.separatorChar + "hibernate.properties");
 
         if (hibernatePropFile.exists()) {
             FileInputStream fis = null;
@@ -302,15 +287,35 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 fis = new FileInputStream(hibernatePropFile);
                 properties.load(new BufferedInputStream(fis));
             } catch (IOException e) {
-                String errmsg = __msgs.msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
+                String errmsg = __msgs
+                        .msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
                 __log.error(errmsg, e);
                 throw new JBIException(errmsg, e);
             }
         } else {
-            __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
+            __log.info(__msgs
+                    .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
         }
 
-        SessionManager sm = new SessionManager(properties, _ode._dataSource, _ode.getTransactionManager());
+        // Guess Hibernate dialect if not specified in hibernate.properties
+        if (properties.get(Environment.DIALECT) == null) {
+            try {
+                properties.put(Environment.DIALECT, guessDialect(_ode._dataSource));
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
+                else __log.error(errmsg);
+            }
+        }
+        if (properties.get(Environment.DIALECT) != null) {
+            _dialect = (String) properties.get(Environment.DIALECT);
+            if (_dialect.equals("org.hibernate.dialect.SQLServerDialect"))
+                _dbType = "sqlserver";
+            else _dbType = "other";
+        }
+
+        SessionManager sm = new SessionManager(properties, _ode._dataSource, _ode
+                .getTransactionManager());
         _ode._daocf = new BpelDAOConnectionFactoryImpl(sm);
     }
 
@@ -327,10 +332,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             try {
                 _connector.start();
             } catch (Exception e) {
-                __log.error("Failed to initialize JCA connector.", e);
+                __log.error("Failed to initialize JCA connector.",e);
             }
         }
     }
+
 
     public synchronized void start() throws JBIException {
         if (_started)
@@ -343,7 +349,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 String errmsg = "attempt to call start() after init() failure.";
                 IllegalStateException ex = new IllegalStateException(errmsg);
                 __log.fatal(errmsg, ex);
-                throw new JBIException(errmsg, ex);
+                throw new JBIException(errmsg,ex);
             }
 
             if (_ode.getChannel() == null) {
@@ -354,7 +360,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 _ode._server.start();
             } catch (Exception ex) {
                 String errmsg = __msgs.msgOdeBpelServerStartFailure();
-                __log.error(errmsg, ex);
+                __log.error(errmsg,ex);
                 throw new JBIException(errmsg, ex);
             }
 
@@ -406,12 +412,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     /**
      * Shutdown the service engine. This performs cleanup before the BPE is
-     * terminated. Once this method has been called, init() must be called
-     * before the transformation engine can be started again with a call to
-     * start().
-     * 
+     * terminated. Once this method has been called, init() must be called before
+     * the transformation engine can be started again with a call to start().
+     *
      * @throws javax.jbi.JBIException
-     *             if the transformation engine is unable to shut down.
+     *           if the transformation engine is unable to shut down.
      */
     public void shutDown() throws JBIException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
@@ -421,7 +426,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             try {
                 _connector.shutdown();
             } catch (Exception e) {
-                __log.error("Error shutting down JCA server.", e);
+                __log.error("Error shutting down JCA server.",e);
             }
             _connector = null;
         }
@@ -445,9 +450,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 __log.debug("shutting down derby.");
                 EmbeddedDriver driver = new EmbeddedDriver();
                 try {
-                    driver.connect(_derbyUrl + ";shutdown=true", new Properties());
+                    driver.connect(_derbyUrl+";shutdown", new Properties());
                 } catch (Exception ex) {
-                    ; // this is fine, we expect to get a connect exception.
+                    __log.error("Error shutting down derby.", ex);
                 }
             }
             __log.info("Shutdown completed.");
@@ -491,13 +496,15 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             if (metaData != null) {
                 String dbProductName = metaData.getDatabaseProductName();
                 int dbMajorVer = metaData.getDatabaseMajorVersion();
-                __log.info("Using database " + dbProductName + " major version " + dbMajorVer);
+                __log.info("Using database " + dbProductName + " major version "
+                        + dbMajorVer);
                 DialectFactory.DatabaseDialectMapper mapper = (DialectFactory.DatabaseDialectMapper) HIBERNATE_DIALECTS
                         .get(dbProductName);
                 if (mapper != null) {
                     dialect = mapper.getDialectClass(dbMajorVer);
                 } else {
-                    Dialect hbDialect = DialectFactory.determineDialect(dbProductName, dbMajorVer);
+                    Dialect hbDialect = DialectFactory.determineDialect(
+                            dbProductName, dbMajorVer);
                     if (hbDialect != null)
                         dialect = hbDialect.getClass().getName();
                 }
@@ -507,7 +514,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
 
         if (dialect == null) {
-            __log.info("Cannot determine hibernate dialect for this database: using the default one.");
+            __log
+                    .info("Cannot determine hibernate dialect for this database: using the default one.");
             dialect = DEFAULT_HIBERNATE_DIALECT;
         }
 
@@ -520,11 +528,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
 
     static {
-        // Hibernate has a nice table that resolves the dialect from the
-        // database
+        // Hibernate has a nice table that resolves the dialect from the database
         // product name,
-        // but doesn't include all the drivers. So this is supplementary, and
-        // some
+        // but doesn't include all the drivers. So this is supplementary, and some
         // day in the
         // future they'll add more drivers and we can get rid of this.
         // Drivers already recognized by Hibernate:
@@ -536,8 +542,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         // Sybase SQL Server
         // Informix Dynamic Server
         // Oracle 8 and Oracle >8
-        HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(
-                "org.hibernate.dialect.DerbyDialect"));
+        HIBERNATE_DIALECTS.put("Apache Derby",
+                new DialectFactory.VersionInsensitiveMapper(
+                        "org.hibernate.dialect.DerbyDialect"));
     }
 
 }
