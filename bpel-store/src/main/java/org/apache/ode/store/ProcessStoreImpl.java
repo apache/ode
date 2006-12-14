@@ -80,12 +80,12 @@ public class ProcessStoreImpl implements ProcessStore {
     private DataSource _inMemDs;
 
     public ProcessStoreImpl() {
-        this(null);
+        this(null, null);
     }
 
-    public ProcessStoreImpl(DataSource ds) {
+    public ProcessStoreImpl(DataSource ds, String dbName) {
         if (ds != null) {
-            _cf = new DbConfStoreConnectionFactory(ds, false);
+            _cf = new DbConfStoreConnectionFactory(ds, false, dbName);
         } else {
 
             // If the datasource is not provided, then we create a HSQL-based in-memory
@@ -94,7 +94,7 @@ public class ProcessStoreImpl implements ProcessStore {
             hsqlds.setDatabase("jdbc:hsqldb:mem:" + _guid);
             hsqlds.setUser("sa");
             hsqlds.setPassword("");
-            _cf = new DbConfStoreConnectionFactory(hsqlds, true);
+            _cf = new DbConfStoreConnectionFactory(hsqlds, true, null);
             _inMemDs = hsqlds;
         }
 
@@ -533,7 +533,7 @@ public class ProcessStoreImpl implements ProcessStore {
             _deploymentUnits.put(dud.getName(),dud);
             
             for (ProcessConfDAO p : dudao.getProcesses()) {
-                Process pinfo = dud.getProcessDeployInfo(p.getPID());
+                TDeployment.Process pinfo = dud.getProcessDeployInfo(p.getPID());
                 if (pinfo == null) {
                     __log.warn("Cannot load " + p.getPID() + "; cannot find descriptor.");
                     continue;
@@ -592,4 +592,5 @@ public class ProcessStoreImpl implements ProcessStore {
 
         abstract V call(ConfStoreConnection conn);
     }
+
 }
