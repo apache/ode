@@ -47,6 +47,7 @@ import javax.transaction.TransactionManager;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.sql.DriverManager;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -146,6 +147,13 @@ class MockBpelServer {
         _scheduler.stop();
         _scheduler.shutdown();
         _jotm.stop();
+        try {
+            DriverManager.getConnection("jdbc:derby:target/test-classes/derby-db/data;shutdown=true");
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+        
+        
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
