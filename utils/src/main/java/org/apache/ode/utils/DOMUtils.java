@@ -18,9 +18,6 @@
  */
 package org.apache.ode.utils;
 
-import com.sun.org.apache.xml.internal.serialize.DOMSerializerImpl;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
@@ -30,6 +27,9 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.ode.utils.sax.LoggingErrorHandler;
 import org.apache.xerces.dom.DOMOutputImpl;
 import org.apache.xerces.impl.Constants;
+import org.apache.xml.serialize.DOMSerializerImpl;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -687,10 +687,6 @@ public class DOMUtils {
         return true;
     }
 
-    /**
-     * @param el
-     * @return
-     */
     public static QName getElementQName(Element el) {
         return new QName(el.getNamespaceURI(),el.getLocalName());
     }
