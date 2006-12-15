@@ -18,12 +18,12 @@
  */
 package org.apache.ode.utils;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.xerces.jaxp.SAXParserFactoryImpl;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.parsers.SAXParser;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.xml.sax.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
