@@ -18,21 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-
-import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.trans.DynamicError;
-
+import net.sf.saxon.xpath.XPathEvaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -49,11 +36,14 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.utils.xsd.XMLCalendar;
 import org.apache.ode.utils.xsl.XslTransformHandler;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
+
+import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import java.util.*;
 
 /**
  * XPath 2.0 Expression Language run-time subsytem.
@@ -172,9 +162,12 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
 
             Object evalResult = expr.evaluate(ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode(), type);
-            if (evalResult != null && __log.isDebugEnabled())
+            if (evalResult != null && __log.isDebugEnabled()) {
                 __log.debug("Expression " + cexp.toString() + " generated result " + evalResult
                         + " - type=" + evalResult.getClass().getName());
+                if (ctx.getRootNode() != null)
+                    __log.debug("Was using context node " + DOMUtils.domToString(ctx.getRootNode()));
+            }
             return evalResult;
         } catch (XPathExpressionException e) {
             // Extracting the real cause from all this wrapping isn't a simple task
