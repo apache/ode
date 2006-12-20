@@ -433,6 +433,7 @@ public class ODEServer {
     private void initProcessStore() {
         _store = new ProcessStoreImpl(_datasource, _dialect);
         _store.registerListener(new ProcessStoreListenerImpl());
+        _store.setDeployDir(new File(_workRoot, "processes"));
     }
 
     private void initBpelServer() {
