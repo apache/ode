@@ -65,6 +65,8 @@ public class ProcessStoreImpl implements ProcessStore {
     private String _guid = new GUID().toString();
 
     private DbConfStoreConnectionFactory _cf;
+    
+    private File _deployDir;
 
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
@@ -195,7 +197,10 @@ public class ProcessStoreImpl implements ProcessStore {
 
                 dudao = conn.createDeploymentUnit(du.getName());
                 try {
-                    dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
+                    if (_deployDir == null)
+                        dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
+                    else 
+                        dudao.setDeploymentUnitDir(deploymentUnitDirectory.getName());
                 } catch (IOException e1) {
                     String errmsg = "Error getting canonical path for " + du.getName()
                             + "; deployment unit will not be available after restart!";
@@ -514,7 +519,10 @@ public class ProcessStoreImpl implements ProcessStore {
 
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
-        File dudir = new File(dudao.getDeploymentUnitDir());
+        File dudir;
+        if (_deployDir == null) dudir = new File(dudao.getDeploymentUnitDir());
+        else dudir = new File(_deployDir, dudao.getDeploymentUnitDir());
+
         if (!dudir.exists())
             throw new ContextException("Deployed directory " + dudir + " no longer there!");
         DeploymentUnitDir dud = new DeploymentUnitDir(dudir);
@@ -591,6 +599,10 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
         abstract V call(ConfStoreConnection conn);
+    }
+    
+    public void setDeployDir(File depDir) {
+        _deployDir = depDir;
     }
 
 }
