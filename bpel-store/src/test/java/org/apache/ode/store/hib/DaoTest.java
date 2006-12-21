@@ -20,7 +20,7 @@ public class DaoTest extends TestCase {
         hsqlds.setUser("sa");
         hsqlds.setPassword("");
 
-        cf = new DbConfStoreConnectionFactory(hsqlds, true);
+        cf = new DbConfStoreConnectionFactory(hsqlds, true, null);
     }
 
     public void tearDown() throws Exception {

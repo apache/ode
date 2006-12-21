@@ -75,7 +75,7 @@ class WSDLRegistry {
     private CompilerContext _ctx;
 
 
-    WSDLRegistry(WsdlFinder finder, CompilerContext cc) {
+    WSDLRegistry(ResourceFinder finder, CompilerContext cc) {
         // bogus schema to force schema creation
         _schemas.put(URI.create("http://fivesight.com/bogus/namespace"),
                 ("<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
@@ -85,7 +85,7 @@ class WSDLRegistry {
                         + "</xsd:simpleType>" + "</xsd:schema>").getBytes());
         if (finder != null)
             _resolver = new WsdlFinderXMLEntityResolver(finder);
-
+        
         _ctx = cc;
     }
 

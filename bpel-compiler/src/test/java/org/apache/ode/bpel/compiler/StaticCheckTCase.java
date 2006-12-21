@@ -47,7 +47,7 @@ import org.xml.sax.InputSource;
  * These test cases are intended to be run as part of a suite. Each test case
  * instance is used to test a particular detectable error condition.
  */
-class StaticCheckTCase extends TestCase implements CompileListener, WsdlFinder {
+class StaticCheckTCase extends TestCase implements CompileListener {
 
   private int idx = 0;
   private String name;
@@ -71,7 +71,6 @@ class StaticCheckTCase extends TestCase implements CompileListener, WsdlFinder {
   protected void setUp() throws Exception {
     super.setUp();
     _compiler = BpelC.newBpelCompiler();
-    _compiler.setWsdlFinder(this);
     _compiler.setCompileListener(this);
     _errors.clear();
 
@@ -119,35 +118,5 @@ class StaticCheckTCase extends TestCase implements CompileListener, WsdlFinder {
 
   public void setBaseURI(URI u) {
   }
-  
-  public Definition4BPEL loadDefinition(WSDLReader f, File importLoc, URI uri) throws WSDLException {
-    InputStream is;
-    try {
-      is = getClass().getResource(uri.toASCIIString()).openStream();
-    } catch (IOException ioex) {
-      throw new WSDLException(WSDLException.INVALID_WSDL,uri.toASCIIString());
-    }
-    
-    try {
-      return (Definition4BPEL) f.readWSDL(null, new InputSource(is));
-    } finally {
-      try {
-        is.close();
-      } catch (Exception ie) {
-          throw new RuntimeException(ie);
-      }
-    }
-  }
-
-	public InputStream openResource(URI uri) throws MalformedURLException, IOException {
-		try {
-			InputStream is = getClass().getResource(uri.toASCIIString()).openStream();
-      _streams.add(is);
-      return is;
-		} catch (NullPointerException npe) {
-			throw new IOException("NotFound: " + uri);
-		}
-	}
-  
   
 }

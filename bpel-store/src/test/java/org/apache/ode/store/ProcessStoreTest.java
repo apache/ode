@@ -17,7 +17,7 @@ public class ProcessStoreTest extends TestCase {
     private File _testdd;
     
     public void setUp() throws Exception {
-        _ps = new ProcessStoreImpl(null);
+        _ps = new ProcessStoreImpl();
         _ps.loadAll();
         URL tdd= getClass().getResource("/testdd/deploy.xml");
         _testdd = new File(tdd.getPath()).getParentFile();
