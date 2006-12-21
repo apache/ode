@@ -318,17 +318,24 @@ public class BpelEngineImpl implements BpelEngine {
             try {
                 while (true) {
                     Thread.sleep(10000);
-                    for (BpelProcess process : _activeProcesses.values()) {
-                        Long lru;
-                        synchronized(_processesLRU) {
-                            lru = _processesLRU.get(process._pid);
+                    try {
+                        for (BpelProcess process : _activeProcesses.values()) {
+                            Long lru;
+                            synchronized(_processesLRU) {
+                                lru = _processesLRU.get(process._pid);
+                            }
+                            if (lru != null && process._oprocess != null
+                                    && System.currentTimeMillis() - lru > _processMaxAge) {
+                                process._oprocess = null;
+                                __log.debug("Process definition reaper cleaning " + process._pid);
+                            }
+                            Thread.sleep(10);
                         }
-                        if (lru != null && process._oprocess != null
-                                && System.currentTimeMillis() - lru > _processMaxAge) {
-                            process._oprocess = null;
-                            __log.debug("Process definition reaper cleaning " + process._pid);
-                        }
-                        Thread.sleep(10);
+                    } catch (ConcurrentModificationException cme) {
+                        // A concurrent modification could happen once in a while, it's not really a
+                        // problem as we'll try again 10s later.
+                        __log.debug("Concurrent modification exception while trying to reap process definitions, " +
+                                "will try again in a few seconds.");
                     }
                 }
             } catch (InterruptedException e) {
