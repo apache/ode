@@ -137,7 +137,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.COMPENSATE, CompensateActivity.class);
         _mappings.put(Bpel11QNames.TERMINATE, TerminateActivity.class);
         _mappings.put(Bpel11QNames.FLOW, FlowActivity.class);
-        _mappings.put(Bpel11QNames.SWITCH, IfActivity.class);
+        _mappings.put(Bpel11QNames.SWITCH, SwitchActivity.class);
         _mappings.put(Bpel11QNames.WHILE, WhileActivity11.class);
         _mappings.put(Bpel11QNames.SEQUENCE, SequenceActivity.class);
         _mappings.put(Bpel11QNames.PICK, PickActivity.class);
@@ -152,7 +152,8 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.COMPENSATE, CompensateActivity.class);
         _mappings.put(Bpel11QNames.COMPENSATIONHANDLER, CompensationHandler.class);
         _mappings.put(Bpel11QNames.FAULTHANDLERS, FaultHandler.class);
-        _mappings.put(Bpel11QNames.CASE, IfActivity.Case.class);
+        _mappings.put(Bpel11QNames.CASE, SwitchActivity.Case.class);
+        _mappings.put(Bpel11QNames.OTHERWISE, SwitchActivity.Case.class);
         _mappings.put(Bpel11QNames.ONALARM, OnAlarm.class);
         _mappings.put(Bpel11QNames.ONMESSAGE, OnMessage.class);
         _mappings.put(Bpel11QNames.PLINKTYPE, PartnerLinkType.class);

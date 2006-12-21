@@ -29,6 +29,7 @@ import org.apache.ode.bpel.compiler.bom.PickActivity;
 import org.apache.ode.bpel.compiler.bom.ReceiveActivity;
 import org.apache.ode.bpel.compiler.bom.ReplyActivity;
 import org.apache.ode.bpel.compiler.bom.SequenceActivity;
+import org.apache.ode.bpel.compiler.bom.SwitchActivity;
 import org.apache.ode.bpel.compiler.bom.TerminateActivity;
 import org.apache.ode.bpel.compiler.bom.ThrowActivity;
 import org.apache.ode.bpel.compiler.bom.WaitActivity;
@@ -54,7 +55,7 @@ public class BpelCompiler11 extends BpelCompiler {
         registerActivityCompiler(AssignActivity.class, new AssignGenerator());
         registerActivityCompiler(ThrowActivity.class, new ThrowGenerator());
         registerActivityCompiler(WhileActivity.class, new WhileGenerator());
-        registerActivityCompiler(IfActivity.class, new IfGenerator());
+        registerActivityCompiler(SwitchActivity.class, new SwitchGenerator());
         registerActivityCompiler(PickActivity.class, new PickGenerator());
         registerActivityCompiler(ReplyActivity.class, new ReplyGenerator());
         registerActivityCompiler(ReceiveActivity.class, new ReceiveGenerator());
