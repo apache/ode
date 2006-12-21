@@ -67,9 +67,9 @@ public class WSDLRegistryTest extends TestCase {
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
     WSDLReader reader = factory.newWSDLReader();
-    WsdlFinder finder = new DefaultWsdlFinder();
-    Definition4BPEL def = finder.loadDefinition(reader, null, wsd.toURI());
-    _registry.addDefinition(def);
+    ResourceFinder finder = new DefaultResourceFinder();
+    //Definition4BPEL def = finder.loadDefinition(reader, null, wsd.toURI());
+    //_registry.addDefinition(def);
 
     // access model
     SchemaModel m = _registry.getSchemaModel();
