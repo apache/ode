@@ -16,27 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.ode.bpel.compiler;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.io.File;
+
+import javax.wsdl.xml.WSDLLocator;
 
 /**
- * Simple wrapper for XSLT location.
+ * Simple wrapper for WSDL location.
  */
-public interface XsltFinder {
+public interface ResourceFinder {
+  
+    InputStream openResource(URI uri) throws MalformedURLException, IOException;
 
-    /**
-     * Set the base URL to compose relative URLs against.
-     * @param base the base URL to resolve against or <code>null</code> if none exists.
-     */
-    public void setBaseURI(URI base);
-
-    /**
-     * Resolve a URI to a XSLT sheet.
-     * @param uri of the xslt sheet.
-     * @return the sheet content
-     */
-    public String loadXsltSheet(File importFrom, URI uri);
 }
+
