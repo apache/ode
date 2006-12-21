@@ -3,6 +3,8 @@ package org.apache.ode.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.DefaultResourceFinder;
+import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
@@ -18,6 +20,7 @@ import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -185,13 +188,15 @@ class DeploymentUnitDir  {
 
             WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
             WSDLReader r = wsdlFactory.newWSDLReader();
-
+            DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory);
+            URI basedir = _duDirectory.toURI();
             ArrayList<File> wsdls = listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
             for (File file : wsdls) {
+                URI uri = basedir.relativize(file.toURI());
                 try {
-                    _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(file.toURI().toString()));
+                    _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(new WSDLLocatorImpl(rf, uri)));
                 } catch (WSDLException e) {
-                    throw new ContextException("Couldn't read WSDL document " + file.getAbsolutePath(), e);
+                    throw new ContextException("Couldn't read WSDL document at " +  uri, e);
                 }
             }
         }
