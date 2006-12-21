@@ -3,8 +3,6 @@ package org.apache.ode.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
-import org.apache.ode.bpel.compiler.DefaultWsdlFinder;
-import org.apache.ode.bpel.compiler.DefaultXsltFinder;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
@@ -123,8 +121,6 @@ class DeploymentUnitDir  {
     private void compile(File bpelFile) {
         BpelC bpelc = BpelC.newBpelCompiler();
         bpelc.setOutputDirectory(_duDirectory);
-        bpelc.setWsdlFinder(new DefaultWsdlFinder(_duDirectory));
-        bpelc.setXsltFinder(new DefaultXsltFinder(_duDirectory));
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         try {
             bpelc.compile(bpelFile);

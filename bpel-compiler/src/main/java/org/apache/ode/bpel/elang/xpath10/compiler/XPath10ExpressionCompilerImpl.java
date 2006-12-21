@@ -109,9 +109,7 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
         if (node == null) {
             throw new IllegalStateException("XPath string and xpath node are both null");
         }
-        if (node.getNodeType() != Node.TEXT_NODE) {
-            throw new CompilationException(__msgs.errUnexpectedNodeTypeForXPath(DOMUtils.domToString(node)));
-        }
+
         xpathStr = node.getNodeValue();
         xpathStr = xpathStr.trim();
 

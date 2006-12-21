@@ -56,8 +56,7 @@ public class BpelC {
     private File _outputDir = null;
 
     private File _bpelFile;
-    private WsdlFinder _wsdlFinder;
-    private XsltFinder _xsltFinder;
+    private ResourceFinder _wsdlFinder;
     private URI _bpel11wsdl;
     private Map<String,Object> _compileProperties;
 
@@ -75,7 +74,7 @@ public class BpelC {
     }
 
     private void invalidate() {
-        this.setWsdlFinder(null);
+        this.setResourceFinder(null);
         this.setCompileListener(null);
         this.setOutputStream(null);
         this.setOutputDirectory(null);
@@ -96,22 +95,12 @@ public class BpelC {
      * Tell the compiler how to locate WSDL imports for a BPEL process.  Setting this
      * to <code>null</code> will cause the default behavior.
      * </p>
-     * @param finder the {@link WsdlFinder} implementation to use.
+     * @param finder the {@link ResourceFinder} implementation to use.
      */
-    public void setWsdlFinder(WsdlFinder finder) {
+    public void setResourceFinder(ResourceFinder finder) {
         _wsdlFinder = finder;
     }
 
-    /**
-     * <p>
-     * Tell the compiler how to locate XSLT sheets used in assignment withn a BPEL process.
-     * Setting this to <code>null</code> will cause the default behavior.
-     * </p>
-     * @param finder the {@link XsltFinder} implementation to use.
-     */
-    public void setXsltFinder(XsltFinder finder) {
-        _xsltFinder = finder;
-    }
 
     /**
      * Register a "global" WSDL import for compilation. This is used to specify WSDL
@@ -200,19 +189,12 @@ public class BpelC {
         logCompilationMessage(__cmsgs.infCompilingProcess());
 
         BpelCompiler compiler;
-        WsdlFinder wf;
-        XsltFinder xf;
+        ResourceFinder wf;
 
         if (_wsdlFinder != null) {
             wf = _wsdlFinder;
         } else {
-            wf = new DefaultWsdlFinder(_bpelFile.getParentFile());
-        }
-
-        if (_xsltFinder != null) {
-            xf = _xsltFinder;
-        } else {
-            xf = new DefaultXsltFinder(_bpelFile.getParentFile());
+            wf = new DefaultResourceFinder(_bpelFile.getParentFile());
         }
 
         CompileListener clistener = new CompileListener() {
@@ -232,7 +214,7 @@ public class BpelC {
             switch (process.getBpelVersion()) {
                 case BPEL20:
                     compiler = new BpelCompiler20();
-                    compiler.setXsltFinder(xf);
+                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
                         logCompilationMessage(cmsg);
@@ -240,8 +222,9 @@ public class BpelC {
                     break;
                 case BPEL11:
                     compiler = new BpelCompiler11();
+                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
-                        compiler.addWsdlImport(_bpelFile, _bpel11wsdl);
+                        compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl);
                     } else {
                         CompilationMessage cmsg = __cmsgs.errBpel11RequiresWsdl();
                         logCompilationMessage(cmsg);
@@ -256,7 +239,6 @@ public class BpelC {
                     throw new CompilationException(cmsg);
             }
             compiler.setCompileListener(clistener);
-            compiler.setWsdlFinder(wf);
             if (_compileProperties != null) {
                 if (_compileProperties.get(PROCESS_CUSTOM_PROPERTIES) != null)
                     compiler.setCustomProperties((Map<QName, Node>) _compileProperties.get(PROCESS_CUSTOM_PROPERTIES));

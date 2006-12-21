@@ -45,10 +45,10 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
      */
     private boolean _failIfNotFound = true;
 
-    private WsdlFinder _wsdlFinder;
+    private ResourceFinder _wsdlFinder;
     private HashMap<String,String> _internalResources = new HashMap<String, String>();
 
-    public WsdlFinderXMLEntityResolver(WsdlFinder finder) {
+    public WsdlFinderXMLEntityResolver(ResourceFinder finder) {
         _wsdlFinder = finder;
     }
 
@@ -62,10 +62,10 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         URI location;
 
         try {
-            if (resourceIdentifier.getExpandedSystemId() == null)
+            if (resourceIdentifier.getLiteralSystemId() == null)
                 location = new URI(resourceIdentifier.getNamespace());
             else
-                location = new URI(FileUtils.encodePath(resourceIdentifier.getExpandedSystemId()));
+                location = new URI(FileUtils.encodePath(resourceIdentifier.getLiteralSystemId()));
         } catch (URISyntaxException e) {
             __log.debug("resolveEntity: URI syntax error", e);
             throw new IOException(e.getMessage());
