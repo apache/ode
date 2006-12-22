@@ -172,6 +172,7 @@ public class DeploymentWebService {
 
                         File deployedMarker = new File(_deployPath, elmtStr + ".deployed");
                         deployedMarker.delete();
+                        FileUtils.deepDelete(new File(_deployPath, elmtStr));
 
                         OMElement response = factory.createOMElement("response", depns);
                         response.setText("" + (undeployed.size() > 0));
