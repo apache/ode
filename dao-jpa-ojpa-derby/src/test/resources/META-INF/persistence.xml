@@ -17,14 +17,24 @@
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
 
         <properties>
-            <!-- Properties for an embedded Derby connection -->
+            <!-- Properties for an embedded Derby connection 
             <property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp.BasicDataSource"/>
             <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
-            <!-- To validate DBSchema and create DDL at runtime - use this property. Currently the DDL is created at build time -->
-            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
-
+             
             <property name="openjpa.ConnectionProperties"
-                value="DriverClassName=org.apache.derby.jdbc.EmbeddedDriver,Url=jdbc:derby:target/database/openjpa-test-database;create=true,MaxActive=100,MaxWait=10000,TestOnBorrow=true"/>
+                value="DriverClassName=org.apache.derby.jdbc.EmbeddedDriver,Url=jdbc:derby:target/database/derby/ode-test-db;userid=sa;create=false,MaxActive=100,MaxWait=10000,TestOnBorrow=true"/>
+            -->
+
+            <!-- Properties for an embedded Derby connection -->
+            <property name="openjpa.ConnectionDriverName" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+            <property name="openjpa.ConnectionURL" value="jdbc:derby:target/database/derby/ode-test-db;create=false"/>
+            <property name="openjpa.ConnectionUserName" value="SA"/>
+            <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
+ 
+            <!-- Use this property to generate DDL at runtime
+            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+            -->
+
 
         </properties>
     </persistence-unit>
