@@ -1,6 +1,6 @@
 package org.apache.ode.test;
 
-public class DataHandling20Tests extends BPELTest {
+public class DataHandling20Test extends BPELTest {
 
     public void testXPathNamespace1() throws Throwable {
     	go("target/test-classes/bpel/2.0/TestXPathNamespace1");
