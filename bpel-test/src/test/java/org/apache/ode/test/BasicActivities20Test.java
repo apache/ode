@@ -1,6 +1,6 @@
 package org.apache.ode.test;
 
-public class BasicActivities20Tests extends BPELTest {
+public class BasicActivities20Test extends BPELTest {
 	public void testHelloWorld2() throws Throwable {
 		go("target/test-classes/bpel/2.0/HelloWorld2");
 	}
