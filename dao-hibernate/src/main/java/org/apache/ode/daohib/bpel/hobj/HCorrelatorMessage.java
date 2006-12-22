@@ -29,7 +29,7 @@ public class HCorrelatorMessage extends HObject {
     private String _correlationKey;
 
     /**
-     * @hibernate.many-to-one column="MEX" not-null="true"
+     * @hibernate.many-to-one column="MEX"
      */
     public HMessageExchange getMessageExchange() {
         return _messageExchange;
