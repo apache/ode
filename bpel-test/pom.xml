@@ -38,14 +38,28 @@
                     <useProjectReferences>false</useProjectReferences>
                 </configuration>
             </plugin>
-            <!-- Having some problems with this because the embedded DB is created
-                 relative to the build path - see persistent.xml URL
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.0</version>
-
                 <executions>
+                    <execution>
+                        <id>Generate Derby DB</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <tasks>
+                                <ant antfile="build.xml" target="db" inheritRefs="true"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+
+
+                    <!-- Having some problems with this because the embedded DB is created
+                        relative to the build path - see persistent.xml URL
                     <execution>
                         <phase>compile</phase>
                         <id>OpenJPA Mapping Tool</id>
@@ -65,10 +79,11 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
+                    -->
                 </executions>
 
             </plugin>
-            -->
+
         </plugins>
     </build>
 
