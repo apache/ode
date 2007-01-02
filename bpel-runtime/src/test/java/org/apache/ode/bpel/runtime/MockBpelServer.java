@@ -66,8 +66,8 @@ import org.w3c.dom.Element;
 
 class MockBpelServer {
 
-    BpelServerImpl             _server;
-    ProcessStoreImpl           _store;
+    BpelServerImpl            _server;
+    ProcessStoreImpl          _store;
     TransactionManager        _txManager;
     Jotm                      _jotm;
     MinervaPool               _minervaPool;
@@ -133,7 +133,6 @@ class MockBpelServer {
               throw except;
         }
     }
-
 
     public TransactionManager getTransactionManager() {
         return _txManager;
