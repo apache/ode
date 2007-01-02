@@ -105,7 +105,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       recoverJobs(conn);
       commitConnection(conn);
@@ -131,7 +131,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       cleanVolatileTriggerAndJobs(conn);
 
@@ -175,7 +175,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
       if (isLockOnInsert()) {
         getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
         transOwner = true;
-        // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+        getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
       }
 
       if (newJob.isVolatile() && !newTrigger.isVolatile()) {
@@ -218,7 +218,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
       if (isLockOnInsert() || replaceExisting) {
         getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
         transOwner = true;
-        // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+        getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
       }
 
       storeJob(conn, ctxt, newJob, replaceExisting);
@@ -256,7 +256,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       return removeJob(conn, ctxt, jobName, groupName, true);
     } finally {
@@ -732,7 +732,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       pauseTrigger(conn, ctxt, triggerName, groupName);
     } finally {
@@ -757,7 +757,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       pauseTriggerGroup(conn, ctxt, groupName);
     } finally {
@@ -782,7 +782,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       Trigger[] triggers = getTriggersForJob(conn, ctxt, jobName, groupName);
       for (int j = 0; j < triggers.length; j++) {
@@ -810,7 +810,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       String[] jobNames = getJobNames(conn, ctxt, groupName);
 
@@ -849,7 +849,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       resumeTrigger(conn, ctxt, triggerName, groupName);
     } finally {
@@ -879,7 +879,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       resumeTriggerGroup(conn, ctxt, groupName);
     } finally {
@@ -910,7 +910,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       Trigger[] triggers = getTriggersForJob(conn, ctxt, jobName, groupName);
       for (int j = 0; j < triggers.length; j++) {
@@ -944,7 +944,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       String[] jobNames = getJobNames(conn, ctxt, groupName);
 
@@ -983,7 +983,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       pauseAll(conn, ctxt);
     } finally {
@@ -1012,7 +1012,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       resumeAll(conn, ctxt);
     } finally {
@@ -1043,7 +1043,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       Trigger trigger = acquireNextTrigger(conn, ctxt, noLaterThan);
 
@@ -1079,7 +1079,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       releaseAcquiredTrigger(conn, ctxt, trigger);
       commitConnection(conn);
@@ -1114,7 +1114,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       TriggerFiredBundle tfb = null;
       JobPersistenceException err = null;
@@ -1161,7 +1161,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     try {
       getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
       transOwner = true;
-      // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+      getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
 
       triggeredJobComplete(conn, ctxt, trigger, jobDetail, triggerInstCode);
 
@@ -1227,7 +1227,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
       if (failedRecords.size() > 0) {
         getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
-        // getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+        getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
         transOwner = true;
 
         clusterRecover(conn, failedRecords);
