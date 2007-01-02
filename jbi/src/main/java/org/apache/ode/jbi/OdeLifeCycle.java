@@ -52,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -74,8 +75,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private boolean _needDerbyShutdown;
     private String _derbyUrl;
     private BpelServerConnector _connector;
-    private String _dbType;
-    private String _dialect;
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -96,8 +95,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._consumer = new OdeConsumer(_ode);
 
 
-            TempFileManager.setWorkingDirectory(new File(_ode.getContext()
-                    .getWorkspaceRoot()));
+            if (_ode.getContext().getWorkspaceRoot() != null)
+                TempFileManager.setWorkingDirectory(new File(_ode.getContext()
+                        .getWorkspaceRoot()));
 
             __log.debug("Loading properties.");
             initProperties();
@@ -248,10 +248,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setTransactionManager((TransactionManager) _ode
                 .getContext().getTransactionManager());
         _ode._scheduler.setDataSource(_ode._dataSource);
-        if ("sqlserver".equals(_dbType)) _ode._scheduler.setSqlServer(true);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource, _dialect);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource);
+        _ode._store.loadAll();
 
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
@@ -307,12 +307,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 else __log.error(errmsg);
             }
         }
-        if (properties.get(Environment.DIALECT) != null) {
-            _dialect = (String) properties.get(Environment.DIALECT);
-            if (_dialect.equals("org.hibernate.dialect.SQLServerDialect"))
-                _dbType = "sqlserver";
-            else _dbType = "other";
-        }
+
 
         SessionManager sm = new SessionManager(properties, _ode._dataSource, _ode
                 .getTransactionManager());
@@ -332,7 +327,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             try {
                 _connector.start();
             } catch (Exception e) {
-                __log.error("Failed to initialize JCA connector.",e);
+
+                __log.error("Failed to initialize JCA connector (check security manager configuration)");
+                __log.debug("Failed to initialize JCA connector (check security manager configuration)",e);
+
             }
         }
     }
@@ -450,9 +448,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 __log.debug("shutting down derby.");
                 EmbeddedDriver driver = new EmbeddedDriver();
                 try {
-                    driver.connect(_derbyUrl+";shutdown", new Properties());
+                    driver.connect(_derbyUrl+";shutdown=true", new Properties());
+                } catch (SQLException ex) {
+                    // Shutdown will always return an exeption!
+                    if (ex.getErrorCode() != 45000)
+                        __log.error("Error shutting down Derby: " + ex.getErrorCode(), ex);
+                        
                 } catch (Exception ex) {
-                    __log.error("Error shutting down derby.", ex);
+                    __log.error("Error shutting down Derby.", ex);
                 }
             }
             __log.info("Shutdown completed.");
