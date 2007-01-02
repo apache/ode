@@ -45,19 +45,6 @@ public class ListProcessTest extends BaseDAOTest {
     stopTM();
   }
 
-  public void testListProcess() throws Exception {
-    for (int index = 0; index < 5; index++) {
-      StringBuffer filter = new StringBuffer();
-      for (Map.Entry<String, List> entry : filterElmts.entrySet()) {
-        filter.append(entry.getKey());
-        filter.append(entry.getValue().get((index < entry.getValue().size()) ? index : index % entry.getValue().size()));
-        ProcessFilter pfilter = new ProcessFilter(filter.toString(),
-                order.get((index < order.size()) ? index : index % order.size()));
-        daoConn.processQuery(pfilter);
-      }
-    }
-  }
-
   private void buildFilterElements() {
     filterElmts = new HashMap<String, List>();
     ArrayList<String> nameList = new ArrayList<String>();

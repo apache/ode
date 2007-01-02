@@ -73,9 +73,30 @@ public interface Scheduler {
   <T> T execTransaction(Callable<T> transaction) 
     throws Exception, ContextException;
   
+  /**
+   * Register a transaction synchronizer. 
+   * @param synch synchronizer
+   * @throws ContextException
+   */
+  void registerSynchronizer(Synchronizer synch) throws ContextException;
+  
   void start();
   
   void stop();
 
   void shutdown();
+  
+  public interface Synchronizer {
+      /**
+       * Called after the transaction is completed. 
+       * @param success indicates whether the transaction was comitted 
+       */
+      void afterCompletion(boolean success);
+      
+      /**
+       * Called before the transaction is completed.
+       */
+      void beforeCompletion();
+
+  }
 }

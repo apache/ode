@@ -58,14 +58,21 @@ class OdeServiceUnit {
     }
 
     public void deploy() throws DeploymentException {
-
+        
+        // Do a pre-emptive undeploy. 
+        try {
+            _ode._store.undeploy(_serviceUnitRootPath);
+        } catch (Exception ex) {
+            __log.debug("Undeploy failed.",ex);
+        }
+        
         try {
             _ode._store.deploy(_serviceUnitRootPath);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
             __log.error(errmsg, ex);
             throw new DeploymentException(errmsg, ex);
-        }
+        } 
     }
 
     public void undeploy() throws Exception {
@@ -94,6 +101,11 @@ class OdeServiceUnit {
 
     public void start() throws Exception {
         List<QName> pids = _ode._store.listProcesses(_serviceUnitRootPath.getName());
+        if (pids == null) {
+            __log.error(_serviceUnitRootPath.getName() + " not found in process stroe. ");
+            throw new IllegalStateException("Process store and JBI out of synch.");
+        }
+
         Exception e = null;
         for (QName pid : pids) {
             try {
