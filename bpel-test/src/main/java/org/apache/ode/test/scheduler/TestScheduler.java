@@ -19,6 +19,7 @@
 
 package org.apache.ode.test.scheduler;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 
 public class TestScheduler implements Scheduler {
-    List<Scheduler.Synchronizer> _synchros = new CopyOnWriteArrayList<Scheduler.Synchronizer>();
+    ThreadLocal<List<Scheduler.Synchronizer>> _synchros = 
+        new ThreadLocal<List<Scheduler.Synchronizer>>() {
+            @Override
+            protected List<Synchronizer> initialValue() {
+                return new ArrayList<Synchronizer>();
+            }
+        
+    };
 
     public String schedulePersistedJob(Map<String, Object> arg0, Date arg1) throws ContextException {
         return null;
@@ -44,21 +53,12 @@ public class TestScheduler implements Scheduler {
     }
 
     public <T> T execTransaction(Callable<T> arg0) throws Exception, ContextException {
+        begin();
         try {
             T retval = arg0.call();
             return retval;
         } finally {
-            for (Synchronizer s : _synchros)
-                try {
-                    s.beforeCompletion();
-                } catch (Throwable t) {
-                }
-            for (Synchronizer s : _synchros)
-                try {
-                    s.afterCompletion(true);
-                } catch (Throwable t) {
-                }
-
+            commit();
         }
     }
 
@@ -72,6 +72,26 @@ public class TestScheduler implements Scheduler {
     }
 
     public void registerSynchronizer(Synchronizer synch) throws ContextException {
-        _synchros.add(synch);
+        _synchros.get().add(synch);
+    }
+    
+    public void begin(){
+        _synchros.get().clear();
+    }
+    
+    public void commit() {
+        for (Synchronizer s : _synchros.get())
+            try {
+                s.beforeCompletion();
+            } catch (Throwable t) {
+            }
+        for (Synchronizer s : _synchros.get())
+            try {
+                s.afterCompletion(true);
+            } catch (Throwable t) {
+            }
+            
+        _synchros.get().clear();
     }
 }
+
