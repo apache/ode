@@ -72,6 +72,7 @@
             <artifactId>ode-dao-hibernate-db-derby</artifactId>
             <version>${project.version}</version>
             <type>tar</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

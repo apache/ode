@@ -8,7 +8,7 @@
 
   <target name="test-db">
     <artifact:pom id="maven.project" file="pom.xml" />
-    <artifact:dependencies filesetId="dependency.derby" useScope="runtime">
+    <artifact:dependencies filesetId="dependency.derby" useScope="test">
       <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
                   version="${maven.project.version}" type="tar"/>
     </artifact:dependencies>
