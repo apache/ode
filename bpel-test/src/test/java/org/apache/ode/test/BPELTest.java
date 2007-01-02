@@ -18,24 +18,31 @@
  */
 package org.apache.ode.test;
 
-import junit.framework.TestCase;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.test.scheduler.TestScheduler;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
+import java.io.File;
+import java.util.Collection;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Collection;
-import java.util.Properties;
-import java.util.regex.Pattern;
+
+import junit.framework.TestCase;
+
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.test.scheduler.TestScheduler;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 public abstract class BPELTest extends TestCase {
 
@@ -44,6 +51,7 @@ public abstract class BPELTest extends TestCase {
 	private MessageExchangeContextImpl mexContext;
 	private EntityManager em;
 	private EntityManagerFactory emf;
+    private TestScheduler scheduler;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -56,11 +64,26 @@ public abstract class BPELTest extends TestCase {
 			em = emf.createEntityManager();
 			String pr = Persistence.PERSISTENCE_PROVIDER;
 			server.setDaoConnectionFactory(new org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl(em));
+            scheduler = new TestScheduler() {
+                @Override
+                public void begin() {
+                    super.begin();
+                    em.getTransaction().begin();
+                }
+
+                @Override
+                public void commit() {
+                    super.commit();
+                    em.getTransaction().commit();
+                }
+                
+            };
 		} else {
 			server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+            scheduler = new TestScheduler();
 		}
         server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
-        server.setScheduler(new TestScheduler());
+        server.setScheduler(scheduler);
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
         store = new ProcessStoreImpl();
@@ -118,7 +141,7 @@ public abstract class BPELTest extends TestCase {
 			}
 		}
 
-		if ( em != null ) em.getTransaction().begin();
+		scheduler.begin();
 		try {
 			Collection<QName> procs =  store.deploy(new File(deployDir));
             for (QName procName : procs) {
@@ -135,11 +158,11 @@ public abstract class BPELTest extends TestCase {
 			e.printStackTrace();
 			fail();
 		}
-		if ( em != null ) em.getTransaction().commit();
+		scheduler.commit();
         
 		while (testPropsFile.exists()) {
 
-			if ( em != null ) em.getTransaction().begin();
+			scheduler.begin();
 			
 			Properties testProps = new Properties();
 			testProps.load(testPropsFile.toURL().openStream());
@@ -241,7 +264,7 @@ public abstract class BPELTest extends TestCase {
 			propsFileCnt++;
 			testPropsFile = new File(deployDir + "/test" + propsFileCnt
 					+ ".properties");
-			if ( em != null ) em.getTransaction().commit();
+			scheduler.commit();
 		}
 	}
 
