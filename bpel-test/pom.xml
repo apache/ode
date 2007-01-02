@@ -44,9 +44,13 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
+                    <!-- This is causing a problem, file not found derby.sql
+                         Let's move this into a separate test module. -Maciej1/2/07 
                     <execution>
                         <id>Generate Derby DB</id>
                         <phase>compile</phase>
+
+                             
                         <configuration>
                             <tasks>
                                 <ant antfile="build.xml" target="db" inheritRefs="true"/>
@@ -56,7 +60,7 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-
+                    -->
 
                     <!-- Having some problems with this because the embedded DB is created
                         relative to the build path - see persistent.xml URL
@@ -108,6 +112,11 @@
             <artifactId>ode-dao-jpa-ojpa-derby</artifactId>
             <version>${project.version}</version>
         </dependency>
+<dependency>
+                <groupId>org.apache.derby</groupId>
+                <artifactId>derby</artifactId>
+            </dependency>
+
 
     </dependencies>
 </project>
