@@ -21,9 +21,7 @@ package org.apache.ode.daohib.bpel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.common.ProcessFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -154,102 +152,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return daos;
     }
 
-    public Collection<ProcessDAO> processQuery(ProcessFilter filter) {
-        List<ProcessDAO> daos = new ArrayList<ProcessDAO>();
-
-        Iterator<HProcess> iter = _processQuery(_session, filter);
-        while (iter.hasNext()) {
-            daos.add(new ProcessDaoImpl(_sm, iter.next()));
-        }
-
-        return daos;
-    }
-
-    @SuppressWarnings("unchecked")
-    static Iterator<HProcess> _processQuery(Session session, ProcessFilter filter) {
-        Criteria crit = session.createCriteria(HProcess.class);
-
-        // TODO Implement process status filtering when status will exist
-
-        // TODO separate localname and namespace to provide proper querying
-        if (filter != null) {
-            // Filtering using an example object
-            HProcess exampleProcess = new HProcess();
-            crit.add(Example.create(exampleProcess).ignoreCase().enableLike().excludeZeroes()
-                    .excludeProperty("retired").excludeProperty("active").excludeProperty("version"));
-
-            if (filter.getNameFilter() != null) {
-                exampleProcess.setTypeName(filter.getNameFilter().replaceAll("\\*", "%"));
-            }
-            if (filter.getNamespaceFilter() != null) {
-                exampleProcess.setTypeNamespace(filter.getNamespaceFilter().replaceAll("\\*", "%"));
-            }
-
-            // Specific filter for deployment date.
-            if (filter.getDeployedDateFilter() != null) {
-                for (String ddf : filter.getDeployedDateFilter()) {
-                    Date deployDate = null;
-                    try {
-                        deployDate = ISO8601DateParser.parse(Filter.getDateWithoutOp(ddf));
-                    } catch (ParseException e) {
-                        // Never occurs, the deploy date format is pre-validated
-                        // by the filter
-                    }
-                    if (ddf.startsWith("=")) {
-                        crit.add(Restrictions.eq("deployDate", deployDate));
-                    } else if (ddf.startsWith("<=")) {
-                        crit.add(Restrictions.le("deployDate", deployDate));
-                    } else if (ddf.startsWith(">=")) {
-                        crit.add(Restrictions.ge("deployDate", deployDate));
-                    } else if (ddf.startsWith("<")) {
-                        crit.add(Restrictions.lt("deployDate", deployDate));
-                    } else if (ddf.startsWith(">")) {
-                        crit.add(Restrictions.gt("deployDate", deployDate));
-                    }
-                }
-            }
-
-            // Ordering
-            if (filter.getOrders() != null) {
-                for (String key : filter.getOrders()) {
-                    boolean ascending = true;
-                    String orderKey = key;
-                    if (key.startsWith("+") || key.startsWith("-")) {
-                        orderKey = key.substring(1, key.length());
-                        if (key.startsWith("-"))
-                            ascending = false;
-                    }
-
-                    if ("name".equals(orderKey)) {
-                        if (ascending)
-                            crit.addOrder(Property.forName("processName").asc());
-                        else
-                            crit.addOrder(Property.forName("processName").desc());
-                    } else if ("namespace".equals(orderKey)) {
-                        if (ascending)
-                            crit.addOrder(Property.forName("processNamespace").asc());
-                        else
-                            crit.addOrder(Property.forName("processNamespace").desc());
-                    } else if ("version".equals(orderKey)) {
-                        if (ascending)
-                            crit.addOrder(Property.forName("version").asc());
-                        else
-                            crit.addOrder(Property.forName("version").desc());
-                        // TODO Implement when process status will be
-                        // implemented
-                        // } else if ("status".equals(orderKey)) {
-                    } else if ("deployed".equals(orderKey)) {
-                        if (ascending)
-                            crit.addOrder(Property.forName("deployDate").asc());
-                        else
-                            crit.addOrder(Property.forName("deployDate").desc());
-                    }
-                }
-            }
-        }
-        return crit.list().iterator();
-    }
-
+    
     @SuppressWarnings("unchecked")
     static Iterator<HProcessInstance> _instanceQuery(Session session, boolean countOnly, InstanceFilter filter) {
         Criteria crit = session.createCriteria(HProcessInstance.class);

@@ -95,6 +95,9 @@ public class BpelProcess {
 
     private final ProcessConf _pconf;
 
+    /** Last time the process was used. */
+    volatile long _lastUsed;
+
     public BpelProcess(ProcessConf conf, OProcess oprocess, BpelEventListener debugger, ExpressionLanguageRuntimeRegistry expLangRuntimeRegistry) {
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -157,6 +160,7 @@ public class BpelProcess {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
 
+        markused();
         BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
         processInstance.recoverActivity(channel, activityId, action, fault);
     }
@@ -176,6 +180,7 @@ public class BpelProcess {
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
         PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
 
+        markused();
         if (target == null) {
             String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
             __log.error(errmsg);
@@ -202,7 +207,7 @@ public class BpelProcess {
     }
 
     void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
-        reload();
+        markused();
         PartnerLinkMyRoleImpl target = null;
         for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
             if (endpoint.serviceName.equals(mex.getServiceName()))
@@ -228,7 +233,7 @@ public class BpelProcess {
      * @throws FaultException
      */
     String extractProperty(Element msgData, OProcess.OPropertyAlias alias, String target) throws FaultException {
-
+        markused();
         PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, alias);
         Node lValue = ectx.getRootNode();
 
@@ -641,7 +646,7 @@ public class BpelProcess {
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public void handleWorkEvent(Map<String, Object> jobData) {
-        reload();
+        markused();
         ProcessInstanceDAO procInstance;
 
         if (__log.isDebugEnabled()) {
@@ -736,6 +741,8 @@ public class BpelProcess {
         }
 
         __log.debug("Activated " + _pid);
+        
+        markused();
     }
 
     void deactivate() {
@@ -773,6 +780,7 @@ public class BpelProcess {
     }
 
     public void saveEvent(ProcessInstanceEvent event) {
+        markused();
         boolean enabled = false;
         List<String> scopeNames = null;
         if (event instanceof ScopeEvent) {
@@ -794,16 +802,12 @@ public class BpelProcess {
         return _pconf.isTransient();
     }
 
-    private void reload() {
-        // Reload OProcess if it has been disposed
-        if (_oprocess == null) {
-            try {
-                _oprocess = BpelServerImpl.deserializeCompiledProcess(_pconf.getCBPInputStream());
-            } catch (Exception e) {
-                String errmsg = __msgs.msgProcessLoadError(_pconf.getProcessId());
-                __log.error(errmsg, e);
-                throw new BpelEngineException(errmsg, e);
-            }
-        }
+    public long getLastUsed() {
+        return _lastUsed;
+    }
+    
+    /** Keep track of the time the process was last used. */ 
+    private final void markused() {
+        _lastUsed = System.currentTimeMillis();
     }
 }

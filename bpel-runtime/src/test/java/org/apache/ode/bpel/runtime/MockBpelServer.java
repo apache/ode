@@ -18,11 +18,37 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import com.fs.naming.mem.InMemoryContextFactory;
+import java.io.File;
+import java.sql.DriverManager;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
@@ -36,22 +62,6 @@ import org.objectweb.jotm.Jotm;
 import org.opentools.minerva.MinervaPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.Name;
-import javax.naming.Reference;
-import javax.naming.spi.ObjectFactory;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.sql.DriverManager;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 class MockBpelServer {
@@ -160,14 +170,6 @@ class MockBpelServer {
         _jotm = new Jotm(true, false);
         _txManager = _jotm.getTransactionManager();
         _txManager.setTransactionTimeout(30);
-        Reference txm = new Reference("javax.transaction.TransactionManager",
-                                      JotmTransactionManagerFactory.class.getName(), null);
-        System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-                           InMemoryContextFactory.class.getName());
-        System.setProperty(Context.PROVIDER_URL, "pxe");
-        InitialContext ctx = new InitialContext();
-        ctx.rebind("TransactionManager", txm);
-        ctx.close();
         return _txManager;
     }
 
@@ -213,11 +215,7 @@ class MockBpelServer {
         properties.put(Environment.DIALECT, "org.hibernate.dialect.DerbyDialect");
         SessionManager sm = new SessionManager(properties, _dataSource, _txManager);
         _daoCF = new BpelDAOConnectionFactoryImpl(sm);
-        Reference bpelSscfRef = new Reference(BpelDAOConnectionFactory.class.getName(),
-                                              HibernateDaoObjectFactory.class.getName(), null);
-        InitialContext ctx = new InitialContext();
-        ctx.rebind("bpelSSCF", bpelSscfRef);
-        ctx.close();
+
         return _daoCF;
     }
 
@@ -280,32 +278,7 @@ class MockBpelServer {
         return _bindContext;
     }
 
-    /**
-     * An {@link javax.naming.spi.ObjectFactory} implementation that can be used to bind the
-     * JOTM {@link javax.transaction.TransactionManager} implementation in JNDI.
-     */
-    private class JotmTransactionManagerFactory implements ObjectFactory {
-        public Object getObjectInstance(Object objref, Name name, Context ctx, Hashtable env) throws Exception {
-            Reference ref = (Reference) objref;
-            if (ref.getClassName().equals(TransactionManager.class.getName()))
-                return _jotm.getTransactionManager();
-            throw new RuntimeException("The reference class name \"" + ref.getClassName() + "\" is unknown.");
-        }
-    }
-
-    /**
-     * JNDI {@link ObjectFactory} implementation for Hibernate-based
-     * connection factory objects.
-     */
-    private class HibernateDaoObjectFactory implements ObjectFactory {
-        public Object getObjectInstance(Object objref, Name name, Context ctx, Hashtable env) throws Exception {
-            Reference ref = (Reference) objref;
-            if (ref.getClassName().equals(BpelDAOConnectionFactory.class.getName()))
-                return _daoCF;
-            throw new RuntimeException("The reference class name \"" + ref.getClassName() + "\" is unknown.");
-        }
-    }
-
+  
     private class SchedulerWrapper implements Scheduler {
 
         QuartzSchedulerImpl _quartz;
@@ -344,6 +317,10 @@ class MockBpelServer {
         public void start() { _quartz.start(); }
         public void stop() { _quartz.stop(); }
         public void shutdown() { _quartz.shutdown(); }
+
+        public void registerSynchronizer(Synchronizer synch) throws ContextException {
+            _quartz.registerSynchronizer(synch);
+        }
     }
 
 }

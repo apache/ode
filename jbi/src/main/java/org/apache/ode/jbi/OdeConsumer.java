@@ -159,6 +159,12 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
         public Boolean call() throws Exception {
           PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server
               .getEngine().getMessageExchange(mexref);
+          
+          if (pmex == null) {
+              __log.warn("Cannot locate ODE message exchange: " + mexref + "; ignoring.");
+              return null;
+          }
+
           pmex.replyWithFailure(FailureType.OTHER, "Error: "
               + jbiMex.getError(), null);
           return null;
@@ -183,6 +189,12 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
         public Boolean call() throws Exception {
           PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server
               .getEngine().getMessageExchange(mexref);
+          
+          if (pmex == null) {
+              // I'm a bit unclear as to why this would occur, but it appears to be possible.
+              __log.warn("Cannot locate ODE message exchange: " + mexref + "; ignoring.");
+              return null;
+          }
 
           String mapperName = pmex.getProperty(Mapper.class.getName());
           Mapper mapper = mapperName == null ? _ode.getDefaultMapper() : _ode.getMapper(mapperName);

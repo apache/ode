@@ -19,6 +19,21 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.io.File;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +41,34 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.dao.*;
-import org.apache.ode.bpel.evt.*;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.evt.ActivityEvent;
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.evt.CorrelationEvent;
+import org.apache.ode.bpel.evt.CorrelationMatchEvent;
+import org.apache.ode.bpel.evt.CorrelationSetEvent;
+import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
+import org.apache.ode.bpel.evt.ExpressionEvaluationEvent;
+import org.apache.ode.bpel.evt.ExpressionEvaluationFailedEvent;
+import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
+import org.apache.ode.bpel.evt.PartnerLinkEvent;
+import org.apache.ode.bpel.evt.ProcessCompletionEvent;
+import org.apache.ode.bpel.evt.ProcessEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
+import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
+import org.apache.ode.bpel.evt.ScopeCompletionEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.ScopeFaultEvent;
+import org.apache.ode.bpel.evt.VariableEvent;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelServer;
@@ -38,26 +79,56 @@ import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.pmapi.*;
+import org.apache.ode.bpel.pmapi.ActivityExtInfoListDocument;
+import org.apache.ode.bpel.pmapi.ActivityInfoDocument;
+import org.apache.ode.bpel.pmapi.EventInfoListDocument;
+import org.apache.ode.bpel.pmapi.InstanceInfoDocument;
+import org.apache.ode.bpel.pmapi.InstanceInfoListDocument;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
+import org.apache.ode.bpel.pmapi.InvalidRequestException;
+import org.apache.ode.bpel.pmapi.ManagementException;
+import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
+import org.apache.ode.bpel.pmapi.ProcessInfoDocument;
+import org.apache.ode.bpel.pmapi.ProcessInfoListDocument;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.bpel.pmapi.ProcessNotFoundException;
+import org.apache.ode.bpel.pmapi.ProcessingException;
+import org.apache.ode.bpel.pmapi.ScopeInfoDocument;
+import org.apache.ode.bpel.pmapi.TActivityExtInfo;
+import org.apache.ode.bpel.pmapi.TActivityStatus;
+import org.apache.ode.bpel.pmapi.TActivitytExtInfoList;
+import org.apache.ode.bpel.pmapi.TCorrelationProperty;
+import org.apache.ode.bpel.pmapi.TDefinitionInfo;
+import org.apache.ode.bpel.pmapi.TDeploymentInfo;
+import org.apache.ode.bpel.pmapi.TDocumentInfo;
+import org.apache.ode.bpel.pmapi.TEndpointReferences;
+import org.apache.ode.bpel.pmapi.TEventInfo;
+import org.apache.ode.bpel.pmapi.TEventInfoList;
+import org.apache.ode.bpel.pmapi.TFailureInfo;
+import org.apache.ode.bpel.pmapi.TFailuresInfo;
+import org.apache.ode.bpel.pmapi.TFaultInfo;
+import org.apache.ode.bpel.pmapi.TInstanceInfo;
+import org.apache.ode.bpel.pmapi.TInstanceInfoList;
+import org.apache.ode.bpel.pmapi.TInstanceStatus;
+import org.apache.ode.bpel.pmapi.TInstanceSummary;
+import org.apache.ode.bpel.pmapi.TProcessInfo;
+import org.apache.ode.bpel.pmapi.TProcessInfoList;
+import org.apache.ode.bpel.pmapi.TProcessProperties;
+import org.apache.ode.bpel.pmapi.TProcessStatus;
+import org.apache.ode.bpel.pmapi.TScopeInfo;
+import org.apache.ode.bpel.pmapi.TScopeRef;
+import org.apache.ode.bpel.pmapi.TVariableInfo;
+import org.apache.ode.bpel.pmapi.TVariableRef;
+import org.apache.ode.bpel.pmapi.VariableInfoDocument;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Property;
-import org.hibernate.criterion.Restrictions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.text.ParseException;
-import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Implentation of the Process and InstanceManagement APIs.
@@ -717,6 +788,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
         final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus + " name="
                 + pconf.getProcessId().getLocalPart() + " namespace=" + pconf.getProcessId().getNamespaceURI());
+        
         int count = dbexec(new BpelDatabase.Callable<Integer>() {
 
             public Integer run(BpelDAOConnection conn) throws Exception {
@@ -1034,7 +1106,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         // Name filter can be implemented using only the PIDs.
         if (filter != null && filter.getNameFilter() != null) {
-            final Pattern pattern = Pattern.compile(filter.getNameFilter());
+            final Pattern pattern = Pattern.compile(filter.getNameFilter().replace("*",".*"));
             CollectionsX.remove_if(pids, new MemberOfFunction<QName>() {
                 @Override
                 public boolean isMember(QName o) {
@@ -1044,7 +1116,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
 
         if (filter != null && filter.getNamespaceFilter() != null) {
-            final Pattern pattern = Pattern.compile(filter.getNameFilter());
+            final Pattern pattern = Pattern.compile(filter.getNamespaceFilter().replace("*",".*"));
             CollectionsX.remove_if(pids, new MemberOfFunction<QName>() {
                 @Override
                 public boolean isMember(QName o) {

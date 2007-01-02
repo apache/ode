@@ -27,6 +27,7 @@ import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OProcess;
@@ -61,6 +62,26 @@ public class BpelServerImpl implements BpelServer {
     private static final Log __log = LogFactory.getLog(BpelServer.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
+
+    /** Maximum age of a process before it is quiesced */
+    private static Long __processMaxAge;
+
+    static {
+        // TODO Clean this up and factorize engine configuration
+        try {
+            String processMaxAge = System.getenv("ODE_DEF_MAX_AGE");
+            if (processMaxAge != null && processMaxAge.length() > 0) {
+                __processMaxAge = Long.valueOf(processMaxAge);
+                __log.info("Process definition max age adjusted. Max age = " + __processMaxAge + "ms.");
+            }
+        } catch (Throwable t) {
+            if (__log.isDebugEnabled()) {
+                __log.debug("Could not parse ODE_DEF_MAX_AGE environment variable."  ,t);
+            } else {
+                __log.info("Could not parse ODE_DEF_MAX_AGE environment variable; reaping disabled.");
+            }
+        }
+    }
 
     /**
      * Management lock for synchronizing management operations and preventing
@@ -203,8 +224,15 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public BpelEngine getEngine() {
-        // TODO: acquire read lock and tie the release to the current
-        // transaction.
+        
+        _mngmtLock.readLock().lock();
+        _contexts.scheduler.registerSynchronizer(new Synchronizer() {
+            public void afterCompletion(boolean success) {}
+            public void beforeCompletion() {
+                _mngmtLock.readLock().unlock();
+            }
+            
+        });
         return _engine;
     }
 
@@ -450,4 +478,40 @@ public class BpelServerImpl implements BpelServer {
         }
 
     }
+    
+    
+//   
+//   I've moved this code out of BpelEngineImpl, it should be here not there. 
+//   -Maciej 12/22/06
+//   /**
+//     
+//     */
+//    private class ProcessDefReaper implements Runnable {
+//        public void run() {
+//            try {
+//                while (true) {
+//                    Thread.sleep(10000);
+//                    _mngmtLock.writeLock().lock();
+//                    try {
+//                        for (BpelProcess process : _activeProcesses.values()) {
+//                            Long lru;
+//                            synchronized(_processesLRU) {
+//                                lru = _processesLRU.get(process._pid);
+//                            }
+//                            if (lru != null && process._oprocess != null
+//                                    && System.currentTimeMillis() - lru > _processMaxAge) {
+//                                process._oprocess = null;
+//                                __log.debug("Process definition reaper cleaning " + process._pid);
+//                            }
+//                            Thread.sleep(10);
+//                        }
+//                    } finally {
+//                        _mngmtLock.writeLock().unlock();
+//                    }
+//                }
+//            } catch (InterruptedException e) {
+//                __log.info(e);
+//            }
+//        }
+//    }
 }

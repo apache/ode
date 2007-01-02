@@ -19,13 +19,31 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
+import java.sql.Connection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+
+import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.GUID;
-import org.quartz.*;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import org.quartz.core.QuartzScheduler;
 import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.core.SchedulingContext;
@@ -36,17 +54,11 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.ThreadPool;
 import org.quartz.utils.DBConnectionManager;
 
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
 /**
- * Base class that can be used to quickly implement a persistent scheduler.
+ * Quartz-based scheduler.
+ * 
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
+ *
  */
 public class QuartzSchedulerImpl implements Scheduler {
 
@@ -69,7 +81,7 @@ public class QuartzSchedulerImpl implements Scheduler {
 
     private TransactionManager _txm;
 
-    private boolean isSqlServer = false;
+    private boolean _isSqlServer = false;
 
     public QuartzSchedulerImpl() {
         _id = "ODE";
@@ -107,6 +119,8 @@ public class QuartzSchedulerImpl implements Scheduler {
         JobStoreJTA jobStore = new JobStoreJTA(_txm);
         jobStore.setDataSource("managed");
 
+        checkSqlServer();
+        
         try {
             _quartz = createScheduler(_id, _id, new QuartzThreadPoolExecutorServiceImpl(_executorSvc,
                     _threads), jobStore);
@@ -115,6 +129,27 @@ public class QuartzSchedulerImpl implements Scheduler {
         } catch (Exception ex) {
             throw new ContextException(ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * Check to see if the database is SQL server.
+     */
+    private void checkSqlServer() {
+        Connection conn = null;
+        try {
+            conn = _managedDS.getConnection();
+            String dbname = conn.getMetaData().getDatabaseProductName().toLowerCase();
+            _isSqlServer = dbname.contains("sqlserver") || dbname.contains(" sql server") || dbname.contains("microsoft sql");
+        } catch (Exception ex) {
+            throw new ContextException("Error connecting to the database.", ex);
+        } finally {
+            try {
+                conn.close();
+            } catch (Exception ex) {
+                ;
+            }
+        }
+        
     }
 
     public void start() {
@@ -285,7 +320,7 @@ public class QuartzSchedulerImpl implements Scheduler {
 
         jobStore.setInstanceName(schedulerName);
         jobStore.setInstanceId(schedulerInstanceId);
-        if (isSqlServer)
+        if (_isSqlServer)
             jobStore.setSelectWithLockSQL("SELECT * FROM {0}LOCKS UPDLOCK WHERE LOCK_NAME = ?");
 
         JTAJobRunShellFactory jrsf = new JTAJobRunShellFactory(_txm);
@@ -314,8 +349,23 @@ public class QuartzSchedulerImpl implements Scheduler {
         return scheduler;
     }
 
-    public void setSqlServer(boolean sqlServer) {
-        isSqlServer = sqlServer;
+
+    public void registerSynchronizer(final Synchronizer synch) throws ContextException {
+        try {
+            _txm.getTransaction().registerSynchronization(new Synchronization() {
+
+                public void beforeCompletion() {
+                    synch.beforeCompletion();
+                }
+
+                public void afterCompletion(int status) {
+                    synch.afterCompletion(status == Status.STATUS_COMMITTED);
+                }
+                
+            });
+        } catch (Exception e) {
+            throw new ContextException("Unable to register synchronizer.", e);
+        }
     }
 
 }

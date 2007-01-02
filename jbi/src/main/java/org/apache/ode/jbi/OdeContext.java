@@ -26,6 +26,7 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.store.ProcessStoreImpl;
 import org.w3c.dom.Document;
 
 import javax.jbi.component.ComponentContext;
@@ -83,7 +84,7 @@ final class OdeContext {
 
     DataSource _dataSource;
 
-    ProcessStore _store;
+    ProcessStoreImpl _store;
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();

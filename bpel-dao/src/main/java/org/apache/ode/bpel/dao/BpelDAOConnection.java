@@ -18,16 +18,15 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.evt.BpelEvent;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.evt.BpelEvent;
 
 
 /**
@@ -65,13 +64,6 @@ public interface BpelDAOConnection  {
    * @return Collection<ProcessInstanceDAO>
    */
   Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria);
-
-  /**
-   * Query processes in the database meeting the request criteria.
-   * @param criteria
-   * @return Collection<ProcessDAO>
-   */
-  Collection<ProcessDAO> processQuery(ProcessFilter criteria);
 
   /**
    * Insert a BPEL event into the database.
