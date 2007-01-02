@@ -76,7 +76,7 @@ public class BpelServerImpl implements BpelServer {
             }
         } catch (Throwable t) {
             if (__log.isDebugEnabled()) {
-                __log.debug("Could not parse ODE_DEF_MAX_AGE environment variable."  ,t);
+                __log.debug("Could not parse ODE_DEF_MAX_AGE environment variable.", t);
             } else {
                 __log.info("Could not parse ODE_DEF_MAX_AGE environment variable; reaping disabled.");
             }
@@ -224,15 +224,26 @@ public class BpelServerImpl implements BpelServer {
     }
 
     public BpelEngine getEngine() {
-        
+
+        boolean registered = false;
         _mngmtLock.readLock().lock();
-        _contexts.scheduler.registerSynchronizer(new Synchronizer() {
-            public void afterCompletion(boolean success) {}
-            public void beforeCompletion() {
+        try {
+            _contexts.scheduler.registerSynchronizer(new Synchronizer() {
+                public void afterCompletion(boolean success) {
+                }
+
+                public void beforeCompletion() {
+                    _mngmtLock.readLock().unlock();
+                }
+
+            });
+            registered = true;
+        } finally {
+            // If we failed to register the synchro,then there was an ex/throwable; we need to unlock now.
+            if (!registered)
                 _mngmtLock.readLock().unlock();
-            }
-            
-        });
+        }
+        assert registered;
         return _engine;
     }
 
@@ -478,40 +489,39 @@ public class BpelServerImpl implements BpelServer {
         }
 
     }
-    
-    
-//   
-//   I've moved this code out of BpelEngineImpl, it should be here not there. 
-//   -Maciej 12/22/06
-//   /**
-//     
-//     */
-//    private class ProcessDefReaper implements Runnable {
-//        public void run() {
-//            try {
-//                while (true) {
-//                    Thread.sleep(10000);
-//                    _mngmtLock.writeLock().lock();
-//                    try {
-//                        for (BpelProcess process : _activeProcesses.values()) {
-//                            Long lru;
-//                            synchronized(_processesLRU) {
-//                                lru = _processesLRU.get(process._pid);
-//                            }
-//                            if (lru != null && process._oprocess != null
-//                                    && System.currentTimeMillis() - lru > _processMaxAge) {
-//                                process._oprocess = null;
-//                                __log.debug("Process definition reaper cleaning " + process._pid);
-//                            }
-//                            Thread.sleep(10);
-//                        }
-//                    } finally {
-//                        _mngmtLock.writeLock().unlock();
-//                    }
-//                }
-//            } catch (InterruptedException e) {
-//                __log.info(e);
-//            }
-//        }
-//    }
+
+    //   
+    // I've moved this code out of BpelEngineImpl, it should be here not there.
+    // -Maciej 12/22/06
+    // /**
+    //     
+    // */
+    // private class ProcessDefReaper implements Runnable {
+    // public void run() {
+    // try {
+    // while (true) {
+    // Thread.sleep(10000);
+    // _mngmtLock.writeLock().lock();
+    // try {
+    // for (BpelProcess process : _activeProcesses.values()) {
+    // Long lru;
+    // synchronized(_processesLRU) {
+    // lru = _processesLRU.get(process._pid);
+    // }
+    // if (lru != null && process._oprocess != null
+    // && System.currentTimeMillis() - lru > _processMaxAge) {
+    // process._oprocess = null;
+    // __log.debug("Process definition reaper cleaning " + process._pid);
+    // }
+    // Thread.sleep(10);
+    // }
+    // } finally {
+    // _mngmtLock.writeLock().unlock();
+    // }
+    // }
+    // } catch (InterruptedException e) {
+    // __log.info(e);
+    // }
+    // }
+    // }
 }
