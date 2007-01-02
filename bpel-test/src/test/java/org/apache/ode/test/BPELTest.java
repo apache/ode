@@ -76,6 +76,11 @@ public abstract class BPELTest extends TestCase {
                     super.commit();
                     em.getTransaction().commit();
                 }
+                @Override
+                public void rollback() {
+                    super.rollback();
+                    em.getTransaction().rollback();
+                }
                 
             };
 		} else {
@@ -258,7 +263,7 @@ public abstract class BPELTest extends TestCase {
 				}
 			} catch ( Throwable e ) {
 				e.printStackTrace();
-				if ( em != null ) em.getTransaction().rollback();
+				scheduler.rollback();
 				throw e;
 			}
 			propsFileCnt++;
