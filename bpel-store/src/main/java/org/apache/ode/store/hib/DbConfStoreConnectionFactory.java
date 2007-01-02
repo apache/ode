@@ -1,5 +1,15 @@
 package org.apache.ode.store.hib;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -14,15 +24,6 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
     private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);
@@ -59,7 +60,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     final SessionFactory _sessionFactory;
 
-    public DbConfStoreConnectionFactory(DataSource ds, boolean auto, String dbname) {
+    public DbConfStoreConnectionFactory(DataSource ds, boolean auto) {
         _ds = ds;
 
         Properties properties = new Properties();
@@ -69,16 +70,12 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         properties.put("guid", _guid);
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
 
-        if (dbname != null) {
-            properties.put(Environment.DIALECT, dbname);
-        } else {
-            try {
-                properties.put(Environment.DIALECT, guessDialect(_ds));
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-                __log.error(errmsg, ex);
-                throw new BpelEngineException(errmsg, ex);
-            }
+        try {
+            properties.put(Environment.DIALECT, guessDialect(_ds));
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+            __log.error(errmsg, ex);
+            throw new BpelEngineException(errmsg, ex);
         }
         
         if (auto) {

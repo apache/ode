@@ -1,0 +1,3 @@
+<HelloRequest xmlns="urn:/HelloWorld2.wsdl">
+	<text>hello</text>
+</HelloRequest>

@@ -75,7 +75,6 @@
         <junitVersion>3.8.1</junitVersion>
         <log4jVersion>1.2.13</log4jVersion>
         <saxonVersion>8.7</saxonVersion>
-        <servicemixVersion>3.0-incubating-SNAPSHOT</servicemixVersion>
         <staxApiVersion>1.0</staxApiVersion>
         <staxVersion>1.1.2-dev</staxVersion>
         <wsdl4jVersion>1.5.2</wsdl4jVersion>
@@ -141,7 +140,6 @@
         <module>jca-rar</module>
         <module>jca-server</module>
 
-        <module>naming</module>
         <module>tools</module>
         <module>bpel-scheduler-quartz</module>
 
@@ -499,11 +497,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-naming</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -764,12 +757,6 @@
                 <groupId>geronimo</groupId>
                 <artifactId>geronimo-transaction</artifactId>
                 <version>${geronimoVersion}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix</groupId>
-                <artifactId>servicemix-jbi</artifactId>
-                <version>${servicemixVersion}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

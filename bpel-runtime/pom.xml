@@ -136,11 +136,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-naming</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-minerva</artifactId>
             <scope>test</scope>
         </dependency>
@@ -155,6 +150,8 @@
 			    <execution>
 			      <phase>generate-sources</phase>
 			      <configuration>
+  					<nocompile>true</nocompile>
+  					<fork>true</fork>
 			        <generated>target/generated-sources/apt</generated>
 			        <target>1.5</target>
 			      </configuration>

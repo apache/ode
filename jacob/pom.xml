@@ -57,6 +57,8 @@
       <phase>generate-sources</phase>
       <configuration>
         <generated>target/generated-sources/apt</generated>
+		<nocompile>true</nocompile>
+		<fork>true</fork>
         <target>1.5</target>
       </configuration>
       <goals>
