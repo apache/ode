@@ -40,7 +40,9 @@ import org.apache.ode.bpel.pmapi.TFaultInfo;
 import org.apache.ode.bpel.pmapi.TFailureInfo;
 import org.apache.ode.bpel.pmapi.TFailuresInfo;
 import org.apache.ode.bpel.pmapi.TInstanceInfo;
+import org.apache.ode.bpel.pmapi.TInstanceInfoList;
 import org.apache.ode.bpel.pmapi.TInstanceStatus;
+import org.apache.ode.bpel.pmapi.TInstanceSummary;
 import org.apache.ode.bpel.pmapi.TScopeInfo;
 import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.bpel.o.OFailureHandling;
@@ -112,6 +114,47 @@ public class ActivityRecoveryTest extends TestCase {
         assertCompleted(true, 3, null);
     }
 
+    public void testInstanceSummary() throws Exception {
+        _processQName = new QName(NAMESPACE, "FailureToRecovery");
+        _failFor = 3;
+        _invoked = 0;
+        _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
+        _server.waitForBlocking();
+        recover("retry"); // Completed.
+        _invoked = 0;
+        _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
+        _server.waitForBlocking();
+        recover("fault"); // Faulted.
+        _invoked = 0;
+        _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
+        _server.waitForBlocking(); // Active, recovery.
+
+        TInstanceSummary summary = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary();
+        for (TInstanceSummary.Instances instances : summary.getInstancesList()) {
+            switch (instances.getState().intValue()) {
+              case TInstanceStatus.INT_COMPLETED:
+                assertTrue(instances.getCount() == 1);
+                break;
+              case TInstanceStatus.INT_FAILED:
+                assertTrue(instances.getCount() == 1);
+                break;
+              case TInstanceStatus.INT_ACTIVE:
+                assertTrue(instances.getCount() == 1);
+                break;
+              default:
+                assertTrue(instances.getCount() == 0);
+                break;
+            }
+        }
+        assertTrue(summary.getFailures().getCount() == 1);
+        assertNotNull(summary.getFailures().getDtFailure());
+    }
+
+/*
+    public void testOrderByStatus() throws Exception {
+    }
+*/
+
     protected void setUp() throws Exception {
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
@@ -163,8 +206,7 @@ public class ActivityRecoveryTest extends TestCase {
         _failFor = failFor;
         _management.delete(null);
         _processQName = new QName(NAMESPACE, process);
-        _server.invoke(_processQName, "instantiate",
-                       DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
+        _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
     }
 
@@ -229,7 +271,11 @@ public class ActivityRecoveryTest extends TestCase {
      * recovery channel for the activity in question.
      */
     protected void recover(String action) {
-        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+        TInstanceInfoList instances = _management.listAllInstances().getInstanceInfoList();
+        assertTrue(instances.sizeOfInstanceInfoArray() > 0);
+        TInstanceInfo instance = instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
+        assertNotNull(instance);
+
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
         assertTrue(recoveries.size() == 1);
         TActivityInfo activity = recoveries.get(0);
