@@ -31,13 +31,12 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 
 public class TestScheduler implements Scheduler {
-    ThreadLocal<List<Scheduler.Synchronizer>> _synchros = 
-        new ThreadLocal<List<Scheduler.Synchronizer>>() {
-            @Override
-            protected List<Synchronizer> initialValue() {
-                return new ArrayList<Synchronizer>();
-            }
-        
+    ThreadLocal<List<Scheduler.Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
+        @Override
+        protected List<Synchronizer> initialValue() {
+            return new ArrayList<Synchronizer>();
+        }
+
     };
 
     public String schedulePersistedJob(Map<String, Object> arg0, Date arg1) throws ContextException {
@@ -74,11 +73,11 @@ public class TestScheduler implements Scheduler {
     public void registerSynchronizer(Synchronizer synch) throws ContextException {
         _synchros.get().add(synch);
     }
-    
-    public void begin(){
+
+    public void begin() {
         _synchros.get().clear();
     }
-    
+
     public void commit() {
         for (Synchronizer s : _synchros.get())
             try {
@@ -90,8 +89,21 @@ public class TestScheduler implements Scheduler {
                 s.afterCompletion(true);
             } catch (Throwable t) {
             }
-            
+
+        _synchros.get().clear();
+    }
+
+    public void rollback() {
+        for (Synchronizer s : _synchros.get())
+            try {
+                s.beforeCompletion();
+            } catch (Throwable t) {
+            }
+        for (Synchronizer s : _synchros.get())
+            try {
+                s.afterCompletion(false);
+            } catch (Throwable t) {
+            }
         _synchros.get().clear();
     }
 }
-
