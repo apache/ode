@@ -64,7 +64,7 @@
 		<invoke name="probe1" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
 		
 		<wait>
-			<for>'PT10s'</for>
+			<for>'PT10S'</for>
 		</wait>
 		
 		<invoke name="probe2" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>

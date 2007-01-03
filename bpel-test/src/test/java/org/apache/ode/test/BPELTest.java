@@ -30,8 +30,10 @@ import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessStore;
@@ -153,7 +155,7 @@ public abstract class BPELTest extends TestCase {
                 server.register(store.getProcessConfiguration(procName));
             }
 
-        } catch (BpelEngineException bpelE) {
+        } catch (ContextException bpelE) {
 			Properties testProps = new Properties();
 			testProps.load(testPropsFile.toURL().openStream());
 			String responsePattern = testProps.getProperty("response1");
