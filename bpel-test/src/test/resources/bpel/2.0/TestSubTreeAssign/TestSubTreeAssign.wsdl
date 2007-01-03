@@ -55,7 +55,7 @@
   </wsdl:types>
 
   <wsdl:message name="requestMessage">
-    <wsdl:part name="requestMessageData" type="typens:testMessage"/>
+    <wsdl:part name="requestMessageData" element="typens:aTestMessage"/>
   </wsdl:message>
    
   <wsdl:message name="replyMessage">
@@ -93,7 +93,7 @@
   <bpws:property name="testPath" type="xsd:string"/>
   <bpws:propertyAlias propertyName="tns:testPath" messageType="tns:requestMessage" part="requestMessageData">
     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/typeIndicators/typens:indicatorTwo
+      typeIndicators/typens:indicatorTwo
     </bpws:query> 
   </bpws:propertyAlias>
   
