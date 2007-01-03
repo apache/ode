@@ -638,6 +638,7 @@ abstract class BpelCompiler implements CompilerContext {
         constants.qnUninitializedPartnerRole = new QName(getBpwsNamespace(), "uninitializedPartnerRole");
         constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
+        constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
         return constants;
     }
 
