@@ -398,7 +398,7 @@ public class BpelProcess {
                 mex.setFailure(FailureType.UNKNOWN_OPERATION, mex.getOperationName(), null);
                 return;
             }
-
+            
             mex.getDAO().setPartnerLinkModelId(_plinkDef.getId());
             mex.setPortOp(_plinkDef.myRolePortType, operation);
             mex.setPattern(operation.getOutput() == null ? MessageExchangePattern.REQUEST_ONLY
