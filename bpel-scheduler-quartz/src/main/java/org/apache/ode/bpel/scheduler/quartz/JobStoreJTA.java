@@ -324,7 +324,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
                     STATE_WAITING, false, false);
         } finally {
             releaseLock(conn, LOCK_TRIGGER_ACCESS, transOwner);
-            releaseLock(conn, LOCK_JOB_ACCESS, transOwner);
 
             closeConnection(conn);
         }
@@ -366,7 +365,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             return removeTrigger(conn, ctxt, triggerName, groupName);
         } finally {
             releaseLock(conn, LOCK_TRIGGER_ACCESS, transOwner);
-            releaseLock(conn, LOCK_JOB_ACCESS, transOwner);
 
             closeConnection(conn);
         }
@@ -387,7 +385,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             return replaceTrigger(conn, ctxt, triggerName, groupName, newTrigger);
         } finally {
             releaseLock(conn, LOCK_TRIGGER_ACCESS, transOwner);
-            releaseLock(conn, LOCK_JOB_ACCESS, transOwner);
 
             closeConnection(conn);
         }
@@ -447,7 +444,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
                     updateTriggers);
         } finally {
             releaseLock(conn, LOCK_TRIGGER_ACCESS, lockOwner);
-            releaseLock(conn, LOCK_JOB_ACCESS, lockOwner);
 
             closeConnection(conn);
         }
@@ -479,7 +475,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             return removeCalendar(conn, ctxt, calName);
         } finally {
             releaseLock(conn, LOCK_CALENDAR_ACCESS, true);
-            releaseLock(conn, LOCK_JOB_ACCESS, true);
 
             closeConnection(conn);
         }
@@ -1230,7 +1225,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             throw new JobPersistenceException("TX failure: " + e.getMessage(), e);
         } finally {
             releaseLock(conn, LOCK_TRIGGER_ACCESS, transOwner);
-            releaseLock(conn, LOCK_JOB_ACCESS, transOwner);
             closeConnection(conn);
         }
 
@@ -1267,7 +1261,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             rollbackConnection(conn);
             throw new JobPersistenceException("TX failure: " + e.getMessage(), e);
         } finally {
-            releaseLock(conn, LOCK_TRIGGER_ACCESS, transOwner);
             releaseLock(conn, LOCK_STATE_ACCESS, transStateOwner);
             closeConnection(conn);
         }
