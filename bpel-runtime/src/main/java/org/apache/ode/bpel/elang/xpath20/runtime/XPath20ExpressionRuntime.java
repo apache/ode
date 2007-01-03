@@ -134,8 +134,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         try {
             return new XMLCalendar(literal);
         } catch (Exception ex) {
-            __log.error("Date conversion error." ,ex);
-            throw new EvaluationException("Date conversion errror.", ex);
+            String errmsg = "Invalid date: " + literal;
+            __log.error(errmsg, ex);
+            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,errmsg);
         }
     }
 
@@ -144,8 +145,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         try {
             return new Duration(literal);
         } catch (Exception ex) {
-            __log.error("Date conversion error.", ex);
-            throw new EvaluationException("Duration conversion error." ,ex);
+            String errmsg = "Invalid duration: " + literal;
+            __log.error(errmsg, ex);
+            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,errmsg);
         }
     }
 

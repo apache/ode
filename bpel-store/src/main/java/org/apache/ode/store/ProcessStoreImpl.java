@@ -22,6 +22,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -144,7 +145,14 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
-        du.compile();
+        try {
+            du.compile();
+        } catch (CompilationException ce) {
+            String errmsg = __msgs.msgDeployFailCompileErrors();
+            __log.error(errmsg,ce);
+            throw new ContextException(errmsg,ce);
+        }
+        
         du.scan();
         DeployDocument dd = du.getDeploymentDescriptor();
         final ArrayList<ProcessConfImpl> processes = new ArrayList<ProcessConfImpl>();

@@ -41,6 +41,7 @@ public class OConstants extends OBase {
     public QName qnUninitializedPartnerRole;
     public QName qnForEachCounterError;
     public QName qnInvalidBranchCondition;
+    public QName qnInvalidExpressionValue;
 
 
     public OConstants(OProcess owner) {
