@@ -46,21 +46,21 @@
          so grab all the dependencies into the scratch directory
          and process the one we need. -->
     <artifact:dependencies filesetId="dependency.derby" useScope="runtime">
-      <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
+      <dependency groupId="org.apache.ode" artifactId="ode-jpa-ojpa-derby"
                   version="${maven.project.version}" type="tar"/>
     </artifact:dependencies>
     <copy todir="${maven.project.build.directory}/scratch" flatten="true">
       <fileSet refid="dependency.derby"/>
     </copy>
-    <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
-           dest="${maven.project.build.directory}/resources/WEB-INF"/>
+    <untar src="${maven.project.build.directory}/scratch/ode-jpa-ojpa-derby-${maven.project.version}.tar"
+           dest="${maven.project.build.directory}/resources"/>
 
     <!-- Dirty, mean and ugly but will work for now -->
-    <copy todir="${maven.project.build.directory}/resources/WEB-INF"
+    <copy todir="${maven.project.build.directory}/resources"
       file="${maven.project.build.directory}/../../axis2/src/main/wsdl/pmapi.wsdl"/>
-    <copy todir="${maven.project.build.directory}/resources/WEB-INF"
+    <copy todir="${maven.project.build.directory}/resources"
       file="${maven.project.build.directory}/../../axis2/src/main/wsdl/deploy.wsdl"/>
-    <copy todir="${maven.project.build.directory}/resources/WEB-INF"
+    <copy todir="${maven.project.build.directory}/resources"
       file="${maven.project.build.directory}/../../bpel-schemas/src/main/xsd/pmapi.xsd"/>
 
   </target>
