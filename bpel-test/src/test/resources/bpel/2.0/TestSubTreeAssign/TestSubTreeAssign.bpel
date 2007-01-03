@@ -75,24 +75,24 @@
 				<from>
 					<literal><![CDATA[pass]]></literal>
 				</from>
-				<to>$testType1/testMessage/typeIndicators/types:indicatorTwo</to>
+				<to>$testType1/typeIndicators/types:indicatorTwo</to>
 			</copy>		
 		</assign>
 	
 		<assign name="assignG">
 			<!-- copy subtree to tree -->
 			<copy>
-				<from>$testType1/testMessage/typeIndicators</from>
-				<to>$testType2/testMessage/typeIndicators</to>
+				<from>$testType1/typeIndicators</from>
+				<to>$testType2/typeIndicators</to>
 			</copy>
 		</assign>
 		<assign name="assign3">			
 			<copy>
-				<from>$testType2/testMessage/requestID</from>
+				<from>$testType2/requestID</from>
 				<to variable="reply" part="replyID"/>
 			</copy>
 			<copy>
-				<from>$testType2/testMessage/typeIndicators/types:indicatorTwo</from>
+				<from>$testType2/typeIndicators/types:indicatorTwo</from>
 				<to>$reply.replyText</to>
 			</copy>
 		</assign>
