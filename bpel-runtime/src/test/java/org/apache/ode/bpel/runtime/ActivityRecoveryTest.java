@@ -24,7 +24,10 @@ import java.util.ArrayList;
 
 import javax.xml.namespace.QName;
 
-import junit.framework.TestCase;
+import org.jmock.*;
+import org.jmock.core.*;
+import org.jmock.core.matcher.StatelessInvocationMatcher;
+import org.jmock.core.stub.CustomStub;
 
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -51,83 +54,127 @@ import org.apache.ode.utils.DOMUtils;
 /**
  * Test activity recovery and failure handling.
  */
-public class ActivityRecoveryTest extends TestCase {
+public class ActivityRecoveryTest extends MockObjectTestCase {
 
     static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
     static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
-    int                   _invoked;
-    int                   _failFor;
-    boolean               _responseSent;
     MockBpelServer        _server;
     BpelManagementFacade  _management;
     QName                 _processQName;
+    private Mock _testService;
 
-    public void testSuccessfulInvoke() throws Exception { 
-        execute("FailureToRecovery", 0);
-        assertCompleted(true, 1, null);
+
+    interface TestService {
+
+        public boolean invoke(); 
+
+        public void completed();
+
     }
 
-    public void testInvokeAndRetry() throws Exception {
-        execute("FailureToRecovery", 2);
-        assertCompleted(true, 3, null);
+
+    protected Stub[] failFirst(int times) {
+        Stub[] stubs = new Stub[times + 1];
+        for (int i = 0; i < times; ++i)
+            stubs[i] = returnValue(false);
+        stubs[times] = returnValue(true);
+        return stubs;
     }
 
-    public void testRetryRecoveryAction() throws Exception {
-        execute("FailureToRecovery", 4);
-        assertRecovery(3, ACTIONS);
-        recover("retry");
-        assertRecovery(4, ACTIONS);
-        recover("retry");
-        assertCompleted(true, 5, null);
+    public void testInvokeSucceeds() throws Exception {
+        _testService.expects(once()).method("invoke").will(returnValue(true));
+        _testService.expects(once()).method("completed").after("invoke");
+
+        execute("FailureToRecovery");
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertNoFailures();
     }
 
-    public void testFaultRecoveryAction() throws Exception {
-        execute("FailureToRecovery", 4);
-        assertRecovery(3, ACTIONS);
+    public void testFailureWithRecoveryAfterRetry() throws Exception {
+        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(2)));
+        _testService.expects(once()).method("completed").after("invoke");
+
+        execute("FailureToRecovery");
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertNoFailures();
+    }
+
+    public void testFailureWithManualRecovery() throws Exception {
+        _testService.expects(exactly(5)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        _testService.expects(once()).method("completed").after("invoke");
+
+        execute("FailureToRecovery");
         recover("retry");
-        assertRecovery(4, ACTIONS);
+        recover("retry");
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertNoFailures();
+    }
+
+    public void testFailureWithFaultAction() throws Exception {
+        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        _testService.expects(never()).method("completed").after("invoke");
+
+        execute("FailureToRecovery");
+        recover("retry");
         recover("fault");
-        assertCompleted(false, 4, OFailureHandling.FAILURE_FAULT_NAME);
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
+        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
+        assertNoFailures();
     }
 
-    public void testCancelRecoveryAction() throws Exception {
-        execute("FailureToCancel", 4);
-        assertRecovery(3, ACTIONS);
+    public void testFailureWithCancelAction() throws Exception {
+        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        _testService.expects(once()).method("completed").after("invoke");
+
+        execute("FailureToCancel");
         recover("retry");
-        assertRecovery(4, ACTIONS);
         recover("cancel");
-        assertCompleted(true, 4, null);
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertNoFailures();
     }
 
     public void testImmediateFailure() throws Exception {
-        execute("FailureNoRetry", 1);
+        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
+        _testService.expects(never()).method("completed").after("invoke");
+
+        execute("FailureNoRetry");
         assertRecovery(1, ACTIONS);
     }
 
-    public void testImmediateFault() throws Exception {
-        execute("FailureToFault", 2);
-        assertCompleted(false, 1, OFailureHandling.FAILURE_FAULT_NAME);
+    public void testImmediateFailureAndFault() throws Exception {
+        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
+        _testService.expects(never()).method("completed").after("invoke");
+
+        execute("FailureToFault");
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
+        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
+        assertNoFailures();
     }
 
-    public void testInheritence() throws Exception {
-        execute("FailureInheritence", 2);
-        assertCompleted(true, 3, null);
+    public void testFailureHandlingInheritence() throws Exception {
+        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(2)));
+        _testService.expects(once()).method("completed").after("invoke");
+
+        execute("FailureInheritence");
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertNoFailures();
     }
 
     public void testInstanceSummary() throws Exception {
         _processQName = new QName(NAMESPACE, "FailureToRecovery");
-        _failFor = 3;
-        _invoked = 0;
+        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
+        _testService.expects(once()).method("completed").after("invoke");
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("retry"); // Completed.
-        _invoked = 0;
+        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("fault"); // Faulted.
-        _invoked = 0;
+        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking(); // Active, recovery.
+        // Stay active, awaiting recovery.
 
         TInstanceSummary summary = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary();
         for (TInstanceSummary.Instances instances : summary.getInstancesList()) {
@@ -150,35 +197,41 @@ public class ActivityRecoveryTest extends TestCase {
         assertNotNull(summary.getFailures().getDtFailure());
     }
 
-/*
-    public void testOrderByStatus() throws Exception {
-    }
-*/
 
     protected void setUp() throws Exception {
+        // Override testService in test case.
+        _testService = mock(TestService.class);
+        // We use one partner to simulate failing service and receive message upon process completion.
+        final Mock partner = mock(MessageExchangeContext.class);
+        partner.expects(atMostOnce()).match(invokeOnOperation("respond")).will(new CustomStub("process completed") {
+            public Object invoke(Invocation invocation) {
+                ((TestService)_testService.proxy()).completed();
+                return null;
+            }
+        });
+        partner.expects(atLeastOnce()).match(invokeOnOperation("invoke")).will(new CustomStub("invoke failing service") {
+            public Object invoke(Invocation invocation) {
+                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) invocation.parameterValues.get(0);
+                if (((TestService)_testService.proxy()).invoke()) {
+                    Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
+                    response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
+                    mex.reply(response);
+                } else {
+                    mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
+                }
+                return null;
+            }
+        });
+        partner.expects(atMostOnce()).method("onAsyncReply").will(new CustomStub("async reply") {
+            public Object invoke(Invocation invocation) {
+                // If we generate a reply after failure, e.g. by faulting the invoke.
+                return null;
+            }
+        });
+        
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
-                return new MessageExchangeContext() {
-
-                    public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
-                        if (mex.getOperation().getName().equals("invoke")) {
-                            // First fail, then succeed, that's the nature of a test case.
-                            ++_invoked;
-                            if (_invoked > _failFor) {
-                                Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
-                                response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
-                                mex.reply(response);
-                            } else {
-                                mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
-                            }
-                        } else if (mex.getOperation().getName().equals("respond")) {
-                            // Happens when the process completes its last activity.
-                            _responseSent = true; 
-                        }
-                    }
-
-                    public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
-                };
+                return (MessageExchangeContext) partner.proxy();
             }
         };
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
@@ -191,32 +244,54 @@ public class ActivityRecoveryTest extends TestCase {
         _server.shutdown();
 
         _server = null;
-        _failFor = 0;
-        _invoked = 0;
         _management = null;
-        _responseSent = false;
         _processQName = null;
+    }
+
+    protected InvocationMatcher invokeOnOperation(final String opName) {
+        return new StatelessInvocationMatcher() {
+            public boolean matches(Invocation invocation) {
+                return invocation.invokedMethod.getName().equals("invokePartner") &&
+                    invocation.parameterValues.size() == 1 &&
+                    ((PartnerRoleMessageExchange) invocation.parameterValues.get(0)).getOperation().getName().equals(opName);
+            }
+
+            public StringBuffer describeTo(StringBuffer buffer) {
+                return buffer.append("check that the operation ").append(opName).append(" is invoked");
+            }
+        };
     }
 
     /**
      * Call this to execute the process so it fails the specified number of times.
      * Returns when the process has either completed, or waiting for recovery to happen.
      */
-    protected void execute(String process, int failFor) throws Exception {
-        _failFor = failFor;
+    protected void execute(String process) throws Exception {
         _management.delete(null);
         _processQName = new QName(NAMESPACE, process);
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
     }
 
+
+    protected void assertNoFailures() {
+        TFailuresInfo failures = lastInstance().getFailures();
+        assertTrue(failures == null || failures.getCount() == 0);
+        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
+        assertTrue(failures == null || failures.getCount() == 0);
+    }
+
+    protected TInstanceInfo lastInstance() {
+        return _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
+    }
+
+
     /**
      * Asserts that the process has completed, successfully or not. If not,
      * it is either terminated, or faulted with the specified fault name.
      * This method also checks how many time the process invoked the service.
      */
-    protected void assertCompleted(boolean successful, int invoked, QName faultName) {
-        assertTrue(_invoked == invoked);
+    protected void assertCompleted(boolean successful, QName faultName) {
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         // Process has completed, so no activities in the failure state.
         TFailuresInfo failures = instance.getFailures();
@@ -225,12 +300,9 @@ public class ActivityRecoveryTest extends TestCase {
         assertTrue(failures == null || failures.getCount() == 0);
         if (successful) {
             assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
-            assertTrue(_responseSent);
         } else if (faultName == null) {
             assertTrue(instance.getStatus() == TInstanceStatus.TERMINATED);
-            assertFalse(_responseSent);
         } else {
-            assertFalse(_responseSent);
             assertTrue(instance.getStatus() == TInstanceStatus.FAILED);
             TFaultInfo faultInfo = instance.getFaultInfo();
             assertTrue(faultInfo != null && faultInfo.getName().equals(faultName));
@@ -244,7 +316,6 @@ public class ActivityRecoveryTest extends TestCase {
         // Process is still active, none of the completed states.
         TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         assertTrue(instance.getStatus() == TInstanceStatus.ACTIVE);
-        assertFalse(_responseSent);
         // Tests here will only generate one failure.
         TFailuresInfo failures = instance.getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
