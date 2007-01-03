@@ -262,7 +262,7 @@
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
             <snapshots>
-               <enabled>false</enabled>
+               <enabled>true</enabled>
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
