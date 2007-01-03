@@ -188,5 +188,9 @@ public class Messages extends MessageBundle {
     public String msgDeployFailedProcessNotFound(QName pid, String du) {
         return format("Deploy failed; process \"{0}\" not found in deployment unit \"{1}\".",pid,du);
     }
+
+    public String msgDeployFailCompileErrors() {
+        return format("Deploy failed; BPEL compilation errors." );
+    }
     
 }
