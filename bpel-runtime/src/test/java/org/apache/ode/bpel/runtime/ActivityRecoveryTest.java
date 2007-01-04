@@ -28,6 +28,7 @@ import org.jmock.*;
 import org.jmock.core.*;
 import org.jmock.core.matcher.StatelessInvocationMatcher;
 import org.jmock.core.stub.CustomStub;
+import org.jmock.core.stub.StubSequence;
 
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -64,6 +65,11 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     private Mock _testService;
 
 
+    /**
+     * The process calls the failing service, simulated by a call to invoke.
+     * The method returns true if the call succeeded, false for failure.
+     * If the process completes, it calls the completed method.
+     */
     interface TestService {
 
         public boolean invoke(); 
@@ -73,15 +79,8 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
 
-    protected Stub[] failFirst(int times) {
-        Stub[] stubs = new Stub[times + 1];
-        for (int i = 0; i < times; ++i)
-            stubs[i] = returnValue(false);
-        stubs[times] = returnValue(true);
-        return stubs;
-    }
-
     public void testInvokeSucceeds() throws Exception {
+        // Since the service invocation succeeds, the process completes.
         _testService.expects(once()).method("invoke").will(returnValue(true));
         _testService.expects(once()).method("completed").after("invoke");
 
@@ -91,7 +90,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testFailureWithRecoveryAfterRetry() throws Exception {
-        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(2)));
+        // Since the invocation is repeated 3 times, the process completes after
+        // the third (successful) invocation.
+        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(2));
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureToRecovery");
@@ -100,7 +101,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testFailureWithManualRecovery() throws Exception {
-        _testService.expects(exactly(5)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        // Recovery required after three failures. Only one attempt made after recovery.
+        // Only the fifth invocation succeeds.
+        _testService.expects(exactly(5)).method("invoke").will(failTheFirst(4));
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureToRecovery");
@@ -111,7 +114,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testFailureWithFaultAction() throws Exception {
-        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        // Recovery required after three failures. Only one attempt made after recovery.
+        // Use the last failure to cause a fault.
+        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(4));
         _testService.expects(never()).method("completed").after("invoke");
 
         execute("FailureToRecovery");
@@ -123,7 +128,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testFailureWithCancelAction() throws Exception {
-        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(4)));
+        // Recovery required after three failures. Only one attempt made after recovery.
+        // Use the last failure to cancel the activity, allowing the process to complete.
+        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(4));
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureToCancel");
@@ -134,6 +141,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testImmediateFailure() throws Exception {
+        // This process does not attempt to retry, entering recovery immediately.
         _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
         _testService.expects(never()).method("completed").after("invoke");
 
@@ -142,6 +150,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testImmediateFailureAndFault() throws Exception {
+        // This process responds to failure with a fault.
         _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
         _testService.expects(never()).method("completed").after("invoke");
 
@@ -152,7 +161,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     public void testFailureHandlingInheritence() throws Exception {
-        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(2)));
+        // Since the invocation is repeated 3 times, the process completes after
+        // the third (successful) invocation.
+        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(2));
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureInheritence");
@@ -162,16 +173,19 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     public void testInstanceSummary() throws Exception {
         _processQName = new QName(NAMESPACE, "FailureToRecovery");
-        _testService.expects(exactly(4)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
+        // Failing the first three times and recovering, the process completes.
+        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(3));
         _testService.expects(once()).method("completed").after("invoke");
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("retry"); // Completed.
-        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
+        // Failing the first three times, we can then fault the process.
+        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(3));
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("fault"); // Faulted.
-        _testService.expects(exactly(3)).method("invoke").will(onConsecutiveCalls(failFirst(3)));
+        // Failing the first three times, we can then leave it waiting for recovery.
+        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(3));
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking(); // Active, recovery.
         // Stay active, awaiting recovery.
@@ -203,12 +217,14 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         _testService = mock(TestService.class);
         // We use one partner to simulate failing service and receive message upon process completion.
         final Mock partner = mock(MessageExchangeContext.class);
+        // Some processes will complete, but not all.
         partner.expects(atMostOnce()).match(invokeOnOperation("respond")).will(new CustomStub("process completed") {
             public Object invoke(Invocation invocation) {
                 ((TestService)_testService.proxy()).completed();
                 return null;
             }
         });
+        // There will be multiple calls to invoke.
         partner.expects(atLeastOnce()).match(invokeOnOperation("invoke")).will(new CustomStub("invoke failing service") {
             public Object invoke(Invocation invocation) {
                 PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) invocation.parameterValues.get(0);
@@ -222,9 +238,10 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
                 return null;
             }
         });
+        // Faulting a process would send the fault message asynchronously.
+        // (Which might be a bug, but right now we swallow it).
         partner.expects(atMostOnce()).method("onAsyncReply").will(new CustomStub("async reply") {
             public Object invoke(Invocation invocation) {
-                // If we generate a reply after failure, e.g. by faulting the invoke.
                 return null;
             }
         });
@@ -240,15 +257,23 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     protected void tearDown() throws Exception {
         _management.delete(null);
-        
         _server.shutdown();
+    }
 
-        _server = null;
-        _management = null;
-        _processQName = null;
+    /**
+     * Returns a stub that will fail (return false) for the first n number of times,
+     * and on the last call succeed (return true).
+     */
+    protected Stub failTheFirst(int times) {
+        Stub[] stubs = new Stub[times + 1];
+        for (int i = 0; i < times; ++i)
+            stubs[i] = returnValue(false);
+        stubs[times] = returnValue(true);
+        return new StubSequence(stubs);
     }
 
     protected InvocationMatcher invokeOnOperation(final String opName) {
+        // Decides which method to call the TestService mock based on the operation.
         return new StatelessInvocationMatcher() {
             public boolean matches(Invocation invocation) {
                 return invocation.invokedMethod.getName().equals("invokePartner") &&
@@ -268,11 +293,11 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      */
     protected void execute(String process) throws Exception {
         _management.delete(null);
+        // We need the process QName to make assertions on its state.
         _processQName = new QName(NAMESPACE, process);
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
     }
-
 
     protected void assertNoFailures() {
         TFailuresInfo failures = lastInstance().getFailures();
@@ -282,31 +307,8 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     protected TInstanceInfo lastInstance() {
-        return _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-    }
-
-
-    /**
-     * Asserts that the process has completed, successfully or not. If not,
-     * it is either terminated, or faulted with the specified fault name.
-     * This method also checks how many time the process invoked the service.
-     */
-    protected void assertCompleted(boolean successful, QName faultName) {
-        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-        // Process has completed, so no activities in the failure state.
-        TFailuresInfo failures = instance.getFailures();
-        assertTrue(failures == null || failures.getCount() == 0);
-        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
-        assertTrue(failures == null || failures.getCount() == 0);
-        if (successful) {
-            assertTrue(instance.getStatus() == TInstanceStatus.COMPLETED);
-        } else if (faultName == null) {
-            assertTrue(instance.getStatus() == TInstanceStatus.TERMINATED);
-        } else {
-            assertTrue(instance.getStatus() == TInstanceStatus.FAILED);
-            TFaultInfo faultInfo = instance.getFaultInfo();
-            assertTrue(faultInfo != null && faultInfo.getName().equals(faultName));
-        }
+        TInstanceInfoList instances = _management.listAllInstances().getInstanceInfoList();
+        return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
     }
 
     /**
@@ -314,17 +316,15 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      */
     protected void assertRecovery(int invoked, String[] actions) {
         // Process is still active, none of the completed states.
-        TInstanceInfo instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
-        assertTrue(instance.getStatus() == TInstanceStatus.ACTIVE);
+        assertTrue(lastInstance().getStatus() == TInstanceStatus.ACTIVE);
         // Tests here will only generate one failure.
-        TFailuresInfo failures = instance.getFailures();
+        TFailuresInfo failures = lastInstance().getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
         failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
         // Look for individual activities inside the process instance.
         @SuppressWarnings("unused")
-        TScopeInfo rootScope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
-        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(lastInstance(), null, null);
         assertTrue(recoveries.size() == 1);
         TFailureInfo failure = recoveries.get(0).getFailure();
         assertTrue(failure.getRetries() == invoked - 1);
@@ -342,16 +342,18 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * recovery channel for the activity in question.
      */
     protected void recover(String action) {
+/*
         TInstanceInfoList instances = _management.listAllInstances().getInstanceInfoList();
         assertTrue(instances.sizeOfInstanceInfoArray() > 0);
         TInstanceInfo instance = instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
         assertNotNull(instance);
+*/
 
-        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+        ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(lastInstance(), null, null);
         assertTrue(recoveries.size() == 1);
         TActivityInfo activity = recoveries.get(0);
         assertNotNull(activity);
-        _management.recoverActivity(Long.valueOf(instance.getIid()), Long.valueOf(activity.getAiid()), action);
+        _management.recoverActivity(Long.valueOf(lastInstance().getIid()), Long.valueOf(activity.getAiid()), action);
         _server.waitForBlocking();
     }
 
