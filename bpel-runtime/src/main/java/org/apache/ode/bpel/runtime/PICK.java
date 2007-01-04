@@ -185,7 +185,7 @@ class PICK extends ACTIVITY {
                 throw new InvalidProcessException(errmsg);
             }
             if (msgPart == null) {
-                String errmsg = "Message missing part: " + msgPart;
+                String errmsg = "Message missing part: " + pName;
                 __log.fatal(errmsg);
                 throw new InvalidContextException(errmsg);
             }           
