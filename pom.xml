@@ -64,13 +64,14 @@
         <commonsLangVersion>2.1</commonsLangVersion>
         <commonsLoggingVersion>1.0.3</commonsLoggingVersion>
         <commonsPoolVersion>1.2</commonsPoolVersion>
-        <hibernateVersion>3.1.2</hibernateVersion>
         <geronimoSpecsVersion>1.0</geronimoSpecsVersion>
         <geronimoVersion>1.1</geronimoVersion>
+        <hibernateVersion>3.1.2</hibernateVersion>
         <jaxenVersion>1.1-beta-8</jaxenVersion>
         <jettyVersion>5.1.9</jettyVersion>
         <jencksVersion>1.3</jencksVersion>
         <jasperVersion>4.2.20RC0</jasperVersion>
+        <jmockVersion>1.1.0</jmockVersion>
         <jotmVersion>2.0.10</jotmVersion>
         <junitVersion>3.8.1</junitVersion>
         <log4jVersion>1.2.13</log4jVersion>
@@ -156,6 +157,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junitVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>jmock</groupId>
+            <artifactId>jmock</artifactId>
+            <version>${jmockVersion}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
