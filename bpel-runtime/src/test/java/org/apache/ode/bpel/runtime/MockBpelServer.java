@@ -124,7 +124,11 @@ class MockBpelServer {
             if (mex.getOperation() == null)
                 throw new Exception("Did not find operation " + opName + " on service " + serviceName);
             Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
-            request.setMessage(body);
+            Element wrapper = body.getOwnerDocument().createElementNS("", "main");
+            wrapper.appendChild(body);
+            Element message = body.getOwnerDocument().createElementNS("", "message");
+            message.appendChild(wrapper);
+            request.setMessage(message);
             mex.invoke(request);
             mex.complete();
             _txManager.commit();
