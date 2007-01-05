@@ -9,14 +9,14 @@
   <target name="test-db">
     <artifact:pom id="maven.project" file="pom.xml" />
     <artifact:dependencies filesetId="dependency.derby" useScope="test">
-      <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
+      <dependency groupId="org.apache.ode" artifactId="ode-jpa-ojpa-derby"
                   version="${maven.project.version}" type="tar"/>
     </artifact:dependencies>
     <copy todir="${maven.project.build.directory}/scratch" flatten="true">
       <fileSet refid="dependency.derby"/>
     </copy>
     <delete dir="${maven.project.build.directory}/test-classes/derby-db"/>
-    <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
+    <untar src="${maven.project.build.directory}/scratch/ode-jpa-ojpa-derby-${maven.project.version}.tar"
            dest="${maven.project.build.directory}/test-classes/derby-db"/>
   </target>
 

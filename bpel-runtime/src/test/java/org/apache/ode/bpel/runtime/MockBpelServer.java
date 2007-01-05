@@ -18,50 +18,36 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.apache.openjpa.ee.ManagedRuntime;
+import org.objectweb.jotm.Jotm;
+import org.opentools.minerva.MinervaPool;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.sql.DriverManager;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.daohib.DataSourceConnectionProvider;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
-import org.hibernate.cfg.Environment;
-import org.objectweb.jotm.Jotm;
-import org.opentools.minerva.MinervaPool;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 
 class MockBpelServer {
@@ -209,15 +195,20 @@ class MockBpelServer {
             throw new RuntimeException("No transaction manager");
         if (_dataSource == null)
             throw new RuntimeException("No data source");
-        Properties properties = new Properties();
-        properties.put(Environment.CONNECTION_PROVIDER,
-                       DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
-                       HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
-        properties.put(Environment.DIALECT, "org.hibernate.dialect.DerbyDialect");
-        SessionManager sm = new SessionManager(properties, _dataSource, _txManager);
-        _daoCF = new BpelDAOConnectionFactoryImpl(sm);
+
+        HashMap propMap = new HashMap();
+        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
+        propMap.put("openjpa.ManagedRuntime", new ManagedRuntime() {
+            public TransactionManager getTransactionManager() throws Exception {
+                return _txManager;
+            }
+        });
+        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        propMap.put("javax.persistence.nonJtaDataSource", _dataSource);
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
+        EntityManager em = emf.createEntityManager();
+        _daoCF = new BPELDAOConnectionFactoryImpl(em);
 
         return _daoCF;
     }
