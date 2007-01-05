@@ -85,25 +85,30 @@
             <artifactId>commons-collections</artifactId>
             <version>${commonsCollectionsVersion}</version>
         </dependency>
-       <dependency>
-          <groupId>jaxen</groupId>
-          <artifactId>jaxen</artifactId>
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
         </dependency>
 
         <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>saxon</artifactId>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>saxon</artifactId>
         </dependency>
 
         <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>saxon-xpath</artifactId>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>saxon-xpath</artifactId>
         </dependency>
 
-       <dependency>
-         <groupId>net.sf.saxon</groupId>
-         <artifactId>saxon-dom</artifactId>
-       </dependency>
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>saxon-dom</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>jotm</groupId>
@@ -154,25 +159,25 @@
     </dependencies>
     <build>
         <plugins>
-			<plugin>
-			  <groupId>org.apache.myfaces.tobago</groupId>
-			  <artifactId>maven-apt-plugin</artifactId>
-			  <executions>
-			    <execution>
-			      <phase>generate-sources</phase>
-			      <configuration>
-  					<nocompile>true</nocompile>
-  					<fork>true</fork>
-			        <generated>target/generated-sources/apt</generated>
-			        <target>1.5</target>
-			      </configuration>
-			      <goals>
-			        <goal>execute</goal>
-			      </goals>
-			    </execution>
-			  </executions>
-			</plugin>
-			
+            <plugin>
+                <groupId>org.apache.myfaces.tobago</groupId>
+                <artifactId>maven-apt-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <nocompile>true</nocompile>
+                            <fork>true</fork>
+                            <generated>target/generated-sources/apt</generated>
+                            <target>1.5</target>
+                        </configuration>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
