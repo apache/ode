@@ -19,34 +19,14 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.evt.BpelEvent;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
-import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.BpelEvent;
 
 @Entity
 @Table(name="ODE_SCOPE")
@@ -183,8 +163,8 @@ public class ScopeDAOImpl implements ScopeDAO {
 	}
 
 	public List<BpelEvent> listEvents(BpelEventFilter efilter) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Implement me
+		return new ArrayList<BpelEvent>();
 	}
 
 	public void setState(ScopeStateEnum state) {
