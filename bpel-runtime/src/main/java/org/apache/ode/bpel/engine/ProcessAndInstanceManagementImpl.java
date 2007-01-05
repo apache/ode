@@ -837,7 +837,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
             List<BpelEvent> events = scope.listEvents(null);
-            if (events )
             ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
             for (BpelEvent e : events)
                 b.onEvent(e);
