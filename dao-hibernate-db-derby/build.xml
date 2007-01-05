@@ -116,7 +116,7 @@
                       output="${derby.target.store.sql}">
             <fileset dir="${basedir}/../bpel-store/target/generated-resources/xdoclet">
                 <include name="**/*.hbm.xml"/>
-            </fileset> 
+            </fileset>
         </schemaexport>
 
         <schemaexport properties="${src.sql.dir}/ode.derby.properties"
@@ -126,9 +126,9 @@
                       drop="no"
                       create="yes"
                       output="${derby.target.runtime.sql}">
-        <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">  
+        <fileset dir="${basedir}/../dao-hibernate/target/generated-resources/xdoclet">
                 <include name="**/*.hbm.xml"/>
-            </fileset> 
+            </fileset>
         </schemaexport>
         <schemaexport properties="${src.sql.dir}/ode.sqlserver.properties"
                       quiet="yes"

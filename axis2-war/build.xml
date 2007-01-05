@@ -19,51 +19,61 @@
 
 <project name="dao-hibernate-db-derby" default="db" xmlns:artifact="urn:maven-artifact-ant">
 
-  <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
-    <classpath>
-      <pathelement location="lib/maven-artifact-ant-2.0.4-dep.jar" />
-    </classpath>
-  </typedef>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
+        <classpath>
+            <pathelement location="lib/maven-artifact-ant-2.0.4-dep.jar" />
+        </classpath>
+    </typedef>
 
-  <target name="default">
-    <artifact:pom id="maven.project" file="pom.xml" />
+    <target name="default">
+        <artifact:pom id="maven.project" file="pom.xml" />
 
-    <!-- Grab Addressing MAR and add it to /modules -->
-    <!-- Not used right now.
-         I'm keeping it here so we can overwrite with newer versions
-         or add new modules.
-    <artifact:dependencies filesetId="dependency.mars">
-      <dependency groupId="axis2" artifactId="addressing"
-                  version="1.0" type="mar"/>
-    </artifact:dependencies>
-    <copy todir="${maven.project.build.directory}/resources/WEB-INF/modules" flatten="true">
-      <fileSet refid="dependency.mars"/>
-    </copy>
-    -->
+        <!-- Grab Addressing MAR and add it to /modules -->
+        <!-- Not used right now.
+             I'm keeping it here so we can overwrite with newer versions
+             or add new modules.
+        <artifact:dependencies filesetId="dependency.mars">
+          <dependency groupId="axis2" artifactId="addressing"
+                      version="1.0" type="mar"/>
+        </artifact:dependencies>
+        <copy todir="${maven.project.build.directory}/resources/WEB-INF/modules" flatten="true">
+          <fileSet refid="dependency.mars"/>
+        </copy>
+        -->
 
-    <!-- Grab Derby DB Tar and expand it into WEB-INF/data.
-         There's no way to get it as a single dependency,
-         so grab all the dependencies into the scratch directory
-         and process the one we need. -->
-    <artifact:dependencies filesetId="dependency.derby" useScope="runtime">
-      <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
-                  version="${maven.project.version}" type="tar"/>
-    </artifact:dependencies>
-    <copy todir="${maven.project.build.directory}/scratch" flatten="true">
-      <fileSet refid="dependency.derby"/>
-    </copy>
-    <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
-           dest="${maven.project.build.directory}/resources"/>
+        <!-- Grab Derby DB Tar and expand it into WEB-INF/data.
+  There's no way to get it as a single dependency,
+  so grab all the dependencies into the scratch directory
+  and process the one we need. -->
+        <artifact:dependencies filesetId="dependency.derby.hib" useScope="runtime">
+            <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
+                        version="${maven.project.version}" type="tar"/>
+        </artifact:dependencies>
+        <artifact:dependencies filesetId="dependency.derby.jpa" useScope="runtime">
+            <dependency groupId="org.apache.ode" artifactId="ode-jpa-ojpa-derby"
+                        version="${maven.project.version}" type="tar"/>
+        </artifact:dependencies>
 
-    <!-- Dirty, mean and ugly but will work for now -->
-    <copy todir="${maven.project.build.directory}/resources"
-      file="${maven.project.build.directory}/../../axis2/src/main/wsdl/pmapi.wsdl"/>
-    <copy todir="${maven.project.build.directory}/resources"
-      file="${maven.project.build.directory}/../../axis2/src/main/wsdl/deploy.wsdl"/>
-    <copy todir="${maven.project.build.directory}/resources"
-      file="${maven.project.build.directory}/../../bpel-schemas/src/main/xsd/pmapi.xsd"/>
+        <copy todir="${maven.project.build.directory}/scratch" flatten="true">
+            <fileSet refid="dependency.derby.jpa"/>
+        </copy>
+        <untar src="${maven.project.build.directory}/scratch/ode-jpa-ojpa-derby-${maven.project.version}.tar"
+               dest="${maven.project.build.directory}/resources/jpadb"/>
+        <copy todir="${maven.project.build.directory}/scratch" flatten="true">
+            <fileSet refid="dependency.derby.hib"/>
+        </copy>
+        <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
+               dest="${maven.project.build.directory}/resources/hibdb"/>
 
-  </target>
+        <!-- Dirty, mean and ugly but will work for now -->
+        <copy todir="${maven.project.build.directory}/resources"
+              file="${maven.project.build.directory}/../../axis2/src/main/wsdl/pmapi.wsdl"/>
+        <copy todir="${maven.project.build.directory}/resources"
+              file="${maven.project.build.directory}/../../axis2/src/main/wsdl/deploy.wsdl"/>
+        <copy todir="${maven.project.build.directory}/resources"
+              file="${maven.project.build.directory}/../../bpel-schemas/src/main/xsd/pmapi.xsd"/>
+
+    </target>
 
 </project>
 

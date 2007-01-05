@@ -262,6 +262,28 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- JPA -->
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-dao-jpa-ojpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>ode-dao-jpa</artifactId>
+                    <groupId>org.apache.ode</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.openjpa</groupId>
+          <artifactId>openjpa-all</artifactId>
+        </dependency>
+
         <!-- Other dependencies (brought by Axis2) -->
         <dependency>
             <groupId>annogen</groupId>
@@ -373,12 +395,19 @@
             <artifactId>xalan</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.8.1</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- ODE Database -->
         <dependency>
-            <scope>compile</scope>
+            <scope>runtime</scope>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-hibernate-db-derby</artifactId>
+            <artifactId>ode-jpa-ojpa-derby</artifactId>
+            <version>${project.version}</version>
             <type>tar</type>
         </dependency>
     </dependencies>
