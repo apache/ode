@@ -570,11 +570,15 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         ii.setSiid(siid);
         dbexec(new BpelDatabase.Callable<Object>() {
             public Object run(BpelDAOConnection conn) throws Exception {
+                try {
                 ScopeDAO instance = conn.getScope(siidl);
                 if (instance == null)
                     throw new InvalidRequestException("Scope not found: " + siidl);
                 // TODO: deal with "ERROR" state information.
                 fillScopeInfo(ii, instance, includeActivityInfo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
         });
@@ -833,6 +837,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
             List<BpelEvent> events = scope.listEvents(null);
+            if (events )
             ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
             for (BpelEvent e : events)
                 b.onEvent(e);
