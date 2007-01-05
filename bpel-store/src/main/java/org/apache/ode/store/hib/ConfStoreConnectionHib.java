@@ -1,21 +1,18 @@
 package org.apache.ode.store.hib;
 
-import java.util.Collection;
-import java.util.Date;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
-import org.apache.ode.store.Messages;
 import org.apache.ode.store.ProcessConfDAO;
-import org.apache.ode.utils.msg.MessageBundle;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Transaction;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * Connection to a Hibernate data store. Essentially a thin wrapper around Hibernate's
@@ -29,7 +26,7 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
     private Transaction _tx;
 
     static final ThreadLocal<Session> _current = new ThreadLocal<Session>();
-    
+
     public ConfStoreConnectionHib(Session session) {
         _session = session;
         _current.set(session);

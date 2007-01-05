@@ -1,13 +1,13 @@
 package org.apache.ode.store.hib;
 
-import javax.xml.namespace.QName;
-
+import junit.framework.TestCase;
 import org.apache.ode.store.ConfStoreConnection;
+import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
 import org.hsqldb.jdbc.jdbcDataSource;
 
-import junit.framework.TestCase;
+import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
     jdbcDataSource hsqlds;

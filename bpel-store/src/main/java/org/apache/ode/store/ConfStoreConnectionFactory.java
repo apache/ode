@@ -1,6 +1,4 @@
-package org.apache.ode.store.hib;
-
-import org.apache.ode.store.ConfStoreConnection;
+package org.apache.ode.store;
 
 /**
  * Connection factory for DB store. 
@@ -8,6 +6,6 @@ import org.apache.ode.store.ConfStoreConnection;
   */
 public interface ConfStoreConnectionFactory {
 
-    
+
     ConfStoreConnection getConnection() ;
 }

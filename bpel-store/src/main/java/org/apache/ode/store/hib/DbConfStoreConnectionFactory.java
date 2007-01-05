@@ -1,18 +1,9 @@
 package org.apache.ode.store.hib;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.Messages;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -24,6 +15,15 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
     private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);

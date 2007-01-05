@@ -1,38 +1,12 @@
 package org.apache.ode.store;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.sql.DataSource;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
-import org.apache.ode.store.hib.DbConfStoreConnectionFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -41,20 +15,33 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  * <p>
  * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of HSQL database.
  * </p>
- * 
+ *
  * <p>
  * The philsophy here is to keep things simple. Process store operations are relatively infrequent. Performance of the public
  * methods is not a concern. However, note that the {@link org.apache.ode.bpel.iapi.ProcessConf} objects returned by the class are
  * going to be used from within the engine runtime, and hence their performance needs to be very good. Similarly, these objects
  * should be immutable so as not to confuse the engine.
- * 
+ *
  * Note the way that the database is used in this class, it is more akin to a recovery log, this is intentional: we want to start
  * up, load stuff from the database and then pretty much forget about it when it comes to reads.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author mriou <mriou at apache dot org>
  */
@@ -76,8 +63,8 @@ public class ProcessStoreImpl implements ProcessStore {
     /** GUID used to create a unique in-memory db. */
     private String _guid = new GUID().toString();
 
-    private DbConfStoreConnectionFactory _cf;
-    
+    private ConfStoreConnectionFactory _cf;
+
     private File _deployDir;
 
     /**
@@ -98,8 +85,12 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public ProcessStoreImpl(DataSource ds) {
+        String persistenceType = System.getProperty("ode.persistence");
         if (ds != null) {
-            _cf = new DbConfStoreConnectionFactory(ds, false);
+            if ("hibernate".equalsIgnoreCase(persistenceType))
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, false);
+            else
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds);
         } else {
 
             // If the datasource is not provided, then we create a HSQL-based in-memory
@@ -108,7 +99,10 @@ public class ProcessStoreImpl implements ProcessStore {
             hsqlds.setDatabase("jdbc:hsqldb:mem:" + _guid);
             hsqlds.setUser("sa");
             hsqlds.setPassword("");
-            _cf = new DbConfStoreConnectionFactory(hsqlds, true);
+            if ("hibernate".equalsIgnoreCase(persistenceType))
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, false);
+            else
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds);
             _inMemDs = hsqlds;
         }
 
