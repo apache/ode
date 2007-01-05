@@ -336,7 +336,6 @@ public class ODEServerJPA extends ODEServer {
     }
 
     private void initJPA() {
-        String url = "jdbc:derby:" + _workRoot + "/" + _odeConfig.getDbEmbeddedName();
         HashMap propMap = new HashMap();
         propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
         propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
