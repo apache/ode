@@ -79,7 +79,7 @@ class MockBpelServer {
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
             //_store = new ProcessStoreImpl(new File("."), _dataSource, _txManager);
-            _store = new ProcessStoreImpl();
+            _store = new ProcessStoreImpl(_dataSource);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
@@ -165,7 +165,7 @@ class MockBpelServer {
     protected DataSource createDataSource() throws Exception {
         if (_txManager == null)
             throw new RuntimeException("No transaction manager");
-        String url = "jdbc:derby:target/test-classes/derby-db/data";
+        String url = "jdbc:derby:/home/dusty/Dev/Projects/ode/bpel-runtime/target/test-classes/derby-db/data";
         _minervaPool = new MinervaPool();
         _minervaPool.setTransactionManager(_txManager);
         _minervaPool.getConnectionFactory().setConnectionURL(url);
