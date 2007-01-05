@@ -3,13 +3,18 @@ package org.apache.ode.bpel.compiler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.wsdl.xml.WSDLLocator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
 public class WSDLLocatorImpl implements WSDLLocator {
 
+    private static final Log __log = LogFactory.getLog(WSDLLocatorImpl.class);
+    
     private ResourceFinder _resourceFinder;
     private URI _base;
     private String _latest;
@@ -33,7 +38,15 @@ public class WSDLLocatorImpl implements WSDLLocator {
     }
 
     public InputSource getImportInputSource(String parent, String imprt) {
-        URI uri = parent == null ? _base.resolve(imprt) : _base.resolve(parent).resolve(imprt);
+        URI uri;
+        try {
+            uri = parent == null ? _base.resolve(imprt) : new URI(parent).resolve(imprt);
+        } catch (URISyntaxException e1) {
+            __log.error("URI syntax error: " + parent);
+            return null;
+        }
+        __log.debug("getImportInputSource: parent=" + parent + ", imprt=" + imprt + ", uri=" + uri);
+
         InputSource is = new InputSource();
         try {
             is.setByteStream(_resourceFinder.openResource(uri));
