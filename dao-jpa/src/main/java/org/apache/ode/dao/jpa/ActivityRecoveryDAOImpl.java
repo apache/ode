@@ -20,19 +20,12 @@
 package org.apache.ode.dao.jpa;
 
 
-import java.util.Date;
-
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
+
+import javax.persistence.*;
+import java.util.Date;
 
 
 @Entity
@@ -56,8 +49,8 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 		_activityId = activityId;
 		_reason = reason;
 		_dateTime = dateTime;
-		
-		_details = DOMUtils.domToString(data);
+
+        if (data != null) _details = DOMUtils.domToString(data);
 		
         String alist = actions[0];
         for (int i = 1; i < actions.length; ++i)

@@ -109,7 +109,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	
 	public ProcessInstanceDAO getInstance(Long iid) {
 		// TODO: may need a map or DB lookup here for performance
-		for (ProcessInstanceDAOImpl inst : _instances) {
+		for (ProcessInstanceDAO inst : _instances) {
 			if (inst.getInstanceId().equals(iid) ) return inst;
 		}
 		return null;
@@ -148,21 +148,18 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	}
 
 	public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
-		// TODO: Auto-generated method stub
-		//return null;
-		throw new UnsupportedOperationException();
+        // TODO: Implement me
+        return new ArrayList<ProcessInstanceDAO>(_instances);
 	}
 
 	public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
-		// TODO Auto-generated method stub
-		//return null;
-		throw new UnsupportedOperationException();
+        // TODO: Implement me
+        return new ArrayList<ProcessInstanceDAO>(_instances);
 	}
 
 	public Collection<ProcessDAO> processQuery(ProcessFilter criteria) {
-		// TODO Auto-generated method stub
-		//return null;
-		throw new UnsupportedOperationException();
+        // TODO: Implement me
+        return new ArrayList<ProcessDAO>(_processes);
 	}
 	
 	EntityManager getEntityManager() {
