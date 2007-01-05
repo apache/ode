@@ -19,43 +19,14 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.w3c.dom.Element;
+
+import javax.persistence.*;
+import javax.xml.namespace.QName;
+import java.util.*;
 
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
@@ -112,7 +83,9 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	public ScopeDAO createScope(ScopeDAO parentScope, String name,
 			int scopeModelId) {
 		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this,_connection);
-		_scopes.add(ret);
+        ret.setState(ScopeStateEnum.ACTIVE);
+
+        _scopes.add(ret);
 		
 		_rootScope = (parentScope == null)?ret:_rootScope;
 		
@@ -180,12 +153,9 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public Set<CorrelationSetDAO> getCorrelationSets() {
 		//	TODO: should this method be deprecated?
-		
 		//  Its not clear where the correlation set for the process is used
 		//  or populated.
-		//return new HashSet<CorrelationSetDAO>();
-		
-		throw new UnsupportedOperationException();
+		return new HashSet<CorrelationSetDAO>();
 	}
 
 	public Date getCreateTime() {
