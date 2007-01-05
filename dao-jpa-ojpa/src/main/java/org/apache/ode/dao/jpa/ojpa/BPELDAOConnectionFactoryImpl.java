@@ -21,16 +21,15 @@
 package org.apache.ode.dao.jpa.ojpa;
 
 
-import java.util.List;
-import java.util.Properties;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.dao.jpa.BPELDAOConnectionImpl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
-
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.dao.jpa.BPELDAOConnectionImpl;
+import java.util.List;
+import java.util.Properties;
 
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 
@@ -46,7 +45,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 		if ( conn == null ) {
 			List<BpelDAOConnection> conns = null;
 			
-			Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x order by x._id asc");
+			Query q = em.createQuery("SELECT x FROM org.apache.ode.dao.jpa.BPELDAOConnectionImpl x order by x._id asc");
 			
 			try {
 				conns = (List<BpelDAOConnection>)q.getResultList();
@@ -72,7 +71,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 		
 		BPELDAOConnectionImpl tmpConn = null;
 		
-		Query q = em.createQuery("SELECT x FROM BPELDAOConnectionImpl x WHERE x._id = ?1");
+		Query q = em.createQuery("SELECT x FROM org.apache.ode.dao.jpa.BPELDAOConnectionImpl x WHERE x._id = ?1");
 		q.setParameter(1, connID);
 		
 		try {

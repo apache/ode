@@ -34,10 +34,10 @@
 
     <properties>
         <vendor.name>Apache Software Foundation</vendor.name>
- 
+
         <!-- Disable test cases; not ready for everybody -->
         <maven.test.skip>true</maven.test.skip>
-        
+
         <!--  Default ODE properties, these properties may be referenced in resources and the like. -->
 
         <ode.default.http.port>8080</ode.default.http.port>
@@ -88,10 +88,10 @@
         <quartzVersion>1.5.1</quartzVersion>
         <xstreamVersion>1.2</xstreamVersion>
         <xalanVersion>2.7.0</xalanVersion>
-	    <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
+        <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
         <openjpaVersion>0.9.6-incubating-SNAPSHOT</openjpaVersion>
         <commonsDBCPVersion>1.2.1</commonsDBCPVersion>
-	  <persistenceAPIVersion>1.0</persistenceAPIVersion>
+        <persistenceAPIVersion>1.0</persistenceAPIVersion>
 
         <!--
         | Build number used by the intalio:release plugin
@@ -145,11 +145,10 @@
         <module>bpel-scheduler-quartz</module>
 
         <module>distro-axis2</module>
-    	<module>distro-jbi</module>
-     <module>dao-jpa</module>
-      <module>dao-jpa-ojpa</module>
-      <module>dao-jpa-ojpa-derby</module>
-
+        <module>distro-jbi</module>
+        <module>dao-jpa</module>
+        <module>dao-jpa-ojpa</module>
+        <module>dao-jpa-ojpa-derby</module>
     </modules>
 
     <dependencies>
@@ -243,14 +242,14 @@
                     </configuration>
                 </plugin>
 
-      		<plugin>
-        	   <groupId>org.apache.maven.plugins</groupId>
-        	   <artifactId>maven-eclipse-plugin</artifactId>
-		   <version>2.2</version>
-        	   <configuration>
-          		<useProjectReferences>true</useProjectReferences>
-        	   </configuration>
-      		</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.2</version>
+                    <configuration>
+                        <useProjectReferences>true</useProjectReferences>
+                    </configuration>
+                </plugin>
 
             </plugins>
         </pluginManagement>
@@ -273,24 +272,24 @@
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
-<!-- Repository is down;
-        <repository>
-            <id>apache-incubator</id>
-            <name>Apache Incubator Repository</name>
-            <url>http://people.apache.org/repo/m2-incubating-repository</url>
-            <snapshots>
-               <enabled>false</enabled>
-               <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
--->        
+        <!-- Repository is down;
+                <repository>
+                    <id>apache-incubator</id>
+                    <name>Apache Incubator Repository</name>
+                    <url>http://people.apache.org/repo/m2-incubating-repository</url>
+                    <snapshots>
+                       <enabled>false</enabled>
+                       <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+        -->
         <repository>
             <id>central</id>
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
             <snapshots>
-               <enabled>false</enabled>
-               <updatePolicy>never</updatePolicy>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
         <repository>
@@ -306,30 +305,30 @@
         </repository>
         <repository>
             <id>apache-snapshots</id>
-		<name>Apache Snapshot Repository</name>
+            <name>Apache Snapshot Repository</name>
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-        </repository>     
-<!--        <repository>
-            <id>apache</id>
-            <name>Apache Repository</name>
-            <url>http://cvs.apache.org/repository</url>
-            <layout>legacy</layout>
-            <snapshots>
-               <enabled>false</enabled>
-               <updatePolicy>never</updatePolicy>
-            </snapshots>
         </repository>
-        <repository>
-            <id>ode</id>
-            <name>Apache Ode Repository</name>
-            <url>http://incubator.apache.org/ode/m2</url>
-            <layout>legacy</layout>
-            <snapshots>
-               <enabled>false</enabled>
-               <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
--->
+                <repository>
+                    <id>apache</id>
+                    <name>Apache Repository</name>
+                    <url>http://cvs.apache.org/repository</url>
+                    <layout>legacy</layout>
+                    <snapshots>
+                       <enabled>false</enabled>
+                       <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>ode</id>
+                    <name>Apache Ode Repository</name>
+                    <url>http://incubator.apache.org/ode/m2</url>
+                    <layout>legacy</layout>
+                    <snapshots>
+                       <enabled>false</enabled>
+                       <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -338,9 +337,9 @@
             <url>http://pxe.intalio.org/public/maven2</url>
         </pluginRepository>
         <pluginRepository>
-          <id>central</id>
-          <name>Maven Repository Switchboard</name>
-          <url>http://repo1.maven.org/maven2</url>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
         </pluginRepository>
         <!--pluginRepository>
             <id>codehaus</id>
@@ -563,6 +562,12 @@
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiomVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>xercesImpl</artifactId>
+                        <groupId>xerces</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
@@ -878,33 +883,37 @@
                 <version>${derbyVersion}</version>
             </dependency>
 
-  		<dependency>
-      		<groupId>org.apache.openjpa</groupId>
-			<artifactId>openjpa-all</artifactId>
-			<version>${openjpaVersion}</version>
-    		</dependency>
-    		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>${persistenceAPIVersion}</version>
-    		</dependency>
-    		<dependency>
-      		<groupId>commons-dbcp</groupId>
-      		<artifactId>commons-dbcp</artifactId>
-      		<version>${commonsDBCPVersion}</version>
-    		</dependency>
+            <dependency>
+                <groupId>org.apache.openjpa</groupId>
+                <artifactId>openjpa-all</artifactId>
+                <version>${openjpaVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>persistence-api</artifactId>
+                <version>${persistenceAPIVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>${commonsDBCPVersion}</version>
+            </dependency>
 
             <dependency>
-		    <groupId>org.apache.ode</groupId>
-		    <artifactId>ode-dao-jpa</artifactId>
-		    <version>${project.version}</version>
-		</dependency>
+                <groupId>org.apache.ode</groupId>
+                <artifactId>ode-dao-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
-		    <groupId>org.apache.ode</groupId>
-		    <artifactId>ode-dao-jpa-ojpa</artifactId>
-		    <version>${project.version}</version>
-		</dependency>
-
+                <groupId>org.apache.ode</groupId>
+                <artifactId>ode-dao-jpa-ojpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ode</groupId>
+                <artifactId>ode-jpa-ojpa-derby</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

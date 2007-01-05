@@ -19,9 +19,10 @@
 
 package org.apache.ode.axis2.hooks;
 
-import org.apache.ode.axis2.ODEServer;
-import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.ode.axis2.ODEServer;
+import org.apache.ode.axis2.ODEServerJPA;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -31,25 +32,27 @@ import javax.servlet.ServletException;
  * deployment ourselves.
  */
 public class ODEAxisServlet extends AxisServlet {
-  private static final long serialVersionUID = 4898351526757154917L;
-  
-  private ODEServer _odeServer;
+    private static final long serialVersionUID = 4898351526757154917L;
 
-  /**
-   * Initialize the Axis configuration context
-   *
-   * @param config Servlet configuration
-   * @throws ServletException
-   */
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-    _odeServer = new ODEServer();
-    _odeServer.init(config, axisConfiguration);
-  }
+    private ODEServer _odeServer;
 
-  public void stop() throws AxisFault {
-    super.stop();
-    _odeServer.shutDown();
-  }
+    /**
+     * Initialize the Axis configuration context
+     *
+     * @param config Servlet configuration
+     * @throws ServletException
+     */
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        String persistenceType = System.getProperty("ode.persistence");
+        if ("hibernate".equalsIgnoreCase(persistenceType)) _odeServer = new ODEServer();
+        else _odeServer = new ODEServerJPA();
+        _odeServer.init(config, axisConfiguration);
+    }
+
+    public void stop() throws AxisFault {
+        super.stop();
+        _odeServer.shutDown();
+    }
 
 }
