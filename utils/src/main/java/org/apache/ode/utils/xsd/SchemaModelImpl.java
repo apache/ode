@@ -60,7 +60,8 @@ public class SchemaModelImpl implements SchemaModel {
     public static final SchemaModel newModel(Map<URI, byte[]> schemas) {
         XMLSchemaLoader schemaLoader = new XMLSchemaLoader();
         InternalSchemaResolver resolver = new InternalSchemaResolver();
-//        schemaLoader.setEntityResolver(resolver);
+        schemaLoader.setEntityResolver(resolver);
+
 
         final String[] uris = new String[schemas.size()];
         final byte[][] content = new byte[schemas.size()][];
@@ -166,13 +167,14 @@ public class SchemaModelImpl implements SchemaModel {
         public void put(URI uri, byte[] bytes) {
             _schemas.put(uri.toASCIIString(), bytes);
         }
+        
         public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
             XMLInputSource src = new XMLInputSource(resourceIdentifier);
             String location = "";
             if (resourceIdentifier.getNamespace() != null && _schemas.get(resourceIdentifier.getNamespace()) != null)
                 location = resourceIdentifier.getNamespace();
-            else if (resourceIdentifier.getBaseSystemId() != null && _schemas.get(resourceIdentifier.getBaseSystemId()) != null)
-                location = resourceIdentifier.getBaseSystemId();
+            else if (resourceIdentifier.getLiteralSystemId() != null && _schemas.get(resourceIdentifier.getLiteralSystemId()) != null)
+                location = resourceIdentifier.getLiteralSystemId();
 
             src.setByteStream(new ByteArrayInputStream(_schemas.get(location)));
             return src;
