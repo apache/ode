@@ -90,10 +90,6 @@ class DeploymentUnitDir  {
     void compile() {
         File[] bpels = _duDirectory.listFiles(DeploymentUnitDir._bpelFilter);
         for (File bpel : bpels) {
-            File compiled = new File(bpel.getParentFile(), bpel.getName().substring(0,bpel.getName().length()-".bpel".length()) + ".cbp");
-            if (compiled.exists() && compiled.lastModified() >= bpel.lastModified()) {
-                continue;
-            }
             compile(bpel);
         }
     }
