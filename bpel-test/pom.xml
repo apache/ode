@@ -109,13 +109,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-jpa-ojpa-derby</artifactId>
+            <artifactId>ode-jpa-ojpa-derby</artifactId>
             <version>${project.version}</version>
         </dependency>
-<dependency>
-                <groupId>org.apache.derby</groupId>
-                <artifactId>derby</artifactId>
-            </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>
 
 
     </dependencies>
