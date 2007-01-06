@@ -74,6 +74,13 @@
             <type>tar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-jpa-ojpa-derby</artifactId>
+            <version>${project.version}</version>
+            <type>tar</type>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>stax</groupId>
