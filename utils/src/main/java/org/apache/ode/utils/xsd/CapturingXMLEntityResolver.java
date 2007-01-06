@@ -86,12 +86,12 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
 
     try {
       URI systemId = new URI(
-          FileUtils.encodePath(resourceIdentifier.getExpandedSystemId() == null ? resourceIdentifier
-              .getNamespace() : resourceIdentifier.getExpandedSystemId()));
+          FileUtils.encodePath(resourceIdentifier.getLiteralSystemId() == null ? resourceIdentifier
+              .getNamespace() : resourceIdentifier.getLiteralSystemId()));
 
       _capture.put(systemId, data);
     } catch (URISyntaxException use) {
-      __log.error("Invalid URI: " + resourceIdentifier.getExpandedSystemId());
+      __log.error("Invalid URI: " + resourceIdentifier.getLiteralSystemId());
       throw new XNIException(use);
     }
     
