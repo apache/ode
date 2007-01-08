@@ -158,6 +158,10 @@ class ProcessConfImpl implements ProcessConf {
         return _du.getDefinitionForService(serviceName);
     }
 
+    public Definition getDefinitionForPortType(QName portTypeName) {
+        return _du.getDefinitionForPortType(portTypeName);
+    }
+
     public Map<String, Endpoint> getInvokeEndpoints() {
         return Collections.unmodifiableMap(_partnerRoleInitialValues);
     }

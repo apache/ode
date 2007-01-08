@@ -23,9 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.jbi.util.WSDLFlattener;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.w3c.dom.Document;
 
@@ -34,7 +36,9 @@ import javax.jbi.messaging.DeliveryChannel;
 import javax.jbi.messaging.NormalizedMessage;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
 import javax.wsdl.Operation;
+import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,12 +161,21 @@ final class OdeContext {
         return (TransactionManager) getContext().getTransactionManager();
     }
 
-    public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
+    public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint, QName portType) throws Exception {
         if (__log.isDebugEnabled()) {
             __log.debug("Activate endpoint: " + endpoint);
         }
 
         OdeService service = new OdeService(this, endpoint);
+        try {
+            ProcessConf pc = _store.getProcessConfiguration(pid);
+            Definition def = pc.getDefinitionForPortType(portType);
+            def = new WSDLFlattener(def).getDefinition(portType);
+            Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
+            addEndpointDoc(endpoint.serviceName, doc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         MyEndpointReference myepr = new MyEndpointReference(service);
         service.activate();
         _activeOdeServices.put(endpoint, service);
