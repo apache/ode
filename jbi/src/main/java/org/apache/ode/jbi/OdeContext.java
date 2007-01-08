@@ -48,7 +48,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
- * 
+ *
  * @author mszefler
  */
 final class OdeContext {
@@ -95,7 +95,7 @@ final class OdeContext {
 
     /**
      * Gets the delivery channel.
-     * 
+     *
      * @return delivery channel
      */
     public DeliveryChannel getChannel() {
@@ -105,8 +105,7 @@ final class OdeContext {
             try {
                 chnl = _context.getDeliveryChannel();
             } catch (Exception e) {
-                // TODO better error logging
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
 
@@ -115,7 +114,7 @@ final class OdeContext {
 
     /**
      * Sets the Component context.
-     * 
+     *
      * @param ctx
      *            component context.
      */
@@ -125,7 +124,7 @@ final class OdeContext {
 
     /**
      * DOCUMENT ME!
-     * 
+     *
      * @return Transformation engine context
      */
     public ComponentContext getContext() {
@@ -134,7 +133,7 @@ final class OdeContext {
 
     /**
      * Used to grab a reference of this object.
-     * 
+     *
      * @return an initialized TransformationEngineContext reference
      */
     public static synchronized OdeContext getInstance() {
@@ -174,7 +173,7 @@ final class OdeContext {
             Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
             addEndpointDoc(endpoint.serviceName, doc);
         } catch (Exception e) {
-            e.printStackTrace();
+            __log.warn("Exception during endpoint activation", e);
         }
         MyEndpointReference myepr = new MyEndpointReference(service);
         service.activate();
@@ -202,7 +201,7 @@ final class OdeContext {
         }
         return null;
     }
-    
+
     public Mapper findMapper(NormalizedMessage nmsMsg, Operation op) {
         ArrayList<Mapper> maybe = new ArrayList<Mapper>();
 
