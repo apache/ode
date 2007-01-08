@@ -509,12 +509,7 @@ abstract class BpelCompiler implements CompilerContext {
         // in the directory that contains the file.
         setResourceFinder(new DefaultResourceFinder(bpelFile.getParentFile()));
         
-        try {
-            _processURI = new URI(bpelFile.getName());
-        } catch (URISyntaxException e) {
-            // Really should never happen.
-            throw new RuntimeException(e);
-        }
+        _processURI = bpelFile.toURI();
         _processDef = process;
         _generatedDate = new Date();
         _structureStack.clear();
