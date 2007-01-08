@@ -203,6 +203,10 @@ class DeploymentUnitDir  {
         return getDocRegistry().getDefinition(name);
     }
 
+    public Definition getDefinitionForPortType(QName name) {
+        return getDocRegistry().getDefinitionForPortType(name);
+    }
+
     public Collection<Definition> getDefinitions() {
         Definition4BPEL defs[] = getDocRegistry().getDefinitions();
         ArrayList<Definition> ret = new ArrayList<Definition>(defs.length);

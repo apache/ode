@@ -106,8 +106,13 @@ public interface ProcessConf {
      */
     Definition getDefinitionForService(QName serviceName);
 
-   
-    
+    /**
+     * Gets the WSDL definition used in a process into which a PortType is defined.
+     * @param portTypeName
+     * @return definition
+     */
+    Definition getDefinitionForPortType(QName portTypeName);
+
     /**
      * Gets the list of endpoints a process should provide.
      * @param processId
