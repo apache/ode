@@ -165,7 +165,7 @@ class MockBpelServer {
     protected DataSource createDataSource() throws Exception {
         if (_txManager == null)
             throw new RuntimeException("No transaction manager");
-        String url = "jdbc:derby:/home/dusty/Dev/Projects/ode/bpel-runtime/target/test-classes/derby-db/data";
+        String url = "jdbc:derby:target/test-classes/derby-db/data";
         _minervaPool = new MinervaPool();
         _minervaPool.setTransactionManager(_txManager);
         _minervaPool.getConnectionFactory().setConnectionURL(url);
@@ -205,7 +205,8 @@ class MockBpelServer {
         });
         propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
         propMap.put("javax.persistence.nonJtaDataSource", _dataSource);
-        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        //propMap.put("openjpa.Log", "DefaultLevel=ERROR");
+        propMap.put("openjpa.Log", "log4j");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
         EntityManager em = emf.createEntityManager();
         _daoCF = new BPELDAOConnectionFactoryImpl(em);
