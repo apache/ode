@@ -55,6 +55,23 @@ public class DocumentRegistry {
         return null;
     }
 
+    /**
+     * Obtains an WSDL definition based on its target namespace.
+     *
+     * @param serviceName
+     *
+     * @return WSDL definition or <code>null</code> if unavailable.
+     */
+    public Definition4BPEL getDefinitionForPortType(QName serviceName) {
+        for (Definition4BPEL definition4BPEL : _definitions) {
+            if (definition4BPEL.getTargetNamespace().equals(serviceName.getNamespaceURI())) {
+                if (definition4BPEL.getPortType(serviceName) != null)
+                    return definition4BPEL;
+            }
+        }
+        return null;
+    }
+
     public Definition4BPEL[] getDefinitions(){
         return _definitions.toArray(new Definition4BPEL[_definitions.size()]);
     }
