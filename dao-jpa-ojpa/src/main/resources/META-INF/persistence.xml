@@ -12,6 +12,7 @@
         <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.EventDAOImpl</class>
         <class>org.apache.ode.dao.jpa.FaultDAOImpl</class>
         <class>org.apache.ode.dao.jpa.MessageDAOImpl</class>
         <class>org.apache.ode.dao.jpa.MessageExchangeDAOImpl</class>

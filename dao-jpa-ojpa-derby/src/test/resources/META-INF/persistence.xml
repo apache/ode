@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
-     <persistence-unit name="ode-unit-test-embedded">
+    <persistence-unit name="ode-unit-test-embedded">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
         <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.EventDAOImpl</class>
         <class>org.apache.ode.dao.jpa.FaultDAOImpl</class>
         <class>org.apache.ode.dao.jpa.MessageDAOImpl</class>
         <class>org.apache.ode.dao.jpa.MessageExchangeDAOImpl</class>
@@ -30,7 +31,7 @@
             <property name="openjpa.ConnectionURL" value="jdbc:derby:target/database/derby/ode-test-db;create=false"/>
             <property name="openjpa.ConnectionUserName" value="SA"/>
             <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
- 
+
             <!-- Use this property to generate DDL at runtime
             <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
             -->
