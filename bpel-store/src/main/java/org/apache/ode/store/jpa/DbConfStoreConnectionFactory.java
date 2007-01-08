@@ -39,7 +39,8 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         _ds = ds;
         HashMap propMap = new HashMap();
         propMap.put("javax.persistence.nonJtaDataSource", ds);
-        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        //propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        propMap.put("openjpa.Log", "log4j");
         propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
 //        propMap.put("openjpa.MetaDataFactory",
 //                "Types=org.apache.ode.store.jpa.ProcessConfDaoImpl;" +
