@@ -27,6 +27,7 @@ import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -64,6 +65,8 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         try {
             if (resourceIdentifier.getLiteralSystemId() == null)
                 location = new URI(resourceIdentifier.getNamespace());
+            else if (resourceIdentifier.getExpandedSystemId() != null)
+                location = new URI(FileUtils.encodePath(resourceIdentifier.getExpandedSystemId()));
             else
                 location = new URI(FileUtils.encodePath(resourceIdentifier.getLiteralSystemId()));
         } catch (URISyntaxException e) {
