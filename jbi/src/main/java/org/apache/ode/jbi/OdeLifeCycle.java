@@ -25,16 +25,11 @@ import org.apache.derby.jdbc.EmbeddedDriver;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.daohib.DataSourceConnectionProvider;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.hibernate.cfg.Environment;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.DialectFactory;
+import org.apache.openjpa.ee.ManagedRuntime;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
 
@@ -44,6 +39,9 @@ import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import java.io.BufferedInputStream;
@@ -108,8 +106,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Creating data source.");
             initDataSource();
 
-            __log.debug("Starting Hibernate.");
-            initHibernate();
+            __log.debug("Starting Dao.");
+            initDao();
 
             __log.info("Hibernate started.");
 
@@ -266,52 +264,30 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     /**
-     * Initialize the Hibernate data store.
+     * Initialize the data store.
      *
      * @throws JBIException
      */
-    private void initHibernate() throws JBIException {
-        Properties properties = new Properties();
-        properties.put(Environment.CONNECTION_PROVIDER,
-                DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
-                HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.SESSION_FACTORY_NAME, "jta");
-
-        File hibernatePropFile = new File(_ode.getContext().getInstallRoot()
-                + File.separatorChar + "hibernate.properties");
-
-        if (hibernatePropFile.exists()) {
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(hibernatePropFile);
-                properties.load(new BufferedInputStream(fis));
-            } catch (IOException e) {
-                String errmsg = __msgs
-                        .msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
-                __log.error(errmsg, e);
-                throw new JBIException(errmsg, e);
-            }
-        } else {
-            __log.info(__msgs
-                    .msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
-        }
-
-        // Guess Hibernate dialect if not specified in hibernate.properties
-        if (properties.get(Environment.DIALECT) == null) {
-            try {
-                properties.put(Environment.DIALECT, guessDialect(_ode._dataSource));
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
-                else __log.error(errmsg);
-            }
-        }
-
-
-        SessionManager sm = new SessionManager(properties, _ode._dataSource, _ode
-                .getTransactionManager());
-        _ode._daocf = new BpelDAOConnectionFactoryImpl(sm);
+    private void initDao() throws JBIException {
+        HashMap propMap = new HashMap();
+        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
+        propMap.put("openjpa.ManagedRuntime", new ManagedRuntime() {
+            public TransactionManager getTransactionManager() throws Exception {
+                return _ode.getTransactionManager();
+            }            
+        });
+        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        propMap.put("javax.persistence.nonJtaDataSource", _ode._dataSource);
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
+//        propMap.put("openjpa.ConnectionUserName", "sa");
+//        propMap.put("openjpa.ConnectionPassword", "");
+//        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+//        propMap.put("ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+//        propMap.put("openjpa.ConnectionURL", url);
+        EntityManager em = emf.createEntityManager();
+//        ((EntityManagerImpl)em).
+        _ode._daocf = new BPELDAOConnectionFactoryImpl(em);
     }
 
     private void initConnector() throws JBIException {
@@ -488,6 +464,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     }
 
+    /*
     private String guessDialect(DataSource dataSource) throws Exception {
         String dialect = null;
         // Open a connection and use that connection to figure out database
@@ -549,5 +526,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 new DialectFactory.VersionInsensitiveMapper(
                         "org.hibernate.dialect.DerbyDialect"));
     }
+    */
 
 }
