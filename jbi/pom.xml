@@ -76,16 +76,6 @@
 			<artifactId>ode-bpel-connector</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.servicemix</groupId>
-			<artifactId>servicemix-jbi</artifactId>
-                        <version>${servicemixVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix</groupId>
-			<artifactId>servicemix-core</artifactId>
-                	<version>${servicemixVersion}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 		</dependency>
