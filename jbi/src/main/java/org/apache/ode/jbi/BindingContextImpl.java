@@ -68,7 +68,7 @@ class BindingContextImpl implements BindingContext {
         if (initialPartnerEndpoint != null) {
             ServiceEndpoint se = _ode.getContext().getEndpoint(initialPartnerEndpoint.serviceName,initialPartnerEndpoint.portName);
             if (se == null)
-                throw new ContextException("Unkown endpoint: "  + initialPartnerEndpoint, null);
+                throw new ContextException("Unknown endpoint: "  + initialPartnerEndpoint, null);
             JbiEndpointReference jbiEpr = new JbiEndpointReference(se);
             return new PartnerRoleChannelImpl(jbiEpr);
         } else {
