@@ -19,8 +19,11 @@
 
 package org.apache.ode.jbi.msgmap;
 
+import java.util.Collection;
+
 import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
+import javax.wsdl.Fault;
 import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
@@ -125,6 +128,23 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     pel.appendChild(doc.importNode(el,true));
     odeMsg.setMessage(msgel);
     
+  }
+
+
+  public Fault toFaultType(javax.jbi.messaging.Fault jbiFlt, Collection<Fault> faults) throws MessageTranslationException {
+      Element el = parse(jbiFlt.getContent());
+      QName elQname = new QName(el.getNamespaceURI(),el.getLocalName());
+      for (Fault f : faults) {
+          if (f.getMessage() == null || f.getMessage().getParts().size() != 1)
+              continue;
+          javax.wsdl.Part pdef = (Part) f.getMessage().getParts().values().iterator().next();
+          if (pdef.getElementName() == null)
+              continue;
+          if (pdef.getElementName().equals(elQName))
+              return f;
+      }
+      
+      return null;
   }
 
   /**

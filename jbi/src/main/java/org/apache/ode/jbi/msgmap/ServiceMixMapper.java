@@ -19,10 +19,12 @@
 
 package org.apache.ode.jbi.msgmap;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
+import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.xml.namespace.QName;
@@ -170,6 +172,13 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
     }
   }
 
+  public Fault toFaultType(javax.jbi.messaging.Fault jbiFlt, Collection<Fault> faults) throws MessageTranslationException {
+      if (faults.isEmpty())
+          return null;
+      
+      // anynone's guess really
+      return faults.iterator().next();
+  }
   private String prettyPrint( Element el ) {
       try {
           return DOMUtils.prettyPrint( el );
@@ -177,4 +186,6 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
           return ioe.getMessage();
       }
   }
+
+
 }
