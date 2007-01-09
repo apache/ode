@@ -186,6 +186,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
 
     try {
       _ode._scheduler.execTransaction(new Callable<Boolean>() {
+        @SuppressWarnings("unchecked")
         public Boolean call() throws Exception {
           PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server
               .getEngine().getMessageExchange(mexref);
@@ -206,9 +207,20 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
             try {
               Fault jbiFlt = jbiMex.getFault();
               if (jbiFlt != null) {
-
-                // TODO: How are we supposed to figure out the fault type exactly?
-                throw new AssertionError("todo");
+                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt,pmex.getOperation().getFaults().values());
+                if (wsdlFlt == null) {
+                    pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Unrecognized fault message.", null);
+                } else {
+                    if (wsdlFlt.getMessage() != null) {
+                        Message faultResponse = pmex.createMessage(wsdlFlt.getMessage().getQName());
+                        mapper.toODE(faultResponse,jbiFlt,wsdlFlt.getMessage());
+                        pmex.replyWithFault(wsdlFlt.getName(), faultResponse);
+                    } else {
+                        // Can this even happen?
+                        __log.fatal("Internal Error: fault found without a message type: " + wsdlFlt); 
+                        pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Fault has no message: " + wsdlFlt.getName(), null);;
+                    }
+                }                    
               } else {
                 Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
                 mapper.toODE(response,jbiMex.getOutMessage(),pmex.getOperation().getOutput().getMessage());
