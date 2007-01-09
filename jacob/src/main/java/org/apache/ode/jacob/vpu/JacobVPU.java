@@ -435,7 +435,7 @@ public final class JacobVPU {
             assert _method != null;
             assert _method.getDeclaringClass().isAssignableFrom(_methodBody.getClass());
 
-            if (__log.isTraceEnabled()) {
+            if (__log.isDebugEnabled()) {
                 String dbgMsg = _cycle + ": " + _source;
                 __log.debug(dbgMsg);
                 _prefix = "     ===> ";
