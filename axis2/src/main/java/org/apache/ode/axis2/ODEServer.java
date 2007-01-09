@@ -142,6 +142,8 @@ public class ODEServer {
         __log.debug("Initializing BPEL server.");
         initBpelServer();
 
+        // Register BPEL event listeners configured in axis2.properties file.
+        registerEventListeners();
 
         try {
             _server.start();
