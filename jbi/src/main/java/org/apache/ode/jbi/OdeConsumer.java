@@ -25,6 +25,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.msgmap.MessageTranslationException;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -207,7 +208,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
             try {
               Fault jbiFlt = jbiMex.getFault();
               if (jbiFlt != null) {
-                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt,pmex.getOperation().getFaults().values());
+                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt, (Collection<javax.wsdl.Fault>) pmex.getOperation().getFaults().values());
                 if (wsdlFlt == null) {
                     pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Unrecognized fault message.", null);
                 } else {
