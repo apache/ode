@@ -264,6 +264,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             jbiMex.setError(new Exception("MEXFailure"));
             jbiMex.setStatus(ExchangeStatus.ERROR);
             // TODO: get failure codes out of the message.
+            _ode.getChannel().send(jbiMex);
         } catch (MessagingException ex) {
             __log.fatal("Error bridging ODE out response: ", ex);
         }
@@ -290,10 +291,10 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
         } catch (MessagingException ex) {
             __log.error("Error bridging ODE out response: ", ex);
-            inout.setError(ex);
+            sendError(jbiMex, ex);
         } catch (MessageTranslationException e) {
             __log.error("Error translating ODE message " + mex.getResponse() + " to NMS format!", e);
-            inout.setError(e);
+            sendError(jbiMex, e);
         }
     }
 
@@ -317,10 +318,19 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             _ode.getChannel().send(inout);
         } catch (MessagingException e) {
             __log.error("Error bridging ODE fault response: ", e);
-            inout.setError(e);
+            sendError(jbiMex, e);
         } catch (MessageTranslationException mte) {
             __log.error("Error translating ODE fault message " + mex.getFaultResponse() + " to NMS format!", mte);
-            inout.setError(mte);
+            sendError(jbiMex, mte);
+        }
+    }
+    
+    private void sendError(javax.jbi.messaging.MessageExchange jbiMex, Exception error) {
+        try {
+            jbiMex.setError(error);
+            _ode.getChannel().send(jbiMex);
+        } catch (Exception e) {
+            __log.error("Error sending ERROR status: ", e);
         }
     }
 
