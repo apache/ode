@@ -34,25 +34,25 @@ import java.util.Stack;
 
 /**
  * The JACOB Virtual Processing Unit ("VPU").
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
 public final class JacobVPU {
     private static final Log __log = LogFactory.getLog(JacobVPU.class);
 
-    /** 
+    /**
      * Internationalization messages.
      */
     private static final JacobMessages __msgs = MessageBundle.getMessages(JacobMessages.class);
 
-    /** 
+    /**
      * Thread-local for associating a thread with a VPU. Needs to be stored in a stack to allow reentrance.
      */
     static final ThreadLocal<Stack<JacobThread>> __activeJacobThread = new ThreadLocal<Stack<JacobThread>>();
 
     private static final Method REDUCE_METHOD;
 
-    /** 
+    /**
      * Resolve the {@link JacobRunnable#run} method statically
      */
     static {
@@ -63,14 +63,14 @@ public final class JacobVPU {
         }
     }
 
-    /** 
+    /**
      * Persisted cross-VPU state (state of the channels)
      */
     private ExecutionQueue _executionQueue;
 
     private Map<Class, Object> _extensions = new HashMap<Class, Object>();
 
-    /** 
+    /**
      * Classloader used for loading object continuations.
      */
     private ClassLoader _classLoader = getClass().getClassLoader();
@@ -79,8 +79,8 @@ public final class JacobVPU {
 
     private Statistics _statistics = new Statistics();
 
-    /** 
-     * The fault "register" of the VPU . 
+    /**
+     * The fault "register" of the VPU .
      */
     private RuntimeException _fault;
 
@@ -92,7 +92,7 @@ public final class JacobVPU {
 
     /**
      * Re-hydration constructor.
-     * 
+     *
      * @param executionQueue previously saved execution context
      */
     public JacobVPU(ExecutionQueue executionQueue) {
@@ -102,7 +102,7 @@ public final class JacobVPU {
     /**
      * Instantiation constructor; used to initialize context with the concretion
      * of a process abstraction.
-     * 
+     *
      * @param context virgin context object
      * @param concretion the process
      */
@@ -113,7 +113,7 @@ public final class JacobVPU {
 
     /**
      * Execute one VPU cycle.
-     * 
+     *
      * @return <code>true</code> if the run queue is not empty after this cycle, <code>false</code> otherwise.
      */
     public boolean execute() {
@@ -159,7 +159,7 @@ public final class JacobVPU {
     /**
      * Set the state of of the VPU; this is analagous to loading a CPU with a
      * thread's context (re-hydration).
-     * 
+     *
      * @param executionQueue
      *            process executionQueue (state)
      */
@@ -284,8 +284,6 @@ public final class JacobVPU {
 
         private final Method _method;
 
-        private String _prefix;
-
         /** Text string identifying the left side of the reduction (for debug). */
         private String _source;
 
@@ -310,8 +308,8 @@ public final class JacobVPU {
 
         public void instance(JacobRunnable template) {
             String desc = null;
-            if (__log.isDebugEnabled()) {
-                __log.debug(_cycle + ": " + _prefix + template);
+            if (__log.isTraceEnabled()) {
+                __log.trace(_cycle + ": " + template);
                 desc = template.toString();
             }
             _statistics.numReductionsStruct++;
@@ -319,8 +317,8 @@ public final class JacobVPU {
         }
 
         public Channel message(Channel channel, Method method, Object[] args) {
-            if (__log.isDebugEnabled()) {
-                __log.debug(_cycle + ": " + _prefix + channel + " ! "
+            if (__log.isTraceEnabled()) {
+                __log.trace(_cycle + ": " + channel + " ! "
                         + method.getName() + "(" + stringify(args) + ")");
             }
             _statistics.messagesSent++;
@@ -352,16 +350,16 @@ public final class JacobVPU {
             _executionQueue.add(chnl);
 
             Channel ret = ChannelFactory.createChannel(chnl, channelType);
-            if (__log.isDebugEnabled())
-                __log.debug(_cycle + ": " + _prefix + "new " + ret);
+            if (__log.isTraceEnabled())
+                __log.trace(_cycle + ": new " + ret);
 
             _statistics.channelsCreated++;
             return ret;
         }
 
         public String exportChannel(Channel channel) {
-            if (__log.isDebugEnabled()) {
-                __log.debug(_cycle + ": " + _prefix + "export<" + channel + ">");
+            if (__log.isTraceEnabled()) {
+                __log.trace(_cycle + ": export<" + channel + ">");
             }
             CommChannel chnl = (CommChannel) ChannelFactory.getBackend(channel);
             return _executionQueue.createExport(chnl);
@@ -373,14 +371,12 @@ public final class JacobVPU {
         }
 
         public void object(boolean replicate, ChannelListener[] ml) {
-            if (__log.isDebugEnabled()) {
+            if (__log.isTraceEnabled()) {
                 StringBuffer msg = new StringBuffer();
                 msg.append(_cycle);
                 msg.append(": ");
-                msg.append(_prefix);
                 for (int i = 0; i < ml.length; ++i) {
-                    if (i != 0)
-                        msg.append(" + ");
+                    if (i != 0) msg.append(" + ");
                     msg.append(ml[i].getChannel());
                     msg.append(" ? ");
                     msg.append(ml.toString());
@@ -425,7 +421,7 @@ public final class JacobVPU {
             return frame;
         }
         */
-        
+
         public Object getExtension(Class extensionClass) {
             return _extensions.get(extensionClass);
         }
@@ -435,10 +431,8 @@ public final class JacobVPU {
             assert _method != null;
             assert _method.getDeclaringClass().isAssignableFrom(_methodBody.getClass());
 
-            if (__log.isDebugEnabled()) {
-                String dbgMsg = _cycle + ": " + _source;
-                __log.debug(dbgMsg);
-                _prefix = "     ===> ";
+            if (__log.isTraceEnabled()) {
+                __log.trace(_cycle + ": " + _source);
             }
 
             Object[] args;
@@ -472,7 +466,6 @@ public final class JacobVPU {
                 ctime = System.currentTimeMillis() - ctime;
                 _statistics.totalClientTimeMs += ctime;
                 unstackThread();
-                _prefix = null;
             }
         }
 
