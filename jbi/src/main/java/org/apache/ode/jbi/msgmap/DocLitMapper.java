@@ -86,6 +86,12 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     Part partdef = (Part) msgdef.getParts().values().iterator().next();
     assert partdef.getElementName() != null : "non-element part!";
 
+    if (odeMsg.getMessage() == null) {
+        String errmsg = "Unknown fault: " +  odeMsg.getType();
+        __log.debug(errmsg);
+        throw new MessageTranslationException(errmsg);
+    }
+    
     Element part = DOMUtils.findChildByName(odeMsg.getMessage(),new QName(null, partdef.getName()));
     if (part == null) {
       String errmsg = "ODE message did not contain expected part: " +  partdef.getName();
