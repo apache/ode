@@ -140,7 +140,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
           javax.wsdl.Part pdef = (Part) f.getMessage().getParts().values().iterator().next();
           if (pdef.getElementName() == null)
               continue;
-          if (pdef.getElementName().equals(elQName))
+          if (pdef.getElementName().equals(elQname))
               return f;
       }
       
