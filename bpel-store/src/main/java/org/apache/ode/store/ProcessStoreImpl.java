@@ -85,6 +85,10 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public ProcessStoreImpl(DataSource ds) {
+        this(ds, false);
+    }
+    
+    public ProcessStoreImpl(DataSource ds, boolean auto) {
         String persistenceType = System.getProperty("ode.persistence");
         if (ds != null) {
             if ("hibernate".equalsIgnoreCase(persistenceType))
@@ -92,13 +96,9 @@ public class ProcessStoreImpl implements ProcessStore {
             else
                 _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds);
         } else {
-
             // If the datasource is not provided, then we create a HSQL-based in-memory
             // database. Makes testing a bit simpler.
-            jdbcDataSource hsqlds = new jdbcDataSource();
-            hsqlds.setDatabase("jdbc:hsqldb:mem:" + _guid);
-            hsqlds.setUser("sa");
-            hsqlds.setPassword("");
+            DataSource hsqlds = createInternalDS(_guid);
             if ("hibernate".equalsIgnoreCase(persistenceType))
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, false);
             else
@@ -108,16 +108,15 @@ public class ProcessStoreImpl implements ProcessStore {
 
     }
 
+
     public void shutdown() {
         if (_inMemDs != null) {
-            try {
-                _inMemDs.getConnection().createStatement().execute("SHUTDOWN;");
-            } catch (SQLException e) {
-                __log.error("Error shutting down.", e);
-            }
+            shutdownInternalDB(_inMemDs);
+            _inMemDs = null;
         }
     }
 
+    
     @Override
     protected void finalize() throws Throwable {
         // force a shutdown so that HSQL cleans up its mess.
@@ -405,19 +404,22 @@ public class ProcessStoreImpl implements ProcessStore {
      * 
      */
     public void loadAll() {
-        
+        final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
         exec(new Callable<Object>() {
             public Object call(ConfStoreConnection conn) {
                 Collection<DeploymentUnitDAO> dus = conn.getDeploymentUnits();
                 for (DeploymentUnitDAO du : dus)
                     try {
-                        load(du);
+                       loaded.addAll(load(du));
                     } catch (Exception ex) {
                         __log.error("Error loading DU from store: " + du.getName(), ex);
                     }
                 return null;
             }
         });
+        
+        for (ProcessConfImpl p : loaded)
+            fireStateChange(p.getProcessId(), p.getState());
 
     }
 
@@ -529,7 +531,7 @@ public class ProcessStoreImpl implements ProcessStore {
      * Load a deployment unit record stored in the db into memory.
      * @param dudao
      */
-    private void load(DeploymentUnitDAO dudao) {
+    protected List<ProcessConfImpl>load(DeploymentUnitDAO dudao) {
 
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
@@ -546,12 +548,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
         _rw.writeLock().lock();
         try {
-            // NOTE: we don't try to reload things here.
-            if (_deploymentUnits.containsKey(dudao.getName())) {
-                __log.debug("Skipping load of " + dudao.getName() + ", it is already loaded.");
-                return;
-            }
-
             _deploymentUnits.put(dud.getName(),dud);
             
             for (ProcessConfDAO p : dudao.getProcesses()) {
@@ -574,10 +570,7 @@ public class ProcessStoreImpl implements ProcessStore {
             _rw.writeLock().unlock();
         }
 
-        // Fire the events outside of the lock
-        for (ProcessConfImpl p : loaded)
-            fireStateChange(p.getProcessId(), p.getState());
-
+       return loaded;
     }
 
     /**
@@ -617,6 +610,22 @@ public class ProcessStoreImpl implements ProcessStore {
     
     public void setDeployDir(File depDir) {
         _deployDir = depDir;
+    }
+
+    public static DataSource createInternalDS(String guid) {
+        jdbcDataSource hsqlds = new jdbcDataSource();
+        hsqlds.setDatabase("jdbc:hsqldb:mem:" + guid);
+        hsqlds.setUser("sa");
+        hsqlds.setPassword("");
+        return hsqlds;
+    }
+
+    public static void shutdownInternalDB(DataSource ds) {
+        try {
+            ds.getConnection().createStatement().execute("SHUTDOWN;");
+        } catch (SQLException e) {
+            __log.error("Error shutting down.", e);
+        }
     }
 
 }

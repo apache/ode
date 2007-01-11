@@ -14,6 +14,9 @@ import junit.framework.TestCase;
 public class DeploymentUnitTest  extends TestCase {
     DeploymentUnitDir du;
     
+    /**
+     * Test some complicated xsd/wsdl loading. 
+     */
     public void setUp() throws Exception {
         File dir = new File(getClass().getResource("/complexImport/deploy.xml").getPath()).getParentFile();
         du = new DeploymentUnitDir(dir);

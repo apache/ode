@@ -26,10 +26,19 @@ import java.net.URI;
 import javax.wsdl.xml.WSDLLocator;
 
 /**
- * Simple wrapper for WSDL location.
+ * General interace for retrieving resources identified by a URI.
+ * 
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
 public interface ResourceFinder {
   
+    /**
+     * Obtain an input stream to the resource at the given URI. 
+     * @param uri resource URI
+     * @return input stream or <code>null</code> if the resource is not found
+     * @throws MalformedURLException in case of invalid URI
+     * @throws IOException in case of read error
+     */
     InputStream openResource(URI uri) throws MalformedURLException, IOException;
 
 }

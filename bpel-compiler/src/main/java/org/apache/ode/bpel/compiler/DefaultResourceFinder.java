@@ -28,17 +28,33 @@ import java.net.URI;
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 
-
+/**
+ * Basic implementation of the {@link ResourceFinder} interface. Resolves
+ * URIs relative to a base URI specified at the time of construction.
+ *  
+ * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
+ *
+ */
 public class DefaultResourceFinder implements ResourceFinder {
-
+    private static final Log __log = LogFactory.getLog(DefaultResourceFinder.class); 
+    
     private File _suDir;
 
+    /**
+     * Default constructor: resolve relative URIs against current working directory.
+     */
     public DefaultResourceFinder() {
         _suDir = new File("");
     }
 
+    /**
+     * Constructor: resolve relative URIs against specified directory.
+     * @param suDir base path for relative URIs.
+     */
     public DefaultResourceFinder(File suDir) {
         _suDir = suDir;
     }
@@ -46,10 +62,13 @@ public class DefaultResourceFinder implements ResourceFinder {
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
         URI suURI = _suDir.toURI();
+        
+        // Note that if we get an absolute URI, the relativize operation will simply 
+        // return the absolute URI. 
         URI relative = suURI.relativize(uri);
-        if (relative.isAbsolute()) {
-            // We don't allow absolute URIs 
-            return null;
+        if (relative.isAbsolute() && !relative.getScheme().equals("urn")) {
+           __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
+           return null;
         }
         
         return new FileInputStream(new File(suURI.getPath(),relative.getPath()));
