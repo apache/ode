@@ -20,7 +20,6 @@ package org.apache.ode.bpel.compiler;
 
 import java.io.StringReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +45,6 @@ import org.apache.ode.bpel.compiler.bom.PropertyAlias;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.XMLSchemaType;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;
@@ -71,11 +69,10 @@ class WSDLRegistry {
 
     private SchemaModel _model;
 
-    private WsdlFinderXMLEntityResolver _resolver;
     private CompilerContext _ctx;
 
 
-    WSDLRegistry(ResourceFinder finder, CompilerContext cc) {
+    WSDLRegistry(CompilerContext cc) {
         // bogus schema to force schema creation
         _schemas.put(URI.create("http://fivesight.com/bogus/namespace"),
                 ("<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
@@ -83,8 +80,6 @@ class WSDLRegistry {
                         + "<xsd:simpleType name=\"__bogusType__\">"
                         + "<xsd:restriction base=\"xsd:normalizedString\"/>"
                         + "</xsd:simpleType>" + "</xsd:schema>").getBytes());
-        if (finder != null)
-            _resolver = new WsdlFinderXMLEntityResolver(finder);
         
         _ctx = cc;
     }
@@ -119,7 +114,7 @@ class WSDLRegistry {
      * @param def WSDL definition
      */
     @SuppressWarnings("unchecked")
-    public void addDefinition(Definition4BPEL def) throws CompilationException {
+    public void addDefinition(Definition4BPEL def, ResourceFinder rf, URI defuri) throws CompilationException {
         if (def == null)
             throw new NullPointerException("def=null");
 
@@ -131,7 +126,7 @@ class WSDLRegistry {
             // This indicates that we imported a WSDL with the same namespace from
             // two different locations. This is not an error, but should be a warning.
             if (__log.isInfoEnabled()) {
-                __log.info("WSDL at " + def.getDocumentBaseURI() + " is a duplicate import, your documents " +
+                __log.info("WSDL at " + defuri + " is a duplicate import, your documents " +
                         "should all be in different namespaces (its's not nice but will still work).");
             }
         }
@@ -143,7 +138,7 @@ class WSDLRegistry {
         defs.add(def);
         _definitions.put(def.getTargetNamespace(), defs);
 
-        captureSchemas(def);
+        captureSchemas(def, rf, defuri);
 
         if (__log.isDebugEnabled())
             __log.debug("Processing <imports> in " + def.getDocumentBaseURI());
@@ -181,13 +176,13 @@ class WSDLRegistry {
                 }
 
                 imported.add(im.getNamespaceURI());
-                addDefinition((Definition4BPEL) im.getDefinition());
+                addDefinition((Definition4BPEL) im.getDefinition(), rf, defuri.resolve(im.getLocationURI()));
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void captureSchemas(Definition def) throws CompilationException {
+    private void captureSchemas(Definition def, ResourceFinder rf, URI defuri) throws CompilationException {
         assert def != null;
 
         if (__log.isDebugEnabled())
@@ -201,20 +196,15 @@ class WSDLRegistry {
                  iter.hasNext();) {
                 ExtensibilityElement ee = iter.next();
 
+                
                 if (ee instanceof XMLSchemaType) {
                     String schema = ((XMLSchemaType)ee).getXMLSchema();
                     Map<URI, byte[]> capture = null;
-                    URI docuri;
-                    try {
-                        docuri = new URI(FileUtils.encodePath(def.getDocumentBaseURI()));
-                    } catch (URISyntaxException e) {
-                        // This is really quite unexpected..
-                        __log.fatal("Internal Error: WSDL Base URI is invalid.",e);
-                        throw new RuntimeException(e);
-                    }
 
+                    WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri);
                     try {
-                        capture = XSUtils.captureSchema(docuri, schema, _resolver);
+                        
+                        capture = XSUtils.captureSchema(defuri, schema, resolver);
 
                         // Add new schemas to our list.
                         _schemas.putAll(capture);
@@ -223,12 +213,12 @@ class WSDLRegistry {
                             Document doc = DOMUtils.parse(new InputSource(new StringReader(schema)));
                             String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
                             if (schemaTargetNS != null && schemaTargetNS.length() > 0)
-                                _resolver.addInternalResource(schemaTargetNS, schema);
+                                resolver.addInternalResource(new URI(schemaTargetNS), schema);
                         } catch (Exception e) {
                             throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
                         }
                     } catch (XsdException xsde) {
-                        __log.debug("captureSchemas: capture failed for " + docuri,xsde);
+                        __log.debug("captureSchemas: capture failed for " + defuri,xsde);
 
                         LinkedList<XsdException> exceptions = new LinkedList<XsdException>();
                         while (xsde != null)  {

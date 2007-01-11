@@ -279,28 +279,6 @@ public class BpelC {
         try {
             Serializer fileHeader = new Serializer(System.currentTimeMillis());
             fileHeader.writeOProcess(oprocess, _outputStream);
-
-//      if (_bpelFile.toString().startsWith("file:") && _outputDir != null) {
-//        String filePath = _bpelFile.getFile();
-//        filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".dd";
-//
-//        DDHandler ddHandler;
-//        try {
-//          ddHandler = new DDHandler(new File(filePath));
-//          if (!ddHandler.exists()) __log.info("No deployment descriptor found, one will be generated if needed.");
-//          boolean modified = ddHandler.validateAndEnhance(oprocess, compiler.getWsdlDefinitions());
-//          if (ddHandler.exists() || modified)
-//            ddHandler.write(new File(_outputDir, oprocess.getName() + ".dd"));
-//        } catch (DDValidationException e) {
-//          CompilationMessage cm = __cmsgs.errInvalidDeploymentDescriptor(e.getMessage());
-//          logCompilationMessage(cm);
-//          throw new CompilationException(cm);
-//        } catch (DDException e) {
-//          logCompilationMessage(__cmsgs.errInvalidDeploymentDescriptor(e.getMessage()));
-//        }
-//      } else {
-//        __log.warn("Post-compilation using deployment descriptor deactivated (compilation from url or stream).");
-//      }
         } finally {
             // close & mark myself invalid
             this.invalidate();

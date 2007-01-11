@@ -41,7 +41,7 @@ public class WSDLRegistryTest extends TestCase {
   protected void setUp() throws Exception
   {
     super.setUp();
-    _registry = new WSDLRegistry(null, null);
+    _registry = new WSDLRegistry(null);
   }
 
   protected void tearDown() throws Exception

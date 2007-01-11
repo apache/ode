@@ -180,7 +180,7 @@ class DeploymentUnitDir  {
 
     public DocumentRegistry getDocRegistry() {
         if (_docRegistry == null) {
-            _docRegistry = new DocumentRegistry(new DocumentEntityResolver(_duDirectory));
+            _docRegistry = new DocumentRegistry();
 
             WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
             WSDLReader r = wsdlFactory.newWSDLReader();
