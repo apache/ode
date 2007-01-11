@@ -17,8 +17,8 @@
       
 	<wsdl:types>
      <xsd:schema targetNamespace="http://foo/bar" >
-       <xsd:import namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.xsd"
-        schemaLocation="baz.xsd"/>
+       <xsd:import namespace="http://foo.xsd"
+        schemaLocation="../foo.xsd"/>
     </xsd:schema>
     </wsdl:types>
 </wsdl:definitions>
