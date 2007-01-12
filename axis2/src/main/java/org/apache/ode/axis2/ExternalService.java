@@ -19,6 +19,12 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -37,14 +43,10 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to
@@ -63,13 +65,16 @@ public class ExternalService implements PartnerRoleChannel {
     private AxisConfiguration _axisConfig;
     private boolean _isReplicateEmptyNS = false;
 
+    private Scheduler _sched;
+
     public ExternalService(Definition definition, QName serviceName,
-                           String portName, ExecutorService executorService, AxisConfiguration axisConfig) {
+                           String portName, ExecutorService executorService, AxisConfiguration axisConfig, Scheduler sched) {
         _definition = definition;
         _serviceName = serviceName;
         _portName = portName;
         _executorService = executorService;
         _axisConfig = axisConfig;
+        _sched = sched;
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -102,38 +107,42 @@ public class ExternalService implements PartnerRoleChannel {
             serviceClient.setOverrideOptions(mexOptions);
 
             if (isTwoWay) {
-                // Invoking in a separate thread even though we're supposed to wait for a synchronous reply
-                // to force clear transaction separation.
-                Future<OMElement> freply = _executorService.submit(new Callable<OMElement>() {
-                    public OMElement call() throws Exception {
-                        return serviceClient.sendReceive(payload);
-                    }
-                });
-                OMElement reply;
-                try {
-                    reply = freply.get();
+                // Defer the invoke until the transaction commits. 
+                
+                _sched.registerSynchronizer(new Scheduler.Synchronizer() {
 
-                    if (reply == null) {
-                        String errmsg = "Received empty (null) reply for ODE mex " + odeMex;
-                        __log.error(errmsg);
-                        odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
-                    } else {
-                        Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
-                        Element responseElmt = OMUtils.toDOM(reply);
-                        responseElmt = SOAPUtils.unwrap(responseElmt, _definition,
-                                odeMex.getOperation().getOutput().getMessage(), _serviceName);
-                        __log.debug("Received synchronous response for MEX " + odeMex);
-                        __log.debug("Message: " + DOMUtils.domToString(responseElmt));
-                        response.setMessage(responseElmt);
-                        odeMex.reply(response);
+                    public void afterCompletion(boolean success) {
+                        // If the TX is rolled back, then we don't send the request.
+                        if (!success) return;
+                        OMElement reply;
+                        try {
+                            reply = serviceClient.sendReceive(payload);
+                            reply(odeMex,reply);
+                        } catch (Throwable t) {
+                            String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
+                            __log.error(errmsg, t);
+                            replyWithFailure(odeMex,MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                            return;
+                        }
+                        if (reply == null) {
+                            String errmsg = "Received empty (null) reply for ODE mex " + odeMex;
+                            __log.error(errmsg);
+                            replyWithFailure(odeMex,MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                        } else {
+                        }
                     }
-                } catch (Exception e) {
-                    String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-                    __log.error(errmsg, e);
-                    odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
-                }
+
+
+
+                    public void beforeCompletion() {                
+                    }
+                    
+                });
+                odeMex.replyAsync();
+              
             } else /** one-way case **/ {
                 serviceClient.fireAndForget(payload);
+                odeMex.replyOneWayOk();
             }
         } catch (AxisFault axisFault) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
@@ -198,4 +207,53 @@ public class ExternalService implements PartnerRoleChannel {
     public QName getServiceName() {
         return _serviceName;
     }
+    
+    
+    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg,final Element details) {
+        // ODE MEX needs to be invoked in a TX.
+        try {
+            _sched.execTransaction(new Callable<Void>() {
+                public Void call() throws Exception {
+                    odeMex.replyWithFailure(error, errmsg, details);
+                    return null;
+                }
+            });
+
+        } catch (Exception e) {
+            String emsg = "Error executing replyWithFailure transaction; reply will be lost.";
+            __log.error(emsg, e);
+
+        }
+        
+    }
+
+    private void reply(final PartnerRoleMessageExchange odeMex, final OMElement reply) {
+        // ODE MEX needs to be invoked in a TX.
+        try {
+            _sched.execTransaction(new Callable<Void>() {
+                public Void call() throws Exception {
+                    Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
+                    try {
+                        Element responseElmt = OMUtils.toDOM(reply);
+                        responseElmt = SOAPUtils.unwrap(responseElmt, _definition,
+                                odeMex.getOperation().getOutput().getMessage(), _serviceName);
+                        __log.debug("Received synchronous response for MEX " + odeMex);
+                        __log.debug("Message: " + DOMUtils.domToString(responseElmt));
+                        response.setMessage(responseElmt);
+                        odeMex.reply(response);
+                    } catch (Exception ex) {
+                        String errmsg =  "Unable to process response: " + ex.getMessage();
+                        __log.error(errmsg, ex);
+                        odeMex.replyWithFailure(FailureType.FORMAT_ERROR,errmsg, null);
+                    }
+                    return null;
+                }
+            });
+
+        } catch (Exception e) {
+            String errmsg = "Error executing reply transaction; reply will be lost.";
+            __log.error(errmsg, e);
+        }        
+    }
+
 }
