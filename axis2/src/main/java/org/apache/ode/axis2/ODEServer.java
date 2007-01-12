@@ -245,7 +245,7 @@ public class ODEServer {
         if (extService != null)
             return extService;
 
-        extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig);
+        extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler);
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting external service with empty namespace replication");
             extService.setReplicateEmptyNS(true);
@@ -527,6 +527,7 @@ public class ODEServer {
                 String listenerCN = tokenizer.nextToken();
                 try {
                     _server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
+                    __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be " +
                             "loaded properly.");
