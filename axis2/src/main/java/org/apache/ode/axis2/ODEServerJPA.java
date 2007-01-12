@@ -1,18 +1,5 @@
 package org.apache.ode.axis2;
 
-import java.io.File;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -36,7 +23,24 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
+import org.apache.openjpa.ee.ManagedRuntime;
 import org.opentools.minerva.MinervaPool;
+
+import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -332,17 +336,30 @@ public class ODEServerJPA extends ODEServer {
     }
 
     private void initJPA() {
-
-        BPELDAOConnectionFactoryImpl daoCF = new BPELDAOConnectionFactoryImpl();
-        daoCF.setTransactionManager(_txMgr);
-        daoCF.setDBDictionary("org.apache.openjpa.jdbc.sql.DerbyDictionary");
-        daoCF.setDataSource(_datasource);
-        daoCF.init(null);
-
-        _daoCF = daoCF;
+        HashMap propMap = new HashMap();
+        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
+        propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
+        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        propMap.put("javax.persistence.nonJtaDataSource", _datasource);
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
+//        propMap.put("openjpa.ConnectionUserName", "sa");
+//        propMap.put("openjpa.ConnectionPassword", "");
+//        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+//        propMap.put("ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+//        propMap.put("openjpa.ConnectionURL", url);
+        EntityManager em = emf.createEntityManager();
+//        ((EntityManagerImpl)em).
+        _daoCF = new BPELDAOConnectionFactoryImpl(em);
     }
 
-  
+    public class TxMgrProvider implements ManagedRuntime {
+        public TxMgrProvider() {
+        }
+        public TransactionManager getTransactionManager() throws Exception {
+            return _txMgr;
+        }
+    }
 
     /**
      * Initialize the Hibernate data store.
