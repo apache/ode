@@ -138,8 +138,13 @@ public class Messages extends MessageBundle {
     return format("The WSDL for namespace \"{0}\" could not be found in \"{1}\".", wsdlUri, location);
   }
 
+  public String msgBpelEventListenerRegistered(String listenerCN) {
+     return format("Registered custom BPEL event listener: {0}", listenerCN);
+  }
+
   public String msgOdeShutdownCompleted() {
       return "Shutdown completed. ";
   }
+
 
 }
