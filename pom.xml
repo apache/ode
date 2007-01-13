@@ -90,8 +90,8 @@
         <xalanVersion>2.7.0</xalanVersion>
         <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
         <openjpaVersion>0.9.6-incubating-SNAPSHOT</openjpaVersion>
-        <commonsDBCPVersion>1.2.1</commonsDBCPVersion>
         <persistenceAPIVersion>1.0</persistenceAPIVersion>
+	<dom4jVersion>1.6.1</dom4jVersion>
 
         <!--
         | Build number used by the intalio:release plugin
@@ -135,7 +135,7 @@
         <module>bpel-store</module>
         <module>dao-hibernate-db-derby</module>
 
-        <module>jbi</module>
+        <!-- <module>jbi</module> -->
 
         <module>jca-ra</module>
         <module>jca-rar</module>
@@ -530,6 +530,7 @@
                 <version>${project.version}</version>
                 <classifier>tar</classifier>
             </dependency>
+
             <dependency>
                 <groupId>axis</groupId>
                 <artifactId>axis-saaj</artifactId>
@@ -539,6 +540,24 @@
                 <groupId>quartz</groupId>
                 <artifactId>quartz</artifactId>
                 <version>${quartzVersion}</version>
+                <exclusions>
+	  	   <exclusion>
+		      <groupId>commons-dbcp</groupId>
+                      <artifactId>commons-dbcp</artifactId>
+		   </exclusion>	
+	  	   <exclusion>
+		      <groupId>javax.mail</groupId>
+                      <artifactId>mail</artifactId>
+		   </exclusion>	
+	  	   <exclusion>
+		      <groupId>javax.servlet</groupId>
+                      <artifactId>servlet</artifactId>
+		   </exclusion>	
+	  	   <exclusion>
+		      <groupId>javax.ejb</groupId>
+                      <artifactId>ejb</artifactId>
+		   </exclusion>	
+                </exclusions>	
             </dependency>
 
             <dependency>
@@ -619,6 +638,10 @@
                         <artifactId>xml-apis</artifactId>
                         <groupId>xml-apis</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>junit</artifactId>
+                        <groupId>junit</groupId>
+                    </exclusion>
 
                 </exclusions>
             </dependency>
@@ -641,8 +664,40 @@
                 <version>${hibernateVersion}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>jta</artifactId>
                         <groupId>javax.transaction</groupId>
+                        <artifactId>jta</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>ant</artifactId>
+                        <groupId>ant</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xml-apis</artifactId>
+                        <groupId>xml-apis</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xerces</artifactId>
+                        <groupId>xercesImpl</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xerces</artifactId>
+                        <groupId>xmlParserAPIs</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>stax</artifactId>
+                        <groupId>stax-ri</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xalan</artifactId>
+                        <groupId>xalan</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jdom</artifactId>
+                        <groupId>jdom</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>dom4j</artifactId>
+                        <groupId>dom4j</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -654,6 +709,22 @@
                     <exclusion>
                         <artifactId>xalan</artifactId>
                         <groupId>xalan</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xerces</artifactId>
+                        <groupId>xercesImpl</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xerces</artifactId>
+                        <groupId>xmlParserAPIs</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jdom</artifactId>
+                        <groupId>jdom</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>dom4j</artifactId>
+                        <groupId>dom4j</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -709,8 +780,16 @@
                 <version>${jotmVersion}</version>
                 <exclusions>
                     <exclusion>
+                        <artifactId>junit</artifactId>
+                        <groupId>junit</groupId>
+                    </exclusion>
+                    <exclusion>
                         <artifactId>jta</artifactId>
                         <groupId>javax.transaction</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>javax.jts</artifactId>
+                        <groupId>jts</groupId>
                     </exclusion>
                     <exclusion>
                         <groupId>javax.resource</groupId>
@@ -719,6 +798,14 @@
                     <exclusion>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-cli</groupId>
+                        <artifactId>commons-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -892,11 +979,6 @@
                 <groupId>javax.persistence</groupId>
                 <artifactId>persistence-api</artifactId>
                 <version>${persistenceAPIVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-dbcp</groupId>
-                <artifactId>commons-dbcp</artifactId>
-                <version>${commonsDBCPVersion}</version>
             </dependency>
 
             <dependency>
