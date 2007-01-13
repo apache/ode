@@ -99,7 +99,12 @@
               <artifactId>ode-bpel-store</artifactId>
               <version>${project.version}</version>
             </dependency>
-    
+            
+            <dependency>
+              <groupId>dom4j</groupId>
+              <artifactId>dom4j</artifactId>
+              <version>${dom4jVersion}</version>
+            </dependency>
           </dependencies>
         </plugin>
 
