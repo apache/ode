@@ -58,6 +58,17 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-dao</artifactId>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+	    <scope>compile</scope>
+        </dependency>
+    <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>persistence-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+
 
     </dependencies>
 
