@@ -19,19 +19,13 @@
 
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.derby.jdbc.EmbeddedDriver;
-import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.fs.TempFileManager;
-import org.apache.openjpa.ee.ManagedRuntime;
-import org.opentools.minerva.MinervaPool;
-import org.opentools.minerva.MinervaPool.PoolType;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
 import javax.jbi.component.ComponentContext;
@@ -39,29 +33,26 @@ import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.derby.jdbc.EmbeddedDriver;
+import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.fs.TempFileManager;
+import org.opentools.minerva.MinervaPool;
+import org.opentools.minerva.MinervaPool.PoolType;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this
  * engine class automatically when JBI framework starts up.
  */
 public class OdeLifeCycle implements ComponentLifeCycle {
-
-    private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
     private static final Messages __msgs = Messages.getMessages(Messages.class);
     private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
 
@@ -269,25 +260,33 @@ public class OdeLifeCycle implements ComponentLifeCycle {
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-        HashMap propMap = new HashMap();
-        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
-        propMap.put("openjpa.ManagedRuntime", new ManagedRuntime() {
-            public TransactionManager getTransactionManager() throws Exception {
-                return _ode.getTransactionManager();
-            }            
-        });
-        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-        propMap.put("javax.persistence.nonJtaDataSource", _ode._dataSource);
-        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
-//        propMap.put("openjpa.ConnectionUserName", "sa");
-//        propMap.put("openjpa.ConnectionPassword", "");
-//        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-//        propMap.put("ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-//        propMap.put("openjpa.ConnectionURL", url);
-        EntityManager em = emf.createEntityManager();
-//        ((EntityManagerImpl)em).
-        _ode._daocf = new BPELDAOConnectionFactoryImpl(em);
+    
+        Properties properties = new Properties();
+        File daoPropFile;
+        String confDir = _ode.getContext().getInstallRoot();
+        daoPropFile = new File((confDir != null) ? new File(confDir) : new File(""), "bpel-dao.properties");
+    
+        if (daoPropFile.exists()) {
+            FileInputStream fis;
+            try {
+                fis = new FileInputStream(daoPropFile);
+                properties.load(new BufferedInputStream(fis));
+            } catch (IOException e) {
+                String errmsg = __msgs.msgOdeInitDAOErrorReadingProperties(daoPropFile);
+                __log.error(errmsg, e);
+                throw new JBIException(errmsg, e);
+            }
+        } else {
+            __log.info(__msgs.msgOdeInitDAOPropertiesNotFound(daoPropFile));
+        }
+    
+        BpelDAOConnectionFactoryJDBC cf = createDaoCF();
+        cf.setDataSource(_ode._dataSource);
+        cf.setTransactionManager(_ode.getTransactionManager());
+        cf.init(properties);
+
+
+        _ode._daocf = cf;
     }
 
     private void initConnector() throws JBIException {
@@ -311,6 +310,22 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
+    private BpelDAOConnectionFactoryJDBC createDaoCF() throws JBIException {
+        String pClassName = _ode._config.getDAOConnectionFactory();
+
+        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
+
+        BpelDAOConnectionFactoryJDBC cf;
+        try {
+            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
+            __log.error(errmsg, ex);
+            throw new JBIException(errmsg, ex);
+        }
+
+        return cf;
+    }
 
     public synchronized void start() throws JBIException {
         if (_started)
@@ -464,68 +479,5 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     }
 
-    /*
-    private String guessDialect(DataSource dataSource) throws Exception {
-        String dialect = null;
-        // Open a connection and use that connection to figure out database
-        // product name/version number in order to decide which Hibernate
-        // dialect to use.
-        Connection conn = dataSource.getConnection();
-        try {
-            DatabaseMetaData metaData = conn.getMetaData();
-            if (metaData != null) {
-                String dbProductName = metaData.getDatabaseProductName();
-                int dbMajorVer = metaData.getDatabaseMajorVersion();
-                __log.info("Using database " + dbProductName + " major version "
-                        + dbMajorVer);
-                DialectFactory.DatabaseDialectMapper mapper = (DialectFactory.DatabaseDialectMapper) HIBERNATE_DIALECTS
-                        .get(dbProductName);
-                if (mapper != null) {
-                    dialect = mapper.getDialectClass(dbMajorVer);
-                } else {
-                    Dialect hbDialect = DialectFactory.determineDialect(
-                            dbProductName, dbMajorVer);
-                    if (hbDialect != null)
-                        dialect = hbDialect.getClass().getName();
-                }
-            }
-        } finally {
-            conn.close();
-        }
-
-        if (dialect == null) {
-            __log
-                    .info("Cannot determine hibernate dialect for this database: using the default one.");
-            dialect = DEFAULT_HIBERNATE_DIALECT;
-        }
-
-        assert dialect != null;
-
-        return dialect;
-
-    }
-
-    private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
-
-    static {
-        // Hibernate has a nice table that resolves the dialect from the database
-        // product name,
-        // but doesn't include all the drivers. So this is supplementary, and some
-        // day in the
-        // future they'll add more drivers and we can get rid of this.
-        // Drivers already recognized by Hibernate:
-        // HSQL Database Engine
-        // DB2/NT
-        // MySQL
-        // PostgreSQL
-        // Microsoft SQL Server Database, Microsoft SQL Server
-        // Sybase SQL Server
-        // Informix Dynamic Server
-        // Oracle 8 and Oracle >8
-        HIBERNATE_DIALECTS.put("Apache Derby",
-                new DialectFactory.VersionInsensitiveMapper(
-                        "org.hibernate.dialect.DerbyDialect"));
-    }
-    */
-
+  
 }
