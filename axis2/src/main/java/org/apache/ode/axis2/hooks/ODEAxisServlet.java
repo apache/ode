@@ -19,13 +19,12 @@
 
 package org.apache.ode.axis2.hooks;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.ode.axis2.ODEServer;
-import org.apache.ode.axis2.ODEServerJPA;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 /**
  * Overrides standard AxisServlet to handle our service configurations and
@@ -44,10 +43,7 @@ public class ODEAxisServlet extends AxisServlet {
      */
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        String persistenceType = System.getProperty("ode.persistence");
-        if ("hibernate".equalsIgnoreCase(persistenceType)) _odeServer = new ODEServer();
-        else _odeServer = new ODEServerJPA();
-        _odeServer.init(config, axisConfiguration);
+        _odeServer = new ODEServer();
     }
 
     public void stop() throws AxisFault {
