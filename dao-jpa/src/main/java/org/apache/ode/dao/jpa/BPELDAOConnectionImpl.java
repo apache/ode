@@ -55,9 +55,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     @OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
     private Collection<ScopeDAOImpl> _scopes = new ArrayList<ScopeDAOImpl>();
 
-    public BPELDAOConnectionImpl() {}
-    public BPELDAOConnectionImpl(Long id, EntityManager em) {
-        _id = id;
+    public BPELDAOConnectionImpl(EntityManager em) {
+        _id = 0L;
         _em = em;
     }
 
