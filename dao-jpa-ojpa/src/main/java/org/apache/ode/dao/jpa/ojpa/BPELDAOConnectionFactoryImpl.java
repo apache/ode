@@ -52,7 +52,6 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         return new BPELDAOConnectionImpl(_emf.createEntityManager());
     }
 
-    @SuppressWarnings("unchecked")
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();
 
@@ -66,7 +65,8 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
             propMap.put("openjpa.jdbc.DBDictionary", _dbdictionary);
 
         if (properties != null)
-            propMap.putAll((Map<? extends String, ? extends Object>) properties);
+            for (Map.Entry me : properties.entrySet())
+                propMap.put((String)me.getKey(),me.getValue());
         
         _emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
     }
