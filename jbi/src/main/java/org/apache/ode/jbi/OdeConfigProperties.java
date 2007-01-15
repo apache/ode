@@ -28,7 +28,6 @@ import javax.jbi.JBIException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.ode.jbi.msgmap.JbiWsdl11WrapperMapper;
 
 public class OdeConfigProperties extends Properties {
@@ -43,6 +42,8 @@ public class OdeConfigProperties extends Properties {
     private static final String PROP_NAMESPACE = "ode-jbi.pidNamespace";
 
     private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "ode-jbi.allowIncompleteDeployment";
+   
+    private static final String PROP_DAOCF = "ode-jbi.dao.factory";
 
     private static final String PROP_DB_MODE = "ode-jbi.db.mode";
 
@@ -59,6 +60,7 @@ public class OdeConfigProperties extends Properties {
     private static final String PROP_CONNECTOR_PORT = "ode-jbi.connector.registryPort";
 
     private static final String PROP_CONNECTOR_NAME = "ode-jbi.connector.registryName";
+
 
     private String _installDir;
 
@@ -160,5 +162,9 @@ public class OdeConfigProperties extends Properties {
 
     public String getConnectorName() {
         return getProperty(PROP_CONNECTOR_NAME, "ode");
+    }
+
+    public String getDAOConnectionFactory() {
+        return getProperty(PROP_DAOCF, "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl");        
     }
 }

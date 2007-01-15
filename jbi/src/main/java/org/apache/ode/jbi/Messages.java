@@ -40,10 +40,6 @@ public class Messages extends MessageBundle {
 
     }
 
-    public String msgOdeInitHibernatePropertiesNotFound(File expected) {
-        return format("Hibernate configuration file \"{0}\" not found!", expected);
-    }
-
     public String msgOdeUsingExternalDb(String dbDataSource) {
         return format("ODE using external DataSource \"{0}\".", dbDataSource);
     }
@@ -125,7 +121,25 @@ public class Messages extends MessageBundle {
     }
 
     public String msgOdeEmbeddedDbNotFoundUsingTemp(File dbDir, File tmpDir) {
-        return format("Embedded database directory \"{0}\" does not exist, creating temporary database in \"{1}\"!", dbDir,tmpDir);
+        return format("Embedded database directory \"{0}\" does not exist, creating temporary database in \"{1}\"!",
+                dbDir, tmpDir);
+    }
+
+    public Object msgOdeUsingDAOImpl(String className) {
+        return format("Using DAO Connection Factory class {0}.", className);
+    }
+
+    public String msgDAOInstantiationFailed(String className) {
+        return format("Failed to instantiate DAO Connection Factory class {0}.", className);
+    }
+
+    public String msgOdeInitDAOErrorReadingProperties(File daoPropFile) {
+        return format("Error reading DAO property file \"{0}\".", daoPropFile);
+
+    }
+
+    public String msgOdeInitDAOPropertiesNotFound(File daoPropFile) {
+        return format("DAO property file \"{0}\" not found.", daoPropFile);
     }
 
 }
