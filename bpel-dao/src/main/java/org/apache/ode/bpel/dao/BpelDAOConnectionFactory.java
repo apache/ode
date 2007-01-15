@@ -40,5 +40,7 @@ public interface BpelDAOConnectionFactory {
    * @param properties
    */
   public void init(Properties properties);
+  
+  public void shutdown();
 
 }
