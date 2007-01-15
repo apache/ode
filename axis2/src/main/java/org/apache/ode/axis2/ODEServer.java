@@ -223,9 +223,22 @@ public class ODEServer {
                     __log.error("Scheduler couldn't be shutdown.", ex);
                 }
 
-            __log.debug("cleaning up temporary files.");
-            TempFileManager.cleanup();
-
+            if (_store != null) 
+                try {
+                    _store.shutdown();
+                    _store = null;
+                } catch (Throwable t) {
+                    __log.error("Store could not be shutdown.",t);
+                }
+                
+            if (_daoCF != null) 
+                try {
+                    _daoCF.shutdown();
+                    _daoCF = null;
+                } catch (Throwable ex) {
+                    __log.error("DOA shutdown failed.", ex);                    
+                }
+                
             if (_minervaPool != null)
                 try {
                     __log.debug("shutting down minerva pool.");
@@ -234,11 +247,18 @@ public class ODEServer {
                 } catch (Throwable t) {
                     __log.error("Minerva pool could not be shut down.", t);
                 }
-                
+
             if (_txMgr != null) {
                 __log.debug("shutting down transaction manager.");
                 // TODO: we need to shutdown jotm if it is running.
                 _txMgr = null;
+            }
+
+            try {
+                __log.debug("cleaning up temporary files.");
+                TempFileManager.cleanup();
+            } catch (Throwable t) {
+                __log.error("Unable to cleanup temp files.", t);
             }
 
             __log.info(__msgs.msgOdeShutdownCompleted());
