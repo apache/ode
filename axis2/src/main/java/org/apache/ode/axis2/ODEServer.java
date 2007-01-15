@@ -19,6 +19,23 @@
 
 package org.apache.ode.axis2;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -33,45 +50,20 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.daohib.DataSourceConnectionProvider;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.hibernate.cfg.Environment;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.DialectFactory;
 import org.opentools.minerva.MinervaPool;
 
-import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
- * Server class called by our Axis hooks to handle all ODE lifecycle
- * management.
+ * Server class called by our Axis hooks to handle all ODE lifecycle management.
+ * 
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEServer {
@@ -110,103 +102,144 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
+    private MinervaPool _minervaPool;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
-        _axisConfig = axisConf;
-        _appRoot = new File(config.getServletContext().getRealPath("/WEB-INF"));
-        TempFileManager.setWorkingDirectory(_appRoot);
-
-        __log.debug("Loading properties");
-        String confDir = System.getProperty("org.apache.ode.configDir");
-        if (confDir == null) _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
-        else _odeConfig = new ODEConfigProperties(new File(confDir));
-        _odeConfig.load();
-
-        String wdir = _odeConfig.getWorkingDir();
-        if (wdir == null) _workRoot = _appRoot;
-        else _workRoot = new File(wdir.trim());
-
-        __log.debug("Initializing transaction manager");
-        initTxMgr();
-
-        __log.debug("Creating data source.");
-        initDataSource();
-
-        __log.debug("Starting Hibernate.");
-        initHibernate();
-        __log.debug("Hibernate started.");
-
-        __log.debug("Initializing BPEL process store.");
-        initProcessStore();
-
-        __log.debug("Initializing BPEL server.");
-        initBpelServer();
-
-        // Register BPEL event listeners configured in axis2.properties file.
-        registerEventListeners();
-
+        boolean success = false;
         try {
-            _server.start();
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeBpelServerStartFailure();
-            __log.error(errmsg, ex);
-            throw new ServletException(errmsg, ex);
+            _axisConfig = axisConf;
+            _appRoot = new File(config.getServletContext().getRealPath("/WEB-INF"));
+            TempFileManager.setWorkingDirectory(_appRoot);
+
+            __log.debug("Loading properties");
+            String confDir = System.getProperty("org.apache.ode.configDir");
+            if (confDir == null)
+                _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
+            else
+                _odeConfig = new ODEConfigProperties(new File(confDir));
+            _odeConfig.load();
+
+            String wdir = _odeConfig.getWorkingDir();
+            if (wdir == null)
+                _workRoot = _appRoot;
+            else
+                _workRoot = new File(wdir.trim());
+
+            __log.debug("Initializing transaction manager");
+            initTxMgr();
+
+            __log.debug("Creating data source.");
+            initDataSource();
+
+            __log.debug("Starting DAO.");
+            initDAO();
+
+            __log.debug("DAO started.");
+
+            __log.debug("Initializing BPEL process store.");
+            initProcessStore();
+
+            __log.debug("Initializing BPEL server.");
+            initBpelServer();
+
+            // Register BPEL event listeners configured in axis2.properties
+            // file.
+            registerEventListeners();
+
+            try {
+                _server.start();
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeBpelServerStartFailure();
+                __log.error(errmsg, ex);
+                throw new ServletException(errmsg, ex);
+            }
+
+            _store.loadAll();
+
+            __log.debug("Initializing JCA adapter.");
+            initConnector();
+
+            File deploymentDir = new File(_workRoot, "processes");
+            _poller = new DeploymentPoller(deploymentDir, this);
+
+            new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+            new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(),
+                    _workRoot.getAbsolutePath());
+
+            _poller.start();
+            __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
+            __log.info(__msgs.msgOdeStarted());
+            success = true;
+        } finally {
+            if (!success)
+                try {
+                    shutDown();
+                } catch (Exception ex) {
+                    // Problem rolling back start(). Not so important
+                    __log.debug("Error rolling back incomplete shutdown.", ex);
+                }
         }
 
-        _store.loadAll();
-        
-        __log.debug("Initializing JCA adapter.");
-        initConnector();
-
-        File deploymentDir = new File(_workRoot, "processes");
-        _poller = new DeploymentPoller(deploymentDir, this);
-
-        new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
-        new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
-                .getAbsolutePath());
-
-        _poller.start();
-        __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
-
-        __log.info(__msgs.msgOdeStarted());
     }
 
     /**
      * Shutdown the service engine. This performs cleanup before the BPE is
-     * terminated. Once this method has been called, init() must be called before
-     * the transformation engine can be started again with a call to start().
+     * terminated. Once this method has been called, init() must be called
+     * before the transformation engine can be started again with a call to
+     * start().
      * 
-     * @throws AxisFault if the engine is unable to shut down.
+     * @throws AxisFault
+     *             if the engine is unable to shut down.
      */
     public void shutDown() throws AxisFault {
+
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
-        if (_poller != null) {
-        _poller.stop();
-        _poller = null;
-        }
-        
         try {
-            _server.stop();
-        } catch (Throwable ex) {
-            __log.fatal("Error stopping services.", ex);
-        }
-        __log.info("ODE stopped.");
+            if (_poller != null)
+                try {
+                    __log.debug("shutting down poller");
+                    _poller.stop();
+                    _poller = null;
+                } catch (Throwable t) {
+                    __log.error("Error stopping poller.", t);
+                }
 
-        try {
-            try {
-                __log.debug("shutting down quartz scheduler.");
-                _scheduler.shutdown();
-            } catch (Exception ex) {
-                __log.error("Scheduler couldn't be shutdown.", ex);
-            }
+            if (_server != null)
+                try {
+                    __log.debug("shutting down ODE server.");
+                    _server.shutdown();
+                    _server = null;
+                } catch (Throwable ex) {
+                    __log.error("Error stopping services.", ex);
+                }
+
+            if (_scheduler != null)
+                try {
+                    __log.debug("shutting down quartz scheduler.");
+                    _scheduler.shutdown();
+                    _scheduler = null;
+                } catch (Exception ex) {
+                    __log.error("Scheduler couldn't be shutdown.", ex);
+                }
 
             __log.debug("cleaning up temporary files.");
             TempFileManager.cleanup();
 
-            __log.debug("shutting down transaction manager.");
-            _txMgr = null;
+            if (_minervaPool != null)
+                try {
+                    __log.debug("shutting down minerva pool.");
+                    _minervaPool.stop();
+                    _minervaPool = null;
+                } catch (Throwable t) {
+                    __log.error("Minerva pool could not be shut down.", t);
+                }
+                
+            if (_txMgr != null) {
+                __log.debug("shutting down transaction manager.");
+                // TODO: we need to shutdown jotm if it is running.
+                _txMgr = null;
+            }
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {
@@ -228,7 +261,8 @@ public class ODEServer {
 
         _services.put(serviceName, portName, odeService);
 
-        // Setting our new service on the receiver, the same receiver handles all
+        // Setting our new service on the receiver, the same receiver handles
+        // all
         // operations so the first one should fit them all
         AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
         ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
@@ -270,11 +304,13 @@ public class ODEServer {
     }
 
     public ODEService getService(QName serviceName, QName portTypeName) {
-        // TODO Normally this lookup should't exist as there could be more one than port
+        // TODO Normally this lookup should't exist as there could be more one
+        // than port
         // TODO for a portType. See MessageExchangeContextImpl.
         for (Object o : _services.values()) {
             ODEService service = (ODEService) o;
-            if (service.respondsTo(serviceName, portTypeName)) return service;
+            if (service.respondsTo(serviceName, portTypeName))
+                return service;
         }
         return null;
     }
@@ -354,74 +390,58 @@ public class ODEServer {
 
         __log.debug("creating Minerva pool for " + url);
 
-        MinervaPool minervaPool = new MinervaPool();
-        minervaPool.setTransactionManager(_txMgr);
-        minervaPool.getConnectionFactory().setConnectionURL(url);
-        minervaPool.getConnectionFactory().setUserName("sa");
-        minervaPool.getConnectionFactory().setDriver(
-                org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        _minervaPool = new MinervaPool();
+        _minervaPool.setTransactionManager(_txMgr);
+        _minervaPool.getConnectionFactory().setConnectionURL(url);
+        _minervaPool.getConnectionFactory().setUserName("sa");
+        _minervaPool.getConnectionFactory().setDriver(org.apache.derby.jdbc.EmbeddedDriver.class.getName());
 
-        minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
-        minervaPool.getPoolParams().minSize = _odeConfig.getPoolMinSize();
-        minervaPool.getPoolParams().blocking = false;
-        minervaPool.setType(MinervaPool.PoolType.MANAGED);
+        _minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
+        _minervaPool.getPoolParams().minSize = _odeConfig.getPoolMinSize();
+        _minervaPool.getPoolParams().blocking = false;
+        _minervaPool.setType(MinervaPool.PoolType.MANAGED);
 
         try {
-            minervaPool.start();
+            _minervaPool.start();
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
             __log.error(errmsg, ex);
             throw new ServletException(errmsg, ex);
         }
 
-        _datasource = minervaPool.createDataSource();
+        _datasource = _minervaPool.createDataSource();
     }
 
     /**
-     * Initialize the Hibernate data store.
+     * Initialize the DAO.
      * 
      * @throws ServletException
      */
-    private void initHibernate() throws ServletException {
+    protected void initDAO() throws ServletException {
         Properties properties = new Properties();
-        properties.put(Environment.CONNECTION_PROVIDER,
-                DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY,
-                HibernateTransactionManagerLookup.class.getName());
-        // properties.put(Environment.SESSION_FACTORY_NAME, "jta");
-
-        File hibernatePropFile;
+        File daoPropFile;
         String confDir = System.getProperty("org.apache.ode.configDir");
-        if (confDir != null) hibernatePropFile = new File(confDir, "hibernate.properties");
-        else hibernatePropFile = new File(_appRoot, "conf" + File.separatorChar + "hibernate.properties");
+        daoPropFile = new File((confDir != null) ? new File(confDir) : _appRoot, "bpel-dao.properties");
 
-        if (hibernatePropFile.exists()) {
+        if (daoPropFile.exists()) {
             FileInputStream fis;
             try {
-                fis = new FileInputStream(hibernatePropFile);
+                fis = new FileInputStream(daoPropFile);
                 properties.load(new BufferedInputStream(fis));
             } catch (IOException e) {
-                String errmsg = __msgs.msgOdeInitHibernateErrorReadingHibernateProperties(hibernatePropFile);
+                String errmsg = __msgs.msgOdeInitDAOErrorReadingProperties(daoPropFile);
                 __log.error(errmsg, e);
                 throw new ServletException(errmsg, e);
             }
         } else {
-            __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(hibernatePropFile));
+            __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(daoPropFile));
         }
 
-        // Guess Hibernate dialect if not specified in hibernate.properties
-        if (properties.get(Environment.DIALECT) == null) {
-            try {
-                properties.put(Environment.DIALECT, guessDialect(_datasource));
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-                if (__log.isDebugEnabled()) __log.error(errmsg,ex);
-                else __log.error(errmsg);
-            }
-        }
-        
-        SessionManager sm = new SessionManager(properties, _datasource, _txMgr);
-        _daoCF = new BpelDAOConnectionFactoryImpl(sm);
+        BpelDAOConnectionFactoryJDBC cf = createDaoCF();
+        cf.setDataSource(_datasource);
+        cf.setTransactionManager(_txMgr);
+        cf.init(properties);
+
     }
 
     private void initProcessStore() {
@@ -447,8 +467,8 @@ public class ODEServer {
         _server.setDaoConnectionFactory(_daoCF);
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
-        _server.setMessageExchangeContext(
-                new P2PMexContextImpl(this, new MessageExchangeContextImpl(this), _executorService, _txMgr));
+        _server.setMessageExchangeContext(new P2PMexContextImpl(this, new MessageExchangeContextImpl(this),
+                _executorService, _txMgr));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
         _server.init();
@@ -476,42 +496,6 @@ public class ODEServer {
         }
     }
 
-    private String guessDialect(DataSource dataSource) throws Exception {
-        String dialect = null;
-        // Open a connection and use that connection to figure out database
-        // product name/version number in order to decide which Hibernate
-        // dialect to use.
-        Connection conn = dataSource.getConnection();
-        try {
-            DatabaseMetaData metaData = conn.getMetaData();
-            if (metaData != null) {
-                String dbProductName = metaData.getDatabaseProductName();
-                int dbMajorVer = metaData.getDatabaseMajorVersion();
-                __log.info("Using database " + dbProductName + " major version "
-                        + dbMajorVer);
-                DialectFactory.DatabaseDialectMapper mapper = HIBERNATE_DIALECTS.get(dbProductName);
-                if (mapper != null) {
-                    dialect = mapper.getDialectClass(dbMajorVer);
-                } else {
-                    Dialect hbDialect = DialectFactory.determineDialect(dbProductName, dbMajorVer);
-                    if (hbDialect != null)
-                        dialect = hbDialect.getClass().getName();
-                }
-            }
-        } finally {
-            conn.close();
-        }
-
-        if (dialect == null) {
-            __log
-                    .info("Cannot determine hibernate dialect for this database: using the default one.");
-            dialect = DEFAULT_HIBERNATE_DIALECT;
-        }
-
-        return dialect;
-
-    }
-
     public ProcessStore getProcessStore() {
         return _store;
     }
@@ -519,8 +503,8 @@ public class ODEServer {
     public BpelServerImpl getBpelServer() {
         return _server;
     }
- 	
- 	private void registerEventListeners() {
+
+    private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
@@ -529,13 +513,22 @@ public class ODEServer {
                     _server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
-                    __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be " +
-                            "loaded properly.");
+                    __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
+                            + "loaded properly.");
                 }
             }
 
         }
     }
+
+    private class ProcessStoreListenerImpl implements ProcessStoreListener {
+
+        public void onProcessStoreEvent(ProcessStoreEvent event) {
+            handleEvent(event);
+        }
+
+    }
+
     private void handleEvent(ProcessStoreEvent pse) {
         __log.debug("Process store event: " + pse);
         switch (pse.type) {
@@ -554,35 +547,30 @@ public class ODEServer {
         }
     }
 
-    private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
-
-    private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
-
-    static {
-        // Hibernate has a nice table that resolves the dialect from the database
-        // product name,
-        // but doesn't include all the drivers. So this is supplementary, and some
-        // day in the
-        // future they'll add more drivers and we can get rid of this.
-        // Drivers already recognized by Hibernate:
-        // HSQL Database Engine
-        // DB2/NT
-        // MySQL
-        // PostgreSQL
-        // Microsoft SQL Server Database, Microsoft SQL Server
-        // Sybase SQL Server
-        // Informix Dynamic Server
-        // Oracle 8 and Oracle >8
-        HIBERNATE_DIALECTS.put("Apache Derby",
-                new DialectFactory.VersionInsensitiveMapper(
-                        "org.hibernate.dialect.DerbyDialect"));
-    }
-
-    private class ProcessStoreListenerImpl implements ProcessStoreListener {
-
-        public void onProcessStoreEvent(ProcessStoreEvent event) {
-            handleEvent(event);
+    private BpelDAOConnectionFactoryJDBC createDaoCF() throws ServletException {
+        String pClassName = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
+        String persistenceType = System.getProperty("ode.persistence");
+        if (persistenceType != null) {
+            if ("hibernate".equalsIgnoreCase(persistenceType))
+                pClassName = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
+            else if ("jpa".equalsIgnoreCase(persistenceType))
+                pClassName = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
+            else
+                pClassName = persistenceType;
         }
 
+        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
+
+        BpelDAOConnectionFactoryJDBC cf;
+        try {
+            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
+        }
+
+        return cf;
     }
+
 }
