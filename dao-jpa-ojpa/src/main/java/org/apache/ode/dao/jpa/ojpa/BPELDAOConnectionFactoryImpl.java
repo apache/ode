@@ -17,82 +17,94 @@
  * under the License.
  */
 
-
 package org.apache.ode.dao.jpa.ojpa;
 
-
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.dao.jpa.BPELDAOConnectionImpl;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 
-	private EntityManager em;
-	private BPELDAOConnectionImpl conn;
-	
-	public BPELDAOConnectionFactoryImpl(EntityManager em) {
-		this.em = em;
-	}
-	
-	public BpelDAOConnection getConnection() {
-		
-		if ( conn == null ) {
-			List<BpelDAOConnection> conns = null;
-			
-			Query q = em.createQuery("SELECT x FROM org.apache.ode.dao.jpa.BPELDAOConnectionImpl x order by x._id asc");
-			
-			try {
-				conns = (List<BpelDAOConnection>)q.getResultList();
-				if ( conns.size() < 1 ) {
-					conn = new BPELDAOConnectionImpl(new Long(1),em);
-				} else {
-					conn = (BPELDAOConnectionImpl)conns.get(conns.size()-1);
-					conn.setEntityManger(em);
-				}
-				
-			} catch (NoResultException e) {
-				conn = new BPELDAOConnectionImpl(new Long(1),em);
-			}
-		}
-		
-		return conn;
-	}
-	
-	public BpelDAOConnection getConnection(Long connID) {
-		if ( conn != null && conn.getID().equals(connID) ) {
-			return conn;
-		}
-		
-		BPELDAOConnectionImpl tmpConn = null;
-		
-		Query q = em.createQuery("SELECT x FROM org.apache.ode.dao.jpa.BPELDAOConnectionImpl x WHERE x._id = ?1");
-		q.setParameter(1, connID);
-		
-		try {
-			tmpConn = (BPELDAOConnectionImpl)q.getSingleResult();
-			tmpConn.setEntityManger(em);
-		} catch (NoResultException e){}
-		
-		if ( tmpConn == null ) {
-			conn = new BPELDAOConnectionImpl(connID,em);
-			tmpConn = conn;
-		}
-		
-		return tmpConn;
-	}
-	
-	public Long getConnectionId(BpelDAOConnection conn) {
-		BPELDAOConnectionImpl oConn = (BPELDAOConnectionImpl)conn;
-		return oConn.getID();
-	}
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.dao.jpa.BPELDAOConnectionImpl;
+import org.apache.openjpa.ee.ManagedRuntime;
 
-	public void init(Properties properties) {
-	}
+public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
+
+    private EntityManagerFactory _emf;
+
+    private TransactionManager _tm;
+
+    private DataSource _ds;
+
+    private Object _dbdictionary;
+
+    private DataSource _unmanagedDS;
+
+    public BPELDAOConnectionFactoryImpl() {
+    }
+
+    public BpelDAOConnection getConnection() {
+        return new BPELDAOConnectionImpl(_emf.createEntityManager());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void init(Properties properties) {
+        HashMap<String, Object> propMap = new HashMap<String,Object>();
+
+        propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
+//        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        propMap.put("javax.persistence.nonJtaDataSource", _unmanagedDS == null ? _ds : _unmanagedDS);
+        propMap.put("javax.persistence.DataSource", _ds);
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
+        if (_dbdictionary != null)
+            propMap.put("openjpa.jdbc.DBDictionary", _dbdictionary);
+
+        if (properties != null)
+            propMap.putAll((Map<? extends String, ? extends Object>) properties);
+        
+        _emf = Persistence.createEntityManagerFactory("ode-dao", propMap);
+    }
+
+    public void setTransactionManager(TransactionManager tm) {
+        _tm = tm;
+    }
+
+    public void setDataSource(DataSource datasource) {
+        _ds = datasource;
+
+    }
+
+    public void setDBDictionary(String dbd) {
+        _dbdictionary = dbd;
+    }
+
+    public void setTransactionManager(Object tm) {
+        _tm = (TransactionManager) tm;
+        
+    }
+
+    public void setUnmanagedDataSource(DataSource ds) {
+        _unmanagedDS = ds;
+    }
+
+    public void shutdown() {
+        _emf.close();
+    }
+    
+
+    private class TxMgrProvider implements ManagedRuntime {
+        public TxMgrProvider() {
+        }
+
+        public TransactionManager getTransactionManager() throws Exception {
+            return _tm;
+        }
+    }
 
 }
