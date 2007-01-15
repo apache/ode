@@ -135,8 +135,8 @@
         <module>bpel-store</module>
         <module>dao-hibernate-db-derby</module>
 
+	<!-- Maven/Servicemix is kaput right now. -->
         <!-- <module>jbi</module> -->
-
         <module>jca-ra</module>
         <module>jca-rar</module>
         <module>jca-server</module>
@@ -144,11 +144,13 @@
         <module>tools</module>
         <module>bpel-scheduler-quartz</module>
 
-        <module>distro-axis2</module>
-        <module>distro-jbi</module>
         <module>dao-jpa</module>
         <module>dao-jpa-ojpa</module>
         <module>dao-jpa-ojpa-derby</module>
+
+	<!-- If you want a distro, build it explicitly. -->
+        <!-- <module>distro-jbi</module> -->
+        <!-- <module>distro-axis2</module> -->
     </modules>
 
     <dependencies>
@@ -694,10 +696,6 @@
                     <exclusion>
                         <artifactId>jdom</artifactId>
                         <groupId>jdom</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>dom4j</artifactId>
-                        <groupId>dom4j</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
