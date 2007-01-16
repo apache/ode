@@ -11,12 +11,14 @@
         xmlns:wsa="http://www.w3.org/2005/08/addressing"
         xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
 
-  <types>
-    <xsd:element name="dummy" type="xsd:string"/>
-    <xsd:element name="dummy2" type="xsd:string"/>
-    <xsd:element name="acknowledgement" type="xsd:string"/>
-    <xsd:element name="url" type="xsd:string"/>
-  </types>
+  <wsdl:types>
+        <xsd:schema targetNamespace="http://ode/bpel/responder.wsdl">
+            <xsd:element name="dummy" type="xsd:string"/>
+            <xsd:element name="dummy2" type="xsd:string"/>
+            <xsd:element name="acknowledgement" type="xsd:string"/>
+            <xsd:element name="url" type="xsd:string"/>
+        </xsd:schema>
+  </wsdl:types>
 
   <wsdl:message name="DummyMessage">
     <wsdl:part name="payload" element="tns:dummy"/>
