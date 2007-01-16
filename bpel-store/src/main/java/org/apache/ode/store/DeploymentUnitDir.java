@@ -88,7 +88,7 @@ class DeploymentUnitDir  {
      * starts compilation. 
      */
     void compile() {
-        File[] bpels = _duDirectory.listFiles(DeploymentUnitDir._bpelFilter);
+        ArrayList<File> bpels = listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
         for (File bpel : bpels) {
             compile(bpel);
         }
@@ -96,7 +96,7 @@ class DeploymentUnitDir  {
 
     void scan() {
         HashMap<QName, CBPInfo> processes = new HashMap<QName, CBPInfo>();
-        File[] cbps = _duDirectory.listFiles(DeploymentUnitDir._cbpFilter);
+        ArrayList<File> cbps = listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
         for (File file : cbps) {
             CBPInfo cbpinfo = loadCBPInfo(file);
             processes.put(cbpinfo.processName, cbpinfo);
