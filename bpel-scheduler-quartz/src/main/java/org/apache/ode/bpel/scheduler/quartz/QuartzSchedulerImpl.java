@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -262,6 +263,16 @@ public class QuartzSchedulerImpl implements Scheduler {
                 }
         }
     }
+
+    public <T> T execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
+        Future<T> res =  _executorSvc.submit(new Callable<T>() {
+            public T call() throws Exception {
+                return execTransaction(transaction);
+            }
+        });
+        return res.get();
+    }
+
 
     protected void rollback() throws Exception {
         try {

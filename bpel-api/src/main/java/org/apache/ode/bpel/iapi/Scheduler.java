@@ -28,75 +28,86 @@ import java.util.concurrent.Callable;
  */
 public interface Scheduler {
 
-  /**
-   * Schedule a persisted job. Persisted jobs MUST survive system failure.
-   * They also must not be scheduled unless the transaction associated with 
-   * the calling thread commits. 
-   * @param jobDetail information about the job
-   * @param when when the job should run (<code>null</code> means now)
-   * @return unique job identifier
-   */
-  String schedulePersistedJob(Map<String,Object>jobDetail,Date when) 
-    throws ContextException ;
-  
-  
-  /**
-   * Schedule a volatile (non-persisted) job. Volatile jobs should not be 
-   * saved in the database and should not survive system crash. Volatile 
-   * jobs scheduled from a transactional context should be scheduled 
-   * regardless of whether the tansaction commits. 
-   * 
-   * @param jobDetail information about the job
-   * @param when when the job should run (<code>null</code> means now)
-   * @return unique (as far as the scheduler is concerned) job identifier
-   */
-  String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail, 
-      Date when) throws ContextException;
-  
-  /**
-   * Make a good effort to cancel the job. If its already running no big
-   * deal. 
-   * @param jobId job identifier of the job 
-   */
-  void cancelJob(String jobId) throws ContextException;
-  
-  /**
-   * Execute a {@link Callable} in a transactional context. If the callable 
-   * throws an exception, then the transaction will be rolled back, otherwise
-   * the transaction will commit. 
-   * 
-   * @param <T> return type
-   * @param transaction transaction to execute
-   * @return result
-   * @throws Exception
-   */
-  <T> T execTransaction(Callable<T> transaction) 
-    throws Exception, ContextException;
-  
-  /**
-   * Register a transaction synchronizer. 
-   * @param synch synchronizer
-   * @throws ContextException
-   */
-  void registerSynchronizer(Synchronizer synch) throws ContextException;
-  
-  void start();
-  
-  void stop();
+    /**
+     * Schedule a persisted job. Persisted jobs MUST survive system failure.
+     * They also must not be scheduled unless the transaction associated with
+     * the calling thread commits.
+     * @param jobDetail information about the job
+     * @param when when the job should run (<code>null</code> means now)
+     * @return unique job identifier
+     */
+    String schedulePersistedJob(Map<String,Object>jobDetail,Date when)
+            throws ContextException ;
 
-  void shutdown();
-  
-  public interface Synchronizer {
-      /**
-       * Called after the transaction is completed. 
-       * @param success indicates whether the transaction was comitted 
-       */
-      void afterCompletion(boolean success);
-      
-      /**
-       * Called before the transaction is completed.
-       */
-      void beforeCompletion();
 
-  }
+    /**
+     * Schedule a volatile (non-persisted) job. Volatile jobs should not be
+     * saved in the database and should not survive system crash. Volatile
+     * jobs scheduled from a transactional context should be scheduled
+     * regardless of whether the tansaction commits.
+     *
+     * @param jobDetail information about the job
+     * @param when when the job should run (<code>null</code> means now)
+     * @return unique (as far as the scheduler is concerned) job identifier
+     */
+    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail,
+                               Date when) throws ContextException;
+
+    /**
+     * Make a good effort to cancel the job. If its already running no big
+     * deal.
+     * @param jobId job identifier of the job
+     */
+    void cancelJob(String jobId) throws ContextException;
+
+    /**
+     * Execute a {@link Callable} in a transactional context. If the callable
+     * throws an exception, then the transaction will be rolled back, otherwise
+     * the transaction will commit.
+     *
+     * @param <T> return type
+     * @param transaction transaction to execute
+     * @return result
+     * @throws Exception
+     */
+    <T> T execTransaction(Callable<T> transaction)
+            throws Exception, ContextException;
+
+    /**
+     * Same as execTransaction but executes in a different thread to guarantee
+     * isolation from the main execution thread.
+     * @param transaction
+     * @return
+     * @throws Exception
+     * @throws ContextException
+     */
+    <T> T execIsolatedTransaction(final Callable<T> transaction)
+            throws Exception, ContextException;
+
+    /**
+     * Register a transaction synchronizer.
+     * @param synch synchronizer
+     * @throws ContextException
+     */
+    void registerSynchronizer(Synchronizer synch) throws ContextException;
+
+    void start();
+
+    void stop();
+
+    void shutdown();
+
+    public interface Synchronizer {
+        /**
+         * Called after the transaction is completed.
+         * @param success indicates whether the transaction was comitted
+         */
+        void afterCompletion(boolean success);
+
+        /**
+         * Called before the transaction is completed.
+         */
+        void beforeCompletion();
+
+    }
 }
