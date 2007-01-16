@@ -44,6 +44,7 @@ public class ODEAxisServlet extends AxisServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         _odeServer = new ODEServer();
+        _odeServer.init(config, axisConfiguration);
     }
 
     public void stop() throws AxisFault {
