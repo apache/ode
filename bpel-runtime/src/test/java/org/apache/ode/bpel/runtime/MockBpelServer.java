@@ -308,6 +308,9 @@ class MockBpelServer {
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _quartz.execTransaction(transaction);
         }
+        public <T> T execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
+            return _quartz.execIsolatedTransaction(transaction);
+        }
 
         public void start() { _quartz.start(); }
         public void stop() { _quartz.stop(); }
