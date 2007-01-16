@@ -1,9 +1,8 @@
 package org.apache.ode.store;
 
+import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
-
-import javax.xml.namespace.QName;
 
 /**
  * DAO interface for a "deployment unit", a collection of processes deployed as a single
@@ -52,7 +51,7 @@ public interface DeploymentUnitDAO {
      */
     void delete();
 
-    ProcessConfDAO createProcess(QName pid, QName type);
+    ProcessConfDAO createProcess(QName pid, QName type, int version);
 
     ProcessConfDAO getProcess(QName pid);
     

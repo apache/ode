@@ -22,26 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
-import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
-import org.apache.ode.daohib.bpel.hobj.HProcess;
-import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
-import org.apache.ode.daohib.bpel.hobj.HScope;
+import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.daohib.bpel.ql.HibernateInstancesQueryCompiler;
 import org.apache.ode.ql.eval.skel.CommandEvaluator;
 import org.apache.ode.ql.tree.Builder;
 import org.apache.ode.ql.tree.BuilderFactory;
 import org.apache.ode.ql.tree.nodes.Query;
-import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.SerializableUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunctionEx;
@@ -49,23 +39,14 @@ import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
-import org.hibernate.criterion.Restrictions;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Hibernate-based {@link BpelDAOConnection} implementation.
@@ -95,13 +76,14 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
     }
 
-    public ProcessDAO createProcess(QName pid, QName type, String guid) {
+    public ProcessDAO createProcess(QName pid, QName type, String guid, int version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());
         process.setTypeNamespace(type.getNamespaceURI());
         process.setDeployDate(new Date());
         process.setGuid(guid);
+        process.setVersion(version);
         _session.save(process);
         return new ProcessDaoImpl(_sm, process);
     }

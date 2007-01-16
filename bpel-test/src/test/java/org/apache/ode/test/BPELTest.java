@@ -18,41 +18,36 @@
  */
 package org.apache.ode.test;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
-
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.util.Collection;
+import java.util.Properties;
+import java.util.regex.Pattern;
+
 public abstract class BPELTest extends TestCase {
 
-	private BpelServerImpl server;
-    private ProcessStore store;
-	private MessageExchangeContextImpl mexContext;
-	private EntityManager em;
-	private EntityManagerFactory emf;
-    private TestScheduler scheduler;
+	protected BpelServerImpl server;
+    protected ProcessStore store;
+	protected MessageExchangeContextImpl mexContext;
+	protected EntityManager em;
+	protected EntityManagerFactory emf;
+    protected TestScheduler scheduler;
+    protected BpelDAOConnectionFactory _cf;
 
-	@Override
+    @Override
 	protected void setUp() throws Exception {
 		server = new BpelServerImpl();
 		mexContext = new MessageExchangeContextImpl();
@@ -62,7 +57,8 @@ public abstract class BPELTest extends TestCase {
 			emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
 			em = emf.createEntityManager();
 			String pr = Persistence.PERSISTENCE_PROVIDER;
-			server.setDaoConnectionFactory(new org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl(em));
+            _cf = new org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl();
+            server.setDaoConnectionFactory(_cf);
             scheduler = new TestScheduler() {
                 @Override
                 public void begin() {
@@ -83,7 +79,8 @@ public abstract class BPELTest extends TestCase {
                 
             };
 		} else {
-			server.setDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+            _cf = new BpelDAOConnectionFactoryImpl();
+            server.setDaoConnectionFactory(_cf);
             scheduler = new TestScheduler();
 		}
         server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
@@ -95,7 +92,8 @@ public abstract class BPELTest extends TestCase {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process
                 server.unregister(event.pid);
-                server.register(store.getProcessConfiguration(event.pid));
+                if (event.type != ProcessStoreEvent.Type.UNDEPLOYED)
+                    server.register(store.getProcessConfiguration(event.pid));
             }
         });
         server.init();
@@ -156,8 +154,9 @@ public abstract class BPELTest extends TestCase {
 			Properties testProps = new Properties();
 			testProps.load(testPropsFile.toURL().openStream());
 			String responsePattern = testProps.getProperty("response1");
+            bpelE.printStackTrace();
 			testResponsePattern(bpelE.getMessage(), responsePattern);
-			return;
+            return;
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			fail();

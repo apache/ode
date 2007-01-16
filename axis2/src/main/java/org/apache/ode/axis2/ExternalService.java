@@ -19,12 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -39,14 +33,15 @@ import org.apache.ode.axis2.util.SOAPUtils;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to
@@ -107,8 +102,8 @@ public class ExternalService implements PartnerRoleChannel {
             serviceClient.setOverrideOptions(mexOptions);
 
             if (isTwoWay) {
-                // Defer the invoke until the transaction commits. 
-                
+                // Defer the invoke until the transaction commits.
+
                 _sched.registerSynchronizer(new Scheduler.Synchronizer() {
 
                     public void afterCompletion(boolean success) {
@@ -136,10 +131,10 @@ public class ExternalService implements PartnerRoleChannel {
 
                     public void beforeCompletion() {                
                     }
-                    
+
                 });
                 odeMex.replyAsync();
-              
+
             } else /** one-way case **/ {
                 serviceClient.fireAndForget(payload);
                 odeMex.replyOneWayOk();

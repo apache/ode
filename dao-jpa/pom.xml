@@ -18,31 +18,32 @@
   ~ under the License.
   -->
 <project>
-  <groupId>org.apache.ode</groupId>
-  <artifactId>ode-dao-jpa</artifactId>
-  <name>ODE :: JPA DAO Impl</name>
-  <description>A JPA Implementation of the ODE DAO</description>
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
     <groupId>org.apache.ode</groupId>
-    <artifactId>ode</artifactId>
+    <artifactId>ode-dao-jpa</artifactId>
+    <name>ODE :: JPA DAO Impl</name>
+    <description>A JPA Implementation of the ODE DAO</description>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.ode</groupId>
+        <artifactId>ode</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
     <version>2.0-SNAPSHOT</version>
-  </parent>
-  <version>2.0-SNAPSHOT</version>
-  
-  
-  <dependencies>
-   <dependency>
-      <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-dao</artifactId>
-    </dependency>
-    <dependency>
-	<groupId>javax.persistence</groupId>
-	<artifactId>persistence-api</artifactId>
-      <version>1.0</version>
-    </dependency>
 
-  </dependencies>
- 
- 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-dao</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.openjpa</groupId>
+            <artifactId>openjpa-all</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

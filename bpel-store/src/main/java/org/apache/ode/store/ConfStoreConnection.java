@@ -1,6 +1,7 @@
 package org.apache.ode.store;
 
 
+import javax.xml.namespace.QName;
 import java.util.Collection;
 
 /**
@@ -18,7 +19,8 @@ public interface ConfStoreConnection {
 
     void close();
 
-    
+    int getNextVersion(QName processName);
 
+    void setVersion(QName processName, int version);
     
 }

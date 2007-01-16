@@ -87,22 +87,22 @@ public class ProcessStoreImpl implements ProcessStore {
     public ProcessStoreImpl(DataSource ds) {
         this(ds, false);
     }
-    
+
     public ProcessStoreImpl(DataSource ds, boolean auto) {
         String persistenceType = System.getProperty("ode.persistence");
         if (ds != null) {
             if ("hibernate".equalsIgnoreCase(persistenceType))
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, false);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, false);
         } else {
             // If the datasource is not provided, then we create a HSQL-based in-memory
             // database. Makes testing a bit simpler.
             DataSource hsqlds = createInternalDS(_guid);
             if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, false);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, true);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
             _inMemDs = hsqlds;
         }
 
@@ -116,7 +116,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
-    
+
     @Override
     protected void finalize() throws Throwable {
         // force a shutdown so that HSQL cleans up its mess.
@@ -139,17 +139,31 @@ public class ProcessStoreImpl implements ProcessStore {
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
         try {
+            System.out.println("CALLING COMPILATION");
             du.compile();
         } catch (CompilationException ce) {
             String errmsg = __msgs.msgDeployFailCompileErrors();
             __log.error(errmsg,ce);
             throw new ContextException(errmsg,ce);
         }
-        
+
         du.scan();
-        DeployDocument dd = du.getDeploymentDescriptor();
+        final DeployDocument dd = du.getDeploymentDescriptor();
         final ArrayList<ProcessConfImpl> processes = new ArrayList<ProcessConfImpl>();
         Collection<QName> deployed;
+
+        // Process and DU are all versioned at the highest process version number
+        // which becomes the DU version (subversion style).
+        int version = exec(new Callable<Integer>() {
+            public Integer call(ConfStoreConnection conn) {
+                int v = 0;
+                for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
+                    int procVersion = conn.getNextVersion(processDD.getName());
+                    if (procVersion > v) v = procVersion;
+                }
+                return v;
+            }
+        });
 
         _rw.writeLock().lock();
 
@@ -160,8 +174,18 @@ public class ProcessStoreImpl implements ProcessStore {
                 throw new ContextException(errmsg);
             }
 
+            du.setVersion(version);
+
             for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
-                if (_processes.containsKey(processDD.getName())) {
+                QName pid = toPid(processDD.getName(), version);
+                // Retires older version
+                try {
+                    if (version > 1) setState(toPid(processDD.getName(), version - 1), ProcessState.RETIRED);
+                } catch (ContextException ce) {
+                    __log.debug("No previous version to retire on deployment of version " + version);
+                }
+
+                if (_processes.containsKey(pid)) {
                     String errmsg = __msgs.msgDeployFailDuplicatePID(processDD.getName(), du.getName());
                     __log.error(errmsg);
                     throw new ContextException(errmsg);
@@ -177,14 +201,13 @@ public class ProcessStoreImpl implements ProcessStore {
                 }
 
                 // final OProcess oprocess = loadCBP(cbpInfo.cbp);
-                ProcessConfImpl pconf = new ProcessConfImpl(du, processDD, deployDate, calcInitialProperties(processDD),
-                        calcInitialState(processDD));
+                ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD,
+                        deployDate, calcInitialProperties(processDD), calcInitialState(processDD));
                 processes.add(pconf);
-
             }
 
             _deploymentUnits.put(du.getName(),du);
-            
+
             for (ProcessConfImpl process : processes) {
                 __log.info(__msgs.msgProcessDeployed(du.getDeployDir(), process.getProcessId()));
                 _processes.put(process.getProcessId(), process);
@@ -211,7 +234,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 try {
                     if (_deployDir == null)
                         dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
-                    else 
+                    else
                         dudao.setDeploymentUnitDir(deploymentUnitDirectory.getName());
                 } catch (IOException e1) {
                     String errmsg = "Error getting canonical path for " + du.getName()
@@ -224,21 +247,20 @@ public class ProcessStoreImpl implements ProcessStore {
                 // Going trough each process declared in the dd
                 for (ProcessConfImpl pc : processes) {
                     try {
-                        ProcessConfDAO newDao = dudao.createProcess(pc.getProcessId(), pc.getType());
+                        ProcessConfDAO newDao = dudao.createProcess(pc.getProcessId(), pc.getType(), pc.getVersion());
                         newDao.setState(pc.getState());
                         for (Map.Entry<QName, Node> prop : pc.getProperties().entrySet()) {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());
+                        conn.setVersion(pc.getType(), pc.getVersion());
                     } catch (Throwable e) {
                         String errmsg = "Error persisting deployment record for " + pc.getProcessId()
                                 + "; process will not be available after restart!";
                         __log.error(errmsg, e);
                     }
                 }
-
                 return deployed;
-
             }
 
         });
@@ -254,28 +276,25 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public Collection<QName> undeploy(final File dir) {
-
         try {
             exec(new Callable<Collection<QName>>() {
-
                 public Collection<QName> call(ConfStoreConnection conn) {
                     DeploymentUnitDAO dudao = conn.getDeploymentUnit(dir.getName());
                     if (dudao != null)
                         dudao.delete();
                     return null;
                 }
-
             });
         } catch (Exception ex) {
             __log.error("Error synchronizing with data store; " + dir.getName() + " may be reappear after restart!");
         }
-    
+
         Collection<QName> undeployed = Collections.emptyList();
         _rw.writeLock().lock();
         try {
             DeploymentUnitDir du = _deploymentUnits.remove(dir.getName());
             if (du != null) {
-                undeployed = du.getProcessNames();
+                undeployed = toPids(du.getProcessNames(), du.getVersion());
                 _processes.keySet().removeAll(undeployed);
             }
         } finally {
@@ -350,6 +369,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
                 ProcessState old = dao.getState();
                 dao.setState(state);
+                pconf.setState(state);
                 return old;
             }
         });
@@ -401,7 +421,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Load all the deployment units out of the store. Called on start-up.
-     * 
+     *
      */
     public void loadAll() {
         final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
@@ -417,7 +437,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 return null;
             }
         });
-        
+
         for (ProcessConfImpl p : loaded)
             fireStateChange(p.getProcessId(), p.getState());
 
@@ -488,7 +508,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     /**
-     * Create a property mapping based on the initial values in the deployment 
+     * Create a property mapping based on the initial values in the deployment
      * descriptor.
      * @param dd
      * @return
@@ -512,7 +532,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     /**
-     * Figure out the initial process state from the state in the deployment descriptor. 
+     * Figure out the initial process state from the state in the deployment descriptor.
      * @param dd deployment descriptor
      * @return
      */
@@ -549,9 +569,9 @@ public class ProcessStoreImpl implements ProcessStore {
         _rw.writeLock().lock();
         try {
             _deploymentUnits.put(dud.getName(),dud);
-            
+
             for (ProcessConfDAO p : dudao.getProcesses()) {
-                TDeployment.Process pinfo = dud.getProcessDeployInfo(p.getPID());
+                TDeployment.Process pinfo = dud.getProcessDeployInfo(p.getType());
                 if (pinfo == null) {
                     __log.warn("Cannot load " + p.getPID() + "; cannot find descriptor.");
                     continue;
@@ -560,7 +580,8 @@ public class ProcessStoreImpl implements ProcessStore {
                 Map<QName, Node> props = calcInitialProperties(pinfo);
                 // TODO: update the props based on the values in the DB.
 
-                ProcessConfImpl pconf = new ProcessConfImpl(dud, pinfo, dudao.getDeployDate(), props, p.getState());
+                ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud,
+                        pinfo, dudao.getDeployDate(), props, p.getState());
 
                 _processes.put(pconf.getProcessId(), pconf);
                 loaded.add(pconf);
@@ -607,7 +628,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         abstract V call(ConfStoreConnection conn);
     }
-    
+
     public void setDeployDir(File depDir) {
         _deployDir = depDir;
     }
@@ -626,6 +647,18 @@ public class ProcessStoreImpl implements ProcessStore {
         } catch (SQLException e) {
             __log.error("Error shutting down.", e);
         }
+    }
+
+    private Collection<QName> toPids(Collection<QName> processTypes, int version) {
+        ArrayList<QName> result = new ArrayList<QName>();
+        for (QName pqName : processTypes) {
+            result.add(toPid(pqName, version));
+        }
+        return result;
+    }
+
+    private QName toPid(QName processType, int version) {
+        return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
     }
 
 }

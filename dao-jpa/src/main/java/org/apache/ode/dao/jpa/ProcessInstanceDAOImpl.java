@@ -22,6 +22,7 @@ package org.apache.ode.dao.jpa;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.w3c.dom.Element;
 
 import javax.persistence.*;
@@ -49,7 +50,8 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
+    @ElementJoinColumn(name="INST_ID", referencedColumnName="REC_ID")
+    private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	@Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;

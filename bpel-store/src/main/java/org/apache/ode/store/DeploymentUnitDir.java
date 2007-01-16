@@ -43,6 +43,8 @@ class DeploymentUnitDir  {
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
 
+    private int _version = -1;
+
     private static final FileFilter _wsdlFilter = new FileFilter() {
         public boolean accept(File path) {
             return path.getName().endsWith(".wsdl");
@@ -104,11 +106,9 @@ class DeploymentUnitDir  {
         _processes = processes;
 
         HashMap<QName, Process> processInfo = new HashMap<QName, TDeployment.Process>();
-
         for (TDeployment.Process p : getDeploymentDescriptor().getDeploy().getProcessList()) {
             processInfo.put(p.getName(), p);
         }
-
         _processInfo = processInfo;
 
     }
@@ -223,11 +223,11 @@ class DeploymentUnitDir  {
         return "{DeploymentUnit " + _name + "}";
     }
 
-    public TDeployment.Process getProcessDeployInfo(QName pid) {
+    public TDeployment.Process getProcessDeployInfo(QName type) {
         if (_processInfo == null) {
         }
 
-        return _processInfo.get(pid);
+        return _processInfo.get(type);
     }
 
     public List<File> allFiles() {
@@ -288,6 +288,14 @@ class DeploymentUnitDir  {
             }
         }
         return null;
+    }
+
+    public int getVersion() {
+        return _version;
+    }
+
+    public void setVersion(int version) {
+        _version = version;
     }
 
 }

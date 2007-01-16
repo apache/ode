@@ -18,15 +18,14 @@
  */
 package org.apache.ode.bpel.dao;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.evt.BpelEvent;
+
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -94,7 +93,7 @@ public interface BpelDAOConnection  {
   
   Collection<ProcessInstanceDAO> instanceQuery(String expression);
 
-  ProcessDAO createProcess(QName pid, QName type, String guid);
+  ProcessDAO createProcess(QName pid, QName type, String guid, int version);
 
 
   /**

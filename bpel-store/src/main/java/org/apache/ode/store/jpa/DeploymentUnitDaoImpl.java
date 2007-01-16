@@ -114,12 +114,13 @@ public class DeploymentUnitDaoImpl extends JpaObj implements DeploymentUnitDAO {
         super.delete();
     }
 
-    public ProcessConfDAO createProcess(QName pid, QName type) {
+    public ProcessConfDAO createProcess(QName pid, QName type, int version) {
         ProcessConfDaoImpl p = new ProcessConfDaoImpl();
         p.setPID(pid);
         p.setType(type);
         p.setDeploymentUnit(this);
         p.setState(ProcessState.ACTIVE);
+        p.setVersion(version);
         getEM().persist(p);
         _processes.add(p);
         getEM().persist(this);
