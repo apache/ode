@@ -64,6 +64,29 @@
             <artifactId>persistence-api</artifactId>
             <version>1.0</version>
         </dependency>
+
+        <!-- Enhancer dependencies, necessary for now as Maven doesn't set maven.plugin.classpath for reactor builds -->
+        <dependency>
+            <groupId>org.apache.openjpa</groupId>
+            <artifactId>openjpa-all</artifactId>
+            <version>0.9.7-incubating-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -92,28 +115,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.1</version>
 
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.openjpa</groupId>
-                        <artifactId>openjpa-all</artifactId>
-                        <version>0.9.6-incubating-SNAPSHOT</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>commons-dbcp</groupId>
-                        <artifactId>commons-dbcp</artifactId>
-                        <version>1.2.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                        <version>2.0.2</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>commons-collections</groupId>
-                        <artifactId>commons-collections</artifactId>
-                        <version>3.1</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
                         <phase>compile</phase>
@@ -127,7 +128,7 @@
                                     <arg line="-d ${basedir}/target/classes"/>
                                     <classpath>
                                         <path refid="maven.compile.classpath"/>
-                                        <path refid="maven.plugin.classpath"/>
+                                        <!--<path refid="maven.plugin.classpath"/>-->
                                     </classpath>
                                 </java>
                             </tasks>

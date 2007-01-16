@@ -126,7 +126,8 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
     }
 
     static Configuration getDefaultConfiguration() throws MappingException {
-        return new Configuration().addClass(ProcessConfDaoImpl.class).addClass(DeploymentUnitDaoImpl.class);
+        return new Configuration().addClass(ProcessConfDaoImpl.class).addClass(DeploymentUnitDaoImpl.class)
+                .addClass(VersionTrackerDAOImpl.class);
     }
 
     public static class DataSourceConnectionProvider implements ConnectionProvider {

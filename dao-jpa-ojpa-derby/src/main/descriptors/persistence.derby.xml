@@ -19,6 +19,7 @@
         <class>org.apache.ode.store.jpa.ProcessConfDaoImpl</class>
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>
+        <class>org.apache.ode.store.jpa.VersionTrackerDAOImpl</class>
 
         <properties>
             <!-- Properties for an embedded Derby connection -->

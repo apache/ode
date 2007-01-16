@@ -117,7 +117,7 @@ public class DaoTest extends TestCase {
         conn.begin();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo1");
-            ProcessConfDAO p = du.createProcess(foobar,foobar);
+            ProcessConfDAO p = du.createProcess(foobar,foobar,1);
             assertEquals(foobar,p.getPID());
             assertEquals(foobar,p.getType());
             assertNotNull(p.getDeploymentUnit());
@@ -151,7 +151,7 @@ public class DaoTest extends TestCase {
         conn.begin();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo1");
-            ProcessConfDAO p = du.createProcess(foobar,foobar);
+            ProcessConfDAO p = du.createProcess(foobar,foobar,1);
             p.setProperty(foobar,"baz");
         } finally {
             conn.commit();

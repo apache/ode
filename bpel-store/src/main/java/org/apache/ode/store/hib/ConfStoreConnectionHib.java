@@ -60,6 +60,24 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
         }
     }
 
+    public int getNextVersion(QName processName) {
+        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
+                _session.get(VersionTrackerDAOImpl.class,processName.toString());
+        if (vt == null) return 1;
+        else return vt.getVersion() + 1;
+    }
+
+    public void setVersion(QName processName, int version) {
+        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
+                _session.get(VersionTrackerDAOImpl.class,processName.toString());
+        if (vt == null) {
+            vt = new VersionTrackerDAOImpl();
+            vt.setNamespace(processName.toString());
+        }
+        vt.setVersion(version);
+        _session.save(vt);
+    }
+
     @SuppressWarnings("unchecked")
     public Collection<DeploymentUnitDAO> getDeploymentUnits() {
         Criteria c = _session.createCriteria(DeploymentUnitDaoImpl.class);
@@ -80,7 +98,6 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
 
     public void rollback() {
         _tx.rollback();
-        
     }
 
 }
