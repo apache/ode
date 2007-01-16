@@ -212,7 +212,7 @@ public class ExternalService implements PartnerRoleChannel {
     private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg,final Element details) {
         // ODE MEX needs to be invoked in a TX.
         try {
-            _sched.execTransaction(new Callable<Void>() {
+            _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     odeMex.replyWithFailure(error, errmsg, details);
                     return null;
@@ -230,7 +230,7 @@ public class ExternalService implements PartnerRoleChannel {
     private void reply(final PartnerRoleMessageExchange odeMex, final OMElement reply) {
         // ODE MEX needs to be invoked in a TX.
         try {
-            _sched.execTransaction(new Callable<Void>() {
+            _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
                     try {
