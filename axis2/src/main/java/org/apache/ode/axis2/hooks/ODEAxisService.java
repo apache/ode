@@ -30,6 +30,7 @@ import javax.wsdl.Definition;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.wsdl.Port;
+import javax.wsdl.Service;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -91,7 +92,11 @@ public class ODEAxisService extends AxisService {
 
   private static String extractServiceName(Definition wsdlDefinition, QName wsdlServiceName, String portName) throws AxisFault {
     String url = null;
-    Port port = wsdlDefinition.getService(wsdlServiceName).getPort(portName);
+    Service service = wsdlDefinition.getService(wsdlServiceName);
+    if (service == null) {
+      throw new AxisFault("Unable to find service " + wsdlServiceName + " from service WSDL definition " + wsdlDefinition.getDocumentBaseURI());
+    }
+    Port port = service.getPort(portName);
     for (Object oext : port.getExtensibilityElements()) {
       if (oext instanceof SOAPAddress)
         url = ((SOAPAddress)oext).getLocationURI();
