@@ -50,6 +50,12 @@ public interface ProcessConf {
     QName getType();
 
     /**
+     * Get the process version.
+     * @return version
+     */
+    int getVersion();
+
+    /**
      * Is this a <em>transient</em> process? Transient processes are not persisted in the store.
      * @return <code>true</code> if this is a transient process.
      */

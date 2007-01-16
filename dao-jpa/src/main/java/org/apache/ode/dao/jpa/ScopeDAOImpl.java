@@ -22,6 +22,7 @@ package org.apache.ode.dao.jpa;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -49,7 +50,8 @@ public class ScopeDAOImpl implements ScopeDAO {
 	@OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<CorrelationSetDAO> _correlationSets = new ArrayList<CorrelationSetDAO>();
 	@OneToMany(targetEntity=PartnerLinkDAOImpl.class,fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<PartnerLinkDAO> _partnerLinks = new ArrayList<PartnerLinkDAO>();
+    @ElementJoinColumn(name="SCOPE_ID", referencedColumnName="PLINK_ID")
+    private Collection<PartnerLinkDAO> _partnerLinks = new ArrayList<PartnerLinkDAO>();
 	@OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<XmlDataDAO> _variables = new ArrayList<XmlDataDAO>();
 	

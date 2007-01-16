@@ -30,5 +30,6 @@
         <class>org.apache.ode.store.jpa.ProcessConfDaoImpl</class>
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>
+        <class>org.apache.ode.store.jpa.VersionTrackerDAOImpl</class>
     </persistence-unit>
 </persistence>

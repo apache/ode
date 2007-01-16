@@ -59,7 +59,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class BpelServerImpl implements BpelServer {
 
-    private static final Log __log = LogFactory.getLog(BpelServer.class);
+    private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -294,7 +294,7 @@ public class BpelServerImpl implements BpelServer {
             }
 
             // Create the processDAO if necessary.
-            createProcessDAO(conf.getProcessId(), compiledProcess);
+            createProcessDAO(conf.getProcessId(), conf.getVersion(), compiledProcess);
 
             BpelProcess process = new BpelProcess(conf, compiledProcess, null, elangRegistry);
 
@@ -338,9 +338,8 @@ public class BpelServerImpl implements BpelServer {
      * 
      * @param pid
      * @param oprocess
-     * @return
      */
-    private void createProcessDAO(final QName pid, final OProcess oprocess) {
+    private void createProcessDAO(final QName pid, final int version, final OProcess oprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
         try {
             boolean create = _db.exec(new BpelDatabase.Callable<Boolean>() {
@@ -365,10 +364,9 @@ public class BpelServerImpl implements BpelServer {
                     }
 
                     // GUIDS dont match, delete and create new
-                    // TODO: Versioning will need to handle this differently.
                     String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid
                             + "; replacing.";
-                    __log.warn(errmsg);
+                    __log.debug(errmsg);
                     old.delete();
 
                     return true;
@@ -400,7 +398,7 @@ public class BpelServerImpl implements BpelServer {
                             }
                         }
 
-                        ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid);
+                        ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, version);
                         for (String correlator : oprocess.getCorrelators()) {
                             newDao.addCorrelator(correlator);
                         }

@@ -274,7 +274,6 @@
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
-        <!-- Repository is down;
                 <repository>
                     <id>apache-incubator</id>
                     <name>Apache Incubator Repository</name>
@@ -284,7 +283,6 @@
                        <updatePolicy>never</updatePolicy>
                     </snapshots>
                 </repository>
-        -->
         <repository>
             <id>central</id>
             <name>Maven Repository Switchboard</name>
@@ -343,21 +341,26 @@
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
         </pluginRepository>
-        <!--pluginRepository>
+        <pluginRepository>
             <id>codehaus</id>
             <name>Maven Central Plugins Development Repository</name>
             <url>http://snapshots.maven.codehaus.org/maven2</url>
-        </pluginRepository-->
+        </pluginRepository>
         <pluginRepository>
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
         </pluginRepository>
-        <!--pluginRepository>
+        <pluginRepository>
             <id>apache-incubator</id>
             <name>Apache Incubator Repository</name>
             <url>http://people.apache.org/repo/m2-incubating-repository</url>
-        </pluginRepository-->
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache-snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+        </pluginRepository>
     </pluginRepositories>
 
 

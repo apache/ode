@@ -19,24 +19,6 @@
 
 package org.apache.ode.axis2.service;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
@@ -57,6 +39,18 @@ import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -119,12 +113,7 @@ public class DeploymentWebService {
                         // it to hold on for a while.
                         _poller.hold();
 
-                        // Cleaning up if something existed previously
-                        File dest = new File(_deployPath, namePart.getText());
-                        Collection<QName> undeployed = _store.undeploy(dest);
-                        for (QName pqname : undeployed) {
-                            _server.unregister(pqname);
-                        }
+                        File dest = buildUnusedDir(_deployPath, namePart.getText());
 
                         // If the previous deployment failed, there will still be something but
                         // undeploy won't do anything
@@ -141,7 +130,7 @@ public class DeploymentWebService {
 
                         Collection<QName> deployed = _store.deploy(dest);
 
-                        File deployedMarker = new File(_deployPath, namePart.getText() + ".deployed");
+                        File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
                         deployedMarker.createNewFile();
 
                         // Telling the poller what we deployed so that it doesn't try to deploy it again
@@ -215,6 +204,12 @@ public class DeploymentWebService {
             }
             if (unknown) throw new AxisFault("Unknown operation: '"
                     + messageContext.getAxisOperation().getName() + "'");
+        }
+
+        private File buildUnusedDir(File deployPath, String dirName) {
+            int v = 1;
+            while (new File(deployPath, dirName + "-" + v).exists()) v++;
+            return new File(deployPath, dirName + "-" + v);
         }
 
         private void unzip(File dest, DataHandler dataHandler) throws AxisFault {
