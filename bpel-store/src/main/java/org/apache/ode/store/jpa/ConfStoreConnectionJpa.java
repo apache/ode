@@ -23,6 +23,7 @@ import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 
 import javax.persistence.EntityManager;
+import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
 
@@ -69,5 +70,21 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
 
     public void rollback() {
         _em.getTransaction().rollback();
+    }
+
+    public int getNextVersion(QName processName) {
+        VersionTrackerDAOImpl vt = _em.find(VersionTrackerDAOImpl.class,processName.toString());
+        if (vt == null) return 1;
+        else return vt.getVersion() + 1;
+    }
+
+    public void setVersion(QName processName, int version) {
+        VersionTrackerDAOImpl vt = _em.find(VersionTrackerDAOImpl.class,processName.toString());
+        if (vt == null) {
+            vt = new VersionTrackerDAOImpl();
+            vt.setNamespace(processName.toString());
+        }
+        vt.setVersion(version);
+        _em.persist(vt);
     }
 }

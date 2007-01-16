@@ -19,97 +19,89 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Entity
 @Table(name="ODE_CORRELATOR")
 public class CorrelatorDAOImpl implements CorrelatorDAO {
-	
-	@Id @Column(name="CORRELATOR_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Long _correlatorId;
-	@Basic @Column(name="CORRELATOR_KEY") private String _correlatorKey;
-	@OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
-	@OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<MessageExchangeDAOImpl> _exchanges = new ArrayList<MessageExchangeDAOImpl>();
-	
-	@Version @Column(name="VERSION") private long _version;
-	
-	public CorrelatorDAOImpl(){}
-	public CorrelatorDAOImpl(String correlatorKey) {
-		_correlatorKey = correlatorKey;
-	}
 
-	public void addRoute(String routeGroupId, ProcessInstanceDAO target,
-			int index, CorrelationKey correlationKey) {
-		MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,routeGroupId,index,(ProcessInstanceDAOImpl)target);
-		
-		_routes.add(mr);
-	}
+    @Id @Column(name="CORRELATOR_ID")
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long _correlatorId;
+    @Basic @Column(name="CORRELATOR_KEY") private String _correlatorKey;
+    @OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @ElementJoinColumn(name="CORR_ID", referencedColumnName="ROUTE_ID")
+    private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
+    @OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @ElementJoinColumn(name="CORR_ID", referencedColumnName="MEX_ID")
+    private Collection<MessageExchangeDAOImpl> _exchanges = new ArrayList<MessageExchangeDAOImpl>();
 
-	public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
-		for (Iterator itr=_exchanges.iterator(); itr.hasNext();){
-			MessageExchangeDAOImpl mex = (MessageExchangeDAOImpl)itr.next();
-			if (mex.getCorrelationKeys().contains(correlationKey)) {
-				itr.remove();
-				return mex;
-			}
-		}
-		return null;
-	}
+    @Version @Column(name="VERSION") private long _version;
 
-	public void enqueueMessage(MessageExchangeDAO mex,
-			CorrelationKey[] correlationKeys) {
-		for (CorrelationKey key : correlationKeys ) {
-			((MessageExchangeDAOImpl)mex).addCorrelationKey(key);
-		}
-		_exchanges.add((MessageExchangeDAOImpl)mex);
+    public CorrelatorDAOImpl(){}
+    public CorrelatorDAOImpl(String correlatorKey) {
+        _correlatorKey = correlatorKey;
+    }
 
-	}
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target,
+                         int index, CorrelationKey correlationKey) {
+        MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,routeGroupId,index,(ProcessInstanceDAOImpl)target);
 
-	public MessageRouteDAO findRoute(CorrelationKey correlationKey) {
-		for (MessageRouteDAOImpl mr : _routes ) {
-			if ( mr.getCorrelationKey().equals(correlationKey)) return mr;
-		}
-		return null;
-	}
+        _routes.add(mr);
+    }
 
-	public String getCorrelatorId() {
-		return _correlatorKey;
-	}
+    public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
+        for (Iterator itr=_exchanges.iterator(); itr.hasNext();){
+            MessageExchangeDAOImpl mex = (MessageExchangeDAOImpl)itr.next();
+            if (mex.getCorrelationKeys().contains(correlationKey)) {
+                itr.remove();
+                return mex;
+            }
+        }
+        return null;
+    }
 
-	public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
-		// remove route across all correlators of the process
-		((ProcessInstanceDAOImpl)target).removeRoutes(routeGroupId);
-	}
-	
-	void removeLocalRoutes(String routeGroupId, ProcessInstanceDAO target) {
-		for (Iterator itr=_routes.iterator(); itr.hasNext(); ) {
-			MessageRouteDAOImpl mr = (MessageRouteDAOImpl)itr.next();
-			if ( mr.getGroupId().equals(routeGroupId) &&
-					mr.getTargetInstance().equals(target))
-				itr.remove();
-		}		
-	}
+    public void enqueueMessage(MessageExchangeDAO mex,
+                               CorrelationKey[] correlationKeys) {
+        for (CorrelationKey key : correlationKeys ) {
+            ((MessageExchangeDAOImpl)mex).addCorrelationKey(key);
+        }
+        _exchanges.add((MessageExchangeDAOImpl)mex);
+
+    }
+
+    public MessageRouteDAO findRoute(CorrelationKey correlationKey) {
+        for (MessageRouteDAOImpl mr : _routes ) {
+            if ( mr.getCorrelationKey().equals(correlationKey)) return mr;
+        }
+        return null;
+    }
+
+    public String getCorrelatorId() {
+        return _correlatorKey;
+    }
+
+    public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
+        // remove route across all correlators of the process
+        ((ProcessInstanceDAOImpl)target).removeRoutes(routeGroupId);
+    }
+
+    void removeLocalRoutes(String routeGroupId, ProcessInstanceDAO target) {
+        for (Iterator itr=_routes.iterator(); itr.hasNext(); ) {
+            MessageRouteDAOImpl mr = (MessageRouteDAOImpl)itr.next();
+            if ( mr.getGroupId().equals(routeGroupId) &&
+                    mr.getTargetInstance().equals(target))
+                itr.remove();
+        }
+    }
 }

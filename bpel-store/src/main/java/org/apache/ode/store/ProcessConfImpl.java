@@ -29,43 +29,35 @@ import java.util.*;
  */
 class ProcessConfImpl implements ProcessConf {
     private static final Log __log = LogFactory.getLog(ProcessConfImpl.class);
-
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     private final Date _deployDate;
-
     private final Map<QName, Node> _props;
-
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();;
-
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
-
     private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
-
     private final ArrayList<String> _mexi = new ArrayList<String>();
-
-    final ProcessState _state;
-
+    ProcessState _state;
     final TDeployment.Process _pinfo;
-
     final DeploymentUnitDir _du;
+    private int _version = 0;
+    private QName _pid;
+    private QName _type;
 
-
-    ProcessConfImpl(DeploymentUnitDir du, 
-            TDeployment.Process pinfo, 
-            Date deployDate, 
-            Map<QName, Node> props,
-            ProcessState pstate) {
+    ProcessConfImpl(QName pid, QName type, int version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
+                    Map<QName, Node> props, ProcessState pstate) {
+        _pid = pid;
+        _version = version;
         _du = du;
         _pinfo = pinfo;
         _deployDate = deployDate;
         _props = Collections.unmodifiableMap(props);
         _state = pstate;
+        _type = type;
 
         initLinks();
         initMexInterceptors();
         initEventList();
-
     }
 
     private void initMexInterceptors() {
@@ -120,11 +112,11 @@ class ProcessConfImpl implements ProcessConf {
     }
 
     public QName getProcessId() {
-        return _pinfo.getName();
+        return _pid;
     }
 
     public QName getType() {
-        return _pinfo.getType() == null ? getProcessId() : _pinfo.getType();
+        return _pinfo.getType() == null ? _type : _pinfo.getType();
     }
 
     public String getPackage() {
@@ -133,6 +125,10 @@ class ProcessConfImpl implements ProcessConf {
 
     public Map<QName, Node> getProperties() {
         return _props;
+    }
+
+    public int getVersion() {
+        return _version;
     }
 
     public InputStream getCBPInputStream() {
@@ -271,6 +267,10 @@ class ProcessConfImpl implements ProcessConf {
                 _events.put(tScopeEvents.getName(), evtSet);
             }
         }
+    }
+
+    void setState(ProcessState state) {
+        _state = state;
     }
 
 }

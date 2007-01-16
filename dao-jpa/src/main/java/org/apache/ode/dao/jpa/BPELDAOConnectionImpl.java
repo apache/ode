@@ -88,8 +88,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return ret;
     }
 
-    public ProcessDAO createProcess(QName pid, QName type, String guid) {
-        ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,this);
+    public ProcessDAO createProcess(QName pid, QName type, String guid, int version) {
+        ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,this,version);
 
         _processes.add(ret);
         return ret;
@@ -125,10 +125,9 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public ProcessDAO getProcess(QName processId) {
-        for ( ProcessDAOImpl p : _processes){
-            if ( p.getProcessId().equals(processId)) return p;
-        }
-        return null;
+        List daos = _em.createQuery("select p from ProcessDAOImpl p").getResultList();
+        if (daos.size() > 0) return (ProcessDAO) daos.get(0);
+        else return null;
     }
 
     public ScopeDAO getScope(Long siidl) {
@@ -169,7 +168,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return new ArrayList<ProcessDAO>(_processes);
     }
 
-    EntityManager getEntityManager() {
+    public EntityManager getEntityManager() {
         return _em;
     }
 

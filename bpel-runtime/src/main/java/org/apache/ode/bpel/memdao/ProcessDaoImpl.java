@@ -11,12 +11,8 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.*;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Date;
 
 /**
  * A very simple, in-memory implementation of the {@link ProcessDAO} interface.
@@ -26,6 +22,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     private QName _processId;
     private QName _type;
+    private int _version;
     final Map<String, CorrelatorDaoImpl> _correlators = new ConcurrentHashMap<String, CorrelatorDaoImpl>();
     protected final Map<Long, ProcessInstanceDAO> _instances = new ConcurrentHashMap<Long, ProcessInstanceDAO>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
@@ -34,9 +31,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     private String _guid;
 
-    public ProcessDaoImpl(BpelDAOConnectionImpl conn,
-                          Map<QName, ProcessDaoImpl> store,
-                          QName processId, QName type, String guid) {
+    public ProcessDaoImpl(BpelDAOConnectionImpl conn, Map<QName, ProcessDaoImpl> store,
+                          QName processId, QName type, String guid, int version) {
         if (__log.isDebugEnabled()) {
             __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
         }
@@ -46,6 +42,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _store = store;
         _processId = processId;
         _type = type;
+        _version = version;
     }
 
     public QName getProcessId() {
@@ -101,7 +98,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public void instanceCompleted(ProcessInstanceDAO instance) {
-        _instances.remove(instance.getInstanceId());
     }
 
     public void delete() {
@@ -109,7 +105,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public int getVersion() {
-        return 0;
+        return _version;
     }
 
     public String getDeployer() {

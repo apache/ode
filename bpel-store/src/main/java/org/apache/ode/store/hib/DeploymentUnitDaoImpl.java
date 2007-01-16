@@ -1,17 +1,15 @@
 package org.apache.ode.store.hib;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
+
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -104,12 +102,13 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
         super.delete();
     }
     
-    public ProcessConfDAO createProcess(QName pid, QName type) {
+    public ProcessConfDAO createProcess(QName pid, QName type, int version) {
         ProcessConfDaoImpl p = new ProcessConfDaoImpl();
         p.setPID(pid);
         p.setType(type);
         p.setDeploymentUnit(this);
         p.setState(ProcessState.ACTIVE);
+        p.setVersion(version);
         getSession().save(p);
         _processes.add(p);
         return p;
