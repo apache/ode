@@ -173,7 +173,7 @@ public class ODEServer {
         } finally {
             if (!success)
                 try {
-                    shutDown();
+                    // shutDown();
                 } catch (Exception ex) {
                     // Problem rolling back start(). Not so important
                     __log.debug("Error rolling back incomplete shutdown.", ex);
@@ -461,7 +461,7 @@ public class ODEServer {
         cf.setDataSource(_datasource);
         cf.setTransactionManager(_txMgr);
         cf.init(properties);
-
+        _daoCF = cf;
     }
 
     private void initProcessStore() {
