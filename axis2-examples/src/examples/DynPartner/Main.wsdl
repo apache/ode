@@ -13,9 +13,11 @@
 
   <import namespace="http://ode/bpel/responder.wsdl" location="Responder.wsdl"/>
 
-  <types>
-    <xsd:element name="result" type="xsd:string"/>
-  </types>
+  <wsdl:types>
+        <xsd:schema targetNamespace="http://ode/bpel/unit-test.wsdl">
+            <xsd:element name="result" type="xsd:string"/>
+        </xsd:schema>
+  </wsdl:types>
 
   <wsdl:message name="ResultMessage">
     <wsdl:part name="ack" element="tns:result"/>
