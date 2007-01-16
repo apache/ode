@@ -202,7 +202,7 @@ public class ODEServer {
                     _poller.stop();
                     _poller = null;
                 } catch (Throwable t) {
-                    __log.error("Error stopping poller.", t);
+                    __log.debug("Error stopping poller.", t);
                 }
 
             if (_server != null)
@@ -211,7 +211,7 @@ public class ODEServer {
                     _server.shutdown();
                     _server = null;
                 } catch (Throwable ex) {
-                    __log.error("Error stopping services.", ex);
+                    __log.debug("Error stopping services.", ex);
                 }
 
             if (_scheduler != null)
@@ -220,7 +220,7 @@ public class ODEServer {
                     _scheduler.shutdown();
                     _scheduler = null;
                 } catch (Exception ex) {
-                    __log.error("Scheduler couldn't be shutdown.", ex);
+                    __log.debug("Scheduler couldn't be shutdown.", ex);
                 }
 
             if (_store != null) 
@@ -228,7 +228,7 @@ public class ODEServer {
                     _store.shutdown();
                     _store = null;
                 } catch (Throwable t) {
-                    __log.error("Store could not be shutdown.",t);
+                    __log.debug("Store could not be shutdown.",t);
                 }
                 
             if (_daoCF != null) 
@@ -236,7 +236,7 @@ public class ODEServer {
                     _daoCF.shutdown();
                     _daoCF = null;
                 } catch (Throwable ex) {
-                    __log.error("DOA shutdown failed.", ex);                    
+                    __log.debug("DOA shutdown failed.", ex);                    
                 }
                 
             if (_minervaPool != null)
@@ -245,7 +245,7 @@ public class ODEServer {
                     _minervaPool.stop();
                     _minervaPool = null;
                 } catch (Throwable t) {
-                    __log.error("Minerva pool could not be shut down.", t);
+                    __log.debug("Minerva pool could not be shut down.", t);
                 }
 
             if (_txMgr != null) {
