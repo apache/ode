@@ -19,16 +19,14 @@
 
 package org.apache.ode.test.scheduler;
 
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Scheduler;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 
 public class TestScheduler implements Scheduler {
     ThreadLocal<List<Scheduler.Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
@@ -52,6 +50,16 @@ public class TestScheduler implements Scheduler {
     }
 
     public <T> T execTransaction(Callable<T> arg0) throws Exception, ContextException {
+        begin();
+        try {
+            T retval = arg0.call();
+            return retval;
+        } finally {
+            commit();
+        }
+    }
+
+    public <T> T execIsolatedTransaction(Callable<T> arg0) throws Exception, ContextException {
         begin();
         try {
             T retval = arg0.call();
