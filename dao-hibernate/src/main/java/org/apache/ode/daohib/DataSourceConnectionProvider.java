@@ -29,16 +29,22 @@ import org.hibernate.connection.ConnectionProvider;
 public class DataSourceConnectionProvider implements ConnectionProvider {
 
   private Properties _props;
+  private int _isolationLevel;
   
   public DataSourceConnectionProvider() {
   }
   
   public void configure(Properties props) throws HibernateException {
     _props = props;
+    _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "0"));
   }
 
   public Connection getConnection() throws SQLException {
-    return SessionManager.getConnection(_props);
+    Connection c = SessionManager.getConnection(_props);
+    if (_isolationLevel != 0) {
+        c.setTransactionIsolation(_isolationLevel);
+    }
+    return c;
   }
 
   public void closeConnection(Connection arg0) throws SQLException {

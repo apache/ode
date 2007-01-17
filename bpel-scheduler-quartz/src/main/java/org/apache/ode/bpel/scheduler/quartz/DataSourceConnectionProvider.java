@@ -28,13 +28,19 @@ import org.quartz.utils.ConnectionProvider;
 
 class DataSourceConnectionProvider implements ConnectionProvider {
   private DataSource _ds;
-  
+  private int _isolationLevel;
+
   DataSourceConnectionProvider(DataSource ds) {
     _ds = ds;
+    _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "0"));
   }
   
   public Connection getConnection() throws SQLException {
-    return _ds.getConnection();
+    Connection c = _ds.getConnection();
+    if (_isolationLevel != 0) {
+        c.setTransactionIsolation(_isolationLevel);
+    }
+    return c;
   }
 
   public void shutdown() throws SQLException {
