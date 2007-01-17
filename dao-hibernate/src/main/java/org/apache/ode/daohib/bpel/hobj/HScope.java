@@ -165,4 +165,8 @@ public class HScope extends HObject{
 	public void setScopeModelId(int scopeModelId) {
 		_scopeModelId = scopeModelId;
 	}
+
+    public String toString() {
+        return "HScope{id="+getId()+",name="+_name+"}";
+    }
 }
