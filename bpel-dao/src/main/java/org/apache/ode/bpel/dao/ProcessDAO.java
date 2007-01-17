@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.apache.ode.bpel.common.CorrelationKey;
+import java.util.Collection;
 
 import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Date;
+
+import org.apache.ode.bpel.common.CorrelationKey;
 
 /**
  * BPEL process data access objects. Contains references to active process instances ({@link ProcessInstanceDAO} and messages bound
