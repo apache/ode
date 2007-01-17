@@ -18,12 +18,14 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OWhile;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -31,9 +33,6 @@ import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.jacob.SynchChannel;
-
-import java.util.HashSet;
-import java.util.Set;
 import org.w3c.dom.Element;
 
 /**
