@@ -75,4 +75,7 @@ public class HObject {
         _lock = lock;
     }
 
+    public String toString() {
+        return this.getClass()+"{id="+_id+"}";
+    }
 }
