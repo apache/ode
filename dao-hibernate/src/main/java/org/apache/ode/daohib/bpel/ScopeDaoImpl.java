@@ -18,36 +18,20 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
-import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
-import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
-import org.apache.ode.daohib.bpel.hobj.HScope;
-import org.apache.ode.daohib.bpel.hobj.HXmlData;
+import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.utils.SerializableUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
 import org.apache.ode.utils.stl.UnaryFunctionEx;
 import org.hibernate.Criteria;
-import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
+
+import java.util.*;
 
 /**
  * Hibernate-based {@link ScopeDAO} implementation.
@@ -79,18 +63,16 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         qry.setString(0,corrSetName);
         qry.setLong(1,_scope.getId());
         HCorrelationSet cs;
-        Iterator iter = qry.iterate();
+        List res = qry.list();
 
-        if(!iter.hasNext()){
+        if(res.size() > 0){
             // if it doesn't exist, we make it
             cs = new HCorrelationSet(_scope, corrSetName);
             _scope.getCorrelationSets().add(cs);
             getSession().save(cs);
-        }else{
-            cs = (HCorrelationSet)iter.next();
+        } else {
+            cs = (HCorrelationSet)res.get(0);
         }
-
-        Hibernate.close(iter);
         return new CorrelationSetDaoImpl(_sm, cs);
     }
     /**
@@ -134,10 +116,10 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         Query qry = getSession().createQuery(QRY_VARIABLE);
         qry.setString(0,varName);
         qry.setLong(1,_scope.getId());
-        Iterator iter = qry.iterate();
+        List res = qry.list();
 
-        if(iter.hasNext())
-            data = (HXmlData)iter.next();
+        if(res.size() > 0)
+            data = (HXmlData)res.get(0);
         else{
             data = new HXmlData();
             data.setName(varName);
@@ -145,9 +127,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
             _scope.getVariables().add(data);
             getSession().save(data);
         }
-        Hibernate.close(iter);
         return new XmlDataDaoImpl(_sm, data);
-
     }
 
     /**
