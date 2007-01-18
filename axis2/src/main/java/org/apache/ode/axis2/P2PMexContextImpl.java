@@ -37,8 +37,8 @@ public class P2PMexContextImpl implements MessageExchangeContext {
         _scheduler = scheduler;
     }
 
-    public void invokePartner(final PartnerRoleMessageExchange mex) throws ContextException {
-        ExternalService target = (ExternalService) mex.getChannel();
+    public void invokePartner(final PartnerRoleMessageExchange pmex) throws ContextException {
+        ExternalService target = (ExternalService) pmex.getChannel();
         ODEService myService = _server.getService(target.getServiceName(), target.getPortName());
 
         // If we have direct access to the other process (i.e. it is locally
@@ -56,7 +56,7 @@ public class P2PMexContextImpl implements MessageExchangeContext {
                         _scheduler.execIsolatedTransaction(new Callable<Void>() {
 
                             public Void call() throws Exception {
-                                buildAndInvokeMyRoleMex(mex);
+                                buildAndInvokeMyRoleMex(pmex);
                                 return null;
                             }
                         });
@@ -72,22 +72,36 @@ public class P2PMexContextImpl implements MessageExchangeContext {
                 }
             });
 
-            if (mex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE) 
-                _waiters.put(mex.getMessageExchangeId(),mex);
+            if (pmex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE) {
+                _waiters.put(pmex.getMessageExchangeId(),pmex);
+                if (__log.isDebugEnabled())
+                    __log.debug("registered P2P reply waiter for Partner Mex " + pmex);
+            }
             // There is no way we can get a synchronous response.
-            mex.replyAsync();
+            pmex.replyAsync();
         } else {
-            _wrapped.invokePartner(mex);
+            _wrapped.invokePartner(pmex);
         }
     }
 
     public void onAsyncReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
-        PartnerRoleMessageExchange pmex = _waiters.remove(myRoleMex.getMessageExchangeId());
+        if (__log.isDebugEnabled())
+            __log.debug("Received Async reply to " + myRoleMex);
+
+        // Note that when we created the MyRoleMessageExchange, we gave the PartnerRoleMex Id 
+        // as the client id. 
+        PartnerRoleMessageExchange pmex = myRoleMex.getClientId() == null ? null : _waiters.remove(myRoleMex.getClientId());
         if (pmex == null) {
+            if (__log.isDebugEnabled())
+                __log.debug("Received Async reply to " + myRoleMex + " is NOT a P2P reply, deferring.");
             _wrapped.onAsyncReply(myRoleMex);
             return;
         }
 
+        
+        if (__log.isDebugEnabled())
+            __log.debug("for async reply, found matching P2P Partner Mex " + pmex);
+        
         handleResponse(pmex, myRoleMex);
 
     }
@@ -95,21 +109,27 @@ public class P2PMexContextImpl implements MessageExchangeContext {
     private MyRoleMessageExchange buildAndInvokeMyRoleMex(PartnerRoleMessageExchange pmex) {
         ExternalService target = (ExternalService) pmex.getChannel();
 
-        // Creating message exchange
-        String messageId = new GUID().toString();
-
-        MyRoleMessageExchange odeMex = _server.getBpelServer().getEngine().createMessageExchange("" + messageId,
+        MyRoleMessageExchange odeMex = _server.getBpelServer().getEngine().createMessageExchange(
+                pmex.getMessageExchangeId(),
                 target.getServiceName(), pmex.getOperationName());
-        __log.debug("ODE routed to operation " + pmex.getOperationName() + " from service " + target.getServiceName());
+
+        if(__log.isDebugEnabled())
+            __log.debug("Invoking (P2P) service " + odeMex.getServiceName() + " with operation " +  
+                    odeMex.getOperationName());
 
         copyHeader(pmex, odeMex);
 
-        if (__log.isDebugEnabled()) {
-            __log.debug("Invoking ODE using MEX " + odeMex);
-        }
-
+        
         odeMex.invoke(pmex.getRequest());
+        
+        if (__log.isDebugEnabled())
+            __log.debug("invoke of (P2P) service " + odeMex.getServiceName() + " with operation " +  
+                    odeMex.getOperationName() + "; MyRoleMex status = " + odeMex.getStatus());
+
+        
         if (odeMex.getStatus() != MessageExchange.Status.ASYNC) {
+            if (__log.isDebugEnabled())
+                __log.debug("invoke of P2P service did not result in ASYNC state, removing waiter for " + pmex);
             _waiters.remove(pmex.getMessageExchangeId());
             handleResponse(pmex, odeMex);
         }
