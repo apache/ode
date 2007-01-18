@@ -4,9 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +72,8 @@ public class P2PMexContextImpl implements MessageExchangeContext {
                 }
             });
 
+            if (mex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE) 
+                _waiters.put(mex.getMessageExchangeId(),mex);
             // There is no way we can get a synchronous response.
             mex.replyAsync();
         } else {
@@ -110,8 +109,10 @@ public class P2PMexContextImpl implements MessageExchangeContext {
         }
 
         odeMex.invoke(pmex.getRequest());
-        if (odeMex.getStatus() != MessageExchange.Status.ASYNC)
+        if (odeMex.getStatus() != MessageExchange.Status.ASYNC) {
+            _waiters.remove(pmex.getMessageExchangeId());
             handleResponse(pmex, odeMex);
+        }
 
         return odeMex;
     }
