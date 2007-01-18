@@ -133,7 +133,7 @@ public class P2PMexContextImpl implements MessageExchangeContext {
             pmex.reply(myRoleMex.getResponse());
             break;
         default:
-            pmex.replyWithFailure(MessageExchange.FailureType.NO_RESPONSE, "no response received", null);
+            __log.debug("Unexpected state: " + myRoleMex.getStatus());
             break;
 
         }
