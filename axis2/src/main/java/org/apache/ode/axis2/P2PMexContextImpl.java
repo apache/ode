@@ -34,8 +34,7 @@ public class P2PMexContextImpl implements MessageExchangeContext {
     private Map<String, PartnerRoleMessageExchange> _waiters = Collections
             .synchronizedMap(new HashMap<String, PartnerRoleMessageExchange>());
 
-    public P2PMexContextImpl(ODEServer server, MessageExchangeContext wrapped, ExecutorService executorService,
-            TransactionManager txMgr, Scheduler scheduler) {
+    public P2PMexContextImpl(ODEServer server, MessageExchangeContext wrapped, Scheduler scheduler) {
         _server = server;
         _wrapped = wrapped;
         _scheduler = scheduler;
