@@ -488,7 +488,7 @@ public class ODEServer {
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
         _server.setMessageExchangeContext(new P2PMexContextImpl(this, new MessageExchangeContextImpl(this),
-                _executorService, _txMgr));
+                _scheduler));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
         _server.init();
