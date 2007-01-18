@@ -65,7 +65,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         HCorrelationSet cs;
         List res = qry.list();
 
-        if(res.size() > 0){
+        if(res.size() == 0){
             // if it doesn't exist, we make it
             cs = new HCorrelationSet(_scope, corrSetName);
             _scope.getCorrelationSets().add(cs);
