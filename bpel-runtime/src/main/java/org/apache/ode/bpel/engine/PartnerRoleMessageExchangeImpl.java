@@ -83,6 +83,10 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
      * 
      */
     private void continueAsync() {
+        // If there is no channel waiting for us, there is nothing to do.
+        if (getDAO().getChannel() == null)
+            return;
+        
         WorkEvent we = new WorkEvent();
         we.setIID(getDAO().getInstance().getInstanceId());
         we.setType(Type.INVOKE_RESPONSE);
