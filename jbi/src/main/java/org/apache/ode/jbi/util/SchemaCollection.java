@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -98,7 +99,7 @@ public class SchemaCollection {
     }
     
     public void read(InputSource inputSource) throws Exception {
-        DocumentBuilderFactory docFac = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFac = XMLParserUtils.getDocumentBuilderFactory(); // don't trust system provided parser! 
         docFac.setNamespaceAware(true);
         DocumentBuilder builder = docFac.newDocumentBuilder();
         Document doc = builder.parse(inputSource);
