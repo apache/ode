@@ -52,16 +52,6 @@ public class XMLParserUtils {
     XERCES_P_ROOT + "external-noNamespaceSchemaLocation";
 
   /**
-   * Set the necessary system properties to use the correct XML parsers
-   */
-  static {
-    System.setProperty("javax.xml.parsers.SAXParserFactory", 
-        "org.apache.xerces.jaxp.SAXParserFactoryImpl");
-    System.setProperty("javax.xml.parsers.DocumentBuilderFactory", 
-        "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-  }
-
-  /**
    * <p>
    * Get the 'correct' implementation of a JAXP <code>SAXParserFactory</code>; this is
    * intended to ensure that local implementations (e.g., Crimson) don't sneak into
