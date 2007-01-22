@@ -33,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.XMLParserUtils;
 
 public class OdeSUManager implements ServiceUnitManager {
   private static final Log __log = LogFactory.getLog(OdeSUManager.class);
@@ -222,7 +223,10 @@ public class OdeSUManager implements ServiceUnitManager {
     // and not a DOM ? But the 64k question is what is wrong with Exceptions?
     Document doc;
     try {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        // Note that we are using our own choice of factory (xerces), not the 
+        // one that is provided by the system. This is important, otherwise the
+        // serialization routine won't work. 
+      DocumentBuilderFactory dbf = XMLParserUtils.getDocumentBuilderFactory();
       DocumentBuilder db = dbf.newDocumentBuilder();
       doc = db.newDocument();
     } catch (Exception ex) {
