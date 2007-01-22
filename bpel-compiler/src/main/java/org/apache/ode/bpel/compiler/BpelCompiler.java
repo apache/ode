@@ -600,9 +600,22 @@ abstract class BpelCompiler implements CompilerContext {
         _oprocess.guid = new GUID().toString();
         _oprocess.constants = makeConstants();
         _oprocess.debugInfo = createDebugInfo(process, "process");
-        _oprocess.processName = _processDef.getName();
+        
+        if (process.getTargetNamespace() == null) {
+            _oprocess.targetNamespace = "--UNSPECIFIED--";
+            recoveredFromError(process, new CompilationException(__cmsgs.errProcessNamespaceNotSpecified()));
+        } else {
+            _oprocess.targetNamespace = _processDef.getTargetNamespace();
+        }
+        
+        if (process.getName() == null) {
+            _oprocess.processName = "--UNSPECIFIED--";
+            recoveredFromError(process, new CompilationException(__cmsgs.errProcessNameNotSpecified()));
+        } else {
+            _oprocess.processName = _processDef.getName();
+        }
+        
         _oprocess.compileDate = _generatedDate;
-        _oprocess.targetNamespace = _processDef.getTargetNamespace();
 
         _konstExprLang = new OExpressionLanguage(_oprocess, null);
         _konstExprLang.debugInfo = createDebugInfo(_processDef, "Constant Value Expression Language");
