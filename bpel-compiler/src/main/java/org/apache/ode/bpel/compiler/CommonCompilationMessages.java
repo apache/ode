@@ -425,4 +425,12 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         else
             return this.formatCompilationMessage("A scope enclosed inside an atomic scope cannot declare itself as not atomic");
     }
+
+    public CompilationMessage errProcessNameNotSpecified() {
+        return this.formatCompilationMessage("The process name was not specified.");
+    }
+    
+    public CompilationMessage errProcessNamespaceNotSpecified() {
+        return this.formatCompilationMessage("The process namespace was not specified.");
+    }
 }
