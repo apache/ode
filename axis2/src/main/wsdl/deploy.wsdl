@@ -43,6 +43,12 @@
                 <xsd:element name="id" type="xsd:QName"/>
             </xsd:all>
         </xsd:complexType>
+        <xsd:complexType name="deployUnit">
+            <xsd:sequence>
+                <xsd:element name="name" type="xsd:string"/>
+                <xsd:element name="id" type="xsd:QName" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
     </types>
 
     <message name="deployInput">
@@ -50,10 +56,10 @@
         <part name="package" type="tns:package"/>
     </message>
     <message name="deployOutput">
-        <part name="response" type="xsd:boolean"/>
+        <part name="response" type="tns:deployUnit"/>
     </message>
     <message name="undeployInput">
-        <part name="processName" type="xsd:QName"/>
+        <part name="packageName" type="xsd:QName"/>
     </message>
     <message name="undeployOutput">
         <part name="response" type="xsd:boolean"/>
@@ -103,46 +109,46 @@
         <operation name="deploy">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="undeploy">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listDeployedPackages">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listProcesses">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getProcessPackage">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
     </binding>

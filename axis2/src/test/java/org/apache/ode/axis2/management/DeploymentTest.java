@@ -19,7 +19,15 @@
 
 package org.apache.ode.axis2.management;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -30,53 +38,72 @@ import org.apache.axis2.AxisFault;
 import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.utils.Namespaces;
 
-import javax.xml.namespace.QName;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-
 public class DeploymentTest extends TestCase {
 
     private OMFactory _factory;
     private ServiceClientUtil _client;
 
+    private ArrayList<QName> _deployed = new ArrayList<QName>();
+    private String _package;
+    
     public void testDeployUndeploy() throws Exception {
         // Setup and tear down are doing ost of the job here, just checking in the middle
 
         // Check deployment
-        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
-                new String[] {"name=DynPartnerMain", ""});
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[0], new String[0]);
         OMElement result = sendToPM(listRoot);
-        // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
-        assert(result.toString().split("process-info").length == 3);
-        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
-                new String[] {"name=DynPartnerResponder", ""});
+    	
+        // look for DynPartnerMain-xxx
+    	listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name="+_deployed.get(0).getLocalPart(), ""});
         result = sendToPM(listRoot);
-        assert(result.toString().split("process-info").length == 3);
+        
+        assertEquals("process-info-list", result.getLocalName());
+        OMElement child = result.getFirstElement();
+        assertNotNull("Missing deployed process", child);
+        assertEquals("process-info", child.getLocalName());
+        OMElement pid = child.getFirstElement();
+        assertEquals(_deployed.get(0).toString(), pid.getTextAsQName().toString());
+
+        // look for DynPartnerResponder-xxx
+        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+                new String[] {"name="+_deployed.get(1).getLocalPart(), ""});
+        result = sendToPM(listRoot);
+        assertEquals("process-info-list", result.getLocalName());
+        child = result.getFirstElement();
+        assertNotNull("Missing deployed process", child);
+        assertEquals("process-info", child.getLocalName());
+        assertEquals("process-info", child.getLocalName());
+        pid = child.getFirstElement();
+        assertEquals(_deployed.get(1).toString(), pid.getTextAsQName().toString());
     }
 
     public void testListDeployedPackages() throws Exception {
         OMElement root = _client.buildMessage("listDeployedPackages", new String[] {}, new String[] {});
         OMElement result = sendToDeployment(root);
-        assert(result.getFirstElement().getFirstElement().getText().equals("DynPartner"));
+        assertEquals(_package, result.getFirstElement().getText());
     }
 
     public void testListProcesses() throws Exception {
         OMElement root = _client.buildMessage("listProcesses", new String[] {"packagesNames"},
-                new String[] {"DynPartner"});
+                new String[] {_package});
         OMElement result = sendToDeployment(root);
-        assert(result.toString().indexOf("http://ode/bpel/unit-test")>=0);
-        assert(result.toString().indexOf("DynPartnerMain")>=0);
-        assert(result.toString().indexOf("http://ode/bpel/responder")>=0);
-        assert(result.toString().indexOf("DynPartnerResponder")>=0);
-        System.out.println(result);
+        assertTrue(result.toString().indexOf("http://ode/bpel/unit-test")>=0);
+        assertTrue(result.toString().indexOf("DynPartnerMain")>=0);
+        assertTrue(result.toString().indexOf("http://ode/bpel/responder")>=0);
+        assertTrue(result.toString().indexOf("DynPartnerResponder")>=0);
     }
 
     public void testGetProcessPackage() throws Exception {
         OMElement root = _client.buildMessage("getProcessPackage", new String[] {"processId"},
-                new Object[] { new QName("http://ode/bpel/unit-test", "DynPartnerMain") });
+                new Object[] { _deployed.get(0) } );
         OMElement result = sendToDeployment(root);
-        assert(result.getText().equals("DynPartner"));
-        System.out.println(result);
+        assertEquals(_package, result.getText());
+
+        OMElement root2 = _client.buildMessage("getProcessPackage", new String[] {"processId"},
+                new Object[] { _deployed.get(1) } );
+        OMElement result2 = sendToDeployment(root2);
+        assertEquals(_package, result2.getText());
     }
 
     protected void setUp() throws Exception {
@@ -95,8 +122,10 @@ public class DeploymentTest extends TestCase {
         // Add the zip to deploy
         InputStream is = this.getClass().getClassLoader().getResourceAsStream("DynPartner.zip");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (int b = is.read(); b >= 0; b = is.read()) {
-            outputStream.write((byte) b);
+        byte[] buffer = new byte[4096];
+        int len;
+        while((len = is.read(buffer)) >= 0) {
+        	outputStream.write(buffer, 0, len);
         }
         String base64Enc = Base64.encode(outputStream.toByteArray());
         OMText zipContent = _factory.createOMText(base64Enc, "application/zip", true);
@@ -106,15 +135,30 @@ public class DeploymentTest extends TestCase {
         zipElmt.addChild(zipContent);
 
         // Deploy
-        sendToDeployment(root);
+        OMElement result = sendToDeployment(root);
+
+        _deployed.clear();
+        _package = null;
+        Iterator iter = result.getChildElements();
+        while (iter.hasNext()) {
+        	OMElement e = (OMElement) iter.next();
+        	if (e.getLocalName().equals("name")) {
+                _package = e.getText();
+        	}
+        	if (e.getLocalName().equals("id")) {
+        		_deployed.add(e.getTextAsQName());
+        	}        	
+        }
+        assertNotNull(_package);
+        assertEquals(2, _deployed.size());
     }
 
     protected void tearDown() throws Exception {
         // Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
-        OMElement part = _factory.createOMElement("processName", null);
-        part.setText("DynPartner");
+        OMElement part = _factory.createOMElement("packageName", null);
+        part.setText(_package);
         root.addChild(part);
 
         // Undeploy
@@ -123,7 +167,7 @@ public class DeploymentTest extends TestCase {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
-        assert(result.toString().indexOf("process-info") < 0);
+        assertNull("Leftover process after undeployment", result.getFirstElement());
     }
 
 
