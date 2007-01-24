@@ -22,9 +22,7 @@ package org.apache.ode.bpel.iapi;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Node;
