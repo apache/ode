@@ -128,12 +128,12 @@ public class ProcessManagementTest extends TestCase {
         _client = new ServiceClientUtil();
 
         // Use the factory to create three elements
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
-        OMElement root = _factory.createOMElement("deploy", null);
-        OMElement namePart = _factory.createOMElement("name", depns);
+        OMNamespace pmapi = _factory.createOMNamespace("http://www.apache.org/ode/pmapi", "pmapi");
+        OMElement root = _factory.createOMElement("deploy", pmapi); // qualified operation name
+        OMElement namePart = _factory.createOMElement("name", null);
         namePart.setText("DynPartner");
-        OMElement zipPart = _factory.createOMElement("package", depns);
-        OMElement zipElmt = _factory.createOMElement("zip", depns);
+        OMElement zipPart = _factory.createOMElement("package", null);
+        OMElement zipElmt = _factory.createOMElement("zip", null);
 
         // Add the zip to deploy
         InputStream is = this.getClass().getClassLoader().getResourceAsStream("DynPartner.zip");
@@ -154,9 +154,9 @@ public class ProcessManagementTest extends TestCase {
 
     protected void tearDown() throws Exception {
         // Prepare undeploy message
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
-        OMElement root = _factory.createOMElement("undeploy", depns);
-        OMElement part = _factory.createOMElement("processName", null);
+        OMNamespace pmapi = _factory.createOMNamespace("http://www.apache.org/ode/pmapi", "pmapi");
+        OMElement root = _factory.createOMElement("undeploy", pmapi);  // qualified operation name
+        OMElement part = _factory.createOMElement("processName", pmapi);
         part.setText("DynPartner");
         root.addChild(part);
 
