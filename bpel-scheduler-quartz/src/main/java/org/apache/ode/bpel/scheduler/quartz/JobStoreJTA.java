@@ -19,24 +19,10 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Set;
-
-import javax.transaction.Status;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.Calendar;
-import org.quartz.JobDetail;
-import org.quartz.JobPersistenceException;
-import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.SchedulerConfigException;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.apache.ode.utils.LoggingConnectionWrapper;
+import org.quartz.*;
 import org.quartz.core.SchedulingContext;
 import org.quartz.impl.jdbcjobstore.Constants;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
@@ -44,6 +30,14 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
+
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A server-level devloper friendly implementation of {@link JobStore}. This is
@@ -57,7 +51,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
     private TransactionManager _txm;
 
-    protected boolean setTxIsolationLevelReadCommitted = false;
+    protected boolean setTxIsolationLevelReadCommitted = true;
 
     /** Thread-local for holding the transaction that was suspended if any */
     private ThreadLocal<Transaction> _suspenededTx = new ThreadLocal<Transaction>();
@@ -1297,7 +1291,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
             rollback = false;
             resume = false;
-            return conn;
+            return new LoggingConnectionWrapper(conn);
         } catch (SQLException sqle) {
             throw new JobPersistenceException(
                     "Failed to obtain DB connection from data source '" + getDataSource()
@@ -1318,6 +1312,10 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             if (resume)
                 resume();
         }
+    }
+
+    protected Connection getConnection() throws JobPersistenceException {
+        return new LoggingConnectionWrapper(super.getConnection());
     }
 
     @Override
@@ -1368,6 +1366,16 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             __log.error("Error rolling back transaction.",ex);
         }
         resume();
+    }
+
+    public boolean getUseDBLocks() {
+        return false;
+    }
+    public boolean isClustered() {
+        return false;
+    }
+    public boolean isLockOnInsert() {
+        return false;
     }
 
 }
