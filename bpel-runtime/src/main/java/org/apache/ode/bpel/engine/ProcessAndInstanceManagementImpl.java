@@ -90,7 +90,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             for (ProcessConf pconf : processQuery(processFilter))
                 fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
         } catch (Exception e) {
-            throw new ProcessingException("Exception while listing processes", e);
+            __log.error("Exception while listing processes", e);
+            throw new ProcessingException("Exception while listing processes: " + e.toString());
         }
 
         return ret;
@@ -116,7 +117,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         try {
             _store.setState(pid, org.apache.ode.bpel.iapi.ProcessState.ACTIVE);
         } catch (Exception ex) {
-            throw new ManagementException("Error setting process state.", ex);
+            __log.error("Exception while setting process state", ex);
+            throw new ManagementException("Error setting process state: " + ex.toString());
         }
         return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
     }
@@ -125,6 +127,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         try {
             _store.setState(pid, retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
         } catch (BpelEngineException e) {
+            __log.error("Exception while setting process as retired", e);
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
         }
         return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
@@ -139,7 +142,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 _store.setProperty(pid, propertyName, value);
             } catch (Exception ex) {
                 // Likely the process no longer exists in the store.
-                __log.debug("Error setting property value for " + pid + "; " + propertyName);
+                __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
             }
 
             // We have to do this after we set the property, since the
@@ -154,7 +157,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            throw new ProcessingException("Exception while setting process property", e);
+            __log.error("Exception while setting process property", e);
+            throw new ProcessingException("Exception while setting process property: " + e.toString());
         }
 
         return ret;
@@ -169,7 +173,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 _store.setProperty(pid, propertyName, value);
             } catch (Exception ex) {
                 // Likely the process no longer exists in the store.
-                __log.debug("Error setting property value for " + pid + "; " + propertyName);
+                __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
             }
 
             // We have to do this after we set the property, since the
@@ -184,7 +188,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            throw new ProcessingException("Exception while setting process property", e);
+            __log.error("Exception while setting process property", e);
+            throw new ProcessingException("Exception while setting process property" + e.toString());
         }
 
         return ret;
@@ -206,9 +211,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             });
         } catch (Exception e) {
-            throw new ProcessingException("Exception while listing instances", e);
+            __log.error("Exception while listing instances", e);
+            throw new ProcessingException("Exception while listing instances: " + e.toString());
         }
-
         return ret;
     }
 
@@ -317,7 +322,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             });
         } catch (Exception e) {
-            throw new ProcessingException("Exception during activity recovery", e);
+            __log.error("Exception during activity recovery", e);
+            throw new ProcessingException("Exception during activity recovery" + e.toString());
         }
         return genInstanceInfoDocument(iid);
     }
@@ -338,7 +344,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             });
         } catch (Exception e) {
-            throw new ProcessingException("Exception during instance deletion", e);
+            __log.error("Exception during instance deletion", e);
+            throw new ProcessingException("Exception during instance deletion: " + e.toString());
         }
 
         return ret;
@@ -451,7 +458,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             });
         } catch (Exception e) {
-            throw new ProcessingException("Exception during instance retrieval", e);
+            __log.error("Exception during instance retrieval", e);
+            throw new ProcessingException("Exception during instance retrieval: " + e.toString());
         }
 
         return getDebugger(processId);
@@ -472,7 +480,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            throw new ManagementException("Exception during database operation", e);
+            __log.error("Exception during database operation", e);
+            throw new ManagementException("Exception during database operation: " + e.toString());
         }
     }
 
@@ -492,7 +501,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             // Passthrough.
             throw me;
         } catch (Exception ex) {
-            throw new ManagementException("Exception during database operation", ex);
+            __log.error("Exception during database operation", ex);
+            throw new ManagementException("Exception during database operation" + ex.toString());
         }
     }
 
@@ -508,7 +518,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
-            throw new ProcessingException("Exception while retrieving process information", e);
+            __log.error("Exception while retrieving process information", e);
+            throw new ProcessingException("Exception while retrieving process information: " + e.toString());
         }
 
         return ret;
@@ -1009,7 +1020,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             });
         } catch (Exception e) {
-            throw new ProcessingException("Exception while querying instances", e);
+            __log.error("Exception while querying instances", e);
+            throw new ProcessingException("Exception while querying instances: " + e.toString());
         }
 
         return ret;
@@ -1070,7 +1082,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         dd = ISO8601DateParser.parse(Filter.getDateWithoutOp(ddf));
                     } catch (ParseException e) {
                         // Should never happen.
-                        throw new RuntimeException(e);
+                        __log.error("Exception while parsing date", e);
+                        throw new RuntimeException(e.toString());
                     }
 
                     CollectionsX.remove_if(confs, new MemberOfFunction<ProcessConf>() {
