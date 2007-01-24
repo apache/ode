@@ -139,7 +139,6 @@ public class ProcessStoreImpl implements ProcessStore {
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
         try {
-            System.out.println("CALLING COMPILATION");
             du.compile();
         } catch (CompilationException ce) {
             String errmsg = __msgs.msgDeployFailCompileErrors();
