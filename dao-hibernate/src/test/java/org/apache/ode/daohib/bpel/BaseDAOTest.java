@@ -51,7 +51,7 @@ public class BaseDAOTest extends TestCase {
     SessionManager sessMgr = new SessionManager(hibProps, ds, jotm.getTransactionManager());
     jotm.getTransactionManager().begin();
 
-    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl(sessMgr);
+    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl(); 
     daoConn = factoryImpl.getConnection();
   }
 
