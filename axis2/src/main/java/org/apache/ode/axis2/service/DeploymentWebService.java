@@ -19,6 +19,25 @@
 
 package org.apache.ode.axis2.service;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
@@ -37,20 +56,9 @@ import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -59,16 +67,21 @@ public class DeploymentWebService {
 
     private static final Log __log = LogFactory.getLog(DeploymentWebService.class);
 
+    private final OMNamespace _pmapi;
+
     private File _deployPath;
     private DeploymentPoller _poller;
     private ProcessStore _store;
-    private BpelServer _server;
+
+
+    public DeploymentWebService() {
+        _pmapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
+    }
 
     public void enableService(AxisConfiguration axisConfig, BpelServer server, ProcessStore store,
                               DeploymentPoller poller, String rootpath, String workPath) {
         _deployPath = new File(workPath, "processes");
         _store = store;
-        _server = server;
 
         Definition def;
         try {
@@ -93,7 +106,6 @@ public class DeploymentWebService {
         public void receive(MessageContext messageContext) throws AxisFault {
             String operation = messageContext.getAxisOperation().getName().getLocalPart();
             SOAPFactory factory = getSOAPFactory(messageContext);
-            OMNamespace depns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","deployapi");
             boolean unknown = false;
 
             try {
@@ -129,6 +141,7 @@ public class DeploymentWebService {
                                     "descriptor in its root directory named deploy.xml, aborting.");
 
                         Collection<QName> deployed = _store.deploy(dest);
+                        
 
                         File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
                         deployedMarker.createNewFile();
@@ -137,8 +150,19 @@ public class DeploymentWebService {
                         _poller.markAsDeployed(dest);
                         __log.info("Deployment of artifact " + dest.getName() + " successful.");
 
-                        OMElement response = factory.createOMElement("response", depns);
-                        response.setText("true");
+                        OMElement response = factory.createOMElement("response", null);
+
+                        if (__log.isDebugEnabled()) __log.debug("Deployed package: "+dest.getName());
+                    	OMElement d = factory.createOMElement("name", null);
+                    	d.setText(dest.getName());
+                    	response.addChild(d);
+
+                    	for (QName pid : deployed) {
+                        	if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
+                        	d = factory.createOMElement("id", null);
+                        	d.setText(pid);
+                        	response.addChild(d);
+                        }
                         sendResponse(factory, messageContext, "deployResponse", response);
                     } finally {
                         _poller.release();
@@ -146,10 +170,10 @@ public class DeploymentWebService {
                 } else if (operation.equals("undeploy")) {
                     OMElement part = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
 
-                    String elmtStr = part.getText();
-                    File deploymentDir = new File(_deployPath, elmtStr);
+                    String pkg = part.getText();
+                    File deploymentDir = new File(_deployPath, pkg);
                     if (!deploymentDir.exists())
-                        throw new AxisFault("Couldn't find deployment package " + elmtStr + " in directory " + _deployPath);
+                        throw new AxisFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
 
                     try {
                         // We're going to create a directory under the deployment root and put
@@ -159,11 +183,11 @@ public class DeploymentWebService {
 
                         Collection<QName> undeployed = _store.undeploy(deploymentDir);
 
-                        File deployedMarker = new File(_deployPath, elmtStr + ".deployed");
+                        File deployedMarker = new File(_deployPath, pkg + ".deployed");
                         deployedMarker.delete();
-                        FileUtils.deepDelete(new File(_deployPath, elmtStr));
+                        FileUtils.deepDelete(new File(_deployPath, pkg));
 
-                        OMElement response = factory.createOMElement("response", depns);
+                        OMElement response = factory.createOMElement("response", null);
                         response.setText("" + (undeployed.size() > 0));
                         sendResponse(factory, messageContext, "undeployResponse", response);
                         _poller.markAsUndeployed(deploymentDir);
@@ -172,9 +196,9 @@ public class DeploymentWebService {
                     }
                 } else if (operation.equals("listDeployedPackages")) {
                     Collection<String> packageNames = _store.getPackages();
-                    OMElement response = factory.createOMElement("deployedPackages", depns);
+                    OMElement response = factory.createOMElement("deployedPackages", null);
                     for (String name : packageNames) {
-                        OMElement nameElmt = factory.createOMElement("name", depns);
+                        OMElement nameElmt = factory.createOMElement("name", null);
                         nameElmt.setText(name);
                         response.addChild(nameElmt);
                     }
@@ -182,17 +206,21 @@ public class DeploymentWebService {
                 } else if (operation.equals("listProcesses")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     List<QName> processIds = _store.listProcesses(namePart.getText());
-                    OMElement response = factory.createOMElement("processIds", depns);
+                    OMElement response = factory.createOMElement("processIds", null);
                     for (QName qname : processIds) {
-                        OMElement nameElmt = factory.createOMElement("id", depns);
+                        OMElement nameElmt = factory.createOMElement("id", null);
                         nameElmt.setText(qname);
                         response.addChild(nameElmt);
                     }
                     sendResponse(factory, messageContext, "listProcessResponse", response);
                 } else if (operation.equals("getProcessPackage")) {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
+                    ProcessConf process = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart));
+                    if (process == null) {
+                    	throw new AxisFault("Could not find process: " + qnamePart.getTextAsQName());                    	
+                    }
                     String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getPackage();
-                    OMElement response = factory.createOMElement("packageName", depns);
+                    OMElement response = factory.createOMElement("packageName", null);
                     response.setText(packageName);
                     sendResponse(factory, messageContext, "getProcessPackageResponse", response);
                 } else unknown = true;
@@ -200,6 +228,7 @@ public class DeploymentWebService {
                 // Trying to extract a meaningful message
                 Throwable source = t;
                 while (source.getCause() != null && source.getCause() != source) source = source.getCause();
+                __log.warn("Invocation of operation " + operation + " failed", t);
                 throw new AxisFault("Invocation of operation " + operation + " failed: " + source.toString(), t);
             }
             if (unknown) throw new AxisFault("Unknown operation: '"
@@ -243,8 +272,7 @@ public class DeploymentWebService {
             SOAPEnvelope envelope = factory.getDefaultEnvelope();
             outMsgContext.setEnvelope(envelope);
 
-            OMNamespace depns = factory.createOMNamespace("http://www.apache.org/ode/pmapi","deployapi");
-            OMElement responseOp = factory.createOMElement(op, depns);
+            OMElement responseOp = factory.createOMElement(op, _pmapi);
             responseOp.addChild(response);
             envelope.getBody().addChild(response);
             AxisEngine engine = new AxisEngine(
