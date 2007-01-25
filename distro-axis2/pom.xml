@@ -49,13 +49,6 @@
             <classifier>tar</classifier>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-axis2-examples</artifactId>
-            <type>tar</type>
-            <classifier>tar</classifier>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>

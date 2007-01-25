@@ -28,8 +28,8 @@ import org.quartz.JobExecutionException;
  */
 public class JobImpl implements Job {
 
-  public void execute(JobExecutionContext jobcontext) throws JobExecutionException {
-    QuartzSchedulerImpl.execute(jobcontext);
-  }
+    public void execute(JobExecutionContext jobcontext) throws JobExecutionException {
+        QuartzSchedulerImpl.execute(jobcontext);
+    }
 
 }

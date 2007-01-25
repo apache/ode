@@ -106,11 +106,9 @@
         |
     -->
     <modules>
-        <module>jbi-examples</module>
         <module>tools-bin</module>
         <module>axis2</module>
         <module>axis2-war</module>
-        <module>axis2-examples</module>
 
         <module>utils</module>
         <module>minerva</module>
@@ -266,7 +264,7 @@
     -->
     <repositories>
         <repository>
-            <id>intalio</id>
+            <id>central</id>
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
             <snapshots>
@@ -274,6 +272,18 @@
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>central-maven</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+
+<!-- Rely only on Intalio repository, prevents maven madness. 
+ 
                 <repository>
                     <id>apache-incubator</id>
                     <name>Apache Incubator Repository</name>
@@ -283,15 +293,6 @@
                        <updatePolicy>never</updatePolicy>
                     </snapshots>
                 </repository>
-        <repository>
-            <id>central</id>
-            <name>Maven Repository Switchboard</name>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
         <repository>
             <id>ibiblio</id>
             <name>ibiblio</name>
@@ -328,19 +329,23 @@
                        <updatePolicy>never</updatePolicy>
                     </snapshots>
                 </repository>
+-->
 
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>intalio</id>
+            <id>central</id>
             <name>Intalio Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </pluginRepository>
         <pluginRepository>
-            <id>central</id>
+            <id>central-maven</id>
             <name>Maven Repository Switchboard</name>
             <url>http://repo1.maven.org/maven2</url>
         </pluginRepository>
+
+<!-- Safe sex....
+
         <pluginRepository>
             <id>codehaus</id>
             <name>Maven Central Plugins Development Repository</name>
@@ -361,6 +366,9 @@
             <name>Apache Snapshot Repository</name>
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
         </pluginRepository>
+-->
+
+
     </pluginRepositories>
 
 
@@ -479,11 +487,6 @@
                 <artifactId>ode-jbi-install</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-jbi-examples</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>

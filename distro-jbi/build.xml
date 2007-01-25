@@ -15,6 +15,7 @@
     <target name="stage" depends="init" description="stage a distribution">
         <mkdir dir="${stage}" />
         <antcall target="_stage_license" />
+        <antcall target="_stage_examples" />
     </target>
 
     <target name="_stage_license">
@@ -24,6 +25,12 @@
                 <include name="NOTICE"/>
                 <include name="DISCLAIMER"/>
             </fileset>
+        </copy>
+    </target>
+    <target name="_stage_examples">
+        <mkdir dir="${stage}/examples" />
+        <copy todir="${stage}/examples" overwrite="true">
+            <fileset dir="src/examples"/>
         </copy>
     </target>
 
