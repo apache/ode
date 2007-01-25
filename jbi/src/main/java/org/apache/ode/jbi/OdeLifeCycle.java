@@ -232,7 +232,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._mexContext = new MessageExchangeContextImpl(_ode);
         _ode._executorService = Executors.newCachedThreadPool();
         _ode._scheduler = new QuartzSchedulerImpl();
-        _ode._scheduler.setBpelServer(_ode._server);
+        _ode._scheduler.setJobProcessor(_ode._server);
         _ode._scheduler.setExecutorService(_ode._executorService, 20);
         _ode._scheduler.setTransactionManager((TransactionManager) _ode
                 .getContext().getTransactionManager());
