@@ -199,6 +199,8 @@
 
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
+ 		<groupId>org.apache.maven.plugins</groupId>
+
                 <executions>
                     <execution>
                         <phase>test-compile</phase>
