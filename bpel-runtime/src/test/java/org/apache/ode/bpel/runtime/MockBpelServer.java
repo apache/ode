@@ -286,10 +286,10 @@ class MockBpelServer {
         QuartzSchedulerImpl _quartz;
         long                _nextSchedule;
 
-        SchedulerWrapper(BpelServer server, TransactionManager txManager, DataSource dataSource) {
+        SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
             ExecutorService executorService = Executors.newCachedThreadPool();
             _quartz = new QuartzSchedulerImpl();
-            _quartz.setBpelServer(server);
+            _quartz.setJobProcessor(server);
             _quartz.setExecutorService(executorService, 20);
             _quartz.setTransactionManager(txManager);
             _quartz.setDataSource(dataSource);
@@ -325,6 +325,11 @@ class MockBpelServer {
 
         public void registerSynchronizer(Synchronizer synch) throws ContextException {
             _quartz.registerSynchronizer(synch);
+        }
+
+        public void setJobProcessor(JobProcessor processor) throws ContextException {
+            _quartz.setJobProcessor(processor);
+            
         }
     }
 

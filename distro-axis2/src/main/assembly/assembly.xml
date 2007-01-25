@@ -38,7 +38,6 @@
             <scope>runtime</scope>
             <outputDirectory/>
             <includes>
-                <include>org.apache.ode:ode-axis2-examples</include>
                 <include>org.apache.ode:ode-tools-bin</include>
             </includes>
             <unpack>true</unpack>

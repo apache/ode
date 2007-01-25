@@ -36,7 +36,8 @@
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <executions>
+                <version>2.0.2</version>
+		<executions>
                     <execution>
                         <goals>
                             <goal>war</goal>

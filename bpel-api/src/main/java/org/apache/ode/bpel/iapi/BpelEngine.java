@@ -34,7 +34,7 @@ import javax.xml.namespace.QName;
  * exception of any kind, then the current transaction <em>must</em> be rolled
  * back.
  */
-public interface BpelEngine {
+public interface BpelEngine extends Scheduler.JobProcessor {
 
     /**
      * Create a "my role" message exchange for invoking a BPEL process.
@@ -60,16 +60,4 @@ public interface BpelEngine {
 
     MessageExchange getMessageExchangeByClientKey(String clientKey);
 
-    /**
-     * Call-back to the engine used by the {@link Scheduler} implementation for
-     * executing scheduled jobs.
-     * 
-     * @param jobId
-     *            job identifier returned by the {@link Scheduler}.scheduleXXX
-     *            methods.
-     * @param jobDetail
-     *            job details as passed in to the {@link Scheduler}.scheduleXXX
-     *            methods
-     */
-    void onScheduledJob(String jobId, Map<String, Object> jobDetail);
 }
