@@ -478,7 +478,7 @@ public class ODEServer {
 
         _executorService = Executors.newCachedThreadPool();
         _scheduler = new QuartzSchedulerImpl();
-        _scheduler.setBpelServer(_server);
+        _scheduler.setJobProcessor(_server);
         _scheduler.setExecutorService(_executorService, 20);
         _scheduler.setTransactionManager(_txMgr);
         _scheduler.setDataSource(_datasource);
