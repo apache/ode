@@ -35,7 +35,7 @@ import java.util.concurrent.locks.Lock;
  */
 public class InstanceLockManager {
 
-    private final Lock _mutex = null;
+    private final Lock _mutex = new java.util.concurrent.locks.ReentrantLock();
     private final Map<Long, InstanceInfo> _locks = new HashMap<Long,InstanceInfo> ();
     
     public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException, TimeoutException {
