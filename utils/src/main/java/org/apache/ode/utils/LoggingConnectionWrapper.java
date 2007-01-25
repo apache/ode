@@ -201,6 +201,6 @@ public class LoggingConnectionWrapper implements Connection {
     private void print(String str) {
         if (_log != null)
             _log.debug(str);
-        else print(str);
+        else System.out.println(str);
     }
 }
