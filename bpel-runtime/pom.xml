@@ -180,6 +180,7 @@
             <plugin>
                 <groupId>org.apache.myfaces.tobago</groupId>
                 <artifactId>maven-apt-plugin</artifactId>
+                <version>1.0.7</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

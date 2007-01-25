@@ -20,6 +20,7 @@ package org.apache.ode.bpel.compiler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -106,7 +107,13 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         }
 
         try {
-            src.setByteStream(_wsdlFinder.openResource(location));
+            InputStream str = _wsdlFinder.openResource(location);
+            if (str != null)
+                src.setByteStream(str);
+            else {
+                __log.debug("resolveEntity: resource not found: " + location);
+                throw new IOException("Resource not found: " + location);
+            }
         } catch (IOException ioex) {
             __log.debug("resolveEntity: IOException opening " + location,ioex);
 
@@ -117,6 +124,9 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
 
             __log.debug("resolveEntity: failIfNotFound NOT set, returning NULL");
             return null;
+        } catch (Exception ex) {
+            __log.debug("resolveEntity: unexpected error: " + location);
+            throw new IOException("Unexpected error loading resource: " + location);
         }
 
         return src;

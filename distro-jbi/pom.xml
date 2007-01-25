@@ -49,13 +49,6 @@
             <classifier>tar</classifier>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-jbi-examples</artifactId>
-            <type>tar</type>
-            <classifier>tar</classifier>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>

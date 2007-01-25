@@ -19,10 +19,12 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import javax.wsdl.Operation;
@@ -37,21 +39,24 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 
 /**
- * Implementation of the {@link BpelEngine} interface: provides the server
- * methods that should be invoked in the context of a transaction.
+ * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
+ * transaction.
  * 
  * @author mszefler
  * 
@@ -82,6 +87,9 @@ public class BpelEngineImpl implements BpelEngine {
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
+    /** Maximum number of tries for async jobs. */
+    private static final int MAX_RETRIES = 3;
+
     /** Active processes, keyed by process id. */
     final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
 
@@ -101,8 +109,7 @@ public class BpelEngineImpl implements BpelEngine {
 
         MessageExchangeDAO dao;
         if (target == null || target.isInMemory()) {
-            dao = _contexts.inMemDao.getConnection().createMessageExchange(
-                    MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+            dao = _contexts.inMemDao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         } else {
             dao = _contexts.dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         }
@@ -199,16 +206,14 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     /**
-     * Route to a process using the service id. Note, that we do not need the
-     * endpoint name here, we are assuming that two processes would not be
-     * registered under the same service qname but different endpoint.
+     * Route to a process using the service id. Note, that we do not need the endpoint name here, we are assuming that two processes
+     * would not be registered under the same service qname but different endpoint.
      * 
      * @param service
      *            target service id
      * @param request
      *            request message
-     * @return process corresponding to the targetted service, or
-     *         <code>null</code> if service identifier is not recognized.
+     * @return process corresponding to the targetted service, or <code>null</code> if service identifier is not recognized.
      */
     BpelProcess route(QName service, Message request) {
         // TODO: use the message to route to the correct service if more than
@@ -230,49 +235,79 @@ public class BpelEngineImpl implements BpelEngine {
 
         if (process == null)
             return null;
-        
+
         return process._oprocess;
     }
 
-    public void onScheduledJob(String jobId, Map<String, Object> jobDetail) {
-        WorkEvent we = new WorkEvent(jobDetail);
+    public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
+        // NOTE: wrap this method real tight in a try/catch block, we need to handle all types of 
+        // failure here, the scheduler is not going to know how to handle our errors. 
+        try {
+            WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+            ProcessInstanceDAO instance;
+            if (we.isInMem())
+                instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
+            else
+                instance = _contexts.dao.getConnection().getInstance(we.getIID());
 
-        ProcessInstanceDAO instance;
-        if (we.isInMem())
-            instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
-        else
-            instance = _contexts.dao.getConnection().getInstance(we.getIID());
+            if (instance == null) {
+                __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+                // nothing we can do, this instance is not in the database, it will
+                // always
+                // fail.
+                return;
+            }
 
-        if (instance == null) {
-            __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
-            // nothing we can do, this instance is not in the database, it will
-            // always
-            // fail.
-            return;
+            ProcessDAO processDao = instance.getProcess();
+            BpelProcess process = _activeProcesses.get(processDao.getProcessId());
+            if (process == null) {
+                // If the process is not active, it means that we should not be
+                // doing
+                // any work on its behalf, therefore we will reschedule the events
+                // for some time in the future (1 minute).
+                Date future = new Date(System.currentTimeMillis() + (60 * 1000));
+                __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao.getProcessId(), jobInfo.jobName, future));
+                _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, future);
+            }
+
+            assert process != null;
+            process.handleWorkEvent(jobInfo.jobDetail);
+            debuggingDelay();
+        } catch (BpelEngineException bee) {
+            throw new Scheduler.JobProcessorException(bee,checkRetry(jobInfo,bee));
+        } catch (ContextException ce) {
+            throw new Scheduler.JobProcessorException(ce,checkRetry(jobInfo,ce));
+        } catch (RuntimeException rte) {
+            throw new Scheduler.JobProcessorException(rte,checkRetry(jobInfo,rte));
+        } catch (Throwable t) {
+            throw new Scheduler.JobProcessorException(false);
+
         }
+    }
 
-        ProcessDAO processDao = instance.getProcess();
-        BpelProcess process = _activeProcesses.get(processDao.getProcessId());
-        if (process == null) {
-            // If the process is not active, it means that we should not be
-            // doing
-            // any work on its behalf, therefore we will reschedule the events
-            // for some time in the future (1 minute).
-            Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-            __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao.getProcessId(), jobId, future));
-            _contexts.scheduler.schedulePersistedJob(jobDetail, future);
+    private boolean checkRetry(JobInfo jobInfo, Throwable t) {
+        // TODO, better handling of failed jobs (put them in the DB perhaps?)
+        if (jobInfo.retryCount < MAX_RETRIES)
+            return true;
+
+        __log.error("Job could not be completed after " + MAX_RETRIES + "! ",t);
+        
+        try {
+            File f = File.createTempFile("ode-bad-job", ".ser", new File(""));
+            ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream(f));
+            fos.writeObject(jobInfo);
+            fos.close();
+        } catch (Exception ex) {
+            __log.error("Could not save bad job; it will be lost!",ex);
         }
-
-        assert process != null;
-        process.handleWorkEvent(jobDetail);
-        debuggingDelay();
+        
+        // No more retries.
+        return false;
     }
 
     /**
-     * Block the thread for random amount of time. Used for testing for races
-     * and the like. The delay generated is exponentially distributed with the
-     * mean obtained from the <code>ODE_DEBUG_TX_DELAY</code> environment
-     * variable.
+     * Block the thread for random amount of time. Used for testing for races and the like. The delay generated is exponentially
+     * distributed with the mean obtained from the <code>ODE_DEBUG_TX_DELAY</code> environment variable.
      */
     private void debuggingDelay() {
         // Do a delay for debugging purposes.
@@ -280,9 +315,9 @@ public class BpelEngineImpl implements BpelEngine {
             try {
                 double u = _random.nextDouble(); // Uniform
                 long delay = (long) (-Math.log(u) * _delayMean); // Exponential
-                                                                    // distribution
-                                                                    // with mean
-                                                                    // _delayMean
+                // distribution
+                // with mean
+                // _delayMean
                 __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms.");
                 Thread.sleep(delay);
             } catch (InterruptedException e) {

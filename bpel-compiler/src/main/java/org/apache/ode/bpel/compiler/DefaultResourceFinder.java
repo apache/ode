@@ -71,7 +71,13 @@ public class DefaultResourceFinder implements ResourceFinder {
            return null;
         }
         
-        return new FileInputStream(new File(suURI.getPath(),relative.getPath()));
+        File f = new File(suURI.getPath(),relative.getPath());
+        if (!f.exists()) {
+            __log.debug("fileNotFound: " + f);
+            return null;
+        }
+        
+        return new FileInputStream(f);
     }
 
 }

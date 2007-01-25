@@ -27,6 +27,8 @@ import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OExpressionLanguage;
@@ -57,7 +59,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author mriou <mriou at apache dot org>
  */
-public class BpelServerImpl implements BpelServer {
+public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
 
@@ -486,6 +488,10 @@ public class BpelServerImpl implements BpelServer {
             throw new BpelEngineException(errmsg, ex);
         }
 
+    }
+
+    public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
+        getEngine().onScheduledJob(jobInfo);        
     }
 
     //   

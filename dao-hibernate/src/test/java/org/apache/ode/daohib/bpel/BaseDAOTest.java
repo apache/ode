@@ -19,15 +19,11 @@
 
 package org.apache.ode.daohib.bpel;
 
-import java.io.FileInputStream;
-import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.daohib.SessionManager;
 import org.objectweb.jotm.Jotm;
 
 /**
@@ -43,15 +39,15 @@ public class BaseDAOTest extends TestCase {
   private DataSource ds;
   
   protected void initTM() throws Exception {
-    Properties hibProps = new Properties();
-    hibProps.load(new FileInputStream("../dao-hibernate/src/hibernate/derby.properties"));
-
+    
     jotm = new Jotm(true, false);
     ds = getDataSource();
-    SessionManager sessMgr = new SessionManager(hibProps, ds, jotm.getTransactionManager());
     jotm.getTransactionManager().begin();
 
-    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl(); 
+    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl();
+    factoryImpl.setTransactionManager(jotm.getTransactionManager());
+    factoryImpl.setDataSource(ds);
+
     daoConn = factoryImpl.getConnection();
   }
 
