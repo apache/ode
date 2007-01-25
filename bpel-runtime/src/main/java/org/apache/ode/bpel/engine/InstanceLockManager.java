@@ -49,6 +49,7 @@ public class InstanceLockManager {
                 if (li == null) {
                     li = new InstanceInfo(iid, Thread.currentThread());
                     _locks.put(iid, li);
+                    return;
                 } else {
                     if (!li.available.await(time, tu)) 
                         throw new TimeoutException();
