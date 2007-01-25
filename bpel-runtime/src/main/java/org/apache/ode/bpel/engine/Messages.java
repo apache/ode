@@ -186,4 +186,8 @@ public class Messages extends MessageBundle {
         return format("Error registering expression language \"" + expressionLanguageUri + "\" with properties " + properties);
     }
 
+    public String msgScheduledJobFailed(Map<String, Object> jobDetail) {
+        return format("Scheduled job failed; jobDetail={0}", jobDetail);
+    }
+
 }
