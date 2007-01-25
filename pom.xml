@@ -217,6 +217,16 @@
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>1.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-rar-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.1.1</version>
+                </plugin>
 
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -314,6 +324,8 @@
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
+
+
 <!-- Rely only on Intalio repository, prevents maven madness. 
         <repository>
             <id>central-maven</id>
@@ -380,6 +392,8 @@
             <name>Intalio Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </pluginRepository>
+
+
 <!-- Safe sex....
         <pluginRepository>
             <id>central-maven</id>
