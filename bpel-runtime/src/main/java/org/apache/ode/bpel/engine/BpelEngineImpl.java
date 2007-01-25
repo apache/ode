@@ -240,10 +240,11 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
+        WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+
         // NOTE: wrap this method real tight in a try/catch block, we need to handle all types of 
         // failure here, the scheduler is not going to know how to handle our errors. 
         try {
-            WorkEvent we = new WorkEvent(jobInfo.jobDetail);
             ProcessInstanceDAO instance;
             if (we.isInMem())
                 instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
@@ -274,12 +275,16 @@ public class BpelEngineImpl implements BpelEngine {
             process.handleWorkEvent(jobInfo.jobDetail);
             debuggingDelay();
         } catch (BpelEngineException bee) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()),bee);
             throw new Scheduler.JobProcessorException(bee,checkRetry(jobInfo,bee));
         } catch (ContextException ce) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()),ce);
             throw new Scheduler.JobProcessorException(ce,checkRetry(jobInfo,ce));
         } catch (RuntimeException rte) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()),rte);
             throw new Scheduler.JobProcessorException(rte,checkRetry(jobInfo,rte));
         } catch (Throwable t) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()),t);
             throw new Scheduler.JobProcessorException(false);
 
         }
