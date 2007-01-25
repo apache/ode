@@ -114,4 +114,9 @@ public class TestScheduler implements Scheduler {
             }
         _synchros.get().clear();
     }
+
+
+    public void setJobProcessor(JobProcessor processor) throws ContextException {
+        // Nothing to do.
+    }
 }
