@@ -19,34 +19,13 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
@@ -56,7 +35,18 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 
-import com.sun.corba.se.impl.orbutil.threadpool.TimeoutException;
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
@@ -247,13 +237,19 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
-        WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+        final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
 
         // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
         // Note that we don't want to wait too long here to get our lock, since we are likely holding
         // on to scheduler's locks of various sorts.
         try {
             _instanceLockManager.lock(we.getIID(), 1, TimeUnit.MICROSECONDS);
+            _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+                public void afterCompletion(boolean success) {
+                    _instanceLockManager.unlock(we.getIID());
+                }
+                public void beforeCompletion() { }
+            });
         } catch (InterruptedException e) {
             // Retry later.
             __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
@@ -314,8 +310,6 @@ public class BpelEngineImpl implements BpelEngine {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t);
             throw new Scheduler.JobProcessorException(false);
 
-        } finally {
-            _instanceLockManager.unlock(we.getIID());
         }
     }
 
