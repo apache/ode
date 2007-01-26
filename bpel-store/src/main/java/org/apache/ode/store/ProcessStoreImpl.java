@@ -373,6 +373,7 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         });
 
+        pconf.setState(state);
         if (old != null && old != state)
             fireStateChange(pid, state);
     }

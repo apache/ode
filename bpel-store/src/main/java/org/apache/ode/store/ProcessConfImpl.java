@@ -146,6 +146,10 @@ class ProcessConfImpl implements ProcessConf {
         return _state;
     }
 
+    public void setState(ProcessState state) {
+        _state = state;
+    }
+
     public List<String> getMexInterceptors(QName processId) {
         return Collections.unmodifiableList(_mexi);
     }
