@@ -26,6 +26,7 @@ import org.quartz.*;
 import org.quartz.core.SchedulingContext;
 import org.quartz.impl.jdbcjobstore.Constants;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
+import org.quartz.impl.jdbcjobstore.Semaphore;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.SchedulerSignaler;
@@ -50,6 +51,9 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     private static final Log __log = LogFactory.getLog(JobStoreJTA.class);
 
     private TransactionManager _txm;
+
+    // Quartz in-mem semaphore has a bug, ours is identical but fixes it
+    private Semaphore _customerLockHandler = null;
 
     protected boolean setTxIsolationLevelReadCommitted = true;
 
@@ -76,8 +80,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
             throws SchedulerConfigException {
 
-        setUseDBLocks(true); // *must* use DB locks with CMT...
-
+        _customerLockHandler = new NotSoSimpleSemaphore();
         super.initialize(loadHelper, signaler);
     }
 
@@ -1378,4 +1381,8 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
         return false;
     }
 
+
+    protected Semaphore getLockHandler() {
+        return _customerLockHandler;
+    }
 }
