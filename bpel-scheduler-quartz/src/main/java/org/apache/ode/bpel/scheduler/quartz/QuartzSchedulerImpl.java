@@ -19,34 +19,12 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import javax.sql.DataSource;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.GUID;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
+import org.quartz.*;
 import org.quartz.core.QuartzScheduler;
 import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.core.SchedulingContext;
@@ -56,6 +34,19 @@ import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.ThreadPool;
 import org.quartz.utils.DBConnectionManager;
+
+import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+import java.sql.Connection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * Quartz-based scheduler.
@@ -324,16 +315,6 @@ public class QuartzSchedulerImpl implements Scheduler {
     /**
      * Create a QUARTZ scheduler using JTA Job Shell. Unfortunately there is no "easy" way to do this using the standard scheduler
      * factory.
-     * 
-     * @param schedulerName
-     * @param schedulerInstanceId
-     * @param threadPool
-     * @param jobStore
-     * @param rmiRegistryHost
-     * @param rmiRegistryPort
-     * @param idleWaitTime
-     * @param dbFailureRetryInterval
-     * @throws SchedulerException
      */
     private org.quartz.Scheduler createScheduler(String schedulerName, String schedulerInstanceId, ThreadPool threadPool,
             JobStoreJTA jobStore) throws SchedulerException {
