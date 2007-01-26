@@ -27,24 +27,24 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
-        <schema xmlns="http://www.w3.org/2001/XMLSchema">
-            <import namespace="http://www.apache.org/ode/pmapi/types/2006/08/02/" schemaLocation="pmapi.xsd"/>
-        </schema>
-        <xsd:complexType name="aidsType">
-            <xsd:all>
-                <xsd:element name="aid" type="xsd:string"/>
-            </xsd:all>
-        </xsd:complexType>
-        <xsd:complexType name="listType">
-            <xsd:all>
-                <xsd:element name="element" type="xsd:string"/>
-            </xsd:all>
-        </xsd:complexType>
-        <xsd:complexType name="iidsType">
-            <xsd:all>
-                <xsd:element name="iid" type="xsd:long"/>
-            </xsd:all>
-        </xsd:complexType>
+        <xsd:schema targetNamespace="http://www.apache.org/ode/pmapi/types/2006/08/02/">
+            <xsd:import namespace="http://www.apache.org/ode/pmapi/types/2006/08/02/" schemaLocation="pmapi.xsd"/>
+            <xsd:complexType name="aidsType">
+                <xsd:all>
+                    <xsd:element name="aid" type="xsd:string"/>
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:complexType name="listType">
+                <xsd:all>
+                    <xsd:element name="element" type="xsd:string"/>
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:complexType name="iidsType">
+                <xsd:all>
+                    <xsd:element name="iid" type="xsd:long"/>
+                </xsd:all>
+            </xsd:complexType>
+        </xsd:schema>
     </types>
 
     <message name="listProcessesInput">
