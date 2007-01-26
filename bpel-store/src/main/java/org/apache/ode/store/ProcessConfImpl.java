@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface. 
+ * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface.
  * Provides configuration information for a process. Note that this class should
  * be immutable, that is the engine expects it to return consistent results!
- * 
+ *
  * @author mriou <mriou at apache dot org>
  */
 class ProcessConfImpl implements ProcessConf {
@@ -146,7 +146,7 @@ class ProcessConfImpl implements ProcessConf {
         return _state;
     }
 
-    public void setState(ProcessState state) {
+    void setState(ProcessState state) {
         _state = state;
     }
 
@@ -249,7 +249,7 @@ class ProcessConfImpl implements ProcessConf {
                 all.add(t);
             _events.put(null,all);
             return;
-        } 
+        }
 
         // Events filtered at the process level
         if (processEvents.getEnableEventList() != null) {
@@ -271,10 +271,6 @@ class ProcessConfImpl implements ProcessConf {
                 _events.put(tScopeEvents.getName(), evtSet);
             }
         }
-    }
-
-    void setState(ProcessState state) {
-        _state = state;
     }
 
 }
