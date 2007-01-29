@@ -80,11 +80,6 @@ class ASSIGN extends ACTIVITY {
                 faultData = createFault(fault.getQName(), aCopy, fault
                         .getMessage());
                 break;
-            } catch (Exception ex) {
-                __log.fatal("Unexpected exception in assignment, terminating process", ex);
-                instance(ASSIGN.this);
-                getBpelRuntimeContext().terminate();
-                break;
             }
         }
 
