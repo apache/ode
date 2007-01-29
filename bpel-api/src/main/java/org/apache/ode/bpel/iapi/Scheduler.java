@@ -21,6 +21,7 @@ package org.apache.ode.bpel.iapi;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -137,6 +138,11 @@ public interface Scheduler {
             this.jobDetail = jobDetail;
             this.retryCount = retryCount;
         }
+        
+        public String toString() {
+            // Wrap in hashmap in case the underlying object has no toString method.
+            return jobName + "["+retryCount +"]: " + new HashMap<Object, Object>(jobDetail);
+        }   
     }
     
     /**
