@@ -51,9 +51,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
  * transaction.
- * 
+ *
  * @author mszefler
- * 
+ *
  */
 public class BpelEngineImpl implements BpelEngine {
     private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
@@ -189,7 +189,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Register a process with the engine.
-     * 
+     *
      * @param process
      *            the process to register
      */
@@ -205,7 +205,7 @@ public class BpelEngineImpl implements BpelEngine {
     /**
      * Route to a process using the service id. Note, that we do not need the endpoint name here, we are assuming that two processes
      * would not be registered under the same service qname but different endpoint.
-     * 
+     *
      * @param service
      *            target service id
      * @param request
@@ -292,9 +292,9 @@ public class BpelEngineImpl implements BpelEngine {
                 Date future = new Date(System.currentTimeMillis() + (60 * 1000));
                 __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao.getProcessId(), jobInfo.jobName, future));
                 _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, future);
+                return;
             }
 
-            assert process != null;
             process.handleWorkEvent(jobInfo.jobDetail);
             debuggingDelay();
         } catch (BpelEngineException bee) {
@@ -343,8 +343,8 @@ public class BpelEngineImpl implements BpelEngine {
         } else {
             saveToDisk = true;
         }
-        
-        if (saveToDisk)  
+
+        if (saveToDisk)
             try {
                 File f = File.createTempFile("ode-bad-job", ".ser", new File(""));
                 ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream(f));
@@ -354,7 +354,7 @@ public class BpelEngineImpl implements BpelEngine {
             } catch (Exception ex) {
                 __log.error("Could not save bad job; it will be lost: " + jobInfo, ex);
             }
-        
+
 
         // No more retries.
         return false;
@@ -400,7 +400,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Get the list of globally-registered message-exchange interceptors.
-     * 
+     *
      * @return list
      */
     List<MessageExchangeInterceptor> getGlobalInterceptors() {
