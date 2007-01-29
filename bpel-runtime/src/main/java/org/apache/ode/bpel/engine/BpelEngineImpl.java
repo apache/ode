@@ -318,11 +318,11 @@ public class BpelEngineImpl implements BpelEngine {
         if (jobInfo.retryCount < MAX_RETRIES)
             return true;
 
-        __log.error("Job could not be completed after " + MAX_RETRIES + ": " + jobInfo.jobDetail, t);
+        __log.error("Job could not be completed after " + MAX_RETRIES + ": " + jobInfo, t);
 
         boolean saveToDisk = false;
         if (jobInfo.jobDetail.get("final") == null) {
-            __log.error("Rescheduling problematic job for a bit later: " + jobInfo.jobDetail, t);
+            __log.error("Rescheduling problematic job for a bit later: " + jobInfo, t);
 
             try {
                 _contexts.scheduler.execIsolatedTransaction(new Callable<Void>() {
@@ -337,7 +337,7 @@ public class BpelEngineImpl implements BpelEngine {
                 });
 
             } catch (Exception ex) {
-                __log.error("Error rescheduling problematic job: " + jobInfo.jobDetail,ex);
+                __log.error("Error rescheduling problematic job: " + jobInfo,ex);
                 saveToDisk = true;
             }
         } else {
@@ -350,9 +350,9 @@ public class BpelEngineImpl implements BpelEngine {
                 ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream(f));
                 fos.writeObject(jobInfo);
                 fos.close();
-                __log.error("Saved problematic job to disk (last resort): " + jobInfo.jobDetail +" in file " + f);
+                __log.error("Saved problematic job to disk (last resort): " + jobInfo +" in file " + f);
             } catch (Exception ex) {
-                __log.error("Could not save bad job; it will be lost: " + jobInfo.jobDetail, ex);
+                __log.error("Could not save bad job; it will be lost: " + jobInfo, ex);
             }
         
 
