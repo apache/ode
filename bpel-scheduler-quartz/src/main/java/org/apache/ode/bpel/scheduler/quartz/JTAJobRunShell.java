@@ -45,7 +45,7 @@ public class JTAJobRunShell extends JobRunShell {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
 
-  private TransactionManager _txm;
+  private final TransactionManager _txm;
 
   /**
    * <p>
@@ -56,7 +56,10 @@ public class JTAJobRunShell extends JobRunShell {
           Scheduler scheduler, SchedulingContext schdCtxt,
           TransactionManager tm) {
       super(jobRunShellFactory, scheduler, schdCtxt);
+      if (tm == null)
+          throw new NullPointerException("Null transaction manager.");
       _txm = tm;
+      
   }
 
   /*
@@ -111,7 +114,7 @@ public class JTAJobRunShell extends JobRunShell {
           }
       }
 
-      _txm = null;
+
   }
 
 
