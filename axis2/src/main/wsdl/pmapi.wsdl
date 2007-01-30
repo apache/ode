@@ -27,8 +27,10 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
-        <xsd:schema targetNamespace="http://www.apache.org/ode/pmapi/types/2006/08/02/">
+        <xsd:schema>
             <xsd:import namespace="http://www.apache.org/ode/pmapi/types/2006/08/02/" schemaLocation="pmapi.xsd"/>
+        </xsd:schema>
+        <xsd:schema targetNamespace="http://www.apache.org/ode/pmapi">
             <xsd:complexType name="aidsType">
                 <xsd:all>
                     <xsd:element name="aid" type="xsd:string"/>
@@ -335,80 +337,91 @@
         <operation name="listProcesses">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listAllProcesses">
             <soap:operation soapAction="" style="rpc"/>
-            <input/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listProcessesCustom">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getProcessInfo">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </output>
+        </operation>
+        <operation name="getProcessInfoCustom">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getExtensibilityElements">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="setProcessProperty">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="setProcessPropertyNode">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="activate">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="setRetired">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
     </binding>
@@ -418,142 +431,145 @@
         <operation name="listInstances">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="queryInstances">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listAllInstances">
             <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listAllInstancesWithLimit">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getInstanceInfo">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getScopeInfo">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getScopeInfoWithActivity">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getVariableInfo">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="listEvents">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="getEventTimeline">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="suspend">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="resume">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="terminate">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="fault">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="delete">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
         <operation name="recoverActivity">
             <soap:operation soapAction="" style="rpc"/>
             <input>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </input>
             <output>
-                <soap:body namespace="http://www.apache.org/ode/pmapi" use="encoded"/>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
         </operation>
     </binding>
