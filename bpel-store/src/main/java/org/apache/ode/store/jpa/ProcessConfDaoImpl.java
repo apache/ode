@@ -53,7 +53,7 @@ public class ProcessConfDaoImpl extends JpaObj implements ProcessConfDAO {
     private String _type;
 
     @Basic @Column(name="VERSION")
-    private int _version;
+    private long _version;
 
     @Basic @Column(name="STATE")
     private String _state;
@@ -101,11 +101,11 @@ public class ProcessConfDaoImpl extends JpaObj implements ProcessConfDAO {
      * @hibernate.property
      *    column="version"
      */
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 

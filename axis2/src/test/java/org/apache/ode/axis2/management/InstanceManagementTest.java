@@ -20,11 +20,7 @@
 package org.apache.ode.axis2.management;
 
 import junit.framework.TestCase;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.*;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
 import org.apache.ode.axis2.service.ServiceClientUtil;
@@ -45,6 +41,7 @@ public class InstanceManagementTest extends TestCase {
     private OMFactory _factory;
     private DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
     private ServiceClientUtil _client;
+    private String _deployedName;
 
     public void testListInstances() throws Exception {
         OMElement listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
@@ -150,6 +147,14 @@ public class InstanceManagementTest extends TestCase {
         assert(result.toString().split("element").length > 10);
     }
 
+    public void testDeleteInstances() throws Exception {
+        OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
+        OMElement result = sendToIM(root);
+        String iid = result.getFirstElement().getFirstElement().getText();
+        System.out.println("=> " + result.getFirstElement().getFirstElement().getText());
+        _client.buildMessage("delete", new String[] {"piid"}, new String[] {iid});
+    }
+
     protected void setUp() throws Exception {
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
@@ -177,7 +182,8 @@ public class InstanceManagementTest extends TestCase {
         zipElmt.addChild(zipContent);
 
         // Deploy
-        sendToDeployment(root);
+        OMElement res = sendToDeployment(root);
+        _deployedName = res.getFirstChildWithName(new QName(null, "name")).getText();
 
         // Execute
         URL svcUrl = new URL("http://localhost:8080/ode/processes/DynMainService");
@@ -191,8 +197,8 @@ public class InstanceManagementTest extends TestCase {
         // Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
-        OMElement part = _factory.createOMElement("processName", null);
-        part.setText("DynPartner");
+        OMElement part = _factory.createOMElement("package", null);
+        part.setText(_deployedName);
         root.addChild(part);
 
         // Undeploy

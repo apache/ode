@@ -23,9 +23,9 @@ import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 
 import javax.persistence.EntityManager;
-import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -72,18 +72,20 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
         _em.getTransaction().rollback();
     }
 
-    public int getNextVersion(QName processName) {
-        VersionTrackerDAOImpl vt = _em.find(VersionTrackerDAOImpl.class,processName.toString());
-        if (vt == null) return 1;
-        else return vt.getVersion() + 1;
+    public long getNextVersion() {
+        List<VersionTrackerDAOImpl> res = _em.createQuery("select v from VersionTrackerDAOImpl v").getResultList();
+        if (res.size() == 0) return 1;
+        else {
+            VersionTrackerDAOImpl vt = res.get(0);
+            return vt.getVersion() + 1;
+        }
     }
 
-    public void setVersion(QName processName, int version) {
-        VersionTrackerDAOImpl vt = _em.find(VersionTrackerDAOImpl.class,processName.toString());
-        if (vt == null) {
-            vt = new VersionTrackerDAOImpl();
-            vt.setNamespace(processName.toString());
-        }
+    public void setVersion(long version) {
+        List<VersionTrackerDAOImpl> res = _em.createQuery("select v from VersionTrackerDAOImpl v").getResultList();
+        VersionTrackerDAOImpl vt;
+        if (res.size() == 0) vt = new VersionTrackerDAOImpl();
+        else vt = res.get(0);
         vt.setVersion(version);
         _em.persist(vt);
     }

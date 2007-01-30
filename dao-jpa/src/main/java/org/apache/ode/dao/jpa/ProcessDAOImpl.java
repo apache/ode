@@ -39,7 +39,7 @@ public class ProcessDAOImpl implements ProcessDAO {
     @Basic @Column(name="PROCESS_KEY") private QName _processKey;
     @Basic @Column(name="PROCESS_TYPE") private QName _processType;
     @Basic @Column(name="GUID") private String _guid;
-    @Version @Column(name="VERSION") private int _version;
+    @Version @Column(name="VERSION") private long _version;
 
     @OneToMany(targetEntity=ProcessInstanceDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ProcessInstanceDAO> _instances = new ArrayList<ProcessInstanceDAO>();
@@ -51,7 +51,7 @@ public class ProcessDAOImpl implements ProcessDAO {
     private BPELDAOConnectionImpl _connection;
 
     public ProcessDAOImpl() {}
-    public ProcessDAOImpl(QName key, QName type, String guid, BPELDAOConnectionImpl connection, int version) {
+    public ProcessDAOImpl(QName key, QName type, String guid, BPELDAOConnectionImpl connection, long version) {
         _processKey = key;
         _processType = type;
         _connection = connection;
@@ -119,7 +119,7 @@ public class ProcessDAOImpl implements ProcessDAO {
         return _processType;
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 

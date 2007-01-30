@@ -25,29 +25,29 @@ package org.apache.ode.store.hib;
  */
 public class VersionTrackerDAOImpl extends HibObj {
 
-    private String _namespace;
-    private int _version;
+    private int _id;
+    private long _version;
 
     /**
      * @hibernate.id generator-class="assigned"
-     * @hibernate.property column="NS"
+     * @hibernate.column name="ID" not-null="true"
      */
-    public String getNamespace() {
-        return _namespace;
+    public int getId() {
+        return _id;
     }
 
-    public void setNamespace(String namespace) {
-        _namespace = namespace;
+    public void setId(int id) {
+        _id = id;
     }
 
     /**
      * @hibernate.property column="VERSION"
      */
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 }
