@@ -341,7 +341,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * @param pid
      * @param oprocess
      */
-    private void createProcessDAO(final QName pid, final int version, final OProcess oprocess) {
+    private void createProcessDAO(final QName pid, final long version, final OProcess oprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
         try {
             boolean create = _db.exec(new BpelDatabase.Callable<Boolean>() {

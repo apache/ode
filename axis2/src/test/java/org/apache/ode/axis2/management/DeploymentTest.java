@@ -19,24 +19,18 @@
 
 package org.apache.ode.axis2.management;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
-
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.*;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
 import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.utils.Namespaces;
+
+import javax.xml.namespace.QName;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class DeploymentTest extends TestCase {
 
@@ -106,16 +100,54 @@ public class DeploymentTest extends TestCase {
         assertEquals(_package, result2.getText());
     }
 
+    public void testMultipleDeployUndeployVersion() throws Exception {
+        ArrayList<String> deployed = new ArrayList<String>();
+        // Testing that versions are monotonically increased
+        int lastVer = Integer.parseInt(_package.substring(_package.lastIndexOf("-") + 1, _package.length()));
+        for (int m = 1; m <= 5; m++) {
+            String depPack = deploy();
+            int ver = Integer.parseInt(depPack.substring(depPack.lastIndexOf("-") + 1, depPack.length()));
+            assertEquals(lastVer + m, ver);
+            deployed.add(depPack);
+        }
+        // Deploying a couple of "tagged" versions
+        String depPack = deploy("foo");
+        int ver = Integer.parseInt(depPack.substring(depPack.lastIndexOf("-") + 1, depPack.length()));
+        assertEquals(lastVer + 6, ver);
+        deployed.add(depPack);
+
+        depPack = deploy("bar");
+        ver = Integer.parseInt(depPack.substring(depPack.lastIndexOf("-") + 1, depPack.length()));
+        assertEquals(lastVer + 7, ver);
+        deployed.add(depPack);
+
+        // Cleaning up
+        for (String aDeployed : deployed) {
+            undeploy(aDeployed);
+        }
+    }
+
     protected void setUp() throws Exception {
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
         _client = new ServiceClientUtil();
 
+        _package = deploy();
+
+        assertNotNull(_package);
+        assertEquals(2, _deployed.size());
+    }
+
+    protected void tearDown() throws Exception {
+        undeploy(_package);
+    }
+
+    private String deploy(String packageName) throws Exception {
         // Use the factory to create three elements
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("deploy", null);
         OMElement namePart = _factory.createOMElement("name", depns);
-        namePart.setText("DynPartner");
+        namePart.setText(packageName);
         OMElement zipPart = _factory.createOMElement("package", depns);
         OMElement zipElmt = _factory.createOMElement("zip", depns);
 
@@ -138,27 +170,30 @@ public class DeploymentTest extends TestCase {
         OMElement result = sendToDeployment(root);
 
         _deployed.clear();
-        _package = null;
+        String pakage = null;
         Iterator iter = result.getChildElements();
         while (iter.hasNext()) {
         	OMElement e = (OMElement) iter.next();
         	if (e.getLocalName().equals("name")) {
-                _package = e.getText();
+                pakage = e.getText();
         	}
         	if (e.getLocalName().equals("id")) {
         		_deployed.add(e.getTextAsQName());
-        	}        	
+        	}
         }
-        assertNotNull(_package);
-        assertEquals(2, _deployed.size());
+        return pakage;
     }
 
-    protected void tearDown() throws Exception {
+    private String deploy() throws Exception {
+        return deploy("DynPartner");
+    }
+
+    private void undeploy(String pakage) throws Exception {
         // Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("packageName", null);
-        part.setText(_package);
+        part.setText(pakage);
         root.addChild(part);
 
         // Undeploy
@@ -169,7 +204,6 @@ public class DeploymentTest extends TestCase {
         OMElement result = sendToPM(listRoot);
         assertNull("Leftover process after undeployment", result.getFirstElement());
     }
-
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
         return _client.send(msg, "http://localhost:8080/ode/services/ProcessManagement");

@@ -76,7 +76,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
     }
 
-    public ProcessDAO createProcess(QName pid, QName type, String guid, int version) {
+    public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());
@@ -88,9 +88,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return new ProcessDaoImpl(_sm, process);
     }
 
-    /**
-     * @see org.apache.ode.bpel.dao.BpelDAOConnection#getProcess(java.lang.String)
-     */
     public ProcessDAO getProcess(QName processId) {
 
         try {

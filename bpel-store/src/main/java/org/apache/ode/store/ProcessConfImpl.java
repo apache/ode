@@ -40,11 +40,11 @@ class ProcessConfImpl implements ProcessConf {
     ProcessState _state;
     final TDeployment.Process _pinfo;
     final DeploymentUnitDir _du;
-    private int _version = 0;
+    private long _version = 0;
     private QName _pid;
     private QName _type;
 
-    ProcessConfImpl(QName pid, QName type, int version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
+    ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate) {
         _pid = pid;
         _version = version;
@@ -127,7 +127,7 @@ class ProcessConfImpl implements ProcessConf {
         return _props;
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 

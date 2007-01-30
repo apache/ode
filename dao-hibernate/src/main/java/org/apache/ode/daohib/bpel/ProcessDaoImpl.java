@@ -126,7 +126,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new QName(_process.getTypeNamespace(), _process.getTypeName());
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return _process.getVersion();
     }
 
