@@ -19,13 +19,12 @@
 
 package org.apache.ode.bpel.iapi;
 
+import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Node;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -102,4 +101,10 @@ public interface ProcessStore {
      * @param status true for active, false for inactive
      */
     void setState(QName pid, ProcessState state);
+
+    /**
+     * Gets the version used by the store for the last deployment.
+     * @return
+     */
+    long getCurrentVersion();
 }

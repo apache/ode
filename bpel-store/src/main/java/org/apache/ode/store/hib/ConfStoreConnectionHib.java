@@ -60,19 +60,19 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
         }
     }
 
-    public int getNextVersion(QName processName) {
+    public long getNextVersion() {
         VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
-                _session.get(VersionTrackerDAOImpl.class,processName.toString());
+                _session.createQuery("from VersionTrackerDAOImpl v ").uniqueResult();
         if (vt == null) return 1;
         else return vt.getVersion() + 1;
     }
 
-    public void setVersion(QName processName, int version) {
+    public void setVersion(long version) {
         VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
-                _session.get(VersionTrackerDAOImpl.class,processName.toString());
+                _session.createQuery("from VersionTrackerDAOImpl v ").uniqueResult();
         if (vt == null) {
             vt = new VersionTrackerDAOImpl();
-            vt.setNamespace(processName.toString());
+            vt.setId(1);
         }
         vt.setVersion(version);
         _session.save(vt);

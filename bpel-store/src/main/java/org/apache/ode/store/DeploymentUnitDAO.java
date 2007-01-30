@@ -51,7 +51,7 @@ public interface DeploymentUnitDAO {
      */
     void delete();
 
-    ProcessConfDAO createProcess(QName pid, QName type, int version);
+    ProcessConfDAO createProcess(QName pid, QName type, long version);
 
     ProcessConfDAO getProcess(QName pid);
     

@@ -1,10 +1,9 @@
 package org.apache.ode.store;
 
-import java.util.Collection;
+import org.apache.ode.bpel.iapi.ProcessState;
 
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.iapi.ProcessState;
+import java.util.Collection;
 
 /**
  * DAO interface for a process configuration. 
@@ -16,7 +15,7 @@ public interface ProcessConfDAO {
 
     QName getType();
 
-    int getVersion();
+    long getVersion();
 
     DeploymentUnitDAO getDeploymentUnit();
     
