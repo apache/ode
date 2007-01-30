@@ -1294,7 +1294,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
             rollback = false;
             resume = false;
-            return new LoggingConnectionWrapper(conn);
+            return new LoggingConnectionWrapper(conn, __log);
         } catch (SQLException sqle) {
             throw new JobPersistenceException(
                     "Failed to obtain DB connection from data source '" + getDataSource()
@@ -1318,7 +1318,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     }
 
     protected Connection getConnection() throws JobPersistenceException {
-        return new LoggingConnectionWrapper(super.getConnection());
+        return new LoggingConnectionWrapper(super.getConnection(), __log);
     }
 
     @Override

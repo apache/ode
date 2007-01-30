@@ -1,16 +1,15 @@
 package org.apache.ode.store.hib;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.ProcessConfDAO;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -20,7 +19,6 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
 
     private DeploymentUnitDaoImpl _du;
     
-    /** {@link HProcessProperty}s for this process. */
     private Map<String,String> _properties = new HashMap<String,String>();
 
     /** Simple name of the process. */
@@ -31,7 +29,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
 
     
     /** Process version. */
-    private int _version;
+    private long _version;
 
     /** Process state.*/
     private String _state;
@@ -97,11 +95,11 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
      * @hibernate.property
      *    column="version"
      */
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 

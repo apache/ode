@@ -19,7 +19,10 @@
 
 package org.apache.ode.store.jpa;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -28,24 +31,14 @@ import javax.persistence.*;
 @Table(name="STORE_VERSIONS")
 public class VersionTrackerDAOImpl {
 
-    @Id @Column(name="NS")
-    private String _namespace;
     @Basic @Column(name="VERSION")
-    private int _version;
+    private long _version;
 
-    public String getNamespace() {
-        return _namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        _namespace = namespace;
-    }
-
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 }

@@ -61,7 +61,7 @@ public class HProcess extends HObject{
     private String _typeNamespace;
 
     /** Process version. */
-    private int _version;
+    private long _version;
 
     /** Whether process is retired */
     private boolean _retired;
@@ -238,11 +238,11 @@ public class HProcess extends HObject{
      * @hibernate.property
      *    column="version"
      */
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 

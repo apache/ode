@@ -22,7 +22,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     private QName _processId;
     private QName _type;
-    private int _version;
+    private long _version;
     final Map<String, CorrelatorDaoImpl> _correlators = new ConcurrentHashMap<String, CorrelatorDaoImpl>();
     protected final Map<Long, ProcessInstanceDAO> _instances = new ConcurrentHashMap<Long, ProcessInstanceDAO>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
@@ -32,7 +32,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private String _guid;
 
     public ProcessDaoImpl(BpelDAOConnectionImpl conn, Map<QName, ProcessDaoImpl> store,
-                          QName processId, QName type, String guid, int version) {
+                          QName processId, QName type, String guid, long version) {
         if (__log.isDebugEnabled()) {
             __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
         }
@@ -104,7 +104,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _store.remove(_processId);
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 

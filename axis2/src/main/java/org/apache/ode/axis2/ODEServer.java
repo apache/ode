@@ -19,23 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -60,6 +43,22 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.opentools.minerva.MinervaPool;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -406,7 +405,14 @@ public class ODEServer {
     private void initEmbeddedDb() throws ServletException {
         __log.info("Using DataSource Derby");
 
-        String url = "jdbc:derby:" + _workRoot + "/hibdb/" + _odeConfig.getDbEmbeddedName();
+        String db = "jpadb";
+        String persistenceType = System.getProperty("ode.persistence");
+        if (persistenceType != null) {
+            if ("hibernate".equalsIgnoreCase(persistenceType))
+                db = "hibdb";
+        }
+
+        String url = "jdbc:derby:" + _workRoot + "/" + db + "/" + _odeConfig.getDbEmbeddedName();
 
         __log.debug("creating Minerva pool for " + url);
 

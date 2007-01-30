@@ -151,20 +151,13 @@ public class ProcessStoreImpl implements ProcessStore {
         final ArrayList<ProcessConfImpl> processes = new ArrayList<ProcessConfImpl>();
         Collection<QName> deployed;
 
-        // Process and DU are all versioned at the highest process version number
-        // which becomes the DU version (subversion style).
-        int version = exec(new Callable<Integer>() {
-            public Integer call(ConfStoreConnection conn) {
-                int v = 0;
-                for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
-                    int procVersion = conn.getNextVersion(processDD.getName());
-                    if (procVersion > v) v = procVersion;
-                }
-                return v;
+        _rw.writeLock().lock();
+        // Process and DU use a monotically increased single version number.
+        long version = exec(new Callable<Long>() {
+            public Long call(ConfStoreConnection conn) {
+                return conn.getNextVersion();
             }
         });
-
-        _rw.writeLock().lock();
 
         try {
             if (_deploymentUnits.containsKey(du.getName())) {
@@ -252,7 +245,7 @@ public class ProcessStoreImpl implements ProcessStore {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());
-                        conn.setVersion(pc.getType(), pc.getVersion());
+                        conn.setVersion(pc.getVersion());
                     } catch (Throwable e) {
                         String errmsg = "Error persisting deployment record for " + pc.getProcessId()
                                 + "; process will not be available after restart!";
@@ -452,6 +445,15 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
+    public long getCurrentVersion() {
+        long version = exec(new Callable<Long>() {
+            public Long call(ConfStoreConnection conn) {
+                return conn.getNextVersion();
+            }
+        });
+        return version;
+    }
+
     protected void fireEvent(ProcessStoreEvent pse) {
         for (ProcessStoreListener psl : _listeners)
             try {
@@ -649,7 +651,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
-    private Collection<QName> toPids(Collection<QName> processTypes, int version) {
+    private Collection<QName> toPids(Collection<QName> processTypes, long version) {
         ArrayList<QName> result = new ArrayList<QName>();
         for (QName pqName : processTypes) {
             result.add(toPid(pqName, version));
@@ -657,7 +659,7 @@ public class ProcessStoreImpl implements ProcessStore {
         return result;
     }
 
-    private QName toPid(QName processType, int version) {
+    private QName toPid(QName processType, long version) {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
     }
 

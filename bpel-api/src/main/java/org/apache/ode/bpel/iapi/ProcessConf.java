@@ -53,7 +53,7 @@ public interface ProcessConf {
      * Get the process version.
      * @return version
      */
-    int getVersion();
+    long getVersion();
 
     /**
      * Is this a <em>transient</em> process? Transient processes are not persisted in the store.

@@ -43,7 +43,7 @@ class DeploymentUnitDir  {
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
 
-    private int _version = -1;
+    private long _version = -1;
 
     private static final FileFilter _wsdlFilter = new FileFilter() {
         public boolean accept(File path) {
@@ -290,11 +290,11 @@ class DeploymentUnitDir  {
         return null;
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return _version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(long version) {
         _version = version;
     }
 
