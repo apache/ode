@@ -82,13 +82,18 @@ public class OAssign extends OActivity {
         private void writeObject(java.io.ObjectOutputStream out)
                 throws IOException
         {
-            out.writeUTF(DOMUtils.domToString(xmlLiteral));
+            out.writeObject(DOMUtils.domToString(xmlLiteral));
         }
 
         private void readObject(java.io.ObjectInputStream in)
                 throws IOException
         {
-            String domStr = in.readUTF();
+            String domStr = null;
+            try {
+                domStr = (String) in.readObject();
+            } catch (ClassNotFoundException e) {
+                throw (IOException)(new IOException("XML de-serialization error.")).initCause(e);
+            }
             try {
                 xmlLiteral = DOMUtils.stringToDOM(domStr).getOwnerDocument();
             } catch (Exception ex) {
