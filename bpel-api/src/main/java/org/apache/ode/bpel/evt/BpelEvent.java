@@ -33,6 +33,11 @@ public abstract class BpelEvent implements Serializable {
         dataHandling, activityLifecycle, scopeHandling, instanceLifecycle, correlation;
     }
 
+    /**
+     * Bpel Event Context. In Event Listeners, use this to get Variable Data
+     */
+    public transient EventContext eventContext;
+
     private Date _timestamp = new Date();
 
     private int _lineNo = -1;
