@@ -18,16 +18,17 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.apache.ode.bpel.evt.ActivityEvent;
+import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.jacob.IndexedObject;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Base template for activities.
@@ -75,7 +76,20 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
             event.setLineNo(_self.o.debugInfo.startLine);
         }
         _scopeFrame.fillEventInfo(event);
+        fillEventContext(event);
         getBpelRuntimeContext().sendEvent(event);
+    }
+
+    /**
+     * Populate BpelEventContext, to be used by Registered Event Listeners
+     * @param event ScopeEvent
+     */
+    protected void fillEventContext(ScopeEvent event)
+    {
+        EventContext eventContext = new EventContextImpl(_scopeFrame.oscope,
+                                                            _scopeFrame.scopeInstanceId,
+                                                            getBpelRuntimeContext());
+        event.eventContext = eventContext;
     }
 
     protected void dpe(Collection<OLink> links) {
