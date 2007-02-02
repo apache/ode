@@ -1270,6 +1270,11 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     protected Connection getNonManagedTXConnection()
             throws JobPersistenceException {
 
+        if (_suspenededTx.get() != null) {
+            __log.fatal("Internal Error: found suspended transaction: " + _suspenededTx.get());
+            throw new IllegalStateException("Found suspended transaction: " + _suspenededTx.get());
+        }
+        
         try {
             if (_txm.getStatus() != Status.STATUS_NO_TRANSACTION) {
                 _suspenededTx.set(_txm.suspend());
@@ -1290,7 +1295,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
             Connection conn = getConnection();
             if (isTxIsolationLevelReadCommitted())
-                conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+                conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
             rollback = false;
             resume = false;
