@@ -71,7 +71,7 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
      * Convert ODE normalized message to JBI normalized "WSDL 1.1 Wrapper"
      * format.
      */
-    public void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef) throws MessagingException {
+    public void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef, QName fault) throws MessagingException {
         if (msgdef == null)
             throw new NullPointerException("Null MessageDef");
         if (odeMsg == null)

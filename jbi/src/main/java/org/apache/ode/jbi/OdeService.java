@@ -29,6 +29,7 @@ import javax.jbi.messaging.InOut;
 import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
 import javax.jbi.servicedesc.ServiceEndpoint;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.msgmap.MessageTranslationException;
+import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -284,7 +286,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 throw new MessageTranslationException(errmsg);
             }
 
-            mapper.toNMS(nmsg, mex.getResponse(), mex.getOperation().getOutput().getMessage());
+            mapper.toNMS(nmsg, mex.getResponse(), mex.getOperation().getOutput().getMessage(), null);
 
             inout.setOutMessage(nmsg);
             _ode.getChannel().send(inout);
@@ -313,7 +315,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 throw new MessageTranslationException(errmsg);
             }
 
-            mapper.toNMS(flt, mex.getResponse(), mex.getOperation().getOutput().getMessage());
+            QName fault = QNameUtils.toQName(mex.getFault());
+            javax.wsdl.Fault wsdlFault = mex.getOperation().getFault(fault.getLocalPart());
+            mapper.toNMS(flt, mex.getFaultResponse(), wsdlFault != null ? wsdlFault.getMessage() : null, fault);
             inout.setFault(flt);
             _ode.getChannel().send(inout);
         } catch (MessagingException e) {
