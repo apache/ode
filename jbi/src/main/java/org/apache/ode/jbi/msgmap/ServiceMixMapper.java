@@ -114,7 +114,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
   }
 
   public void toNMS(NormalizedMessage nmsMsg, Message odeMsg,
-      javax.wsdl.Message msgdef) throws MessagingException,
+      javax.wsdl.Message msgdef, QName fault) throws MessagingException,
       MessageTranslationException {
 
     // Simple, just pass along the message.

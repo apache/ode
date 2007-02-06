@@ -26,6 +26,7 @@ import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
 import javax.wsdl.Fault;
 import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.Message;
 
@@ -54,7 +55,7 @@ public interface Mapper {
      * @throws MessagingException
      * @throws MessageTranslationException
      */
-    void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef) throws MessagingException,
+    void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef, QName fault) throws MessagingException,
             MessageTranslationException;
 
     /**
