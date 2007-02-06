@@ -19,15 +19,17 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.core.JobRunShell;
 import org.quartz.core.JobRunShellFactory;
 import org.quartz.core.SchedulingContext;
+
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 
 /**
  * A riff on the Quartz JTA implementation that dispenses with the use
@@ -36,6 +38,8 @@ import org.quartz.core.SchedulingContext;
  *
  */
 public class JTAJobRunShell extends JobRunShell {
+
+    protected final Log __log = LogFactory.getLog(getClass());
 
   /*
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,6 +76,7 @@ public class JTAJobRunShell extends JobRunShell {
 
   protected void begin() throws SchedulerException {
       try {
+          if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
           _txm.begin();
       } catch (Exception nse) {
 
@@ -97,7 +102,7 @@ public class JTAJobRunShell extends JobRunShell {
 
       if (successfulExecution) {
           try {
-              log.debug("Committing UserTransaction.");
+              if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
               _txm.commit();
           } catch (Exception nse) {
               throw new SchedulerException(
@@ -105,7 +110,7 @@ public class JTAJobRunShell extends JobRunShell {
           }
       } else {
           try {
-              log.debug("Rolling-back UserTransaction.");
+              if (__log.isDebugEnabled()) __log.debug("Rollbacking transaction.");          
               _txm.rollback();
           } catch (Exception nse) {
               throw new SchedulerException(
