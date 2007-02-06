@@ -319,7 +319,7 @@ public class ProcessStoreImpl implements ProcessStore {
             DeploymentUnitDir du = _deploymentUnits.get(packageName);
             if (du == null)
                 return null;
-            return new ArrayList<QName>(du.getProcessNames());
+            return toPids(du.getProcessNames(), du.getVersion());
         } finally {
             _rw.readLock().unlock();
         }
@@ -653,7 +653,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
-    private Collection<QName> toPids(Collection<QName> processTypes, long version) {
+    private List<QName> toPids(Collection<QName> processTypes, long version) {
         ArrayList<QName> result = new ArrayList<QName>();
         for (QName pqName : processTypes) {
             result.add(toPid(pqName, version));
