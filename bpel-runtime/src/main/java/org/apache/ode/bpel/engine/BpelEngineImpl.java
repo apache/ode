@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
  * transaction.
  *
  * @author mszefler
- *
+ * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelEngineImpl implements BpelEngine {
     private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
@@ -144,7 +144,7 @@ public class BpelEngineImpl implements BpelEngine {
                 throw new BpelEngineException(errmsg);
             }
             {
-                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
                 PortType ptype = plink.partnerRolePortType;
                 Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
                 // TODO: recover Partner's EPR
@@ -155,7 +155,7 @@ public class BpelEngineImpl implements BpelEngine {
         case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
             mex = new MyRoleMessageExchangeImpl(this, mexdao);
             if (process != null) {
-                OPartnerLink plink = (OPartnerLink) process._oprocess.getChild(mexdao.getPartnerLinkModelId());
+                OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
                 PortType ptype = plink.myRolePortType;
                 Operation op = plink.getMyRoleOperation(mexdao.getOperation());
                 mex.setPortOp(ptype, op);
@@ -170,7 +170,7 @@ public class BpelEngineImpl implements BpelEngine {
         return mex;
     }
 
-    boolean unregisterProcess(QName process) {
+    BpelProcess unregisterProcess(QName process) {
         BpelProcess p = _activeProcesses.remove(process);
         if (p != null) {
             if (__log.isDebugEnabled())
@@ -180,7 +180,7 @@ public class BpelEngineImpl implements BpelEngine {
             while (_serviceMap.values().remove(p))
                 ;
         }
-        return p != null;
+        return p;
     }
 
     boolean isProcessRegistered(QName pid) {
@@ -189,9 +189,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Register a process with the engine.
-     *
-     * @param process
-     *            the process to register
+     * @param process the process to register
      */
     void registerProcess(BpelProcess process) {
         _activeProcesses.put(process.getPID(), process);
@@ -233,7 +231,7 @@ public class BpelEngineImpl implements BpelEngine {
         if (process == null)
             return null;
 
-        return process._oprocess;
+        return process.getOProcess();
     }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
@@ -391,11 +389,6 @@ public class BpelEngineImpl implements BpelEngine {
         for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
             l.onEvent(event);
         }
-    }
-
-    public MessageExchange getMessageExchangeByClientKey(String clientKey) {
-        // TODO: implement me.
-        throw new UnsupportedOperationException("Todo: implementme");
     }
 
     /**

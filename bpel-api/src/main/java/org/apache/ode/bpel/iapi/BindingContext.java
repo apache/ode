@@ -57,16 +57,15 @@ public interface BindingContext {
      * that would make this happen. 
      * @param processId
      * @param myRoleEndpoint endpoint identifer (service qname + port)
-     * @param portType port type of the endpoint
      * @returns an endpoint reference in XML  format.
      */
-    EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint, PortType portType);
+    EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint);
 
     /**
      * Deactivate a "myRole" endpoint. This is a notification to the integration layer
      * that the BPEL engine is no longer interested in receiving requests for the
      * given endpoint and that the IL should tear down any communication mechanisms
-     * created in {@link #activateMyRoleEndpoint(QName, Endpoint, PortType)}.
+     * created in {@link #activateMyRoleEndpoint(QName, Endpoint)}.
      * @param myRoleEndpoint
      */
     void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint);
