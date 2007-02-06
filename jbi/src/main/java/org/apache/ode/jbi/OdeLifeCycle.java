@@ -239,7 +239,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getPersistenceType());
         _ode._store.loadAll();
 
 
