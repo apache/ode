@@ -61,6 +61,7 @@ public class OdeConfigProperties extends Properties {
 
     private static final String PROP_CONNECTOR_NAME = "ode-jbi.connector.registryName";
 
+    private final static String PROP_PERSISTENCE_TYPE = "ode-jbi.store.persistence";
 
     private String _installDir;
 
@@ -166,5 +167,9 @@ public class OdeConfigProperties extends Properties {
 
     public String getDAOConnectionFactory() {
         return getProperty(PROP_DAOCF, "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl");        
+    }
+    
+    public String getPersistenceType() {
+        return getProperty(PROP_PERSISTENCE_TYPE, "jpa");
     }
 }
