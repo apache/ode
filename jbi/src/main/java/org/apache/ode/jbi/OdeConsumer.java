@@ -99,14 +99,14 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
       if (!isTwoWay) {
         InOnly inonly = ((InOnly) jbiMex);
         NormalizedMessage nmsg = inonly.createMessage();
-        mapper.toNMS(nmsg,odeMex.getRequest(), odeMex.getOperation().getInput().getMessage());
+        mapper.toNMS(nmsg,odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
         inonly.setInMessage(nmsg);
         _ode.getChannel().send(inonly);
         odeMex.replyOneWayOk();
       } else {
         InOut inout = (InOut) jbiMex;
         NormalizedMessage nmsg = inout.createMessage();
-        mapper.toNMS(nmsg,odeMex.getRequest(), odeMex.getOperation().getInput().getMessage());
+        mapper.toNMS(nmsg,odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
         inout.setInMessage(nmsg);
         _ode.getChannel().send(inout);
         _outstandingExchanges.put(inout.getExchangeId(), odeMex
