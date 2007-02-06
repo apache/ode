@@ -19,22 +19,6 @@
 
 package org.apache.ode.jbi;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-
-import javax.jbi.JBIException;
-import javax.jbi.component.ComponentContext;
-import javax.jbi.component.ComponentLifeCycle;
-import javax.jbi.component.ServiceUnitManager;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -44,9 +28,26 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.LoggingDataSourceWrapper;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.opentools.minerva.MinervaPool;
 import org.opentools.minerva.MinervaPool.PoolType;
+
+import javax.jbi.JBIException;
+import javax.jbi.component.ComponentContext;
+import javax.jbi.component.ComponentLifeCycle;
+import javax.jbi.component.ServiceUnitManager;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this
@@ -55,6 +56,7 @@ import org.opentools.minerva.MinervaPool.PoolType;
 public class OdeLifeCycle implements ComponentLifeCycle {
     private static final Messages __msgs = Messages.getMessages(Messages.class);
     private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
+    private static final Log __logSql = LogFactory.getLog("org.apache.ode.sql");
 
     private OdeSUManager _suManager = null;
     private boolean _initSuccess = false;
@@ -158,7 +160,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     private void initExternalDb() throws JBIException {
         try {
-            _ode._dataSource = lookupInJndi(_ode._config.getDbDataSource());
+            if (__logSql.isDebugEnabled())
+                _ode._dataSource = new LoggingDataSourceWrapper((DataSource)
+                        lookupInJndi(_ode._config.getDbDataSource()), __logSql);
+            else
+                _ode._dataSource = (DataSource) lookupInJndi(_ode._config.getDbDataSource());
             __log.info(__msgs.msgOdeUsingExternalDb(_ode._config.getDbDataSource()));
         } catch (Exception ex) {
             String msg = __msgs.msgOdeInitExternalDbFailed(_ode._config.getDbDataSource());
@@ -203,7 +209,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             throw new JBIException(errmsg,ex);
         }
 
-        _ode._dataSource = minervaPool.createDataSource();
+        if (__logSql.isDebugEnabled())
+            _ode._dataSource = new LoggingDataSourceWrapper(minervaPool.createDataSource(), __logSql);
+        else _ode._dataSource = minervaPool.createDataSource();
+
         _needDerbyShutdown = true;
         _derbyUrl = url;
     }
