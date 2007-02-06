@@ -221,6 +221,7 @@ public class QuartzSchedulerImpl implements Scheduler {
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
 
         try {
+            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
             begin();
         } catch (Exception ex) {
             String errmsg = "Failed to start transaction.";
@@ -236,6 +237,7 @@ public class QuartzSchedulerImpl implements Scheduler {
         } finally {
             if (success)
                 try {
+                    if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
                     commit();
                 } catch (Exception ex) {
                     String errmsg = "Failed to commit transaction.";
