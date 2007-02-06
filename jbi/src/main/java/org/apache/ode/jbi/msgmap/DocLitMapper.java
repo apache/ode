@@ -75,8 +75,19 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
   }
 
   public void toNMS(NormalizedMessage nmsMsg,
-      org.apache.ode.bpel.iapi.Message odeMsg, Message msgdef)
+      org.apache.ode.bpel.iapi.Message odeMsg, Message msgdef, QName fault)
       throws MessagingException, MessageTranslationException {
+      
+    // If this is an unkown fault, just return an empty element
+    // built with the fault name
+    if (msgdef == null && fault != null) {
+        Document doc = newDocument();
+        Element content = doc.createElementNS(fault.getNamespaceURI(), fault.getLocalPart());
+        doc.appendChild(content);
+        nmsMsg.setContent(new DOMSource(doc));
+        return;
+    }
+
     // For empty messages there is nothing to do.
     if (msgdef == null || msgdef.getParts().size() == 0)
       return;
