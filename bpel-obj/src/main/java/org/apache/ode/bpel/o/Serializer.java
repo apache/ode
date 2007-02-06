@@ -18,10 +18,9 @@
  */
 package org.apache.ode.bpel.o;
 
+import javax.xml.namespace.QName;
 import java.io.*;
 import java.util.Arrays;
-
-import javax.xml.namespace.QName;
 
 /**
  * Header written at the beginning of every compiled BPEL object file.
@@ -54,7 +53,7 @@ public class Serializer  {
 
     public String guid;
 
-    public OProcess _oprocess;
+//    public OProcess _oprocess;
 
     public QName type;
     
@@ -74,6 +73,7 @@ public class Serializer  {
         read(inputStream);
     }
 
+
     public void read(InputStream is) throws IOException {
         DataInputStream oin = new DataInputStream(is);
         byte[] magic = new byte[MAGIC_NUMBER.length];
@@ -85,12 +85,13 @@ public class Serializer  {
             this.compileTime = oin.readLong();
             oin.readInt();
             ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
+            OProcess oprocess;
             try {
-                _oprocess = (OProcess) ois.readObject();
+                oprocess = (OProcess) ois.readObject();
             } catch (ClassNotFoundException e) {
                 throw new IOException("DataStream Error");
             }
-            this.type  = new QName(_oprocess.targetNamespace, _oprocess.processName);
+            this.type  = new QName(oprocess.targetNamespace, oprocess.processName);
             this.guid = "OLD-FORMAT-NO-GUID";
             
             return;
@@ -125,17 +126,18 @@ public class Serializer  {
     }
 
     public OProcess readOProcess() throws IOException, ClassNotFoundException {
-        if (_oprocess != null)
-            return _oprocess;
+//        if (_oprocess != null)
+//            return _oprocess;
         
         ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
+        OProcess oprocess;
         try {
-            _oprocess = (OProcess) ois.readObject();
+            oprocess = (OProcess) ois.readObject();
         } catch (ClassNotFoundException e) {
             throw new IOException("DataStream Error");
         }
             
-        return _oprocess;
+        return oprocess;
     }
   
     static class CustomObjectOutputStream extends ObjectOutputStream {
@@ -204,9 +206,6 @@ public class Serializer  {
         final String uri;
         final String prefix;
         
-        /**
-         * @param localPart
-         */
         OQName(String uri, String local, String prefix){
             this.uri = uri;
             this.local = local;

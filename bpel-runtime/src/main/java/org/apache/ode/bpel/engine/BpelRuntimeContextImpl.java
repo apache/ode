@@ -259,7 +259,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         int conflict = _outstandingRequests.findConflict(selectors);
         if (conflict != -1)
-            throw new FaultException(_bpelProcess._oprocess.constants.qnConflictingReceive, selectors[conflict]
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingReceive, selectors[conflict]
                     .toString());
 
         _outstandingRequests.register(pickResponseChannelStr, selectors);
@@ -353,7 +353,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
         if (dataDAO.isNull()) {
-            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedVariable, 
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedVariable,
                     "The variable " + variable.declaration.name + " isn't properly initialized.");
         }
 
@@ -383,7 +383,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         if (epr == null) {
-            throw new FaultException(_bpelProcess._oprocess.constants.qnUninitializedPartnerRole);
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedPartnerRole);
         }
 
         return epr;
@@ -474,7 +474,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
-            throw new FaultException(_bpelProcess._oprocess.constants.qnMissingRequest);
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest);
         }
 
         // prepare event
@@ -517,7 +517,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
         ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
-        OScope.CorrelationSet csetdef = (OScope.CorrelationSet) _bpelProcess._oprocess
+        OScope.CorrelationSet csetdef = (OScope.CorrelationSet) _bpelProcess.getOProcess()
                 .getChild(correlation.getCSetId());
         QName[] propNames = new QName[csetdef.properties.size()];
         for (int m = 0; m < csetdef.properties.size(); m++) {

@@ -21,21 +21,23 @@ package org.apache.ode.bpel.o;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
+import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URI;
 import java.util.*;
-
-import javax.wsdl.Operation;
 
 /**
  * Compiled BPEL process representation.
  */
 public class OProcess extends OBase {
-  
+
+    public static int instanceCount = 0;
     static final long serialVersionUID = -1L  ;
 
     public String guid;
-    
+
     /** BPEL version. */
     public final String version;
 
@@ -66,7 +68,7 @@ public class OProcess extends OBase {
     int _childIdCounter = 0;
 
     List<OBase> _children = new ArrayList<OBase>();
-    
+
     public final HashSet<OExpressionLanguage> expressionLanguages = new HashSet<OExpressionLanguage>();
 
     public final HashMap<QName, OMessageVarType> messageTypes = new HashMap<QName, OMessageVarType>();
@@ -80,6 +82,8 @@ public class OProcess extends OBase {
     public OProcess(String bpelVersion) {
         super(null);
         this.version = bpelVersion;
+        System.out.println("### Creating OProcess " + super.hashCode());
+        instanceCount++;
     }
 
     public OBase getChild(final int id) {
@@ -130,12 +134,12 @@ public class OProcess extends OBase {
                 }
             }
         }
-        
+
         return correlators;
     }
-    
+
     public static class OProperty extends OBase {
-      
+
         static final long serialVersionUID = -1L  ;
         public final List<OPropertyAlias> aliases = new ArrayList<OPropertyAlias>();
         public QName name;
@@ -155,7 +159,7 @@ public class OProcess extends OBase {
     }
 
     public static class OPropertyAlias extends OBase {
-      
+
         static final long serialVersionUID = -1L  ;
 
         public OVarType varType;
@@ -182,11 +186,21 @@ public class OProcess extends OBase {
             buf.append(']');
             return buf.toString();
         }
-      
+
     }
 
     public QName getQName() {
         return new QName(targetNamespace, processName);
     }
 
+
+    protected void finalize() throws Throwable {
+        instanceCount--;
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // our "pseudo-constructor"
+        in.defaultReadObject();
+        instanceCount++;
+    }
 }

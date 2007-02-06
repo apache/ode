@@ -35,12 +35,14 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.LoggingDataSourceWrapper;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.opentools.minerva.MinervaPool;
 
@@ -68,6 +70,7 @@ import java.util.concurrent.Executors;
 public class ODEServer {
 
     private static final Log __log = LogFactory.getLog(ODEServer.class);
+    private static final Log __logSql = LogFactory.getLog("org.apache.ode.sql");
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -386,7 +389,10 @@ public class ODEServer {
 
     private void initExternalDb() throws ServletException {
         try {
-            _datasource = lookupInJndi(_odeConfig.getDbDataSource());
+            if (__logSql.isDebugEnabled())
+                _datasource = new LoggingDataSourceWrapper((DataSource) lookupInJndi(_odeConfig.getDbDataSource()), __logSql);
+            else
+                _datasource = (DataSource) lookupInJndi(_odeConfig.getDbDataSource());
             __log.info(__msgs.msgOdeUsingExternalDb(_odeConfig.getDbDataSource()));
         } catch (Exception ex) {
             String msg = __msgs.msgOdeInitExternalDbFailed(_odeConfig.getDbDataSource());
@@ -435,7 +441,9 @@ public class ODEServer {
             throw new ServletException(errmsg, ex);
         }
 
-        _datasource = _minervaPool.createDataSource();
+        if (__logSql.isDebugEnabled())
+            _datasource = new LoggingDataSourceWrapper(_minervaPool.createDataSource(), __logSql);
+        else _datasource = _minervaPool.createDataSource();
     }
 
     /**
@@ -497,6 +505,11 @@ public class ODEServer {
                 _scheduler));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
+        if (_odeConfig.isDehydrationEnabled()){
+            CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
+    //        dehy.setProcessMaxAge(10000);
+            _server.setDehydrationPolicy(dehy);
+        }
         _server.init();
     }
 
