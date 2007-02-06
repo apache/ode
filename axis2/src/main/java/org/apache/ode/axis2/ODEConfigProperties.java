@@ -45,6 +45,7 @@ public class ODEConfigProperties extends Properties {
     private static final String PROP_WORKING_DIR = "ode-axis2.working.dir";
     private static final String PROP_REPLICATE_EMPTYNS = "ode-axis2.message.replicate.emptyns";
     private static final String PROP_EVENT_LISTENERS = "ode-axis2.event.listeners";
+    private static final String PROP_PROCESS_DEHYDRATION = "ode-axis2.process.dehydration";
 
     private File _installDir;
 
@@ -143,4 +144,7 @@ public class ODEConfigProperties extends Properties {
         return getProperty(PROP_EVENT_LISTENERS);
     }
 
+    public boolean isDehydrationEnabled() {
+        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_PROCESS_DEHYDRATION, "false"));
+    }
 }

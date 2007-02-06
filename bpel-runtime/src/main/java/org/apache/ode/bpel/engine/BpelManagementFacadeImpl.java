@@ -190,7 +190,7 @@ public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         if (process == null)
             throw new InvalidRequestException("The process \"" + procid + "\" is not available. Please make sure it is deployed and encompassing System is activated." );
 
-        return process._oprocess;
+        return process.getOProcess();
     }
 
     public void step(final Long iid) throws ManagementException {

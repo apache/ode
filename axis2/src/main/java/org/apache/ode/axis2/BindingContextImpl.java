@@ -42,8 +42,7 @@ public class BindingContextImpl implements BindingContext {
         _store = store;
     }
 
-    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
-            PortType portType) {
+    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         try {
             ODEService svc = _server.createService(_store.getProcessConfiguration(processId).getDefinitionForService(myRoleEndpoint.serviceName)
                     , myRoleEndpoint.serviceName, myRoleEndpoint.portName);
