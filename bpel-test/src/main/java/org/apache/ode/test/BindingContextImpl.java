@@ -37,9 +37,6 @@
  */
 package org.apache.ode.test;
 
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -48,11 +45,13 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 public class BindingContextImpl implements BindingContext {
 	
 
-	public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint,
-			PortType portType) {
+	public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
 		final Document doc = DOMUtils.newDocument();
 		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());

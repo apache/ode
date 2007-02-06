@@ -24,21 +24,19 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -46,7 +44,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * The BPEL server implementation.
  * </p>
- * 
+ *
  * <p>
  * This implementation is intended to be thread safe. The key concurrency
  * mechanism is a "management" read/write lock that synchronizes all management
@@ -55,35 +53,26 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * to the lock is scoped to the method, while read access is scoped to a
  * transaction.
  * </p>
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
- * @author mriou <mriou at apache dot org>
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
+public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, ProcessLifecycleCallback {
 
     private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
-
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
 
-    static {
-        // TODO Clean this up and factorize engine configuration
-        try {
-            String processMaxAge = System.getenv("ODE_DEF_MAX_AGE");
-            if (processMaxAge != null && processMaxAge.length() > 0) {
-                __processMaxAge = Long.valueOf(processMaxAge);
-                __log.info("Process definition max age adjusted. Max age = " + __processMaxAge + "ms.");
-            }
-        } catch (Throwable t) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("Could not parse ODE_DEF_MAX_AGE environment variable.", t);
-            } else {
-                __log.info("Could not parse ODE_DEF_MAX_AGE environment variable; reaping disabled.");
-            }
-        }
-    }
+    private final List<BpelProcess> _runningProcesses =
+            Collections.synchronizedList(new ArrayList<BpelProcess>());
+
+    private State _state = State.SHUTDOWN;
+    private Contexts _contexts = new Contexts();
+    private DehydrationPolicy _dehydrationPolicy;
+    BpelEngineImpl _engine;
+    BpelDatabase _db;
 
     /**
      * Management lock for synchronizing management operations and preventing
@@ -92,17 +81,26 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
 
+    static {
+        // TODO Clean this up and factorize engine configuration
+        try {
+            String processMaxAge = System.getProperty("ode.process.maxage");
+            if (processMaxAge != null && processMaxAge.length() > 0) {
+                __processMaxAge = Long.valueOf(processMaxAge);
+                __log.info("Process definition max age adjusted. Max age = " + __processMaxAge + "ms.");
+            }
+        } catch (Throwable t) {
+            if (__log.isDebugEnabled()) {
+                __log.debug("Could not parse ode.process.maxage environment variable.", t);
+            } else {
+                __log.info("Could not parse ode.process.maxage environment variable; reaping disabled.");
+            }
+        }
+    }
+
     private enum State {
         SHUTDOWN, INIT, RUNNING
     }
-
-    private State _state = State.SHUTDOWN;
-
-    private Contexts _contexts = new Contexts();
-
-    BpelEngineImpl _engine;
-
-    BpelDatabase _db;
 
     public void start() {
         _mngmtLock.writeLock().lock();
@@ -117,6 +115,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _contexts.scheduler.start();
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
+            if (_dehydrationPolicy != null) new Thread(new ProcessDefReaper()).start();
         } finally {
             _mngmtLock.writeLock().unlock();
         }
@@ -125,7 +124,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /**
      * Register a global listener to receive {@link BpelEvent}s froom all
      * processes.
-     * 
      * @param listener
      */
     public void registerBpelEventListener(BpelEventListener listener) {
@@ -136,7 +134,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /**
      * Unregister a global listener from receive {@link BpelEvent}s from all
      * processes.
-     * 
      * @param listener
      */
     public void unregisterBpelEventListener(BpelEventListener listener) {
@@ -161,37 +158,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         } finally {
             _mngmtLock.writeLock().unlock();
         }
-    }
-
-    public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
-        _contexts.mexContext = mexContext;
-    }
-
-    public void setScheduler(Scheduler scheduler) throws BpelEngineException {
-        _contexts.scheduler = scheduler;
-    }
-
-    public void setEndpointReferenceContext(EndpointReferenceContext eprContext) throws BpelEngineException {
-        _contexts.eprContext = eprContext;
-    }
-
-    /**
-     * Set the DAO connection factory. The DAO is used by the BPEL engine to
-     * persist information about active processes.
-     * 
-     * @param daoCF
-     *            {@link BpelDAOConnectionFactory} implementation.
-     */
-    public void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF) throws BpelEngineException {
-        _contexts.dao = daoCF;
-    }
-
-    public void setInMemDaoConnectionFactory(BpelDAOConnectionFactory daoCF) {
-        _contexts.inMemDao = daoCF;
-    }
-
-    public void setBindingContext(BindingContext bc) {
-        _contexts.bindingContext = bc;
     }
 
     public void init() throws BpelEngineException {
@@ -226,7 +192,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     public BpelEngine getEngine() {
-
         boolean registered = false;
         _mngmtLock.readLock().lock();
         try {
@@ -237,7 +202,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 public void beforeCompletion() {
                     _mngmtLock.readLock().unlock();
                 }
-
             });
             registered = true;
         } finally {
@@ -254,16 +218,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             throw new NullPointerException("must specify non-null process configuration.");
 
         __log.debug("register: " + conf.getProcessId());
-
-        // Load the compiled process.
-        OProcess compiledProcess;
-        try {
-            compiledProcess = deserializeCompiledProcess(conf.getCBPInputStream());
-        } catch (Exception e) {
-            String errmsg = __msgs.msgProcessLoadError(conf.getProcessId());
-            __log.error(errmsg, e);
-            throw new BpelEngineException(errmsg, e);
-        }
 
         // Ok, IO out of the way, we will mod the server state, so need to get a
         // lock.
@@ -283,24 +237,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            // Create an expression language registry for this process
-            ExpressionLanguageRuntimeRegistry elangRegistry = new ExpressionLanguageRuntimeRegistry();
-            for (OExpressionLanguage elang : compiledProcess.expressionLanguages) {
-                try {
-                    elangRegistry.registerRuntime(elang);
-                } catch (ConfigurationException e) {
-                    String msg = __msgs.msgExpLangRegistrationError(elang.expressionLanguageUri, elang.properties);
-                    __log.error(msg, e);
-                    throw new BpelEngineException(msg, e);
-                }
-            }
-
-            // Create the processDAO if necessary.
-            createProcessDAO(conf.getProcessId(), conf.getVersion(), compiledProcess);
-
-            BpelProcess process = new BpelProcess(conf, compiledProcess, null, elangRegistry);
+            BpelProcess process = new BpelProcess(conf, null, this);
 
             _engine.registerProcess(process);
+            _runningProcesses.add(process);
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
@@ -320,8 +260,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
 
         try {
-            if (_engine != null)
+            BpelProcess p = null;
+            if (_engine != null) {
                 _engine.unregisterProcess(pid);
+                _runningProcesses.remove(p);
+            }
 
             __log.info(__msgs.msgProcessUnregistered(pid));
 
@@ -337,76 +280,38 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * If necessary, create an object in the data store to represent the
      * process. We'll re-use an existing object if it already exists and matches
      * the GUID.
-     * 
-     * @param pid
-     * @param oprocess
      */
-    private void createProcessDAO(final QName pid, final long version, final OProcess oprocess) {
+    private void bounceProcessDAO(BpelDAOConnection conn, final QName pid,
+                                  final long version, final OProcess oprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
         try {
-            boolean create = _db.exec(new BpelDatabase.Callable<Boolean>() {
-                public Boolean run(BpelDAOConnection conn) throws Exception {
-                    ProcessDAO old = conn.getProcess(pid);
-                    if (old == null) {
-                        // we couldnt find the process, clearly we need to
-                        // create it
-                        return true;
-                    }
-
-                    __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-
-                    if (oprocess.guid == null) {
-                        // No guid, old version assume its good
-                        return false;
-                    }
-
+            boolean create = true;
+            ProcessDAO old = conn.getProcess(pid);
+            if (old != null) {
+                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+                if (oprocess.guid == null) {
+                    // No guid, old version assume its good
+                    create = false;
+                } else {
                     if (old.getGuid().equals(oprocess.guid)) {
                         // Guids match, no need to create
-                        return false;
+                        create = false;
+                    } else {
+                        // GUIDS dont match, delete and create new
+                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match "
+                                + oprocess.guid + "; replacing.";
+                        __log.debug(errmsg);
+                        old.delete();
                     }
-
-                    // GUIDS dont match, delete and create new
-                    String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid
-                            + "; replacing.";
-                    __log.debug(errmsg);
-                    old.delete();
-
-                    return true;
-
                 }
-            });
+            }
 
-            if (create)
-                _db.exec(new BpelDatabase.Callable<Object>() {
-                    public Object run(BpelDAOConnection conn) throws Exception {
-                        ProcessDAO old = conn.getProcess(pid);
-                        if (old != null) {
-                            __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-
-                            if (oprocess.guid != null) {
-                                if (!old.getGuid().equals(oprocess.guid)) {
-                                    // TODO: Versioning will need to handle this
-                                    // differently.
-                                    String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match "
-                                            + oprocess.guid + "; replacing.";
-                                    __log.warn(errmsg);
-                                    old.delete();
-                                } else {
-                                    return null;
-                                }
-                            } else {
-                                // no guid, consider compatible.
-                                return null;
-                            }
-                        }
-
-                        ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, version);
-                        for (String correlator : oprocess.getCorrelators()) {
-                            newDao.addCorrelator(correlator);
-                        }
-                        return null;
-                    }
-                });
+            if (create) {
+                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, version);
+                for (String correlator : oprocess.getCorrelators()) {
+                    newDao.addCorrelator(correlator);
+                }
+            }
         } catch (BpelEngineException ex) {
             throw ex;
         } catch (Exception dce) {
@@ -417,9 +322,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     /**
      * Register a global message exchange interceptor.
-     * 
-     * @param interceptor
-     *            message-exchange interceptor
+     * @param interceptor message-exchange interceptor
      */
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         // NOTE: do not synchronize, globalInterceptors is copy-on-write.
@@ -428,9 +331,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     /**
      * Unregister a global message exchange interceptor.
-     * 
-     * @param interceptor
-     *            message-exchange interceptor
+     * @param interceptor message-exchange interceptor
      */
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         // NOTE: do not synchronize, globalInterceptors is copy-on-write.
@@ -443,32 +344,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private final boolean checkState(State i, State j) {
         if (_state == i)
             return true;
-
         if (_state == j)
             return false;
-
         throw new IllegalStateException("Unexpected state: " + i);
-
-    }
-
-    /**
-     * De-serialize the compiled process representation from a stream.
-     * 
-     * @param is
-     *            input stream
-     * @return process information from configuration database
-     */
-    static OProcess deserializeCompiledProcess(InputStream is) throws Exception {
-
-        OProcess compiledProcess;
-        Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readOProcess();
-        return compiledProcess;
     }
 
     /* TODO: We need to have a method of cleaning up old deployment data. */
     private boolean deleteProcessDAO(final QName pid) {
-
         try {
             // Delete it from the database.
             return _db.exec(new BpelDatabase.Callable<Boolean>() {
@@ -481,51 +363,92 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     return false;
                 }
             });
-
         } catch (Exception ex) {
             String errmsg = "DbError";
             __log.error(errmsg, ex);
             throw new BpelEngineException(errmsg, ex);
         }
-
     }
 
     public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
-        getEngine().onScheduledJob(jobInfo);        
+        getEngine().onScheduledJob(jobInfo);
     }
 
-    //   
-    // I've moved this code out of BpelEngineImpl, it should be here not there.
-    // -Maciej 12/22/06
-    // /**
-    //     
-    // */
-    // private class ProcessDefReaper implements Runnable {
-    // public void run() {
-    // try {
-    // while (true) {
-    // Thread.sleep(10000);
-    // _mngmtLock.writeLock().lock();
-    // try {
-    // for (BpelProcess process : _activeProcesses.values()) {
-    // Long lru;
-    // synchronized(_processesLRU) {
-    // lru = _processesLRU.get(process._pid);
-    // }
-    // if (lru != null && process._oprocess != null
-    // && System.currentTimeMillis() - lru > _processMaxAge) {
-    // process._oprocess = null;
-    // __log.debug("Process definition reaper cleaning " + process._pid);
-    // }
-    // Thread.sleep(10);
-    // }
-    // } finally {
-    // _mngmtLock.writeLock().unlock();
-    // }
-    // }
-    // } catch (InterruptedException e) {
-    // __log.info(e);
-    // }
-    // }
-    // }
+    public void hydrated(final BpelProcess process) {
+        // Recreating the process DAO if the definition has changed, shouldn't do anything
+        // except after a redeploy
+        bounceProcessDAO(_contexts.dao.getConnection(), process.getPID(), process._pconf.getVersion(), process.getOProcess());
+
+        _runningProcesses.add(process);
+    }
+
+    private class ProcessDefReaper implements Runnable {
+        public void run() {
+            __log.debug("Starting process definition reaper thread.");
+            long pollingTime = 10000;
+            try {
+                while (true) {
+                    Thread.sleep(pollingTime);
+                    _mngmtLock.writeLock().lock();
+                    try {
+                        __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
+                        // Copying the runnning process list to avoid synchronization
+                        // problems and a potential mess if a policy modifies the list
+                        List<BpelProcess> runningProcesses;
+                        synchronized(_runningProcesses) {
+                            runningProcesses = new ArrayList<BpelProcess>(_runningProcesses);
+                        }
+                        // And the happy winners are...
+                        List<BpelProcess> ripped = _dehydrationPolicy.markForDehydration(runningProcesses);
+                        // Bye bye
+                        for (BpelProcess process : ripped) {
+                            __log.debug("Dehydrating process " + process.getPID());
+                            process.dehydrate();
+                            _runningProcesses.remove(process);
+                        }
+                    } finally {
+                        _mngmtLock.writeLock().unlock();
+                    }
+                }
+            } catch (InterruptedException e) {
+                __log.info(e);
+            }
+        }
+    }
+
+    public void setDehydrationPolicy(DehydrationPolicy dehydrationPolicy) {
+        _dehydrationPolicy = dehydrationPolicy;
+    }
+
+    public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
+        _contexts.mexContext = mexContext;
+    }
+
+    public void setScheduler(Scheduler scheduler) throws BpelEngineException {
+        _contexts.scheduler = scheduler;
+    }
+
+    public void setEndpointReferenceContext(EndpointReferenceContext eprContext) throws BpelEngineException {
+        _contexts.eprContext = eprContext;
+    }
+
+    /**
+     * Set the DAO connection factory. The DAO is used by the BPEL engine to
+     * persist information about active processes.
+     *
+     * @param daoCF
+     *            {@link BpelDAOConnectionFactory} implementation.
+     */
+    public void setDaoConnectionFactory(BpelDAOConnectionFactory daoCF) throws BpelEngineException {
+        _contexts.dao = daoCF;
+    }
+
+    public void setInMemDaoConnectionFactory(BpelDAOConnectionFactory daoCF) {
+        _contexts.inMemDao = daoCF;
+    }
+
+    public void setBindingContext(BindingContext bc) {
+        _contexts.bindingContext = bc;
+    }
+
 }

@@ -18,39 +18,66 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.jacob.soup.ReplacementMap;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 /**
  * A JACOB {@link ReplacementMap} implementation that eliminates unnecessary serialization
  * of the (constant) compiled process model.
  */
 class ReplacementMapImpl implements ReplacementMap {
-  private OProcess _oprocess;
+    private OProcess _oprocess;
 
-  ReplacementMapImpl(OProcess oprocess) {
-    _oprocess = oprocess;
-  }
+    ReplacementMapImpl(OProcess oprocess) {
+        _oprocess = oprocess;
+    }
 
-  public boolean isReplacement(Object obj) {
-    return obj instanceof BpelProcess.OBaseReplacementImpl;
-  }
+    public boolean isReplacement(Object obj) {
+        return obj instanceof OBaseReplacementImpl;
+    }
 
-  public Object getOriginal(Object replacement) throws IllegalArgumentException {
-    if (!(replacement instanceof BpelProcess.OBaseReplacementImpl))
-      throw new IllegalArgumentException("Not OBaseReplacementObject!");
-    return _oprocess.getChild(((BpelProcess.OBaseReplacementImpl)replacement)._id);
-  }
+    public Object getOriginal(Object replacement) throws IllegalArgumentException {
+        if (!(replacement instanceof OBaseReplacementImpl))
+            throw new IllegalArgumentException("Not OBaseReplacementObject!");
+        return _oprocess.getChild(((OBaseReplacementImpl)replacement)._id);
+    }
 
-  public Object getReplacement(Object original) throws IllegalArgumentException {
-    if (!(original instanceof OBase))
-      throw new IllegalArgumentException("Not OBase!");
-    return new BpelProcess.OBaseReplacementImpl(((OBase)original).getId());
-  }
+    public Object getReplacement(Object original) throws IllegalArgumentException {
+        if (!(original instanceof OBase))
+            throw new IllegalArgumentException("Not OBase!");
+        return new OBaseReplacementImpl(((OBase)original).getId());
+    }
 
-  public boolean isReplaceable(Object obj) {
-    return obj instanceof OBase;
-  }
+    public boolean isReplaceable(Object obj) {
+        return obj instanceof OBase;
+    }
+
+    /**
+     * Replacement object for serializtation of the {@link OBase} (compiled
+     * BPEL) objects in the JACOB VPU.
+     */
+    public static final class OBaseReplacementImpl implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        int _id;
+
+        public OBaseReplacementImpl() {
+        }
+        public OBaseReplacementImpl(int id) {
+            _id = id;
+        }
+        public void readExternal(ObjectInput in) throws IOException {
+            _id = in.readInt();
+        }
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeInt(_id);
+        }
+    }
 
 }

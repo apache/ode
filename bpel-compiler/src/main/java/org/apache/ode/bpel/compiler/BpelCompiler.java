@@ -18,90 +18,15 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
-import org.apache.ode.bpel.compiler.bom.Activity;
-import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.compiler.bom.BpelObject;
-import org.apache.ode.bpel.compiler.bom.Catch;
-import org.apache.ode.bpel.compiler.bom.CompensationHandler;
-import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.compiler.bom.CorrelationSet;
-import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.compiler.bom.FaultHandler;
+import org.apache.ode.bpel.compiler.api.*;
+import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.bom.Import;
-import org.apache.ode.bpel.compiler.bom.LinkSource;
-import org.apache.ode.bpel.compiler.bom.LinkTarget;
-import org.apache.ode.bpel.compiler.bom.OnAlarm;
-import org.apache.ode.bpel.compiler.bom.OnEvent;
-import org.apache.ode.bpel.compiler.bom.PartnerLink;
-import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
 import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.compiler.bom.Property;
-import org.apache.ode.bpel.compiler.bom.PropertyAlias;
-import org.apache.ode.bpel.compiler.bom.Scope;
-import org.apache.ode.bpel.compiler.bom.ScopeActivity;
-import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.compiler.bom.TerminationHandler;
-import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.o.DebugInfo;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OCompensate;
-import org.apache.ode.bpel.o.OCompensationHandler;
-import org.apache.ode.bpel.o.OConstantExpression;
-import org.apache.ode.bpel.o.OConstantVarType;
-import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.ORethrow;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.o.OTerminationHandler;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.o.*;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
@@ -111,6 +36,16 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Node;
+
+import javax.wsdl.*;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
 
 /**
  * Compiler for converting BPEL process descriptions (and their associated WSDL
@@ -516,6 +451,10 @@ abstract class BpelCompiler implements CompilerContext {
                 _oprocess.expressionLanguages.add(expLanguage);
             }
             oexpr.expressionLanguage = expLanguage;
+
+            // Cleaning up expression compiler for furter compilation
+            ec.setCompilerContext(null);
+            
             return oexpr;
         } catch (CompilationException ce) {
             if (ce.getCompilationMessage().source == null)

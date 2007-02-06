@@ -89,6 +89,7 @@ public class ODEService {
         ResponseCallback callback = null;
         try {
             _txManager.begin();
+            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
 
             // Creating mesage exchange
             String messageId = new GUID().toString();
@@ -127,6 +128,7 @@ public class ODEService {
             if (success) {
                 __log.debug("Commiting ODE MEX " + odeMex);
                 try {
+                    if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
                     _txManager.commit();
                 } catch (Exception e) {
                     __log.error("COMMIT FAILED!", e);
@@ -168,6 +170,7 @@ public class ODEService {
                     } else {
                         boolean commit = false;
                         try {
+                            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
                             _txManager.begin();
                         } catch (Exception ex) {
                             throw new AxisFault("Error starting transaction!", ex);
@@ -183,6 +186,7 @@ public class ODEService {
                         } finally {
                             if (commit)
                                 try {
+                                    if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
                                     _txManager.commit();
                                 } catch (Exception e) {
                                     throw new AxisFault("Commit failed!", e);

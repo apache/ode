@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.iapi;
 
-import java.util.Map;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -57,7 +55,5 @@ public interface BpelEngine extends Scheduler.JobProcessor {
      * @return associated message exchange
      */
     MessageExchange getMessageExchange(String mexId);
-
-    MessageExchange getMessageExchangeByClientKey(String clientKey);
 
 }

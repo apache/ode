@@ -16,32 +16,18 @@
  */
 package org.apache.ode.jbi.util;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.ibm.wsdl.extensions.schema.SchemaImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.Endpoint;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Fault;
-import javax.wsdl.Import;
-import javax.wsdl.Input;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Output;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.Types;
+import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.schema.SchemaImport;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.ibm.wsdl.extensions.schema.SchemaImpl;
+import java.net.URI;
+import java.util.*;
 
 public class WSDLFlattener {
 
@@ -49,7 +35,7 @@ public class WSDLFlattener {
     
     private Definition definition;
     private SchemaCollection schemas;
-    private Map flattened;
+    private Map<Endpoint,Definition> flattened;
     private boolean initialized;
     
     public WSDLFlattener() {
@@ -82,15 +68,16 @@ public class WSDLFlattener {
     
     /**
      * Retrieve a flattened definition for a given port type name.
-     * @param portType the port type to create a flat definition for
+     * @param endpoint the port type to create a flat definition for
      * @return a flat definition for the port type
      * @throws Exception if an error occurs
      */
-    public Definition getDefinition(QName portType) throws Exception {
-        Definition def = (Definition) flattened.get(portType);
+    public Definition getDefinition(Endpoint endpoint) throws Exception {
+        Definition def = (Definition) flattened.get(endpoint);
         if (def == null) {
-            def = flattenDefinition(portType);
-            flattened.put(portType, def);
+            PortType pt = def.getService(endpoint.serviceName).getPort(endpoint.portName).getBinding().getPortType();
+            def = flattenDefinition(pt.getQName());
+            flattened.put(endpoint, def);
         }
         return def;
     }
