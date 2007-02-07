@@ -403,7 +403,7 @@ public class BpelProcess {
 
     void deactivate() {
         // Deactivate all the my-role endpoints.
-        for (Endpoint endpoint : getEndpointToMyRoleMap().keySet())
+        for (Endpoint endpoint : _myEprs.keySet())
             getEngine()._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
 
          // TODO Deactivate all the partner-role channels
