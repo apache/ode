@@ -82,7 +82,6 @@ public class OProcess extends OBase {
     public OProcess(String bpelVersion) {
         super(null);
         this.version = bpelVersion;
-        System.out.println("### Creating OProcess " + super.hashCode());
         instanceCount++;
     }
 
