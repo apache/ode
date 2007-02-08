@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * The BPEL scheduler.
@@ -31,7 +32,7 @@ import java.util.concurrent.Callable;
 public interface Scheduler {
 
     void setJobProcessor(JobProcessor processor) throws ContextException;
-    
+
     /**
      * Schedule a persisted job. Persisted jobs MUST survive system failure.
      * They also must not be scheduled unless the transaction associated with
@@ -85,7 +86,7 @@ public interface Scheduler {
      * @throws Exception
      * @throws ContextException
      */
-    <T> T execIsolatedTransaction(final Callable<T> transaction)
+    <T> Future<T> execIsolatedTransaction(final Callable<T> transaction)
             throws Exception, ContextException;
 
     /**
@@ -114,7 +115,7 @@ public interface Scheduler {
         void beforeCompletion();
 
     }
-    
+
     /**
      * Interface implemented by the object responsible for job execution.
      * @author mszefler
@@ -122,9 +123,9 @@ public interface Scheduler {
     public interface JobProcessor {
         void onScheduledJob(JobInfo jobInfo) throws JobProcessorException;
     }
-    
+
     /**
-     * Wrapper containing information about a scheduled job. 
+     * Wrapper containing information about a scheduled job.
      * @author mszefler
      */
     public static class JobInfo implements Serializable {
@@ -132,19 +133,19 @@ public interface Scheduler {
         public final String jobName;
         public final int retryCount;
         public final Map<String,Object> jobDetail;
-        
+
         public JobInfo(String jobName, Map<String,Object>jobDetail, int retryCount) {
             this.jobName = jobName;
             this.jobDetail = jobDetail;
             this.retryCount = retryCount;
         }
-        
+
         public String toString() {
             // Wrap in hashmap in case the underlying object has no toString method.
             return jobName + "["+retryCount +"]: " + new HashMap<Object, Object>(jobDetail);
-        }   
+        }
     }
-    
+
     /**
      * Exception thrown by the {@link JobProcessor} to indicate failure in job
      * processing.
@@ -152,17 +153,17 @@ public interface Scheduler {
      */
     public class JobProcessorException extends Exception {
         private static final long serialVersionUID = 1L;
-        public final boolean retry; 
-        
+        public final boolean retry;
+
         public JobProcessorException(boolean retry) {
             this.retry = retry;
         }
-        
+
         public JobProcessorException(Throwable cause, boolean retry) {
             super(cause);
             this.retry = retry;
         }
     }
-    
-    
+
+
 }
