@@ -54,7 +54,7 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
    * @throws IllegalStateException if delivering this type of message is
    *         inappropriate at the present point.
    */
-  void replyWithFault(String faultType, Message outputFaultMessage)
+  void replyWithFault(QName faultType, Message outputFaultMessage)
     throws BpelEngineException;
 
   /**

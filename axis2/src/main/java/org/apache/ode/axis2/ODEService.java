@@ -19,6 +19,7 @@
 
 package org.apache.ode.axis2;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -27,7 +28,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.util.OMUtils;
-import org.apache.ode.axis2.util.SOAPUtils;
+import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
@@ -69,9 +70,10 @@ public class ODEService {
     private Map<String, ResponseCallback> _waitingCallbacks;
     private WSAEndpoint _serviceRef;
     private boolean _isReplicateEmptyNS = false;
+    private SoapMessageConverter _converter;
 
     public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server,
-                      TransactionManager txManager) {
+                      TransactionManager txManager) throws AxisFault {
         _axisService = axisService;
         _server = server;
         _txManager = txManager;
@@ -80,6 +82,9 @@ public class ODEService {
         _portName = portName;
         _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
+        _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), def, serviceName, portName,
+                _isReplicateEmptyNS);
+        
     }
 
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
@@ -99,11 +104,12 @@ public class ODEService {
 
             if (odeMex.getOperation() != null) {
                 // Preparing message to send to ODE
+                Element msgEl = DOMUtils.newDocument().createElementNS(null, "message");
+                msgEl.getOwnerDocument().appendChild(msgEl);
+                _converter.parseSoapRequest(msgEl, msgContext.getEnvelope(), odeMex.getOperation());
                 Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
-                Element msgContent = SOAPUtils.unwrap(OMUtils.toDOM(msgContext.getEnvelope().getBody()
-                        .getFirstElement()), _wsdlDef, odeMex.getOperation().getInput().getMessage(), _serviceName);
                 readHeader(msgContext, odeMex);
-                odeRequest.setMessage(msgContent);
+                odeRequest.setMessage(msgEl);
 
                 // Preparing a callback just in case we would need one.
                 if (odeMex.getOperation().getOutput() != null) {
@@ -228,16 +234,19 @@ public class ODEService {
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
         switch (mex.getStatus()) {
             case FAULT:
-                throw new AxisFault(mex.getResponse().getType(), mex.getFaultExplanation(), null, null,
-                        mex.getFaultResponse().getMessage() == null ? null :
-                                OMUtils.toOM(mex.getFaultResponse().getMessage(), _isReplicateEmptyNS));
+                if (__log.isDebugEnabled()) 
+                    __log.debug("Generated FAULT response message: " +
+                        mex.getFault());
+                throw new AxisFault(new QName(null,"Server"),
+                        mex.getFaultExplanation(), null, null,
+                        _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation()));
             case ASYNC:
             case RESPONSE:
-                Element response = SOAPUtils.wrap(mex.getResponse().getMessage(), _wsdlDef, _serviceName, mex
-                        .getOperation(), mex.getOperation().getOutput().getMessage());
-                if (__log.isDebugEnabled()) __log.debug("Received response message " +
-                        DOMUtils.domToString(response));
-                msgContext.getEnvelope().getBody().addChild(OMUtils.toOM(response, _isReplicateEmptyNS));
+                _converter.createSoapResponse(msgContext.getEnvelope(), mex.getResponse().getMessage(),
+                        mex.getOperation());
+                if (__log.isDebugEnabled()) 
+                    __log.debug("Generated response message " +
+                        msgContext.getEnvelope());
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:

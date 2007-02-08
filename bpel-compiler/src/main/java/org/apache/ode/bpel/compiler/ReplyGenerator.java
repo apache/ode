@@ -26,6 +26,8 @@ import org.apache.ode.utils.msg.MessageBundle;
 
 import java.util.Iterator;
 
+import javax.wsdl.Fault;
+
 
 /**
  * Generates code for <code>&lt;reply&gt;</code> activities.
@@ -64,13 +66,14 @@ class ReplyGenerator extends DefaultActivityGenerator  {
       throw new CompilationException(_cmsgsGeneral.errTwoWayOperationExpected(oreply.operation.getName()));
 
     if (oreply.isFaultReply) {
-      // This is a bit fishy, WSDL fault names are not QNAMEs, but BPEL fault names are...
+      Fault flt = null;
       if (replyDef.getFaultName().getNamespaceURI().equals(oreply.partnerLink.myRolePortType.getQName().getNamespaceURI()))
-        oreply.fault = oreply.operation.getFault(replyDef.getFaultName().getLocalPart());
-      if (oreply.fault == null)
+        flt = oreply.operation.getFault(replyDef.getFaultName().getLocalPart());
+      if (flt == null)
         throw new CompilationException(__cmsgsLocal.errUndeclaredFault(replyDef.getFaultName().getLocalPart(), oreply.operation.getName()));
-      if (oreply.variable != null && !((OMessageVarType)oreply.variable.type).messageType.equals(oreply.fault.getMessage().getQName()))
-        throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.variable.name, oreply.fault.getMessage().getQName(), ((OMessageVarType)oreply.variable.type).messageType));
+      if (oreply.variable != null && !((OMessageVarType)oreply.variable.type).messageType.equals(flt.getMessage().getQName()))
+        throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.variable.name, flt.getMessage().getQName(), ((OMessageVarType)oreply.variable.type).messageType));
+      oreply.fault = replyDef.getFaultName();
     } else /* !oreply.isFaultReply */ {
       assert oreply.fault == null;
       if (oreply.variable == null)

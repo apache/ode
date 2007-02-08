@@ -175,9 +175,9 @@ public interface MessageExchangeDAO {
 
     boolean getPropagateTransactionFlag();
 
-    String getFault();
+    QName getFault();
 
-    void setFault(String faultType);
+    void setFault(QName faultType);
 
     public String getFaultExplanation();
 

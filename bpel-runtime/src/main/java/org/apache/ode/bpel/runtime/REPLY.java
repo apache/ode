@@ -66,7 +66,7 @@ class REPLY extends ACTIVITY {
                             oreply.messageExchangeId,
                             (Element)msg,
                             (oreply.fault != null)
-                                    ? oreply.fault.getName()
+                                    ? oreply.fault
                                     : null);
         } catch (FaultException e) {
             __log.error(e);

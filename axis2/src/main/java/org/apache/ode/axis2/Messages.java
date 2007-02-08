@@ -108,7 +108,7 @@ public class Messages extends MessageBundle {
     }
 
     /** Port {0} is missing <wsdl:binding> or <soapbind:binding> */
-    public String msgNoBindingForService(QName sericeName) {
+    public String msgNoBindingForPort(QName sericeName) {
         return format("Couldn't find any port in service {0} having <wsdl:binding> and <soapbind:binding>", sericeName);
     }
 
@@ -146,6 +146,91 @@ public class Messages extends MessageBundle {
     public String msgDAOInstantiationFailed(String className) {
         return format("Error instantiating DAO Connection Factory class {0}.", className);
         
+    }
+
+    public Throwable msgOdeMessageMissingRequiredPart(String partName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgServiceDefinitionNotFound(QName serviceName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgPortDefinitionNotFound(QName serviceName, String portName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgBindingOperationNotFound(QName serviceName, String portName, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgBindingInputNotFound(QName serviceName, String portName, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgBindingNotFound(QName serviceName, String portName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgNoSOAPBindingForPort(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgSoapHeaderReferencesUnkownPart(String part) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgBindingDefinesNonElementDocListParts() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgUnexpectedElementInSOAPBody(QName name, QName elementName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgSOAPBodyDoesNotContainAllRequiredParts() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgSOAPBodyDoesNotContainRequiredPart(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgSoapHeaderMissingRequiredElement(QName elementType) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgBindingOutputNotFound(QName serviceName, String portName, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgUndefinedFault(QName serviceName, String portName, String name, QName faultName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgOdeMessagePartMissingRequiredElement(QName serviceName, String portName, String name, QName elementName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Throwable msgSoapBodyDoesNotContainExpectedPartWrapper(QName serviceName, String portName, QName rpcWrapQName) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
