@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class TestScheduler implements Scheduler {
     ThreadLocal<List<Scheduler.Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
@@ -49,24 +51,24 @@ public class TestScheduler implements Scheduler {
 
     }
 
-    public <T> T execTransaction(Callable<T> arg0) throws Exception, ContextException {
+    public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
         begin();
         try {
-            T retval = arg0.call();
+            T retval = transaction.call();
             return retval;
         } finally {
             commit();
         }
     }
 
-    public <T> T execIsolatedTransaction(Callable<T> arg0) throws Exception, ContextException {
-        begin();
-        try {
-            T retval = arg0.call();
-            return retval;
-        } finally {
-            commit();
-        }
+    public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
+        FutureTask future = new FutureTask(new Callable<T>() {
+            public T call() throws Exception {
+                return execTransaction(transaction);
+            }
+        });
+        future.run();
+        return future;
     }
 
     public void start() {
