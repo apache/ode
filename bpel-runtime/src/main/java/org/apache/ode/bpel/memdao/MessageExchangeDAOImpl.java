@@ -30,7 +30,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private Element callbackEPR;
 	private String channel;
 	private boolean propagateTransactionFlag;
-	private String fault;
+	private QName fault;
     private String faultExplanation;
     private String correlationStatus;
 	private ProcessDAO process;
@@ -161,11 +161,11 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return propagateTransactionFlag;
 	}
 
-	public String getFault() {
+	public QName getFault() {
 		return fault;
 	}
 
-	public void setFault(String faultType) {
+	public void setFault(QName faultType) {
 		this.fault = faultType;
 	}
 

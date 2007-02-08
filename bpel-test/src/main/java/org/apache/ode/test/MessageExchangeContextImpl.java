@@ -160,12 +160,12 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		responseMsg.setMessage(response);
 		
 		if ( ind1.equals("yes")){
-			prmx.replyWithFault("FaultMessage1", faultMsg);
+			prmx.replyWithFault(new QName(null,"FaultMessage1"), faultMsg);
 		} else {
 			if ( ind2.equals("yes")){
-				prmx.replyWithFault("FaultMessage2", faultMsg);
+				prmx.replyWithFault(new QName(null,"FaultMessage2"), faultMsg);
 			} else {
-				prmx.replyWithFault("UnKnownFault", faultMsg);
+				prmx.replyWithFault(new QName(null,"UnKnownFault"), faultMsg);
 			}
 		}
 

@@ -307,7 +307,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
             }
 
             if (create) {
-                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, version);
+                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, (int)version);
                 for (String correlator : oprocess.getCorrelators()) {
                     newDao.addCorrelator(correlator);
                 }
@@ -390,7 +390,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
                 while (true) {
                     Thread.sleep(pollingTime);
                     _mngmtLock.writeLock().lock();
-                    try {
+                    try { 
                         __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
                         // Copying the runnning process list to avoid synchronization
                         // problems and a potential mess if a policy modifies the list

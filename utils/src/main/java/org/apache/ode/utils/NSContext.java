@@ -133,6 +133,11 @@ public class NSContext implements NamespaceContext, Externalizable {
      *            URI
      */
     public void register(String prefix, String uri) {
+        if (uri == null)
+            uri = "";
+        if (prefix == null)
+            prefix = "";
+        
         if (__log.isTraceEnabled()) {
             __log.trace("register(prefix=" + prefix + ", uri=" + uri + ")");
         }
@@ -189,5 +194,9 @@ public class NSContext implements NamespaceContext, Externalizable {
 
         return new QName(uri, localname);
 
+    }
+
+    public Map<String, String> toMap() {
+        return Collections.unmodifiableMap(_prefixToUriMap);
     }
 }

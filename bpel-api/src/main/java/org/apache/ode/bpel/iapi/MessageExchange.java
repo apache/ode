@@ -172,7 +172,7 @@ public interface MessageExchange {
      * Get the fault type.
      * @return fault type, or <code>null</code> if not available/applicable.
      */
-    String getFault();
+    QName getFault();
 
     String getFaultExplanation();
 
