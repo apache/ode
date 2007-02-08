@@ -110,7 +110,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return new MessageImpl(getDAO().getResponse());
     }
 
-    public String getFault() {
+    public QName getFault() {
         return getDAO().getFault();
     }
 
@@ -164,7 +164,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _dao;
     }
 
-    void setFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
+    void setFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
         setStatus(Status.FAULT);
         getDAO().setFault(faultType);
         getDAO().setResponse(((MessageImpl)outputFaultMessage)._dao);

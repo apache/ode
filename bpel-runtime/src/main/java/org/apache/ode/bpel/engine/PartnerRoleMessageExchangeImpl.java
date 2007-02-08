@@ -56,7 +56,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         setStatus(Status.ASYNC);
     }
 
-    public void replyWithFault(String faultType, Message outputFaultMessage) throws BpelEngineException {
+    public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
         boolean isAsync = isAsync();
         setFault(faultType, outputFaultMessage);
         if (isAsync)

@@ -193,7 +193,7 @@ public interface BpelRuntimeContext {
    * @param fault fault name, if this is a fault reply, otherwise <code>null</code>
    */
   void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, 
-      String fault)
+      QName fault)
       throws FaultException;
 
 
