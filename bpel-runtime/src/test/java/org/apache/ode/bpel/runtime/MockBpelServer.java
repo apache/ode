@@ -148,8 +148,8 @@ class MockBpelServer {
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
-        
-        
+
+
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
@@ -211,7 +211,7 @@ class MockBpelServer {
 
     protected EndpointReferenceContext createEndpointReferenceContext() {
         _eprContext = new EndpointReferenceContext() {
-            public EndpointReference resolveEndpointReference(Element element) { 
+            public EndpointReference resolveEndpointReference(Element element) {
                 String service = DOMUtils.getChildCharacterData(element);
                 return (EndpointReference)_endpoints.get(service);
             }
@@ -262,13 +262,13 @@ class MockBpelServer {
                 return new PartnerRoleChannel() {
                     public EndpointReference getInitialEndpointReference() { return epr; }
                     public void close() { };
-                }; 
+                };
             }
         };
         return _bindContext;
     }
 
-  
+
     private class SchedulerWrapper implements Scheduler {
 
         QuartzSchedulerImpl _quartz;
@@ -289,21 +289,21 @@ class MockBpelServer {
             _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
             return jobId;
         }
-      
+
         public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail, Date when) throws ContextException {
             String jobId = _quartz.scheduleVolatileJob(transacted, jobDetail, when);
             _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
             return jobId;
         }
-      
+
         public void cancelJob(String jobId) throws ContextException {
             _quartz.cancelJob(jobId);
         }
-      
+
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _quartz.execTransaction(transaction);
         }
-        public <T> T execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
+        public <T> Future<T> execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _quartz.execIsolatedTransaction(transaction);
         }
 
@@ -317,7 +317,7 @@ class MockBpelServer {
 
         public void setJobProcessor(JobProcessor processor) throws ContextException {
             _quartz.setJobProcessor(processor);
-            
+
         }
     }
 

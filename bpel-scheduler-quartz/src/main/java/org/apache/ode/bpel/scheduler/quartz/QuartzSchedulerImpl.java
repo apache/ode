@@ -51,9 +51,9 @@ import java.util.concurrent.Future;
 
 /**
  * Quartz-based scheduler.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
- * 
+ *
  */
 public class QuartzSchedulerImpl implements Scheduler {
 
@@ -264,13 +264,12 @@ public class QuartzSchedulerImpl implements Scheduler {
         }
     }
 
-    public <T> T execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
-        Future<T> res = _executorSvc.submit(new Callable<T>() {
+    public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
+        return _executorSvc.submit(new Callable<T>() {
             public T call() throws Exception {
                 return execTransaction(transaction);
             }
         });
-        return res.get();
     }
 
     protected void rollback() throws Exception {
