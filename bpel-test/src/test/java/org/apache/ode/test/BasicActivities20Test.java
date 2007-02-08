@@ -14,7 +14,6 @@ public class BasicActivities20Test extends BPELTest {
 		 * Test for a specific exception message.
 		 * 
 		 */
-
 		go("target/test-classes/bpel/2.0/NegativeTargetNSTest1");
 	}
 	
@@ -22,5 +21,8 @@ public class BasicActivities20Test extends BPELTest {
 	 go("target/test-classes/bpel/2.0/TestTimer");
 	}
 
+    public void testIf() throws Throwable {
+        go("target/test-classes/bpel/2.0/TestIf");
+    }
 
 }
