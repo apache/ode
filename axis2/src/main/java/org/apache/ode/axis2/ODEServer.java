@@ -486,10 +486,14 @@ public class ODEServer {
         _daoCF = cf;
     }
 
-    private void initProcessStore() {
-        _store = new ProcessStoreImpl(_datasource);
+    protected void initProcessStore() {
+        _store = createProcessStore(_datasource);
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(new File(_workRoot, "processes"));
+    }
+    
+    protected ProcessStoreImpl createProcessStore(DataSource ds) {
+        return new ProcessStoreImpl(ds);
     }
 
     private void initBpelServer() {
