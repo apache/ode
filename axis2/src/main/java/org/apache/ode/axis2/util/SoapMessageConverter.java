@@ -151,7 +151,9 @@ public class SoapMessageConverter {
 
         SOAPBody soapBody = getSOAPBody(bi);
         if (soapBody != null) {
-            org.apache.axiom.soap.SOAPBody sb = _soapFactory.createSOAPBody(soapEnv);
+            org.apache.axiom.soap.SOAPBody sb = soapEnv.getBody() == null ?
+                    _soapFactory.createSOAPBody(soapEnv)
+                    : soapEnv.getBody();
             createSoapBody(sb, soapBody, op.getInput().getMessage(), message, op.getName());
         }
         
@@ -180,7 +182,7 @@ public class SoapMessageConverter {
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null) {
-            org.apache.axiom.soap.SOAPBody sb = _soapFactory.createSOAPBody(soapEnv);
+            org.apache.axiom.soap.SOAPBody sb = soapEnv.getBody() == null ? _soapFactory.createSOAPBody(soapEnv) : soapEnv.getBody();
             createSoapBody(sb, soapBody, op.getInput().getMessage(), message, op.getName() + "Response");
         }
         
