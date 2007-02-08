@@ -68,7 +68,7 @@ public class XSTypes {
 
   public static boolean isDate(QName type) {
     try {
-      STRING.valueOf(type.getLocalPart().toUpperCase());
+      DATEBASE.valueOf(type.getLocalPart().toUpperCase());
       return true;
     } catch (IllegalArgumentException e) {
       return false;
