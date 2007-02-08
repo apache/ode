@@ -136,8 +136,7 @@ public class SoapMessageConverter {
         if (soapEnv == null)
             throw new NullPointerException("Null soapEnv");
 
-        BindingOperation bop = _binding.getBindingOperation(op.getName(), op.getInput() != null ? op.getInput().getName() : null,
-                op.getOutput() != null ? op.getOutput().getName() : null);
+        BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);
 
         if (bop == null)
             throw new AxisFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
