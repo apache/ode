@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<soapenv:Envelope
+xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+<soapenv:Header>
+       <addr:To xmlns:addr="http://www.w3.org/2005/08/addressing">
+
+http://10.23.1.199:8080/SimpleWebService/services/SimpleServices
+       </addr:To>
+       <addr:Action
+xmlns:addr="http://www.w3.org/2005/08/addressing"></addr:Action>
+</soapenv:Header>
+<soapenv:Body>
+       <axis2ns2:addNumbers xmlns:tns="http://ws.sdc.maximus.com"
+                            xmlns:axis2ns2="http://ws.sdc.maximus.com"
+                            xmlns="http://ws.sdc.maximus.com">
+                   <Number1>11</Number1>
+                   <Number2>22</Number2>
+       </axis2ns2:addNumbers>
+ </soapenv:Body>
+ </soapenv:Envelope>
+ 

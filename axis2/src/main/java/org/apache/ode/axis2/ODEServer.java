@@ -58,6 +58,7 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.LoggingDataSourceWrapper;
@@ -76,27 +77,27 @@ public class ODEServer {
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
-    private File _appRoot;
+    protected File _appRoot;
 
-    private File _workRoot;
+    protected File _workRoot;
 
-    private BpelServerImpl _server;
+    protected BpelServerImpl _server;
 
-    private ProcessStoreImpl _store;
+    protected ProcessStoreImpl _store;
 
-    private ODEConfigProperties _odeConfig;
+    protected ODEConfigProperties _odeConfig;
 
-    private AxisConfiguration _axisConfig;
+    protected AxisConfiguration _axisConfig;
 
-    private DataSource _datasource;
+    protected DataSource _datasource;
 
-    private TransactionManager _txMgr;
+    protected TransactionManager _txMgr;
 
-    private BpelDAOConnectionFactory _daoCF;
+    protected BpelDAOConnectionFactory _daoCF;
 
-    private ExecutorService _executorService;
+    protected ExecutorService _executorService;
 
-    private QuartzSchedulerImpl _scheduler;
+    protected Scheduler _scheduler;
 
     private DeploymentPoller _poller;
 
@@ -496,19 +497,24 @@ public class ODEServer {
         return new ProcessStoreImpl(ds);
     }
 
+    protected Scheduler createScheduler() {
+        QuartzSchedulerImpl scheduler = new QuartzSchedulerImpl();
+        scheduler.setExecutorService(_executorService, 20);
+        scheduler.setTransactionManager(_txMgr);
+        scheduler.setDataSource(_datasource);
+        scheduler.init();
+        return scheduler;
+    }
+
     private void initBpelServer() {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
         _server = new BpelServerImpl();
-
-        _executorService = Executors.newCachedThreadPool();
-        _scheduler = new QuartzSchedulerImpl();
+        _scheduler = createScheduler();
         _scheduler.setJobProcessor(_server);
-        _scheduler.setExecutorService(_executorService, 20);
-        _scheduler.setTransactionManager(_txMgr);
-        _scheduler.setDataSource(_datasource);
-        _scheduler.init();
+        
+        _executorService = Executors.newCachedThreadPool();
 
         _server.setDaoConnectionFactory(_daoCF);
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
