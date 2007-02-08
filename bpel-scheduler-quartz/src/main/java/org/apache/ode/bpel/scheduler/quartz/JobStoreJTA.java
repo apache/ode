@@ -53,7 +53,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     private TransactionManager _txm;
 
     // Quartz in-mem semaphore has a bug, ours is identical but fixes it
-    private Semaphore _customerLockHandler = null;
+    private Semaphore _lockHandler = null;
 
     protected boolean setTxIsolationLevelReadCommitted = true;
 
@@ -80,7 +80,8 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
             throws SchedulerConfigException {
 
-        _customerLockHandler = new NotSoSimpleSemaphore();
+        if (!getUseDBLocks() && !isClustered())
+            _lockHandler = new NotSoSimpleSemaphore();
         super.initialize(loadHelper, signaler);
     }
 
@@ -1388,6 +1389,6 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
 
     protected Semaphore getLockHandler() {
-        return _customerLockHandler;
+        return _lockHandler == null ? super.getLockHandler() : _lockHandler;
     }
 }
