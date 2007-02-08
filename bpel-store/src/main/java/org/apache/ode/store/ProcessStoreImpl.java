@@ -32,16 +32,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of HSQL database.
  * </p>
- *
+ * 
  * <p>
  * The philsophy here is to keep things simple. Process store operations are relatively infrequent. Performance of the public
  * methods is not a concern. However, note that the {@link org.apache.ode.bpel.iapi.ProcessConf} objects returned by the class are
  * going to be used from within the engine runtime, and hence their performance needs to be very good. Similarly, these objects
  * should be immutable so as not to confuse the engine.
- *
+ * 
  * Note the way that the database is used in this class, it is more akin to a recovery log, this is intentional: we want to start
  * up, load stuff from the database and then pretty much forget about it when it comes to reads.
- *
+ * 
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author mriou <mriou at apache dot org>
  */
@@ -89,23 +89,23 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public ProcessStoreImpl(DataSource ds, boolean auto) {
-        this(ds, System.getProperty("ode.persistence"));
+        this(ds, System.getProperty("ode.persistence"),auto);
     }
 
-    public ProcessStoreImpl(DataSource ds, String persistenceType) {
+    public ProcessStoreImpl(DataSource ds, String persistenceType, boolean auto) {
         if (ds != null) {
             if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, false);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, auto);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, false);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, auto);
         } else {
             // If the datasource is not provided, then we create a HSQL-based in-memory
             // database. Makes testing a bit simpler.
             DataSource hsqlds = createInternalDS(_guid);
             if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, true);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, auto);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, auto);
             _inMemDs = hsqlds;
         }
 
@@ -261,8 +261,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // We want the events to be fired outside of the bounds of the writelock.
         for (ProcessConfImpl process : processes) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId()));
-            fireStateChange(process.getProcessId(), process.getState());
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(),process.getDeploymentUnit().getName()));
+            fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
         }
 
         return deployed;
@@ -284,9 +284,10 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
         Collection<QName> undeployed = Collections.emptyList();
+        DeploymentUnitDir du;
         _rw.writeLock().lock();
         try {
-            DeploymentUnitDir du = _deploymentUnits.remove(dir.getName());
+            du = _deploymentUnits.remove(dir.getName());
             if (du != null) {
                 undeployed = toPids(du.getProcessNames(), du.getVersion());
                 _processes.keySet().removeAll(undeployed);
@@ -296,7 +297,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
         for (QName pn : undeployed) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
             __log.info(__msgs.msgProcessUndeployed(pn));
         }
 
@@ -370,7 +371,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         pconf.setState(state);
         if (old != null && old != state)
-            fireStateChange(pid, state);
+            fireStateChange(pid, state, pconf.getDeploymentUnit().getName());
     }
 
     public ProcessConf getProcessConfiguration(final QName processId) {
@@ -411,12 +412,12 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         });
 
-        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.PROPERTY_CHANGED, pid));
+        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.PROPERTY_CHANGED, pid,dudir.getName()));
     }
 
     /**
      * Load all the deployment units out of the store. Called on start-up.
-     *
+     * 
      */
     public void loadAll() {
         final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
@@ -434,7 +435,7 @@ public class ProcessStoreImpl implements ProcessStore {
         });
 
         for (ProcessConfImpl p : loaded)
-            fireStateChange(p.getProcessId(), p.getState());
+            fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
 
     }
 
@@ -457,6 +458,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     protected void fireEvent(ProcessStoreEvent pse) {
+        __log.debug("firing event: " + pse);
         for (ProcessStoreListener psl : _listeners)
             try {
                 psl.onProcessStoreEvent(pse);
@@ -465,16 +467,16 @@ public class ProcessStoreImpl implements ProcessStore {
             }
     }
 
-    private void fireStateChange(QName processId, ProcessState state) {
+    private void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
         case ACTIVE:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId,duname));
             break;
         case DISABLED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId,duname));
             break;
         case RETIRED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId,duname));
             break;
         }
 
@@ -492,8 +494,11 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Execute database transactions in an isolated context.
-     * @param <T> return type
-     * @param callable transaction
+     * 
+     * @param <T>
+     *            return type
+     * @param callable
+     *            transaction
      * @return
      */
     synchronized <T> T exec(Callable<T> callable) {
@@ -512,8 +517,8 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     /**
-     * Create a property mapping based on the initial values in the deployment
-     * descriptor.
+     * Create a property mapping based on the initial values in the deployment descriptor.
+     * 
      * @param dd
      * @return
      */
@@ -537,7 +542,9 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Figure out the initial process state from the state in the deployment descriptor.
-     * @param dd deployment descriptor
+     * 
+     * @param dd
+     *            deployment descriptor
      * @return
      */
     private static ProcessState calcInitialState(TDeployment.Process dd) {
@@ -553,6 +560,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Load a deployment unit record stored in the db into memory.
+     * 
      * @param dudao
      */
     protected List<ProcessConfImpl>load(DeploymentUnitDAO dudao) {
@@ -599,10 +607,43 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     /**
+     * Make sure that the deployment unit is loaded.
+     * 
+     * @param duName
+     *            deployment unit name
+     */
+    protected boolean load(final String duName) {
+        _rw.writeLock().lock();
+        try {
+            if (_deploymentUnits.containsKey(duName))
+                return true;
+        } finally {
+            _rw.writeLock().unlock();
+        }
+            
+        try {
+            return exec(new Callable<Boolean>() {
+                public Boolean call(ConfStoreConnection conn) {
+                    DeploymentUnitDAO dudao = conn.getDeploymentUnit(duName);
+                    if (dudao == null)
+                        return false;
+                    load(dudao);
+                    return true;
+                }
+            });
+        } catch (Exception ex) {
+            __log.error("Error loading deployment unit: " + duName);
+            return false;
+        }
+
+    }
+    /**
      * Wrapper for database transactions.
+     * 
      * @author Maciej Szefler
-     *
-     * @param <V> return type
+     * 
+     * @param <V>
+     *            return type
      */
     abstract class Callable<V> implements java.util.concurrent.Callable<V> {
         public V call() {
