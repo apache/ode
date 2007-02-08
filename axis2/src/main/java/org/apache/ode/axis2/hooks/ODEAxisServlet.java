@@ -43,13 +43,17 @@ public class ODEAxisServlet extends AxisServlet {
      */
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        _odeServer = new ODEServer();
+        _odeServer = createODEServer();
         _odeServer.init(config, axisConfiguration);
     }
 
     public void stop() throws AxisFault {
         super.stop();
         _odeServer.shutDown();
+    }
+    
+    protected ODEServer createODEServer() {
+        return new ODEServer();
     }
 
 }
