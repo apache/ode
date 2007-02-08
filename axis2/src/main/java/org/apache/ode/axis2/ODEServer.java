@@ -510,11 +510,11 @@ public class ODEServer {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
+        _executorService = Executors.newCachedThreadPool();
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_server);
         
-        _executorService = Executors.newCachedThreadPool();
 
         _server.setDaoConnectionFactory(_daoCF);
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
