@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.utils.GUID;
 import org.quartz.*;
 import org.quartz.core.QuartzScheduler;
@@ -61,7 +62,7 @@ public class QuartzSchedulerImpl implements Scheduler {
     private static final Map<String, QuartzSchedulerImpl> __instanceMap = Collections
             .synchronizedMap(new HashMap<String, QuartzSchedulerImpl>());
 
-    protected JobProcessor _processor;
+    protected volatile JobProcessor _processor;
 
     private org.quartz.Scheduler _quartz;
 
@@ -76,6 +77,8 @@ public class QuartzSchedulerImpl implements Scheduler {
     private TransactionManager _txm;
 
     private boolean _isSqlServer = false;
+
+    private boolean _isClustered = false;
 
     public QuartzSchedulerImpl() {
         _id = "ODE";
@@ -98,9 +101,11 @@ public class QuartzSchedulerImpl implements Scheduler {
         _txm = txm;
     }
 
+    public void setIsClustered(boolean isclustered) {
+        _isClustered = isclustered;
+    }
+
     public void init() throws ContextException {
-        if (_processor == null)
-            throw new NullPointerException("JobProcessor not set!");
         if (_executorSvc == null)
             throw new NullPointerException("ExecutorService not set!");
         if (_managedDS == null)
@@ -111,11 +116,13 @@ public class QuartzSchedulerImpl implements Scheduler {
         DBConnectionManager.getInstance().addConnectionProvider("managed", new DataSourceConnectionProvider(_managedDS));
         JobStoreJTA jobStore = new JobStoreJTA(_txm);
         jobStore.setDataSource("managed");
+        jobStore.setIsClustered(_isClustered);
 
         checkSqlServer();
 
         try {
-            _quartz = createScheduler(_id, _id, new QuartzThreadPoolExecutorServiceImpl(_executorSvc, _threads), jobStore);
+            _quartz = createScheduler(_id, new GUID().toString(), new QuartzThreadPoolExecutorServiceImpl(_executorSvc, _threads),
+                    jobStore);
             _quartz.getSchedulerInstanceId();
             __instanceMap.put(_id, this);
         } catch (Exception ex) {
@@ -221,7 +228,8 @@ public class QuartzSchedulerImpl implements Scheduler {
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
 
         try {
-            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+            if (__log.isDebugEnabled())
+                __log.debug("Starting transaction.");
             begin();
         } catch (Exception ex) {
             String errmsg = "Failed to start transaction.";
@@ -237,7 +245,8 @@ public class QuartzSchedulerImpl implements Scheduler {
         } finally {
             if (success)
                 try {
-                    if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
+                    if (__log.isDebugEnabled())
+                        __log.debug("Commiting transaction.");
                     commit();
                 } catch (Exception ex) {
                     String errmsg = "Failed to commit transaction.";
@@ -293,11 +302,13 @@ public class QuartzSchedulerImpl implements Scheduler {
 
     @SuppressWarnings("unchecked")
     private void doExecute(JobExecutionContext jobcontext) throws JobExecutionException {
-        JobInfo ji = new JobInfo(jobcontext.getJobDetail().getName(), 
-                jobcontext.getJobDetail().getJobDataMap(),
-                jobcontext.getRefireCount());
+        JobInfo ji = new JobInfo(jobcontext.getJobDetail().getName(), jobcontext.getJobDetail().getJobDataMap(), jobcontext
+                .getRefireCount());
+        JobProcessor processor = _processor;
+        if (processor == null)
+            throw new JobExecutionException("No processor.", null, true);
         try {
-            _processor.onScheduledJob(ji);
+            processor.onScheduledJob(ji);
         } catch (JobProcessorException jpe) {
             throw new JobExecutionException(jpe, jpe.retry);
         } catch (RuntimeException ex) {
