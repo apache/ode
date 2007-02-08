@@ -75,7 +75,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             invoker.invoke(i, mex, ictx);
         } catch (FaultMessageExchangeException fme) {
             __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
-            mex.setFault(fme.getFaultName().getLocalPart(), fme.getFaultData());
+            mex.setFault(fme.getFaultName(), fme.getFaultData());
             return false;
         } catch (AbortMessageExchangeException ame) {
             __log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: " + ame.getMessage());

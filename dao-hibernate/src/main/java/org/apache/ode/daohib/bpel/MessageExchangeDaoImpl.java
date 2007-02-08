@@ -207,12 +207,12 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return false;
     }
 
-    public String getFault() {
-        return _hself.getFault();
+    public QName getFault() {
+        return _hself.getFault() == null ? null : QName.valueOf(_hself.getFault());
     }
 
-    public void setFault(String faultType) {
-        _hself.setFault(faultType);
+    public void setFault(QName faultType) {
+        _hself.setFault(faultType == null ? null : faultType.toString());
         update();
     }
 

@@ -146,8 +146,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _eprElement;
 	}
 
-	public String getFault() {
-		return _fault;
+	public QName getFault() {
+		return _fault == null ? null : QName.valueOf(_fault);
 	}
 
 	public String getFaultExplanation() {
@@ -232,8 +232,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_epr = DOMUtils.domToString(epr);
 	}
 
-	public void setFault(String faultType) {
-		_fault = faultType;
+	public void setFault(QName faultType) {
+		_fault = faultType == null ? null : faultType.toString();
 	}
 
 	public void setFaultExplanation(String explanation) {

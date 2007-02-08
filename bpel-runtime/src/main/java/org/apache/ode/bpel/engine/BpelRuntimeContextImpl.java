@@ -470,7 +470,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
-            String fault) throws FaultException {
+            QName fault) throws FaultException {
         String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
@@ -967,7 +967,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 message.setMessage(faultData.getFaultMessage());
             mex.setResponse(message);
 
-            mex.setFault(faultData.getFaultName().toString(), message);
+            mex.setFault(faultData.getFaultName(), message);
             mex.setFaultExplanation(faultData.getExplanation());
             _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
         }
@@ -1030,7 +1030,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public QName getPartnerFault(String mexId) {
         MessageExchangeDAO mex = _getPartnerResponse(mexId).getMessageExchange();
-        return new QName(mex.getPortType().getNamespaceURI(), mex.getFault());
+        return  mex.getFault();
     }
 
     public QName getPartnerResponseType(String mexId) {

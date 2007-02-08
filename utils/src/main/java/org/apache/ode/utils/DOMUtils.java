@@ -785,4 +785,15 @@ public class DOMUtils {
         return null;
     }
 
+    public static void injectNamespaces(Element domElement, NSContext nscontext) {
+        for (String uri : nscontext.getUriSet()) {
+            String prefix = nscontext.getPrefix(uri);
+            if (prefix == null || "".equals(prefix))
+                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", uri);
+            else 
+                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, uri);
+            
+        }
+    }
+
 }

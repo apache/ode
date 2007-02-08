@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.wsdl.Fault;
 import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
 
 /**
  * Compiled representation of the BPEL <code>&lt;reply&gt;</code> activity.
@@ -35,7 +36,7 @@ public class OReply extends OActivity {
     public boolean isFaultReply;
 
     /** The type of the fault (if isFaultReply). */
-    public Fault fault;
+    public QName fault;
 
     public OPartnerLink partnerLink;
     public Operation operation;

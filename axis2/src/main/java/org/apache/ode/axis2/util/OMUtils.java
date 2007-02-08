@@ -19,24 +19,30 @@
 
 package org.apache.ode.axis2.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamConstants;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMContainer;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.OMText;
 import org.apache.axis2.AxisFault;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.NSContext;
+import org.w3c.dom.Attr;
+import org.w3c.dom.CDATASection;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /**
  * Utility methods to convert from/to AxiOM and DOM.
@@ -44,35 +50,147 @@ import org.w3c.dom.Node;
 public class OMUtils {
 
     public static Element toDOM(OMElement element) throws AxisFault {
-        copyParentNamespaces(element);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            element.serialize(baos);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            return DOMUtils.parse(bais).getDocumentElement();
-        } catch (Exception e) {
-            throw new AxisFault("Unable to read Axis input message.", e);
-        }
+        return toDOM(element, DOMUtils.newDocument());
     }
 
-    public static OMElement toOM(Element element, boolean replicateEmptyNS) throws AxisFault {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            DOMUtils.serialize(element, baos);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(bais);
-            StAXOMBuilder builder = new StAXOMBuilder(parser);
-            OMElement result =  builder.getDocumentElement();
-            if (replicateEmptyNS) reproduceEmptyNS(element, element, result);
-            return result;
-        } catch (Exception e) {
-            throw new AxisFault("Unable to read Axis input message.", e);
+    public static Element toDOM(OMElement element, Document doc) throws AxisFault { 
+        return toDOM(element,doc,true);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static Element toDOM(OMElement element, Document doc, boolean deepNS) throws AxisFault {
+        final Element domElement = doc.createElementNS(element.getQName().getNamespaceURI(), element.getQName().getLocalPart());
+
+        if (deepNS) {
+            NSContext nscontext = new NSContext();
+            buildNScontext(nscontext, element);
+            DOMUtils.injectNamespaces(domElement,nscontext);
+        } else {
+            if (element.getAllDeclaredNamespaces() != null) {
+                for (Iterator<OMNamespace> i = element.getAllDeclaredNamespaces(); i.hasNext(); ) {
+                    OMNamespace omns = i.next();
+                    if (omns.getPrefix().equals(""))
+                        domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", omns.getNamespaceURI() == null ? "" : omns.getNamespaceURI());
+                    else
+                        domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ omns.getPrefix(), omns.getNamespaceURI());
+                }
+    
+            }
+        }
+            
+        for (Iterator i = element.getAllAttributes(); i.hasNext();) {
+            final OMAttribute attr = (OMAttribute) i.next();
+            if (attr.getNamespace() != null)
+                domElement.setAttributeNS(attr.getNamespace().getNamespaceURI(), attr.getLocalName(), attr.getAttributeValue());
+            else
+                domElement.setAttributeNS(null,attr.getLocalName(), attr.getAttributeValue());
+                
+        }
+
+        for (Iterator<OMNode> i = element.getChildren(); i.hasNext();) {
+            OMNode omn = i.next();
+
+            switch (omn.getType()) {
+            case OMNode.CDATA_SECTION_NODE:
+                domElement.appendChild(doc.createCDATASection(((OMText)omn).getText()));
+                break;
+            case OMNode.TEXT_NODE:
+                domElement.appendChild(doc.createTextNode(((OMText)omn).getText()));
+                break;
+            case OMNode.ELEMENT_NODE:
+                domElement.appendChild(toDOM((OMElement)omn,doc, false));
+                break;
+            }
+            
+        }
+        
+        return domElement;
+        
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void buildNScontext(NSContext nscontext, OMElement element) {
+        if (element == null)
+            return;
+        
+        if (element.getParent() instanceof OMElement)
+            buildNScontext(nscontext, (OMElement) element.getParent());
+        
+        if (element.getAllDeclaredNamespaces() != null)
+            for (Iterator<OMNamespace> i=element.getAllDeclaredNamespaces(); i.hasNext(); ){
+                OMNamespace omn = i.next();
+                nscontext.register(omn.getPrefix(), omn.getNamespaceURI());
+            }
+        
+        if (element.getDefaultNamespace() != null)
+            nscontext.register("", element.getDefaultNamespace().getNamespaceURI());
+    }
+
+    public static OMElement toOM(Element src, OMFactory omf) throws AxisFault {
+        return toOM(src,omf,null);
+    }
+
+    public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) throws AxisFault {
+        OMNamespace elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
+        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(),elns) :
+        omf.createOMElement(src.getLocalName(),elns,parent);
+        
+        
+        
+        
+        if (parent == null) {
+            NSContext nscontext = DOMUtils.getMyNSContext(src);
+            injectNamespaces(omElement,nscontext.toMap());
+        } else {
+            Map<String,String> nss = DOMUtils.getMyNamespaces(src);
+            injectNamespaces(omElement, nss);
+        }
+        
+        NamedNodeMap attrs = src.getAttributes();
+        for (int i = 0; i <attrs.getLength(); ++i) {
+            Attr attr = (Attr)attrs.item(i);
+            if (attr.getLocalName().equals("xmlns") 
+                    || (attr.getNamespaceURI() != null && attr.getNamespaceURI().equals(DOMUtils.NS_URI_XMLNS)))
+                continue;
+            omElement.addAttribute(attr.getLocalName(), attr.getValue(), omElement.findNamespaceURI(attr.getNamespaceURI()));
+        }
+
+        NodeList children = src.getChildNodes();
+        for (int i = 0 ; i < children.getLength(); ++i) {
+            Node n = children.item(i);
+
+            switch (n.getNodeType()) {
+            case Node.CDATA_SECTION_NODE:
+                omElement.addChild(omf.createOMText(((CDATASection)n).getTextContent(),XMLStreamConstants.CDATA));
+                break;
+            case Node.TEXT_NODE:
+                omElement.addChild(omf.createOMText(((Text)n).getTextContent(),XMLStreamConstants.CHARACTERS));
+                break;
+            case Node.ELEMENT_NODE:
+                toOM((Element)n,omf,omElement);
+                break;
+            }
+            
+        }
+        
+        return omElement;
+    }
+
+
+    private static void injectNamespaces(OMElement omElement, Map<String,String> nscontext) {
+        for (String prefix : nscontext.keySet()) {
+            String uri = nscontext.get(prefix);
+            if (prefix.equals(""))
+                omElement.declareDefaultNamespace(uri);
+            else
+                omElement.declareNamespace(uri, prefix);
         }
     }
 
     /**
-     * Axiom is supposed to handle this properly however this method is buggy
-     * and doesn't work (whereas setting a QName as text works).
+     * Axiom is supposed to handle this properly however this method is buggy and doesn't work (whereas setting a QName as text
+     * works).
+     * 
      * @param elmt
      * @return text qname
      */
@@ -89,69 +207,5 @@ public class OMUtils {
         return qname;
     }
 
-    /**
-     * Translation from DOM to AXIOM loses empty namespace definitions. So if you have something
-     * like:
-     * <pre>
-     *   <foo xmlns="ns:foo">
-     *     <bar xmlns="">
-     *   </pr:foo>
-     * </pre>
-     * After translation bar will be in the same namespace as foo. This is due to Woodstox (the
-     * stax parser behind AXIOM) that considers xmlns="" as being a null namespace, hence it is
-     * ignored.
-     * @param root
-     * @param elmt
-     * @param omelmt
-     */
-    private static void reproduceEmptyNS(Element root, Element elmt, OMElement omelmt) {
-        if (root.getNamespaceURI() != null && elmt.getNamespaceURI() == null) {
-            OMAttribute emptynsa = omelmt.getOMFactory().createOMAttribute("xmlns", null, "");
-            omelmt.addAttribute(emptynsa);
-        }
 
-        NodeList children = elmt.getChildNodes();
-        Iterator omchildren = omelmt.getChildElements();
-        for (int m = 0; m < children.getLength(); m++) {
-            Node child = children.item(m);
-            if (child.getNodeType() == Node.ELEMENT_NODE) {
-                OMElement omchild = (OMElement) omchildren.next();
-                reproduceEmptyNS(root, (Element) child, omchild);
-            }
-        }
-
-    }
-
-    /**
-     * Copy namespaces found on parent elements on the element itself.
-     * This is useful when detaching an element from its parent to maintain
-     * namespace context.
-     */
-    public static void copyParentNamespaces(OMElement target) {
-        if (target.getParent() instanceof OMElement) {
-            HashSet<String> declaredNS = new HashSet<String>();
-            Iterator iter = target.getAllDeclaredNamespaces();
-            while (iter.hasNext()) {
-                OMNamespace ns = (OMNamespace) iter.next();
-                declaredNS.add(ns.getPrefix());
-            }
-            copyParentNamespaces(target, (OMElement) target.getParent(), declaredNS);
-        }
-    }
-
-    private static void copyParentNamespaces(OMElement target, OMElement parent, HashSet<String> declaredNS) {
-        Iterator iter = parent.getAllDeclaredNamespaces();
-        while (iter.hasNext()) {
-            OMNamespace ns = (OMNamespace) iter.next();
-            // do not override local namespace mappings
-            if (!ns.getPrefix().equals("") && !declaredNS.contains(ns.getPrefix())) {
-                target.declareNamespace(ns.getName(), ns.getPrefix());
-                declaredNS.add(ns.getPrefix());
-            }
-        }
-        // recurse
-        if (parent.getParent() instanceof OMElement) {
-            copyParentNamespaces(target, (OMElement) parent.getParent(), declaredNS);
-        }
-    }
 }

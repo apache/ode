@@ -19,6 +19,23 @@
 
 package org.apache.ode.axis2;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -37,6 +54,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
@@ -45,22 +63,6 @@ import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.LoggingDataSourceWrapper;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.opentools.minerva.MinervaPool;
-
-import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -296,12 +298,18 @@ public class ODEServer {
         return odeService;
     }
 
-    public ExternalService createExternalService(Definition def, QName serviceName, String portName) {
+    public ExternalService createExternalService(Definition def, QName serviceName, String portName) throws ContextException  {
         ExternalService extService = (ExternalService) _externalServices.get(serviceName);
         if (extService != null)
             return extService;
 
-        extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler);
+        try {
+            extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler);
+        } catch (Exception ex) {
+            __log.error("Could not create external service.", ex);
+            throw new ContextException("Error creating external service.", ex);
+        }
+        
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting external service with empty namespace replication");
             extService.setReplicateEmptyNS(true);
