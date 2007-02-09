@@ -26,6 +26,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.utils.DOMUtils;
 
@@ -36,9 +38,17 @@ import org.apache.ode.utils.DOMUtils;
  */
 class JbiEndpointReference implements EndpointReference {
 
+  private OdeContext _ode;
+  private Endpoint _initialPartnerEndpoint;
   private ServiceEndpoint _se;
   private QName _type;
   
+  JbiEndpointReference(Endpoint initialPartnerEndpoint, OdeContext ode) {
+    _initialPartnerEndpoint = initialPartnerEndpoint;
+    _ode = ode;
+  }
+  
+
   JbiEndpointReference(ServiceEndpoint se) {
     if (se == null)
       throw new NullPointerException("Null ServiceEndpoint");
@@ -51,10 +61,9 @@ class JbiEndpointReference implements EndpointReference {
   }
 
 public Document toXML() {
-    DocumentFragment fragment = _se.getAsReference(_type);
+    DocumentFragment fragment = getServiceEndpoint().getAsReference(_type);
     if (fragment == null)
       return null;
-    
     Document doc = DOMUtils.newDocument();
     Element root = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(),SERVICE_REF_QNAME.getLocalPart());
     root.appendChild(doc.importNode(fragment,true));
@@ -64,15 +73,33 @@ public Document toXML() {
 
   public boolean equals(Object other) {
     if (other instanceof JbiEndpointReference)
-      return _se.getServiceName().equals(((JbiEndpointReference)other)._se.getServiceName());
+      return getServiceEndpoint().getServiceName().equals(((JbiEndpointReference)other).getServiceEndpoint().getServiceName());
     return false;
   }
   
   public int hashCode() {
-    return _se.getServiceName().hashCode();
+    return getServiceEndpoint().getServiceName().hashCode();
+  }
+  
+  public String toString() {
+      if (_se != null) {
+          return "JbiEndpointReference[" + _se.getServiceName() + ":" + _se.getEndpointName() + "]";
+      } else if (_initialPartnerEndpoint != null) {
+          return "JbiEndpointReference[" + _initialPartnerEndpoint.serviceName + ":" + _initialPartnerEndpoint.portName + "]";
+      } else {
+          return "JbiEndpointReference[unknown]";
+      }
   }
 
   ServiceEndpoint getServiceEndpoint() {
+    if (_se == null) {
+        if (_initialPartnerEndpoint != null) {
+            _se = _ode.getContext().getEndpoint(_initialPartnerEndpoint.serviceName, _initialPartnerEndpoint.portName);
+            if (_se == null) {
+                throw new ContextException("Unknown endpoint: "  + _initialPartnerEndpoint, null);
+            }
+        }
+    }
     return _se;
   }
 }
