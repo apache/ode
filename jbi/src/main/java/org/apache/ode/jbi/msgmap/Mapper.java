@@ -20,7 +20,6 @@
 package org.apache.ode.jbi.msgmap;
 
 import java.util.Collection;
-import java.util.Map;
 
 import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
