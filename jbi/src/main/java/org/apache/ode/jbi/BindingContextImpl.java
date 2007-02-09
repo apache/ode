@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.*;
 
-import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
@@ -63,17 +62,12 @@ class BindingContextImpl implements BindingContext {
 
     public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
             Endpoint initialPartnerEndpoint) {
-        
         if (initialPartnerEndpoint != null) {
-            ServiceEndpoint se = _ode.getContext().getEndpoint(initialPartnerEndpoint.serviceName,initialPartnerEndpoint.portName);
-            if (se == null)
-                throw new ContextException("Unknown endpoint: "  + initialPartnerEndpoint, null);
-            JbiEndpointReference jbiEpr = new JbiEndpointReference(se);
+            JbiEndpointReference jbiEpr = new JbiEndpointReference(initialPartnerEndpoint, _ode);
             return new PartnerRoleChannelImpl(jbiEpr);
         } else {
             return new PartnerRoleChannelImpl();
         }
-        
     }
 
     
