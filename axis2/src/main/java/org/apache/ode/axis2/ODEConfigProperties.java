@@ -38,6 +38,8 @@ public class ODEConfigProperties extends Properties {
     private static final String PROP_DB_MODE = "ode-axis2.db.mode";
     private static final String PROP_DB_EXTERNAL_DS = "ode-axis2.db.ext.dataSource";
     private static final String PROP_DB_EMBEDDED_NAME = "ode-axis2.db.emb.name";
+    private static final String PROP_DB_INTERNAL_URL = "ode-axis2.db.int.jdbcurl";
+    
     private static final String PROP_TX_FACTORY_CLASS = "ode-axis2.tx.factory.class";
     private static final String PROP_POOL_MAX = "ode-axis2.db.pool.max";
     private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
@@ -102,6 +104,10 @@ public class ODEConfigProperties extends Properties {
         return getProperty(ODEConfigProperties.PROP_DB_EMBEDDED_NAME, "data");
     }
 
+    public String getDbIntenralJdbcUrl() {
+        return getProperty(ODEConfigProperties.PROP_DB_INTERNAL_URL, "jdbc:derby://localhost/ode");
+    }
+    
     /**
      * Possible database modes.
      */
