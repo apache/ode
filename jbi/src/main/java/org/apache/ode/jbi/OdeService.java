@@ -1,4 +1,4 @@
-s/*
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -40,7 +40,6 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.msgmap.MessageTranslationException;
-import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -315,7 +314,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 throw new MessageTranslationException(errmsg);
             }
 
-            QName fault = QNameUtils.toQName(mex.getFault());
+            QName fault = mex.getFault();
             javax.wsdl.Fault wsdlFault = mex.getOperation().getFault(fault.getLocalPart());
             mapper.toNMS(flt, mex.getFaultResponse(), wsdlFault != null ? wsdlFault.getMessage() : null, fault);
             inout.setFault(flt);
