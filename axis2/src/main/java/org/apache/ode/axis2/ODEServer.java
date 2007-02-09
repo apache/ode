@@ -411,25 +411,14 @@ public class ODEServer {
     }
 
     private void initInternalDb() throws ServletException {
-        throw new ServletException("internalDb not supported!");
+        __log.info("Using internal data source for JDBC URL: " + _odeConfig.getDbIntenralJdbcUrl());
+        initInternalDb(_odeConfig.getDbIntenralJdbcUrl());
+        
     }
 
-    /**
-     * Initialize embedded (DERBY) database.
-     */
-    private void initEmbeddedDb() throws ServletException {
-        __log.info("Using DataSource Derby");
+    private void initInternalDb(String url) throws ServletException {
 
-        String db = "jpadb";
-        String persistenceType = System.getProperty("ode.persistence");
-        if (persistenceType != null) {
-            if ("hibernate".equalsIgnoreCase(persistenceType))
-                db = "hibdb";
-        }
-
-        String url = "jdbc:derby:" + _workRoot + "/" + db + "/" + _odeConfig.getDbEmbeddedName();
-
-        __log.debug("creating Minerva pool for " + url);
+        __log.debug("Creating Minerva DataSource/Pool for " + url);
 
         _minervaPool = new MinervaPool();
         _minervaPool.setTransactionManager(_txMgr);
@@ -453,6 +442,24 @@ public class ODEServer {
         if (__logSql.isDebugEnabled())
             _datasource = new LoggingDataSourceWrapper(_minervaPool.createDataSource(), __logSql);
         else _datasource = _minervaPool.createDataSource();
+        
+    }
+    /**
+     * Initialize embedded (DERBY) database.
+     */
+    private void initEmbeddedDb() throws ServletException {
+
+        String db = "jpadb";
+        String persistenceType = System.getProperty("ode.persistence");
+        if (persistenceType != null) {
+            if ("hibernate".equalsIgnoreCase(persistenceType))
+                db = "hibdb";
+        }
+
+        String url = "jdbc:derby:" + _workRoot + "/" + db + "/" + _odeConfig.getDbEmbeddedName();
+        __log.info("Using Embedded Derby: " + url);
+        initInternalDb(url);
+       
     }
 
     /**
