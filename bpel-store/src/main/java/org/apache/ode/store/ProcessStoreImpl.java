@@ -226,10 +226,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
                 dudao = conn.createDeploymentUnit(du.getName());
                 try {
-                    if (_deployDir == null)
-                        dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
-                    else
-                        dudao.setDeploymentUnitDir(deploymentUnitDirectory.getName());
+                    dudao.setDeploymentUnitDir(deploymentUnitDirectory.getCanonicalPath());
                 } catch (IOException e1) {
                     String errmsg = "Error getting canonical path for " + du.getName()
                             + "; deployment unit will not be available after restart!";
@@ -568,8 +565,7 @@ public class ProcessStoreImpl implements ProcessStore {
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
         File dudir;
-        if (_deployDir == null) dudir = new File(dudao.getDeploymentUnitDir());
-        else dudir = new File(_deployDir, dudao.getDeploymentUnitDir());
+        dudir = new File(dudao.getDeploymentUnitDir());
 
         if (!dudir.exists())
             throw new ContextException("Deployed directory " + dudir + " no longer there!");
