@@ -215,11 +215,12 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                     if (wsdlFlt.getMessage() != null) {
                         Message faultResponse = pmex.createMessage(wsdlFlt.getMessage().getQName());
                         mapper.toODE(faultResponse,jbiFlt,wsdlFlt.getMessage());
-                        pmex.replyWithFault(wsdlFlt.getName(), faultResponse);
+                        pmex.replyWithFault(new QName(pmex.getPortType().getQName().getNamespaceURI(), 
+                                                      wsdlFlt.getName()), faultResponse);
                     } else {
                         // Can this even happen?
                         __log.fatal("Internal Error: fault found without a message type: " + wsdlFlt); 
-                        pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Fault has no message: " + wsdlFlt.getName(), null);;
+                        pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Fault has no message: " + wsdlFlt.getName(), null);
                     }
                 }                    
               } else {
