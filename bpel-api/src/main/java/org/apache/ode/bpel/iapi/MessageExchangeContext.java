@@ -55,7 +55,7 @@ public interface MessageExchangeContext {
    * via the {@link PartnerRoleMessageExchange#reply(Message)}, 
    * {@link PartnerRoleMessageExchange#replyOneWayOk()}, 
    * {@link PartnerRoleMessageExchange#replyWithFailure(FailureType, String, Element)}
-   * {@link PartnerRoleMessageExchange#replyWithFault(String, Message)},
+   * {@link PartnerRoleMessageExchange#replyWithFault(javax.xml.namespace.QName, Message)},
    * or {@link PartnerRoleMessageExchange#replyAsync()} methods. </p>
    * 
    * <p>Invocation of reliable, unreliable, and transactional transports should 
