@@ -24,6 +24,9 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.util.WSDLFlattener;
@@ -167,10 +170,26 @@ final class OdeContext {
         OdeService service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
-            Definition def = pc.getDefinitionForService(endpoint.serviceName);
-            def = new WSDLFlattener(def).getDefinition(endpoint);
-            Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
-            addEndpointDoc(endpoint.serviceName, doc);
+            Serializer ofh = new Serializer(pc.getCBPInputStream());
+            OProcess compiledProcess = ofh.readOProcess();
+            QName portType = null;
+            for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
+                if (provide.getValue().equals(endpoint)) {
+                    OPartnerLink plink = compiledProcess.getPartnerLink(provide.getKey());
+                    portType = plink.myRolePortType.getQName();
+                    break;
+                }
+            }
+            if (portType == null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Could not find PortType for endpoint");
+                }
+            } else {
+                Definition def = pc.getDefinitionForService(endpoint.serviceName);
+                def = new WSDLFlattener(def).getDefinition(portType);
+                Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
+                addEndpointDoc(endpoint.serviceName, doc);
+            }
         } catch (Exception e) {
             __log.warn("Exception during endpoint activation", e);
         }
