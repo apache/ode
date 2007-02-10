@@ -19,7 +19,6 @@ package org.apache.ode.jbi.util;
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.Endpoint;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -35,7 +34,7 @@ public class WSDLFlattener {
     
     private Definition definition;
     private SchemaCollection schemas;
-    private Map<Endpoint,Definition> flattened;
+    private Map<QName, Definition> flattened;
     private boolean initialized;
     
     public WSDLFlattener() {
@@ -68,16 +67,15 @@ public class WSDLFlattener {
     
     /**
      * Retrieve a flattened definition for a given port type name.
-     * @param endpoint the port type to create a flat definition for
+     * @param portType the port type to create a flat definition for
      * @return a flat definition for the port type
      * @throws Exception if an error occurs
      */
-    public Definition getDefinition(Endpoint endpoint) throws Exception {
-        Definition def = (Definition) flattened.get(endpoint);
+    public Definition getDefinition(QName portType) throws Exception {
+        Definition def = (Definition) flattened.get(portType);
         if (def == null) {
-            PortType pt = def.getService(endpoint.serviceName).getPort(endpoint.portName).getBinding().getPortType();
-            def = flattenDefinition(pt.getQName());
-            flattened.put(endpoint, def);
+            def = flattenDefinition(portType);
+            flattened.put(portType, def);
         }
         return def;
     }
