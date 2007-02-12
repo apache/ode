@@ -307,6 +307,10 @@ class MockBpelServer {
             return _quartz.execIsolatedTransaction(transaction);
         }
 
+        public boolean isTransacted() {
+            return _quartz.isTransacted();
+        }
+
         public void start() { _quartz.start(); }
         public void stop() { _quartz.stop(); }
         public void shutdown() { _quartz.shutdown(); }
