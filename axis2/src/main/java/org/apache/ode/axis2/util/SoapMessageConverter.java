@@ -52,6 +52,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.Messages;
+import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
@@ -59,9 +60,9 @@ import org.w3c.dom.Element;
 /**
  * SOAP/ODE Message converter. Uses WSDL binding information to convert the protocol-neutral ODE representation into a SOAP
  * representation and vice versa.
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r (at) g m a i l . c o m )
- * 
+ *
  */
 public class SoapMessageConverter {
 
@@ -106,20 +107,20 @@ public class SoapMessageConverter {
 
         _serviceDef = _def.getService(serviceName);
         if (_serviceDef == null)
-            throw new AxisFault(__msgs.msgServiceDefinitionNotFound(serviceName));
+            throw new OdeFault(__msgs.msgServiceDefinitionNotFound(serviceName));
         _port = _serviceDef.getPort(portName);
         if (_port == null)
-            throw new AxisFault(__msgs.msgPortDefinitionNotFound(serviceName, portName));
+            throw new OdeFault(__msgs.msgPortDefinitionNotFound(serviceName, portName));
         _binding = _port.getBinding();
         if (_binding == null)
-            throw new AxisFault(__msgs.msgBindingNotFound(serviceName, portName));
+            throw new OdeFault(__msgs.msgBindingNotFound(serviceName, portName));
 
 
         Collection<SOAPBinding> soapBindings = CollectionsX.filter(_binding.getExtensibilityElements(), SOAPBinding.class);
         if (soapBindings.isEmpty())
-            throw new AxisFault(__msgs.msgNoSOAPBindingForPort(_portName));
+            throw new OdeFault(__msgs.msgNoSOAPBindingForPort(_portName));
         else if (soapBindings.size() > 1) {
-            throw new AxisFault(__msgs.msgMultipleSoapBindingsForPort(_portName));
+            throw new OdeFault(__msgs.msgMultipleSoapBindingsForPort(_portName));
         }
 
         _soapBinding = (SOAPBinding) soapBindings.iterator().next();
@@ -139,11 +140,11 @@ public class SoapMessageConverter {
         BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);
 
         if (bop == null)
-            throw new AxisFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
 
         BindingInput bi = bop.getBindingInput();
         if (bi == null)
-            throw new AxisFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bi);
         for (SOAPHeader sh : soapHeaders)
@@ -156,7 +157,7 @@ public class SoapMessageConverter {
                     : soapEnv.getBody();
             createSoapBody(sb, soapBody, op.getInput().getMessage(), message, op.getName());
         }
-        
+
     }
 
     public void createSoapResponse(SOAPEnvelope soapEnv, Element message, Operation op) throws AxisFault {
@@ -170,23 +171,23 @@ public class SoapMessageConverter {
         BindingOperation bop = _binding.getBindingOperation(op.getName(),null,null);
 
         if (bop == null)
-            throw new AxisFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
 
         BindingOutput bo = bop.getBindingOutput();
         if (bo == null)
-            throw new AxisFault(__msgs.msgBindingOutputNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingOutputNotFound(_serviceName, _portName, op.getName()));
 
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bo);
         for (SOAPHeader sh : soapHeaders)
-            createSoapHeader(soapEnv, sh, op.getInput().getMessage(), message);
+            createSoapHeader(soapEnv, sh, op.getOutput().getMessage(), message);
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null) {
             org.apache.axiom.soap.SOAPBody sb = soapEnv.getBody() == null ? _soapFactory.createSOAPBody(soapEnv) : soapEnv.getBody();
-            createSoapBody(sb, soapBody, op.getInput().getMessage(), message, op.getName() + "Response");
+            createSoapBody(sb, soapBody, op.getOutput().getMessage(), message, op.getName() + "Response");
         }
-        
-        
+
+
     }
 
     @SuppressWarnings("unchecked")
@@ -195,26 +196,26 @@ public class SoapMessageConverter {
 
         if (headerdef.getPart() == null)
             return;
-        
-        if (payloadMessageHeader && msgdef.getPart(headerdef.getPart()) == null)
-            throw new AxisFault(__msgs.msgSoapHeaderReferencesUnkownPart(headerdef.getPart()));
 
-        Element srcPartEl = DOMUtils.findChildByName(message, new QName(payloadMessageHeader 
+        if (payloadMessageHeader && msgdef.getPart(headerdef.getPart()) == null)
+            throw new OdeFault(__msgs.msgSoapHeaderReferencesUnkownPart(headerdef.getPart()));
+
+        Element srcPartEl = DOMUtils.findChildByName(message, new QName(payloadMessageHeader
                 ? null : FOREIGN_HEADER_PART_NS, headerdef.getPart()));
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.
         if (srcPartEl == null && payloadMessageHeader)
-            throw new AxisFault(__msgs.msgOdeMessageMissingRequiredPart(headerdef.getPart()));
-        
+            throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(headerdef.getPart()));
+
         if (srcPartEl == null)
             return;
-        
+
         org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
         if (soaphdr == null) {
             soaphdr = _soapFactory.createSOAPHeader(soapEnv);
         }
-        
+
         OMElement omPart = OMUtils.toOM(srcPartEl, _soapFactory);
         for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();)
             soaphdr.addChild(i.next());
@@ -223,22 +224,22 @@ public class SoapMessageConverter {
 
     public OMElement createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
         if (faultName.getNamespaceURI() == null || !faultName.getNamespaceURI().equals(_def.getTargetNamespace()))
-            throw new AxisFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
+            throw new OdeFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
         Fault f = op.getFault(faultName.getLocalPart());
         if (f == null)
-            throw new AxisFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
-        
-        // For faults, there will be exactly one part. 
+            throw new OdeFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
+
+        // For faults, there will be exactly one part.
         Part p = (Part)f.getMessage().getParts().values().iterator().next();
         Element partEl= DOMUtils.getFirstChildElement(DOMUtils.findChildByName(message,new QName(null,p.getName())));
         if (partEl == null)
-            throw new AxisFault(__msgs.msgOdeMessageMissingRequiredPart(p.getName()));
+            throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(p.getName()));
         if (p == null)
-            throw new AxisFault(new IllegalStateException("fault part is non-element" + p.getName()));
+            throw new OdeFault(new IllegalStateException("fault part is non-element" + p.getName()));
         Element detail = DOMUtils.findChildByName(partEl, p.getElementName());
         if (detail == null)
-            throw new AxisFault(__msgs.msgOdeMessagePartMissingRequiredElement(_serviceName, _portName, op.getName(), p.getElementName()));
-        
+            throw new OdeFault(__msgs.msgOdeMessagePartMissingRequiredElement(_serviceName, _portName, op.getName(), p.getElementName()));
+
         return OMUtils.toOM(detail, _soapFactory);
    }
 
@@ -246,11 +247,11 @@ public class SoapMessageConverter {
         BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);
 
         if (bop == null)
-            throw new AxisFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
-        
+            throw new OdeFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
+
         BindingInput bi = bop.getBindingInput();
         if (bi == null)
-            throw new AxisFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
         SOAPBody soapBody = getSOAPBody(bi);
         if (soapBody != null)
@@ -266,11 +267,11 @@ public class SoapMessageConverter {
         BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);
 
         if (bop == null)
-            throw new AxisFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingOperationNotFound(_serviceName, _portName, op.getName()));
 
         BindingOutput bo = bop.getBindingOutput();
         if (bo == null)
-            throw new AxisFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null)
@@ -278,24 +279,24 @@ public class SoapMessageConverter {
     }
 
     @SuppressWarnings("unchecked")
-    public void createSoapBody(org.apache.axiom.soap.SOAPBody sb, 
-            SOAPBody soapBody, 
-            Message msgDef, 
+    public void createSoapBody(org.apache.axiom.soap.SOAPBody sb,
+            SOAPBody soapBody,
+            Message msgDef,
             Element message,
             String rpcWrapper) throws AxisFault {
-        
+
         OMElement partHolder;
         if (_isRPC) {
             partHolder = _soapFactory.createOMElement(new QName(soapBody.getNamespaceURI(),rpcWrapper), sb);
         } else
-            partHolder = sb; 
+            partHolder = sb;
 
         List<Part> parts = msgDef.getOrderedParts(soapBody.getParts());
 
         for (Part part : parts) {
             Element srcPartEl = DOMUtils.findChildByName(message, new QName(null, part.getName()));
             if (srcPartEl == null)
-                throw new AxisFault(__msgs.msgOdeMessageMissingRequiredPart(part.getName()));
+                throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(part.getName()));
 
             OMElement omPart = OMUtils.toOM(srcPartEl, _soapFactory);
             if (_isRPC) {
@@ -320,14 +321,14 @@ public class SoapMessageConverter {
             QName rpcWrapQName = new QName(bodyDef.getNamespaceURI(), rpcWrapper);
             OMElement partWrapper = soapBody.getFirstChildWithName(rpcWrapQName);
             if (partWrapper == null)
-                throw new AxisFault(__msgs.msgSoapBodyDoesNotContainExpectedPartWrapper(_serviceName,_portName,rpcWrapQName));
+                throw new OdeFault(__msgs.msgSoapBodyDoesNotContainExpectedPartWrapper(_serviceName,_portName,rpcWrapQName));
             // In RPC the body element is the operation name, wrapping parts. Order doesn't really matter as far as
             // we're concerned. All we need to do is copy the soap:body children, since doc-lit rpc looks the same
             // in ode and soap.
             for (Part pdef : bodyParts) {
                 OMElement srcPart = partWrapper.getFirstChildWithName(new QName(null, pdef.getName()));
                 if (srcPart == null)
-                    throw new AxisFault(__msgs.msgSOAPBodyDoesNotContainRequiredPart(pdef.getName()));
+                    throw new OdeFault(__msgs.msgSOAPBodyDoesNotContainRequiredPart(pdef.getName()));
                 message.appendChild(message.getOwnerDocument().importNode(OMUtils.toDOM(srcPart), true));
             }
 
@@ -337,13 +338,13 @@ public class SoapMessageConverter {
             Iterator<OMElement> srcParts = soapBody.getChildElements();
             for (Part partDef : bodyParts) {
                 if (!srcParts.hasNext())
-                    throw new AxisFault(__msgs.msgSOAPBodyDoesNotContainRequiredPart(partDef.getName()));
+                    throw new OdeFault(__msgs.msgSOAPBodyDoesNotContainRequiredPart(partDef.getName()));
 
                 OMElement srcPart = srcParts.next();
                 if (partDef.getElementName() == null)
-                    throw new AxisFault(__msgs.msgBindingDefinesNonElementDocListParts());
+                    throw new OdeFault(__msgs.msgBindingDefinesNonElementDocListParts());
                 if (!srcPart.getQName().equals(partDef.getElementName()))
-                    throw new AxisFault(__msgs.msgUnexpectedElementInSOAPBody(srcPart.getQName(), partDef.getElementName()));
+                    throw new OdeFault(__msgs.msgUnexpectedElementInSOAPBody(srcPart.getQName(), partDef.getElementName()));
                 Element destPart = message.getOwnerDocument().createElementNS(null, partDef.getName());
                 message.appendChild(destPart);
                 destPart.appendChild(message.getOwnerDocument().importNode(OMUtils.toDOM(srcPart), true));
@@ -358,7 +359,7 @@ public class SoapMessageConverter {
         boolean requiredHeader = payloadMessageHeader || (headerdef.getRequired() != null && headerdef.getRequired() == true);
 
         if (requiredHeader && header == null)
-            throw new AxisFault(__msgs.msgSoapHeaderMissingRequiredElement(headerdef.getElementType()));
+            throw new OdeFault(__msgs.msgSoapHeaderMissingRequiredElement(headerdef.getElementType()));
 
         if (header == null)
             return;
@@ -369,10 +370,10 @@ public class SoapMessageConverter {
         Part p = hdrMsg.getPart(headerdef.getPart());
         if (p == null || p.getElementName() == null)
             return;
-        
+
         OMElement headerEl = header.getFirstChildWithName(p.getElementName());
         if (requiredHeader && headerEl == null)
-            throw new AxisFault(__msgs.msgSoapHeaderMissingRequiredElement(headerdef.getElementType()));
+            throw new OdeFault(__msgs.msgSoapHeaderMissingRequiredElement(headerdef.getElementType()));
 
         if (headerEl == null)
             return;
@@ -403,7 +404,7 @@ public class SoapMessageConverter {
 
     /**
      * Attempts to extract the SOAP Action is defined in the WSDL document.
-     * 
+     *
      * @param def
      * @param service
      * @param port
@@ -427,11 +428,11 @@ public class SoapMessageConverter {
         Fault fdef = inferFault(operation, flt);
         if (fdef == null)
             return null;
-        
+
         Part pdef = (Part)fdef.getMessage().getParts().values().iterator().next();
         Element partel = odeMsgEl.getOwnerDocument().createElementNS(null,pdef.getName());
         odeMsgEl.appendChild(partel);
-        
+
         partel.appendChild(odeMsgEl.getOwnerDocument().importNode(OMUtils.toDOM(detail),true));
         return new QName(_def.getTargetNamespace(), fdef.getName());
     }
@@ -440,27 +441,25 @@ public class SoapMessageConverter {
     private Fault inferFault(Operation operation, SOAPFault flt) {
         if (flt.getDetail() == null)
             return null;
-        
+
         QName elName = flt.getDetail().getQName();
         for (Fault f : (Collection<Fault>)operation.getFaults().values()) {
             if (f.getMessage() == null)
                 continue;  // should have checked in ctor
-            
+
             Collection<Part> parts = f.getMessage().getParts().values();
             if (parts.isEmpty())
                 continue;  // should check this in ctor
             Part p = parts.iterator().next();
             if (p.getElementName() == null)
                 continue;  // should check this is ctor
-            
+
             if (p.getElementName().equals(elName))
                 return f;
-                
+
         }
-        
+
         return null;
     }
-
-
 
 }
