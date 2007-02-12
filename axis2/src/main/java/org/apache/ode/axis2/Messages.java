@@ -145,92 +145,94 @@ public class Messages extends MessageBundle {
 
     public String msgDAOInstantiationFailed(String className) {
         return format("Error instantiating DAO Connection Factory class {0}.", className);
-        
+
     }
 
     public Throwable msgOdeMessageMissingRequiredPart(String partName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Message is missing required part: {0}", partName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgServiceDefinitionNotFound(QName serviceName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Servicd definition not found: {0}.", serviceName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgPortDefinitionNotFound(QName serviceName, String portName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Port definition not found: service {0} port {1}.", serviceName, portName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgBindingOperationNotFound(QName serviceName, String portName, String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Binding operation not found: service {0} port {1} name {2}.", serviceName, portName, name);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgBindingInputNotFound(QName serviceName, String portName, String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Binding input not found: service {0} port {1} name {2}.", serviceName, portName, name);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgBindingNotFound(QName serviceName, String portName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Binding not found: service {0} port {1}.", serviceName, portName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgNoSOAPBindingForPort(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("No SOAP binding for port: {0}.", name);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgSoapHeaderReferencesUnkownPart(String part) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("SOAP header references unknown part: {0}.", part);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgBindingDefinesNonElementDocListParts() {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Binding defines non-element document literal part(s)");
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgUnexpectedElementInSOAPBody(QName name, QName elementName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Unexpected element in SOAP body: message {0} element {1}.", name, elementName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgSOAPBodyDoesNotContainAllRequiredParts() {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("SOAP body does not contain all required parts");
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgSOAPBodyDoesNotContainRequiredPart(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("SOAP body does not contain required part: {0}.", name);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgSoapHeaderMissingRequiredElement(QName elementType) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("SOAP header missing required element: {0}.", elementType);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgBindingOutputNotFound(QName serviceName, String portName, String name) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Binding output not found: service {0} port {1} name {2}.", serviceName, portName, name);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgUndefinedFault(QName serviceName, String portName, String name, QName faultName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Undefined fault: service {0} port {1} name {2} fault {3}.", serviceName, portName, name, faultName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgOdeMessagePartMissingRequiredElement(QName serviceName, String portName, String name, QName elementName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("Message part is missing required element: service {0} port {1} name {2} element {3}.",
+                          serviceName, portName, name, elementName);
+        return new IllegalArgumentException(s);
     }
 
     public Throwable msgSoapBodyDoesNotContainExpectedPartWrapper(QName serviceName, String portName, QName rpcWrapQName) {
-        // TODO Auto-generated method stub
-        return null;
+        String s = format("SOAP body does not contain expected part wrapper: service {0} port {1} wrapper {2}",
+                          serviceName, portName, rpcWrapQName);
+        return new IllegalArgumentException(s);
     }
 
 }
