@@ -71,6 +71,10 @@ public class TestScheduler implements Scheduler {
         return future;
     }
 
+    public boolean isTransacted() {
+        return false;
+    }
+
     public void start() {
     }
 
