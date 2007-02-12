@@ -133,6 +133,16 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
     }
 
+    public void setPackageRetired(final String packageName, final boolean retired)
+            throws ManagementException {
+        try {
+            _store.setRetiredPackage(packageName, retired);
+        } catch (BpelEngineException e) {
+            __log.error("Exception while setting process as retired", e);
+            throw new ProcessNotFoundException("PackageNotFound:" + packageName);
+        }
+    }
+
     public ProcessInfoDocument setProcessPropertyNode(final QName pid, final QName propertyName, final Node value)
             throws ManagementException {
         ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();

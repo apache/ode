@@ -87,7 +87,7 @@ public abstract class BPELTest extends TestCase {
         server.setScheduler(scheduler);
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-        store = new ProcessStoreImpl();
+        store = new ProcessStoreImpl(null, true);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process

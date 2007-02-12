@@ -112,4 +112,10 @@ public interface ProcessManagement {
   ProcessInfoDocument setRetired(QName pid, boolean retired)
           throws ManagementException;
 
+    /**
+     * Retires all the processes contained in a package.
+     * @param packageName
+     * @param retired
+     */
+    void setPackageRetired(final String packageName, final boolean retired);
 }
