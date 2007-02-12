@@ -87,7 +87,7 @@ public interface ProcessStore {
 
     /**
      * Set a process property.
-     * @param processId
+     * @param pid
      * @param propName 
      * @param value
      */
@@ -97,10 +97,18 @@ public interface ProcessStore {
     
     /**
      * Marks a process as active / retired or disabled
-     * @param processId
-     * @param status true for active, false for inactive
+     * @param pid
+     * @param state true for active, false for inactive
+     * @deprecated
      */
     void setState(QName pid, ProcessState state);
+
+    /**
+     * Retires all processes in a given package.
+     * @param packageName
+     * @param retired
+     */
+    void setRetiredPackage(String packageName, boolean retired);
 
     /**
      * Gets the version used by the store for the last deployment.
