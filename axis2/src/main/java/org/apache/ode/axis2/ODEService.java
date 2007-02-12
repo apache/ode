@@ -84,7 +84,7 @@ public class ODEService {
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
         _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), def, serviceName, portName,
                 _isReplicateEmptyNS);
-        
+
     }
 
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
@@ -127,9 +127,9 @@ public class ODEService {
                 success = false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            __log.error("Exception occured while invoking ODE", e);
             success = false;
-            throw new AxisFault("An exception occured when invoking ODE.", e);
+            throw new OdeFault("An exception occured when invoking ODE.", e);
         } finally {
             if (success) {
                 __log.debug("Commiting ODE MEX " + odeMex);
@@ -137,7 +137,7 @@ public class ODEService {
                     if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
                     _txManager.commit();
                 } catch (Exception e) {
-                    __log.error("COMMIT FAILED!", e);
+                    __log.error("Commit failed", e);
                     success = false;
                 }
             }
@@ -146,7 +146,7 @@ public class ODEService {
                 try {
                     _txManager.rollback();
                 } catch (Exception e) {
-                    throw new AxisFault("ROLLBACK FAILED!", e);
+                    throw new OdeFault("Rollback failed", e);
                 }
             }
 
@@ -179,29 +179,31 @@ public class ODEService {
                             if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
                             _txManager.begin();
                         } catch (Exception ex) {
-                            throw new AxisFault("Error starting transaction!", ex);
+                            throw new OdeFault("Error starting transaction!", ex);
                         }
                         try {
                             onResponse(odeMex, outMsgContext);
                             commit = true;
                         } catch (AxisFault af) {
+                            __log.error("Error processing response for MEX " + odeMex, af);
                             commit = true;
                             throw af;
                         } catch (Exception e) {
-                            throw new AxisFault("An exception occured when invoking ODE.", e);
+                            __log.error("Error processing response for MEX " + odeMex, e);
+                            throw new OdeFault("An exception occured when invoking ODE.", e);
                         } finally {
                             if (commit)
                                 try {
                                     if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
                                     _txManager.commit();
                                 } catch (Exception e) {
-                                    throw new AxisFault("Commit failed!", e);
+                                    throw new OdeFault("Commit failed!", e);
                                 }
                             else
                                 try {
                                     _txManager.rollback();
                                 } catch (Exception ex) {
-                                    throw new AxisFault("Rollback failed!", ex);
+                                    throw new OdeFault("Rollback failed!", ex);
                                 }
 
                         }
@@ -210,7 +212,7 @@ public class ODEService {
             }
         }
         if (!success)
-            throw new AxisFault("Message was either unroutable or timed out!");
+            throw new OdeFault("Message was either unroutable or timed out!");
     }
 
     public void notifyResponse(MyRoleMessageExchange mex) {
@@ -234,25 +236,25 @@ public class ODEService {
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
         switch (mex.getStatus()) {
             case FAULT:
-                if (__log.isDebugEnabled()) 
+                if (__log.isDebugEnabled())
                     __log.debug("Generated FAULT response message: " +
                         mex.getFault());
-                throw new AxisFault(new QName(null,"Server"),
+                throw new AxisFault(mex.getFault(),
                         mex.getFaultExplanation(), null, null,
                         _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation()));
             case ASYNC:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext.getEnvelope(), mex.getResponse().getMessage(),
                         mex.getOperation());
-                if (__log.isDebugEnabled()) 
+                if (__log.isDebugEnabled())
                     __log.debug("Generated response message " +
                         msgContext.getEnvelope());
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:
-                throw new AxisFault("Message exchange failure!");
+                throw new OdeFault("Message exchange failure");
             default:
-                __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
+                throw new OdeFault("Received ODE message exchange in unexpected state: " + mex.getStatus());
         }
     }
 
@@ -347,7 +349,7 @@ public class ODEService {
 
     /**
      * Get the EPR of this service from the WSDL.
-     * 
+     *
      * @param name
      *            service name
      * @param portName
@@ -386,7 +388,7 @@ public class ODEService {
 
     /**
      * Create-and-copy a service-ref element.
-     * 
+     *
      * @param elmt
      * @return wrapped element
      */

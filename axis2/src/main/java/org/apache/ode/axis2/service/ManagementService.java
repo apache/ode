@@ -33,6 +33,7 @@ import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
@@ -78,7 +79,7 @@ public class ManagementService {
         try {
             WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
             wsdlReader.setFeature("javax.wsdl.verbose", false);
-            
+
             def = wsdlReader.readWSDL(rootpath + "/pmapi.wsdl");
             AxisService processService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
@@ -127,9 +128,9 @@ public class ManagementService {
                 engine.send(outMsgContext);
             }
         } catch (IllegalAccessException e) {
-            throw new AxisFault("Couldn't invoke method named " + methodName + " in management interface!", e);
+            throw new OdeFault("Couldn't invoke method named " + methodName + " in management interface!", e);
         } catch (InvocationTargetException e) {
-            throw new AxisFault("Invocation of method " + methodName + " in management interface failed!", e);
+            throw new OdeFault("Invocation of method " + methodName + " in management interface failed!", e);
         }
     }
 
@@ -178,17 +179,17 @@ public class ManagementService {
                 return beanFactory.getMethod("parse", XMLStreamReader.class)
                         .invoke(elmt.getXMLStreamReaderWithoutCaching());
             } catch (ClassNotFoundException e) {
-                throw new AxisFault("Couldn't find class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
+                throw new OdeFault("Couldn't find class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
             } catch (IllegalAccessException e) {
-                throw new AxisFault("Couldn't access class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
+                throw new OdeFault("Couldn't access class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
             } catch (InvocationTargetException e) {
-                throw new AxisFault("Couldn't access xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
+                throw new OdeFault("Couldn't access xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
                         "to instantiate xml bean", e);
             } catch (NoSuchMethodException e) {
-                throw new AxisFault("Couldn't find xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
+                throw new OdeFault("Couldn't find xml bean parse method on class " + clazz.getCanonicalName() + ".Factory " +
                         "to instantiate xml bean", e);
             }
-        } else throw new AxisFault("Couldn't use element " + elmt + " to obtain a management method parameter.");
+        } else throw new OdeFault("Couldn't use element " + elmt + " to obtain a management method parameter.");
     }
 
     private static OMElement convertToOM(SOAPFactory soapFactory, Object obj) throws AxisFault {
@@ -196,7 +197,7 @@ public class ManagementService {
             try {
                 return new StAXOMBuilder(((XmlObject)obj).newInputStream()).getDocumentElement();
             } catch (XMLStreamException e) {
-                throw new AxisFault("Couldn't serialize result to an outgoing messages.", e);
+                throw new OdeFault("Couldn't serialize result to an outgoing messages.", e);
             }
         } else if (obj instanceof List) {
             OMElement listElmt = soapFactory.createOMElement("list", null);
@@ -206,7 +207,7 @@ public class ManagementService {
                 listElmt.addChild(stuffElmt);
             }
             return listElmt;
-        } else throw new AxisFault("Couldn't convert object " + obj + " into a response element.");
+        } else throw new OdeFault("Couldn't convert object " + obj + " into a response element.");
     }
 
     private static boolean hasResponse(AxisOperation op) {
@@ -237,7 +238,7 @@ public class ManagementService {
         for (Method method : clazz.getMethods()) {
             if (method.getName().equals(methodName)) return method;
         }
-        throw new AxisFault("Couldn't find any method named " + methodName + " in interface " + clazz.getName());
+        throw new OdeFault("Couldn't find any method named " + methodName + " in interface " + clazz.getName());
     }
 
     private static Object parseType(Class clazz, String str) {
