@@ -90,6 +90,11 @@ public interface Scheduler {
             throws Exception, ContextException;
 
     /**
+     * @return true if the current thread is associated with a transaction.
+     */
+    boolean isTransacted();
+
+    /**
      * Register a transaction synchronizer.
      * @param synch synchronizer
      * @throws ContextException

@@ -377,7 +377,24 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
     public void hydrated(final BpelProcess process) {
         // Recreating the process DAO if the definition has changed, shouldn't do anything
         // except after a redeploy
-        bounceProcessDAO(_contexts.dao.getConnection(), process.getPID(), process._pconf.getVersion(), process.getOProcess());
+        if (_contexts.scheduler.isTransacted())
+            bounceProcessDAO(_contexts.dao.getConnection(), process.getPID(),
+                    process._pconf.getVersion(), process.getOProcess());
+        else {
+            try {
+                _db.exec(new BpelDatabase.Callable<Object>() {
+                    public Object run(BpelDAOConnection conn) throws Exception {
+                        bounceProcessDAO(conn, process.getPID(),
+                                process._pconf.getVersion(), process.getOProcess());
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                String errmsg = "DbError";
+                __log.error(errmsg, ex);
+                throw new BpelEngineException(errmsg, ex);
+            }
+        }
 
         _runningProcesses.add(process);
     }
