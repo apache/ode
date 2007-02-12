@@ -74,11 +74,11 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
         container.start();
         
         // For lack of a better way of doing this:
-        component.getServiceUnitManager().deploy("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
-        component.getServiceUnitManager().init("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().deploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().init("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
         component.getServiceUnitManager().start("HelloWorld");
         component.getServiceUnitManager().stop("HelloWorld");
-        component.getServiceUnitManager().undeploy("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().undeploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
 
         container.deactivateComponent("ODE");
         
