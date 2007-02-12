@@ -102,7 +102,7 @@ class OdeServiceUnit {
     public void start() throws Exception {
         List<QName> pids = _ode._store.listProcesses(_serviceUnitRootPath.getName());
         if (pids == null) {
-            __log.error(_serviceUnitRootPath.getName() + " not found in process stroe. ");
+            __log.error(_serviceUnitRootPath.getName() + " not found in process store. ");
             throw new IllegalStateException("Process store and JBI out of synch.");
         }
 
