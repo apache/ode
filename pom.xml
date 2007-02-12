@@ -133,8 +133,7 @@
         <module>bpel-store</module>
         <module>dao-hibernate-db-derby</module>
 
-	<!-- Maven/Servicemix is kaput right now. -->
-        <!-- <module>jbi</module> -->
+        <module>jbi</module>
         <module>jca-ra</module>
         <module>jca-rar</module>
         <module>jca-server</module>
@@ -324,6 +323,11 @@
                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>apache-incubator</id>
+            <name>Apache Incubator Repository</name>
+            <url>http://people.apache.org/repo/m2-incubating-repository</url>
+        </repository>
 
 
 <!-- Rely only on Intalio repository, prevents maven madness. 
@@ -336,17 +340,6 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
-
- 
-                <repository>
-                    <id>apache-incubator</id>
-                    <name>Apache Incubator Repository</name>
-                    <url>http://people.apache.org/repo/m2-incubating-repository</url>
-                    <snapshots>
-                       <enabled>false</enabled>
-                       <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
         <repository>
             <id>ibiblio</id>
             <name>ibiblio</name>
@@ -392,6 +385,11 @@
             <name>Intalio Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>apache-incubator</id>
+            <name>Apache Incubator Repository</name>
+            <url>http://people.apache.org/repo/m2-incubating-repository</url>
+        </pluginRepository>
 
 
 <!-- Safe sex....
@@ -411,11 +409,6 @@
             <id>ibiblio</id>
             <name>ibiblio</name>
             <url>http://www.ibiblio.org/maven2</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache-incubator</id>
-            <name>Apache Incubator Repository</name>
-            <url>http://people.apache.org/repo/m2-incubating-repository</url>
         </pluginRepository>
         <pluginRepository>
             <id>apache-snapshots</id>
