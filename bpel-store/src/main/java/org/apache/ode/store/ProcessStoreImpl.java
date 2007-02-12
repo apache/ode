@@ -154,7 +154,7 @@ public class ProcessStoreImpl implements ProcessStore {
         Collection<QName> deployed;
 
         _rw.writeLock().lock();
-        // Process and DU use a monotically increased single version number.
+        // Process and DU use a monotonically increased single version number.
         long version = exec(new Callable<Long>() {
             public Long call(ConfStoreConnection conn) {
                 return conn.getNextVersion();
@@ -172,12 +172,10 @@ public class ProcessStoreImpl implements ProcessStore {
 
             for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
                 QName pid = toPid(processDD.getName(), version);
-                // Retires older version
-                try {
-                    if (version > 1) setState(toPid(processDD.getName(), version - 1), ProcessState.RETIRED);
-                } catch (ContextException ce) {
-                    __log.debug("No previous version to retire on deployment of version " + version);
-                }
+                
+                // Retires older version if we can find one
+                DeploymentUnitDir oldDU = findOldDU(du.getName());
+                if (oldDU != null) setRetiredPackage(oldDU.getName(), true);
 
                 if (_processes.containsKey(pid)) {
                     String errmsg = __msgs.msgDeployFailDuplicatePID(processDD.getName(), du.getName());
@@ -381,6 +379,14 @@ public class ProcessStoreImpl implements ProcessStore {
         pconf.setState(state);
         if (old != null && old != state)
             fireStateChange(pid, state, pconf.getDeploymentUnit().getName());
+    }
+
+    public void setRetiredPackage(String packageName, boolean retired) {
+        DeploymentUnitDir duDir = _deploymentUnits.get(packageName);
+        if (duDir == null) throw new ContextException("Could not find package " + packageName);
+        for (QName processName : duDir.getProcessNames()) {
+            setState(toPid(processName, duDir.getVersion()), retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
+        }
     }
 
     public ProcessConf getProcessConfiguration(final QName processId) {
@@ -718,4 +724,19 @@ public class ProcessStoreImpl implements ProcessStore {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
     }
 
+    private DeploymentUnitDir findOldDU(String newName) {
+        DeploymentUnitDir old = null;
+        int dashIdx = newName.lastIndexOf("-");
+        if (dashIdx > 0 && dashIdx + 1 < newName.length()) {
+            String radical = newName.substring(0, dashIdx);
+            int newVersion = -1;
+            try {
+                newVersion = Integer.parseInt(newName.substring(newName.lastIndexOf("-") + 1));
+            } catch (NumberFormatException e) {
+                // Swallowing, if we can't parse then we just can't find an old version
+            }
+            while (old == null && newVersion >= 0) old = _deploymentUnits.get(radical + "-" + (newVersion--));
+        }
+        return old;
+    }
 }
