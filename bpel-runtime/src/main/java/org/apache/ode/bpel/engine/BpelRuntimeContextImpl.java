@@ -104,7 +104,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (PROCESS != null) {
             vpu.inject(PROCESS);
         }
-        
+
         __log.debug("BpelRuntimeContextImpl created. INDEXED STATE=" + soup.getIndex());
     }
 
@@ -326,7 +326,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (int i = 0; i < selectors.length; ++i) {
             CorrelatorDAO correlator = correlators.get(i);
             Selector selector = selectors[i];
-            
+
             correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKey);
             scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKey);
 
@@ -401,7 +401,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /**
      * Evaluate a property alias query expression against a variable, returning
      * the normalized {@link String} representation of the property value.
-     * 
+     *
      * @param variable
      *            variable to read
      * @param property
@@ -535,12 +535,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /**
      * Common functionality to initialize a correlation set based on data
      * available in a variable.
-     * 
+     *
      * @param cset
      *            the correlation set instance
      * @param variable
      *            variable instance
-     * 
+     *
      * @throws IllegalStateException
      *             DOCUMENTME
      */
@@ -660,10 +660,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 //        mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
         if ( mySessionId != null )
            	mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
-        if ( partnerSessionId != null ) 
+        if ( partnerSessionId != null )
            	mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
 
-        
+
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
@@ -838,7 +838,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new NullPointerException("Null responseChannelId");
         if (mexid == null)
             throw new NullPointerException("Null mexId");
-        
+
         vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
@@ -851,7 +851,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     /**
      * Continuation of the above.
-     * 
+     *
      * @param mexid
      * @param responseChannel
      */
@@ -925,8 +925,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     } catch (FaultException e) {
                         // This will fail as we're basically trying to extract properties on all
                         // received messages for optimization purposes.
-                        __log.debug("Couldn't extract property '" + property.toString()
-                                + "' in property pre-extraction.", e);
+                        if (__log.isDebugEnabled())
+                            __log.debug("Couldn't extract property '" + property.toString()
+                                        + "' in property pre-extraction: " + e.toString());
                     }
                 }
             }
@@ -1173,30 +1174,30 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     /**
      * Attempt to match message exchanges on a correlator.
-     * 
+     *
      */
     public void matcherEvent(String correlatorId, CorrelationKey ckey) {
-        
+
         __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
         CorrelatorDAO correlator = _dao.getProcess().getCorrelator(correlatorId);
 
-        // Find the route first, this is a SELECT FOR UPDATE on the "selector" row, 
-        // So we want to acquire the lock before we do anthing else. 
+        // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
+        // So we want to acquire the lock before we do anthing else.
         MessageRouteDAO mroute = correlator.findRoute(ckey);
         if (mroute == null) {
             // Ok, this means that a message arrived before we did, so nothing to do.
             __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
             return;
         }
-        
-        // Now see if there is a message that matches this selector. 
+
+        // Now see if there is a message that matches this selector.
         MessageExchangeDAO mexdao = correlator.dequeueMessage(ckey);
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
-            
+
             // We have a match, so we can get rid of the routing entries.
             correlator.removeRoutes(mroute.getGroupId(),_dao);
-            
+
             // Found message matching one of our selectors.
             if (BpelProcess.__log.isDebugEnabled()) {
                 BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
@@ -1209,7 +1210,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             execute();
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
-            
+
         }
     }
 }
