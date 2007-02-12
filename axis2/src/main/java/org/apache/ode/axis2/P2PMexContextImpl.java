@@ -88,8 +88,8 @@ public class P2PMexContextImpl implements MessageExchangeContext {
         if (__log.isDebugEnabled())
             __log.debug("Received Async reply to " + myRoleMex);
 
-        // Note that when we created the MyRoleMessageExchange, we gave the PartnerRoleMex Id 
-        // as the client id. 
+        // Note that when we created the MyRoleMessageExchange, we gave the PartnerRoleMex Id
+        // as the client id.
         PartnerRoleMessageExchange pmex = myRoleMex.getClientId() == null ? null : _waiters.remove(myRoleMex.getClientId());
         if (pmex == null) {
             if (__log.isDebugEnabled())
@@ -98,10 +98,10 @@ public class P2PMexContextImpl implements MessageExchangeContext {
             return;
         }
 
-        
+
         if (__log.isDebugEnabled())
             __log.debug("for async reply, found matching P2P Partner Mex " + pmex);
-        
+
         handleResponse(pmex, myRoleMex);
 
     }
@@ -114,19 +114,19 @@ public class P2PMexContextImpl implements MessageExchangeContext {
                 target.getServiceName(), pmex.getOperationName());
 
         if(__log.isDebugEnabled())
-            __log.debug("Invoking (P2P) service " + odeMex.getServiceName() + " with operation " +  
+            __log.debug("Invoking (P2P) service " + odeMex.getServiceName() + " with operation " +
                     odeMex.getOperationName());
 
         copyHeader(pmex, odeMex);
 
-        
+
         odeMex.invoke(pmex.getRequest());
-        
+
         if (__log.isDebugEnabled())
-            __log.debug("invoke of (P2P) service " + odeMex.getServiceName() + " with operation " +  
+            __log.debug("Invoked (P2P) service " + odeMex.getServiceName() + " with operation " +
                     odeMex.getOperationName() + "; MyRoleMex status = " + odeMex.getStatus());
 
-        
+
         if (odeMex.getStatus() != MessageExchange.Status.ASYNC) {
             if (__log.isDebugEnabled())
                 __log.debug("invoke of P2P service did not result in ASYNC state, removing waiter for " + pmex);

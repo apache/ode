@@ -19,6 +19,25 @@
 
 package org.apache.ode.axis2.service;
 
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
@@ -34,6 +53,7 @@ import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.OMUtils;
@@ -109,7 +129,7 @@ public class DeploymentWebService {
                     OMElement zip = zipPart.getFirstElement();
                     if (!zipPart.getQName().getLocalPart().equals("package") ||
                             !zip.getQName().getLocalPart().equals("zip"))
-                        throw new AxisFault("Your message should contain a part named 'package' with a zip element");
+                        throw new OdeFault("Your message should contain a part named 'package' with a zip element");
 
                     OMText binaryNode = (OMText) zip.getFirstOMChild();
                     binaryNode.setOptimize(true);
@@ -126,7 +146,7 @@ public class DeploymentWebService {
                         // Check that we have a deploy.xml
                         File deployXml = new File(dest, "deploy.xml");
                         if (!deployXml.exists())
-                            throw new AxisFault("The deployment doesn't appear to contain a deployment " +
+                            throw new OdeFault("The deployment doesn't appear to contain a deployment " +
                                     "descriptor in its root directory named deploy.xml, aborting.");
 
                         Collection<QName> deployed = _store.deploy(dest);
@@ -161,7 +181,7 @@ public class DeploymentWebService {
                     String pkg = part.getText();
                     File deploymentDir = new File(_deployPath, pkg);
                     if (!deploymentDir.exists())
-                        throw new AxisFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
+                        throw new OdeFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
 
                     try {
                         // We're going to create a directory under the deployment root and put
@@ -205,7 +225,7 @@ public class DeploymentWebService {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     ProcessConf process = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart));
                     if (process == null) {
-                    	throw new AxisFault("Could not find process: " + qnamePart.getTextAsQName());                    	
+                    	throw new OdeFault("Could not find process: " + qnamePart.getTextAsQName());
                     }
                     String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getPackage();
                     OMElement response = factory.createOMElement("packageName", null);
@@ -217,9 +237,9 @@ public class DeploymentWebService {
                 Throwable source = t;
                 while (source.getCause() != null && source.getCause() != source) source = source.getCause();
                 __log.warn("Invocation of operation " + operation + " failed", t);
-                throw new AxisFault("Invocation of operation " + operation + " failed: " + source.toString(), t);
+                throw new OdeFault("Invocation of operation " + operation + " failed: " + source.toString(), t);
             }
-            if (unknown) throw new AxisFault("Unknown operation: '"
+            if (unknown) throw new OdeFault("Unknown operation: '"
                     + messageContext.getAxisOperation().getName() + "'");
         }
 
@@ -248,7 +268,7 @@ public class DeploymentWebService {
                 }
                 zis.close();
             } catch (IOException e) {
-                throw new AxisFault("An error occured on deployment.", e);
+                throw new OdeFault("An error occured on deployment.", e);
             }
         }
 

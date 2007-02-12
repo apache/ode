@@ -25,6 +25,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
+import org.apache.ode.axis2.OdeFault;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Operation;
@@ -94,7 +95,7 @@ public class ODEAxisService extends AxisService {
     String url = null;
     Service service = wsdlDefinition.getService(wsdlServiceName);
     if (service == null) {
-      throw new AxisFault("Unable to find service " + wsdlServiceName + " from service WSDL definition " + wsdlDefinition.getDocumentBaseURI());
+      throw new OdeFault("Unable to find service " + wsdlServiceName + " from service WSDL definition " + wsdlDefinition.getDocumentBaseURI());
     }
     Port port = service.getPort(portName);
     for (Object oext : port.getExtensibilityElements()) {
@@ -102,12 +103,12 @@ public class ODEAxisService extends AxisService {
         url = ((SOAPAddress)oext).getLocationURI();
     }
     if (url == null) {
-      throw new AxisFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName +
+      throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName +
               " (necessary to establish the process target address)!");
     }
     String serviceName = parseURLForService(url);
     if (serviceName == null) {
-      throw new AxisFault("The soap:address used for service WSDL definition " + wsdlServiceName +
+      throw new OdeFault("The soap:address used for service WSDL definition " + wsdlServiceName +
               " and port " + portName + " should be of the form http://hostname:port/ode/processes/myProcessEndpointName");
     }
     return serviceName;
