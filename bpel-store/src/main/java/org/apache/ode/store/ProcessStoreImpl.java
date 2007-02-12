@@ -317,7 +317,19 @@ public class ProcessStoreImpl implements ProcessStore {
             DeploymentUnitDir du = _deploymentUnits.get(packageName);
             if (du == null)
                 return null;
-            return toPids(du.getProcessNames(), du.getVersion());
+            Map<QName, Long> versions = new HashMap<QName, Long>();
+            for (ProcessConfImpl p : _processes.values()) {
+                QName type = p.getType();
+                long version = p.getVersion();
+                if (versions.get(type) == null || versions.get(type) < version) {
+                    versions.put(type, version);
+                }
+            }
+            List<QName> pids = new ArrayList<QName>();
+            for (Map.Entry<QName, Long> entry : versions.entrySet()) {
+                pids.add(toPid(entry.getKey(), entry.getValue()));
+            }
+            return pids;
         } finally {
             _rw.readLock().unlock();
         }
