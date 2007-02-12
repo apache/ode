@@ -590,6 +590,7 @@ public class ProcessStoreImpl implements ProcessStore {
         try {
             _deploymentUnits.put(dud.getName(),dud);
 
+            long version = 0;
             for (ProcessConfDAO p : dudao.getProcesses()) {
                 TDeployment.Process pinfo = dud.getProcessDeployInfo(p.getType());
                 if (pinfo == null) {
@@ -602,11 +603,14 @@ public class ProcessStoreImpl implements ProcessStore {
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud,
                         pinfo, dudao.getDeployDate(), props, p.getState());
+                version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);
                 loaded.add(pconf);
             }
-
+            
+            // All processes and the DU have the same version
+            dud.setVersion(version);
         } finally {
             _rw.writeLock().unlock();
         }
