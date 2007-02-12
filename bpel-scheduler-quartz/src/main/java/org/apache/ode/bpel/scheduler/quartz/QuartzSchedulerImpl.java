@@ -39,6 +39,7 @@ import org.quartz.utils.DBConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import java.sql.Connection;
 import java.util.Collections;
@@ -270,6 +271,16 @@ public class QuartzSchedulerImpl implements Scheduler {
                 return execTransaction(transaction);
             }
         });
+    }
+
+    public boolean isTransacted() {
+        try {
+            return _txm.getStatus() != Status.STATUS_NO_TRANSACTION;
+        } catch (SystemException e) {
+            String errmsg = "Failed to get transaction status.";
+            __log.error(errmsg, e);
+            throw new ContextException(errmsg, e);
+        }
     }
 
     protected void rollback() throws Exception {
