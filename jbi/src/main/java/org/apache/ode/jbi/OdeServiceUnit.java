@@ -58,14 +58,6 @@ class OdeServiceUnit {
     }
 
     public void deploy() throws DeploymentException {
-        
-        // Do a pre-emptive undeploy. 
-        try {
-            _ode._store.undeploy(_serviceUnitRootPath);
-        } catch (Exception ex) {
-            __log.debug("Undeploy failed.",ex);
-        }
-        
         try {
             _ode._store.deploy(_serviceUnitRootPath);
         } catch (Exception ex) {
