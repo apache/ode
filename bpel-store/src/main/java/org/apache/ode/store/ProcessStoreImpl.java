@@ -89,7 +89,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public ProcessStoreImpl(DataSource ds, boolean auto) {
-        this(ds, System.getProperty("ode.persistence"),auto);
+        this(ds, System.getProperty("ode.persistence"), auto);
     }
 
     public ProcessStoreImpl(DataSource ds, String persistenceType, boolean auto) {
@@ -118,7 +118,6 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
-
     @Override
     protected void finalize() throws Throwable {
         // force a shutdown so that HSQL cleans up its mess.
@@ -144,8 +143,8 @@ public class ProcessStoreImpl implements ProcessStore {
             du.compile();
         } catch (CompilationException ce) {
             String errmsg = __msgs.msgDeployFailCompileErrors();
-            __log.error(errmsg,ce);
-            throw new ContextException(errmsg,ce);
+            __log.error(errmsg, ce);
+            throw new ContextException(errmsg, ce);
         }
 
         du.scan();
@@ -172,10 +171,11 @@ public class ProcessStoreImpl implements ProcessStore {
 
             for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
                 QName pid = toPid(processDD.getName(), version);
-                
+
                 // Retires older version if we can find one
                 DeploymentUnitDir oldDU = findOldDU(du.getName());
-                if (oldDU != null) setRetiredPackage(oldDU.getName(), true);
+                if (oldDU != null)
+                    setRetiredPackage(oldDU.getName(), true);
 
                 if (_processes.containsKey(pid)) {
                     String errmsg = __msgs.msgDeployFailDuplicatePID(processDD.getName(), du.getName());
@@ -193,12 +193,12 @@ public class ProcessStoreImpl implements ProcessStore {
                 }
 
                 // final OProcess oprocess = loadCBP(cbpInfo.cbp);
-                ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD,
-                        deployDate, calcInitialProperties(processDD), calcInitialState(processDD));
+                ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
+                        calcInitialProperties(processDD), calcInitialState(processDD));
                 processes.add(pconf);
             }
 
-            _deploymentUnits.put(du.getName(),du);
+            _deploymentUnits.put(du.getName(), du);
 
             for (ProcessConfImpl process : processes) {
                 __log.info(__msgs.msgProcessDeployed(du.getDeployDir(), process.getProcessId()));
@@ -256,7 +256,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // We want the events to be fired outside of the bounds of the writelock.
         for (ProcessConfImpl process : processes) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(),process.getDeploymentUnit().getName()));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(), process.getDeploymentUnit()
+                    .getName()));
             fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
         }
 
@@ -295,7 +296,6 @@ public class ProcessStoreImpl implements ProcessStore {
             fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
             __log.info(__msgs.msgProcessUndeployed(pn));
         }
-
 
         return undeployed;
     }
@@ -371,7 +371,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public void setRetiredPackage(String packageName, boolean retired) {
         DeploymentUnitDir duDir = _deploymentUnits.get(packageName);
-        if (duDir == null) throw new ContextException("Could not find package " + packageName);
+        if (duDir == null)
+            throw new ContextException("Could not find package " + packageName);
         for (QName processName : duDir.getProcessNames()) {
             setState(toPid(processName, duDir.getVersion()), retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
         }
@@ -415,7 +416,7 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         });
 
-        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.PROPERTY_CHANGED, pid,dudir.getName()));
+        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.PROPERTY_CHANGED, pid, dudir.getName()));
     }
 
     /**
@@ -429,7 +430,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 Collection<DeploymentUnitDAO> dus = conn.getDeploymentUnits();
                 for (DeploymentUnitDAO du : dus)
                     try {
-                       loaded.addAll(load(du));
+                        loaded.addAll(load(du));
                     } catch (Exception ex) {
                         __log.error("Error loading DU from store: " + du.getName(), ex);
                     }
@@ -473,13 +474,13 @@ public class ProcessStoreImpl implements ProcessStore {
     private void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
         case ACTIVE:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId,duname));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
             break;
         case DISABLED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId,duname));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId, duname));
             break;
         case RETIRED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId,duname));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId, duname));
             break;
         }
 
@@ -566,7 +567,7 @@ public class ProcessStoreImpl implements ProcessStore {
      * 
      * @param dudao
      */
-    protected List<ProcessConfImpl>load(DeploymentUnitDAO dudao) {
+    protected List<ProcessConfImpl> load(DeploymentUnitDAO dudao) {
 
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
@@ -581,7 +582,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         _rw.writeLock().lock();
         try {
-            _deploymentUnits.put(dud.getName(),dud);
+            _deploymentUnits.put(dud.getName(), dud);
 
             long version = 0;
             for (ProcessConfDAO p : dudao.getProcesses()) {
@@ -594,21 +595,21 @@ public class ProcessStoreImpl implements ProcessStore {
                 Map<QName, Node> props = calcInitialProperties(pinfo);
                 // TODO: update the props based on the values in the DB.
 
-                ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud,
-                        pinfo, dudao.getDeployDate(), props, p.getState());
+                ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao
+                        .getDeployDate(), props, p.getState());
                 version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);
                 loaded.add(pconf);
             }
-            
+
             // All processes and the DU have the same version
             dud.setVersion(version);
         } finally {
             _rw.writeLock().unlock();
         }
 
-       return loaded;
+        return loaded;
     }
 
     protected File findDeployDir(DeploymentUnitDAO dudao) {
@@ -618,7 +619,7 @@ public class ProcessStoreImpl implements ProcessStore {
         f = new File(_deployDir, dudao.getName());
         if (f.exists())
             return f;
-        
+
         return null;
     }
 
@@ -636,7 +637,7 @@ public class ProcessStoreImpl implements ProcessStore {
         } finally {
             _rw.writeLock().unlock();
         }
-            
+
         try {
             return exec(new Callable<Boolean>() {
                 public Boolean call(ConfStoreConnection conn) {
@@ -653,6 +654,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
     }
+
     /**
      * Wrapper for database transactions.
      * 
@@ -733,7 +735,8 @@ public class ProcessStoreImpl implements ProcessStore {
             } catch (NumberFormatException e) {
                 // Swallowing, if we can't parse then we just can't find an old version
             }
-            while (old == null && newVersion >= 0) old = _deploymentUnits.get(radical + "-" + (newVersion--));
+            while (old == null && newVersion >= 0)
+                old = _deploymentUnits.get(radical + "-" + (newVersion--));
         }
         return old;
     }
