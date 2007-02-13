@@ -65,7 +65,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private ConfStoreConnectionFactory _cf;
 
-    private File _deployDir;
+    protected File _deployDir;
 
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
@@ -570,10 +570,9 @@ public class ProcessStoreImpl implements ProcessStore {
 
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
-        File dudir;
-        dudir = new File(dudao.getDeploymentUnitDir());
+        File dudir = findDeployDir(dudao);
 
-        if (!dudir.exists())
+        if (dudir == null || !dudir.exists())
             throw new ContextException("Deployed directory " + dudir + " no longer there!");
         DeploymentUnitDir dud = new DeploymentUnitDir(dudir);
         dud.scan();
@@ -610,6 +609,17 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
        return loaded;
+    }
+
+    protected File findDeployDir(DeploymentUnitDAO dudao) {
+        File f = new File(dudao.getDeploymentUnitDir());
+        if (f.exists())
+            return f;
+        f = new File(_deployDir, dudao.getName());
+        if (f.exists())
+            return f;
+        
+        return null;
     }
 
     /**
