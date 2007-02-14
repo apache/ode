@@ -406,7 +406,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
             try {
                 while (true) {
                     Thread.sleep(pollingTime);
-                    _mngmtLock.writeLock().lock();
+                    _mngmtLock.writeLock().lockInterruptibly();
                     try { 
                         __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
                         // Copying the runnning process list to avoid synchronization
