@@ -18,14 +18,6 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -37,6 +29,13 @@ import org.hibernate.HibernateException;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * Hibernate-based {@link org.apache.ode.bpel.dao.BpelDAOConnectionFactory}
@@ -111,6 +110,12 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
                 __log.error(errmsg);
             }
         }
+
+        // Isolation levels override
+        if (System.getProperty("ode.connection.isolation") != null) {
+            String level = System.getProperty("ode.connection.isolation", "2");
+            properties.put(Environment.ISOLATION, level);
+        }        
 
         SessionManager sm = new SessionManager(properties, _ds, _tm);
         _sessionManager = sm;
