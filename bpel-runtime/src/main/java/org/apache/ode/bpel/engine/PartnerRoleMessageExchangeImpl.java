@@ -21,11 +21,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.WorkEvent.Type;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.*;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Operation;
@@ -66,6 +62,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     public void reply(Message response) throws BpelEngineException {
         boolean isAsync = isAsync();
         setResponse(response);
+        System.out.println("#### REPLY ASYNC " + isAsync);
         if (isAsync)
             continueAsync();
 
@@ -90,6 +87,8 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         WorkEvent we = new WorkEvent();
         we.setIID(getDAO().getInstance().getInstanceId());
         we.setType(Type.INVOKE_RESPONSE);
+        if (_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory())
+            we.setInMem(true);
         we.setChannel(getDAO().getChannel());
         we.setMexId(getDAO().getMessageExchangeId());
         _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
