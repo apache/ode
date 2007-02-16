@@ -235,4 +235,8 @@ public class Messages extends MessageBundle {
         return new IllegalArgumentException(s);
     }
 
+    public String msgOdeDbConfigError() {
+        return format("Error starting database connections, check the database configuration!");
+    }
+
 }

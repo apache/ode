@@ -142,4 +142,8 @@ public class Messages extends MessageBundle {
         return format("DAO property file \"{0}\" not found.", daoPropFile);
     }
 
+    public String msgOdeDbConfigError() {
+        return format("Database configuration error.");
+    }
+
 }
