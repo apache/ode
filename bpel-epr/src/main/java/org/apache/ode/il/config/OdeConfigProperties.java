@@ -51,8 +51,6 @@ public class OdeConfigProperties {
 
     private static final String PROP_DB_LOGGING = "db.logging";
 
-    private static final String PROP_DB_DAO = "db.dao";
-
     private static final String PROP_TX_FACTORY_CLASS = "tx.factory.class";
 
     private static final String PROP_POOL_MAX = "db.pool.max";
@@ -71,12 +69,29 @@ public class OdeConfigProperties {
 
     private static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
+    private static final String PROP_DAOCF = "dao.factory";
+
+
     private File _cfgFile;
 
     private String _prefix;
 
     private Properties _props;
 
+    /** Default defaults for the database embedded name and dao connection factory class. */
+    private static String __dbEmbName = "jpadb";
+    private static String __daoCfClass = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
+
+    static {
+        String odep = System.getProperty("ode.persistence");
+        if (odep != null && 
+                "hibernate".equalsIgnoreCase(odep)) {
+            __log.debug("Using HIBERNATE due to system property override!");
+            __dbEmbName = "hibdb";
+            __daoCfClass = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
+            
+        }
+    }
     /**
      * Possible database modes.
      */
@@ -89,10 +104,6 @@ public class OdeConfigProperties {
 
         /** Embedded database (managed by us--Minerva) */
         EMBEDDED
-    }
-
-    public enum DaoType {
-        JPA, HIBERNATE
     }
 
     public OdeConfigProperties(File cfgFile, String prefix) {
@@ -131,9 +142,18 @@ public class OdeConfigProperties {
      * 
      * @return db mode
      */
+    public String getDbEmbeddedName() {
+        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName); 
+                
+    }  
+    
     public DatabaseMode getDbMode() {
         return DatabaseMode.valueOf(getProperty(OdeConfigProperties.PROP_DB_MODE, DatabaseMode.EMBEDDED.toString()).trim()
                 .toUpperCase());
+    }
+    
+    public String getDAOConnectionFactory() {
+        return getProperty(PROP_DAOCF, __daoCfClass);        
     }
 
     public String getDbDataSource() {
@@ -193,19 +213,6 @@ public class OdeConfigProperties {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_LOGGING, "false"));
     }
 
-    public DaoType getDbDaoImpl() {
-        try {
-            String persistenceType = System.getProperty("ode.persistence");
-            if (persistenceType != null) {
-                return DaoType.valueOf(persistenceType.toUpperCase());
-            }
-        } catch (Throwable t) {
-            __log.debug("error reading system property override for DAO type.", t);
-            // fall through, and use the default mechanism
-        }
-       
-        return DaoType.valueOf(_props.getProperty(PROP_DB_DAO, DaoType.JPA.toString()));
-    }
 
     protected String getProperty(String pname) {
         return _props.getProperty(_prefix + pname);
@@ -213,6 +220,10 @@ public class OdeConfigProperties {
 
     protected String getProperty(String key, String dflt) {
         return _props.getProperty(_prefix + key, dflt);
+    }
+
+    public Properties getProperties() {
+        return _props;
     }
 
 }

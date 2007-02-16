@@ -2,7 +2,6 @@ package org.apache.ode.il.dbutil;
 
 import java.io.File;
 
-import org.apache.ode.il.config.OdeConfigProperties.DaoType;
 import org.apache.ode.utils.msg.MessageBundle;
 
 public class Messages extends MessageBundle {
@@ -39,10 +38,6 @@ public class Messages extends MessageBundle {
     public String msgDAOInstantiationFailed(String className) {
         return format("Error instantiating DAO Connection Factory class {0}.", className);
 
-    }
-
-    public String msgUnrecoginizedDaoType(DaoType dbDaoImpl) {
-        return format("Unsupported/Unrecoginized DAO type {0}. ", dbDaoImpl);
     }
 
 }
