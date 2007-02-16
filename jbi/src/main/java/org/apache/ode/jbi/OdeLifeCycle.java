@@ -19,12 +19,8 @@
 
 package org.apache.ode.jbi;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
@@ -42,6 +38,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
@@ -196,7 +193,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDbDaoImpl().toString(), false);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
         _ode._store.loadAll();
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
@@ -216,31 +213,13 @@ public class OdeLifeCycle implements ComponentLifeCycle {
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-
-        Properties properties = new Properties();
-        File daoPropFile;
-        String confDir = _ode.getContext().getInstallRoot();
-        daoPropFile = new File((confDir != null) ? new File(confDir) : new File(""), "bpel-dao.properties");
-
-        if (daoPropFile.exists()) {
-            FileInputStream fis;
-            try {
-                fis = new FileInputStream(daoPropFile);
-                properties.load(new BufferedInputStream(fis));
-            } catch (IOException e) {
-                String errmsg = __msgs.msgOdeInitDAOErrorReadingProperties(daoPropFile);
-                __log.error(errmsg, e);
-                throw new JBIException(errmsg, e);
-            }
-        } else {
-            __log.info(__msgs.msgOdeInitDAOPropertiesNotFound(daoPropFile));
+        BpelDAOConnectionFactoryJDBC cf;
+        try {
+            cf = _db.createDaoCF();
+        } catch (DatabaseConfigException e) {
+            String errmsg = __msgs.msgDAOInstantiationFailed(_ode._config.getDAOConnectionFactory());
+            throw new JBIException(errmsg,e);
         }
-
-        BpelDAOConnectionFactoryJDBC cf = createDaoCF();
-        cf.setDataSource(_ode._dataSource);
-        cf.setTransactionManager(_ode.getTransactionManager());
-        cf.init(properties);
-
         _ode._daocf = cf;
     }
 
@@ -265,22 +244,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
-    private BpelDAOConnectionFactoryJDBC createDaoCF() throws JBIException {
-        String pClassName = _ode._config.getDAOConnectionFactory();
-
-        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
-
-        BpelDAOConnectionFactoryJDBC cf;
-        try {
-            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
-            __log.error(errmsg, ex);
-            throw new JBIException(errmsg, ex);
-        }
-
-        return cf;
-    }
+ 
 
     public synchronized void start() throws JBIException {
         if (_started)

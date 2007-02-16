@@ -11,6 +11,7 @@ import javax.transaction.TransactionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.LoggingDataSourceWrapper;
 import org.opentools.minerva.MinervaPool;
@@ -175,19 +176,7 @@ public class Database {
      */
     private void initEmbeddedDb() throws DatabaseConfigException {
 
-        String db;
-        switch (_odeConfig.getDbDaoImpl()) {
-        case HIBERNATE:
-            db = "hibdb";
-            break;
-        case JPA:
-            db = "jpadb";
-            break;
-        default:
-            String errmsg = __msgs.msgUnrecoginizedDaoType(_odeConfig.getDbDaoImpl());
-            __log.error(errmsg);
-            throw new DatabaseConfigException(errmsg, null);
-        }
+        String db = _odeConfig.getDbEmbeddedName();
 
         String url = "jdbc:derby:" + _workRoot + "/" + db ;
         __log.info("Using Embedded Derby: " + url);
@@ -216,6 +205,26 @@ public class Database {
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
+    }
+
+    public BpelDAOConnectionFactoryJDBC createDaoCF() throws DatabaseConfigException  {
+        String pClassName = _odeConfig.getDAOConnectionFactory();
+
+        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
+
+        BpelDAOConnectionFactoryJDBC cf;
+        try {
+            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
+            __log.error(errmsg, ex);
+            throw new DatabaseConfigException(errmsg, ex);
+        }
+
+        cf.setDataSource(_datasource);
+        cf.setTransactionManager(_txm);
+        cf.init(_odeConfig.getProperties());
+        return cf;
     }
 
 }

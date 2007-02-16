@@ -34,8 +34,6 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
 
     private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "allowIncompleteDeployment";
    
-    private static final String PROP_DAOCF = "dao.factory";
-
     private static final String PROP_MSGMAPPER = "messageMapper";
 
 
@@ -70,7 +68,4 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
         return getProperty(PROP_MSGMAPPER, JbiWsdl11WrapperMapper.class.getName());
     }
 
-    public String getDAOConnectionFactory() {
-        return getProperty(PROP_DAOCF, "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl");        
-    }
  }
