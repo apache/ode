@@ -16,39 +16,53 @@
  */
 package org.apache.ode.jbi.util;
 
-import com.ibm.wsdl.extensions.schema.SchemaImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.wsdl.*;
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.Import;
+import javax.wsdl.Input;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Output;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.schema.SchemaImport;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
-import java.net.URI;
-import java.util.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
 public class WSDLFlattener {
 
-    private static Log log = LogFactory.getLog(WSDLFlattener.class);
+    private static Log __log = LogFactory.getLog(WSDLFlattener.class);
     
-    private Definition definition;
-    private SchemaCollection schemas;
-    private Map<QName, Definition> flattened;
-    private boolean initialized;
+    private Definition _definition;
+    private SchemaCollection _schemas;
+    private Map<QName, Definition> _flattened;
+    private boolean _initialized;
     
-    public WSDLFlattener() {
-        this(null, null);
-    }
-        
+
     public WSDLFlattener(Definition definition) {
         this(definition, null);
     }
         
     public WSDLFlattener(Definition definition, SchemaCollection schemas) {
-        this.definition = definition;
-        this.flattened = new HashMap();
-        this.schemas = schemas;
+        if (definition == null)
+            throw new NullPointerException("Null definition!");
+        this._definition = definition;
+        this._flattened = new ConcurrentHashMap<QName, Definition>();
+        this._schemas = schemas;
     }
     
     /**
@@ -56,12 +70,12 @@ public class WSDLFlattener {
      * @throws Exception if an error occurs
      */
     public void initialize() throws Exception {
-        if (!initialized) {
-            if (schemas == null) {
-                this.schemas = new SchemaCollection(getUri(this.definition.getDocumentBaseURI()));
+        if (!_initialized) {
+            if (_schemas == null) {
+                this._schemas = new SchemaCollection(getUri(_definition.getDocumentBaseURI()));
             }
-            parseSchemas(this.definition);
-            initialized = true;
+            parseSchemas(this._definition);
+            _initialized = true;
         }
     }
     
@@ -72,10 +86,10 @@ public class WSDLFlattener {
      * @throws Exception if an error occurs
      */
     public Definition getDefinition(QName portType) throws Exception {
-        Definition def = (Definition) flattened.get(portType);
+        Definition def = (Definition) _flattened.get(portType);
         if (def == null) {
             def = flattenDefinition(portType);
-            flattened.put(portType, def);
+            _flattened.put(portType, def);
         }
         return def;
     }
@@ -84,28 +98,28 @@ public class WSDLFlattener {
      * @return Returns the definition.
      */
     public Definition getDefinition() {
-        return definition;
+        return _definition;
     }
 
     /**
      * @param definition The definition to set.
      */
     public void setDefinition(Definition definition) {
-        this.definition = definition;
+        this._definition = definition;
     }
 
     /**
      * @return Returns the schemas.
      */
     public SchemaCollection getSchemas() throws Exception {
-        return schemas;
+        return _schemas;
     }
 
     /**
      * @param schemas The schemas to set.
      */
     public void setSchemas(SchemaCollection schemas) {
-        this.schemas = schemas;
+        this._schemas = schemas;
     }
     
     private Definition flattenDefinition(QName name) throws Exception {
@@ -114,9 +128,9 @@ public class WSDLFlattener {
         // Create new definition
         Definition flat = WSDLFactory.newInstance().newDefinition();
         flat.setTargetNamespace(name.getNamespaceURI());
-        addNamespaces(flat, definition);
+        addNamespaces(flat, _definition);
         // Create port type
-        PortType defPort = definition.getPortType(name);
+        PortType defPort = _definition.getPortType(name);
         PortType flatPort = flat.createPortType();
         flatPort.setQName(defPort.getQName());
         flatPort.setUndefined(false);
@@ -162,9 +176,9 @@ public class WSDLFlattener {
         }
         
         // Import schemas in definition
-        if (schemas.getSize() > 0) {
+        if (_schemas.getSize() > 0) {
            Types types = flat.createTypes();
-           for (Iterator it = schemas.getSchemas().iterator(); it.hasNext();) {
+           for (Iterator it = _schemas.getSchemas().iterator(); it.hasNext();) {
               javax.wsdl.extensions.schema.Schema imp = new SchemaImpl();
               imp.setElement(((Schema)it.next()).getRoot());
               imp.setElementType(new QName("http://www.w3.org/2001/XMLSchema", "schema"));
@@ -184,13 +198,13 @@ public class WSDLFlattener {
                 if (element instanceof javax.wsdl.extensions.schema.Schema) {
                     javax.wsdl.extensions.schema.Schema schema = (javax.wsdl.extensions.schema.Schema) element;
                     if (schema.getElement() != null) {
-                        schemas.read(schema.getElement(), getUri(schema.getDocumentBaseURI()));
+                        _schemas.read(schema.getElement(), getUri(schema.getDocumentBaseURI()));
                     }
                     for (Iterator itImp = schema.getImports().values().iterator(); itImp.hasNext();) {
                         Collection imps = (Collection) itImp.next();
                         for (Iterator itSi = imps.iterator(); itSi.hasNext();) {
                             SchemaImport imp = (SchemaImport) itSi.next();
-                            schemas.read(imp.getSchemaLocationURI(), getUri(def.getDocumentBaseURI()));
+                            _schemas.read(imp.getSchemaLocationURI(), getUri(def.getDocumentBaseURI()));
                         }
                     }
                 }
