@@ -155,7 +155,7 @@
 				<version>1.0</version>
 				<executions>
 					<execution>
-						<id>unpack-samples</id>
+						<id>unpack-jpa</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>unpack</goal>
@@ -166,6 +166,24 @@
 								<artifactItem>
 									<groupId>org.apache.ode</groupId>
 									<artifactId>ode-jpa-ojpa-derby</artifactId>
+									<version>${pom.version}</version>
+									<type>tar</type>
+								</artifactItem>							
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-hib</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}-installer</outputDirectory>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.ode</groupId>
+									<artifactId>ode-dao-hibernate-db-derby</artifactId>
 									<version>${pom.version}</version>
 									<type>tar</type>
 								</artifactItem>							

@@ -42,7 +42,7 @@
     <property name="sql.generate.dir" value="${basedir}/target" />
     <property name="target.dir" value="${basedir}/target" />
     <property name="database.dir" value="${basedir}/target/derby" />
-    <property name="database.name" value="data" />
+    <property name="database.name" value="jpadb" />
     <property name="derby.target.sql" value="${target.dir}/derby.sql" />
     <property name="src.sql.dir" value="${basedir}/src/main/scripts" />
 

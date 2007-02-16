@@ -19,7 +19,7 @@
 
 <project name="dao-hibernate-db-derby" default="db" >
     <property name="database.dir" value="${basedir}/target/derby" />
-    <property name="database.name" value="data" />
+    <property name="database.name" value="hibdb" />
 
     <property name="target.dir" value="${basedir}/target" />
     <property name="src.sql.dir" value="${basedir}/src/main/sql" />
