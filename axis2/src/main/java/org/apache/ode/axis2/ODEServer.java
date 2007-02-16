@@ -19,12 +19,8 @@
 
 package org.apache.ode.axis2;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,7 +46,6 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -95,6 +90,8 @@ public class ODEServer {
 
     protected Scheduler _scheduler;
 
+    protected Database _db;
+
     private DeploymentPoller _poller;
 
     private MultiKeyMap _services = new MultiKeyMap();
@@ -103,7 +100,6 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
-    private Database _db;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         boolean success = false;
@@ -408,30 +404,15 @@ public class ODEServer {
      * @throws ServletException
      */
     protected void initDAO() throws ServletException {
-        Properties properties = new Properties();
-        File daoPropFile;
-        String confDir = System.getProperty("org.apache.ode.configDir");
-        daoPropFile = new File((confDir != null) ? new File(confDir) : _appRoot, "bpel-dao.properties");
-
-        if (daoPropFile.exists()) {
-            FileInputStream fis;
-            try {
-                fis = new FileInputStream(daoPropFile);
-                properties.load(new BufferedInputStream(fis));
-            } catch (IOException e) {
-                String errmsg = __msgs.msgOdeInitDAOErrorReadingProperties(daoPropFile);
-                __log.error(errmsg, e);
-                throw new ServletException(errmsg, e);
-            }
-        } else {
-            __log.info(__msgs.msgOdeInitHibernatePropertiesNotFound(daoPropFile));
+        __log.info(__msgs.msgOdeUsingDAOImpl(_odeConfig.getDAOConnectionFactory()));
+        try {
+            _daoCF = _db.createDaoCF();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgDAOInstantiationFailed(_odeConfig.getDAOConnectionFactory());
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
+            
         }
-
-        BpelDAOConnectionFactoryJDBC cf = createDaoCF();
-        cf.setDataSource(_db.getDataSource());
-        cf.setTransactionManager(_txMgr);
-        cf.init(properties);
-        _daoCF = cf;
     }
 
     protected void initProcessStore() {
@@ -441,7 +422,7 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(DataSource ds) {
-        return new ProcessStoreImpl(ds);
+        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(),false);
     }
 
     protected Scheduler createScheduler() {
@@ -525,32 +506,6 @@ public class ODEServer {
         default:
             __log.debug("Ignoring store event: " + pse);
         }
-    }
-
-    private BpelDAOConnectionFactoryJDBC createDaoCF() throws ServletException {
-        String pClassName = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
-        String persistenceType = System.getProperty("ode.persistence");
-        if (persistenceType != null) {
-            if ("hibernate".equalsIgnoreCase(persistenceType))
-                pClassName = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
-            else if ("jpa".equalsIgnoreCase(persistenceType))
-                pClassName = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
-            else
-                pClassName = persistenceType;
-        }
-
-        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
-
-        BpelDAOConnectionFactoryJDBC cf;
-        try {
-            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
-            __log.error(errmsg, ex);
-            throw new ServletException(errmsg, ex);
-        }
-
-        return cf;
     }
 
 }

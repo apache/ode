@@ -88,7 +88,7 @@ class MockBpelServer {
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
             //_store = new ProcessStoreImpl(new File("."), _dataSource, _txManager);
-            _store = new ProcessStoreImpl(_dataSource);
+            _store = new ProcessStoreImpl(_dataSource,"jpa", true);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
