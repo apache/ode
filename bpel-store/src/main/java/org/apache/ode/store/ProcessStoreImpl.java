@@ -81,20 +81,13 @@ public class ProcessStoreImpl implements ProcessStore {
     private DataSource _inMemDs;
 
     public ProcessStoreImpl() {
-        this(null);
+        this(null, "", true);
     }
-
-    public ProcessStoreImpl(DataSource ds) {
-        this(ds, false);
-    }
-
-    public ProcessStoreImpl(DataSource ds, boolean auto) {
-        this(ds, System.getProperty("ode.persistence"), auto);
-    }
-
+    
     public ProcessStoreImpl(DataSource ds, String persistenceType, boolean auto) {
         if (ds != null) {
-            if ("hibernate".equalsIgnoreCase(persistenceType))
+            // ugly hack
+            if (persistenceType.toLowerCase().indexOf("hib") != -1)
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, auto);
             else
                 _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, auto);
