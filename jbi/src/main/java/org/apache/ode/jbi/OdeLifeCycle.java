@@ -19,19 +19,13 @@
 
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.derby.jdbc.EmbeddedDriver;
-import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.LoggingDataSourceWrapper;
-import org.apache.ode.utils.fs.TempFileManager;
-import org.opentools.minerva.MinervaPool;
-import org.opentools.minerva.MinervaPool.PoolType;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
 import javax.jbi.component.ComponentContext;
@@ -39,33 +33,41 @@ import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.fs.TempFileManager;
 
 /**
- * This class implements ComponentLifeCycle. The JBI framework will start this
- * engine class automatically when JBI framework starts up.
+ * This class implements ComponentLifeCycle. The JBI framework will start this engine class automatically when JBI framework starts
+ * up.
  */
 public class OdeLifeCycle implements ComponentLifeCycle {
     private static final Messages __msgs = Messages.getMessages(Messages.class);
+
     private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
-    private static final Log __logSql = LogFactory.getLog("org.apache.ode.sql");
 
     private OdeSUManager _suManager = null;
+
     private boolean _initSuccess = false;
+
     private OdeContext _ode;
+
     private Receiver _receiver;
+
     private boolean _started;
-    private boolean _needDerbyShutdown;
-    private String _derbyUrl;
+
     private BpelServerConnector _connector;
+
+    private Database _db;
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -85,10 +87,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode.setContext(context);
             _ode._consumer = new OdeConsumer(_ode);
 
-
             if (_ode.getContext().getWorkspaceRoot() != null)
-                TempFileManager.setWorkingDirectory(new File(_ode.getContext()
-                        .getWorkspaceRoot()));
+                TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
 
             __log.debug("Loading properties.");
             initProperties();
@@ -120,7 +120,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
-    private void initMappers() throws JBIException  {
+    private void initMappers() throws JBIException {
         Class mapperClass;
         try {
             mapperClass = Class.forName(_ode._config.getMessageMapper());
@@ -143,89 +143,38 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     private void initDataSource() throws JBIException {
-        switch (_ode._config.getDbMode()) {
-            case EXTERNAL:
-                initExternalDb();
-                break;
-            case EMBEDDED:
-                initEmbeddedDb();
-                break;
-            case INTERNAL:
-                initInternalDb();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void initExternalDb() throws JBIException {
-        try {
-            if (__logSql.isDebugEnabled())
-                _ode._dataSource = new LoggingDataSourceWrapper((DataSource)
-                        lookupInJndi(_ode._config.getDbDataSource()), __logSql);
-            else
-                _ode._dataSource = (DataSource) lookupInJndi(_ode._config.getDbDataSource());
-            __log.info(__msgs.msgOdeUsingExternalDb(_ode._config.getDbDataSource()));
-        } catch (Exception ex) {
-            String msg = __msgs.msgOdeInitExternalDbFailed(_ode._config.getDbDataSource());
-            __log.error(msg,ex);
-            throw new JBIException(msg,ex);
-        }
-    }
-
-    private void initInternalDb() throws JBIException {
-        throw new JBIException("internalDb not supported!");
-    }
-
-    /**
-     * Initialize embedded (DERBY) database.
-     */
-    private void initEmbeddedDb() throws JBIException {
-        __log.info("Using DataSource Derby");
-
-        String url =
-                "jdbc:derby:" + _ode.getContext().getInstallRoot() + "/"
-                        + _ode._config.getDbEmbeddedName();
-
-        __log.debug("creating Minerva pool for " + url);
-
-        MinervaPool minervaPool = new MinervaPool();
-        minervaPool.setTransactionManager(_ode.getTransactionManager());
-        minervaPool.getConnectionFactory().setConnectionURL(url);
-        minervaPool.getConnectionFactory().setUserName("sa");
-        minervaPool.getConnectionFactory().setDriver(
-                org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-
-        minervaPool.getPoolParams().maxSize = _ode._config.getPoolMaxSize();
-        minervaPool.getPoolParams().minSize = _ode._config.getPoolMinSize();
-        minervaPool.getPoolParams().blocking = false;
-        minervaPool.setType(PoolType.MANAGED);
+        _db = new Database(_ode._config);
+        _db.setTransactionManager(_ode.getTransactionManager());
+        _db.setWorkRoot(new File(_ode.getContext().getInstallRoot()));
 
         try {
-            minervaPool.start();
+            _db.start();
         } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
-            __log.error(errmsg,ex);
-            throw new JBIException(errmsg,ex);
+            String errmsg = __msgs.msgOdeDbConfigError();
+            __log.error(errmsg, ex);
+            throw new JBIException(errmsg, ex);
         }
-
-        if (__logSql.isDebugEnabled())
-            _ode._dataSource = new LoggingDataSourceWrapper(minervaPool.createDataSource(), __logSql);
-        else _ode._dataSource = minervaPool.createDataSource();
-
-        _needDerbyShutdown = true;
-        _derbyUrl = url;
+        
+        _ode._dataSource = _db.getDataSource();
     }
 
     /**
      * Load the "ode-jbi.properties" file from the install directory.
-     *
+     * 
      * @throws JBIException
      */
     private void initProperties() throws JBIException {
-        OdeConfigProperties config = new OdeConfigProperties(_ode.getContext()
-                .getInstallRoot());
-        config.load();
+        OdeConfigProperties config = new OdeConfigProperties(new File(_ode.getContext().getInstallRoot(),
+                OdeConfigProperties.CONFIG_FILE_NAME));
+        
+        try {
+            config.load();
+        } catch (FileNotFoundException fnf) {
+            __log.warn(__msgs.msgOdeInstallErrorCfgNotFound(config.getFile()));
+        } catch (Exception ex) {
+           String errmsg = __msgs.msgOdeInstallErrorCfgReadError(config.getFile());
+           throw new JBIException(errmsg,ex);
+        }
         _ode._config = config;
     }
 
@@ -243,14 +192,12 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler = new QuartzSchedulerImpl();
         _ode._scheduler.setJobProcessor(_ode._server);
         _ode._scheduler.setExecutorService(_ode._executorService, 20);
-        _ode._scheduler.setTransactionManager((TransactionManager) _ode
-                .getContext().getTransactionManager());
+        _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
         _ode._scheduler.setDataSource(_ode._dataSource);
         _ode._scheduler.init();
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getPersistenceType(), false);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDbDaoImpl().toString(), false);
         _ode._store.loadAll();
-
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _ode._server.setDaoConnectionFactory(_ode._daocf);
@@ -265,16 +212,16 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     /**
      * Initialize the data store.
-     *
+     * 
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-    
+
         Properties properties = new Properties();
         File daoPropFile;
         String confDir = _ode.getContext().getInstallRoot();
         daoPropFile = new File((confDir != null) ? new File(confDir) : new File(""), "bpel-dao.properties");
-    
+
         if (daoPropFile.exists()) {
             FileInputStream fis;
             try {
@@ -288,12 +235,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         } else {
             __log.info(__msgs.msgOdeInitDAOPropertiesNotFound(daoPropFile));
         }
-    
+
         BpelDAOConnectionFactoryJDBC cf = createDaoCF();
         cf.setDataSource(_ode._dataSource);
         cf.setTransactionManager(_ode.getTransactionManager());
         cf.init(properties);
-
 
         _ode._daocf = cf;
     }
@@ -313,7 +259,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             } catch (Exception e) {
 
                 __log.error("Failed to initialize JCA connector (check security manager configuration)");
-                __log.debug("Failed to initialize JCA connector (check security manager configuration)",e);
+                __log.debug("Failed to initialize JCA connector (check security manager configuration)", e);
 
             }
         }
@@ -347,7 +293,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 String errmsg = "attempt to call start() after init() failure.";
                 IllegalStateException ex = new IllegalStateException(errmsg);
                 __log.fatal(errmsg, ex);
-                throw new JBIException(errmsg,ex);
+                throw new JBIException(errmsg, ex);
             }
 
             if (_ode.getChannel() == null) {
@@ -358,7 +304,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 _ode._server.start();
             } catch (Exception ex) {
                 String errmsg = __msgs.msgOdeBpelServerStartFailure();
-                __log.error(errmsg,ex);
+                __log.error(errmsg, ex);
                 throw new JBIException(errmsg, ex);
             }
 
@@ -409,12 +355,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     /**
-     * Shutdown the service engine. This performs cleanup before the BPE is
-     * terminated. Once this method has been called, init() must be called before
-     * the transformation engine can be started again with a call to start().
-     *
+     * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
+     * must be called before the transformation engine can be started again with a call to start().
+     * 
      * @throws javax.jbi.JBIException
-     *           if the transformation engine is unable to shut down.
+     *             if the transformation engine is unable to shut down.
      */
     public void shutDown() throws JBIException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
@@ -424,7 +369,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             try {
                 _connector.shutdown();
             } catch (Exception e) {
-                __log.error("Error shutting down JCA server.",e);
+                __log.error("Error shutting down JCA server.", e);
             }
             _connector = null;
         }
@@ -438,26 +383,20 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
             }
 
+            try {
+                _db.shutdown();
+            } catch (Exception ex) {
+                __log.debug("error shutting down db.", ex);
+            } finally {
+                _db = null;
+            }
+
             __log.debug("cleaning up temporary files.");
             TempFileManager.cleanup();
 
             _suManager = null;
             _ode = null;
 
-            if (_needDerbyShutdown) {
-                __log.debug("shutting down derby.");
-                EmbeddedDriver driver = new EmbeddedDriver();
-                try {
-                    driver.connect(_derbyUrl+";shutdown=true", new Properties());
-                } catch (SQLException ex) {
-                    // Shutdown will always return an exeption!
-                    if (ex.getErrorCode() != 45000)
-                        __log.error("Error shutting down Derby: " + ex.getErrorCode(), ex);
-                        
-                } catch (Exception ex) {
-                    __log.error("Error shutting down Derby.", ex);
-                }
-            }
             __log.info("Shutdown completed.");
         } finally {
             Thread.currentThread().setContextClassLoader(old);
@@ -488,5 +427,4 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     }
 
-  
 }
