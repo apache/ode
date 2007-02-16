@@ -140,10 +140,6 @@ public class OdeConfigProperties {
         return getProperty(OdeConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/env/jdbc/ode-ds");
     }
 
-    public String getDbEmbeddedName() {
-        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, "data");
-    }
-
     public String getDbIntenralJdbcUrl() {
         return getProperty(OdeConfigProperties.PROP_DB_INTERNAL_URL, "jdbc:derby://localhost/ode");
     }
