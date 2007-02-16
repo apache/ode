@@ -189,7 +189,7 @@ public class Database {
             throw new DatabaseConfigException(errmsg, null);
         }
 
-        String url = "jdbc:derby:" + _workRoot + "/" + db + "/" + _odeConfig.getDbEmbeddedName();
+        String url = "jdbc:derby:" + _workRoot + "/" + db ;
         __log.info("Using Embedded Derby: " + url);
         _derbyUrl = url;
         initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName());
