@@ -186,9 +186,13 @@ final class OdeContext {
                 }
             } else {
                 Definition def = pc.getDefinitionForService(endpoint.serviceName);
-                def = new WSDLFlattener(def).getDefinition(portType);
-                Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
-                addEndpointDoc(endpoint.serviceName, doc);
+                if (def == null) {
+                    __log.debug("Could not find definition for service: " + endpoint.serviceName); 
+                } else {
+                    def = new WSDLFlattener(def).getDefinition(portType);
+                    Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
+                    addEndpointDoc(endpoint.serviceName, doc);
+                }
             }
         } catch (Exception e) {
             __log.warn("Exception during endpoint activation", e);
