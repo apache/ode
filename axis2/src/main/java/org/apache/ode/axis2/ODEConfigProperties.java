@@ -19,138 +19,20 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.ServletException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Properties;
 
-public class ODEConfigProperties extends Properties {
+import org.apache.ode.il.config.OdeConfigProperties;
+
+public class ODEConfigProperties extends OdeConfigProperties {
 
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(ODEConfigProperties.class);
-    private static final Messages __msgs = Messages.getMessages(Messages.class);
     private static final String CONFIG_FILE_NAME = "ode-axis2.properties";
-    private static final String PROP_DB_MODE = "ode-axis2.db.mode";
-    private static final String PROP_DB_EXTERNAL_DS = "ode-axis2.db.ext.dataSource";
-    private static final String PROP_DB_EMBEDDED_NAME = "ode-axis2.db.emb.name";
-    private static final String PROP_DB_INTERNAL_URL = "ode-axis2.db.int.jdbcurl";
-    
-    private static final String PROP_TX_FACTORY_CLASS = "ode-axis2.tx.factory.class";
-    private static final String PROP_POOL_MAX = "ode-axis2.db.pool.max";
-    private static final String PROP_POOL_MIN = "ode-axis2.db.pool.min";
-    private static final String PROP_CONNECTOR_PORT = "ode-axis2.jca.port";
-    private static final String PROP_WORKING_DIR = "ode-axis2.working.dir";
-    private static final String PROP_REPLICATE_EMPTYNS = "ode-axis2.message.replicate.emptyns";
-    private static final String PROP_EVENT_LISTENERS = "ode-axis2.event.listeners";
-    private static final String PROP_PROCESS_DEHYDRATION = "ode-axis2.process.dehydration";
-
-    private File _installDir;
+        
 
     public ODEConfigProperties(File installRoot) {
-        _installDir = installRoot;
+        super(new File(installRoot, ODEConfigProperties.CONFIG_FILE_NAME),"ode-axis2.");
     }
 
-    public void load() throws ServletException {
-        boolean found = true;
-        File configFile = new File(_installDir, ODEConfigProperties.CONFIG_FILE_NAME);
-        if (!configFile.exists()) {
-            try {
-                URL resource = getClass().getClassLoader().getResource(ODEConfigProperties.CONFIG_FILE_NAME);
-                if (resource != null) configFile = new File(resource.toURI());
-                else found = false;
-            } catch (URISyntaxException e) {
-                // Reported below as log msg
-            }
-        }
 
-        if (found) {
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(configFile);
-                load(fis);
-            } catch (Exception ex) {
-                String errmsg = ODEConfigProperties.__msgs.msgOdeInstallErrorCfgReadError(configFile);
-                ODEConfigProperties.__log.warn(errmsg,ex);
-            } finally {
-                if (fis != null)
-                    try {
-                        fis.close();
-                    } catch (Exception ex) { ex.printStackTrace(); }
-            }
-        } else {
-            String errmsg = ODEConfigProperties.__msgs.msgOdeInstallErrorCfgNotFound(configFile);
-            ODEConfigProperties.__log.warn(errmsg);
-        }
-    }
 
-    /**
-     * Should the internal database be used, or are the datasources provided?
-     * @return db mode
-     */
-    public DatabaseMode getDbMode() {
-        return DatabaseMode.valueOf(getProperty(ODEConfigProperties.PROP_DB_MODE, DatabaseMode.EMBEDDED.toString()).trim().toUpperCase());
-    }
-
-    public String getDbDataSource() {
-        return getProperty(ODEConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/env/jdbc/ode-ds");
-    }
-
-    public String getDbEmbeddedName(){
-        return getProperty(ODEConfigProperties.PROP_DB_EMBEDDED_NAME, "data");
-    }
-
-    public String getDbIntenralJdbcUrl() {
-        return getProperty(ODEConfigProperties.PROP_DB_INTERNAL_URL, "jdbc:derby://localhost/ode");
-    }
-    
-    /**
-     * Possible database modes.
-     */
-    public enum DatabaseMode {
-        /** External data-source (managed by app server) */
-        EXTERNAL,
-
-        /** Internal data-source (managed by us--Minerva) */
-        INTERNAL,
-
-        /** Embedded database (managed by us--Minerva) */
-        EMBEDDED
-    }
-
-    public int getPoolMaxSize() {
-        return Integer.valueOf(getProperty(ODEConfigProperties.PROP_POOL_MAX, "10"));
-    }
-
-    public int getPoolMinSize() {
-        return Integer.valueOf(getProperty(ODEConfigProperties.PROP_POOL_MIN, "1"));
-    }
-
-    public int getConnectorPort() {
-        return Integer.valueOf(getProperty(ODEConfigProperties.PROP_CONNECTOR_PORT,"2099"));
-    }
-
-    public String getWorkingDir() {
-        return getProperty(ODEConfigProperties.PROP_WORKING_DIR);
-    }
-
-    public String getTxFactoryClass() {
-        return getProperty(ODEConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.axis2.util.JotmFactory");
-    }
-
-    public boolean isReplicateEmptyNS() {
-        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_REPLICATE_EMPTYNS, "true"));
-    }
-
-    public String getEventListeners() {
-        return getProperty(PROP_EVENT_LISTENERS);
-    }
-
-    public boolean isDehydrationEnabled() {
-        return Boolean.valueOf(getProperty(ODEConfigProperties.PROP_PROCESS_DEHYDRATION, "false"));
-    }
 }
