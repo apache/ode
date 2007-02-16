@@ -20,8 +20,8 @@
 
 <project>
     <artifactId>ode-bpel-epr</artifactId>
-    <name>ODE :: BPEL Common EPR Implementations</name>
-    <description>Implementations of the EndpointReference interface.</description>
+    <name>ODE :: IL Utilities</name>
+    <description>Various utilities useful to IL implementations.</description>
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -43,6 +43,18 @@
 	<dependency>
             <groupId>wsdl4j</groupId>
             <artifactId>wsdl4j</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-minerva</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>
+        <dependency>
+           <groupId>geronimo</groupId>
+           <artifactId>geronimo-transaction</artifactId>
         </dependency>
 
     </dependencies>
