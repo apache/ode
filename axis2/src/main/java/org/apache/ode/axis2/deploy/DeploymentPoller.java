@@ -58,9 +58,13 @@ public class DeploymentPoller {
 
     /** The polling interval. */
     private static final long POLL_TIME = 3000;
+
     private File _deployDir;
+
     private PollingThread _poller;
+
     private ODEServer _odeServer;
+
     private boolean _onHold = false;
 
     /** Filter accepting directories containing a .odedd file. */
@@ -74,6 +78,13 @@ public class DeploymentPoller {
                 }).length == 1;
             } else
                 return false;
+        }
+    };
+
+    /** Filter accepting *.deployed files. */
+    private static final FileFilter _deployedFilter = new FileFilter() {
+        public boolean accept(File path) {
+            return path.isFile() && path.getName().endsWith(".deployed");
         }
     };
 
@@ -96,9 +107,8 @@ public class DeploymentPoller {
     }
 
     /**
-     * Scan the directory for new (or removed) files (called mainly from
-     * {@link PollingThread}) and calls whoever is in charge of the actual
-     * deployment (or undeployment).
+     * Scan the directory for new (or removed) files (called mainly from {@link PollingThread}) and calls whoever is in charge of
+     * the actual deployment (or undeployment).
      */
     private void check() {
         File[] files = _deployDir.listFiles(_fileFilter);
@@ -123,13 +133,13 @@ public class DeploymentPoller {
                 __log.error("Error creating deployed marker file, " + file + " will not be deployed");
                 continue;
             }
-            
+
             try {
                 _odeServer.getProcessStore().undeploy(file);
             } catch (Exception ex) {
                 __log.error("Error undeploying " + file.getName());
             }
-            
+
             try {
                 Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
                 __log.info("Deployment of artifact " + file.getName() + " successful.");
@@ -139,20 +149,18 @@ public class DeploymentPoller {
         }
 
         // Removing deployments that disappeared
-        Collection<String> deployed = _odeServer.getProcessStore().getPackages();
-        for (String s : deployed) {
-            if (s != null) {
-                File deployDir = new File(_deployDir, s);
-                if (!deployDir.exists()) {
-                    Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
-                    File marker = new File(_deployDir, s + ".deployed");
-                    marker.delete();
-                    if (undeployed.size() > 0) __log.info("Successfully undeployed " + s);
-                }
+        File[] deployed = _deployDir.listFiles(_deployedFilter);
+        for (File file : deployed) {
+            String pkg = file.getName().substring(0, file.getName().length() - ".deployed".length());
+            File deployDir = new File(_deployDir, pkg);
+            if (!deployDir.exists()) {
+                Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
+                file.delete();
+                if (undeployed.size() > 0)
+                    __log.info("Successfully undeployed " + pkg);
             }
         }
-     }
-
+    }
 
     /**
      * Thread that does the actual polling for new files.
@@ -176,7 +184,8 @@ public class DeploymentPoller {
         public void run() {
             try {
                 while (_active) {
-                    if (!_onHold) check();
+                    if (!_onHold)
+                        check();
                     synchronized (this) {
                         try {
                             this.wait(POLL_TIME);

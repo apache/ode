@@ -22,13 +22,13 @@ package org.apache.ode.axis2;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
@@ -55,15 +55,13 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.LoggingDataSourceWrapper;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.opentools.minerva.MinervaPool;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -73,7 +71,6 @@ import org.opentools.minerva.MinervaPool;
 public class ODEServer {
 
     private static final Log __log = LogFactory.getLog(ODEServer.class);
-    private static final Log __logSql = LogFactory.getLog("org.apache.ode.sql");
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -89,7 +86,6 @@ public class ODEServer {
 
     protected AxisConfiguration _axisConfig;
 
-    protected DataSource _datasource;
 
     protected TransactionManager _txMgr;
 
@@ -107,7 +103,7 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
-    private MinervaPool _minervaPool;
+    private Database _db;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         boolean success = false;
@@ -122,7 +118,18 @@ public class ODEServer {
                 _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
             else
                 _odeConfig = new ODEConfigProperties(new File(confDir));
-            _odeConfig.load();
+
+            try {
+                _odeConfig.load();
+            } catch (FileNotFoundException fnf) {
+                String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
+                __log.warn(errmsg);
+
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
+                __log.error(errmsg, ex);
+                throw new ServletException(errmsg, ex);
+            }
 
             String wdir = _odeConfig.getWorkingDir();
             if (wdir == null)
@@ -168,8 +175,8 @@ public class ODEServer {
             _poller = new DeploymentPoller(deploymentDir, this);
 
             new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
-            new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(),
-                    _workRoot.getAbsolutePath());
+            new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
+                    .getAbsolutePath());
 
             _poller.start();
             __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
@@ -187,11 +194,24 @@ public class ODEServer {
 
     }
 
+    private void initDataSource() throws ServletException {
+        _db = new Database(_odeConfig);
+        _db.setTransactionManager(_txMgr);
+        _db.setWorkRoot(_workRoot);
+
+        try {
+            _db.start();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgOdeDbConfigError();
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
+        }
+
+    }
+
     /**
-     * Shutdown the service engine. This performs cleanup before the BPE is
-     * terminated. Once this method has been called, init() must be called
-     * before the transformation engine can be started again with a call to
-     * start().
+     * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
+     * must be called before the transformation engine can be started again with a call to start().
      * 
      * @throws AxisFault
      *             if the engine is unable to shut down.
@@ -228,29 +248,31 @@ public class ODEServer {
                     __log.debug("Scheduler couldn't be shutdown.", ex);
                 }
 
-            if (_store != null) 
+            if (_store != null)
                 try {
                     _store.shutdown();
                     _store = null;
                 } catch (Throwable t) {
-                    __log.debug("Store could not be shutdown.",t);
+                    __log.debug("Store could not be shutdown.", t);
                 }
-                
-            if (_daoCF != null) 
+
+            if (_daoCF != null)
                 try {
                     _daoCF.shutdown();
-                    _daoCF = null;
                 } catch (Throwable ex) {
-                    __log.debug("DOA shutdown failed.", ex);                    
+                    __log.debug("DOA shutdown failed.", ex);
+                } finally {
+                    _daoCF = null;
                 }
-                
-            if (_minervaPool != null)
+
+            if (_db != null)
                 try {
-                    __log.debug("shutting down minerva pool.");
-                    _minervaPool.stop();
-                    _minervaPool = null;
-                } catch (Throwable t) {
-                    __log.debug("Minerva pool could not be shut down.", t);
+                    _db.shutdown();
+                    
+                } catch (Throwable ex) {
+                    __log.debug("DB shutdown failed.", ex);
+                } finally {
+                    _db = null;
                 }
 
             if (_txMgr != null) {
@@ -299,7 +321,7 @@ public class ODEServer {
         return odeService;
     }
 
-    public ExternalService createExternalService(Definition def, QName serviceName, String portName) throws ContextException  {
+    public ExternalService createExternalService(Definition def, QName serviceName, String portName) throws ContextException {
         ExternalService extService = (ExternalService) _externalServices.get(serviceName);
         if (extService != null)
             return extService;
@@ -310,7 +332,7 @@ public class ODEServer {
             __log.error("Could not create external service.", ex);
             throw new ContextException("Error creating external service.", ex);
         }
-        
+
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting external service with empty namespace replication");
             extService.setReplicateEmptyNS(true);
@@ -362,22 +384,6 @@ public class ODEServer {
         }
     }
 
-    private void initDataSource() throws ServletException {
-        switch (_odeConfig.getDbMode()) {
-        case EXTERNAL:
-            initExternalDb();
-            break;
-        case EMBEDDED:
-            initEmbeddedDb();
-            break;
-        case INTERNAL:
-            initInternalDb();
-            break;
-        default:
-            break;
-        }
-    }
-
     private void initConnector() throws ServletException {
         int port = _odeConfig.getConnectorPort();
         if (port == 0) {
@@ -394,72 +400,6 @@ public class ODEServer {
                 __log.error("Failed to initialize JCA connector.");
             }
         }
-    }
-
-    private void initExternalDb() throws ServletException {
-        try {
-            if (__logSql.isDebugEnabled())
-                _datasource = new LoggingDataSourceWrapper((DataSource) lookupInJndi(_odeConfig.getDbDataSource()), __logSql);
-            else
-                _datasource = (DataSource) lookupInJndi(_odeConfig.getDbDataSource());
-            __log.info(__msgs.msgOdeUsingExternalDb(_odeConfig.getDbDataSource()));
-        } catch (Exception ex) {
-            String msg = __msgs.msgOdeInitExternalDbFailed(_odeConfig.getDbDataSource());
-            __log.error(msg, ex);
-            throw new ServletException(msg, ex);
-        }
-    }
-
-    private void initInternalDb() throws ServletException {
-        __log.info("Using internal data source for JDBC URL: " + _odeConfig.getDbIntenralJdbcUrl());
-        initInternalDb(_odeConfig.getDbIntenralJdbcUrl());
-        
-    }
-
-    private void initInternalDb(String url) throws ServletException {
-
-        __log.debug("Creating Minerva DataSource/Pool for " + url);
-
-        _minervaPool = new MinervaPool();
-        _minervaPool.setTransactionManager(_txMgr);
-        _minervaPool.getConnectionFactory().setConnectionURL(url);
-        _minervaPool.getConnectionFactory().setUserName("sa");
-        _minervaPool.getConnectionFactory().setDriver(org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-
-        _minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
-        _minervaPool.getPoolParams().minSize = _odeConfig.getPoolMinSize();
-        _minervaPool.getPoolParams().blocking = false;
-        _minervaPool.setType(MinervaPool.PoolType.MANAGED);
-
-        try {
-            _minervaPool.start();
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
-            __log.error(errmsg, ex);
-            throw new ServletException(errmsg, ex);
-        }
-
-        if (__logSql.isDebugEnabled())
-            _datasource = new LoggingDataSourceWrapper(_minervaPool.createDataSource(), __logSql);
-        else _datasource = _minervaPool.createDataSource();
-        
-    }
-    /**
-     * Initialize embedded (DERBY) database.
-     */
-    private void initEmbeddedDb() throws ServletException {
-
-        String db = "jpadb";
-        String persistenceType = System.getProperty("ode.persistence");
-        if (persistenceType != null) {
-            if ("hibernate".equalsIgnoreCase(persistenceType))
-                db = "hibdb";
-        }
-
-        String url = "jdbc:derby:" + _workRoot + "/" + db + "/" + _odeConfig.getDbEmbeddedName();
-        __log.info("Using Embedded Derby: " + url);
-        initInternalDb(url);
-       
     }
 
     /**
@@ -488,18 +428,18 @@ public class ODEServer {
         }
 
         BpelDAOConnectionFactoryJDBC cf = createDaoCF();
-        cf.setDataSource(_datasource);
+        cf.setDataSource(_db.getDataSource());
         cf.setTransactionManager(_txMgr);
         cf.init(properties);
         _daoCF = cf;
     }
 
     protected void initProcessStore() {
-        _store = createProcessStore(_datasource);
+        _store = createProcessStore(_db.getDataSource());
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(new File(_workRoot, "processes"));
     }
-    
+
     protected ProcessStoreImpl createProcessStore(DataSource ds) {
         return new ProcessStoreImpl(ds);
     }
@@ -508,7 +448,7 @@ public class ODEServer {
         QuartzSchedulerImpl scheduler = new QuartzSchedulerImpl();
         scheduler.setExecutorService(_executorService, 20);
         scheduler.setTransactionManager(_txMgr);
-        scheduler.setDataSource(_datasource);
+        scheduler.setDataSource(_db.getDataSource());
         scheduler.init();
         return scheduler;
     }
@@ -521,46 +461,22 @@ public class ODEServer {
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_server);
-        
 
         _server.setDaoConnectionFactory(_daoCF);
         _server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl());
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
-        _server.setMessageExchangeContext(new P2PMexContextImpl(this, new MessageExchangeContextImpl(this),
-                _scheduler));
+        _server.setMessageExchangeContext(new P2PMexContextImpl(this, new MessageExchangeContextImpl(this), _scheduler));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
-        if (_odeConfig.isDehydrationEnabled()){
+        if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
-    //        dehy.setProcessMaxAge(10000);
+            // dehy.setProcessMaxAge(10000);
             _server.setDehydrationPolicy(dehy);
         }
         _server.init();
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T lookupInJndi(String objName) throws Exception {
-        ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
-            InitialContext ctx = null;
-            try {
-                ctx = new InitialContext();
-                return (T) ctx.lookup(objName);
-            } finally {
-                if (ctx != null)
-                    try {
-                        ctx.close();
-                    } catch (Exception ex1) {
-                        __log.error("Error closing JNDI connection.", ex1);
-                    }
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(old);
-        }
-    }
-
-    public ProcessStore getProcessStore() {
+    public ProcessStoreImpl getProcessStore() {
         return _store;
     }
 
