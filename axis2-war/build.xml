@@ -45,25 +45,6 @@
   There's no way to get it as a single dependency,
   so grab all the dependencies into the scratch directory
   and process the one we need. -->
-        <artifact:dependencies filesetId="dependency.derby.hib" useScope="runtime">
-            <dependency groupId="org.apache.ode" artifactId="ode-dao-hibernate-db-derby"
-                        version="${maven.project.version}" type="tar"/>
-        </artifact:dependencies>
-        <artifact:dependencies filesetId="dependency.derby.jpa" useScope="runtime">
-            <dependency groupId="org.apache.ode" artifactId="ode-jpa-ojpa-derby"
-                        version="${maven.project.version}" type="tar"/>
-        </artifact:dependencies>
-
-        <copy todir="${maven.project.build.directory}/scratch" flatten="true">
-            <fileSet refid="dependency.derby.jpa"/>
-        </copy>
-        <untar src="${maven.project.build.directory}/scratch/ode-jpa-ojpa-derby-${maven.project.version}.tar"
-               dest="${maven.project.build.directory}/resources/jpadb"/>
-        <copy todir="${maven.project.build.directory}/scratch" flatten="true">
-            <fileSet refid="dependency.derby.hib"/>
-        </copy>
-        <untar src="${maven.project.build.directory}/scratch/ode-dao-hibernate-db-derby-${maven.project.version}.tar"
-               dest="${maven.project.build.directory}/resources/hibdb"/>
 
         <!-- Dirty, mean and ugly but will work for now -->
         <copy todir="${maven.project.build.directory}/resources"
