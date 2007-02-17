@@ -73,6 +73,51 @@
                 </executions>
             </plugin>
             <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>dependency-maven-plugin</artifactId>
+                                <version>1.0</version>
+                                <executions>
+                                        <execution>
+                                                <id>unpack-jpa</id>
+                                                <phase>generate-resources</phase>
+                                                <goals> 
+                                                        <goal>unpack</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <outputDirectory>${project.build.directory}/resources</outputDirectory>
+                                                        <artifactItems>
+                                                                <artifactItem>
+                                                                        <groupId>org.apache.ode</groupId>
+                                                                        <artifactId>ode-jpa-ojpa-derby</artifactId>
+                                                                        <version>${pom.version}</version>
+                                                                        <type>tar</type>
+                                                                </artifactItem>         
+                                                        </artifactItems>
+                                                </configuration>
+                                        </execution>
+
+          <execution>
+                                                <id>unpack-hib</id>
+                                                <phase>generate-resources</phase>
+                                                <goals> 
+                                                        <goal>unpack</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <outputDirectory>${project.build.directory}/resources</outputDirectory>
+                                                        <artifactItems>
+                                                                <artifactItem>
+                                                                        <groupId>org.apache.ode</groupId>
+                                                                        <artifactId>ode-dao-hibernate-db-derby</artifactId>
+                                                                        <version>${pom.version}</version>
+                                                                        <type>tar</type>
+                                                                </artifactItem>         
+                                                        </artifactItems>
+                                                </configuration>
+       	                                 </execution>
+			</executions>
+
+		</plugin>
+            <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>maven-jetty-plugin</artifactId>
                 <version>6.0.1</version>
