@@ -628,7 +628,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" + operation + " channel="
+            BpelProcess.__log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" + operation.getName() + " channel="
                     + channel + ")");
         }
 
