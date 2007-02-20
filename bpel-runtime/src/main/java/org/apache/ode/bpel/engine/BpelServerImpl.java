@@ -18,27 +18,35 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEngine;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * <p>
@@ -102,6 +110,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
         SHUTDOWN, INIT, RUNNING
     }
 
+    public BpelServerImpl() {
+    }
+    
     public void start() {
         _mngmtLock.writeLock().lock();
         try {
@@ -170,6 +181,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
             _state = State.INIT;
+            
             _engine = new BpelEngineImpl(_contexts);
 
         } finally {
