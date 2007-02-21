@@ -132,7 +132,7 @@ public class JDBCManagedConnectionFactory implements ManagedConnectionFactory {
                 continue;
             }
             JDBCManagedConnection con = (JDBCManagedConnection)unknown;
-            if(con.getUser().equals(user) && con.getURL().equals(url)) {
+            if( (user == null || con.getUser() == null || con.getUser().equals(user)) && con.getURL().equals(url)) {
                 return con;
             }
         }
