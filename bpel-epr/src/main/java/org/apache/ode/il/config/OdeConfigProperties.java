@@ -49,6 +49,10 @@ public class OdeConfigProperties {
 
     private static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
 
+    private static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";
+
+    private static final String PROP_DB_INTERNAL_USER = "db.int.username";
+
     private static final String PROP_DB_LOGGING = "db.logging";
 
     private static final String PROP_TX_FACTORY_CLASS = "tx.factory.class";
@@ -70,7 +74,6 @@ public class OdeConfigProperties {
     private static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
     private static final String PROP_DAOCF = "dao.factory";
-
 
     private File _cfgFile;
 
@@ -224,6 +227,14 @@ public class OdeConfigProperties {
 
     public Properties getProperties() {
         return _props;
+    }
+
+    public String getDbInternalUserName() {
+        return getProperty(PROP_DB_INTERNAL_USER);
+    }
+
+    public String getDbInternalPassword() {
+        return getProperty(PROP_DB_INTERNAL_PASSWORD);
     }
 
 }
