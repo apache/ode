@@ -140,18 +140,22 @@ public class Database {
 
     private void initInternalDb() throws DatabaseConfigException {
         __log.info(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
-        initInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass());
+        initInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass(),
+                _odeConfig.getDbInternalUserName(), _odeConfig.getDbInternalPassword());
 
     }
 
-    private void initInternalDb(String url, String driverClass) throws DatabaseConfigException {
+    private void initInternalDb(String url, String driverClass,String username,String password) throws DatabaseConfigException {
 
         __log.debug("Creating Minerva DataSource/Pool for " + url + " with driver " + driverClass);
 
         _minervaPool = new MinervaPool();
         _minervaPool.setTransactionManager(_txm);
         _minervaPool.getConnectionFactory().setConnectionURL(url);
-        _minervaPool.getConnectionFactory().setUserName("sa");
+        if (username != null)
+            _minervaPool.getConnectionFactory().setUserName(username);
+        if (password != null)
+            _minervaPool.getConnectionFactory().setPassword(password);
         _minervaPool.getConnectionFactory().setDriver(driverClass);
 
         _minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
@@ -181,7 +185,7 @@ public class Database {
         String url = "jdbc:derby:" + _workRoot + "/" + db ;
         __log.info("Using Embedded Derby: " + url);
         _derbyUrl = url;
-        initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName(),"sa",null);
 
     }
 
