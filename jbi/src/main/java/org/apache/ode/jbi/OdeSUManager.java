@@ -60,7 +60,7 @@ public class OdeSUManager implements ServiceUnitManager {
       su.deploy();
     } catch (Exception ex) {
       __log.error(__msgs.msgServiceUnitDeployFailed(serviceUnitID));
-      return makeStatusMessage("deploy", "FAILURE");
+      return makeStatusMessage("deploy", "FAILED");
     }
 
     return makeStatusMessage("deploy", "SUCCESS");
@@ -133,10 +133,10 @@ public class OdeSUManager implements ServiceUnitManager {
    * Stop the deployment. This causes the component to cease generating service
    * requests related to the deployment. This returns the deployment to a state
    * equivalent to after init() was called
-   * 
+   *
    * @param serviceUnitID
    *          service unit ID
-   * 
+   *
    * @throws DeploymentException
    *           deployment exception
    */
@@ -166,14 +166,14 @@ public class OdeSUManager implements ServiceUnitManager {
   /**
    * Cancel a Service Deployment. If the deployment is in use (has
    * dependencies), then will operation may fail.
-   * 
+   *
    * @param serviceUnitID -
    *          ID of the Service Unit being undeployed
    * @param serviceUnitRootPath -
    *          Full path to the Service Unit root.
-   * 
+   *
    * @return NOT YET DOCUMENTED
-   * 
+   *
    * @throws DeploymentException
    *           deployment exception
    */
@@ -184,12 +184,12 @@ public class OdeSUManager implements ServiceUnitManager {
 
     OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID,
         serviceUnitRootPath);
-    
+
     try {
       su.undeploy();
     } catch (Exception ex) {
       __log.error(__msgs.msgServiceUnitDeployFailed(serviceUnitID));
-      return makeStatusMessage("undeploy", "FAILURE");
+      return makeStatusMessage("undeploy", "FAILED");
     }
 
     return makeStatusMessage("undeploy", "SUCCESS");
@@ -200,7 +200,7 @@ public class OdeSUManager implements ServiceUnitManager {
    * Generate those lame XML result strings that JBI requires. Oh did I mention
    * how lame this is? If not, let me remind the reader: this is just about the
    * lamest "clever idea" I have ever seen.
-   * 
+   *
    * @param task
    *          the task that failed and must now generate a lame result string
    * @param status
@@ -216,16 +216,16 @@ public class OdeSUManager implements ServiceUnitManager {
      * <task-id>deploy</task-id> <task-result>SUCCESS</task-result>
      * </task-result-details> </component-task-result-details>
      * </component-task-result>
-     * 
+     *
      */
 
     // First of all, what is the logic why XML ? and if XML, why a String
     // and not a DOM ? But the 64k question is what is wrong with Exceptions?
     Document doc;
     try {
-        // Note that we are using our own choice of factory (xerces), not the 
+        // Note that we are using our own choice of factory (xerces), not the
         // one that is provided by the system. This is important, otherwise the
-        // serialization routine won't work. 
+        // serialization routine won't work.
       DocumentBuilderFactory dbf = XMLParserUtils.getDocumentBuilderFactory();
       DocumentBuilder db = dbf.newDocumentBuilder();
       doc = db.newDocument();
