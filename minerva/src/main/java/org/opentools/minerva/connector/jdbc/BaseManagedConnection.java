@@ -51,11 +51,15 @@ public abstract class BaseManagedConnection implements ManagedConnection {
     }
 
     public void addConnectionEventListener(ConnectionEventListener listener) {
+        synchronized (this) {
         listeners.add(listener);
+    }
     }
 
     public void removeConnectionEventListener(ConnectionEventListener listener) {
+        synchronized (this) {
         listeners.remove(listener);
+    }
     }
 
     public void setLogWriter(PrintWriter writer) throws ResourceException {
@@ -67,8 +71,10 @@ public abstract class BaseManagedConnection implements ManagedConnection {
     }
 
     public void destroy() throws ResourceException {
+        synchronized (this) {
         listeners.clear();
         listeners = null;
+        }
         logger = null;
         user = null;
     }
@@ -78,7 +84,10 @@ public abstract class BaseManagedConnection implements ManagedConnection {
     }
 
     protected void fireConnectionEvent(ConnectionEvent evt) {
-        List<ConnectionEventListener> local = new ArrayList<ConnectionEventListener>(listeners);
+        List<ConnectionEventListener> local;
+        synchronized (this) {
+            local = new ArrayList<ConnectionEventListener>(listeners);
+        }
         for(int i=local.size()-1; i >= 0; i--) {
             if(evt.getId() == ConnectionEvent.CONNECTION_CLOSED) {
                 local.get(i).connectionClosed(evt);
