@@ -7,9 +7,13 @@ package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import java.util.Properties;
+import java.io.IOException;
 
 
 /**
@@ -52,7 +56,19 @@ class XmlDataDaoImpl implements XmlDataDAO {
    * @see XmlDataDAO#set(org.w3c.dom.Node)
    */
   public void set(Node val) {
-    _data = val;
+      if (!(val instanceof Element)) _data = val;
+      // For some reason we're getting some weird DOM trees from ServiceMix. Until we
+      // spot where it exactly comes from, this fixes it.
+      // The weirdness lies in elements being in xmlns="" when printed with a DOMWriter
+      // but having a ns when the elements are queried directly.
+      try {
+          _data = DOMUtils.stringToDOM(DOMUtils.domToString(_data));
+      } catch (SAXException e) {
+          // Should never happen but life is full of surprises
+          throw new RuntimeException("Couldn't reread!", e);
+      } catch (IOException e) {
+          throw new RuntimeException("Couldn't reread!", e);
+      }
   }
 
 	/**
