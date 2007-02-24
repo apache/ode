@@ -185,6 +185,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
         default:
             __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
         }
+        mex.release();
     }
 
     /**
@@ -246,10 +247,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             if (odeMex.getMessageExchangePattern() != MessageExchangePattern.REQUEST_RESPONSE)
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
 
-        } finally {
-            if (odeMex!= null) odeMex.release();
-            else __log.warn("Couldn't release a message exchange, it's null.");
-            
+        } finally {            
             if (success) {
                 __log.debug("Commiting ODE MEX " + odeMex);
                 _ode.getTransactionManager().commit();
