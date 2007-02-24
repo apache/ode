@@ -98,6 +98,11 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public void instanceCompleted(ProcessInstanceDAO instance) {
+        // Cleaning up
+        __log.debug("Removing completed process instance " + instance.getInstanceId() + " from in-memory store.");
+        ProcessInstanceDAO removed = _instances.remove(instance.getInstanceId());
+        if (removed == null)
+            __log.warn("Couldn't find process instance " + instance.getInstanceId() + " for cleanup.");
     }
 
     public void delete() {

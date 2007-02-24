@@ -47,25 +47,20 @@ public class P2PMexContextImpl implements MessageExchangeContext {
         if (myService != null) {
             // Defer invoke until tx is comitted.
             _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-
                 public void afterCompletion(boolean success) {
-                    if (!success)
-                        return;
-
+                    if (!success) return;
                     try {
                         _scheduler.execIsolatedTransaction(new Callable<Void>() {
-
                             public Void call() throws Exception {
-                                buildAndInvokeMyRoleMex(pmex);
+                                MyRoleMessageExchange mymex = buildAndInvokeMyRoleMex(pmex);
+                                mymex.release();
                                 return null;
                             }
                         });
-
                     } catch (Exception ex) {
                         __log.error("Unexpected error", ex);
                         throw new RuntimeException(ex);
                     }
-
                 }
 
                 public void beforeCompletion() {
@@ -118,7 +113,6 @@ public class P2PMexContextImpl implements MessageExchangeContext {
                     odeMex.getOperationName());
 
         copyHeader(pmex, odeMex);
-
 
         odeMex.invoke(pmex.getRequest());
 

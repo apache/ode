@@ -247,6 +247,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
 
         } finally {
+            if (odeMex!= null) odeMex.release();
+            else __log.warn("Couldn't release a message exchange, it's null.");
+            
             if (success) {
                 __log.debug("Commiting ODE MEX " + odeMex);
                 _ode.getTransactionManager().commit();
