@@ -27,7 +27,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
-    private static AtomicLong counter = new AtomicLong(0);
+    private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
 
 
     BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store) {

@@ -126,7 +126,8 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
-        MessageExchangeDAO mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
+        if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
         if (mexdao == null)
             return null;
 
