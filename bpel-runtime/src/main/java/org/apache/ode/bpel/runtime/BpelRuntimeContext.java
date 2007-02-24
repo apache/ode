@@ -52,205 +52,207 @@ import javax.xml.namespace.QName;
  */
 public interface BpelRuntimeContext {
 
-  Long getPid();
-  
-  /**
-   * Checks for variable initialization, i.e. has had a 'write'
-   *
-   * @param variable variable
-   *
-   * @return <code>true</code> if initialized
-   */
-  boolean isVariableInitialized(VariableInstance variable);
+    Long getPid();
 
-   /**
-   * Create a scope instance object.
-   * @param parentScopeId _id of parent scope (null if root scope)
-   * @param scopeType the type of scope, i.e. the name of the scope
-   *
-   * @return scope instance identifier
-   */
-  Long createScopeInstance(Long parentScopeId, OScope scopeType);
+    /**
+     * Checks for variable initialization, i.e. has had a 'write'
+     *
+     * @param variable variable
+     *
+     * @return <code>true</code> if initialized
+     */
+    boolean isVariableInitialized(VariableInstance variable);
 
-  /**
-   * Initializes endpoint references for partner links inside a scope.
-   * @param parentScopeId
-   * @param partnerLinks
-   */
-  void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks);
+    /**
+     * Create a scope instance object.
+     * @param parentScopeId _id of parent scope (null if root scope)
+     * @param scopeType the type of scope, i.e. the name of the scope
+     *
+     * @return scope instance identifier
+     */
+    Long createScopeInstance(Long parentScopeId, OScope scopeType);
 
-  /**
-   *
-   * @param var variable to read
-   * @return
-   */
-  Node fetchVariableData(VariableInstance var, boolean forWriting)
-          throws FaultException;
+    /**
+     * Initializes endpoint references for partner links inside a scope.
+     * @param parentScopeId
+     * @param partnerLinks
+     */
+    void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks);
 
-  Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
-          throws FaultException;
+    /**
+     *
+     * @param var variable to read
+     * @return
+     */
+    Node fetchVariableData(VariableInstance var, boolean forWriting)
+            throws FaultException;
 
-  /**
-   * Fetches the my-role endpoint reference data.
-   * @param pLink
-   * @param isMyEPR
-   * @return
-   * @throws FaultException
-   */
-  Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink);
-  
-  Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException;
+    Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
+            throws FaultException;
 
-  /**
-   * Determine if the partner role of an endpoint has been initialized (either explicitly throug assginment or via the
-   * deployment descriptor)
-   * @param pLink partner link
-   * @return
-   */
-  boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink);
+    /**
+     * Fetches the my-role endpoint reference data.
+     * @param pLink
+     * @param isMyEPR
+     * @return
+     * @throws FaultException
+     */
+    Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink);
 
-  /**
-   * Fetches our session id associated with the partner link instance.  This will always return a 
-   * non-null value.
-   * @param pLink partner link
-   */
-  String fetchMySessionId(PartnerLinkInstance pLink);
-  
-  /**
-   * Fetches the partner's session id associated with the partner link instance.  
-   * @param pLink partner link
-   */
-  String fetchPartnersSessionId(PartnerLinkInstance pLink);
-  
-  /**
-   * Initialize the partner's session id for this partner link instance.
-   * @param pLink partner link
-   * @param session session identifier 
-   */
-  void initializePartnersSessionId(PartnerLinkInstance pLink, String session);
+    Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException;
 
-  /**
-   * Evaluate a property alias query expression against a variable, returning the normalized
-   * {@link String} representation of the property value.
-   * @param var variable to read
-   * @param property property to read
-   * @return value of property for variable, in String form
-   * @throws FaultException in case of selection or other fault
-   */
-  String readProperty(VariableInstance var, OProcess.OProperty property)
-          throws FaultException;
+    /**
+     * Determine if the partner role of an endpoint has been initialized (either explicitly throug assginment or via the
+     * deployment descriptor)
+     * @param pLink partner link
+     * @return
+     */
+    boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink);
 
-  Node initializeVariable(VariableInstance var, Node initData);
+    /**
+     * Fetches our session id associated with the partner link instance.  This will always return a
+     * non-null value.
+     * @param pLink partner link
+     */
+    String fetchMySessionId(PartnerLinkInstance pLink);
 
-  /**
-   * Writes a partner EPR.
-   * 
-   * @param variable
-   * @param data
-   * @throws FaultException
-   */
-  void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
+    /**
+     * Fetches the partner's session id associated with the partner link instance.
+     * @param pLink partner link
+     */
+    String fetchPartnersSessionId(PartnerLinkInstance pLink);
 
-  Node convertEndpointReference(Element epr, Node targetNode);
+    /**
+     * Initialize the partner's session id for this partner link instance.
+     * @param pLink partner link
+     * @param session session identifier
+     */
+    void initializePartnersSessionId(PartnerLinkInstance pLink, String session);
 
-  void commitChanges(VariableInstance var, Node changes);
+    /**
+     * Evaluate a property alias query expression against a variable, returning the normalized
+     * {@link String} representation of the property value.
+     * @param var variable to read
+     * @param property property to read
+     * @return value of property for variable, in String form
+     * @throws FaultException in case of selection or other fault
+     */
+    String readProperty(VariableInstance var, OProcess.OProperty property)
+            throws FaultException;
 
-  boolean isCorrelationInitialized(CorrelationSetInstance cset);
+    Node initializeVariable(VariableInstance var, Node initData);
 
-  CorrelationKey readCorrelation(CorrelationSetInstance cset);
+    /**
+     * Writes a partner EPR.
+     *
+     * @param variable
+     * @param data
+     * @throws FaultException
+     */
+    void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
 
-  void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation);
+    Node convertEndpointReference(Element epr, Node targetNode);
 
-  /**
-   * Should be invoked by process template, signalling process completion
-   * with no faults.
-   *
-   */
-  void completedOk();
+    void commitChanges(VariableInstance var, Node changes);
 
-  /**
-   * Should be invoked by process template, signalling process completion
-   * with fault.
-   */
-  void completedFault(FaultData faultData);
+    boolean isCorrelationInitialized(CorrelationSetInstance cset);
 
- 
-  /**
-   * Non-deterministic selection on incoming message-exchanges.
-   */
-  void select(PickResponseChannel response, Date timeout, boolean createInstnace, 
-      Selector[] selectors) throws FaultException;
+    CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
-  /**
-   * Cancel a timer, or pick.
-   * @param timerResponseChannel
-   */
-  void cancel(TimerResponseChannel timerResponseChannel);
+    void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation);
 
-  /**
-   * Send a reply to an open message-exchange.
-   * @param msg response message
-   * @param fault fault name, if this is a fault reply, otherwise <code>null</code>
-   */
-  void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, 
-      QName fault)
-      throws FaultException;
+    /**
+     * Should be invoked by process template, signalling process completion
+     * with no faults.
+     *
+     */
+    void completedOk();
+
+    /**
+     * Should be invoked by process template, signalling process completion
+     * with fault.
+     */
+    void completedFault(FaultData faultData);
 
 
-  String invoke(PartnerLinkInstance partnerLinkInstance, 
-      Operation operation, 
-      Element outboundMsg, 
-      InvokeResponseChannel invokeResponseChannel) throws FaultException;
+    /**
+     * Non-deterministic selection on incoming message-exchanges.
+     */
+    void select(PickResponseChannel response, Date timeout, boolean createInstnace,
+                Selector[] selectors) throws FaultException;
+
+    /**
+     * Cancel a timer, or pick.
+     * @param timerResponseChannel
+     */
+    void cancel(TimerResponseChannel timerResponseChannel);
+
+    /**
+     * Send a reply to an open message-exchange.
+     * @param msg response message
+     * @param fault fault name, if this is a fault reply, otherwise <code>null</code>
+     */
+    void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg,
+               QName fault)
+            throws FaultException;
 
 
-  /**
-   * Registers a timer for future notification.
-   * @param timerChannel channel for timer notification
-   * @param timeToFire future time to fire timer notification
-   */
-  void registerTimer(TimerResponseChannel timerChannel, Date timeToFire);
-  
-  /**
-   * Terminates the process / sets state flag to terminate
-   * and ceases all processing on the VPU.
-   */
-  void terminate();
+    String invoke(PartnerLinkInstance partnerLinkInstance,
+                  Operation operation,
+                  Element outboundMsg,
+                  InvokeResponseChannel invokeResponseChannel) throws FaultException;
 
-  /**
-   * Sends the bpel event.
-   * @param event
-   */
-  void sendEvent(ProcessInstanceEvent event);
 
-  ExpressionLanguageRuntimeRegistry getExpLangRuntime();
+    /**
+     * Registers a timer for future notification.
+     * @param timerChannel channel for timer notification
+     * @param timeToFire future time to fire timer notification
+     */
+    void registerTimer(TimerResponseChannel timerChannel, Date timeToFire);
 
- 
-  /**
-   * Generate a unique (and monotonic) ID in the context of this instance.
-   * @return
-   */
-  long genId();
+    /**
+     * Terminates the process / sets state flag to terminate
+     * and ceases all processing on the VPU.
+     */
+    void terminate();
 
-  Element getPartnerResponse(String mexId);
+    /**
+     * Sends the bpel event.
+     * @param event
+     */
+    void sendEvent(ProcessInstanceEvent event);
 
-  Element getMyRequest(String mexId);
+    ExpressionLanguageRuntimeRegistry getExpLangRuntime();
 
-  QName getPartnerFault(String mexId);
 
-  String getPartnerFaultExplanation(String mexId);
+    /**
+     * Generate a unique (and monotonic) ID in the context of this instance.
+     * @return
+     */
+    long genId();
 
-  QName getPartnerResponseType(String mexId);
+    Element getPartnerResponse(String mexId);
 
-  Node getPartData(Element message, Part part);
+    Element getMyRequest(String mexId);
 
-  Element getSourceEPR(String mexId);
+    QName getPartnerFault(String mexId);
 
-  void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-                                   Date dateTime, Element details, String[] actions, int retries);
+    String getPartnerFaultExplanation(String mexId);
 
-  void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
+    QName getPartnerResponseType(String mexId);
 
-  void recoverActivity(String channel, long activityId, String action, FaultData fault);
+    Node getPartData(Element message, Part part);
 
-  String getSourceSessionId(String mexId);
+    Element getSourceEPR(String mexId);
+
+    void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
+                                     Date dateTime, Element details, String[] actions, int retries);
+
+    void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
+
+    void recoverActivity(String channel, long activityId, String action, FaultData fault);
+
+    String getSourceSessionId(String mexId);
+
+    void releasePartnerMex(String mexId);
 }

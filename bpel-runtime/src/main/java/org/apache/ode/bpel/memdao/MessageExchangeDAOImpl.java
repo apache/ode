@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-public class MessageExchangeDAOImpl implements MessageExchangeDAO {
+public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
 	private String messageExchangeId;
 	private MessageDAO response;
@@ -40,9 +40,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
 	
-	public MessageExchangeDAOImpl(char direction, String mesageEchangeId){
+	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
-		this.messageExchangeId = mesageEchangeId;
+		this.messageExchangeId = messageEchangeId;
 	}
 	
 	public String getMessageExchangeId() {
@@ -243,4 +243,17 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
         return retVal;
     }
 
+    public void release() {
+        instance = null;
+        process = null;
+        _plink = null;
+        request = null;
+        response = null;
+        BpelDAOConnectionImpl.removeMessageExchange(getMessageExchangeId());
+    }
+
+
+    public String toString() {
+        return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
+    }
 }

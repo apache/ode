@@ -7,7 +7,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
-public class MessageDAOImpl implements MessageDAO {
+public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 	
 	private QName type;
 	private Element data;

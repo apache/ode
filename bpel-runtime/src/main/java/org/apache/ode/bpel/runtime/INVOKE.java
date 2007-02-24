@@ -143,6 +143,8 @@ public class INVOKE extends ACTIVITY {
 
                         // TODO update output variable with data from non-initiate
                         // correlation sets
+
+                        getBpelRuntimeContext().releasePartnerMex(mexId);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
                     }
 

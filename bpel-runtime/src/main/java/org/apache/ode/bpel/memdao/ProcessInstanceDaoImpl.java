@@ -380,4 +380,7 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
         return _conn;
     }
 
+    public String toString() {
+        return "mem.instance(type=" + _processDao.getType() + " iid=" + _instanceId + ")";
+    }
 }

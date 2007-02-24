@@ -300,4 +300,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
+    public void release() {
+        // no-op for now, could be used to do some cleanup
+    }
+
 }
