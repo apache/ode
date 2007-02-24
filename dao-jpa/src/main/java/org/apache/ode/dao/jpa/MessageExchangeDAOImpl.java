@@ -297,4 +297,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	public Collection<CorrelationKey> getCorrelationKeys() {
 		return _correlationKeys;
 	}
+
+    public void release() {
+        // no-op for now, could be used to do some cleanup
+    }
 }

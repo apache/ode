@@ -192,6 +192,8 @@ public class ODEService {
                             __log.error("Error processing response for MEX " + odeMex, e);
                             throw new OdeFault("An exception occured when invoking ODE.", e);
                         } finally {
+                            if (odeMex!= null) odeMex.release();
+                            else __log.warn("Couldn't release a message exchange, it's null.");
                             if (commit)
                                 try {
                                     if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
@@ -205,7 +207,6 @@ public class ODEService {
                                 } catch (Exception ex) {
                                     throw new OdeFault("Rollback failed!", ex);
                                 }
-
                         }
                     }
                 }

@@ -223,6 +223,12 @@ public interface MessageExchange {
      */
     public Set<String> getPropertyNames();
 
+    /**
+     * Should be called by the external partner when it's done with the
+     * message exchange. Ncessary for a better resource management and
+     * proper mex cleanup.
+     */
+    public void release();
 
     public static final String PROPERTY_SEP_MYROLE_SESSIONID = "org.apache.ode.bpel.myRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_SESSIONID = "org.apache.ode.bpel.partnerRoleSessionId";

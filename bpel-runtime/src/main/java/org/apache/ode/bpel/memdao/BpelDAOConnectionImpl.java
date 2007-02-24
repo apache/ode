@@ -14,6 +14,8 @@ import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -24,6 +26,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
+    private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
+
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
@@ -263,5 +267,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
         //TODO
         throw new UnsupportedOperationException();
+    }
+
+    static void removeMessageExchange(String mexId) {
+        // Cleaning up mex
+        __log.debug("Removing mex " + mexId + " from memory store.");
+        MessageExchangeDAO mex = _mexStore.remove(mexId);
+        if (mex == null)
+            __log.warn("Couldn't find mex " + mexId + " for cleanup.");
     }
 }

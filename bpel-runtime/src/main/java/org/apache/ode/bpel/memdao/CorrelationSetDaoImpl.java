@@ -17,8 +17,7 @@ import java.util.Map;
 /**
  * A very simple, in-memory implementation of the {@link CorrelationSetDAO} interface.
  */
-class CorrelationSetDaoImpl
-  implements CorrelationSetDAO {
+class CorrelationSetDaoImpl extends DaoBaseImpl implements CorrelationSetDAO {
   private Long _csetId;
   private ScopeDAO _scope;
   private String _name;
