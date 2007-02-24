@@ -1058,28 +1058,32 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new BpelEngineException(msg);
         }
 
+        MessageDAO response;
         MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
-        case FAULT:
-        case RESPONSE:
-            MessageDAO response = dao.getResponse();
-            if (response == null) {
-                // this also should not happen
-                String msg = "Engine requested response for message exchange that did not have one: " + mexId;
+            case FAULT:
+            case RESPONSE:
+                response = dao.getResponse();
+                if (response == null) {
+                    // this also should not happen
+                    String msg = "Engine requested response for message exchange that did not have one: " + mexId;
+                    __log.fatal(msg);
+                    throw new BpelEngineException(msg);
+                }
+                break;
+            default:
+                // We should not be in any other state when requesting this.
+                String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
+                        + status;
                 __log.fatal(msg);
                 throw new BpelEngineException(msg);
-            }
-
-            return response;
-
-        default:
-            // We should not be in any other state when requesting this.
-            String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
-                    + status;
-            __log.fatal(msg);
-            throw new BpelEngineException(msg);
         }
+        return response;
+    }
 
+    public void releasePartnerMex(String mexId) {
+        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        dao.release();
     }
 
     public Node getPartData(Element message, Part part) {

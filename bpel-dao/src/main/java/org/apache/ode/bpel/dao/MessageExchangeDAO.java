@@ -85,9 +85,7 @@ public interface MessageExchangeDAO {
 
     /**
      * Set state of last message sent/received.
-     *
-     * @param string
-     *          state to be set
+     * @param string state to be set
      */
     void setStatus(String status);
 
@@ -233,5 +231,7 @@ public interface MessageExchangeDAO {
     void setPartnerLink(PartnerLinkDAO plinkDAO);
 
     PartnerLinkDAO getPartnerLink();
+
+    void release();
 
 }
