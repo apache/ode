@@ -26,8 +26,8 @@ class DaoBaseImpl {
         return _createTime;
     }
 
-    protected void finalize() throws Throwable {
-        super.finalize();
-        __logger.debug("Finalizing " + this);
-    }
+//    protected void finalize() throws Throwable {
+//        super.finalize();
+//        __logger.debug("Finalizing " + this);
+//    }
 }
