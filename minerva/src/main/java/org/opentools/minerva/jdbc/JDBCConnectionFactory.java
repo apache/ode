@@ -28,7 +28,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.opentools.minerva.cache.ObjectCache;
 import org.opentools.minerva.pool.ObjectPool;
 import org.opentools.minerva.pool.PoolObjectFactory;
 
@@ -47,7 +46,6 @@ public class JDBCConnectionFactory extends PoolObjectFactory {
     private String userName;
     private String password;
     private PrintWriter log;
-    private int psCacheSize = 10;
     private ObjectPool pool;
 
     /**
@@ -101,20 +99,18 @@ public class JDBCConnectionFactory extends PoolObjectFactory {
     public String getPassword() {return password;}
 
     /**
-     * Sets the number of PreparedStatements to be cached for each
-     * Connection.  Your DB product may impose a limit on the number
-     * of open PreparedStatements.  The default value is 10.
+     * NOOP 
+     * @deprecated
      */
     public void setPSCacheSize(int size) {
-        psCacheSize = size;
     }
 
     /**
-     * Gets the number of PreparedStatements to be cached for each
-     * Connection.  The default value is 10.
+     * Returns 0.
+     * @deprecated
      */
     public int getPSCacheSize() {
-        return psCacheSize;
+        return 0;
     }
 
     /**
@@ -161,7 +157,6 @@ public class JDBCConnectionFactory extends PoolObjectFactory {
     public Object prepareObject(Object pooledObject) {
         Connection con = (Connection)pooledObject;
         ConnectionInPool wrapper = new ConnectionInPool(con);
-        wrapper.setPSCacheSize(psCacheSize);
         return wrapper;
     }
 
@@ -181,7 +176,7 @@ public class JDBCConnectionFactory extends PoolObjectFactory {
         ConnectionInPool wrapper = (ConnectionInPool)clientObject;
         Connection con = wrapper.getUnderlyingConnection();
         try {
-            wrapper.reset();
+            wrapper.invalidate();
         } catch(SQLException e) {
             pool.markObjectAsInvalid(clientObject);
         }
@@ -196,12 +191,6 @@ public class JDBCConnectionFactory extends PoolObjectFactory {
         try {
             con.rollback();
         } catch(SQLException e) {}
-
-        // Removed all the cached PreparedStatements for this Connection
-        ObjectCache cache = ConnectionInPool.psCaches.remove(con);
-        if(cache != null) {
-            cache.close();
-        }
 
         try {
             con.close();

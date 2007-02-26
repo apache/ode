@@ -39,15 +39,11 @@ public interface ConnectionWrapper extends Connection {
      * it) was used.
      */
     public void setLastUsed();
+    
     /**
      * Indicates to the connection that an error occured.  This is typically
      * used by statements and result sets derived from this connection.
      */
     public void setError(SQLException e);
-    /**
-     * Indicates that a statement derived from this connection was closed.
-     * Statements are tracked so that any open statements can be closed when
-     * the connection is closed (or reused in a pool).
-     */
-    public void statementClosed(Statement st);
+
 }
