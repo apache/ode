@@ -31,8 +31,6 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
-import org.opentools.minerva.cache.ObjectCache;
-import org.opentools.minerva.jdbc.ConnectionInPool;
 import org.opentools.minerva.pool.PoolEvent;
 import org.opentools.minerva.pool.PoolEventListener;
 import org.opentools.minerva.pool.PooledObject;
@@ -125,9 +123,7 @@ public class XAConnectionImpl implements XAConnection, PooledObject {
         try {
             con.close();
         } catch(SQLException e) {}
-        ObjectCache cache = ConnectionInPool.psCaches.remove(con);
-        if(cache != null)
-            cache.close();
+
         con = null;
         resource = null;
         listeners.clear();
@@ -218,7 +214,6 @@ public class XAConnectionImpl implements XAConnection, PooledObject {
     public Connection getConnection() {
         ++clientConnectionCount;
         XAClientConnection xaCon = new XAClientConnection(this, con);
-        xaCon.setPSCacheSize(preparedStatementCacheSize);
         return xaCon;
     }
 
