@@ -113,6 +113,9 @@ public class SharedLocalConnectionManager extends BaseConnectionManager implemen
             // and create one if necessary
             con = (ManagedConnection)pool.getObject(new ConnectionParameters(subj, info));
         }
+        
+        if (con == null)
+            throw new ResourceException("Pool exhausted, not blocking!");
 
         // Register the connection with the Tx Cache & the Transaction
         ConnectionListener listener = null;

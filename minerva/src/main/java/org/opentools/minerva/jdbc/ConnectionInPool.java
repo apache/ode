@@ -22,25 +22,25 @@
  */
 package org.opentools.minerva.jdbc;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.opentools.minerva.cache.LeastRecentlyUsedCache;
-import org.opentools.minerva.cache.ObjectCache;
 import org.opentools.minerva.pool.PoolEvent;
 import org.opentools.minerva.pool.PoolEventListener;
 import org.opentools.minerva.pool.PooledObject;
@@ -51,101 +51,51 @@ import org.opentools.minerva.pool.PooledObject;
  * etc. to update the last used time for the connection.
  * 
  * @author Aaron Mulder (ammulder@alumni.princeton.edu)
+ * @author Maciej Szefler m s z e f l e r ( at ) g m a i l . c o m 
  */
 public class ConnectionInPool implements PooledObject, ConnectionWrapper {
     private final static String CLOSED = "Connection has been closed!";
 
-    public final static int PS_CACHE_UNLIMITED = 0;
+    private static final String CONCURRENT = "Concurrent access to connection not permitted!";
 
-    public final static int PS_CACHE_DISABLED = -1;
+    private static final Class[] RESULT_SET_CLASS = { ResultSet.class };
 
-    public final static Map<Connection, ObjectCache> psCaches = new HashMap<Connection, ObjectCache>();
+    /** The actual (underlying) connection. */
+    protected volatile Connection _con;
 
-    private Connection con;
+    /** Has the object been invalidated? */
+    private volatile boolean _invalid = false;
 
-    private Set<Statement> statements;
+    /** Listeners. */
+    private CopyOnWriteArrayList<PoolEventListener> _listeners = new CopyOnWriteArrayList<PoolEventListener>();
 
-    private Vector<PoolEventListener> listeners;
+    /** Statements/result sets created by this connection wrapper. */
+    private Set<ManagedObject> _managedObjects = new HashSet<ManagedObject>();
 
-    private int preparedStatementCacheSize = 0;
-
-    private ObjectCache preparedStatementCache;
+    /** Work lock: detect concurrent use of connection. */
+    private AtomicBoolean _spinlock = new AtomicBoolean(false);
 
     /**
      * Creates a new connection wrapper.
      * 
-     * @param con
-     *            The "real" database connection to wrap.
+     * @param con the "real" database connection to wrap.
      */
     public ConnectionInPool(Connection con) {
-        this.con = con;
-        preparedStatementCache = psCaches.get(con);
-        if (preparedStatementCache == null) {
-            PreparedStatementFactory factory = new PreparedStatementFactory(con);
-            preparedStatementCache = new LeastRecentlyUsedCache(factory, preparedStatementCacheSize);
-            psCaches.put(con, preparedStatementCache);
-        }
-        statements = new HashSet<Statement>();
-        listeners = new Vector<PoolEventListener>();
-    }
-
-    /**
-     * Creates a new connection wrapper, using the specified maximum size for the prepared statement cache.
-     * 
-     * @param con
-     *            The "real" database connection to wrap.
-     * @param psCacheSize
-     *            The size of the PreparedStatement cache.
-     * @see #PS_CACHE_UNLIMITED
-     * @see #PS_CACHE_DISABLED
-     */
-    public ConnectionInPool(Connection con, int psCacheSize) {
-        this.con = con;
-        if (psCacheSize >= 0) {
-            preparedStatementCache = psCaches.get(con);
-            if (preparedStatementCache == null) {
-                PreparedStatementFactory factory = new PreparedStatementFactory(con);
-                preparedStatementCache = new LeastRecentlyUsedCache(factory, preparedStatementCacheSize);
-                psCaches.put(con, preparedStatementCache);
-            }
-        }
-        setPSCacheSize(psCacheSize);
-        statements = new HashSet<Statement>();
-        listeners = new Vector<PoolEventListener>();
-    }
-
-    /**
-     * Sets the number of PreparedStatements to be cached for each Connection. Your DB product may impose a limit on the number of
-     * open PreparedStatements.
-     * 
-     * @see #PS_CACHE_UNLIMITED
-     * @see #PS_CACHE_DISABLED
-     */
-    public void setPSCacheSize(int maxSize) {
-        preparedStatementCacheSize = maxSize;
-        if (maxSize >= 0 && preparedStatementCache != null)
-            preparedStatementCache.setSize(maxSize);
-    }
-
-    /**
-     * Gets the number of PreparedStatements to be cached for each Connection.
-     */
-    public int getPSCacheSize() {
-        return preparedStatementCacheSize;
+        this._con = con;
     }
 
     /**
      * Adds a listener for pool events.
      */
     public void addPoolEventListener(PoolEventListener listener) {
-        listeners.addElement(listener);
+        _listeners.add(listener);
     }
 
     /**
      * Removes a listener for pool events.
      */
     public void removePoolEventListener(PoolEventListener listener) {
-        listeners.remove(listener);
+        _listeners.remove(listener);
     }
 
     /**
@@ -153,16 +103,7 @@ public class ConnectionInPool implements PooledObject, ConnectionWrapper {
      * proprietary method - you will defeat all the pooling if you use the underlying connection directly.
      */
     public Connection getUnderlyingConnection() {
-        return con;
-    }
-
-    /**
-     * Closes this connection wrapper permanently. All further calls with throw a SQLException.
-     */
-    public void shutdown() {
-        con = null;
-        statements = null;
-        listeners = null;
+        return _con;
     }
 
     /**
@@ -188,173 +129,153 @@ public class ConnectionInPool implements PooledObject, ConnectionWrapper {
         firePoolEvent(pe);
     }
 
-    /**
-     * Indicates that a statement has been closed and no longer needs to be tracked. Outstanding statements are closed when the
-     * connection is returned to the pool.
-     */
-    public void statementClosed(Statement st) {
-        statements.remove(st);
-        if ((con != null) && (st instanceof PreparedStatementInPool)) {
-            // Now return the "real" statement to the pool
-            PreparedStatementInPool ps = (PreparedStatementInPool) st;
-            PreparedStatement ups = ps.getUnderlyingPreparedStatement();
-            if (preparedStatementCacheSize >= 0) {
-                preparedStatementCache.returnObject(ps.getArgs(), ups);
-            } else {
-                try {
-                    ups.close();
-                } catch (SQLException e) {
-                }
-            }
-            /*
-             * int rsType = ResultSet.TYPE_FORWARD_ONLY; int rsConcur = ResultSet.CONCUR_READ_ONLY; // We may have JDBC 1.0 driver
-             * try { rsType = ups.getResultSetType(); rsConcur = ups.getResultSetConcurrency(); } catch (Throwable th) { }
-             * PreparedStatementInPool.preparedStatementCache.put( new PSCacheKey(con, ps.getSql(), rsType, rsConcur), ups);
-             */
-        }
-    }
 
     /**
      * Prepares a connection to be returned to the pool. All outstanding statements are closed, and if AutoCommit is off, the
-     * connection is rolled back. No further SQL calls are possible once this is called.
+     * connection is rolled back. No further SQL calls are possible once this is called. This method may be invoked outside the
+     * normal application thread (typically by the transaction manager synchronizer).
      */
-    public void reset() throws SQLException {
-        List<Statement> copy = new ArrayList<Statement>(statements);
-        Iterator<Statement> it = copy.iterator();
-        while (it.hasNext())
-            try {
-                it.next().close();
-            } catch (SQLException e) {
+    public void invalidate() throws SQLException {
+        if (_invalid)
+            return;
+
+        _invalid = true; // this will prevent any further invocations.
+
+        try {
+            // Grab the lock, no waiting, if there is some rogue thread holding on to this
+            // connection, we cannot return to the pool.
+            if (!_spinlock.compareAndSet(false, true)) {
+                // throwing the exception will cause this connection to be purged from the pool.
+                throw new SQLException(CONCURRENT);
             }
-        if (!con.getAutoCommit()) {
-            con.rollback();
+
+            // We have the lock, we're safe, can clean up properly: close all the statements/results sets
+            for (ManagedObject s : _managedObjects)
+                s.invalidate();
+
+            if (!_con.getAutoCommit()) {
+                _con.rollback();
+            }
+        } finally {
+            _con = null;
         }
-        con = null;
     }
 
     /**
      * Dispatches an event to the listeners.
      */
     protected void firePoolEvent(PoolEvent evt) {
-        Vector local = (Vector) listeners.clone();
-        for (int i = local.size() - 1; i >= 0; i--)
+        for (PoolEventListener pel : _listeners) {
             if (evt.getType() == PoolEvent.OBJECT_CLOSED)
-                ((PoolEventListener) local.elementAt(i)).objectClosed(evt);
+                pel.objectClosed(evt);
             else if (evt.getType() == PoolEvent.OBJECT_ERROR)
-                ((PoolEventListener) local.elementAt(i)).objectError(evt);
+                pel.objectError(evt);
             else
-                ((PoolEventListener) local.elementAt(i)).objectUsed(evt);
+                pel.objectUsed(evt);
+        }
     }
 
     // ---- Implementation of java.sql.Connection ----
     public Statement createStatement() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            StatementInPool st = new StatementInPool(con.createStatement(), this);
-            statements.add(st);
-            return st;
+            return proxy(_con.createStatement(), Statement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
-        }
-    }
-
-    public PreparedStatement prepareStatement(PreparedStatementArgs args) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
-        try {
-            PreparedStatementInPool wrapper = null;
-            if (preparedStatementCacheSize >= 0) {
-                PreparedStatement ps = (PreparedStatement) preparedStatementCache.useObject(args);
-                if (ps == null)
-                    throw new SQLException("Unable to create PreparedStatement!");
-                wrapper = new PreparedStatementInPool(ps, this, args);
-            } else {
-                wrapper = new PreparedStatementInPool(con.prepareStatement(args.sql), this, args);
-            }
-            statements.add(wrapper);
-            return wrapper;
-        } catch (SQLException e) {
-            setError(e);
-            throw e;
+        } finally {
+            exit();
         }
     }
 
     public CallableStatement prepareCall(String sql) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.prepareCall(sql);
+            return proxy(_con.prepareCall(sql), CallableStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public String nativeSQL(String sql) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.nativeSQL(sql);
+            return _con.nativeSQL(sql);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.setAutoCommit(autoCommit);
+            _con.setAutoCommit(autoCommit);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public boolean getAutoCommit() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getAutoCommit();
+            return _con.getAutoCommit();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void commit() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.commit();
+            _con.commit();
         } catch (SQLException e) {
             setCatastrophicError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void rollback() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.rollback();
+            _con.rollback();
         } catch (SQLException e) {
             setCatastrophicError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void close() throws SQLException {
-        if (con == null)
+        // IMPORTANT: do not call enter()/exit() in this method, doing so will cause deadlock
+        // due to invalidate() being called via callback.
+
+        if (_con == null || _invalid)
             throw new SQLException(CLOSED);
+
         firePoolEvent(new PoolEvent(this, PoolEvent.OBJECT_CLOSED));
-        shutdown();
+
+        _con = null;
+        _listeners = null;
     }
 
     public boolean isClosed() throws SQLException {
+        Connection con = _con; // avoid NPE if _con changes between null test and isClosed() call.
+
         if (con == null)
             return true;
         try {
@@ -366,301 +287,320 @@ public class ConnectionInPool implements PooledObject, ConnectionWrapper {
     }
 
     public DatabaseMetaData getMetaData() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getMetaData();
+            return _con.getMetaData();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setReadOnly(boolean readOnly) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.setReadOnly(readOnly);
+            _con.setReadOnly(readOnly);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public boolean isReadOnly() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.isReadOnly();
+            return _con.isReadOnly();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setCatalog(String catalog) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.setCatalog(catalog);
+            _con.setCatalog(catalog);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public String getCatalog() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getCatalog();
+            return _con.getCatalog();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setTransactionIsolation(int level) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.setTransactionIsolation(level);
+            _con.setTransactionIsolation(level);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public int getTransactionIsolation() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getTransactionIsolation();
+            return _con.getTransactionIsolation();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public SQLWarning getWarnings() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getWarnings();
+            return _con.getWarnings();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void clearWarnings() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.clearWarnings();
+            _con.clearWarnings();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            StatementInPool st = new StatementInPool(con.createStatement(resultSetType, resultSetConcurrency), this);
-            statements.add(st);
-            return st;
+            return proxy(_con.createStatement(resultSetType, resultSetConcurrency), Statement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return prepareStatement(sql);
-    }
-
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.prepareCall(sql, resultSetType, resultSetConcurrency);
+            return proxy(_con.prepareStatement(sql, resultSetType, resultSetConcurrency), PreparedStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
+        }
+    }
+
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        enter();
+        try {
+            return proxy(_con.prepareCall(sql, resultSetType, resultSetConcurrency), CallableStatement.class);
+        } catch (SQLException e) {
+            setError(e);
+            throw e;
+        } finally {
+            exit();
         }
     }
 
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getTypeMap();
+            return _con.getTypeMap();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        if (con == null) {
-            throw new SQLException(CLOSED);
-        }
+        enter();
         try {
-            con.setTypeMap(map);
+            _con.setTypeMap(map);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public int getHoldability() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return con.getHoldability();
+            return _con.getHoldability();
 
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void setHoldability(int holdability) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.setHoldability(holdability);
+            _con.setHoldability(holdability);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public Savepoint setSavepoint() throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
-
+        enter();
         try {
-            return con.setSavepoint();
+            return _con.setSavepoint();
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.releaseSavepoint(savepoint);
+            _con.releaseSavepoint(savepoint);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public void rollback(Savepoint savepoint) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            con.rollback(savepoint);
+            _con.rollback(savepoint);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            Statement s = con.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
-            statements.add(s);
-            return s;
+            return proxy(_con.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), Statement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
 
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            CallableStatement cs = con.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-            statements.add(cs);
-            return cs;
+            return proxy(_con.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), CallableStatement.class);
+
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            return prepareStatement(new PreparedStatementArgs(sql, autoGeneratedKeys));
+            return proxy(_con.prepareStatement(sql, autoGeneratedKeys), PreparedStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
 
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            PreparedStatement ps = con.prepareStatement(sql, resultSetType, resultSetConcurrency);
-            statements.add(ps);
-            return ps;
+            return proxy(_con.prepareStatement(sql, resultSetType, resultSetConcurrency), PreparedStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public PreparedStatement prepareStatement(String sql, int columnIndexes[]) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            PreparedStatement ps = con.prepareStatement(sql, columnIndexes);
-            statements.add(ps);
-            return ps;
+            return proxy(_con.prepareStatement(sql, columnIndexes), PreparedStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public Savepoint setSavepoint(String name) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
-
+        enter();
         try {
-            return con.setSavepoint(name);
+            return _con.setSavepoint(name);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
     public PreparedStatement prepareStatement(String sql, String columnNames[]) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
+        enter();
         try {
-            PreparedStatement ps = con.prepareStatement(sql, columnNames);
-            statements.add(ps);
-            return ps;
+            return proxy(_con.prepareStatement(sql, columnNames), PreparedStatement.class);
         } catch (SQLException e) {
             setError(e);
             throw e;
+        } finally {
+            exit();
         }
     }
 
@@ -668,9 +608,126 @@ public class ConnectionInPool implements PooledObject, ConnectionWrapper {
      * @see java.sql.Connection#prepareStatement(java.lang.String)
      */
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        if (con == null)
-            throw new SQLException(CLOSED);
-        return prepareStatement(new PreparedStatementArgs(sql));
+        enter();
+        try {
+            return proxy(_con.prepareStatement(sql), PreparedStatement.class);
+        } finally {
+            exit();
+        }
     }
 
+    @SuppressWarnings("unchecked")
+    /**
+     * Build a managed proxy for a JDBC Statement-type object.
+     */
+    private <ST extends Statement> ST proxy(ST st, Class<ST> cls) throws SQLException {
+        StatementInvocationHandler sih = new StatementInvocationHandler(st);
+        Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { cls }, sih);
+        _managedObjects.add(sih);
+        return (ST) proxy;
+    }
+
+    private ResultSet proxy(ResultSet rs) throws SQLException {
+        ResultSetInvocationHandler sih = new ResultSetInvocationHandler(rs);
+        Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), RESULT_SET_CLASS, sih);
+        _managedObjects.add(sih);
+        return (ResultSet) proxy;
+    }
+
+    protected void enter() throws SQLException {
+        if (_spinlock.compareAndSet(false, true)) {
+            // Got lock, check if we are ok to proceed
+            if (_con == null || _invalid) {
+                // remember, we need to release the lock.
+                _spinlock.set(false);
+                throw new SQLException(CLOSED);
+            }
+        } else {
+            // couldn't get lock. indicates concurrent access attempt.
+            throw new SQLException(CONCURRENT);
+        }
+    }
+
+    protected void exit() {
+        if (!_spinlock.compareAndSet(true, false))
+            throw new IllegalStateException("INTERNAL ERROR: Releasing unheld lock!");
+    }
+
+    private abstract class ManagedObject implements InvocationHandler {
+        protected Object _target;
+
+        protected ManagedObject(Object target) {
+            _target = target;
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            enter();
+            try {
+                if (_target == null)
+                    throw new SQLException(CLOSED);
+
+                Object ret = method.invoke(_target, args);
+
+                if (method.getName().equals("close")) {
+                    _target = null;
+                    _managedObjects.remove(this);
+                }
+                    
+
+                if (ret instanceof ResultSet)
+                    return proxy((ResultSet) ret);
+                if (ret instanceof PreparedStatement)
+                    return proxy((PreparedStatement) ret, PreparedStatement.class);
+                if (ret instanceof CallableStatement)
+                    return proxy((CallableStatement) ret, CallableStatement.class);
+                if (ret instanceof Statement)
+                    return proxy((Statement) ret, Statement.class);
+                return ret;
+            } catch (InvocationTargetException ite) {
+                Throwable ex = ite.getTargetException();
+                if (ex instanceof SQLException)
+                    setError((SQLException) ex);
+                throw ex;
+            } finally {
+                exit();
+            }
+        }
+
+        abstract void invalidate();
+
+    }
+
+    private class StatementInvocationHandler extends ManagedObject {
+
+        public StatementInvocationHandler(Statement target) {
+            super(target);
+        }
+
+        public void invalidate() {
+            try {
+                ((Statement) _target).close();
+
+            } catch (Exception ex) {
+                ;
+                ; // not much we can do here.
+            }
+        }
+
+    }
+
+    private class ResultSetInvocationHandler extends ManagedObject {
+
+        public ResultSetInvocationHandler(ResultSet target) {
+            super(target);
+        }
+
+        public void invalidate() {
+            try {
+                ((ResultSet) _target).close();
+            } catch (Exception ex) {
+                ;
+                ; // not much we can do here.
+            }
+        }
+    }
 }
