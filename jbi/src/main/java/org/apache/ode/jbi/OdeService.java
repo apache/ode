@@ -18,8 +18,16 @@
  */
 package org.apache.ode.jbi;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.jbi.msgmap.MessageTranslationException;
+import org.w3c.dom.Element;
 
 import javax.jbi.JBIException;
 import javax.jbi.messaging.ExchangeStatus;
@@ -30,17 +38,8 @@ import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
 import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.xml.namespace.QName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.jbi.msgmap.MessageTranslationException;
-import org.w3c.dom.Element;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Bridge JBI (consumer) to ODE (provider).
@@ -212,6 +211,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             }
             odeMex = _ode._server.getEngine().createMessageExchange(jbiMex.getExchangeId(), _endpoint.serviceName,
                     jbiMex.getOperation().getLocalPart());
+            MessageExchangePattern pattern = odeMex.getMessageExchangePattern();
 
             if (odeMex.getOperation() != null) {
                 copyMexProperties(odeMex, jbiMex);
@@ -244,7 +244,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
             success = true;
             // For one-way invocation we do not need to maintain the association
-            if (odeMex.getMessageExchangePattern() != MessageExchangePattern.REQUEST_RESPONSE)
+            if (pattern != MessageExchangePattern.REQUEST_RESPONSE)
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
 
         } finally {            
