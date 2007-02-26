@@ -707,7 +707,7 @@ public class ObjectPool implements PoolEventListener {
             log("Pool "+this+" returned object "+object+" to the pool.");
         if(blocking) {
             synchronized(this) {
-                notify();
+                notifyAll();
             }
         }
     }

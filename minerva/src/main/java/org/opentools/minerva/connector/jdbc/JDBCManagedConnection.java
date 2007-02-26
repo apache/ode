@@ -38,15 +38,14 @@ import org.opentools.minerva.pool.PoolEvent;
 import org.opentools.minerva.pool.PoolEventListener;
 
 /**
- * ManagedConnection implementation for JDBC connections.  Rolls back on
- * cleanup, closes on destroy.  This represents one physical connection to
- * the DB, and it can be shared, but uses LocalTransactions only (no
- * XAResource).
+ * ManagedConnection implementation for JDBC connections. Rolls back on cleanup, closes on destroy. This represents one physical
+ * connection to the DB, and it can be shared, but uses LocalTransactions only (no XAResource).
+ * 
  * @author Aaron Mulder <ammulder@alumni.princeton.edu>
- * @version $Revision: 245 $
  */
 public class JDBCManagedConnection extends BaseManagedConnection {
     private Connection con;
+
     private String url;
 
     public JDBCManagedConnection(Connection con, String user, String url) {
@@ -56,7 +55,7 @@ public class JDBCManagedConnection extends BaseManagedConnection {
     }
 
     public Object getConnection(Subject sub, ConnectionRequestInfo info) throws ResourceException {
-        final ConnectionInPool wrapper = new ConnectionInPool(con, ConnectionInPool.PS_CACHE_UNLIMITED);
+        final ConnectionInPool wrapper = new ConnectionInPool(con);
         wrapper.addPoolEventListener(new PoolEventListener() {
             public void objectClosed(PoolEvent evt) {
                 ConnectionEvent ce = new ConnectionEvent(JDBCManagedConnection.this, ConnectionEvent.CONNECTION_CLOSED);
@@ -64,13 +63,16 @@ public class JDBCManagedConnection extends BaseManagedConnection {
                 fireConnectionEvent(ce);
                 wrapper.removePoolEventListener(this);
             }
+
             public void objectError(PoolEvent evt) {
                 ConnectionEvent ce = new ConnectionEvent(JDBCManagedConnection.this, ConnectionEvent.CONNECTION_ERROR_OCCURRED);
                 ce.setConnectionHandle(wrapper);
                 fireConnectionEvent(ce);
                 wrapper.removePoolEventListener(this);
             }
-            public void objectUsed(PoolEvent evt) {}
+
+            public void objectUsed(PoolEvent evt) {
+            }
         });
         return wrapper;
     }
@@ -87,8 +89,8 @@ public class JDBCManagedConnection extends BaseManagedConnection {
         super.destroy();
         try {
             con.close();
-        } catch(SQLException e) {
-            throw new ResourceException("Unable to close DB connection: "+e);
+        } catch (SQLException e) {
+            throw new ResourceException("Unable to close DB connection: " + e);
         }
         con = null;
     }
@@ -96,13 +98,13 @@ public class JDBCManagedConnection extends BaseManagedConnection {
     public void cleanup() throws ResourceException {
         try {
             con.rollback();
-        } catch(SQLException e) {
-            throw new ResourceException("Unable to rollback DB connection: "+e);
+        } catch (SQLException e) {
+            throw new ResourceException("Unable to rollback DB connection: " + e);
         }
     }
 
     public ManagedConnectionMetaData getMetaData() throws ResourceException {
-        /**@todo: Implement this javax.resource.spi.ManagedConnection method*/
+        /** @todo: Implement this javax.resource.spi.ManagedConnection method */
         throw new java.lang.UnsupportedOperationException("Method getMetaData() not yet implemented.");
     }
 
