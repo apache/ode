@@ -21,7 +21,17 @@ package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.evt.BpelEvent;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.sql.Timestamp;
 
 /**
@@ -31,10 +41,12 @@ import java.sql.Timestamp;
 @Table(name="ODE_EVENT")
 public class EventDAOImpl {
 
-    @Id @Column(name="EVENT_ID")
+    @Id
+    @Column(name="EVENT_ID")
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	private Long _id;
-    @Basic @Column(name="TSTAMP")
+    @Basic
+    @Column(name="TSTAMP")
     private Timestamp _tstamp;
     @Basic @Column(name="TYPE")
     private String _type;
@@ -48,10 +60,11 @@ public class EventDAOImpl {
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="PROCESS_ID")
     private ProcessDAOImpl _process;
-    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
+    @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="INSTANCE_ID")
     private ProcessInstanceDAOImpl _instance;
-    @Lob @Column(name="DATA")
+    @Lob
+    @Column(name="DATA")
     private BpelEvent _event;
 
     public BpelEvent getEvent() {

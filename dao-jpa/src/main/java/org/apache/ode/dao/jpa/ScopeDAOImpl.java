@@ -20,11 +20,29 @@
 package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Table;
+import javax.persistence.Version;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,14 +50,20 @@ import java.util.List;
 @Entity
 @Table(name="ODE_SCOPE")
 public class ScopeDAOImpl implements ScopeDAO {
+
+    @PersistenceContext private EntityManager _em;
 	
-	@Id @Column(name="SCOPE_ID")
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
+    @Column(name="SCOPE_ID")
+    @GeneratedValue(strategy= GenerationType.AUTO)
 	private Long _scopeInstanceId;
-	@Basic @Column(name="MODEL_ID") private int _modelId;
+    
+	@Basic
+    @Column(name="MODEL_ID") private int _modelId;
 	@Basic @Column(name="SCOPE_NAME") private String _name;
 	@Basic @Column(name="SCOPE_STATE") private String _scopeState;
-	@Version @Column(name="VERSION") private long _version;
+	@Version
+    @Column(name="VERSION") private long _version;
 	
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="PARENT_SCOPE_ID")
@@ -49,7 +73,7 @@ public class ScopeDAOImpl implements ScopeDAO {
 	private Collection<ScopeDAO> _childScopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<CorrelationSetDAO> _correlationSets = new ArrayList<CorrelationSetDAO>();
-	@OneToMany(targetEntity=PartnerLinkDAOImpl.class,fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+	@OneToMany(targetEntity=PartnerLinkDAOImpl.class,fetch= FetchType.LAZY,cascade={CascadeType.ALL})
     @ElementJoinColumn(name="SCOPE_ID", referencedColumnName="PLINK_ID")
     private Collection<PartnerLinkDAO> _partnerLinks = new ArrayList<PartnerLinkDAO>();
 	@OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -58,18 +82,12 @@ public class ScopeDAOImpl implements ScopeDAO {
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="PROCESS_INSTANCE_ID")
 	private ProcessInstanceDAOImpl _processInstance;
-	
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="CONNECTION_ID")
-	private BPELDAOConnectionImpl _connection;
 
 	public ScopeDAOImpl() {}
-	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi, BPELDAOConnectionImpl connection) {
+	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi) {
 		_parentScope = parentScope;
 		_name = name;
 		_modelId = scopeModelId;
-		_connection = connection;
-		_connection.addScope(this);
 		_processInstance = pi;
 	}
 	
@@ -100,7 +118,7 @@ public class ScopeDAOImpl implements ScopeDAO {
 			ret = new CorrelationSetDAOImpl(this,corrSetName);
 			
 			// Persist the new correlation set to generate an ID
-			_connection.getEntityManager().persist(ret);
+			_em.persist(ret);
 			
 			_correlationSets.add(ret);
 		}

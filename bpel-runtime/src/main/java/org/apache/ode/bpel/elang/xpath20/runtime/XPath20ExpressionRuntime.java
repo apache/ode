@@ -36,14 +36,22 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.utils.xsd.XMLCalendar;
 import org.apache.ode.utils.xsl.XslTransformHandler;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * XPath 2.0 Expression Language run-time subsytem.
@@ -94,6 +102,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
         if (someRes instanceof List) {
             result = (List) someRes;
+            __log.debug("Returned list of size " + result.size());
             if ((result.size() == 1) && !(result.get(0) instanceof Node)) {
               Document d = DOMUtils.newDocument();
               // Giving our node a parent just in case it's an LValue expression
@@ -105,6 +114,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             }
         } else if (someRes instanceof NodeList) {
             NodeList retVal = (NodeList) someRes;
+            __log.debug("Returned node list of size " + retVal.getLength());
             result = new ArrayList(retVal.getLength());
             for(int m = 0; m < retVal.getLength(); ++m) {
                 Node val = retVal.item(m);

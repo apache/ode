@@ -18,14 +18,14 @@
  */
 package org.apache.ode.bpel.engine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * 
@@ -43,6 +43,8 @@ public class InstanceLockManager {
     private final Map<Long, InstanceInfo> _locks = new HashMap<Long,InstanceInfo> ();
     
     public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException, TimeoutException {
+        if (iid == null) return;
+
         String thrd = Thread.currentThread().toString();
         if (__log.isDebugEnabled())
             __log.debug(thrd + ": lock(iid=" + iid + ", time=" + time + tu+")");
@@ -79,6 +81,8 @@ public class InstanceLockManager {
     }
     
     public void unlock(Long iid)  {
+        if (iid == null) return;
+
         String thrd = Thread.currentThread().toString();
         if (__log.isDebugEnabled())
             __log.debug(thrd + ": unlock(iid=" + iid + ")");        

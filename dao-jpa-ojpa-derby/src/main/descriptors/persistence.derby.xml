@@ -3,7 +3,6 @@
     <persistence-unit name="ode-unit-test-embedded">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
         <class>org.apache.ode.dao.jpa.EventDAOImpl</class>
@@ -16,6 +15,7 @@
         <class>org.apache.ode.dao.jpa.ProcessInstanceDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
+        
         <class>org.apache.ode.store.jpa.ProcessConfDaoImpl</class>
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>

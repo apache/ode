@@ -19,19 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -57,6 +44,18 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -445,7 +444,7 @@ public class ODEServer {
 
         _server.setDaoConnectionFactory(_daoCF);
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
-        _server.setMessageExchangeContext(new P2PMexContextImpl(this, new MessageExchangeContextImpl(this), _scheduler));
+        _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
         if (_odeConfig.isDehydrationEnabled()) {
@@ -506,5 +505,4 @@ public class ODEServer {
             __log.debug("Ignoring store event: " + pse);
         }
     }
-
 }

@@ -56,11 +56,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         if (__log.isDebugEnabled())
             __log.debug("Processing an async reply from service " + myRoleMessageExchange.getServiceName());
 
-        // TODO Add a port in MessageExchange (for now there's only service) to be able to find the
-        // TODO right service. For now we'll just lookup by service+portType but if we have severalt ports
-        // TODO for the same portType that will not work.
-        ODEService service = _server.getService(myRoleMessageExchange.getServiceName(),
-                myRoleMessageExchange.getPortType().getQName());
-        service.notifyResponse(myRoleMessageExchange);
+        // Nothing to do, no callback is necessary, the client just synchornizes itself with the
+        // mex reply when invoking the engine.
     }
 }

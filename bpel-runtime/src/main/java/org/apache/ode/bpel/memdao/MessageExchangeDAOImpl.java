@@ -39,7 +39,8 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private QName callee;
 	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
-	
+    private String pipedMessageExchangeId;
+
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
 		this.messageExchangeId = messageEchangeId;
@@ -241,6 +242,14 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
             retVal.add((String)e.getKey());
         }
         return retVal;
+    }
+
+    public String getPipedMessageExchangeId() {
+        return pipedMessageExchangeId;
+    }
+
+    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
+        this.pipedMessageExchangeId = pipedMessageExchangeId;
     }
 
     public void release() {

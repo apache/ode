@@ -27,10 +27,20 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
@@ -45,7 +55,12 @@ import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -119,7 +134,6 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
-        markused();
         PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
         if (target == null) {
             String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
@@ -250,52 +264,57 @@ public class BpelProcess {
      */
     public void handleWorkEvent(Map<String, Object> jobData) {
         markused();
-        ProcessInstanceDAO procInstance;
 
         if (__log.isDebugEnabled()) {
             __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobData", jobData }));
         }
 
         WorkEvent we = new WorkEvent(jobData);
-        procInstance = getProcessDAO().getInstance(we.getIID());
-        if (procInstance == null) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
-            }
-            return;
-        }
 
-        BpelRuntimeContextImpl processInstance = createRuntimeContext(procInstance, null, null);
-        switch (we.getType()) {
-        case TIMER:
+        // Process level events
+        if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
             if (__log.isDebugEnabled()) {
-                __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
+                __log.debug("InvokeInternal event for mexid " + we.getMexId());
             }
-
-            processInstance.timerEvent(we.getChannel());
-            break;
-        case RESUME:
-            if (__log.isDebugEnabled()) {
-                __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
+            MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) getEngine().getMessageExchange(we.getMexId());
+            invokeProcess(mex);
+        } else {
+            // Instance level events
+            ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
+            if (procInstance == null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
+                }
+                return;
             }
 
-            processInstance.execute();
-
-            break;
-        case INVOKE_RESPONSE:
-            if (__log.isDebugEnabled()) {
-                __log.debug("InvokeResponse event for iid " + we.getIID());
+            BpelRuntimeContextImpl processInstance = createRuntimeContext(procInstance, null, null);
+            switch (we.getType()) {
+            case TIMER:
+                if (__log.isDebugEnabled()) {
+                    __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
+                }
+                processInstance.timerEvent(we.getChannel());
+                break;
+            case RESUME:
+                if (__log.isDebugEnabled()) {
+                    __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
+                }
+                processInstance.execute();
+                break;
+            case INVOKE_RESPONSE:
+                if (__log.isDebugEnabled()) {
+                    __log.debug("InvokeResponse event for iid " + we.getIID());
+                }
+                processInstance.invocationResponse(we.getMexId(), we.getChannel());
+                processInstance.execute();
+                break;
+            case MATCHER:
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Matcher event for iid " + we.getIID());
+                }
+                processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
             }
-
-            processInstance.invocationResponse(we.getMexId(), we.getChannel());
-            processInstance.execute();
-            break;
-        case MATCHER:
-            if (__log.isDebugEnabled()) {
-                __log.debug("Matcher event for iid " + we.getIID());
-            }
-
-            processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
         }
     }
 
@@ -414,6 +433,13 @@ public class BpelProcess {
         if (prole == null)
             throw new IllegalStateException("Unknown partner link " + link);
         return prole.getInitialEPR();
+    }
+
+    Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
+        PartnerLinkPartnerRoleImpl prole = getPartnerRoles().get(link);
+        if (prole == null)
+            throw new IllegalStateException("Unknown partner link " + link);
+        return prole._initialPartner;
     }
 
     EndpointReference getInitialMyRoleEPR(OPartnerLink link) {

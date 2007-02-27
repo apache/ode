@@ -19,8 +19,9 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -31,13 +32,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name="ODE_CORRELATION_SET")
@@ -47,14 +49,16 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _correlationSetId;
 	@Basic @Column(name="NAME") private String _name;
-	@Basic @Column(name="PROPERTIES") private HashMap<QName,String> _props = new HashMap<QName,String>();
-	@Basic @Column(name="CORRELATION_KEY") private CorrelationKey _correlationKey;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="SCOPE_ID")
-	private ScopeDAOImpl _scope;
+	@Basic @Column(name="CORRELATION_KEY") private String _correlationKey;
 	@Version @Column(name="VERSION") private long _version;
-	
-	public CorrelationSetDAOImpl() {}
+
+    @OneToMany(cascade={CascadeType.ALL})
+    private Collection<CorrSetProperty> _props = new ArrayList<CorrSetProperty>();
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
+    @Column(name="SCOPE_ID")
+    private ScopeDAOImpl _scope;
+
+    public CorrelationSetDAOImpl() {}
 	public CorrelationSetDAOImpl(ScopeDAOImpl scope, String name) {
 		_name = name;
 		_scope = scope;
@@ -69,7 +73,11 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	}
 
 	public Map<QName, String> getProperties() {
-		return _props;
+        HashMap<QName, String> map = new HashMap<QName, String>();
+        for (CorrSetProperty prop : _props) {
+            map.put(QName.valueOf(prop.getPropertyKey()), prop.getPropertyValue());
+        }
+        return map;
 	}
 
 	public ScopeDAO getScope() {
@@ -77,14 +85,13 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	}
 
 	public CorrelationKey getValue() {
-		return _correlationKey;
+		return new CorrelationKey(_correlationKey);
 	}
 
 	public void setValue(QName[] names, CorrelationKey values) {
-		_correlationKey = values;
+		_correlationKey = values.toCanonicalString();
 	    for (int m = 0; m < names.length; m++) {
-	    	_props.put(names[m], values.getValues()[m]);
+            _props.add(new CorrSetProperty(names[m].toString(), values.getValues()[m]));
         }
 	}
-
 }

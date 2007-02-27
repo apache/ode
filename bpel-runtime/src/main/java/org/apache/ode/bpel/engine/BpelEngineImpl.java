@@ -25,10 +25,17 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngine;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -99,7 +106,8 @@ public class BpelEngineImpl implements BpelEngine {
         _contexts = contexts;
     }
 
-    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation)
+    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService,
+                                                       String operation, String pipedMexId)
             throws BpelEngineException {
 
         BpelProcess target = route(targetService, null);
@@ -116,6 +124,7 @@ public class BpelEngineImpl implements BpelEngine {
         dao.setCallee(targetService);
         dao.setStatus(Status.NEW.toString());
         dao.setOperation(operation);
+        dao.setPipedMessageExchangeId(pipedMexId);
         MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
 
         if (target != null) {
@@ -123,6 +132,10 @@ public class BpelEngineImpl implements BpelEngine {
         }
 
         return mex;
+    }
+
+    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation) {
+        return createMessageExchange(clientKey, targetService, operation, null);        
     }
 
     public MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
@@ -267,29 +280,31 @@ public class BpelEngineImpl implements BpelEngine {
         // to a grinding halt.
         try {
 
-            ProcessInstanceDAO instance;
-            if (we.isInMem())
-                instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
-            else
-                instance = _contexts.dao.getConnection().getInstance(we.getIID());
+            BpelProcess process;
+            if (we.getProcessId() != null) {
+                process = _activeProcesses.get(we.getProcessId());
+            } else {
+                ProcessInstanceDAO instance;
+                if (we.isInMem()) instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
+                else instance = _contexts.dao.getConnection().getInstance(we.getIID());
 
-            if (instance == null) {
-                __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
-                // nothing we can do, this instance is not in the database, it will
-                // always
-                // fail.
-                return;
+                if (instance == null) {
+                    __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+                    // nothing we can do, this instance is not in the database, it will
+                    // always
+                    // fail.
+                    return;
+                }
+                ProcessDAO processDao = instance.getProcess();
+                process = _activeProcesses.get(processDao.getProcessId());
             }
 
-            ProcessDAO processDao = instance.getProcess();
-            BpelProcess process = _activeProcesses.get(processDao.getProcessId());
             if (process == null) {
                 // If the process is not active, it means that we should not be
-                // doing
-                // any work on its behalf, therefore we will reschedule the events
-                // for some time in the future (1 minute).
+                // doing any work on its behalf, therefore we will reschedule the
+                // events for some time in the future (1 minute).
                 Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                __log.info(__msgs.msgReschedulingJobForInactiveProcess(processDao.getProcessId(), jobInfo.jobName, future));
+                __log.info(__msgs.msgReschedulingJobForInactiveProcess(process.getPID(), jobInfo.jobName, future));
                 _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, future);
                 return;
             }
