@@ -8,13 +8,13 @@ package org.apache.ode.bpel.memdao;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import java.util.Properties;
 import java.io.IOException;
+import java.util.Properties;
 
 
 /**

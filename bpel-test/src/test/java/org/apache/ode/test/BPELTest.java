@@ -21,7 +21,12 @@ package org.apache.ode.test;
 import junit.framework.TestCase;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
@@ -57,7 +62,7 @@ public abstract class BPELTest extends TestCase {
 			emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
 			em = emf.createEntityManager();
 			String pr = Persistence.PERSISTENCE_PROVIDER;
-            _cf = new org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl();
+            _cf = new BPELDAOConnectionFactoryImpl();
             server.setDaoConnectionFactory(_cf);
             scheduler = new TestScheduler() {
                 @Override

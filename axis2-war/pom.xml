@@ -311,13 +311,7 @@
         <!-- JPA -->
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-jpa-ojpa</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>ode-dao-jpa</artifactId>
-                    <groupId>org.apache.ode</groupId>
-                </exclusion>
-            </exclusions>
+            <artifactId>ode-dao-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.persistence</groupId>

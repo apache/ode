@@ -27,13 +27,15 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
@@ -47,9 +49,8 @@ import javax.wsdl.Service;
 import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and our
@@ -67,7 +68,6 @@ public class ODEService {
     private Definition _wsdlDef;
     private QName _serviceName;
     private String _portName;
-    private Map<String, ResponseCallback> _waitingCallbacks;
     private WSAEndpoint _serviceRef;
     private boolean _isReplicateEmptyNS = false;
     private SoapMessageConverter _converter;
@@ -80,7 +80,6 @@ public class ODEService {
         _wsdlDef = def;
         _serviceName = serviceName;
         _portName = portName;
-        _waitingCallbacks = Collections.synchronizedMap(new HashMap<String, ResponseCallback>());
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
         _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), def, serviceName, portName,
                 _isReplicateEmptyNS);
@@ -91,7 +90,7 @@ public class ODEService {
             throws AxisFault {
         boolean success = true;
         MyRoleMessageExchange odeMex = null;
-        ResponseCallback callback = null;
+        Future responseFuture = null;
         try {
             _txManager.begin();
             if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
@@ -111,18 +110,12 @@ public class ODEService {
                 readHeader(msgContext, odeMex);
                 odeRequest.setMessage(msgEl);
 
-                // Preparing a callback just in case we would need one.
-                if (odeMex.getOperation().getOutput() != null) {
-                    callback = new ResponseCallback();
-                    _waitingCallbacks.put(odeMex.getClientId(), callback);
-                }
-
                 if (__log.isDebugEnabled()) {
                     __log.debug("Invoking ODE using MEX " + odeMex);
                     __log.debug("Message content:  " + DOMUtils.domToString(odeRequest.getMessage()));
                 }
                 // Invoking ODE
-                odeMex.invoke(odeRequest);
+                responseFuture = odeMex.invoke(odeRequest);
             } else {
                 success = false;
             }
@@ -149,81 +142,66 @@ public class ODEService {
                     throw new OdeFault("Rollback failed", e);
                 }
             }
+        }
 
-            if (odeMex.getOperation() != null) {
-                boolean timeout = false;
-                // Invocation response could be delayed, if so we have to wait
-                // for it.
-                if (odeMex.getMessageExchangePattern() == MessageExchangePattern.REQUEST_RESPONSE &&
-                        odeMex.getStatus() == MessageExchange.Status.ASYNC) {
-                    odeMex = callback.getResponse(TIMEOUT);
-                    if (odeMex == null)
-                        timeout = true;
-                } else {
-                    // Callback wasn't necessary, cleaning up
-                    _waitingCallbacks.remove(odeMex.getMessageExchangeId());
+        if (odeMex.getOperation() != null) {
+            // Waits for the response to arrive
+            try {
+                responseFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                String errorMsg = "Timeout or execution error when waiting for response to MEX "
+                        + odeMex + " " + e.toString();
+                __log.error(errorMsg);
+                __log.error(e);
+                throw new OdeFault(errorMsg);
+            }
+
+            if (outMsgContext != null) {
+                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+                outMsgContext.setEnvelope(envelope);
+
+                // Hopefully we have a response
+                __log.debug("Handling response for MEX " + odeMex);
+                boolean commit = false;
+                try {
+                    if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+                    _txManager.begin();
+                } catch (Exception ex) {
+                    throw new OdeFault("Error starting transaction!", ex);
                 }
-
-                if (outMsgContext != null) {
-                    SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-                    outMsgContext.setEnvelope(envelope);
-
-                    // Hopefully we have a response
-                    __log.debug("Handling response for MEX " + odeMex);
-                    if (timeout) {
-                        __log.error("Timeout when waiting for response to MEX " + odeMex);
-                        success = false;
-                    } else {
-                        boolean commit = false;
+                try {
+                    // Refreshing the message exchange
+                    odeMex = (MyRoleMessageExchange) _server.getEngine()
+                            .getMessageExchange(odeMex.getMessageExchangeId());
+                    onResponse(odeMex, outMsgContext);
+                    commit = true;
+                } catch (AxisFault af) {
+                    __log.error("Error processing response for MEX " + odeMex, af);
+                    commit = true;
+                    throw af;
+                } catch (Exception e) {
+                    __log.error("Error processing response for MEX " + odeMex, e);
+                    throw new OdeFault("An exception occured when invoking ODE.", e);
+                } finally {
+                    if (commit)
                         try {
-                            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
-                            _txManager.begin();
-                        } catch (Exception ex) {
-                            throw new OdeFault("Error starting transaction!", ex);
-                        }
-                        try {
-                            onResponse(odeMex, outMsgContext);
-                            commit = true;
-                        } catch (AxisFault af) {
-                            __log.error("Error processing response for MEX " + odeMex, af);
-                            commit = true;
-                            throw af;
+                            if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
+                            _txManager.commit();
                         } catch (Exception e) {
-                            __log.error("Error processing response for MEX " + odeMex, e);
-                            throw new OdeFault("An exception occured when invoking ODE.", e);
-                        } finally {
-                            if (odeMex!= null) odeMex.release();
-                            else __log.warn("Couldn't release a message exchange, it's null.");
-                            if (commit)
-                                try {
-                                    if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
-                                    _txManager.commit();
-                                } catch (Exception e) {
-                                    throw new OdeFault("Commit failed!", e);
-                                }
-                            else
-                                try {
-                                    _txManager.rollback();
-                                } catch (Exception ex) {
-                                    throw new OdeFault("Rollback failed!", ex);
-                                }
+                            throw new OdeFault("Commit failed!", e);
                         }
-                    }
+                    else
+                        try {
+                            _txManager.rollback();
+                        } catch (Exception ex) {
+                            throw new OdeFault("Rollback failed!", ex);
+                        }
+
                 }
             }
         }
         if (!success)
             throw new OdeFault("Message was either unroutable or timed out!");
-    }
-
-    public void notifyResponse(MyRoleMessageExchange mex) {
-        ResponseCallback callback = _waitingCallbacks.get(mex.getClientId());
-        if (callback == null) {
-            __log.error("No active service for message exchange: " + mex);
-        } else {
-            callback.onResponse(mex);
-            _waitingCallbacks.remove(mex.getClientId());
-        }
     }
 
     public boolean respondsTo(QName serviceName, QName portTypeName) {
@@ -308,35 +286,6 @@ public class ODEService {
 
     public AxisService getAxisService() {
         return _axisService;
-    }
-
-    static class ResponseCallback {
-        private MyRoleMessageExchange _mmex;
-
-        private boolean _timedout;
-
-        synchronized boolean onResponse(MyRoleMessageExchange mmex) {
-            if (_timedout) {
-                return false;
-            }
-            _mmex = mmex;
-            this.notify();
-            return true;
-        }
-
-        synchronized MyRoleMessageExchange getResponse(long timeout) {
-            long etime = timeout == 0 ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
-            long ctime;
-            try {
-                while (_mmex == null && (ctime = System.currentTimeMillis()) < etime) {
-                    this.wait(etime - ctime);
-                }
-            } catch (InterruptedException ie) {
-                // ignore
-            }
-            _timedout = _mmex == null;
-            return _mmex;
-        }
     }
 
     /**

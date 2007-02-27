@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -219,7 +218,6 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             odeMex = _ode._server.getEngine().createMessageExchange(jbiMex.getExchangeId(), _endpoint.serviceName,
                     jbiMex.getOperation().getLocalPart());
 
-            MessageExchangePattern pattern = null;
             if (odeMex.getOperation() != null) {
                 copyMexProperties(odeMex, jbiMex);
                 javax.wsdl.Message msgdef = odeMex.getOperation().getInput().getMessage();
@@ -236,8 +234,6 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 mapper.toODE(odeRequest, request, msgdef);
                 odeMex.invoke(odeRequest);
 
-                pattern = odeMex.getMessageExchangePattern();
-
                 // Handle the response if it is immediately available.
                 if (odeMex.getStatus() != Status.ASYNC) {
                     __log.debug("ODE MEX " + odeMex + " completed SYNCHRONOUSLY.");
@@ -253,8 +249,8 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
             success = true;
             // For one-way invocation we do not need to maintain the association
-            if (pattern == null || pattern != MessageExchangePattern.REQUEST_RESPONSE) {
-                __log.debug("Consuming non Req/Res MEX tracker " + jbiMex.getExchangeId());
+            if (jbiMex.getPattern().equals(org.apache.ode.jbi.MessageExchangePattern.IN_ONLY)) {
+                __log.debug("Consuming non Req/Res MEX tracker " + jbiMex.getExchangeId() + " with pattern " + jbiMex.getPattern());
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
             }
 

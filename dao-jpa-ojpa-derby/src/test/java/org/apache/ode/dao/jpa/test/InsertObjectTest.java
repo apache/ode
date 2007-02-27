@@ -19,18 +19,8 @@
 
 package org.apache.ode.dao.jpa.test;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.GregorianCalendar;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.namespace.QName;
-
+import junit.framework.TestCase;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
@@ -42,12 +32,16 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.dao.jpa.ojpa.*;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.openjpa.persistence.ArgumentException;
 import org.xml.sax.SAXException;
 
-import junit.framework.TestCase;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class InsertObjectTest extends TestCase {
 	
