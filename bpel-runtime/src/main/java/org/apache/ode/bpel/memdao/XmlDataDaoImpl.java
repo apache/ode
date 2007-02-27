@@ -43,11 +43,11 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
      * @see XmlDataDAO#get()
      */
     public Node get() {
-        if (_data == null || !(_data instanceof Element)) return _data;
+        if (_data == null) return null;
         
         Document doc = DOMUtils.newDocument();
         Node copy = doc.importNode(_data, true);
-        doc.appendChild(copy);
+        if (_data instanceof Element) doc.appendChild(copy);
         return copy;
     }
 
