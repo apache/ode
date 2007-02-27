@@ -25,6 +25,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -32,10 +33,21 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
 import javax.xml.namespace.QName;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
+    public static final int TIMEOUT = 2 * 60 * 1000;
+
+    private static Map<String, ResponseCallback> _waitingCallbacks =
+            new ConcurrentHashMap<String, ResponseCallback>();
+
 
     public MyRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO mexdao) {
         super(engine, mexdao);
@@ -86,7 +98,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
-    public void invoke(Message request) {
+    public Future invoke(Message request) {
         if (request == null) {
             String errmsg = "Must pass non-null message to invoke()!";
             __log.fatal(errmsg);
@@ -97,7 +109,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         _dao.setStatus(MessageExchange.Status.REQUEST.toString());
 
         if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked))
-            return;
+            return null;
 
         BpelProcess target = _engine.route(getDAO().getCallee(), request);
 
@@ -110,10 +122,22 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 
             setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT);
             setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
+            return null;
         } else {
-            target.invokeProcess(this);
-        }
+            // Schedule a new job for invocation
+            WorkEvent we = new WorkEvent();
+            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
+            if (target.isInMemory()) we.setInMem(true);
+            we.setProcessId(target.getPID());
+            we.setMexId(getDAO().getMessageExchangeId());
 
+            ResponseCallback callback = new ResponseCallback();
+            _waitingCallbacks.put(getClientId(), callback);
+
+            setStatus(Status.ASYNC);
+            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            return new ResponseFuture(getClientId());
+        }
     }
 
     public void complete() {
@@ -142,6 +166,83 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 
     public boolean isAsynchronous() {
         return true;
+    }
+
+    static class ResponseFuture implements Future {
+        private String _clientId;
+        private boolean _done = false;
+
+        public ResponseFuture(String clientId) {
+            _clientId = clientId;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            throw new UnsupportedOperationException();
+        }
+        public Object get() throws InterruptedException, ExecutionException {
+            try {
+                return get(0, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                // If it's thrown it's definitely a bug
+                throw new ExecutionException(e);
+            }
+        }
+        public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            ResponseCallback callback = _waitingCallbacks.get(_clientId);
+            if (callback != null) {
+                callback.waitResponse(timeout);
+                _done = true;
+                if (callback._timedout)
+                    throw new TimeoutException("Message exchange " + this + " timed out when waiting for a response!");
+            }
+            return null;
+        }
+        public boolean isCancelled() {
+            return false;
+        }
+        public boolean isDone() {
+            return _done;
+        }
+    }
+
+    protected void responseReceived() {
+        final String cid = getClientId();
+        _engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+                __log.debug("Received myrole mex response callback");
+                ResponseCallback callback = _waitingCallbacks.remove(cid);
+                if (callback != null) callback.responseReceived();
+            }
+            public void beforeCompletion() {
+            }
+        });
+    }
+
+    static class ResponseCallback {
+        private boolean _timedout;
+        private boolean _waiting = true;
+
+        synchronized boolean responseReceived() {
+            if (_timedout) {
+                return false;
+            }
+            _waiting = false;
+            this.notify();
+            return true;
+        }
+
+        synchronized void waitResponse(long timeout) {
+            long etime = timeout == 0 ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
+            long ctime;
+            try {
+                while (_waiting && (ctime = System.currentTimeMillis()) < etime) {
+                    this.wait(etime - ctime);
+                }
+            } catch (InterruptedException ie) {
+                // ignore
+            }
+            _timedout = _waiting;
+        }
     }
 
 }

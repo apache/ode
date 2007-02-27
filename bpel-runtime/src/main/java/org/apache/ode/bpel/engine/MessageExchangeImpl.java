@@ -157,7 +157,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _operation = operation;
     }
 
-    protected MessageExchangeDAO getDAO() {
+    MessageExchangeDAO getDAO() {
         return _dao;
     }
 
@@ -178,6 +178,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
         setStatus(Status.RESPONSE);
         getDAO().setFault(null);
         getDAO().setResponse(((MessageImpl)outputMessage)._dao);
+
+        // Meant to be overriden by subclasses when needed
+        responseReceived();
     }
 
     void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
@@ -240,4 +243,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return "MEX["+getDAO().getMessageExchangeId() +"]";
     }
 
+    protected void responseReceived() {
+        // Nothing to do here, just opening the possibility of overriding
+    }
 }

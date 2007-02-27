@@ -19,9 +19,6 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathVariableResolver;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -36,6 +33,9 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathVariableResolver;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -98,7 +98,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
                 	return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
 
-                
+
                 // Saxon expects a node list, this nodelist should contain exactly one item, the attribute
                 // value
                 return new SingletonNodeList(variableNode);

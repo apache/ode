@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 
+import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class WorkEvent {
     }
 
     public enum Type {
-        TIMER, RESUME, INVOKE_RESPONSE, MATCHER
+        TIMER, RESUME, INVOKE_RESPONSE, MATCHER, INVOKE_INTERNAL
     }
 
     public String getChannel() {
@@ -108,6 +109,14 @@ public class WorkEvent {
         Boolean bool = (Boolean) _jobDetail.get("inmem");
         if (bool == null) return false;
         else return bool;
+    }
+
+    public void setProcessId(QName pid) {
+        _jobDetail.put("pid", pid.toString());
+    }
+
+    public QName getProcessId() {
+        return _jobDetail.get("pid") != null? QName.valueOf((String) _jobDetail.get("pid")) : null;
     }
 }
 

@@ -20,6 +20,7 @@
 package org.apache.ode.bpel.iapi;
 
 import javax.xml.namespace.QName;
+import java.util.concurrent.Future;
 
 /**
  * Extension of the {@link org.apache.ode.bpel.iapi.MessageExchange} interface
@@ -67,7 +68,7 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
      * the response become available.
      */
-    void invoke(Message request);
+    Future invoke(Message request);
 
     /**
      * Complete the message, exchange: indicates that the client has receive the
@@ -78,7 +79,7 @@ public interface MyRoleMessageExchange extends MessageExchange {
     /**
      * Associate a client key with this message exchange.
      * 
-     * @param bs
+     * @param clientKey
      */
     void setClientId(String clientKey);
 

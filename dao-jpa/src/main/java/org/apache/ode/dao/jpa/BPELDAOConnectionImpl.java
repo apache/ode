@@ -21,121 +21,68 @@ package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name="ODE_ROOT")
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
-
-    @Transient private EntityManager _em;
-
-    @Id @Column(name="ROOT_ID")
-    private Long _id;
-
-    @OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
-    private Collection<ProcessDAOImpl> _processes = new ArrayList<ProcessDAOImpl>();
-
-    @OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
-    private Collection<ProcessInstanceDAOImpl> _instances = new ArrayList<ProcessInstanceDAOImpl>();
-
-    @OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
-    private Collection<MessageExchangeDAOImpl> _messageEx = new ArrayList<MessageExchangeDAOImpl>();
-
-    @OneToMany(fetch=FetchType.LAZY,mappedBy="_connection",cascade={CascadeType.ALL})
-    private Collection<ScopeDAOImpl> _scopes = new ArrayList<ScopeDAOImpl>();
+	
+	EntityManager _em;
 
     public BPELDAOConnectionImpl(EntityManager em) {
-        _id = 0L;
         _em = em;
     }
 
     public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter,
                                           BpelEventFilter efilter) {
-        // TODO Auto-generated method stub
-        //return null;
+        // TODO
         throw new UnsupportedOperationException();
-        //System.out.println(ifilter.toString());
-        //System.out.println(efilter.toString());
-        //return null;
     }
 
     public List<Date> bpelEventTimelineQuery(InstanceFilter ifilter,
                                              BpelEventFilter efilter) {
-        // TODO Auto-generated method stub
-        //return null;
+        // TODO
         throw new UnsupportedOperationException();
     }
+	
+	public ProcessInstanceDAO getInstance(Long iid) {
+        return _em.find(ProcessInstanceDAOImpl.class, iid);
+	}
 
     public void close() {
         _em = null;
-
     }
 
     public MessageExchangeDAO createMessageExchange(char dir) {
-        MessageExchangeDAOImpl ret = new MessageExchangeDAOImpl(dir,this);
-        _messageEx.add(ret);
+        MessageExchangeDAOImpl ret = new MessageExchangeDAOImpl(dir);
+        _em.persist(ret);
         return ret;
     }
 
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,this,version);
-
-        _processes.add(ret);
+        System.out.println("########## " + _em.contains(ret));
+        _em.persist(ret);
         return ret;
     }
 
-    void addInstance(ProcessInstanceDAOImpl inst) {
-        _instances.add(inst);
-    }
-    void addScope(ScopeDAOImpl scope) {
-        _scopes.add(scope);
-    }
-    public Long getID() {
-        return _id;
-    }
-    public void setID(Long id) {
-        _id = id;
-    }
-
-    public ProcessInstanceDAO getInstance(Long iid) {
-        // TODO: may need a map or DB lookup here for performance
-        for (ProcessInstanceDAO inst : _instances) {
-            if (inst.getInstanceId().equals(iid) ) return inst;
-        }
-        return null;
-    }
-
-    public MessageExchangeDAO getMessageExchange(String mexid) {
-        // TODO: may need a map or DB lookup here for performance
-        for ( MessageExchangeDAOImpl mex : _messageEx ) {
-            if ( mex.getMessageExchangeId().equals(mexid)) return mex;
-        }
-        return null;
-    }
-
     public ProcessDAO getProcess(QName processId) {
-        List daos = _em.createQuery("select p from ProcessDAOImpl p").getResultList();
-        if (daos.size() > 0) return (ProcessDAO) daos.get(0);
-        else return null;
+        return _em.find(ProcessDAOImpl.class, processId.toString());
     }
 
     public ScopeDAO getScope(Long siidl) {
-        // TODO: May need a map or DB lookup here for performance
-        for ( ScopeDAOImpl s : _scopes ) {
-            if ( s.getScopeInstanceId().equals(siidl) ) return s;
-        }
-        return null;
+        return _em.find(ScopeDAOImpl.class, siidl);
     }
 
     public void insertBpelEvent(BpelEvent event, ProcessDAO process, ProcessInstanceDAO instance) {
@@ -151,39 +98,35 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
             eventDao.setScopeId(((ScopeEvent) event).getScopeId());
         eventDao.setEvent(event);
         _em.persist(eventDao);
-    }
+	}
 
+	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
-        // TODO: Implement me
-        return new ArrayList<ProcessInstanceDAO>(_instances);
-    }
+        // TODO
+        return _em.createQuery("select x from ProcessInstanceDAOImpl as x").getResultList();
+	}
 
-    public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
-        // TODO: Implement me
-        return new ArrayList<ProcessInstanceDAO>(_instances);
-    }
+   
+	public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
+	    return instanceQuery(new InstanceFilter(expression));
+	}
 
-    public Collection<ProcessDAO> processQuery(ProcessFilter criteria) {
-        // TODO: Implement me
-        return new ArrayList<ProcessDAO>(_processes);
+	public void setEntityManger(EntityManager em) {
+		_em = em;
+	}
+	
+	void removeProcess(ProcessDAOImpl p) {
+		if ( _em != null ) {
+			_em.remove(p);
+			_em.flush();
+		}
+	}
+
+    public MessageExchangeDAO getMessageExchange(String mexid) {
+        return _em.find(MessageExchangeDAOImpl.class, mexid);
     }
 
     public EntityManager getEntityManager() {
         return _em;
     }
-
-    public void setEntityManger(EntityManager em) {
-        _em = em;
-    }
-
-    void removeProcess(ProcessDAOImpl p) {
-        _processes.remove(p);
-
-        if ( _em != null ) {
-            _em.remove(p);
-            _em.flush();
-        }
-
-    }
-
 }
