@@ -57,7 +57,7 @@
 
 		<dependency>
 			<groupId>org.apache.ode</groupId>
-			<artifactId>ode-dao-jpa-ojpa</artifactId>
+			<artifactId>ode-dao-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ode</groupId>

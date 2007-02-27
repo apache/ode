@@ -85,7 +85,12 @@ public interface MessageExchangeDAO {
 
     /**
      * Set state of last message sent/received.
+<<<<<<< .mine
+     *
+     * @param status state to be set
+=======
      * @param string state to be set
+>>>>>>> .r511955
      */
     void setStatus(String status);
 
@@ -231,6 +236,14 @@ public interface MessageExchangeDAO {
     void setPartnerLink(PartnerLinkDAO plinkDAO);
 
     PartnerLinkDAO getPartnerLink();
+
+    /**
+     * Gets the mex id for the message exchange that has been piped with
+     * this one in a process to process interaction. 
+     * @return
+     */
+    String getPipedMessageExchangeId();
+    void setPipedMessageExchangeId(String mexId);
 
     void release();
 

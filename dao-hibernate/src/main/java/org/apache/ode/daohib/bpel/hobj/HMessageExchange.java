@@ -70,6 +70,8 @@ public class HMessageExchange extends HObject {
 
     private String _callee;
 
+    private String _pipedMessageExchangeId;
+
     private Map<String, String> _properties = new HashMap<String, String>();
 
     /**
@@ -322,4 +324,14 @@ public class HMessageExchange extends HObject {
         return _partnerLink;
     }
 
+    /**
+     * @hibernate.property column="PIPED_ID"
+     */
+    public String getPipedMessageExchangeId() {
+        return _pipedMessageExchangeId;
+    }
+
+    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
+        _pipedMessageExchangeId = pipedMessageExchangeId;
+    }
 }

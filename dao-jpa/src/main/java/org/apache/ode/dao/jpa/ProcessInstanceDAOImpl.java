@@ -20,20 +20,51 @@
 package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.w3c.dom.Element;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
 public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
-	@Id @Column(name="PROCESS_INSTANCE_ID") 
+    @Transient
+    private BPELDAOConnectionImpl _connection;
+
+	@Id @Column(name="PROCESS_INSTANCE_ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _instanceId;
 	@Basic @Column(name="LAST_RECOVERY_DATE") private Date _lastRecovery;
@@ -58,9 +89,6 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="CONNECTION_ID")
-	private BPELDAOConnectionImpl _connection;
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	@Column(name="INSTANTIATING_CORRELATOR_ID")
 	private CorrelatorDAOImpl _instantiatingCorrelator;
@@ -69,7 +97,6 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process, BPELDAOConnectionImpl connection) {
 		_instantiatingCorrelator = correlator;
 		_connection = connection;
-		_connection.addInstance(this);
 		_process = process;
 	}
 	
@@ -84,7 +111,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public ScopeDAO createScope(ScopeDAO parentScope, String name,
 			int scopeModelId) {
-		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this,_connection);
+		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this);
         ret.setState(ScopeStateEnum.ACTIVE);
 
         _scopes.add(ret);
@@ -119,7 +146,6 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	    // make sure we have completed.
 	    assert (ProcessState.isFinished(this.getState()));
 	    // let our process know that we've done our work.
-	    this.getProcess().instanceCompleted(this);
 	}
 
 	public long genMonotonic() {

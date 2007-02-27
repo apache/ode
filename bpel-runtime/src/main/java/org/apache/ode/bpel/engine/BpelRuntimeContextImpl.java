@@ -23,18 +23,50 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.*;
-import org.apache.ode.bpel.evt.*;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
+import org.apache.ode.bpel.evt.ProcessCompletionEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
+import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
+import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.*;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.runtime.BpelJacobRunnable;
+import org.apache.ode.bpel.runtime.BpelRuntimeContext;
+import org.apache.ode.bpel.runtime.CorrelationSetInstance;
+import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
+import org.apache.ode.bpel.runtime.PROCESS;
+import org.apache.ode.bpel.runtime.PartnerLinkInstance;
+import org.apache.ode.bpel.runtime.Selector;
+import org.apache.ode.bpel.runtime.VariableInstance;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
+import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -485,12 +517,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexRef);
 
-        MessageExchange.Status prevStatus = MessageExchange.Status.valueOf(mex.getStatus());
-
         MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
                 .getMessage().getQName());
         message.setData(msg);
-        mex.setResponse(message);
+
+        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
+        _bpelProcess.initMyRoleMex(m);
+        m.setResponse(new MessageImpl(message));
+
         if (fault != null) {
             mex.setStatus(MessageExchange.Status.FAULT.toString());
             mex.setFault(fault);
@@ -499,15 +533,35 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             mex.setStatus(MessageExchange.Status.RESPONSE.toString());
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
-        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
-        _bpelProcess.initMyRoleMex(m);
 
-        if (prevStatus == MessageExchange.Status.ASYNC)
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
+        if (mex.getPipedMessageExchangeId() != null) {
+            PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _bpelProcess
+                    .getEngine().getMessageExchange(mex.getPipedMessageExchangeId());
+            __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
+            switch (m.getStatus()) {
+                case FAILURE:
+                    // We can't seem to get the failure out of the myrole mex?
+                    pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
+                    break;
+                case FAULT:
+                    Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
+                            .getMessage().getQName());
+                    faultRes.setMessage(m.getResponse().getMessage());
+                    pmex.replyWithFault(m.getFault(), faultRes);
+                    break;
+                case RESPONSE:
+                    Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
+                    response.setMessage(m.getResponse().getMessage());
+                    pmex.reply(response);
+                    break;
+                default:
+                    __log.debug("Unexpected state: " + m.getStatus());
+                    break;
+            }
+        } else _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
 
         // send event
         sendEvent(evt);
-
     }
 
     /**
@@ -616,15 +670,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // initialized
         // then use the value from bthe deployment descriptor ..
         Element partnerEPR = plinkDAO.getPartnerEPR();
-        EndpointReference partnerEndpoint;
+        EndpointReference partnerEpr;
 
         if (partnerEPR == null) {
-            partnerEndpoint = _bpelProcess.getInitialPartnerRoleEPR(partnerLink.partnerLink);
+            partnerEpr = _bpelProcess.getInitialPartnerRoleEPR(partnerLink.partnerLink);
             // In this case, the partner link has not been initialized.
-            if (partnerEndpoint == null)
+            if (partnerEpr == null)
                 throw new FaultException(partnerLink.partnerLink.getOwner().constants.qnUninitializedPartnerRole);
         } else {
-            partnerEndpoint = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
+            partnerEpr = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
         }
 
         if (BpelProcess.__log.isDebugEnabled()) {
@@ -640,7 +694,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
-
         mexDao.setStatus(MessageExchange.Status.NEW.toString());
         mexDao.setOperation(operation.getName());
         mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
@@ -656,13 +709,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String mySessionId = plinkDAO.getMySessionId();
         String partnerSessionId = plinkDAO.getPartnerSessionId();
 
-//        mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
-//        mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
         if ( mySessionId != null )
            	mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
         if ( partnerSessionId != null )
            	mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
-
 
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
@@ -673,26 +723,50 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         message.setType(operation.getInput().getMessage().getQName());
 
         // Get he my-role EPR (if myrole exists) for optional use by partner
-        // (for callback
-        // mechanism).
+        // (for callback mechanism).
         EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
                 .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
-
         PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
-                partnerLink.partnerLink.partnerRolePortType, operation, partnerEndpoint, myRoleEndpoint, _bpelProcess
+                partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, _bpelProcess
                         .getPartnerRoleChannel(partnerLink.partnerLink));
-        _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
 
-        // If we couldn't find the endpoint, then there is no sense
-        // in asking the IL to invoke.
-        if (partnerEndpoint != null) {
-            mexDao.setEPR(partnerEndpoint.toXML().getDocumentElement());
+        Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
+        BpelProcess p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
+        if (p2pProcess != null) {
+            // Creating a my mex using the same message id as partner mex to "pipe" them
+            MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
+                    mex.getMessageExchangeId(), partnerEndpoint.serviceName,
+                    operation.getName(), mex.getMessageExchangeId());
+
+            __log.debug("Invoking in a p2p interaction, partnerrole " + mex + " - myrole " + myRoleMex);
+            Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
+            odeRequest.setMessage(outgoingMessage);
+
+            __log.debug("Setting session ids for p2p interaction, mySession "
+                    + partnerSessionId + " - partnerSess " + mySessionId);
+            if ( partnerSessionId != null )
+                   myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
+            if ( mySessionId != null )
+                   myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
+
             mex.setStatus(MessageExchange.Status.REQUEST);
-            _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
+            myRoleMex.invoke(odeRequest);
+
+            // Can't expect any sync response
+            mex.replyAsync();
         } else {
-            __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
-            mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint", partnerEPR);
+            // If we couldn't find the endpoint, then there is no sense
+            // in asking the IL to invoke.
+            if (partnerEpr != null) {
+                mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
+                mex.setStatus(MessageExchange.Status.REQUEST);
+                _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
+            } else {
+                __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
+                mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint", partnerEPR);
+            }
         }
+
         evt.setMexId(mexDao.getMessageExchangeId());
         sendEvent(evt);
 

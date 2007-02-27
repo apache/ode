@@ -19,30 +19,6 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -53,6 +29,26 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Element;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 @Entity
 @Table(name="ODE_MESSAGE_EXCHANGE")
@@ -76,9 +72,11 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	@Basic @Column(name="PORT_TYPE") private QName _portType;
 	@Basic @Column(name="PROPAGATE_TRANS") private boolean _propagateTransactionFlag;
 	@Basic @Column(name="STATUS") private String _status;
-	@Basic @Column(name="PROPERTIES") private HashMap<String,String> _props = new HashMap<String,String>();
-	@Basic @Column(name="CORRELATION_KEYS") 
-	private ArrayList<CorrelationKey> _correlationKeys = new ArrayList<CorrelationKey>();
+    @Basic @Column(name="CORRELATION_KEYS") private String _correlationKeys;
+    @Basic @Column(name="PIPED_ID") private String _pipedMessageExchangeId;
+
+    @OneToMany(cascade={CascadeType.ALL})
+    private Collection<MexProperty> _props = new ArrayList<MexProperty>();
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
 	@Column(name="PROCESS_INSTANCE_ID")
 	private ProcessInstanceDAOImpl _processInst;
@@ -95,14 +93,11 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	@Column(name="RESPONSE_MESSAGE_ID")
 	private MessageDAOImpl _response;
 	@Version @Column(name="VERSION") private long _version;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="CONNECTION_ID")
-	private BPELDAOConnectionImpl _connection;
-	
+		
 	public MessageExchangeDAOImpl() {}
-	public MessageExchangeDAOImpl(char direction, BPELDAOConnectionImpl connection){
+    
+	public MessageExchangeDAOImpl(char direction){
 		_direction = direction;
-		_connection = connection;
 		_id = new UUID().toString();
 	}
 	
@@ -192,11 +187,18 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public String getProperty(String key) {
-		return _props.get(key);
+        for (MexProperty prop : _props) {
+            if (prop.getPropertyKey().equals(key)) return prop.getPropertyValue();
+        }
+        return null;
 	}
 
 	public Set<String> getPropertyNames() {
-		return _props.keySet();
+        HashSet<String> propNames = new HashSet<String>();
+        for (MexProperty prop : _props) {
+            propNames.add(prop.getPropertyKey());
+        }
+        return propNames;
 	}
 
 	public MessageDAO getRequest() {
@@ -242,7 +244,6 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	public void setInstance(ProcessInstanceDAO dao) {
 		_processInst = (ProcessInstanceDAOImpl)dao;
-
 	}
 
 	public void setOperation(String opname) {
@@ -251,7 +252,6 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	public void setPartnerLink(PartnerLinkDAO plinkDAO) {
 		_partnerLink = (PartnerLinkDAOImpl)plinkDAO;
-
 	}
 
 	public void setPartnerLinkModelId(int modelId) {
@@ -268,35 +268,51 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	public void setProcess(ProcessDAO process) {
 		_process = (ProcessDAOImpl)process;
-
 	}
 
 	public void setProperty(String key, String value) {
-		_props.put(key, value);
-
+        _props.add(new MexProperty(key, value));
 	}
 
 	public void setRequest(MessageDAO msg) {
 		_request = (MessageDAOImpl)msg;
-
 	}
 
 	public void setResponse(MessageDAO msg) {
 		_response = (MessageDAOImpl)msg;
-
 	}
 
 	public void setStatus(String status) {
 		_status = status;
 	}
-	
-	public void addCorrelationKey(CorrelationKey correlationKey) {
-		_correlationKeys.add(correlationKey);
+
+    public String getPipedMessageExchangeId() {
+        return _pipedMessageExchangeId;
+    }
+
+    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
+        _pipedMessageExchangeId = pipedMessageExchangeId;
+    }
+
+    public void addCorrelationKey(CorrelationKey correlationKey) {
+        if (_correlationKeys == null)
+            _correlationKeys = correlationKey.toCanonicalString();
+        else
+            _correlationKeys = _correlationKeys + "^" + correlationKey.toCanonicalString();
 	}
-	
+
 	public Collection<CorrelationKey> getCorrelationKeys() {
-		return _correlationKeys;
-	}
+        ArrayList<CorrelationKey> correlationKeys = new ArrayList<CorrelationKey>();
+        if (_correlationKeys.indexOf("^") > 0) {
+            for (StringTokenizer tokenizer = new StringTokenizer(_correlationId, "^"); tokenizer.hasMoreTokens();) {
+                String corrStr = tokenizer.nextToken();
+                correlationKeys.add(new CorrelationKey(corrStr));
+            }
+            return correlationKeys;
+        } else correlationKeys.add(new CorrelationKey(_correlationKeys));
+        return correlationKeys;
+    }
+
 
     public void release() {
         // no-op for now, could be used to do some cleanup

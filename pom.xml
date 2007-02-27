@@ -142,7 +142,7 @@
         <module>bpel-scheduler-quartz</module>
 
         <module>dao-jpa</module>
-        <module>dao-jpa-ojpa</module>
+        <!--module>dao-jpa-ojpa</module-->
         <module>dao-jpa-ojpa-derby</module>
 
 	<!-- If you want a distro, build it explicitly. -->
@@ -1047,11 +1047,6 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-jpa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-ojpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

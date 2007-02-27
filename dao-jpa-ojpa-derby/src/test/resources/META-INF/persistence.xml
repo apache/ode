@@ -3,7 +3,6 @@
     <persistence-unit name="ode-unit-test-embedded">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.BPELDAOConnectionImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
         <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
         <class>org.apache.ode.dao.jpa.EventDAOImpl</class>

@@ -18,11 +18,6 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.util.Collection;
-import java.util.Date;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -41,6 +36,10 @@ import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * JacobRunnable that performs the work of the <code>invoke</code> activity.
@@ -112,7 +111,7 @@ public class INVOKE extends ACTIVITY {
                             // TODO: Better error handling
                             throw new RuntimeException(e);
                         }
-                       
+
                         getBpelRuntimeContext().initializeVariable(outputVar, response);
 
                         try {

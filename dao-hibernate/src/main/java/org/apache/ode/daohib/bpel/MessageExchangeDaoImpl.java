@@ -19,7 +19,11 @@
 
 package org.apache.ode.daohib.bpel;
 
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -115,16 +119,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         update();
     }
 
-    /**
-     * @see org.apache.ode.sfwk.bapi.dao.MessageExchangeDAO#getCorrelationId()
-     */
     public String getCorrelationId() {
         return _hself.getClientKey();
     }
 
-    /**
-     * @see org.apache.ode.sfwk.bapi.dao.MessageExchangeDAO#setCorrelationId(byte[])
-     */
     public void setCorrelationId(String clientKey) {
         _hself.setClientKey(clientKey);
         update();
@@ -300,8 +298,15 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
+    public String getPipedMessageExchangeId() {
+        return _hself.getPipedMessageExchangeId();
+    }
+
+    public void setPipedMessageExchangeId(String mexId) {
+        _hself.setPipedMessageExchangeId(mexId);
+    }
+
     public void release() {
         // no-op for now, could be used to do some cleanup
     }
-
 }

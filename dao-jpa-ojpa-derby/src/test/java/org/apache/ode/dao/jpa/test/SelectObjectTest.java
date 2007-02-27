@@ -19,16 +19,7 @@
 
 package org.apache.ode.dao.jpa.test;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.xml.namespace.QName;
-
+import junit.framework.TestCase;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -44,10 +35,12 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.utils.DOMUtils;
 
-import junit.framework.TestCase;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.namespace.QName;
+import java.util.Collection;
 
 public class SelectObjectTest extends TestCase {
 	
