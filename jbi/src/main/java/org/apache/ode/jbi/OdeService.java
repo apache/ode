@@ -112,6 +112,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
         if (jbiMex.getStatus() != ExchangeStatus.ACTIVE) {
             // We can forget about the exchange.
+            __log.debug("Consuming MEX tracker " + jbiMex.getExchangeId());
             _jbiMexTracker.consume(jbiMex.getExchangeId());
             return;
         }
@@ -165,6 +166,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
      *            message exchenge
      */
     public void onResponse(MyRoleMessageExchange mex) {
+        __log.debug("Consuming MEX tracker " + mex.getClientId());
         javax.jbi.messaging.MessageExchange jbiMex = _jbiMexTracker.consume(mex.getClientId());
         if (jbiMex == null) {
             __log.warn("Ignoring unknown async reply: " + mex);
@@ -211,8 +213,8 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             }
             odeMex = _ode._server.getEngine().createMessageExchange(jbiMex.getExchangeId(), _endpoint.serviceName,
                     jbiMex.getOperation().getLocalPart());
-            MessageExchangePattern pattern = odeMex.getMessageExchangePattern();
 
+            MessageExchangePattern pattern = null;
             if (odeMex.getOperation() != null) {
                 copyMexProperties(odeMex, jbiMex);
                 javax.wsdl.Message msgdef = odeMex.getOperation().getInput().getMessage();
@@ -229,6 +231,8 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 mapper.toODE(odeRequest, request, msgdef);
                 odeMex.invoke(odeRequest);
 
+                pattern = odeMex.getMessageExchangePattern();
+
                 // Handle the response if it is immediately available.
                 if (odeMex.getStatus() != Status.ASYNC) {
                     __log.debug("ODE MEX " + odeMex + " completed SYNCHRONOUSLY.");
@@ -244,10 +248,12 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
             success = true;
             // For one-way invocation we do not need to maintain the association
-            if (pattern != MessageExchangePattern.REQUEST_RESPONSE)
+            if (pattern == null || pattern != MessageExchangePattern.REQUEST_RESPONSE) {
+                __log.debug("Consuming non Req/Res MEX tracker " + jbiMex.getExchangeId());
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
+            }
 
-        } finally {            
+        } finally {
             if (success) {
                 __log.debug("Commiting ODE MEX " + odeMex);
                 _ode.getTransactionManager().commit();
