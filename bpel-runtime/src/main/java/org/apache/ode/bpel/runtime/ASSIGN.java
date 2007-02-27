@@ -109,8 +109,7 @@ class ASSIGN extends ACTIVITY {
                 Document doc = DOMUtils.newDocument();
                 Node val = to.getVariable().type.newInstance(doc);
                 if (val.getNodeType() == Node.TEXT_NODE) {
-                    Element tempwrapper = doc.createElementNS(null,
-                            "temporary-simple-type-wrapper");
+                    Element tempwrapper = doc.createElementNS(null, "temporary-simple-type-wrapper");
                     doc.appendChild(tempwrapper);
                     tempwrapper.appendChild(val);
                     val = tempwrapper;
@@ -350,6 +349,9 @@ class ASSIGN extends ACTIVITY {
             // Conventional Assignment logic.
             Node rvalue = evalRValue(ocopy.from);
             Node lvalue = evalLValue(ocopy.to);
+            __log.debug("lvalue after eval " + lvalue);
+            if (lvalue != null)
+                __log.debug("content " + DOMUtils.domToString(lvalue));
 
             // Get a pointer within the lvalue.
             Node lvaluePtr = lvalue;
@@ -371,6 +373,7 @@ class ASSIGN extends ACTIVITY {
                 LValueExpression lexpr = (LValueExpression) ocopy.to;
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
+                __log.debug("lvaluePtr expr res " + lvaluePtr);
             }
 
             // For partner link assignmenent, the whole content is assigned.
@@ -471,6 +474,10 @@ class ASSIGN extends ACTIVITY {
             throws FaultException {
         Document d = lvaluePtr.getOwnerDocument();
 
+        __log.debug("lvaluePtr type " + lvaluePtr.getNodeType());
+        __log.debug("lvaluePtr " + DOMUtils.domToString(lvaluePtr));
+        __log.debug("lvalue " + lvalue);
+
         switch (lvaluePtr.getNodeType()) {
             case Node.ELEMENT_NODE:
 
@@ -493,11 +500,17 @@ class ASSIGN extends ACTIVITY {
                 // Replace ourselves .
                 lvaluePtr.getParentNode().replaceChild(newval, lvaluePtr);
 
-                // A little kludge, let our caller know that the root
-                // element has changed. (used for assignment to a simple
-                // typed variable)
-                if (lvalue.getNodeType() == Node.ELEMENT_NODE && lvalue.getFirstChild().getNodeType() == Node.TEXT_NODE)
-                    lvalue = lvalue.getFirstChild();
+                // A little kludge, let our caller know that the root element has changed.
+                // (used for assignment to a simple typed variable)
+                if (lvalue.getNodeType() == Node.ELEMENT_NODE) {
+                    // No children, adding an empty text children to point to
+                    if (lvalue.getFirstChild() == null) {
+                        Text txt = lvalue.getOwnerDocument().createTextNode("");
+                        lvalue.appendChild(txt);
+                    }
+                    if (lvalue.getFirstChild().getNodeType() == Node.TEXT_NODE)
+                        lvalue = lvalue.getFirstChild();
+                }
                 if (lvalue.getNodeType() == Node.TEXT_NODE && ((Text) lvalue).getWholeText().equals(
                         ((Text) lvaluePtr).getWholeText()))
                     lvalue = lvaluePtr = newval;
