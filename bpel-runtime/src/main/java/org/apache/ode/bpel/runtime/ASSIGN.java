@@ -349,9 +349,10 @@ class ASSIGN extends ACTIVITY {
             // Conventional Assignment logic.
             Node rvalue = evalRValue(ocopy.from);
             Node lvalue = evalLValue(ocopy.to);
-            __log.debug("lvalue after eval " + lvalue);
-            if (lvalue != null)
-                __log.debug("content " + DOMUtils.domToString(lvalue));
+            if (__log.isDebugEnabled()) {
+                __log.debug("lvalue after eval " + lvalue);
+                if (lvalue != null) __log.debug("content " + DOMUtils.domToString(lvalue));
+            }
 
             // Get a pointer within the lvalue.
             Node lvaluePtr = lvalue;
@@ -373,7 +374,8 @@ class ASSIGN extends ACTIVITY {
                 LValueExpression lexpr = (LValueExpression) ocopy.to;
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
-                __log.debug("lvaluePtr expr res " + lvaluePtr);
+                if (__log.isDebugEnabled())
+                    __log.debug("lvaluePtr expr res " + lvaluePtr);
             }
 
             // For partner link assignmenent, the whole content is assigned.
@@ -402,7 +404,7 @@ class ASSIGN extends ACTIVITY {
                         .getVariable());
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
-                            "' value '" + DOMUtils.domToString(lvalue) +"'");
+                                "' value '" + DOMUtils.domToString(lvalue) +"'");
                 napi.commitChanges(lval, lvalue);
             }
         }
@@ -449,8 +451,8 @@ class ASSIGN extends ACTIVITY {
             Element replacement = (Element)doc.importNode(src, true);
             parent.replaceChild(replacement, ptr);
             return (lval == ptr) ? replacement :  lval;
-        } 
-    
+        }
+
         Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr
                 .getLocalName());
         NodeList nl = src.getChildNodes();
@@ -474,9 +476,11 @@ class ASSIGN extends ACTIVITY {
             throws FaultException {
         Document d = lvaluePtr.getOwnerDocument();
 
-        __log.debug("lvaluePtr type " + lvaluePtr.getNodeType());
-        __log.debug("lvaluePtr " + DOMUtils.domToString(lvaluePtr));
-        __log.debug("lvalue " + lvalue);
+        if (__log.isDebugEnabled()) {
+            __log.debug("lvaluePtr type " + lvaluePtr.getNodeType());
+            __log.debug("lvaluePtr " + DOMUtils.domToString(lvaluePtr));
+            __log.debug("lvalue " + lvalue);
+        }
 
         switch (lvaluePtr.getNodeType()) {
             case Node.ELEMENT_NODE:
