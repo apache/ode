@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -35,8 +33,6 @@ import javax.xml.transform.dom.DOMResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.DOMUtilsTest;
-import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
