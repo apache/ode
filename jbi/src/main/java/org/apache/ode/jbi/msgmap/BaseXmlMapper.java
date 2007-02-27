@@ -34,14 +34,16 @@ import javax.xml.transform.dom.DOMResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.DOMUtilsTest;
 import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.sun.org.apache.xerces.internal.util.DOMUtil;
+
 public abstract class BaseXmlMapper {
     protected Log __log = LogFactory.getLog(getClass());
-
-    private DocumentBuilderFactory _dbf;
 
     private TransformerFactory _transformerFactory;
 
@@ -50,7 +52,6 @@ public abstract class BaseXmlMapper {
 
     protected BaseXmlMapper() {
         _transformerFactory = TransformerFactory.newInstance();
-        _dbf = XMLParserUtils.getDocumentBuilderFactory();  // we don't trust system provided parser!
     }
 
     protected Element parse(Source content) throws MessageTranslationException {
@@ -83,13 +84,7 @@ public abstract class BaseXmlMapper {
     }
 
     protected Document newDocument() {
-        try {
-            return _dbf.newDocumentBuilder().newDocument();
-        } catch (ParserConfigurationException e) {
-            String errmsg = "Parser configuration error!";
-            __log.fatal(errmsg, e);
-            throw new Error(errmsg, e);
-        }
+        return DOMUtils.newDocument();
     }
 
 }
