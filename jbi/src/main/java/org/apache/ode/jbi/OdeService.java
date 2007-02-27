@@ -117,6 +117,11 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             return;
         }
 
+        if (jbiMex.getOperation() == null) {
+            throw new IllegalArgumentException("Null operation in JBI message exchange id=" + jbiMex.getExchangeId()
+                                                + " endpoint=" + _endpoint);
+        }
+
         if (jbiMex.getPattern().equals(org.apache.ode.jbi.MessageExchangePattern.IN_ONLY)) {
             boolean success = false;
             Exception err = null;
