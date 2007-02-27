@@ -317,9 +317,13 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
             QName fault = mex.getFault();
             javax.wsdl.Fault wsdlFault = mex.getOperation().getFault(fault.getLocalPart());
-            mapper.toNMS(flt, mex.getFaultResponse(), wsdlFault != null ? wsdlFault.getMessage() : null, fault);
-            inout.setFault(flt);
-            _ode.getChannel().send(inout);
+            if (wsdlFault == null) {
+               sendError(jbiMex, new MessageTranslationException("Unmapped Fault : " + fault + ": " + mex.getFaultExplanation()));
+            } else {
+                mapper.toNMS(flt, mex.getFaultResponse(), wsdlFault.getMessage(), fault);
+                inout.setFault(flt);
+                _ode.getChannel().send(inout);
+            }
         } catch (MessagingException e) {
             __log.error("Error bridging ODE fault response: ", e);
             sendError(jbiMex, e);
@@ -332,6 +336,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     private void sendError(javax.jbi.messaging.MessageExchange jbiMex, Exception error) {
         try {
             jbiMex.setError(error);
+            jbiMex.setStatus(ExchangeStatus.ERROR);
             _ode.getChannel().send(jbiMex);
         } catch (Exception e) {
             __log.error("Error sending ERROR status: ", e);
