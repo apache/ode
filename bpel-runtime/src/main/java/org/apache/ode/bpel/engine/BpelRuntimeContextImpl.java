@@ -977,7 +977,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         vpu = new JacobVPU();
         vpu.registerExtension(BpelRuntimeContext.class, this);
         soup = new ExecutionQueueImpl(null);
-        soup.setReplacementMap(_bpelProcess._replacementMap);
+        soup.setReplacementMap(_bpelProcess.getReplacementMap());
         vpu.setContext(soup);
     }
 
