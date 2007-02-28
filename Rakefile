@@ -45,7 +45,7 @@ JAVAX               = OpenStruct.new(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
-JENCKS              = "org.jencks:jencks:jar:1.3:all"
+JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 JOTM                = "jotm:jotm:jar:2.0.10"
 LOG4J               = "log4j:log4j:jar:1.2.13"
@@ -67,7 +67,7 @@ XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 repositories.remote[:central] = "http://pxe.intalio.org/public/maven2"
 repositories.remote[:apache_incubator]="http://people.apache.org/repo/m2-incubating-repository"
-
+repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
