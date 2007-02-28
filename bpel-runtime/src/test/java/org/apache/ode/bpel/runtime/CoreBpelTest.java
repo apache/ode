@@ -404,4 +404,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
       return null;
     }
 
+    public void releasePartnerMex(String mexId) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
