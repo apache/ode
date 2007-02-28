@@ -342,13 +342,6 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * recovery channel for the activity in question.
      */
     protected void recover(String action) {
-/*
-        TInstanceInfoList instances = _management.listAllInstances().getInstanceInfoList();
-        assertTrue(instances.sizeOfInstanceInfoArray() > 0);
-        TInstanceInfo instance = instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
-        assertNotNull(instance);
-*/
-
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(lastInstance(), null, null);
         assertTrue(recoveries.size() == 1);
         TActivityInfo activity = recoveries.get(0);
@@ -359,10 +352,8 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,
                                                             ArrayList<TActivityInfo> recoveries) {
-        if (instance == null)
-            instance = _management.listAllInstances().getInstanceInfoList().getInstanceInfoArray(0);
         if (scope == null)
-            scope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
+            scope = _management.getScopeInfoWithActivity(lastInstance().getRootScope().getSiid(), true).getScopeInfo();
         if (recoveries == null)
             recoveries = new ArrayList<TActivityInfo>();
         TScopeInfo.Activities activities = scope.getActivities();
