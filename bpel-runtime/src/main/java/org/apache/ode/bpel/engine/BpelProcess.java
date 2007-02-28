@@ -96,7 +96,7 @@ public class BpelProcess {
     BpelEngineImpl _engine;
     DebuggerSupport _debugger;
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
-    ReplacementMap _replacementMap;
+    private ReplacementMap _replacementMap;
     final ProcessConf _pconf;
     // Notifying the server when a process hydrates
     private ProcessLifecycleCallback _lifeCallback;
@@ -568,6 +568,7 @@ public class BpelProcess {
 
     public ReplacementMap getReplacementMap() {
         if (_replacementMap == null) hydrate();
+        assert _replacementMap != null;
         return _replacementMap;
     }
 
