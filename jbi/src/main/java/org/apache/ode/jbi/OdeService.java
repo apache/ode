@@ -133,9 +133,11 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             } finally {
                 if (!success) {
                     jbiMex.setStatus(ExchangeStatus.ERROR);
-                    jbiMex.setError(err);
+                    if (err != null && jbiMex.getError() != null)
+                        jbiMex.setError(err);
                 } else {
-                    jbiMex.setStatus(ExchangeStatus.DONE);
+                    if (jbiMex.getStatus() == ExchangeStatus.ACTIVE)
+                        jbiMex.setStatus(ExchangeStatus.DONE);
                 }
             }
         } else if (jbiMex.getPattern().equals(org.apache.ode.jbi.MessageExchangePattern.IN_OUT)) {
@@ -147,11 +149,18 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             } catch (Exception ex) {
                 __log.error("Error invoking ODE.", ex);
                 err = ex;
+            } catch (Throwable t) {
+                __log.error("Unexpected error invoking ODE.", t);
+                err = new RuntimeException(t);
             } finally {
-                if (!success) {
-                    jbiMex.setError(err);
-                    jbiMex.setStatus(ExchangeStatus.ERROR);
-                }
+                // If we got an error that wasn't sent.  
+                if (jbiMex.getStatus() == ExchangeStatus.ACTIVE && !success) {
+                    if (err != null && jbiMex.getError() != null)  {
+                        jbiMex.setError(err);
+                    }
+                    jbiMex.setStatus(ExchangeStatus.ERROR);     
+                    _ode.getChannel().send(jbiMex);         
+                }       
             }
         } else {
             __log.error("JBI MessageExchange " + jbiMex.getExchangeId() + " is of an unsupported pattern "
@@ -244,7 +253,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 }
             } else {
                 __log.error("ODE MEX " + odeMex + " was unroutable.");
-                jbiMex.setError(new IllegalArgumentException("Unroutable invocation."));
+                sendError(jbiMex, new IllegalArgumentException("Unroutable invocation."));
             }
 
             success = true;
