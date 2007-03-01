@@ -52,11 +52,9 @@ public interface Scheduler {
      * regardless of whether the tansaction commits.
      *
      * @param jobDetail information about the job
-     * @param when when the job should run (<code>null</code> means now)
      * @return unique (as far as the scheduler is concerned) job identifier
      */
-    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail,
-                               Date when) throws ContextException;
+    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException;
 
     /**
      * Make a good effort to cancel the job. If its already running no big

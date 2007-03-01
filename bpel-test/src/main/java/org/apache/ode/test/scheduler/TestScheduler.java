@@ -43,7 +43,7 @@ public class TestScheduler implements Scheduler {
         return null;
     }
 
-    public String scheduleVolatileJob(boolean arg0, Map<String, Object> arg1, Date arg2) throws ContextException {
+    public String scheduleVolatileJob(boolean arg0, Map<String, Object> arg1) throws ContextException {
         return null;
     }
 
