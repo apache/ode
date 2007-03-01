@@ -47,6 +47,7 @@ public class OdeConfigProperties {
 
     private static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
+
     private static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
 
     private static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";
@@ -60,6 +61,8 @@ public class OdeConfigProperties {
     private static final String PROP_POOL_MAX = "db.pool.max";
 
     private static final String PROP_POOL_MIN = "db.pool.min";
+
+    private static final String PROP_DB_POOL_BLOCKING = "db.pool.blocking";
 
     private static final String PROP_CONNECTOR_PORT = "jca.port";
 
@@ -175,6 +178,12 @@ public class OdeConfigProperties {
     public String getDbInternalJdbcDriverClass() {
         return getProperty(OdeConfigProperties.PROP_DB_INTERNAL_DRIVER, "org.apache.derby.jdbc.ClientDriver");
     }
+    
+    public boolean getPoolBlocking() {
+        return Boolean.valueOf(getProperty(PROP_DB_POOL_BLOCKING,"false"));
+    }
+
+
 
     public int getPoolMaxSize() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));
