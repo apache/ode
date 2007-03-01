@@ -149,7 +149,8 @@ public abstract class BaseConnectionManager implements ConnectionManager {
         handles = null;
         tm = null;
         sec = null;
-        logger.println(getClass().getName()+" shut down.");
+        if (logger != null)
+            logger.println(getClass().getName()+" shut down.");
         logger = null;
     }
 
