@@ -212,8 +212,29 @@ public class QuartzSchedulerImpl implements Scheduler {
         return jobDetail.getName();
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> detail, Date when) throws ContextException {
-        return schedule(detail, when, true, !transacted);
+    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
+        registerSynchronizer(new Synchronizer() {
+            public void afterCompletion(boolean success) {
+                try {
+                    if (transacted) {
+                        execIsolatedTransaction(new Callable() {
+                            public Object call() throws Exception {
+                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                                doExecute(ji);
+                                return null;
+                            }
+                        });
+                    } else {
+                        JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                        doExecute(ji);
+                    }
+                } catch (Exception e) {
+                    throw new ContextException("Failure when starting a new volatile job.", e);
+                }
+            }
+            public void beforeCompletion() { }
+        });
+        return null;
     }
 
     public void cancelJob(String jobId) throws ContextException {
@@ -311,9 +332,7 @@ public class QuartzSchedulerImpl implements Scheduler {
     }
 
     @SuppressWarnings("unchecked")
-    private void doExecute(JobExecutionContext jobcontext) throws JobExecutionException {
-        JobInfo ji = new JobInfo(jobcontext.getJobDetail().getName(), jobcontext.getJobDetail().getJobDataMap(), jobcontext
-                .getRefireCount());
+    private void doExecute(JobInfo ji) throws JobExecutionException {
         JobProcessor processor = _processor;
         if (processor == null)
             throw new JobExecutionException("No processor.", null, true);
@@ -332,7 +351,9 @@ public class QuartzSchedulerImpl implements Scheduler {
 
     public static void execute(JobExecutionContext jobcontext) throws JobExecutionException {
         String schedulerGuid = jobcontext.getJobDetail().getJobDataMap().getString("__scheduler");
-        __instanceMap.get(schedulerGuid).doExecute(jobcontext);
+        JobInfo ji = new JobInfo(jobcontext.getJobDetail().getName(), jobcontext.getJobDetail().getJobDataMap(),
+                jobcontext.getRefireCount());
+        __instanceMap.get(schedulerGuid).doExecute(ji);
     }
 
     /**

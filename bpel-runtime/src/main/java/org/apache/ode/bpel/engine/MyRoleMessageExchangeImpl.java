@@ -135,7 +135,10 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             _waitingCallbacks.put(getClientId(), callback);
 
             setStatus(Status.ASYNC);
-            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            if (target.isInMemory())
+                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+            else
+                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
             return new ResponseFuture(getClientId());
         }
     }

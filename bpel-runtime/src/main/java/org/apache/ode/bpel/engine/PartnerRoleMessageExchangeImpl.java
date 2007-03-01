@@ -94,7 +94,10 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
             we.setInMem(true);
         we.setChannel(getDAO().getChannel());
         we.setMexId(getDAO().getMessageExchangeId());
-        _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        if (we.isInMem())
+            _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+        else
+            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
     }
 
     /**
