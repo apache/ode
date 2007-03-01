@@ -659,7 +659,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
         we.setInMem(_bpelProcess.isInMemory());
-        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(false, we.getDetail(), new Date());
+        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
     }
 
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
@@ -825,7 +825,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     we.setIID(_iid);
                     we.setType(WorkEvent.Type.RESUME);
                     we.setInMem(_bpelProcess.isInMemory());
-                    _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
+                    if (_bpelProcess.isInMemory())
+                        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+                    else
+                        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);
