@@ -46,6 +46,8 @@ public abstract class BaseXmlMapper {
     /** Cache of the parsed messages. */
     private static Map<Source, Document> __parsed = Collections.synchronizedMap(new WeakHashMap<Source, Document>());
 
+    private static ThreadLocal<Transformer> __txers = new ThreadLocal();
+
     protected BaseXmlMapper() {
         _transformerFactory = TransformerFactory.newInstance();
     }
@@ -58,13 +60,16 @@ public abstract class BaseXmlMapper {
         if (parsed != null)
             return parsed.getDocumentElement();
 
-        Transformer txer = null;
+        Transformer txer = __txers.get();
+        if (txer == null) {
         try {
             txer = _transformerFactory.newTransformer();
+                __txers.set(txer);
         } catch (TransformerConfigurationException e) {
             String errmsg = "Transformer configuration error!";
             __log.fatal(errmsg, e);
             throw new Error(errmsg, e);
+        }
         }
 
         try {
