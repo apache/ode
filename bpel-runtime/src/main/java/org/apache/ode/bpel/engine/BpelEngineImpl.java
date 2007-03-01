@@ -268,8 +268,7 @@ public class BpelEngineImpl implements BpelEngine {
             throw new Scheduler.JobProcessorException(true);
         } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
             __log.debug("Instance " + we.getIID() + " is busy, rescheduling job.");
-            // TODO: This should really be more of something like the exponential backoff algorithm in
-            // ethernet.
+            // TODO: This should really be more of something like the exponential backoff algorithm in ethernet.
             _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, new Date(System.currentTimeMillis()
                     + Math.min(randomExp(1000), 10000)));
             return;
@@ -339,17 +338,17 @@ public class BpelEngineImpl implements BpelEngine {
             __log.error("Rescheduling problematic job for a bit later: " + jobInfo, t);
 
             try {
-                _contexts.scheduler.execIsolatedTransaction(new Callable<Void>() {
-
-                    public Void call() throws Exception {
-                        jobInfo.jobDetail.put("final", true);
-                        _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail,
-                                new Date(System.currentTimeMillis() + 60 * 1000));
-                        return null;
-                    }
-
-                });
-
+                if (jobInfo.jobDetail.get("inmem") != null)
+                    _contexts.scheduler.scheduleVolatileJob(true, jobInfo.jobDetail);
+                else
+                    _contexts.scheduler.execIsolatedTransaction(new Callable<Void>() {
+                        public Void call() throws Exception {
+                            jobInfo.jobDetail.put("final", true);
+                            _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail,
+                                    new Date(System.currentTimeMillis() + 60 * 1000));
+                            return null;
+                        }
+                    });
             } catch (Exception ex) {
                 __log.error("Error rescheduling problematic job: " + jobInfo,ex);
                 saveToDisk = true;
