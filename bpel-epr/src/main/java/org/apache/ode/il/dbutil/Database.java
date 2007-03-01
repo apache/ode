@@ -160,7 +160,7 @@ public class Database {
 
         _minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
         _minervaPool.getPoolParams().minSize = _odeConfig.getPoolMinSize();
-        _minervaPool.getPoolParams().blocking = false;
+        _minervaPool.getPoolParams().blocking = _odeConfig.getPoolBlocking();
         _minervaPool.setType(MinervaPool.PoolType.MANAGED);
 
         try {
