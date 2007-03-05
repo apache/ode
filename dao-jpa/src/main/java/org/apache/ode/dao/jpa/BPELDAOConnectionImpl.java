@@ -57,8 +57,10 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     }
 	
 	public ProcessInstanceDAO getInstance(Long iid) {
-        return _em.find(ProcessInstanceDAOImpl.class, iid);
-	}
+        ProcessInstanceDAOImpl instance = _em.find(ProcessInstanceDAOImpl.class, iid);
+        instance.setConnection(this);
+        return instance;
+    }
 
     public void close() {
         _em = null;
@@ -72,13 +74,17 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,this,version);
-        System.out.println("########## " + _em.contains(ret));
         _em.persist(ret);
         return ret;
     }
 
     public ProcessDAO getProcess(QName processId) {
-        return _em.find(ProcessDAOImpl.class, processId.toString());
+        List l = _em.createQuery("select x from ProcessDAOImpl x where x._processId = ?1")
+                .setParameter(1, processId.toString()).getResultList();
+        if (l.size() == 0) return null;
+        ProcessDAOImpl p = (ProcessDAOImpl) l.get(0);
+        p.setConnection(this);
+        return p;
     }
 
     public ScopeDAO getScope(Long siidl) {
@@ -89,7 +95,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         EventDAOImpl eventDao = new EventDAOImpl();
         eventDao.setTstamp(new Timestamp(System.currentTimeMillis()));
         eventDao.setType(BpelEvent.eventName(event));
-        eventDao.setDetail(event.toString());
+        String evtStr = event.toString();
+        eventDao.setDetail(evtStr.substring(0, Math.min(254, evtStr.length())));
         if (process != null)
             eventDao.setProcess((ProcessDAOImpl) process);
         if (instance != null)
@@ -103,7 +110,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
         // TODO
-        return _em.createQuery("select x from ProcessInstanceDAOImpl as x").getResultList();
+        return _em.createQuery("select x from ProcessInstanceDAOImpl x").getResultList();
 	}
 
    

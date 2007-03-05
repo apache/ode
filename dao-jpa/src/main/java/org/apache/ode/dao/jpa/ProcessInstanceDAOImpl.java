@@ -31,7 +31,6 @@ import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.w3c.dom.Element;
 
 import javax.persistence.Basic;
@@ -44,8 +43,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
@@ -59,6 +61,9 @@ import java.util.Set;
 
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
+@NamedQueries({
+    @NamedQuery(name="ScopeById", query="SELECT s FROM ScopeDAOImpl as s WHERE s._scopeInstanceId = :sid and s._processInstance = :instance")
+        })
 public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
     @Transient
@@ -67,30 +72,32 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	@Id @Column(name="PROCESS_INSTANCE_ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _instanceId;
-	@Basic @Column(name="LAST_RECOVERY_DATE") private Date _lastRecovery;
-	@Basic @Column(name="LAST_ACTIVE_TIME") private Date _lastActive;
-	@Basic @Column(name="INSTANCE_STATE") private short _state;
-	@Basic @Column(name="PREVIOUS_STATE") private short _previousState;
-	@Lob @Column(name="EXECUTION_STATE") private byte[] _executionState;
-	@Basic @Column(name="SEQUENCE") private long _sequence;
-	@Basic @Column(name="DATE_CREATED") private Date _dateCreated = new Date();
+	@Basic @Column(name="LAST_RECOVERY_DATE")
+    private Date _lastRecovery;
+	@Basic @Column(name="LAST_ACTIVE_TIME")
+    private Date _lastActive;
+	@Basic @Column(name="INSTANCE_STATE")
+    private short _state;
+	@Basic @Column(name="PREVIOUS_STATE")
+    private short _previousState;
+	@Lob @Column(name="EXECUTION_STATE")
+    private byte[] _executionState;
+	@Basic @Column(name="SEQUENCE")
+    private long _sequence;
+	@Basic @Column(name="DATE_CREATED")
+    private Date _dateCreated = new Date();
 	
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	@Column(name="ROOT_SCOPE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="ROOT_SCOPE_ID")
 	private ScopeDAOImpl _rootScope;
 	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
-	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-    @ElementJoinColumn(name="INST_ID", referencedColumnName="REC_ID")
+	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	@Column(name="FAULT_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="PROCESS_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	@Column(name="INSTANTIATING_CORRELATOR_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="INSTANTIATING_CORRELATOR_ID")
 	private CorrelatorDAOImpl _instantiatingCorrelator;
 	
 	public ProcessInstanceDAOImpl() {}
@@ -111,7 +118,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public ScopeDAO createScope(ScopeDAO parentScope, String name,
 			int scopeModelId) {
-		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this);
+		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this, _connection);
         ret.setState(ScopeStateEnum.ACTIVE);
 
         _scopes.add(ret);
@@ -228,10 +235,14 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	}
 
 	public ScopeDAO getScope(Long scopeInstanceId) {
-		for (ScopeDAO sElement : _scopes) {
-			if ( sElement.getScopeInstanceId().equals(scopeInstanceId)) return sElement;
-		}
-		return null;
+        Query qry = _connection.getEntityManager().createNamedQuery("ScopeById");
+        qry.setParameter("sid", scopeInstanceId);
+        qry.setParameter("instance", this);
+        List res = qry.getResultList();
+        if (res.size() == 0) return null;
+        ScopeDAOImpl s = (ScopeDAOImpl) res.get(0);
+        s.setConnection(_connection);
+        return s;
 	}
 
 	public Collection<ScopeDAO> getScopes(String scopeName) {
@@ -293,11 +304,13 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	public void setState(short state) {
 		_previousState = _state;
 		_state = state;
-
 	}
 	
 	void removeRoutes(String routeGroupId) {
 		_process.removeRoutes(routeGroupId, this);
 	}
 
+    void setConnection(BPELDAOConnectionImpl connection) {
+        _connection = connection;
+    }
 }

@@ -1,50 +1,81 @@
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.openjpa.ee.ManagedRuntime;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
+    static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
 
     private EntityManagerFactory _emf;
-
     private TransactionManager _tm;
-
     private DataSource _ds;
-
     private Object _dbdictionary;
-
     private DataSource _unmanagedDS;
+
+    private ThreadLocal _emTL = new ThreadLocal();
 
     public BPELDAOConnectionFactoryImpl() {
     }
 
     public BpelDAOConnection getConnection() {
-        return new BPELDAOConnectionImpl(_emf.createEntityManager());
+        try {
+            _tm.getTransaction().registerSynchronization(new Synchronization() {
+                public void afterCompletion(int i) {
+                    _emTL.set(null);
+                }
+                public void beforeCompletion() { }
+            });
+        } catch (RollbackException e) {
+            throw new RuntimeException("Coulnd't register synchronizer!");
+        } catch (SystemException e) {
+            throw new RuntimeException("Coulnd't register synchronizer!");            
+        }
+        if (_emTL.get() != null) {
+            return new BPELDAOConnectionImpl((EntityManager) _emTL.get());
+        } else {
+            HashMap propMap2 = new HashMap();
+            propMap2.put("openjpa.TransactionMode", "managed");
+            EntityManager em = _emf.createEntityManager(propMap2);
+            _emTL.set(em);
+            return new BPELDAOConnectionImpl(em);
+        }
     }
 
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();
 
-        propMap.put("javax.persistence.nonJtaDataSource", _unmanagedDS == null ? _ds : _unmanagedDS);
+//        propMap.put("javax.persistence.nonJtaDataSource", _unmanagedDS == null ? _ds : _unmanagedDS);
+
         propMap.put("openjpa.Log", "DefaultLevel=TRACE");
 //        propMap.put("openjpa.Log", "log4j");
         propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
 
-//        propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
-//        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-//        propMap.put("javax.persistence.nonJtaDataSource", _unmanagedDS == null ? _ds : _unmanagedDS);
-//        propMap.put("javax.persistence.DataSource", _ds);
-//        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
-//        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
+        propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
+        propMap.put("openjpa.ConnectionFactory", _ds);
+        propMap.put("openjpa.ConnectionFactoryMode", "managed");
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+
         if (_dbdictionary != null)
             propMap.put("openjpa.jdbc.DBDictionary", _dbdictionary);
 
@@ -87,8 +118,90 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         }
 
         public TransactionManager getTransactionManager() throws Exception {
-            return _tm;
+            return new DebugTxMgr(_tm);
         }
     }
 
+    private class DebugTxMgr implements TransactionManager {
+        private TransactionManager _tm;
+
+        public DebugTxMgr(TransactionManager tm) {
+            _tm = tm;
+        }
+
+        public void begin() throws NotSupportedException, SystemException {
+            _tm.begin();
+        }
+
+        public void commit() throws HeuristicMixedException, HeuristicRollbackException, IllegalStateException, RollbackException, SecurityException, SystemException {
+            _tm.commit();
+        }
+
+        public int getStatus() throws SystemException {
+            return _tm.getStatus();
+        }
+
+        public Transaction getTransaction() throws SystemException {
+            Transaction tx = _tm.getTransaction();
+            __log.warn("JPA get transaction" + tx);
+            return new DebugTx(tx);
+        }
+
+        public void resume(Transaction transaction) throws IllegalStateException, InvalidTransactionException, SystemException {
+            _tm.resume(transaction);
+        }
+
+        public void rollback() throws IllegalStateException, SecurityException, SystemException {
+            _tm.rollback();
+        }
+
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+            _tm.setRollbackOnly();
+        }
+
+        public void setTransactionTimeout(int i) throws SystemException {
+            _tm.setTransactionTimeout(i);
+        }
+
+        public Transaction suspend() throws SystemException {
+            return _tm.suspend();
+        }
+    }
+
+    private class DebugTx implements Transaction {
+        private Transaction _tx;
+
+        public DebugTx(Transaction tx) {
+            _tx = tx;
+        }
+
+        public void commit() throws HeuristicMixedException, HeuristicRollbackException, RollbackException, SecurityException, SystemException {
+            _tx.commit();
+        }
+
+        public boolean delistResource(XAResource xaResource, int i) throws IllegalStateException, SystemException {
+            return _tx.delistResource(xaResource, i);
+        }
+
+        public boolean enlistResource(XAResource xaResource) throws IllegalStateException, RollbackException, SystemException {
+            return _tx.enlistResource(xaResource);
+        }
+
+        public int getStatus() throws SystemException {
+            return _tx.getStatus();
+        }
+
+        public void registerSynchronization(Synchronization synchronization) throws IllegalStateException, RollbackException, SystemException {
+            __log.warn("Synchronization registration on " + synchronization.getClass().getName());
+            _tx.registerSynchronization(synchronization);
+        }
+
+        public void rollback() throws IllegalStateException, SystemException {
+            _tx.rollback();
+        }
+
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+            _tx.setRollbackOnly();
+        }
+    }
 }

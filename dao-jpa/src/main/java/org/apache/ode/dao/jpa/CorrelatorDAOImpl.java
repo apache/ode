@@ -24,9 +24,18 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,15 +47,14 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
     @Id @Column(name="CORRELATOR_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long _correlatorId;
-    @Basic @Column(name="CORRELATOR_KEY") private String _correlatorKey;
-    @OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-    @ElementJoinColumn(name="CORR_ID", referencedColumnName="ROUTE_ID")
+    @Basic @Column(name="CORRELATOR_KEY")
+    private String _correlatorKey;
+    @OneToMany(targetEntity=MessageRouteDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
-    @OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-    @ElementJoinColumn(name="CORR_ID", referencedColumnName="MEX_ID")
+    @OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MessageExchangeDAOImpl> _exchanges = new ArrayList<MessageExchangeDAOImpl>();
-
-    @Version @Column(name="VERSION") private long _version;
+    @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROC_ID")
+    private ProcessDAOImpl _process;
 
     public CorrelatorDAOImpl(){}
     public CorrelatorDAOImpl(String correlatorKey) {
