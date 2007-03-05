@@ -471,7 +471,8 @@ public class BpelProcess {
         enabled = _pconf.isEventEnabled(scopeNames, event.getType());
         if (enabled) {
             ProcessInstanceDAO instanceDao = getProcessDAO().getInstance(event.getProcessInstanceId());
-            saveEvent(event, instanceDao);
+            if (instanceDao != null) saveEvent(event, instanceDao);
+            else __log.warn("Couldn't find instance to save event, no event generated!");
         }
     }
 

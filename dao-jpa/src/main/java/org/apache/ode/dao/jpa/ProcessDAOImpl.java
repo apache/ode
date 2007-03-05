@@ -30,6 +30,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -38,38 +40,46 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
-    @NamedQuery(name="InstanceById", query="SELECT i FROM ProcessInstanceDAOImpl as i WHERE i.instanceId = :iid"),
-    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._instance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey")
+    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._instance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey"),
+    @NamedQuery(name="CorrelatorByKey", query="SELECT c FROM CorrelatorDAOImpl as c WHERE c._correlatorKey = :ckey")
 })
 public class ProcessDAOImpl implements ProcessDAO {
 
-    @PersistenceContext private EntityManager _em;
+    @PersistenceContext
+    private EntityManager _em;
 
-    @Id @Column(name="PROCESS_ID")
-	private String _id;
-    
-	@Basic @Column(name="NUMBER_OF_INSTANCES") private int _numInstances;
-	@Basic @Column(name="PROCESS_TYPE") private String _processType;
-	@Basic @Column(name="GUID") private String _guid;
-	@Version @Column(name="VERSION") private long _version;
+    @Id @Column(name="ID")
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long _id;
 
-	@OneToMany(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<CorrelatorDAOImpl> _correlators = new ArrayList<CorrelatorDAOImpl>();
+    @Basic @Column(name="PROCESS_ID")
+    private String _processId;
+	@Basic @Column(name="NUMBER_OF_INSTANCES")
+    private int _numInstances;
+	@Basic @Column(name="PROCESS_TYPE")
+    private String _processType;
+	@Basic @Column(name="GUID")
+    private String _guid;
+	@Basic @Column(name="VERSION")
+    private long _version;
+
+	@OneToMany(targetEntity=CorrelatorDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    private Collection<CorrelatorDAOImpl> _correlators = new ArrayList<CorrelatorDAOImpl>();
 
     @Transient
     transient private BPELDAOConnectionImpl _connection;
 
 	public ProcessDAOImpl() {}
 	public ProcessDAOImpl(QName pid, QName type, String guid, BPELDAOConnectionImpl connection, long version) {
-        _id = pid.toString();
+        _processId = pid.toString();
 		_processType = type.toString();
 		_connection = connection;
 		_guid = guid;
@@ -81,23 +91,25 @@ public class ProcessDAOImpl implements ProcessDAO {
 		_correlators.add(corr);
 	}
 
-
     public CorrelatorDAO getCorrelator(String correlatorId) {
-        return null;
+        Query qry = _connection.getEntityManager().createNamedQuery("CorrelatorByKey");
+        qry.setParameter("ckey", correlatorId);
+        List res = qry.getResultList();
+        if (res.size() == 0) return null;
+        return (CorrelatorDAO) res.get(0);
     }
 
     public ProcessInstanceDAO createInstance(
 			CorrelatorDAO instantiatingCorrelator) {
 		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this,_connection);
-		_em.persist(inst);
+		_connection.getEntityManager().persist(inst);
 		_numInstances++;
-		
 		return inst;
 	}
 
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey) {
-		Query qry = _em.createNamedQuery("InstanceByCKey");
+		Query qry = _connection.getEntityManager().createNamedQuery("InstanceByCKey");
         qry.setParameter("ckey", ckey.toCanonicalString());
         return qry.getResultList();
 	}
@@ -107,7 +119,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 	}
 
 	public QName getProcessId() {
-		return QName.valueOf(_id);
+		return QName.valueOf(_processId);
 	}
 
 	public QName getType() {
@@ -138,5 +150,9 @@ public class ProcessDAOImpl implements ProcessDAO {
 
     public String getGuid() {
         return _guid;
+    }
+
+    void setConnection(BPELDAOConnectionImpl connection) {
+        _connection = connection;
     }
 }

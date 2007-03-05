@@ -41,7 +41,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,45 +55,60 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
 	private String _id;
-	@Basic @Column(name="CALLEE") private QName _callee;
-	@Basic @Column(name="CHANNEL") private String _channel;
-	@Basic @Column(name="CORRELATION_ID") private String _correlationId;
-	@Basic @Column(name="CORRELATION_STATUS") private String _correlationStatus;
-	@Basic @Column(name="CREATE_TIME") private Date _createTime;
-	@Basic @Column(name="DIRECTION") private char _direction;
-	@Lob   @Column(name="EPR") private String _epr;
-	@Transient private Element _eprElement;
-	@Basic @Column(name="FAULT") private String _fault;
-	@Basic @Column(name="FAULT_EXPLANATION") private String _faultExplanation;
-	@Basic @Column(name="OPERATION") private String _operation;
-	@Basic @Column(name="PARTNER_LINK_MODEL_ID") private int _partnerLinkModelId;
-	@Basic @Column(name="PATTERN") private String _pattern;
-	@Basic @Column(name="PORT_TYPE") private QName _portType;
-	@Basic @Column(name="PROPAGATE_TRANS") private boolean _propagateTransactionFlag;
-	@Basic @Column(name="STATUS") private String _status;
-    @Basic @Column(name="CORRELATION_KEYS") private String _correlationKeys;
-    @Basic @Column(name="PIPED_ID") private String _pipedMessageExchangeId;
+	@Basic @Column(name="CALLEE")
+    private QName _callee;
+	@Basic @Column(name="CHANNEL")
+    private String _channel;
+	@Basic @Column(name="CORRELATION_ID")
+    private String _correlationId;
+	@Basic @Column(name="CORRELATION_STATUS")
+    private String _correlationStatus;
+	@Basic @Column(name="CREATE_TIME")
+    private Date _createTime;
+	@Basic @Column(name="DIRECTION")
+    private char _direction;
+	@Lob   @Column(name="EPR")
+    private String _epr;
+	@Transient private
+    Element _eprElement;
+	@Basic @Column(name="FAULT")
+    private String _fault;
+	@Basic @Column(name="FAULT_EXPLANATION")
+    private String _faultExplanation;
+	@Basic @Column(name="OPERATION")
+    private String _operation;
+	@Basic @Column(name="PARTNER_LINK_MODEL_ID")
+    private int _partnerLinkModelId;
+	@Basic @Column(name="PATTERN")
+    private String _pattern;
+	@Basic @Column(name="PORT_TYPE")
+    private QName _portType;
+	@Basic @Column(name="PROPAGATE_TRANS")
+    private boolean _propagateTransactionFlag;
+	@Basic @Column(name="STATUS")
+    private String _status;
+    @Basic @Column(name="CORRELATION_KEYS")
+    private String _correlationKeys;
+    @Basic @Column(name="PIPED_ID")
+    private String _pipedMessageExchangeId;
 
-    @OneToMany(cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MexProperty> _props = new ArrayList<MexProperty>();
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="PROCESS_INSTANCE_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
 	private ProcessInstanceDAOImpl _processInst;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="PARTNER_LINK_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PARTNER_LINK_ID")
 	private PartnerLinkDAOImpl _partnerLink;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="PROCESS_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	@Column(name="REQUEST_MESSAGE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="REQUEST_MESSAGE_ID")
 	private MessageDAOImpl _request;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	@Column(name="RESPONSE_MESSAGE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="RESPONSE_MESSAGE_ID")
 	private MessageDAOImpl _response;
-	@Version @Column(name="VERSION") private long _version;
-		
-	public MessageExchangeDAOImpl() {}
+
+    @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
+    private CorrelatorDAOImpl _correlator;
+
+    public MessageExchangeDAOImpl() {}
     
 	public MessageExchangeDAOImpl(char direction){
 		_direction = direction;
