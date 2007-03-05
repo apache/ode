@@ -19,6 +19,10 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,12 +31,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
 
 
 @Entity
@@ -42,12 +41,16 @@ public class FaultDAOImpl implements FaultDAO {
 	@Id @Column(name="FAULT_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
-	@Basic @Column(name="NAME") private QName _name;
-	@Basic @Column(name="MESSAGE") private String _explanation;
-	@Lob @Column(name="DATA") private String _data;
-	@Basic @Column(name="LINE_NUMBER") private int _lineNo;
-	@Basic @Column(name="ACTIVITY_ID") private int _activityId;
-	@Version @Column(name="VERSION") private long _version;
+	@Basic @Column(name="NAME")
+    private QName _name;
+	@Basic @Column(name="MESSAGE")
+    private String _explanation;
+	@Lob @Column(name="DATA")
+    private String _data;
+	@Basic @Column(name="LINE_NUMBER")
+    private int _lineNo;
+	@Basic @Column(name="ACTIVITY_ID")
+    private int _activityId;
 
 	public FaultDAOImpl() {}
 	public FaultDAOImpl(QName faultName, String explanation, int faultLineNo,

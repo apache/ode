@@ -34,7 +34,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,14 +47,14 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	@Id @Column(name="CORRELATION_SET_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _correlationSetId;
-	@Basic @Column(name="NAME") private String _name;
-	@Basic @Column(name="CORRELATION_KEY") private String _correlationKey;
-	@Version @Column(name="VERSION") private long _version;
+	@Basic @Column(name="NAME")
+    private String _name;
+	@Basic @Column(name="CORRELATION_KEY")
+    private String _correlationKey;
 
-    @OneToMany(cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=CorrSetProperty.class,mappedBy="_corrSet",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<CorrSetProperty> _props = new ArrayList<CorrSetProperty>();
-    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-    @Column(name="SCOPE_ID")
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     private ScopeDAOImpl _scope;
 
     public CorrelationSetDAOImpl() {}
@@ -85,7 +84,8 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	}
 
 	public CorrelationKey getValue() {
-		return new CorrelationKey(_correlationKey);
+        if (_correlationKey == null) return null;
+        return new CorrelationKey(_correlationKey);
 	}
 
 	public void setValue(QName[] names, CorrelationKey values) {

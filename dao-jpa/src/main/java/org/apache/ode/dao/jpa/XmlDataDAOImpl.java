@@ -19,7 +19,13 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.Properties;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -33,15 +39,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
-
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
+import java.util.Properties;
 
 @Entity
 @Table(name="ODE_XML_DATA")
@@ -50,15 +48,18 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	@Id @Column(name="XML_DATA_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
-	@Lob @Column(name="DATA") private String _data;
-	@Transient private Node _node;
-	@Basic @Column(name="IS_SIMPLE_TYPE") private boolean _isSimpleType;
-	@Basic @Column(name="NAME") private String _name;
-	@Basic @Column(name="PROPERTIES") private Properties _props = new Properties();
-	@Version @Column(name="VERSION") private long _version;
-	
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="SCOPE_ID")
+	@Lob @Column(name="DATA")
+    private String _data;
+	@Transient
+    private Node _node;
+	@Basic @Column(name="IS_SIMPLE_TYPE")
+    private boolean _isSimpleType;
+	@Basic @Column(name="NAME")
+    private String _name;
+	@Basic @Column(name="PROPERTIES")
+    private Properties _props = new Properties();
+
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
 	private ScopeDAOImpl _scope;
 	
 	public XmlDataDAOImpl() {}

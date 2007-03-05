@@ -19,14 +19,14 @@
 
 package org.apache.ode.il.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
@@ -86,7 +86,7 @@ public class OdeConfigProperties {
 
     /** Default defaults for the database embedded name and dao connection factory class. */
     private static String __dbEmbName = "jpadb";
-    private static String __daoCfClass = "org.apache.ode.dao.jpa.ojpa.BPELDAOConnectionFactoryImpl";
+    private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
 
     static {
         String odep = System.getProperty("ode.persistence");

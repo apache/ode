@@ -555,7 +555,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     pmex.reply(response);
                     break;
                 default:
-                    __log.debug("Unexpected state: " + m.getStatus());
+                    __log.warn("Unexpected state: " + m.getStatus());
                     break;
             }
         } else _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
@@ -916,6 +916,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexid == null)
             throw new NullPointerException("Null mexId");
 
+        __log.debug("Invoking message response for mexid " + mexid + " and channel " + responseChannelId);
         vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
@@ -933,6 +934,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @param responseChannel
      */
     private void invocationResponse2(String mexid, InvokeResponseChannel responseChannel) {
+        __log.debug("Triggering response");
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexid);
 
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
@@ -943,18 +945,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchange.Status status = MessageExchange.Status.valueOf(mex.getStatus());
 
         switch (status) {
-        case FAULT:
-            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAULT);
-            responseChannel.onFault();
-            break;
-        case RESPONSE:
-            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_OUTPUT);
-            responseChannel.onResponse();
-            break;
-        case FAILURE:
-            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAILURE);
-            responseChannel.onFailure();
-            break;
+            case FAULT:
+                evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAULT);
+                responseChannel.onFault();
+                break;
+            case RESPONSE:
+                evt.setAspect(ProcessMessageExchangeEvent.PARTNER_OUTPUT);
+                responseChannel.onResponse();
+                break;
+            case FAILURE:
+                evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAILURE);
+                responseChannel.onFailure();
+                break;
+            default:
+                __log.error("Invalid response state for mex " + mexid + ": " + status);
         }
         sendEvent(evt);
     }
