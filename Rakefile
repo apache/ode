@@ -1,11 +1,9 @@
 require "buildr/lib/buildr.rb"
 require "open3"
 
-
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "2.0-SNAPSHOT"
+VERSION_NUMBER = "2.1"
 NEXT_VERSION = "2.1"
-
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -104,11 +102,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES
 
-    resources(
+    resources do |task|
       unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).
-        into(path_to(:target_dir, "resources")),
+        into(path_to(:target_dir, "resources")).invoke
       #untar(artifact("#{group}:ode-dao-hibernate-db-derby:tar:#{version}")).
       #  into(path_to(:target_dir, "resources")),
+    end
+    resources(
       filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources")),
       filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
     )
@@ -305,7 +305,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
         stdin.puts "exit"
         stdin.close
         # Helps when dignosing SQL errors.
-        puts stdout.read if Rake.application.options.trace
+        returning(stdout.read) { |output| puts output if Rake.application.options.trace }
       end
       # Copy the SQL files into the database directory.
       filter(task.prerequisites).into("#{task.name}/jpadb").invoke
