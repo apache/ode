@@ -20,6 +20,11 @@
 package org.apache.ode.dao.jpa;
 
 
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,13 +37,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
 
 
 @Entity
@@ -48,14 +47,15 @@ public class MessageDAOImpl implements MessageDAO {
 	@Id @Column(name="MESSAGE_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
-	@Basic @Column(name="TYPE") private QName _type;
-	@Lob @Column(name="DATA") private String _data;
-	@Transient private Element _element;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="MESSAGE_EXCHANGE_ID")
+	@Basic @Column(name="TYPE")
+    private QName _type;
+	@Lob @Column(name="DATA")
+    private String _data;
+	@Transient
+    private Element _element;
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="MESSAGE_EXCHANGE_ID")
 	private MessageExchangeDAOImpl _messageExchange;
-	@Version @Column(name="VERSION") private long _version;
-	
+
 	public MessageDAOImpl() {
 		
 	}

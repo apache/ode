@@ -20,21 +20,23 @@
 package org.apache.ode.dao.jpa;
 
 
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
+
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
 
 @Entity
 @Table(name="ODE_PARTNER_LINK")
@@ -43,20 +45,33 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	@Id @Column(name="PARTNER_LINK_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
-	@Lob @Column(name="MY_EPR") private String _myEPR;
-	@Transient private Element _myEPRElement;
-	@Basic @Column(name="MY_ROLE_NAME") private String _myRoleName;
-	@Basic @Column(name="MY_ROLE_SERVICE_NAME") private QName _myRoleServiceName;
-	@Basic @Column(name="MY_SESSION_ID") private String _mySessionId;
-	@Lob @Column(name="PARTNER_EPR") private String _partnerEPR;
-	@Transient private Element _partnerEPRElement;
-	@Basic @Column(name="PARTNER_LINK_MODEL_ID") private int _partnerLinkModelId;
-	@Basic @Column(name="PARTNER_LINK_NAME") private String _partnerLinkName;
-	@Basic @Column(name="PARTNER_ROLE_NAME") private String _partnerRoleName;
-	@Basic @Column(name="PARTNER_SESSION_ID") private String _partnerSessionId;
-	@Version @Column(name="VERSION") private long _version;
-	
-	public PartnerLinkDAOImpl() {}
+	@Lob @Column(name="MY_EPR")
+    private String _myEPR;
+	@Transient
+    private Element _myEPRElement;
+	@Basic @Column(name="MY_ROLE_NAME")
+    private String _myRoleName;
+	@Basic @Column(name="MY_ROLE_SERVICE_NAME")
+    private QName _myRoleServiceName;
+	@Basic @Column(name="MY_SESSION_ID")
+    private String _mySessionId;
+	@Lob @Column(name="PARTNER_EPR")
+    private String _partnerEPR;
+	@Transient
+    private Element _partnerEPRElement;
+	@Basic @Column(name="PARTNER_LINK_MODEL_ID")
+    private int _partnerLinkModelId;
+	@Basic @Column(name="PARTNER_LINK_NAME")
+    private String _partnerLinkName;
+	@Basic @Column(name="PARTNER_ROLE_NAME")
+    private String _partnerRoleName;
+	@Basic @Column(name="PARTNER_SESSION_ID")
+    private String _partnerSessionId;
+
+    @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
+    private ProcessInstanceDAOImpl _scope;
+
+    public PartnerLinkDAOImpl() {}
 	public PartnerLinkDAOImpl(int modelId, String name, String myRole, String partnerRole) {
 		_partnerLinkModelId = modelId;
 		_partnerLinkName = name;
