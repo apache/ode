@@ -33,8 +33,8 @@ public class CountLRUDehydrationPolicy implements DehydrationPolicy {
             runningProcesses.removeAll(ripped);
             Collections.sort(runningProcesses, new Comparator<BpelProcess>() {
                 public int compare(BpelProcess p1, BpelProcess p2) {
-                    if (p1.getLastUsed() > p2.getLastUsed()) return 1;
-                    if (p1.getLastUsed() < p2.getLastUsed()) return -1;
+                    if (p1.getLastUsed() > p2.getLastUsed()) return -1;
+                    if (p1.getLastUsed() < p2.getLastUsed()) return 1;
                     return 0;
                 }
             });
