@@ -50,9 +50,10 @@ public class MexProperty {
 
     public MexProperty() {
     }
-    public MexProperty(String propertyKey, String propertyValue) {
+    public MexProperty(String propertyKey, String propertyValue, MessageExchangeDAOImpl mex) {
         this.propertyKey = propertyKey;
         this.propertyValue = propertyValue;
+        this._mex = mex;
     }
 
     public String getPropertyKey() {

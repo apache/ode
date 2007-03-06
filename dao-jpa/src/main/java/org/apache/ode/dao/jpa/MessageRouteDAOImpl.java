@@ -46,7 +46,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 	@Basic @Column(name="INDEX")
     private int _index;
 	@Basic @Column(name="CORRELATION_KEY")
-    private CorrelationKey _correlationKey;
+    private String _correlationKey;
 
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
     private ProcessInstanceDAOImpl _processInst;
@@ -54,15 +54,17 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     private CorrelatorDAOImpl _correlator;
 
     public MessageRouteDAOImpl() {}
-	public MessageRouteDAOImpl(CorrelationKey key, String groupId, int index, ProcessInstanceDAOImpl processInst) {
-		_correlationKey = key;
+	public MessageRouteDAOImpl(CorrelationKey key, String groupId, int index,
+                               ProcessInstanceDAOImpl processInst, CorrelatorDAOImpl correlator) {
+		_correlationKey = key.toCanonicalString();
 		_groupId = groupId;
 		_index = index;
 		_processInst = processInst;
-	}
+        _correlator = correlator;
+    }
 	
 	public CorrelationKey getCorrelationKey() {
-		return _correlationKey;
+		return new CorrelationKey(_correlationKey);
 	}
 	
 	public String getGroupId() {

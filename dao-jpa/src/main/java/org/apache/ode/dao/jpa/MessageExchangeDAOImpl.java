@@ -285,7 +285,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public void setProperty(String key, String value) {
-        _props.add(new MexProperty(key, value));
+        _props.add(new MexProperty(key, value, this));
 	}
 
 	public void setRequest(MessageDAO msg) {
