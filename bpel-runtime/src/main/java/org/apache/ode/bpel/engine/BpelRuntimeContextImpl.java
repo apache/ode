@@ -742,7 +742,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
             odeRequest.setMessage(outgoingMessage);
 
-            __log.debug("Setting session ids for p2p interaction, mySession "
+            __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
                     + partnerSessionId + " - partnerSess " + mySessionId);
             if ( partnerSessionId != null )
                    myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);

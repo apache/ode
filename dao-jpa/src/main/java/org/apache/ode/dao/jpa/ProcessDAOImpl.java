@@ -28,7 +28,6 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,25 +35,23 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @author Matthieu Riou <mriou at apache dot org>
+ */
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
     @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._instance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey"),
     @NamedQuery(name="CorrelatorByKey", query="SELECT c FROM CorrelatorDAOImpl as c WHERE c._correlatorKey = :ckey")
 })
-public class ProcessDAOImpl implements ProcessDAO {
-
-    @PersistenceContext
-    private EntityManager _em;
+public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -74,14 +71,10 @@ public class ProcessDAOImpl implements ProcessDAO {
 	@OneToMany(targetEntity=CorrelatorDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<CorrelatorDAOImpl> _correlators = new ArrayList<CorrelatorDAOImpl>();
 
-    @Transient
-    transient private BPELDAOConnectionImpl _connection;
-
 	public ProcessDAOImpl() {}
-	public ProcessDAOImpl(QName pid, QName type, String guid, BPELDAOConnectionImpl connection, long version) {
+	public ProcessDAOImpl(QName pid, QName type, String guid, long version) {
         _processId = pid.toString();
 		_processType = type.toString();
-		_connection = connection;
 		_guid = guid;
         _version = version;
     }
@@ -92,7 +85,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 	}
 
     public CorrelatorDAO getCorrelator(String correlatorId) {
-        Query qry = _connection.getEntityManager().createNamedQuery("CorrelatorByKey");
+        Query qry = getEM().createNamedQuery("CorrelatorByKey");
         qry.setParameter("ckey", correlatorId);
         List res = qry.getResultList();
         if (res.size() == 0) return null;
@@ -101,21 +94,21 @@ public class ProcessDAOImpl implements ProcessDAO {
 
     public ProcessInstanceDAO createInstance(
 			CorrelatorDAO instantiatingCorrelator) {
-		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this,_connection);
-		_connection.getEntityManager().persist(inst);
+		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
+		getEM().persist(inst);
 		_numInstances++;
 		return inst;
 	}
 
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey) {
-		Query qry = _connection.getEntityManager().createNamedQuery("InstanceByCKey");
+		Query qry = getEM().createNamedQuery("InstanceByCKey");
         qry.setParameter("ckey", ckey.toCanonicalString());
         return qry.getResultList();
 	}
 
 	public ProcessInstanceDAO getInstance(Long iid) {
-		return _connection.getInstance(iid);
+		return getEM().find(ProcessInstanceDAOImpl.class, iid);
 	}
 
 	public QName getProcessId() {
@@ -127,7 +120,7 @@ public class ProcessDAOImpl implements ProcessDAO {
 	}
 
     public void delete() {
-        _connection.removeProcess(this);
+        getEM().remove(this);
     }
 
     public int getNumInstances() {
@@ -152,7 +145,4 @@ public class ProcessDAOImpl implements ProcessDAO {
         return _guid;
     }
 
-    void setConnection(BPELDAOConnectionImpl connection) {
-        _connection = connection;
-    }
 }
