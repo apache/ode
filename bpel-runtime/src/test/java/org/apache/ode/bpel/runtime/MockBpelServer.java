@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -32,10 +33,10 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.apache.openjpa.ee.ManagedRuntime;
 import org.objectweb.jotm.Jotm;
 import org.opentools.minerva.MinervaPool;
 import org.w3c.dom.Document;
@@ -51,6 +52,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -154,7 +156,7 @@ class MockBpelServer {
         _scheduler.shutdown();
         _jotm.stop();
         try {
-            DriverManager.getConnection("jdbc:derby:target/test-classes/derby-db/data;shutdown=true");
+            DriverManager.getConnection("jdbc:derby:target/test-classes/derby-db/jpadb;shutdown=true");
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
@@ -172,7 +174,7 @@ class MockBpelServer {
     protected DataSource createDataSource() throws Exception {
         if (_txManager == null)
             throw new RuntimeException("No transaction manager");
-        String url = "jdbc:derby:target/test-classes/derby-db/data";
+        String url = "jdbc:derby:target/test-classes/derby-db/jpadb";
         _minervaPool = new MinervaPool();
         _minervaPool.setTransactionManager(_txManager);
         _minervaPool.getConnectionFactory().setConnectionURL(url);
@@ -203,18 +205,11 @@ class MockBpelServer {
         if (_dataSource == null)
             throw new RuntimeException("No data source");
 
-        HashMap propMap = new HashMap();
-        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
-        propMap.put("openjpa.ManagedRuntime", new ManagedRuntime() {
-            public TransactionManager getTransactionManager() throws Exception {
-                return _txManager;
-            }
-        });
-        propMap.put("openjpa.ConnectionDriverName", org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-        propMap.put("javax.persistence.nonJtaDataSource", _dataSource);
-        //propMap.put("openjpa.Log", "DefaultLevel=ERROR");
-        propMap.put("openjpa.Log", "log4j");
-        _daoCF = new BPELDAOConnectionFactoryImpl();
+        BpelDAOConnectionFactoryJDBC daoCF = new BPELDAOConnectionFactoryImpl();
+        daoCF.setDataSource(_dataSource);
+        daoCF.setTransactionManager(_txManager);
+        daoCF.init(new Properties());
+        _daoCF = daoCF;
 
         return _daoCF;
     }
