@@ -2,7 +2,7 @@ require "buildr/lib/buildr.rb"
 require "open3"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "2.1"
+VERSION_NUMBER = "2.0-SNAPSHOT"
 NEXT_VERSION = "2.1"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
@@ -190,14 +190,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     # Include the generated sources.
     compile.sources << generated
 
-    # Test
-    #"#{group}:ode-dao-hibernate:jar:#{version}",
-    #"#{group}:ode-dao-hibernate-db-derby:tar:#{version}",
-    #"#{group}:ode-dao-jpa-ojpa:jar:#{version}",
-    #"#{group}:ode-jpa-ojpa-derby:tar:#{version}",
-    #"#{group}:ode-bpel-scheduler-quartz:jar:#{version}",
-    #"#{group}:ode-minerva:jar:#{version}",
-    #DERBY, JAVAX.connector, JAVAX.transaction, JOTM, LOG4J, OPENJPA
+    test.compile.with *compile.classpath
+    test.compile.with project("ode:bpel-scheduler-quartz"),
+      project("ode:dao-jpa"),
+      project("ode:minerva"),
+      COMMONS.pool, DERBY, JAVAX.connector, JAVAX.transaction,
+      JOTM, LOG4J, OPENJPA, XERCES
     package :jar
   end
 
@@ -256,7 +254,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "dao-jpa" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"), project("ode:utils"),
-      JAVAX.persistence, OPENJPA
+      COMMONS.logging, JAVAX.persistence, JAVAX.transaction, OPENJPA
     package :jar
   end
 
@@ -313,6 +311,30 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     build derby_db
     package :zip, :include=>path_to(:target_dir, "derby/*")
+  end
+
+  define "distro-axis2" do
+    resources(
+      filter(["LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir)),
+      filter(path_to(:src_dir, "examples")).into(path_to(:target_dir))
+    )
+    resources do
+      #unzip("#{group}:ode-tools-bin:zip:#{version}").into(path_to(:target_dir)).invoke
+      # TODO: how do we limit this to files from bins ZIP?
+      #chmod 0755, FileList[task.name + "/*"].collect.exclude("**/*.bat"), :verbose=>false
+    end
+
+    package(:zip).include(path_to(:target_dir, "*"))
+    package(:zip).include(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+      COMMONS.pool, COMMONS.collections, JAXEN,
+      SAXON, LOG4J, WSDL4J, :path=>"lib")
+    package(:zip).include("#{group}:ode-axis2-war:war:#{version}", :as=>"ode.war")
+    package(:zip).merge("#{group}:ode-tools-bin:zip:#{version}")
+    [ "ode-utils", "ode-tools", "ode-bpel-compiler",
+      "ode-bpel-api", "ode-bpel-obj", "ode-bpel-schemas" ].each do |name|
+      artifact = artifact("#{group}:#{name}:jar:#{version}")
+      package(:zip).include(artifact, :as=>"#{artifact.id}.#{artifact.type}", :path=>"lib")
+    end
   end
 
   define "jacob" do
@@ -376,4 +398,3 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
 end
-
