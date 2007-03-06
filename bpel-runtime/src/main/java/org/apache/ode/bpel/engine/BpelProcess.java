@@ -490,6 +490,7 @@ public class BpelProcess {
     }
 
     private void hydrate() {
+        markused();
         __log.debug("Rehydrating process " + _pconf.getProcessId());
         try {
             _oprocess = deserializeCompiledProcess(_pconf.getCBPInputStream());
