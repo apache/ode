@@ -1085,7 +1085,9 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
      */
     public void releaseAcquiredTrigger(SchedulingContext ctxt, Trigger trigger)
             throws JobPersistenceException {
-
+        if (__log.isDebugEnabled())
+            __log.debug("releaseAcquiredTrigger: " + trigger);
+        
         boolean transOwner = false;
         Connection conn = getNonManagedTXConnection();
         ;
@@ -1123,6 +1125,10 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
      */
     public TriggerFiredBundle triggerFired(SchedulingContext ctxt, Trigger trigger)
             throws JobPersistenceException {
+
+        if (__log.isDebugEnabled())
+            __log.debug("triggerFired: " + trigger);
+        
         boolean transOwner = false;
         Connection conn = getNonManagedTXConnection();
 
@@ -1171,6 +1177,9 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
      */
     public void triggeredJobComplete(SchedulingContext ctxt, Trigger trigger,
                                      JobDetail jobDetail, int triggerInstCode) throws JobPersistenceException {
+        if (__log.isDebugEnabled())
+            __log.debug("triggeredJobComplete: trigger=" + trigger + ", jobName=" + jobDetail.getFullName() + ", triggerInstCode="+ triggerInstCode);
+
         boolean transOwner = false;
 
         Connection conn = getNonManagedTXConnection();
@@ -1197,6 +1206,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     }
 
     protected boolean doRecoverMisfires() throws JobPersistenceException {
+        __log.debug("doRecoverMisfires() callled");
         boolean transOwner = false;
         boolean moreToDo = false;
 
@@ -1214,6 +1224,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
             commitConnection(conn);
 
+            __log.debug("doRecoverMisfires() returned moreToDo = " + moreToDo);
             return moreToDo;
         } catch (JobPersistenceException e) {
             rollbackConnection(conn);
@@ -1228,26 +1239,33 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
 
     }
 
-    protected boolean doCheckin() throws JobPersistenceException {
-
-        boolean transOwner = false;
+    protected synchronized boolean doCheckin() throws JobPersistenceException {
+        __log.debug("doCheckin() called, firstCheckIn=" + firstCheckIn);
         boolean transStateOwner = false;
         boolean recovered = false;
 
         Connection conn = getNonManagedTXConnection();
         try {
+            List failedRecords = (firstCheckIn) ? null : clusterCheckIn(conn);
+
+            
+            if (__log.isDebugEnabled())
+                __log.debug("doCheckin: firstCheckIn=" + firstCheckIn + ", failedRecords=" + failedRecords);
 
             getLockHandler().obtainLock(conn, LOCK_STATE_ACCESS);
             transStateOwner = true;
 
-            List failedRecords = clusterCheckIn(conn);
+            if (firstCheckIn || failedRecords.size() > 0) {
+                failedRecords = (firstCheckIn) ? clusterCheckIn(conn) : findFailedInstances(conn);
 
-            if (failedRecords.size() > 0) {
-                getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
-                getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
-                transOwner = true;
-
-                clusterRecover(conn, failedRecords);
+                if (!failedRecords.isEmpty()) {
+                    if (__log.isDebugEnabled())
+                        __log.debug("doChecking: recovering " + failedRecords);
+                    
+                    getLockHandler().obtainLock(conn, LOCK_TRIGGER_ACCESS);
+                    getLockHandler().obtainLock(conn, LOCK_JOB_ACCESS);
+                    clusterRecover(conn, failedRecords);
+                }
                 recovered = true;
             }
 
@@ -1263,13 +1281,16 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             closeConnection(conn);
         }
 
-        firstCheckIn = false;
+        firstCheckIn = false;  
 
         return recovered;
     }
 
+    
     protected Connection getNonManagedTXConnection()
             throws JobPersistenceException {
+
+        __log.debug("getNonManagedTXConnection()");
 
         if (_suspenededTx.get() != null) {
             __log.fatal("Internal Error: found suspended transaction: " + _suspenededTx.get());
@@ -1323,13 +1344,10 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
         }
     }
 
-    protected Connection getConnection() throws JobPersistenceException {
-        return new LoggingConnectionWrapper(super.getConnection(), __log);
-    }
-
     @Override
     protected void commitConnection(Connection conn)
             throws JobPersistenceException {
+        __log.debug("COMMIT: "+ conn);
         try {
             _txm.commit();
         } catch (Exception ex) {
@@ -1341,6 +1359,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     @Override
     protected void rollbackConnection(Connection conn)
             throws JobPersistenceException {
+        __log.debug("ROLLBACK: "+ conn);
         try {
             _txm.rollback();
         } catch (Exception e) {
@@ -1380,13 +1399,10 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     public boolean getUseDBLocks() {
         return false;
     }
-    public boolean isClustered() {
-        return false;
-    }
+    
     public boolean isLockOnInsert() {
         return false;
     }
-
 
     protected Semaphore getLockHandler() {
         return _lockHandler == null ? super.getLockHandler() : _lockHandler;
