@@ -36,6 +36,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author Matthieu Riou <mriou at apache dot org>
+ */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	
 	EntityManager _em;
@@ -58,7 +61,6 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	
 	public ProcessInstanceDAO getInstance(Long iid) {
         ProcessInstanceDAOImpl instance = _em.find(ProcessInstanceDAOImpl.class, iid);
-        instance.setConnection(this);
         return instance;
     }
 
@@ -73,7 +75,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
-        ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,this,version);
+        ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,version);
         _em.persist(ret);
         return ret;
     }
@@ -83,7 +85,6 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 .setParameter(1, processId.toString()).getResultList();
         if (l.size() == 0) return null;
         ProcessDAOImpl p = (ProcessDAOImpl) l.get(0);
-        p.setConnection(this);
         return p;
     }
 
@@ -122,13 +123,6 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 		_em = em;
 	}
 	
-	void removeProcess(ProcessDAOImpl p) {
-		if ( _em != null ) {
-			_em.remove(p);
-			_em.flush();
-		}
-	}
-
     public MessageExchangeDAO getMessageExchange(String mexid) {
         return _em.find(MessageExchangeDAOImpl.class, mexid);
     }

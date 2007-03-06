@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * @author Matthieu Riou <mriou at apache dot org>
+ */
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
     static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
 
@@ -31,9 +34,8 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     private TransactionManager _tm;
     private DataSource _ds;
     private Object _dbdictionary;
-    private DataSource _unmanagedDS;
 
-    private ThreadLocal _emTL = new ThreadLocal();
+    static ThreadLocal<BPELDAOConnectionImpl> _connections = new ThreadLocal<BPELDAOConnectionImpl>();
 
     public BPELDAOConnectionFactoryImpl() {
     }
@@ -41,31 +43,33 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     public BpelDAOConnection getConnection() {
         try {
             _tm.getTransaction().registerSynchronization(new Synchronization() {
+                // OpenJPA allows cross-transaction entity managers, which we don't want
                 public void afterCompletion(int i) {
-                    _emTL.set(null);
+                    if (_connections.get() != null)
+                        _connections.get().getEntityManager().close();
+                    _connections.set(null);
                 }
                 public void beforeCompletion() { }
             });
         } catch (RollbackException e) {
             throw new RuntimeException("Coulnd't register synchronizer!");
         } catch (SystemException e) {
-            throw new RuntimeException("Coulnd't register synchronizer!");            
+            throw new RuntimeException("Coulnd't register synchronizer!");
         }
-        if (_emTL.get() != null) {
-            return new BPELDAOConnectionImpl((EntityManager) _emTL.get());
+        if (_connections.get() != null) {
+            return _connections.get();
         } else {
             HashMap propMap2 = new HashMap();
             propMap2.put("openjpa.TransactionMode", "managed");
             EntityManager em = _emf.createEntityManager(propMap2);
-            _emTL.set(em);
-            return new BPELDAOConnectionImpl(em);
+            BPELDAOConnectionImpl conn = new BPELDAOConnectionImpl(em);
+            _connections.set(conn);
+            return conn;
         }
     }
 
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();
-
-//        propMap.put("javax.persistence.nonJtaDataSource", _unmanagedDS == null ? _ds : _unmanagedDS);
 
         propMap.put("openjpa.Log", "DefaultLevel=TRACE");
 //        propMap.put("openjpa.Log", "log4j");
@@ -74,7 +78,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
         propMap.put("openjpa.ConnectionFactory", _ds);
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
-        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+        propMap.put("openjpa.FlushBeforeQueries", "false");
 
         if (_dbdictionary != null)
             propMap.put("openjpa.jdbc.DBDictionary", _dbdictionary);
@@ -105,7 +109,6 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     }
 
     public void setUnmanagedDataSource(DataSource ds) {
-        _unmanagedDS = ds;
     }
 
     public void shutdown() {

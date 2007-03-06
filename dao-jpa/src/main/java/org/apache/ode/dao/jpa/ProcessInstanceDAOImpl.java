@@ -49,7 +49,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Query;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,12 +63,9 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(name="ScopeById", query="SELECT s FROM ScopeDAOImpl as s WHERE s._scopeInstanceId = :sid and s._processInstance = :instance")
         })
-public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
+public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanceDAO {
 
-    @Transient
-    private BPELDAOConnectionImpl _connection;
-
-	@Id @Column(name="PROCESS_INSTANCE_ID")
+    @Id @Column(name="PROCESS_INSTANCE_ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _instanceId;
 	@Basic @Column(name="LAST_RECOVERY_DATE")
@@ -101,9 +97,8 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	private CorrelatorDAOImpl _instantiatingCorrelator;
 	
 	public ProcessInstanceDAOImpl() {}
-	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process, BPELDAOConnectionImpl connection) {
+	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process) {
 		_instantiatingCorrelator = correlator;
-		_connection = connection;
 		_process = process;
 	}
 	
@@ -116,30 +111,24 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 		_lastRecovery = dateTime;
 	}
 
-	public ScopeDAO createScope(ScopeDAO parentScope, String name,
-			int scopeModelId) {
-		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this, _connection);
+	public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
+		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this);
         ret.setState(ScopeStateEnum.ACTIVE);
-
         _scopes.add(ret);
-		
 		_rootScope = (parentScope == null)?ret:_rootScope;
 		
 		// Must persist the scope to generate a scope ID
-		_connection.getEntityManager().persist(ret);
-		
+		getEM().persist(ret);
 		return ret;
 	}
 
 	public void delete() {
-		if ( _connection.getEntityManager() != null ) {
-			_connection.getEntityManager().remove(this);
+		if (getEM() != null ) {
+			getEM().remove(this);
 		}
-
 	}
 
 	public void deleteActivityRecovery(String channel) {
-		
 		for (Iterator itr=_recoveries.iterator(); itr.hasNext(); ) {
 			ActivityRecoveryDAO arElement = (ActivityRecoveryDAO)itr.next();
 			if ( arElement.getChannel().equals(channel)) {
@@ -169,10 +158,6 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
 		return _recoveries;
-	}
-
-	public BpelDAOConnection getConnection() {
-		return _connection;
 	}
 
 	public CorrelationSetDAO getCorrelationSet(String name) {
@@ -235,14 +220,10 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	}
 
 	public ScopeDAO getScope(Long scopeInstanceId) {
-        Query qry = _connection.getEntityManager().createNamedQuery("ScopeById");
+        Query qry = getEM().createNamedQuery("ScopeById");
         qry.setParameter("sid", scopeInstanceId);
         qry.setParameter("instance", this);
-        List res = qry.getResultList();
-        if (res.size() == 0) return null;
-        ScopeDAOImpl s = (ScopeDAOImpl) res.get(0);
-        s.setConnection(_connection);
-        return s;
+        return getSingleResult(qry);
 	}
 
 	public Collection<ScopeDAO> getScopes(String scopeName) {
@@ -278,7 +259,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 	}
 
 	public void insertBpelEvent(ProcessInstanceEvent event) {
-		_connection.insertBpelEvent(event, getProcess(), this);
+        getConn().insertBpelEvent(event, getProcess(), this);
 	}
 
 	public void setExecutionState(byte[] execState) {
@@ -287,18 +268,15 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 
 	public void setFault(FaultDAO fault) {
 		_fault = (FaultDAOImpl)fault;
-
 	}
 
 	public void setFault(QName faultName, String explanation, int faultLineNo,
 			int activityId, Element faultMessage) {
 		_fault = new FaultDAOImpl(faultName,explanation,faultLineNo,activityId,faultMessage);
-		
 	}
 
 	public void setLastActiveTime(Date dt) {
 		_lastActive = dt;
-
 	}
 
 	public void setState(short state) {
@@ -310,7 +288,7 @@ public class ProcessInstanceDAOImpl implements ProcessInstanceDAO {
 		_process.removeRoutes(routeGroupId, this);
 	}
 
-    void setConnection(BPELDAOConnectionImpl connection) {
-        _connection = connection;
+    public BpelDAOConnection getConnection() {
+        return new BPELDAOConnectionImpl(getEM());
     }
 }

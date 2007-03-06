@@ -42,7 +42,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Query;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,10 +51,7 @@ import java.util.List;
 @NamedQueries({
     @NamedQuery(name="PLinkByModelId", query="SELECT pl FROM PartnerLinkDAOImpl as pl WHERE pl._partnerLinkModelId = :mid")
         })
-public class ScopeDAOImpl implements ScopeDAO {
-
-    @Transient
-    private BPELDAOConnectionImpl _connection;
+public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 
     @Id @Column(name="SCOPE_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -84,13 +80,11 @@ public class ScopeDAOImpl implements ScopeDAO {
 	private ProcessInstanceDAOImpl _processInstance;
 
 	public ScopeDAOImpl() {}
-	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId,
-                        ProcessInstanceDAOImpl pi, BPELDAOConnectionImpl connection) {
+	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi) {
 		_parentScope = parentScope;
 		_name = name;
 		_modelId = scopeModelId;
 		_processInstance = pi;
-        _connection = connection;
     }
 	
 	public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,
@@ -119,7 +113,7 @@ public class ScopeDAOImpl implements ScopeDAO {
 			// PartnerLink creation )
 			ret = new CorrelationSetDAOImpl(this,corrSetName);
 			// Persist the new correlation set to generate an ID
-			_connection.getEntityManager().persist(ret);
+			getEM().persist(ret);
 			_correlationSets.add(ret);
 		}
 		
@@ -143,11 +137,9 @@ public class ScopeDAOImpl implements ScopeDAO {
 	}
 
 	public PartnerLinkDAO getPartnerLink(int plinkModelId) {
-        Query qry = _connection.getEntityManager().createNamedQuery("PLinkByModelId");
-        qry.setParameter("mid", plinkModelId);
-        List res = qry.getResultList();
-        if (res.size() == 0) return null;
-        return (PartnerLinkDAO) res.get(0);
+        Query qry = getEM().createNamedQuery("PLinkByModelId");
+        qry.setParameter("mid", plinkModelId);        
+        return getSingleResult(qry);
 	}
 
 	public Collection<PartnerLinkDAO> getPartnerLinks() {
@@ -192,7 +184,4 @@ public class ScopeDAOImpl implements ScopeDAO {
 		_scopeState = state.toString();
 	}
 
-    void setConnection(BPELDAOConnectionImpl connection) {
-        _connection = connection;
-    }
 }

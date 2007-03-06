@@ -51,7 +51,7 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
     private String _correlatorKey;
     @OneToMany(targetEntity=MessageRouteDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
-    @OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_correlator",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<MessageExchangeDAOImpl> _exchanges = new ArrayList<MessageExchangeDAOImpl>();
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROC_ID")
     private ProcessDAOImpl _process;
@@ -61,10 +61,9 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
         _correlatorKey = correlatorKey;
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target,
-                         int index, CorrelationKey correlationKey) {
-        MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,routeGroupId,index,(ProcessInstanceDAOImpl)target);
-
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey) {
+        MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,
+                routeGroupId, index, (ProcessInstanceDAOImpl) target, this);
         _routes.add(mr);
     }
 
