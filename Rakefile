@@ -45,7 +45,8 @@ JAVAX               = OpenStruct.new(
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
-JOTM                = "jotm:jotm:jar:2.0.10"
+JOTM                = [ "jotm:jotm:jar:2.0.10", "jotm:jotm_jrmp_stubs:jar:2.0.10",
+                        "org.objectweb.carol:carol:jar:2.0.5", "howl:howl-logger:jar:0.1.11" ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = "org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT"
 QUARTZ              = "quartz:quartz:jar:1.5.1"
@@ -190,12 +191,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     # Include the generated sources.
     compile.sources << generated
 
-    test.compile.with *compile.classpath
-    test.compile.with project("ode:bpel-scheduler-quartz"),
+    tests.prepare do |task| 
+      unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).into(path_to(:test_target_dir, "derby-db")).invoke
+    end
+    tests.compile.with *compile.classpath
+    tests.compile.with project("ode:bpel-scheduler-quartz"),
       project("ode:dao-jpa"),
       project("ode:minerva"),
       COMMONS.pool, DERBY, JAVAX.connector, JAVAX.transaction,
-      JOTM, LOG4J, OPENJPA, XERCES
+      JOTM, LOG4J, OPENJPA, XERCES, XSTREAM
     package :jar
   end
 
