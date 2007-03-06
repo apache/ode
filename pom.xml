@@ -85,7 +85,7 @@
         <xmlbeansVersion>2.1.0</xmlbeansVersion>
         <springVersion>1.2.6</springVersion>
         <derbyVersion>10.1.2.1</derbyVersion>
-        <quartzVersion>1.5.1</quartzVersion>
+        <quartzVersion>1.5.2</quartzVersion>
         <xstreamVersion>1.2</xstreamVersion>
         <xalanVersion>2.7.0</xalanVersion>
         <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
