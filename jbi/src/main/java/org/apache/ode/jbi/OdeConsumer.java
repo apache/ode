@@ -98,13 +98,18 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                 inonly.setInMessage(nmsg);
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
-                        if (success)
-                            try {
-                                _ode.getChannel().send(inonly);
-                            } catch (MessagingException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
+                        if (success) {
+                            _ode._executorService.submit( new Runnable() {
+                                public void run() {
+                                    try {
+                                        _ode.getChannel().send(inonly);
+                                    } catch (MessagingException e) {
+                                        String errmsg = "Exception while sending in-only message to JBI for ODE mex " + odeMex;
+                                        __log.error(errmsg, e);
+                                    }
+                                }
+                            });
+                        }
                     }
 
                     public void beforeCompletion() {
@@ -119,14 +124,19 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                 inout.setInMessage(nmsg);
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
-                        if (success)
-                            try {
-                                _outstandingExchanges.put(inout.getExchangeId(), odeMex.getMessageExchangeId());
-                                _ode.getChannel().send(inout);
-                            } catch (MessagingException e) {
-                                String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
-                                __log.error(errmsg, e);
-                            }
+                        if (success) {
+                            _ode._executorService.submit( new Runnable() {
+                                public void run() {
+                                    try {
+                                        _outstandingExchanges.put(inout.getExchangeId(), odeMex.getMessageExchangeId());
+                                        _ode.getChannel().send(inout);
+                                    } catch (MessagingException e) {
+                                        String errmsg = "Exception while sending request-only message to JBI for ODE mex " + odeMex;
+                                        __log.error(errmsg, e);
+                                    }
+                                }
+                            });
+                        }
                     }
 
                     public void beforeCompletion() {
