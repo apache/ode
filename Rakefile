@@ -84,6 +84,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       JAVAX.activation, JAVAX.servlet, JAVAX.stream,
       JAVAX.transaction, JENCKS, JOTM, WSDL4J, XMLBEANS
 
+    tests.compile.with *compile.classpath
+    tests.compile.with project("ode:tools")
+    
     package :jar
   end
 
@@ -113,7 +116,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources")),
       filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
     )
-
+    
     package(:war).with(:libs=>libs, :manifest=>false).
       path("WEB-INF").include(path_to(:target_dir, "resources/*"))
   end
