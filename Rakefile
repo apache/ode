@@ -48,7 +48,8 @@ JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 JOTM                = [ "jotm:jotm:jar:2.0.10", "jotm:jotm_jrmp_stubs:jar:2.0.10",
                         "org.objectweb.carol:carol:jar:2.0.5", "howl:howl-logger:jar:0.1.11" ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = "org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT"
+OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT", 
+                       "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.1"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
@@ -66,6 +67,7 @@ XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 repositories.remote[:central] = "http://pxe.intalio.org/public/maven2"
 repositories.remote[:apache_incubator]="http://people.apache.org/repo/m2-incubating-repository"
+repositories.remote[:maven_central]="http://repo1.maven.org/maven2"
 repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -99,12 +101,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-store"),
       project("ode:dao-hibernate"), project("ode:jacob"),
       project("ode:minerva"), project("ode:utils"),
-      project("ode:dao-jpa-ojpa"), project("ode:dao-jpa-ojpa-derby"),
+      project("ode:dao-jpa"), project("ode:dao-jpa-ojpa-derby"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec,
-      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient, DERBY, DERBY_TOOLS,
+      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient, 
+      COMMONS.lang, DERBY, DERBY_TOOLS,
       JAVAX.activation, JAVAX.javamail, JAVAX.connector, JAVAX.jms,
       JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
-      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, WOODSTOX, WSDL4J,
+      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, QUARTZ, WOODSTOX, WSDL4J,
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES
 
@@ -301,13 +304,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       cmd << "-cp" << artifacts(DERBY, DERBY_TOOLS).join(File::PATH_SEPARATOR)
       cmd << "org.apache.derby.tools.ij"
       Open3.popen3(*cmd) do |stdin, stdout, stderr|
+        puts "INSIDE"
         # Shutdown so if a database already exists, we can remove it.
         stdin.puts "connect 'jdbc:derby:;shutdown=true';"
         rm_rf path_to(:target, "derby") rescue nil
         # Create a new database, and load all the prerequisites.
-        stdin.puts "connect 'jdbc:derby:#{task.name}/jpadb;create=true' user='sa';"
+        stdin.puts "connect 'jdbc:derby:#{task.name}/jpadb;create=true;user=sa'"
+        stdin.puts "set schema sa"
         stdin.puts "autocommit on;"
+        #puts "Going to write prereqs: #{prereq.to_s}"
+        puts "before"
         task.prerequisites.each { |prereq| stdin.write File.read(prereq.to_s) }
+        puts "after"
         # Exiting will shutdown the database so we can copy the files around.
         stdin.puts "exit"
         stdin.close
