@@ -65,7 +65,7 @@ import java.util.Set;
         })
 public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanceDAO {
 
-    @Id @Column(name="PROCESS_INSTANCE_ID")
+    @Id @Column(name="ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _instanceId;
 	@Basic @Column(name="LAST_RECOVERY_DATE")

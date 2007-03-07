@@ -41,7 +41,7 @@ import javax.xml.namespace.QName;
 @Entity
 @Table(name="ODE_PARTNER_LINK")
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
-	
+
 	@Id @Column(name="PARTNER_LINK_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
@@ -69,7 +69,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
     private String _partnerSessionId;
 
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
-    private ProcessInstanceDAOImpl _scope;
+    private ScopeDAOImpl _scope;
 
     public PartnerLinkDAOImpl() {}
 	public PartnerLinkDAOImpl(int modelId, String name, String myRole, String partnerRole) {
@@ -157,4 +157,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 
 	}
 
+    public void setScope(ScopeDAOImpl scope) {
+        _scope = scope;
+    }
 }
