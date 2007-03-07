@@ -71,8 +71,8 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();
 
-//        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
-        propMap.put("openjpa.Log", "log4j");
+        propMap.put("openjpa.Log", "DefaultLevel=TRACE");
+//        propMap.put("openjpa.Log", "log4j");
         propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
 
         propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());

@@ -89,10 +89,10 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 	
 	public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,
 			String myRole, String partnerRole) {
-		PartnerLinkDAO pl = new PartnerLinkDAOImpl(plinkModelId, pLinkName, myRole, partnerRole);
-		
-		_partnerLinks.add(pl);
-		return pl;
+		PartnerLinkDAOImpl pl = new PartnerLinkDAOImpl(plinkModelId, pLinkName, myRole, partnerRole);
+        pl.setScope(this);
+        _partnerLinks.add(pl);
+        return pl;
 	}
 
 	public Collection<ScopeDAO> getChildScopes() {
