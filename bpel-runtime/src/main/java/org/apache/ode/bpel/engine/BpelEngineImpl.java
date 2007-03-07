@@ -303,7 +303,7 @@ public class BpelEngineImpl implements BpelEngine {
                 // doing any work on its behalf, therefore we will reschedule the
                 // events for some time in the future (1 minute).
                 Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                __log.info(__msgs.msgReschedulingJobForInactiveProcess(process.getPID(), jobInfo.jobName, future));
+                __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
                 _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, future);
                 return;
             }
