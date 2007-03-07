@@ -64,6 +64,8 @@ public class OdeConfigProperties {
 
     private static final String PROP_DB_POOL_BLOCKING = "db.pool.blocking";
 
+    private static final String PROP_THREAD_POOL_SIZE = "threads.pool.size";
+    
     private static final String PROP_CONNECTOR_PORT = "jca.port";
 
     private static final String PROP_CONNECTOR_NAME = "jca.name";
@@ -183,7 +185,9 @@ public class OdeConfigProperties {
         return Boolean.valueOf(getProperty(PROP_DB_POOL_BLOCKING,"false"));
     }
 
-
+    public int getThreadPoolMaxSize() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_THREAD_POOL_SIZE, "0"));
+    }
 
     public int getPoolMaxSize() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));

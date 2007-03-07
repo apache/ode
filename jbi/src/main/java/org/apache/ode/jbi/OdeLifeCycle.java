@@ -19,18 +19,6 @@
 
 package org.apache.ode.jbi;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.concurrent.Executors;
-
-import javax.jbi.JBIException;
-import javax.jbi.component.ComponentContext;
-import javax.jbi.component.ComponentLifeCycle;
-import javax.jbi.component.ServiceUnitManager;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.connector.BpelServerConnector;
@@ -42,6 +30,17 @@ import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.jbi.JBIException;
+import javax.jbi.component.ComponentContext;
+import javax.jbi.component.ComponentLifeCycle;
+import javax.jbi.component.ServiceUnitManager;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.transaction.TransactionManager;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this engine class automatically when JBI framework starts
@@ -185,7 +184,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         // we'll do that explcitly
         _ode._eprContext = new EndpointReferenceContextImpl(_ode);
         _ode._mexContext = new MessageExchangeContextImpl(_ode);
-        _ode._executorService = Executors.newCachedThreadPool();
+        if (_ode._config.getThreadPoolMaxSize() == 0)
+            _ode._executorService = Executors.newCachedThreadPool();
+        else
+            _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
         _ode._scheduler = new QuartzSchedulerImpl();
         _ode._scheduler.setJobProcessor(_ode._server);
         _ode._scheduler.setExecutorService(_ode._executorService, 20);
