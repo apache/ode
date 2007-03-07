@@ -437,6 +437,11 @@ public class ODEServer {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
+        if (_odeConfig.getThreadPoolMaxSize() == 0)
+            _executorService = Executors.newCachedThreadPool();
+        else
+            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize());
+
         _executorService = Executors.newCachedThreadPool();
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
