@@ -92,17 +92,19 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "axis2-war" do
     libs = project("ode:axis2"), project("ode:bpel-api"),
-      project("ode:bpel-compiler"), project("ode:bpel-obj"),
+      project("ode:bpel-compiler"), project("ode:bpel-dao"), 
+      project("ode:bpel-epr"), project("ode:bpel-obj"),
       project("ode:bpel-ql"), project("ode:bpel-runtime"),
       project("ode:bpel-scheduler-quartz"), project("ode:bpel-schemas"),
+      project("ode:bpel-store"),
       project("ode:dao-hibernate"), project("ode:jacob"),
       project("ode:minerva"), project("ode:utils"),
       project("ode:dao-jpa-ojpa"), project("ode:dao-jpa-ojpa-derby"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec,
-      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
+      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient, DERBY, DERBY_TOOLS,
       JAVAX.activation, JAVAX.javamail, JAVAX.connector, JAVAX.jms,
-      JAVAX.persistence, JAVAX.transaction, JENCKS, JIBX,
-      GERONIMO.kernel, GERONIMO.transaction, OPENJPA, WOODSTOX,
+      JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
+      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, WOODSTOX, WSDL4J,
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES
 
