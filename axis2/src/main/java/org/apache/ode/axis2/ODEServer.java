@@ -37,6 +37,7 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
@@ -64,7 +65,7 @@ import java.util.concurrent.Executors;
  */
 public class ODEServer {
 
-    private static final Log __log = LogFactory.getLog(ODEServer.class);
+    protected final Log __log = LogFactory.getLog(getClass());
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -500,7 +501,12 @@ public class ODEServer {
         case RETIRED:
             // bounce the process
             _server.unregister(pse.pid);
-            _server.register(_store.getProcessConfiguration(pse.pid));
+            ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
+            if (pconf != null)
+                _server.register(pconf);
+            else {
+                __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
+            }
             break;
         case DISABLED:
         case UNDEPLOYED:
