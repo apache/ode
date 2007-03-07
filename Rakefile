@@ -50,7 +50,7 @@ JOTM                = [ "jotm:jotm:jar:2.0.10", "jotm:jotm_jrmp_stubs:jar:2.0.10
 LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT", 
                        "net.sourceforge.serp:serp:jar:1.12.0"]
-QUARTZ              = "quartz:quartz:jar:1.5.1"
+QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.5.2"
@@ -188,7 +188,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-obj"), project("ode:bpel-schemas"), project("ode:bpel-store"),
       project("ode:jacob"), project("ode:jacob-ap"), project("ode:utils"),
       COMMONS.logging, COMMONS.collections,
-      JAXEN, JAVAX.persistence, SAXON, JAVAX.stream,
+      JAXEN, JAVAX.persistence, JAVAX.stream, SAXON,
       WSDL4J, XMLBEANS
 
     # Prepare before compile, but we use the same classpath,
@@ -199,15 +199,16 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     # Include the generated sources.
     compile.sources << generated
 
-    tests.prepare do |task| 
+    tests.resources do |task| 
+      #rm_rf path_to(:test_target_dir, "derby-db")
       unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).into(path_to(:test_target_dir, "derby-db")).invoke
     end
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-scheduler-quartz"),
-      project("ode:dao-jpa"),
-      project("ode:minerva"),
-      COMMONS.pool, DERBY, JAVAX.connector, JAVAX.transaction,
-      JOTM, LOG4J, OPENJPA, XERCES, XSTREAM
+      project("ode:dao-jpa"), project("ode:minerva"),
+      COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
+      JOTM, LOG4J, XERCES, XSTREAM, OpenJPA::REQUIRES, QUARTZ, XALAN
+
     package :jar
   end
 
@@ -239,9 +240,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.logging, JAVAX.persistence, JAVAX.stream,
       HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    compile do |task|
+    build do |task|
       # Only enhance if any class files were compiled.
-      if task.compiled?
+      if compile.compiled?
         OpenJPA.enhance(:output=>compile.target, :classpath=>compile.classpath,
           :properties=>path_to(:resources_dir, "META-INF/persistence.xml"))
       end
@@ -275,8 +276,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.collections, JAVAX.persistence, JAVAX.transaction,
       OPENJPA, XERCES
 
-    compile do |task|
-      if task.compiled?
+    build do |task|
+      if compile.compiled?
         OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
           :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
       end
@@ -324,6 +325,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       end
       # Copy the SQL files into the database directory.
       filter(task.prerequisites).into("#{task.name}/jpadb").invoke
+      # Tell other tasks we're refreshed, this also prevents running task
+      # due to time differences between derby and jpadb directories.
+      touch task.name 
     end
 
     build derby_db
