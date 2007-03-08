@@ -112,8 +112,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       XALAN, XERCES
 
     resources do |task|
-      unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).
-        into(path_to(:target_dir, "resources")).invoke
+      if compile.compiled?
+        unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).
+          into(path_to(:target_dir, "resources")).invoke
+      end
       #untar(artifact("#{group}:ode-dao-hibernate-db-derby:tar:#{version}")).
       #  into(path_to(:target_dir, "resources")),
     end
@@ -201,7 +203,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     tests.resources do |task| 
       #rm_rf path_to(:test_target_dir, "derby-db")
-      unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).into(path_to(:test_target_dir, "derby-db")).invoke
+      if tests.compile.compiled?
+        unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).into(path_to(:test_target_dir, "derby-db")).invoke
+      end
     end
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-scheduler-quartz"),
@@ -305,7 +309,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       cmd << "-cp" << artifacts(DERBY, DERBY_TOOLS).join(File::PATH_SEPARATOR)
       cmd << "org.apache.derby.tools.ij"
       Open3.popen3(*cmd) do |stdin, stdout, stderr|
-        puts "INSIDE"
         # Shutdown so if a database already exists, we can remove it.
         stdin.puts "connect 'jdbc:derby:;shutdown=true';"
         rm_rf path_to(:target, "derby") rescue nil
@@ -314,9 +317,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
         stdin.puts "set schema sa"
         stdin.puts "autocommit on;"
         #puts "Going to write prereqs: #{prereq.to_s}"
-        puts "before"
         task.prerequisites.each { |prereq| stdin.write File.read(prereq.to_s) }
-        puts "after"
         # Exiting will shutdown the database so we can copy the files around.
         stdin.puts "exit"
         stdin.close
@@ -336,16 +337,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "distro-axis2" do
     resources(
-      filter(["LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir)),
-      filter(path_to(:src_dir, "examples")).into(path_to(:target_dir))
+      filter(["LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir, "stage")),
+      filter(path_to(:src_dir, "examples")).into(path_to(:target_dir, "stage"))
     )
-    resources do
-      #unzip("#{group}:ode-tools-bin:zip:#{version}").into(path_to(:target_dir)).invoke
-      # TODO: how do we limit this to files from bins ZIP?
-      #chmod 0755, FileList[task.name + "/*"].collect.exclude("**/*.bat"), :verbose=>false
-    end
 
-    package(:zip).include(path_to(:target_dir, "*"))
+    package(:zip).include(path_to(:target_dir, "stage/*"))
     package(:zip).include(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
       COMMONS.pool, COMMONS.collections, JAXEN,
       SAXON, LOG4J, WSDL4J, :path=>"lib")
