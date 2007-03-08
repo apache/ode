@@ -225,7 +225,7 @@ public class Database {
             throw new DatabaseConfigException(errmsg, ex);
         }
 
-        cf.setDataSource(_datasource);
+        cf.setDataSource(getDataSource());
         cf.setTransactionManager(_txm);
         cf.init(_odeConfig.getProperties());
         return cf;
