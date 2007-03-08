@@ -320,8 +320,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         return null;
                     for (ActivityRecoveryDAO recovery : instance.getActivityRecoveries()) {
                         if (recovery.getActivityId() == aid) {
-                            BpelProcess process = _server._engine._activeProcesses.get(instance.getProcess()
-                                    .getProcessId());
+                            BpelProcess process = _server._engine._activeProcesses.get(instance.getProcess().getProcessId());
                             if (process != null) {
                                 process.recoverActivity(instance, recovery.getChannel(), aid, action, null);
                                 break;
@@ -654,7 +653,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         if (files != null)
             genDocumentInfo(docinfo, files.toArray(new File[files.size()]), true);
         else if (__log.isDebugEnabled())
-            __log.debug("fillProcessInfo: No files for " + pconf.getProcessId() + " !!!");
+            __log.debug("fillProcessInfo: No files for " + pconf.getProcessId());
 
         if (custom.includeProcessProperties()) {
             TProcessProperties properties = info.addNewProperties();
@@ -730,8 +729,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             ProcessConf pconf) {
         instances.setState(state);
         String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
-        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus + " name="
-                + pconf.getProcessId().getLocalPart() + " namespace=" + pconf.getProcessId().getNamespaceURI());
+        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
+        		+ " pid="+ pconf.getProcessId());
         
         int count = dbexec(new BpelDatabase.Callable<Integer>() {
 
@@ -745,8 +744,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     private void getInstanceSummaryActivityFailure(final TInstanceSummary summary, ProcessConf pconf) {
         String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString()
                 .toLowerCase();
-        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus + " name="
-                + pconf.getProcessId().getLocalPart() + " namespace=" + pconf.getProcessId().getNamespaceURI());
+        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
+        		+ " pid="+ pconf.getProcessId());
         dbexec(new BpelDatabase.Callable<Void>() {
 
             public Void run(BpelDAOConnection conn) throws Exception {
