@@ -137,7 +137,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             vpu.inject(PROCESS);
         }
 
-        __log.debug("BpelRuntimeContextImpl created. INDEXED STATE=" + soup.getIndex());
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("BpelRuntimeContextImpl created. INDEXED STATE=" + soup.getIndex());
+        }
     }
 
     public Long getPid() {
@@ -537,7 +539,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mex.getPipedMessageExchangeId() != null) {
             PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _bpelProcess
                     .getEngine().getMessageExchange(mex.getPipedMessageExchangeId());
-            __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
+            if (BpelProcess.__log.isDebugEnabled()) {
+                __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
+            }
             switch (m.getStatus()) {
                 case FAILURE:
                     // We can't seem to get the failure out of the myrole mex?
@@ -738,12 +742,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     mex.getMessageExchangeId(), partnerEndpoint.serviceName,
                     operation.getName(), mex.getMessageExchangeId());
 
-            __log.debug("Invoking in a p2p interaction, partnerrole " + mex + " - myrole " + myRoleMex);
+            if (BpelProcess.__log.isDebugEnabled()) {
+                __log.debug("Invoking in a p2p interaction, partnerrole " + mex + " - myrole " + myRoleMex);
+            }
+
             Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
             odeRequest.setMessage(outgoingMessage);
 
-            __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
-                    + partnerSessionId + " - partnerSess " + mySessionId);
+            if (BpelProcess.__log.isDebugEnabled()) {
+                __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
+                        + partnerSessionId + " - partnerSess " + mySessionId);
+            }
             if ( partnerSessionId != null )
                    myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
             if ( mySessionId != null )
@@ -916,7 +925,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexid == null)
             throw new NullPointerException("Null mexId");
 
-        __log.debug("Invoking message response for mexid " + mexid + " and channel " + responseChannelId);
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("Invoking message response for mexid " + mexid + " and channel " + responseChannelId);
+        }
         vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
@@ -1262,8 +1273,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      *
      */
     public void matcherEvent(String correlatorId, CorrelationKey ckey) {
-
-        __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
+        }
         CorrelatorDAO correlator = _dao.getProcess().getCorrelator(correlatorId);
 
         // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
