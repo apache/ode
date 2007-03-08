@@ -124,29 +124,16 @@ final class OdeContext {
         _context = ctx;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return Transformation engine context
-     */
     public ComponentContext getContext() {
         return _context;
     }
 
-    /**
-     * Used to grab a reference of this object.
-     *
-     * @return an initialized TransformationEngineContext reference
-     */
-    public static synchronized OdeContext getInstance() {
-        if (__self == null) {
-            synchronized (OdeContext.class) {
-                if (__self == null) {
-                    __self = new OdeContext();
-                }
+    public static OdeContext getInstance() {
+        synchronized (OdeContext.class) {
+            if (__self == null) {
+                __self = new OdeContext();
             }
         }
-
         return __self;
     }
 
@@ -187,7 +174,7 @@ final class OdeContext {
             } else {
                 Definition def = pc.getDefinitionForService(endpoint.serviceName);
                 if (def == null) {
-                    __log.debug("Could not find definition for service: " + endpoint.serviceName); 
+                    __log.debug("Could not find definition for service: " + endpoint.serviceName);
                 } else {
                     def = new WSDLFlattener(def).getDefinition(portType);
                     Document doc = WSDLFactory.newInstance().newWSDLWriter().getDocument(def);
