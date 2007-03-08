@@ -18,9 +18,6 @@
  */
 package org.apache.ode.bpel.common;
 
-import org.apache.ode.bpel.pmapi.InvalidRequestException;
-import org.apache.ode.utils.ISO8601DateParser;
-
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -29,6 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.pmapi.InvalidRequestException;
+import org.apache.ode.utils.ISO8601DateParser;
+
 /**
  * Holds a filter that will get interpreted when listing processe instances. The
  * semantic of the filtering is somewhat different than the one used in the
@@ -36,6 +38,7 @@ import java.util.StringTokenizer;
  * language.
  */
 public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements Serializable {
+    protected static Log LOG = LogFactory.getLog(InstanceFilter.class);
 
     private static final long serialVersionUID = 9999;
 
@@ -338,5 +341,22 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         return limit;
     }
 
+
+    public String toString() {
+    	StringBuffer buf = new StringBuffer();
+    	buf.append("InstanceFilter {");
+    	buf.append("iid="+iid);
+    	buf.append(",pid="+pid);
+    	buf.append(",name="+nameFilter);
+    	buf.append(",namespace="+namespaceFilter);
+    	buf.append(",status="+statusFilter);
+    	buf.append(",startedDate="+startedDateFilter);
+    	buf.append(",lastActiveDate="+lastActiveDateFilter);
+    	buf.append(",propertyValues="+propertyValuesFilter);
+    	buf.append(",orders="+orders);
+    	buf.append(",limit="+limit);
+    	buf.append("}");
+    	return buf.toString();
+    }
 
 }
