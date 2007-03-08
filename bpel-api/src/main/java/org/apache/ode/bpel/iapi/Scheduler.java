@@ -49,7 +49,7 @@ public interface Scheduler {
      * Schedule a volatile (non-persisted) job. Volatile jobs should not be
      * saved in the database and should not survive system crash. Volatile
      * jobs scheduled from a transactional context should be scheduled
-     * regardless of whether the tansaction commits.
+     * regardless of whether the transaction commits.
      *
      * @param jobDetail information about the job
      * @return unique (as far as the scheduler is concerned) job identifier
