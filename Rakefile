@@ -39,7 +39,7 @@ JAVAX               = OpenStruct.new(
   :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
-  :stream           =>"stax:stax-api:jar:1.0",
+  :stream           =>"stax:stax-api:jar:1.0.1",
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
@@ -109,7 +109,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       JAXEN,
       JAVAX.activation, JAVAX.javamail, JAVAX.connector, JAVAX.jms,
       JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
-      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, QUARTZ, 
+      JOTM, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ, 
       SAXON, WOODSTOX, WSDL4J,
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES, XMLBEANS
@@ -214,7 +214,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     tests.compile.with project("ode:bpel-scheduler-quartz"),
       project("ode:dao-jpa"), project("ode:minerva"),
       COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
-      JOTM, LOG4J, XERCES, XSTREAM, OpenJPA::REQUIRES, QUARTZ, XALAN
+      JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
 
     package :jar
   end
@@ -367,7 +367,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "jacob" do
     compile.with project("ode:utils"), project("ode:jacob-ap"),
-      COMMONS.logging, XSTREAM
+      COMMONS.logging
 
     # Prepare before compile, but we use the same classpath,
     # so define this after compile.with.
