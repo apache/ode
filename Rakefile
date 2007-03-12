@@ -53,7 +53,7 @@ OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAP
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
-WSDL4J              = "wsdl4j:wsdl4j:jar:1.5.2"
+WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
 XERCES              = "xerces:xercesImpl:jar:2.8.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
@@ -94,28 +94,31 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "axis2-war" do
     libs = project("ode:axis2"), project("ode:bpel-api"),
-      project("ode:bpel-compiler"), project("ode:bpel-dao"), 
+      project("ode:bpel-compiler"), project("ode:bpel-connector"), project("ode:bpel-dao"), 
       project("ode:bpel-epr"), project("ode:bpel-obj"),
       project("ode:bpel-ql"), project("ode:bpel-runtime"),
       project("ode:bpel-scheduler-quartz"), project("ode:bpel-schemas"),
       project("ode:bpel-store"),
-      project("ode:dao-hibernate"), project("ode:jacob"),
+      project("ode:dao-hibernate"), project("ode:jacob"), 
+      project("ode:jca-ra"), project("ode:jca-server"),
       project("ode:minerva"), project("ode:utils"),
       project("ode:dao-jpa"), project("ode:dao-jpa-ojpa-derby"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec,
       COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient, 
-      COMMONS.lang, DERBY, DERBY_TOOLS,
+      COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS,
+      JAXEN,
       JAVAX.activation, JAVAX.javamail, JAVAX.connector, JAVAX.jms,
       JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
-      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, QUARTZ, WOODSTOX, WSDL4J,
+      JOTM, GERONIMO.kernel, GERONIMO.transaction, OPENJPA, QUARTZ, 
+      SAXON, WOODSTOX, WSDL4J,
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
-      XALAN, XERCES
+      XALAN, XERCES, XMLBEANS
 
     resources do |task|
-      if compile.compiled?
+      # if compile.compiled?
         unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).
           into(path_to(:target_dir, "resources")).invoke
-      end
+      # end
       #untar(artifact("#{group}:ode-dao-hibernate-db-derby:tar:#{version}")).
       #  into(path_to(:target_dir, "resources")),
     end
