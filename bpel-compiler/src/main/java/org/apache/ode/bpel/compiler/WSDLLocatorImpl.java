@@ -1,15 +1,14 @@
 package org.apache.ode.bpel.compiler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xml.sax.InputSource;
+
+import javax.wsdl.xml.WSDLLocator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import javax.wsdl.xml.WSDLLocator;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
 
 public class WSDLLocatorImpl implements WSDLLocator {
 
@@ -66,4 +65,7 @@ public class WSDLLocatorImpl implements WSDLLocator {
         return _latest;
     }
 
+    public void close() {
+        _resourceFinder = null;
+    }
 }
