@@ -80,5 +80,11 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>xalan</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
     </dependencies>
 </project>
