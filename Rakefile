@@ -130,7 +130,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "bpel-api" do
     compile.with project("ode:utils"), project("ode:bpel-obj"),
-      project("ode:bpel-schemas"), WSDL4J
+      project("ode:bpel-schemas"), WSDL4J, COMMONS.logging
     package :jar
   end
 
@@ -271,15 +271,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   define "dao-jpa" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"), project("ode:utils"),
-      COMMONS.logging, JAVAX.persistence, JAVAX.transaction, OPENJPA
-    package :jar
-  end
-
-  define "dao-jpa-ojpa" do
-    compile.with project("ode:bpel-api"), project("ode:dao-jpa"), project("ode:bpel-dao"),
-      COMMONS.collections, JAVAX.persistence, JAVAX.transaction,
+      COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction, 
       OPENJPA, XERCES
-
+    
     build do |task|
       if compile.compiled?
         OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
@@ -288,6 +282,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
     package :jar
   end
+
+#  define "dao-jpa-ojpa" do
+#    compile.with project("ode:bpel-api"), project("ode:dao-jpa"), project("ode:bpel-dao"),
+#      COMMONS.collections, JAVAX.persistence, JAVAX.transaction,
+#      OPENJPA, XERCES
+#
+#    compile do |task|
+#      if task.compiled?
+#        OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
+#          :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
+#      end
+#    end
+#    package :jar
+#  end
 
   define "dao-jpa-ojpa-derby" do
     # Create the Derby SQL file using the OpenJPA mapping tool, and
@@ -370,7 +378,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
   define "jacob-ap" do
-    compile.with File.join(ENV['JAVA_HOME'], "lib/tools.jar")
+    compile.with File.join(ENV['JAVA_HOME'], "lib", "tools.jar")
     package :jar
   end
 
