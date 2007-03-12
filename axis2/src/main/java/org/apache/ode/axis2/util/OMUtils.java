@@ -152,7 +152,14 @@ public class OMUtils {
             if (attr.getLocalName().equals("xmlns") 
                     || (attr.getNamespaceURI() != null && attr.getNamespaceURI().equals(DOMUtils.NS_URI_XMLNS)))
                 continue;
-            omElement.addAttribute(attr.getLocalName(), attr.getValue(), omElement.findNamespaceURI(attr.getNamespaceURI()));
+            OMNamespace attrOmNs = null;
+            String attrNs = attr.getNamespaceURI();
+            String attrPrefix = attr.getPrefix();
+            if (attrNs != null)
+                attrOmNs = omElement.findNamespace(null, attrNs);
+            if (attrOmNs == null && attrPrefix != null)
+                attrOmNs = omElement.findNamespace(attrPrefix, null);
+            omElement.addAttribute(attr.getLocalName(), attr.getValue(), attrOmNs);
         }
 
         NodeList children = src.getChildNodes();
