@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
@@ -43,7 +44,7 @@ import java.util.Map;
  * Wrapper for {@link org.apache.ode.bpel.compiler.BpelCompiler} implementations,
  * providing basic utility methods and auto-detection of BPEL version.
  * </p>
- */
+s */
 public class BpelC {
     private static final Log __log = LogFactory.getLog(BpelC.class);
     private static final CommonCompilationMessages __cmsgs =
@@ -182,7 +183,7 @@ public class BpelC {
      * @throws CompilationException
      *           if one occurs while compiling.
      */
-    public void compile(Process process) throws CompilationException, IOException {
+    public void compile(final Process process) throws CompilationException, IOException {
         if (process == null)
             throw new NullPointerException("Attempt to compile NULL process.");
 
@@ -199,12 +200,9 @@ public class BpelC {
 
         CompileListener clistener = new CompileListener() {
             public void onCompilationMessage(CompilationMessage compilationMessage) {
-                Object location = compilationMessage.source;
+                SourceLocation location = compilationMessage.source;
                 if (location == null) {
-                    compilationMessage.source = _bpelFile + ":";
-                }
-                if (location instanceof BpelObject) {
-                    compilationMessage.source = _bpelFile + ":" + ((BpelObject)location).getLineNo();
+                    compilationMessage.source = process;
                 }
                 logCompilationMessage(compilationMessage);
             }
@@ -224,7 +222,7 @@ public class BpelC {
                     compiler = new BpelCompiler11();
                     compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
-                        compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl);
+                        compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl,null);
                     } else {
                         CompilationMessage cmsg = __cmsgs.errBpel11RequiresWsdl();
                         logCompilationMessage(cmsg);
@@ -255,7 +253,7 @@ public class BpelC {
 
         OProcess oprocess;
         try {
-            oprocess = compiler.compile(_bpelFile, process);
+            oprocess = compiler.compile(process,wf);
         }
         catch (CompilationException cex) {
             this.invalidate();
@@ -311,11 +309,11 @@ public class BpelC {
             InputSource isrc = new InputSource(new ByteArrayInputStream(StreamUtils.read(bpelFile.toURL())));
             isrc.setSystemId(bpelFile.getAbsolutePath());
 
-            process = BpelObjectFactory.getInstance().parse(isrc);
+            process = BpelObjectFactory.getInstance().parse(isrc,_bpelFile.toURI());
 
 
         } catch (Exception e) {
-            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(bpelFile.getAbsolutePath());
+            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocationImpl(bpelFile.toURI()));
             this.invalidate();
             throw new CompilationException(cmsg, e);
         }
