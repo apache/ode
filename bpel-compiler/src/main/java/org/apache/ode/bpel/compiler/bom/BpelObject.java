@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -30,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +42,7 @@ import java.util.Map;
  * location information (i.e. line numbers) and namespace context (XML namespace
  * prefix maps).
  */
-public class BpelObject {
+public class BpelObject implements SourceLocation {
 
     public static final QName ATTR_LINENO = new QName("urn:org.apache.ode.bpel.compiler", "lineno");
 
@@ -51,6 +53,9 @@ public class BpelObject {
     private final NSContext _nsContext;
 
     private List<BpelObject> _children = null;
+    
+    /** URI of the source document. */ 
+    private URI _docURI;
     
 
     public BpelObject(Element el) {
@@ -186,7 +191,7 @@ public class BpelObject {
     }
 
     protected BpelObject createBpelObject(Element element) {
-        return BpelObjectFactory.getInstance().createBpelObject(element);
+        return BpelObjectFactory.getInstance().createBpelObject(element,_docURI);
     }
 
     protected String getAttribute(QName name, String dflt) {
@@ -260,4 +265,19 @@ public class BpelObject {
         return DOMUtils.domToString(_element);
     }
 
+    public int getColumnNo() {
+        return 0;
+    }
+
+    public String getPath() {
+        return null;
+    }
+
+    public URI getURI() {
+        return _docURI;
+    }
+
+    public void setURI(URI uri) {
+        _docURI = uri;
+    }
 }

@@ -22,6 +22,7 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.utils.msg.MessageBundle;
 
+import java.net.URI;
 import java.util.Locale;
 
 import junit.framework.TestCase;
@@ -35,11 +36,12 @@ public class CompilationMessageTest extends TestCase {
   private static String WRONG_PARAMETER_CODE = "WrongParameter";
 
   private CompilationTestMessages _bundle;
-
+  private SourceLocationImpl sloc;
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     _bundle = MessageBundle.getMessages(CompilationTestMessages.class);
+    sloc = new SourceLocationImpl(new URI("urn:foo"));
   }
 
   @Override
@@ -49,58 +51,58 @@ public class CompilationMessageTest extends TestCase {
   }
 
   public void testNoParameter() {
-    CompilationMessage msg = _bundle.infNoParameter().setSource(this);
+    CompilationMessage msg = _bundle.infNoParameter().setSource(sloc);
     assertEquals(NO_PARAMETER, msg.messageText);
     assertEquals(CompilationMessage.INFO, msg.severity);
     assertEquals(NO_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
 
-    msg = _bundle.warnNoParameter().setSource(this);
+    msg = _bundle.warnNoParameter().setSource(sloc);
     assertEquals("No parameter!", msg.messageText);
     assertEquals(CompilationMessage.WARN, msg.severity);
     assertEquals(NO_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
 
-    msg = _bundle.errNoParameter().setSource(this);
+    msg = _bundle.errNoParameter().setSource(sloc);
     assertEquals(NO_PARAMETER, msg.messageText);
     assertEquals(CompilationMessage.ERROR, msg.severity);
     assertEquals(NO_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
   }
 
   public void testNoParameterLocalized() {
     CompilationTestMessages bundle = MessageBundle.getMessages(
         CompilationTestMessages.class, Locale.GERMAN);
-    CompilationMessage msg = bundle.infNoParameter().setSource(this);
+    CompilationMessage msg = bundle.infNoParameter().setSource(sloc);
     assertEquals(NO_PARAMETER_DE, msg.messageText);
     assertEquals(CompilationMessage.INFO, msg.severity);
     assertEquals(NO_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
   }
 
   public void testWrongParameter() {
-    CompilationMessage msg = _bundle.infWrongParameter(":-)").setSource(this);
+    CompilationMessage msg = _bundle.infWrongParameter(":-)").setSource(sloc);
     assertEquals(WRONG_PARAMETER, msg.messageText);
     assertEquals(CompilationMessage.INFO, msg.severity);
     assertEquals(WRONG_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
 
-    msg = _bundle.warnWrongParameter(":-)").setSource(this);
+    msg = _bundle.warnWrongParameter(":-)").setSource(sloc);
     assertEquals(WRONG_PARAMETER, msg.messageText);
     assertEquals(CompilationMessage.WARN, msg.severity);
     assertEquals(WRONG_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
 
-    msg = _bundle.errWrongParameter(":-)").setSource(this);
+    msg = _bundle.errWrongParameter(":-)").setSource(sloc);
     assertEquals(WRONG_PARAMETER, msg.messageText);
     assertEquals(CompilationMessage.ERROR, msg.severity);
     assertEquals(WRONG_PARAMETER_CODE, msg.code);
-    assertSame(this, msg.source);
+    assertSame(sloc, msg.source);
   }
 
   public void testWrongMethod() {
     try {
-      _bundle.msgWrongMethod().setSource(this);
+      _bundle.msgWrongMethod().setSource(sloc);
       fail("should have failed on msgWrongMethod()");
     }
     catch (UnsupportedOperationException uop) {

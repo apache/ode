@@ -49,14 +49,14 @@ class FlowGenerator extends DefaultActivityGenerator {
             OLink olink = i.next();
             try {
                 if (olink.source == null)
-                    throw new CompilationException(__cmsgs.errLinkMissingSourceActivity(olink.name).setSource(olink));
+                    throw new CompilationException(__cmsgs.errLinkMissingSourceActivity(olink.name).setSource(flowAct));
             } catch (CompilationException ce) {
                 _context.recoveredFromError(src, ce);
             }
 
             try {
                 if (olink.target == null)
-                    throw new CompilationException(__cmsgs.errLinkMissingTargetActivity(olink.name).setSource(olink));
+                    throw new CompilationException(__cmsgs.errLinkMissingTargetActivity(olink.name).setSource(flowAct));
             } catch (CompilationException ce) {
                 _context.recoveredFromError(src, ce);
             }

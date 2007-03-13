@@ -166,11 +166,11 @@ class WSDLRegistry {
                 if (importDef == null) {
                     CompilationException ce = new CompilationException(
                             __cmsgs.errWsdlImportNotFound(im.getNamespaceURI(),
-                                    im.getLocationURI()).setSource(def.getDocumentBaseURI()));
+                                    im.getLocationURI()).setSource(new SourceLocationImpl(defuri)));
                     if (_ctx == null)
                         throw ce;
 
-                    _ctx.recoveredFromError(def.getDocumentBaseURI(), ce);
+                    _ctx.recoveredFromError(new SourceLocationImpl(defuri), ce);
 
                     continue;
                 }
@@ -230,9 +230,9 @@ class WSDLRegistry {
                             // TODO: the line number here is going to be wrong for the in-line schema.
                             String location = ex.getSystemId() + ":"  + ex.getLineNumber();
                             CompilationException ce = new CompilationException(
-                                    __cmsgs.errSchemaError(ex.getDetailMessage()).setSource(location));
+                                    __cmsgs.errSchemaError(ex.getDetailMessage()).setSource(new SourceLocationImpl(defuri)));
                             if (_ctx != null)
-                                _ctx.recoveredFromError(location,ce);
+                                _ctx.recoveredFromError(new SourceLocationImpl(defuri),ce);
                             else
                                 throw ce;
                         }

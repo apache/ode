@@ -47,7 +47,7 @@ public class CompilationMessage {
   public String messageText;
 
   /** The location in the source that caused this error/message/warning */
-  public Object source;
+  public SourceLocation source;
 
   /** Common internationalized words. */
   private static final CommonMessages __commonMsgs = MessageBundle.getMessages(CommonMessages.class);
@@ -58,7 +58,7 @@ public class CompilationMessage {
     __commonMsgs.strError().toLowerCase() + ": "
   };
   
-  public CompilationMessage setSource(Object source) {
+  public CompilationMessage setSource(SourceLocation source) {
     this.source = source;
     return this;
   }
@@ -67,7 +67,9 @@ public class CompilationMessage {
   public String toErrorString() {
     StringBuffer buf = new StringBuffer();
     if (source != null) {
-      buf.append(source);
+      buf.append(source.getURI());
+      buf.append(':');
+      buf.append(source.getLineNo());
       buf.append(": ");
     }
     buf.append(SEVERITY_LEVELS[severity]);
