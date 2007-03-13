@@ -98,7 +98,7 @@ public interface CompilerContext {
     OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property)
             throws CompilationException;
 
-    void recoveredFromError(Object where, CompilationException bce)
+    void recoveredFromError(SourceLocation where, CompilationException bce)
             throws CompilationException;
 
     OLink resolveLink(String linkName)

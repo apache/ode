@@ -19,6 +19,8 @@
 package org.apache.ode.bpel.compiler.wsdl;
 
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.ode.bpel.compiler.bom.BpelObject4WSDL;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
@@ -71,7 +73,13 @@ public class BpelExtensionSerializer implements ExtensionDeserializer, Extension
 
       validateExtensibilityElementContext(el);
 
-      BpelObject4WSDL obj =  (BpelObject4WSDL) _factory.createBpelObject(el);
+      BpelObject4WSDL obj;
+      try {
+          obj = (BpelObject4WSDL) _factory.createBpelObject(el,new URI(def.getDocumentBaseURI()));
+      } catch (URISyntaxException e) {
+          throw new RuntimeException(e);
+      }
+      
       obj.setElementType(eltype);
       obj.setRequired(false);  // ? what does this do 
       obj.setTargetNamespace(def.getTargetNamespace());

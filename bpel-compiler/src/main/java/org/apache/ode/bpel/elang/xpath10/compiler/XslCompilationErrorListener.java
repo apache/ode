@@ -76,6 +76,6 @@ public class XslCompilationErrorListener implements ErrorListener {
     cmsg.phase = 0;
     cmsg.messageText = exception.getMessageAndLocation();
     CompilationException ce = new CompilationException(cmsg, exception);
-    _cc.recoveredFromError(XslTransformHandler.getInstance(), ce);
+    _cc.recoveredFromError(new SourceLoacatorWrapper(exception.getLocator()),ce);
   }
 }
