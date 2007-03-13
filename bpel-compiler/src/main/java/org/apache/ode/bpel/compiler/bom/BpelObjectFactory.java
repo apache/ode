@@ -20,6 +20,7 @@ package org.apache.ode.bpel.compiler.bom;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -187,7 +188,7 @@ public class BpelObjectFactory {
         return __instance;
     }
 
-    public BpelObject createBpelObject(Element el) {
+    public BpelObject createBpelObject(Element el, URI uri) {
         QName type = new QName(el.getNamespaceURI(), el.getLocalName());
         Class cls = _mappings.get(type);
         if (cls == null) {
@@ -195,8 +196,10 @@ public class BpelObjectFactory {
             return new BpelObject(el);
         }
         try {
-        Constructor ctor = cls.getConstructor(__CTOR);
-        return (BpelObject) ctor.newInstance(new Object[]{el});
+            Constructor ctor = cls.getConstructor(__CTOR);
+            BpelObject bo =(BpelObject) ctor.newInstance(new Object[]{el});
+            bo.setURI(uri);
+            return bo;
         } catch (Exception ex) {
             throw new RuntimeException("Internal compiler error", ex); 
         }
@@ -208,7 +211,7 @@ public class BpelObjectFactory {
      * @return
      * @throws SAXException 
      */
-    public Process parse(InputSource isrc) throws IOException, SAXException {
+    public Process parse(InputSource isrc, URI systemURI) throws IOException, SAXException {
         XMLReader _xr = XMLParserUtils.getXMLReader();
         LocalEntityResolver resolver = new LocalEntityResolver();
         resolver.register(Bpel11QNames.NS_BPEL4WS_2003_03, getClass().getResource("/bpel4ws_1_1-fivesight.xsd"));
@@ -223,7 +226,7 @@ public class BpelObjectFactory {
         _xr.setFeature("http://xml.org/sax/features/namespaces",true);
         _xr.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
         _xr.parse(isrc);
-        return (Process) createBpelObject(doc.getDocumentElement());
+        return (Process) createBpelObject(doc.getDocumentElement(), systemURI);
     }
    
 }
