@@ -129,6 +129,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     
     package(:war).with(:libs=>libs, :manifest=>false).
       path("WEB-INF").include(path_to(:target_dir, "resources/*"))
+
+    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode")
   end
 
   define "bpel-api" do
@@ -426,3 +428,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
 end
+
+# Lazy ass aliasing
+task("jetty:bounce" => ["package", "ode:axis2-war:jetty:bounce"])
