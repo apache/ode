@@ -43,7 +43,7 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-public abstract class BPELTest extends TestCase {
+public abstract class BPELTestAbstract extends TestCase {
 
 	protected BpelServerImpl server;
     protected ProcessStore store;
