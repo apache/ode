@@ -433,6 +433,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
 end
 
+desc "Deploys a process in the running Jetty daemon (started using jetty:bounce)."
 task("jetty:process") do
   fail "A process should be provided by specifying PROCESS=/path/to/process." unless ENV['PROCESS']
   options = project("ode").task("axis2-war:jetty:bounce").options
