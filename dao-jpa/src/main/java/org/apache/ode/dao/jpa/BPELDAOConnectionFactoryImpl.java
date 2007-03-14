@@ -121,7 +121,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         }
 
         public TransactionManager getTransactionManager() throws Exception {
-            return new DebugTxMgr(_tm);
+            return _tm;
         }
     }
 
@@ -146,7 +146,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
         public Transaction getTransaction() throws SystemException {
             Transaction tx = _tm.getTransaction();
-            __log.warn("JPA get transaction" + tx);
+            __log.debug("JPA get transaction" + tx);
             return new DebugTx(tx);
         }
 
@@ -195,7 +195,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         }
 
         public void registerSynchronization(Synchronization synchronization) throws IllegalStateException, RollbackException, SystemException {
-            __log.warn("Synchronization registration on " + synchronization.getClass().getName());
+            __log.debug("Synchronization registration on " + synchronization.getClass().getName());
             _tx.registerSynchronization(synchronization);
         }
 
