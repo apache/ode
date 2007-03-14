@@ -86,8 +86,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       JAVAX.activation, JAVAX.servlet, JAVAX.stream,
       JAVAX.transaction, JENCKS, JOTM, WSDL4J, XMLBEANS
 
+=begin
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:tools")
+=end
     
     package :jar
   end
@@ -114,21 +116,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES, XMLBEANS
 
-    resources do |task|
-      # if compile.compiled?
-        unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).
-          into(path_to(:target_dir, "resources")).invoke
-      # end
-      #untar(artifact("#{group}:ode-dao-hibernate-db-derby:tar:#{version}")).
-      #  into(path_to(:target_dir, "resources")),
-    end
-    resources(
-      filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources")),
-      filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
-    )
+    resources filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources"))
+    resources filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
     
     package(:war).with(:libs=>libs, :manifest=>false).
-      path("WEB-INF").include(path_to(:target_dir, "resources/*"))
+      path("WEB-INF").merge(project("ode:dao-jpa-ojpa-derby").package(:zip))
 
     webserve.using(:war_path=>package(:war).name, :context_path=>"/ode", 
                    :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
@@ -210,6 +202,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     # Include the generated sources.
     compile.sources << generated
 
+=begin
     tests.resources do |task| 
       #rm_rf path_to(:test_target_dir, "derby-db")
       if tests.compile.compiled?
@@ -221,6 +214,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:dao-jpa"), project("ode:minerva"),
       COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
       JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
+=end
 
     package :jar
   end
@@ -358,16 +352,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       filter(path_to(:src_dir, "examples")).into(path_to(:target_dir, "stage"))
     )
 
-    package(:zip).include(path_to(:target_dir, "stage/*"))
-    package(:zip).include(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-      COMMONS.pool, COMMONS.collections, JAXEN,
-      SAXON, LOG4J, WSDL4J, :path=>"lib")
-    package(:zip).include("#{group}:ode-axis2-war:war:#{version}", :as=>"ode.war")
-    package(:zip).merge("#{group}:ode-tools-bin:zip:#{version}")
-    [ "ode-utils", "ode-tools", "ode-bpel-compiler",
-      "ode-bpel-api", "ode-bpel-obj", "ode-bpel-schemas" ].each do |name|
-      artifact = artifact("#{group}:#{name}:jar:#{version}")
-      package(:zip).include(artifact, :as=>"#{artifact.id}.#{artifact.type}", :path=>"lib")
+    returning(package(:zip)) do |zip|
+      zip.include path_to(:target_dir, "stage/*")
+      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+        COMMONS.pool, COMMONS.collections, JAXEN,
+        SAXON, LOG4J, WSDL4J)
+      zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
+      zip.merge project("ode:tools-bin").package(:zip)
+      projects("ode:utils", "ode:tools", "ode:bpel-compiler",
+               "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
+      #[ "ode:utils", "ode:tools", "ode:bpel-compiler",
+      #  "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas" ].
+        map(&:packages).flatten.each do |pkg|
+        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+      end
     end
   end
 

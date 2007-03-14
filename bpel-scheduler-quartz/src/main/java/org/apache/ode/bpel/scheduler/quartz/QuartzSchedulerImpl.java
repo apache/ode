@@ -220,6 +220,9 @@ public class QuartzSchedulerImpl implements Scheduler {
         return jobDetail.getName();
     }
 
+    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail, Date when ) throws ContextException {       throw new RuntimeException("Not implemented");
+    }
+
     public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
         registerSynchronizer(new Synchronizer() {
             public void afterCompletion(boolean success) {
