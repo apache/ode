@@ -28,6 +28,7 @@ import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
@@ -92,7 +93,7 @@ public abstract class BPELTest extends TestCase {
         server.setScheduler(scheduler);
 		server.setBindingContext(new BindingContextImpl());
 		server.setMessageExchangeContext(mexContext);
-        store = new ProcessStoreImpl(null, true);
+        store = new ProcessStoreImpl(null, "jpa", true);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process
