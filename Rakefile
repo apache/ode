@@ -130,7 +130,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package(:war).with(:libs=>libs, :manifest=>false).
       path("WEB-INF").include(path_to(:target_dir, "resources/*"))
 
-    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode")
+    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode", 
+                   :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
+                                    "DynPartner"=>"distro-axis2/src/examples/DynPartner",
+                                    "MagicSession"=>"distro-axis2/src/examples/MagicSession"}
+    )
   end
 
   define "bpel-api" do
@@ -427,6 +431,27 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+end
+
+task("jetty:process") do
+  fail "A process should be provided by specifying PROCESS=/path/to/process." unless ENV['PROCESS']
+  options = project("ode").task("axis2-war:jetty:bounce").options
+  res = Jetty.jetty_call('/war', :get, options)
+  case res
+  when Net::HTTPSuccess
+    # Copying process dir
+    process_target = res.body.chomp + '/webapp/WEB-INF/processes'
+    process_source = options[:process_alias][ENV['PROCESS']] || ENV['PROCESS']
+    verbose { puts "Copying #{process_source} to #{process_target} " }
+    FileUtils.cp_r(process_source, process_target)
+
+    # Removing marker files to force redeploy
+    FileUtils.rm Dir.glob("#{process_target}/*.deployed")
+
+    puts "Process deployed."
+  else
+    puts "Unknown response from server: #{res}"
+  end
 end
 
 # Lazy ass aliasing
