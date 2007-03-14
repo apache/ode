@@ -456,3 +456,4 @@ end
 
 # Lazy ass aliasing
 task("jetty:bounce" => ["package", "ode:axis2-war:jetty:bounce"])
+task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
