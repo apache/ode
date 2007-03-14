@@ -28,7 +28,7 @@ import java.io.File;
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class VersionedRedeployTest extends BPELTest {
+public class VersionedRedeployTest extends BPELTestAbstract {
 
     QName qName1 = new QName("http://ode/bpel/unit-test", "HelloWorld2-1");
     QName qName2 = new QName("http://ode/bpel/unit-test", "HelloWorld2-2");
