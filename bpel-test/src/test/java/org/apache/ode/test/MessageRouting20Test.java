@@ -1,6 +1,6 @@
 package org.apache.ode.test;
 
-public class MessageRouting20Test extends BPELTest {
+public class MessageRouting20Test extends BPELTestAbstract {
 
 	public void testCorrelation() throws Throwable {
 		go("target/test-classes/bpel/2.0/TestCorrelation");
