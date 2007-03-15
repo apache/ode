@@ -259,9 +259,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
   define "bpel-test" do
-    compile.with project("ode:bpel-api"), project("ode:bpel-runtime"),
+    compile.with project("ode:bpel-api"), project("ode:bpel-compiler"), 
+      project("ode:bpel-dao"), project("ode:bpel-runtime"),
       project("ode:bpel-store"), project("ode:utils"),
       DERBY, WSDL4J
+
+    tests.resources.into(path_to(:test_target_dir))
+    tests.compile.with *compile.classpath
+    tests.compile.with project("ode:bpel-schemas"), project("ode:bpel-scheduler-quartz"),
+      project("ode:bpel-obj"), project("ode:dao-jpa"), project("ode:minerva"),
+      project("ode:jacob"),
+      COMMONS.pool, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, 
+      JAVAX.transaction, JAVAX.stream, JAXEN, HSQLDB, JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, 
+      QUARTZ, SAXON, XALAN, XMLBEANS
+    
     package :jar
   end
 

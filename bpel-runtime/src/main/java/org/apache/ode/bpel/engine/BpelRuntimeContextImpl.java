@@ -734,8 +734,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, _bpelProcess
                         .getPartnerRoleChannel(partnerLink.partnerLink));
 
+        BpelProcess p2pProcess = null;
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
-        BpelProcess p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
+        if (partnerEndpoint != null)
+            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
+
         if (p2pProcess != null) {
             // Creating a my mex using the same message id as partner mex to "pipe" them
             MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(

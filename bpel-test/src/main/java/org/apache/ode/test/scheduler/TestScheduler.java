@@ -27,23 +27,52 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
+/**
+ * @author Matthieu Riou <mriou at apache dot org>
+ */
 public class TestScheduler implements Scheduler {
+
+    private JobProcessor _processor;
+    private ExecutorService _executorSvc = Executors.newCachedThreadPool();
+    private ThreadLocal<Boolean> _transacted = new ThreadLocal<Boolean>();
+
     ThreadLocal<List<Scheduler.Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
         @Override
         protected List<Synchronizer> initialValue() {
             return new ArrayList<Synchronizer>();
         }
-
     };
 
-    public String schedulePersistedJob(Map<String, Object> arg0, Date arg1) throws ContextException {
-        return null;
+    public String schedulePersistedJob(Map<String, Object> detail, Date date) throws ContextException {
+        return scheduleVolatileJob(true, detail);
     }
 
-    public String scheduleVolatileJob(boolean arg0, Map<String, Object> arg1) throws ContextException {
+    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
+        registerSynchronizer(new Synchronizer() {
+            public void afterCompletion(boolean success) {
+                try {
+                    if (transacted) {
+                        execIsolatedTransaction(new Callable() {
+                            public Object call() throws Exception {
+                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                                doExecute(ji);
+                                return null;
+                            }
+                        });
+                    } else {
+                        JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                        doExecute(ji);
+                    }
+                } catch (Exception e) {
+                    throw new ContextException("Failure when starting a new volatile job.", e);
+                }
+            }
+            public void beforeCompletion() { }
+        });
         return null;
     }
 
@@ -62,17 +91,15 @@ public class TestScheduler implements Scheduler {
     }
 
     public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
-        FutureTask future = new FutureTask(new Callable<T>() {
+        return _executorSvc.submit(new Callable<T>() {
             public T call() throws Exception {
                 return execTransaction(transaction);
             }
         });
-        future.run();
-        return future;
     }
 
     public boolean isTransacted() {
-        return false;
+        return _transacted.get();
     }
 
     public void start() {
@@ -90,9 +117,11 @@ public class TestScheduler implements Scheduler {
 
     public void begin() {
         _synchros.get().clear();
+        _transacted.set(Boolean.TRUE);
     }
 
     public void commit() {
+        System.out.println("COMMITING THREAD " + Thread.currentThread().getName());
         for (Synchronizer s : _synchros.get())
             try {
                 s.beforeCompletion();
@@ -105,6 +134,7 @@ public class TestScheduler implements Scheduler {
             }
 
         _synchros.get().clear();
+        _transacted.set(Boolean.FALSE);
     }
 
     public void rollback() {
@@ -119,10 +149,21 @@ public class TestScheduler implements Scheduler {
             } catch (Throwable t) {
             }
         _synchros.get().clear();
+        _transacted.set(Boolean.FALSE);
     }
 
+    private void doExecute(JobInfo ji) {
+        JobProcessor processor = _processor;
+        if (processor == null)
+            throw new RuntimeException("No processor.");
+        try {
+            processor.onScheduledJob(ji);
+        } catch (Exception jpe) {
+            throw new RuntimeException("Scheduled transaction failed unexpectedly: transaction will not be retried!.", jpe);
+        }
+    }
 
     public void setJobProcessor(JobProcessor processor) throws ContextException {
-        // Nothing to do.
+        _processor = processor;
     }
 }
