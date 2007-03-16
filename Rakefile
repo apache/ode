@@ -72,9 +72,13 @@ repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
+  manifest({"Implementation-Version"=>VERSION_NUMBER,
+            "Implementation-Vendor"=>"Apache Software Foundation"})
+
   compile.options.source = "1.5"
   compile.options.target = "1.5"
 
+  desc "ODE Axis Integration Layer"
   define "axis2" do
     compile.with project("ode:bpel-api"), project("ode:bpel-connector"),
       project("ode:bpel-dao"), project("ode:bpel-epr"),
@@ -94,6 +98,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
     libs = project("ode:axis2"), project("ode:bpel-api"),
       project("ode:bpel-compiler"), project("ode:bpel-connector"), project("ode:bpel-dao"), 
@@ -129,17 +134,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     )
   end
 
+  desc "ODE APIs"
   define "bpel-api" do
     compile.with project("ode:utils"), project("ode:bpel-obj"),
       project("ode:bpel-schemas"), WSDL4J, COMMONS.logging
     package :jar
   end
 
+  desc "ODE JCA connector"
   define "bpel-api-jca" do
     compile.with project("ode:bpel-api"), JAVAX.connector
     package :jar
   end
 
+  desc "ODE BPEL Compiler"
   define "bpel-compiler" do
     compile.with project("ode:bpel-api"), project("ode:bpel-obj"),
       project("ode:bpel-schemas"), project("ode:bpel-scripts"),
@@ -148,17 +156,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE JCA Connector Implementation"
   define "bpel-connector" do
     compile.with project("ode:bpel-api"), project("ode:bpel-api-jca"),
       project("ode:bpel-runtime"), project("ode:jca-ra"), project("ode:jca-server")
     package :jar
   end
 
+  desc "ODE DAO Interfaces"
   define "bpel-dao" do
     compile.with project("ode:bpel-api")
     package :jar
   end
 
+  desc "ODE Interface Layers Common"
   define "bpel-epr" do
     compile.with project("ode:utils"), project("ode:bpel-dao"),
       project("ode:bpel-api"), project("ode:minerva"),
@@ -166,11 +177,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE BPEL Object Model"
   define "bpel-obj" do
     compile.with project("ode:utils"), SAXON, WSDL4J
     package :jar
   end
 
+  desc "ODE BPEL Query Language"
   define "bpel-ql" do
     jjtree_src = path_to(:src_dir, "main/jjtree") 
     jjtree_out = path_to(:target_dir, "generated/jjtree")
@@ -186,6 +199,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE Runtime Engine"
   define "bpel-runtime" do
     compile.with project("ode:bpel-api"), project("ode:bpel-compiler"), project("ode:bpel-dao"),
       project("ode:bpel-obj"), project("ode:bpel-schemas"), project("ode:bpel-store"),
@@ -219,12 +233,14 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE Quartz Interface"
   define "bpel-scheduler-quartz" do
     compile.with project("ode:bpel-api"), project("ode:utils"),
       COMMONS.collections, COMMONS.logging, JAVAX.transaction, QUARTZ
     package :jar
   end
 
+  desc "ODE Schemas"
   define "bpel-schemas" do
     schemas = [ path_to(:src_dir, "main/xsd/pmapi.xsdconfig"),
                 path_to(:src_dir, "main/xsd/dd.xsdconfig"), path_to(:src_dir, "main/xsd") ]
@@ -236,10 +252,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE BPEL Test Script Files"
   define "bpel-scripts" do
     package :jar
   end
 
+  desc "ODE Process Store"
   define "bpel-store" do
     compile.with project("ode:bpel-api"), project("ode:bpel-compiler"),
       project("ode:bpel-dao"), project("ode:bpel-obj"), project("ode:bpel-schemas"),
@@ -258,6 +276,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with project("ode:bpel-api"), project("ode:bpel-compiler"), 
       project("ode:bpel-dao"), project("ode:bpel-runtime"),
@@ -276,6 +295,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE Hibernate DAO Implementation"
   define "dao-hibernate" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"),
       project("ode:bpel-ql"), project("ode:utils"),
@@ -283,6 +303,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE OpenJPA DAO Implementation"
   define "dao-jpa" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"), project("ode:utils"),
       COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction, 
@@ -297,20 +318,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
-#  define "dao-jpa-ojpa" do
-#    compile.with project("ode:bpel-api"), project("ode:dao-jpa"), project("ode:bpel-dao"),
-#      COMMONS.collections, JAVAX.persistence, JAVAX.transaction,
-#      OPENJPA, XERCES
-#
-#    compile do |task|
-#      if task.compiled?
-#        OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
-#          :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
-#      end
-#    end
-#    package :jar
-#  end
-
+  desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
     # Create the Derby SQL file using the OpenJPA mapping tool, and
     # append the Quartz DDL at the end.
@@ -357,6 +365,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :zip, :include=>path_to(:target_dir, "derby/*")
   end
 
+  desc "ODE Axis2 Based Distribution"
   define "distro-axis2" do
     resources(
       filter(["LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir, "stage")),
@@ -380,6 +389,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
   end
 
+  desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with project("ode:utils"), project("ode:jacob-ap"),
       COMMONS.logging
@@ -395,33 +405,39 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
+  desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
     compile.with File.join(ENV['JAVA_HOME'], "lib", "tools.jar")
     package :jar
   end
 
+  desc "ODE JCA Resource Archive"
   define "jca-ra" do
     compile.with project("ode:utils"), JAVAX.connector
     package :jar
   end
 
+  desc "ODE JCA Server"
   define "jca-server" do
     compile.with project("ode:jca-ra"), project("ode:utils"),
       COMMONS.logging
     package :jar
   end
 
+  desc "ODE Minerva Connection Pool"
   define "minerva" do
     compile.with COMMONS.logging, JAVAX.connector, JAVAX.transaction
     package :jar
   end
 
+  desc "ODE Tools"
   define "tools" do
     compile.with project("ode:bpel-compiler"), project("ode:utils"),
       ANT, COMMONS.httpclient, COMMONS.logging
     package :jar
   end
 
+  desc "ODE Tools Binaries"
   define "tools-bin" do
     # Copy binary files over, set permissions on Linux files.
     bins = file(path_to(:target_dir, "bin")=>path_to(:src_dir, "main/dist/bin")) do |task|
@@ -435,6 +451,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :zip, :include=>[path_to(:target_dir, "bin"), path_to(:target_dir, "doc")]
   end
 
+  desc "ODE Utils"
   define "utils" do
     compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES
     package :jar
