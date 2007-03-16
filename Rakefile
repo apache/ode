@@ -263,7 +263,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-dao"), project("ode:bpel-runtime"),
       project("ode:bpel-store"), project("ode:utils"),
       DERBY, WSDL4J
-
+=begin
     tests.resources.into(path_to(:test_target_dir))
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-schemas"), project("ode:bpel-scheduler-quartz"),
@@ -272,7 +272,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.pool, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, 
       JAVAX.transaction, JAVAX.stream, JAXEN, HSQLDB, JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, 
       QUARTZ, SAXON, XALAN, XMLBEANS
-    
+=end
     package :jar
   end
 
@@ -445,7 +445,8 @@ end
 desc "Deploys a process in the running Jetty daemon (started using jetty:bounce)."
 task("jetty:process") do
   fail "A process should be provided by specifying PROCESS=/path/to/process." unless ENV['PROCESS']
-  options = project("ode").task("axis2-war:jetty:bounce").options
+
+  options = project("ode:axis2-war").task("jetty:bounce").options
   res = Jetty.jetty_call('/war', :get, options)
   case res
   when Net::HTTPSuccess
@@ -453,10 +454,10 @@ task("jetty:process") do
     process_target = res.body.chomp + '/webapp/WEB-INF/processes'
     process_source = options[:process_alias][ENV['PROCESS']] || ENV['PROCESS']
     verbose { puts "Copying #{process_source} to #{process_target} " }
-    FileUtils.cp_r(process_source, process_target)
+    cp_r(process_source, process_target)
 
     # Removing marker files to force redeploy
-    FileUtils.rm Dir.glob("#{process_target}/*.deployed")
+    rm Dir.glob("#{process_target}/*.deployed")
 
     puts "Process deployed."
   else
@@ -465,5 +466,5 @@ task("jetty:process") do
 end
 
 # Lazy ass aliasing
-task("jetty:bounce" => ["package", "ode:axis2-war:jetty:bounce"])
+task("jetty:bounce" => ["ode:axis2-war:jetty:bounce"])
 task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
