@@ -19,6 +19,7 @@
 package org.apache.ode.utils;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
 
@@ -27,6 +28,8 @@ import java.net.ServerSocket;
  * TCP port to synchronize multiple processes. The method of operation is
  * simple: by opening a port, a process prevents other processes on the local
  * machine from opening the same port.
+ * 
+ * @author Maciej Szefler  ( m s z e f l e r @ g m a i l . c o m)
  */
 public class ProcessMutex {
   private int port;
@@ -59,7 +62,10 @@ public class ProcessMutex {
 
       while ((startTime + 15000) > System.currentTimeMillis()) {
         try {
-          ss = new ServerSocket(port);
+          ss = new ServerSocket();
+          // Per Dan Kearns suggestion (jira ODE-100), prevents excessive hanging on to socket.
+          ss.setReuseAddress(true);
+          ss.bind(new InetSocketAddress(port));
 
           break;
         } catch (IOException ioe) {
