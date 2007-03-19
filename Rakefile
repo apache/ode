@@ -72,11 +72,10 @@ repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
-  manifest({"Implementation-Version"=>VERSION_NUMBER,
-            "Implementation-Vendor"=>"Apache Software Foundation"})
 
   compile.options.source = "1.5"
   compile.options.target = "1.5"
+  manifest["Implementation-Vendor"] = "Apache Software Foundation"
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
@@ -124,8 +123,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     resources filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources"))
     resources filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
     
-    package(:war).with(:libs=>libs, :manifest=>false).
-      path("WEB-INF").merge(project("ode:dao-jpa-ojpa-derby").package(:zip))
+    package(:war).with(:libs=>libs).path("WEB-INF").
+      merge(project("ode:dao-jpa-ojpa-derby").package(:zip))
 
     webserve.using(:war_path=>package(:war).name, :context_path=>"/ode", 
                    :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
