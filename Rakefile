@@ -193,7 +193,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     compile.with project("ode:bpel-api"), project("ode:bpel-compiler"),
       project("ode:bpel-obj"), project("ode:jacob"), project("ode:utils"),
-    compile.sources << jjtree_out << javacc_out
+      jjtree_out, javacc_out
+    compile.from jjtree_out, javacc_out
       
     package :jar
   end
@@ -213,7 +214,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     prepare Java.apt_task(generated=>path_to(:java_src_dir, "org/apache/ode/bpel/runtime/channels")).
       using(:classpath=>compile.classpath, :source=>compile.options.source)
     # Include the generated sources.
-    compile.sources << generated
+    compile.from generated
 
 =begin
     tests.resources do |task| 
@@ -399,7 +400,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     prepare Java.apt_task(generated=>path_to(:java_src_dir)).
       using(:classpath=>compile.classpath, :source=>compile.options.source)
     # Include the generated sources.
-    compile.sources << generated
+    compile.from generated
 
     package :jar
   end
