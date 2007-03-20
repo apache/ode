@@ -369,7 +369,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Axis2 Based Distribution"
   define "distro-axis2" do
     resources(
-      filter(["README", "LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir, "stage")),
+      filter(["RELEASE_NOTES", "README", "LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir, "stage")),
       filter(path_to(:src_dir, "examples")).into(path_to(:target_dir, "stage"))
     )
 
