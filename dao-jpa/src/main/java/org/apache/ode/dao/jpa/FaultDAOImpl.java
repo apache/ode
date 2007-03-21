@@ -42,7 +42,7 @@ public class FaultDAOImpl implements FaultDAO {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
 	@Basic @Column(name="NAME")
-    private QName _name;
+    private String _name;
 	@Basic @Column(name="MESSAGE")
     private String _explanation;
 	@Lob @Column(name="DATA")
@@ -55,7 +55,7 @@ public class FaultDAOImpl implements FaultDAO {
 	public FaultDAOImpl() {}
 	public FaultDAOImpl(QName faultName, String explanation, int faultLineNo,
 			int activityId, Element faultMessage) {
-		_name = faultName;
+		_name = faultName.toString();
 		_explanation = explanation;
 		_lineNo = faultLineNo;
 		_activityId = activityId;
@@ -87,7 +87,7 @@ public class FaultDAOImpl implements FaultDAO {
 	}
 
 	public QName getName() {
-		return _name;
+		return _name == null ? null : QName.valueOf(_name);
 	}
 
 }
