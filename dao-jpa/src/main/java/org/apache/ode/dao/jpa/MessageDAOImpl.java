@@ -48,7 +48,7 @@ public class MessageDAOImpl implements MessageDAO {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _id;
 	@Basic @Column(name="TYPE")
-    private QName _type;
+    private String _type;
 	@Lob @Column(name="DATA")
     private String _data;
 	@Transient
@@ -60,7 +60,7 @@ public class MessageDAOImpl implements MessageDAO {
 		
 	}
 	public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
-		_type = type;
+		_type = type.toString();
 		_messageExchange = me;
 	}
 	
@@ -81,7 +81,7 @@ public class MessageDAOImpl implements MessageDAO {
 	}
 
 	public QName getType() {
-		return _type;
+		return _type == null ? null : QName.valueOf(_type);
 	}
 
 	public void setData(Element value) {
@@ -90,7 +90,7 @@ public class MessageDAOImpl implements MessageDAO {
 	}
 
 	public void setType(QName type) {
-		_type = type;
+		_type = type.toString();
 	}
 
 }
