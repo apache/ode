@@ -244,7 +244,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "bpel-schemas" do
     schemas = [ path_to(:src_dir, "main/xsd/pmapi.xsdconfig"),
                 path_to(:src_dir, "main/xsd/dd.xsdconfig"), path_to(:src_dir, "main/xsd") ]
-    puts schemas.join("\n")
     prepare XMLBeans.compile_task(path_to(:target_dir, "generated")=>schemas).
       using(:javasource=>compile.options.source,
             :classes=>path_to(:java_target_dir),
