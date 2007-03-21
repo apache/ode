@@ -56,7 +56,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
 	private String _id;
 	@Basic @Column(name="CALLEE")
-    private QName _callee;
+    private String _callee;
 	@Basic @Column(name="CHANNEL")
     private String _channel;
 	@Basic @Column(name="CORRELATION_ID")
@@ -82,7 +82,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	@Basic @Column(name="PATTERN")
     private String _pattern;
 	@Basic @Column(name="PORT_TYPE")
-    private QName _portType;
+    private String _portType;
 	@Basic @Column(name="PROPAGATE_TRANS")
     private boolean _propagateTransactionFlag;
 	@Basic @Column(name="STATUS")
@@ -121,7 +121,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public QName getCallee() {
-		return _callee;
+		return _callee == null ? null : QName.valueOf(_callee);
 	}
 
 	public String getChannel() {
@@ -189,7 +189,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public QName getPortType() {
-		return _portType;
+		return _portType == null ? null : QName.valueOf(_portType);
 	}
 
 	public ProcessDAO getProcess() {
@@ -228,7 +228,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public void setCallee(QName callee) {
-		_callee = callee;
+		_callee = callee.toString();
 	}
 
 	public void setChannel(String channel) {
@@ -277,7 +277,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public void setPortType(QName porttype) {
-		_portType = porttype;
+		_portType = porttype.toString();
 	}
 
 	public void setProcess(ProcessDAO process) {
