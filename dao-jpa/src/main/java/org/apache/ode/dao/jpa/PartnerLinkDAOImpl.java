@@ -52,7 +52,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	@Basic @Column(name="MY_ROLE_NAME")
     private String _myRoleName;
 	@Basic @Column(name="MY_ROLE_SERVICE_NAME")
-    private QName _myRoleServiceName;
+    private String _myRoleServiceName;
 	@Basic @Column(name="MY_SESSION_ID")
     private String _mySessionId;
 	@Lob @Column(name="PARTNER_EPR")
@@ -96,7 +96,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	}
 
 	public QName getMyRoleServiceName() {
-		return _myRoleServiceName;
+		return _myRoleServiceName == null ? null : QName.valueOf(_myRoleServiceName);
 	}
 
 	public String getMySessionId() {
@@ -137,7 +137,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	}
 
 	public void setMyRoleServiceName(QName svcName) {
-		_myRoleServiceName = svcName;
+		_myRoleServiceName = svcName.toString();
 
 	}
 
