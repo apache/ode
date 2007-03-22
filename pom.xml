@@ -351,11 +351,13 @@
             <url>http://www.ibiblio.org/maven</url>
             <layout>legacy</layout>
         </repository>
+        -->
         <repository>
             <id>apache-snapshots</id>
             <name>Apache Snapshot Repository</name>
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
         </repository>
+        <!--
                 <repository>
                     <id>apache</id>
                     <name>Apache Repository</name>
@@ -1047,6 +1049,11 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ode</groupId>
+                <artifactId>ode-dao-jpa-ojpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
