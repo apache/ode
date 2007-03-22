@@ -100,7 +100,7 @@ class OutstandingRequestManager implements Serializable {
       if (_byRid.containsKey(rid)) {
         String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
         __log.fatal(errmsg);
-        throw new IllegalArgumentException(errmsg);
+        throw new IllegalStateException(errmsg);
       }
       _byRid.put(rid,  entry);
     }
