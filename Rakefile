@@ -67,9 +67,9 @@ WS_COMMONS          = OpenStruct.new(
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 
-repositories.remote = ["http://pxe.intalio.org/public/maven2",
-  "http://people.apache.org/repo/m2-incubating-repository",
-  "http://repo1.maven.org/maven2"]
+repositories.remote << "http://pxe.intalio.org/public/maven2"
+repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
+repositories.remote << "http://repo1.maven.org/maven2"
 repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -266,12 +266,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.logging, JAVAX.persistence, JAVAX.stream,
       HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    build do |task|
-      # Only enhance if any class files were compiled.
-      if compile.compiled?
-        OpenJPA.enhance(:output=>compile.target, :classpath=>compile.classpath,
-          :properties=>path_to(:resources_dir, "META-INF/persistence.xml"))
-      end
+    compile do |task|
+      OpenJPA.enhance(:output=>compile.target, :classpath=>compile.classpath,
+        :properties=>path_to(:resources_dir, "META-INF/persistence.xml"))
     end
 
     package :jar
@@ -310,11 +307,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction, 
       OPENJPA, XERCES
     
-    build do |task|
-      if compile.compiled?
-        OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
-          :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
-      end
+    compile do |task|
+      OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
+        :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
     end
     package :jar
   end
@@ -328,9 +323,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_sql = file(path_to(:target_dir, "derby.sql")=>[derby_xml, quartz_sql]) do |task|
       mkpath path_to(:target_dir)
       OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
-        :classpath=>[ project("ode:bpel-store"), project("ode:dao-jpa"),
+        :classpath=>artifacts( project("ode:bpel-store"), project("ode:dao-jpa"),
                       project("ode:bpel-api"), project("ode:bpel-dao"),
-                      project("ode:utils") ]
+                      project("ode:utils") )
       File.open(task.name, "a") { |file| file.write File.read(quartz_sql) }
     end
 
