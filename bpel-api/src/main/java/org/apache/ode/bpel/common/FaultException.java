@@ -41,7 +41,7 @@ public class FaultException extends Exception {
   }
 
   public FaultException(QName qname) {
-    super();
+    super(qname.toString());
     _qname = qname;
   }
 
