@@ -1053,11 +1053,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-ojpa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-jpa-ojpa-derby</artifactId>
                 <version>${project.version}</version>
             </dependency>
