@@ -1,8 +1,6 @@
 require "buildr/lib/buildr.rb"
 require "open3"
 
-import ".rake"
-
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "2.0-SNAPSHOT"
 NEXT_VERSION = "2.1"
