@@ -36,51 +36,28 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.org.apache.xerces.internal.util.DOMUtil;
-
 public abstract class BaseXmlMapper {
     protected Log __log = LogFactory.getLog(getClass());
-
-    private TransformerFactory _transformerFactory;
 
     /** Cache of the parsed messages. */
     private static Map<Source, Document> __parsed = Collections.synchronizedMap(new WeakHashMap<Source, Document>());
 
-    private static ThreadLocal<Transformer> __txers = new ThreadLocal();
-
     protected BaseXmlMapper() {
-        _transformerFactory = TransformerFactory.newInstance();
     }
 
     protected Element parse(Source content) throws MessageTranslationException {
-        
         // Check for the message in the cache. note that we are using a synchronized map here,
-        // so that we are thread safe, although it is possible for the parse to happen twice. 
+        // so that we are thread safe, although it is possible for the parse to happen twice.
         Document parsed = __parsed.get(content);
         if (parsed != null)
             return parsed.getDocumentElement();
 
-        Transformer txer = __txers.get();
-        if (txer == null) {
         try {
-            txer = _transformerFactory.newTransformer();
-                __txers.set(txer);
-        } catch (TransformerConfigurationException e) {
-            String errmsg = "Transformer configuration error!";
-            __log.fatal(errmsg, e);
-            throw new Error(errmsg, e);
-        }
-        }
-
-        try {
-            DOMResult domresult = new DOMResult();
-            txer.transform(content, domresult);
-            parsed = (Document) domresult.getNode();
-            // Again, synchronized map... 
+            parsed = DOMUtils.sourceToDOM(content);
             __parsed.put(content, parsed);
             return parsed.getDocumentElement();
-        } catch (TransformerException e) {
-            throw new MessageTranslationException("Transformer error!", e);
+        } catch (Exception e) {
+            throw new MessageTranslationException("Message parsing exception", e);
         }
     }
 
