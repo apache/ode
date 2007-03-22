@@ -153,6 +153,9 @@ public abstract class Bpel20QNames {
     public static final QName FOREACH = newQName("forEach");
 
     public static final QName ITERATOR = newQName("iterator");
+    
+    public static final QName REPEATUNTIL = newQName("repeatUntil");
+
 
     public static final QName START_COUNTER_VALUE = newQName("startCounterValue");
 
@@ -174,7 +177,8 @@ public abstract class Bpel20QNames {
     
     /** Not part of BPEL, but handy to have. */
     public static final QName RDF_LABEL = new QName(NS_RDF, "label");
-    
+
+        
 
     private static QName newQName(String localname) {
         return new QName(NS_WSBPEL2_0, localname);
