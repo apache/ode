@@ -1,6 +1,8 @@
 require "buildr/lib/buildr.rb"
 require "open3"
 
+import ".rake"
+
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "2.0-SNAPSHOT"
 NEXT_VERSION = "2.1"
@@ -65,13 +67,12 @@ WS_COMMONS          = OpenStruct.new(
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 
-repositories.remote[:central] = "http://pxe.intalio.org/public/maven2"
-repositories.remote[:apache_incubator]="http://people.apache.org/repo/m2-incubating-repository"
-repositories.remote[:maven_central]="http://repo1.maven.org/maven2"
+repositories.remote = ["http://pxe.intalio.org/public/maven2",
+  "http://people.apache.org/repo/m2-incubating-repository",
+  "http://repo1.maven.org/maven2"]
 repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
-
 
   compile.options.source = "1.5"
   compile.options.target = "1.5"
