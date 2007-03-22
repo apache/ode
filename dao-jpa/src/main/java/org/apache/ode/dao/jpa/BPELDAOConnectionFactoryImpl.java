@@ -123,6 +123,14 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         public TransactionManager getTransactionManager() throws Exception {
             return _tm;
         }
+        public void setRollbackOnly(Throwable cause) throws Exception {
+            // there is no generic support for setting the rollback cause
+            getTransactionManager().getTransaction().setRollbackOnly();
+        }
+        public Throwable getRollbackCause() throws Exception {
+            // there is no generic support for setting the rollback cause
+            return null;
+        }
     }
 
     private class DebugTxMgr implements TransactionManager {
