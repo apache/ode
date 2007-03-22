@@ -38,6 +38,19 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+//import javax.xml.transform.stax.StAXSource;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,51 +66,23 @@ public class DOMUtils {
     /** The namespaceURI represented by the prefix <code>xmlns</code>. */
     public static final String NS_URI_XMLNS = "http://www.w3.org/2000/xmlns/";
 
+    private static ThreadLocal<Transformer> __txers = new ThreadLocal();
+    private static ThreadLocal<DocumentBuilder> __builders = new ThreadLocal();
+    private static TransformerFactory _transformerFactory = TransformerFactory.newInstance();
+
     private static DocumentBuilderFactory __documentBuilderFactory ;
-    private static ObjectPool __documentBuilderPool;
 
     static {
-        initDocumentBuilderPool();
+        initDocumentBuilderFactory();
     }
 
     /**
-     * Initialize the document-builder pool.
+     * Initialize the document-builder factory.
      */
-    private static void initDocumentBuilderPool() {
+    private static void initDocumentBuilderFactory() {
         DocumentBuilderFactory f = XMLParserUtils.getDocumentBuilderFactory();
         f.setNamespaceAware(true);
         __documentBuilderFactory = f;
-
-        PoolableObjectFactory pof = new BasePoolableObjectFactory() {
-            public Object makeObject() throws Exception {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("makeObject: Creating new DocumentBuilder.");
-                }
-
-                DocumentBuilder db = null;
-                synchronized (__documentBuilderFactory) {
-                    try {
-                        db = __documentBuilderFactory.newDocumentBuilder();
-                        db.setErrorHandler(new LoggingErrorHandler());
-                    } catch (ParserConfigurationException e) {
-                        __log.error(e);
-                        throw new RuntimeException(e);
-                    }
-                }
-                return db;
-            }
-
-            public void destroyObject(Object obj) throws Exception {
-                if (__log.isDebugEnabled())
-                    __log.debug("destroyObject: Removing DocumentBuilder from pool: " + obj);
-            }
-        };
-
-        GenericObjectPool.Config poolCfg = new GenericObjectPool.Config();
-        poolCfg.maxActive = Integer.MAX_VALUE;
-        poolCfg.maxIdle = 20;
-        poolCfg.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_GROW;
-        __documentBuilderPool = new GenericObjectPool(pof, poolCfg);
     }
 
     /**
@@ -603,17 +588,8 @@ public class DOMUtils {
     }
 
     public static Document newDocument() {
-        DocumentBuilder db;
-        try {
-            db = borrow();
-        } catch (Exception ex) {
-            throw new RuntimeException("XML PARSE ERROR (NO PARSERS!)", ex);
-        }
-        try {
-            return db.newDocument();
-        } finally {
-            returnObject(db);
-        }
+        DocumentBuilder db = getBuilder();
+        return db.newDocument();
     }
 
     /**
@@ -630,36 +606,54 @@ public class DOMUtils {
      * pooled document builder.
      */
     public static Document parse(InputSource inputSource) throws SAXException,IOException{
-        DocumentBuilder db = borrow();
-        try {
-            return db.parse(inputSource);
-        } finally {
-            returnObject(db);
-        }
-
+        DocumentBuilder db = getBuilder();
+        return db.parse(inputSource);
     }
 
     /**
-     * Borrow a {@link DocumentBuilder} to the pool.
+     * Parse an XML document located using an {@link InputSource} using the
+     * pooled document builder.
      */
-    private static synchronized DocumentBuilder borrow() throws SAXException {
+    public static Document sourceToDOM(Source inputSource) throws IOException {
         try {
-            return (DocumentBuilder) __documentBuilderPool.borrowObject();
-        } catch (SAXException sae) {
-            throw sae;
-        } catch (Exception ex) {
-            throw new SAXException(ex);
+            /*
+            // Requires JDK 1.6+
+            if (inputSource instanceof StAXSource) {
+                StAXSource stax = (StAXSource) inputSource;
+                //if (stax.getXMLEventReader() != null || sax.getXMLStreamReader() != null) {
+                if (sax.getXMLStreamReader() != null) {
+                    return parse(stax.getXMLStreamReader());
+                }
+            }
+            */
+            if (inputSource instanceof SAXSource) {
+                InputSource sax = ((SAXSource) inputSource).getInputSource();
+                if (sax.getCharacterStream() != null || sax.getByteStream() != null) {
+                    return parse( ((SAXSource) inputSource).getInputSource() );
+                }
+            }
+            if (inputSource instanceof DOMSource) {
+                Node node = ((DOMSource) inputSource).getNode();
+                if (node != null) {
+                    return toDOMDocument(node);
+                }
+            }
+            if (inputSource instanceof StreamSource) {
+                StreamSource stream = (StreamSource) inputSource;
+                if (stream.getReader() != null || stream.getInputStream() != null) {
+                    return toDocumentFromStream( (StreamSource) inputSource);
+                }
+            }
+            DOMResult domresult = new DOMResult(newDocument());
+            Transformer txer = getTransformer();
+            txer.transform(inputSource, domresult);
+            return (Document) domresult.getNode();
+        } catch (SAXException e) {
+            throwIOException(e);
+        } catch (TransformerException e) {
+            throwIOException(e);
         }
-
-    }
-
-    /** Return the {@link DocumentBuilder} to the pool. */
-    private static synchronized void returnObject(DocumentBuilder db) {
-        try {
-            __documentBuilderPool.returnObject(db);
-        } catch (Exception ex) {
-            __log.debug("Error returning DocumentBuilder to object pool (ignoring).", ex);
-        }
+        throw new IllegalArgumentException("Cannot parse XML source: " + inputSource.getClass());
     }
 
     /**
@@ -790,10 +784,187 @@ public class DOMUtils {
             String prefix = nscontext.getPrefix(uri);
             if (prefix == null || "".equals(prefix))
                 domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", uri);
-            else 
+            else
                 domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, uri);
-            
+
         }
+    }
+
+    public static Document toDOMDocument(Node node) throws TransformerException {
+        // If the node is the document, just cast it
+        if (node instanceof Document) {
+            return (Document) node;
+        // If the node is an element
+        } else if (node instanceof Element) {
+            Element elem = (Element) node;
+            // If this is the root element, return its owner document
+            if (elem.getOwnerDocument().getDocumentElement() == elem) {
+                return elem.getOwnerDocument();
+            // else, create a new doc and copy the element inside it
+            } else {
+                Document doc = newDocument();
+                doc.appendChild(doc.importNode(node, true));
+                return doc;
+            }
+        // other element types are not handled
+        } else {
+            throw new TransformerException("Unable to convert DOM node to a Document");
+        }
+    }
+
+    public static Document toDocumentFromStream(StreamSource source) throws IOException, SAXException {
+        DocumentBuilder builder = getBuilder();
+        Document document = null;
+        Reader reader = source.getReader();
+        if (reader != null) {
+            document = builder.parse(new InputSource(reader));
+        } else {
+            InputStream inputStream = source.getInputStream();
+            if (inputStream != null) {
+                InputSource inputsource = new InputSource(inputStream);
+                inputsource.setSystemId( source.getSystemId() );
+                document = builder.parse(inputsource);
+            }
+            else {
+                throw new IOException("No input stream or reader available");
+            }
+        }
+        return document;
+    }
+
+    // sadly, as of JDK 5.0 IOException still doesn't support new IOException(Throwable)
+    private static void throwIOException(Throwable t) throws IOException {
+        IOException e = new IOException(t.getMessage());
+        e.setStackTrace(t.getStackTrace());
+        throw e;
+    }
+
+
+    public static Document parse(XMLStreamReader reader)
+        throws XMLStreamException
+    {
+        Document doc = newDocument();
+        parse(reader, doc, doc);
+        return doc;
+    }
+
+    private static void parse(XMLStreamReader reader, Document doc, Node parent)
+        throws XMLStreamException
+    {
+        int event = reader.getEventType();
+
+        while (reader.hasNext()) {
+            switch (event) {
+            case XMLStreamConstants.START_ELEMENT:
+                // create element
+                Element e = doc.createElementNS(reader.getNamespaceURI(), reader.getLocalName());
+                if (reader.getPrefix() != null && reader.getPrefix() != "") {
+                    e.setPrefix(reader.getPrefix());
+                }
+                parent.appendChild(e);
+
+                // copy namespaces
+                for (int ns = 0; ns < reader.getNamespaceCount(); ns++) {
+                    String uri = reader.getNamespaceURI(ns);
+                    String prefix = reader.getNamespacePrefix(ns);
+                    declare(e, uri, prefix);
+                }
+
+                // copy attributes
+                for (int att = 0; att < reader.getAttributeCount(); att++) {
+                    String name = reader.getAttributeLocalName(att);
+                    String prefix = reader.getAttributePrefix(att);
+                    if (prefix != null && prefix.length() > 0) {
+                        name = prefix + ":" + name;
+                    }
+                    Attr attr = doc.createAttributeNS(reader.getAttributeNamespace(att), name);
+                    attr.setValue(reader.getAttributeValue(att));
+                    e.setAttributeNode(attr);
+                }
+                // sub-nodes
+                if (reader.hasNext()) {
+                    reader.next();
+                    parse(reader, doc, e);
+                }
+                if (parent instanceof Document) {
+                    while (reader.hasNext()) reader.next();
+                    return;
+                }
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                return;
+            case XMLStreamConstants.CHARACTERS:
+                if (parent != null) {
+                    parent.appendChild(doc.createTextNode(reader.getText()));
+                }
+                break;
+            case XMLStreamConstants.COMMENT:
+                if (parent != null) {
+                    parent.appendChild(doc.createComment(reader.getText()));
+                }
+                break;
+            case XMLStreamConstants.CDATA:
+                parent.appendChild(doc.createCDATASection(reader.getText()));
+                break;
+            case XMLStreamConstants.PROCESSING_INSTRUCTION:
+                parent.appendChild(doc.createProcessingInstruction(reader.getPITarget(), reader.getPIData()));
+                break;
+            case XMLStreamConstants.ENTITY_REFERENCE:
+                parent.appendChild(doc.createProcessingInstruction(reader.getPITarget(), reader.getPIData()));
+                break;
+            case XMLStreamConstants.NAMESPACE:
+            case XMLStreamConstants.ATTRIBUTE:
+                break;
+            default:
+                break;
+            }
+
+            if (reader.hasNext()) {
+                event = reader.next();
+            }
+        }
+    }
+
+    private static void declare(Element node, String uri, String prefix) {
+        if (prefix != null && prefix.length() > 0) {
+            node.setAttributeNS(NS_URI_XMLNS, "xmlns:" + prefix, uri);
+        } else {
+            if (uri != null) {
+                node.setAttributeNS(NS_URI_XMLNS, "xmlns", uri);
+            }
+        }
+    }
+
+    private static Transformer getTransformer() {
+        Transformer txer = __txers.get();
+        if (txer == null) {
+            try {
+                txer = _transformerFactory.newTransformer();
+                __txers.set(txer);
+            } catch (TransformerConfigurationException e) {
+                String errmsg = "Transformer configuration error!";
+                __log.fatal(errmsg, e);
+                throw new Error(errmsg, e);
+            }
+        }
+        return txer;
+    }
+
+    private static DocumentBuilder getBuilder() {
+        DocumentBuilder builder = __builders.get();
+        if (builder == null) {
+            synchronized (__documentBuilderFactory) {
+                try {
+                    builder = __documentBuilderFactory.newDocumentBuilder();
+                    builder.setErrorHandler(new LoggingErrorHandler());
+                } catch (ParserConfigurationException e) {
+                    __log.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+            __builders.set(builder);
+        }
+        return builder;
     }
 
 }
