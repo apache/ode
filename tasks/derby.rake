@@ -1,16 +1,13 @@
 require "open3"
 
-
 module Derby
-  DERBY       = "org.apache.derby:derby:jar:10.1.2.1"
-  DERBY_TOOLS = "org.apache.derby:derbytools:jar:10.1.2.1"
+  VERSION   = "10.1.2.1"
+  REQUIRES  = [ "org.apache.derby:derby:jar:#{VERSION}", "org.apache.derby:derbytools:jar:#{VERSION}" ]
 
   def self.create(args)
     db, prereqs = Rake.application.resolve_args(args)
     file(db=>prereqs) do |task|
-      cmd = [ Java.path_to_bin("java") ]
-      cmd << "-cp" << artifacts(DERBY, DERBY_TOOLS).join(File::PATH_SEPARATOR)
-      cmd << "org.apache.derby.tools.ij"
+      cmd = [ Java.path_to_bin, "-cp", artifacts(REQUIRES).join(File::PATH_SEPARATOR), "org.apache.derby.tools.ij" ]
       Open3.popen3(*cmd) do |stdin, stdout, stderr|
         # Shutdown so if a database already exists, we can remove it.
         stdin.puts "connect 'jdbc:derby:;shutdown=true';"
@@ -34,5 +31,3 @@ module Derby
     end
   end
 end      
-
-
