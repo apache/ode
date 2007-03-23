@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 
 import javax.xml.transform.ErrorListener;
@@ -76,6 +77,7 @@ public class XslCompilationErrorListener implements ErrorListener {
     cmsg.phase = 0;
     cmsg.messageText = exception.getMessageAndLocation();
     CompilationException ce = new CompilationException(cmsg, exception);
-    _cc.recoveredFromError(new SourceLoacatorWrapper(exception.getLocator()),ce);
+    SourceLocation loc = exception.getLocator() != null ? new SourceLocatorWrapper(exception.getLocator()) : null;
+    _cc.recoveredFromError(loc,ce);
   }
 }
