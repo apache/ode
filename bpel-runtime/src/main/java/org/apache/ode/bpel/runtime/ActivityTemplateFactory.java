@@ -42,7 +42,7 @@ public class ActivityTemplateFactory {
     if (type instanceof OWait) return new WAIT(ai, scopeFrame, linkFrame);
     if (type instanceof OWhile) return new WHILE(ai, scopeFrame, linkFrame);
     if (type instanceof OForEach) return new FOREACH(ai, scopeFrame, linkFrame);
-    if (type instancoef ORepeatUntil) return new REPEATUNTIL(ai,scopeFrame,linkFrame);
+    if (type instanceof ORepeatUntil) return new REPEATUNTIL(ai,scopeFrame,linkFrame);
 
     throw new IllegalArgumentException("Unknown type: " + type);
   }
