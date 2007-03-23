@@ -9,9 +9,9 @@
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.0-incubating-SNAPSHOT</version>
     </parent>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.0-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -108,7 +108,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                executions>
+		<executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
