@@ -7,11 +7,11 @@ import javax.xml.transform.SourceLocator;
 
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 
-public class SourceLoacatorWrapper implements SourceLocation {
+public class SourceLocatorWrapper implements SourceLocation {
 
     private SourceLocator _sloc;
 
-    public SourceLoacatorWrapper(SourceLocator sloc) {
+    public SourceLocatorWrapper(SourceLocator sloc) {
         _sloc = sloc;
     }
     
