@@ -1,5 +1,4 @@
 require "buildr/lib/buildr.rb"
-require "open3"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "2.0-SNAPSHOT"
@@ -150,7 +149,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with project("ode:bpel-api"), project("ode:bpel-obj"),
       project("ode:bpel-schemas"), project("ode:bpel-scripts"),
       project("ode:utils"),
-      COMMONS.logging, JAXEN, SAXON, WSDL4J, XALAN, XERCES
+      COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
     package :jar
   end
 
@@ -319,7 +318,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_xml = path_to(:src_dir, "main/descriptors/persistence.derby.xml")
     quartz_sql = path_to(:src_dir, "main/scripts/quartz-derby.sql")
     derby_sql = file(path_to(:target_dir, "derby.sql")=>[derby_xml, quartz_sql]) do |task|
-      mkpath path_to(:target_dir)
+      mkpath path_to(:target_dir), :verbose=>false
       OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
         :classpath=>artifacts( project("ode:bpel-store"), project("ode:dao-jpa"),
                       project("ode:bpel-api"), project("ode:bpel-dao"),
@@ -327,36 +326,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       File.open(task.name, "a") { |file| file.write File.read(quartz_sql) }
     end
 
-    # Generate the derby database using the DDL.
-    derby_db = file(path_to(:target_dir, "derby")=>derby_sql) do |task|
-      cmd = [ Java.path_to_bin("java") ]
-      cmd << "-cp" << artifacts(DERBY, DERBY_TOOLS).join(File::PATH_SEPARATOR)
-      cmd << "org.apache.derby.tools.ij"
-      Open3.popen3(*cmd) do |stdin, stdout, stderr|
-        # Shutdown so if a database already exists, we can remove it.
-        stdin.puts "connect 'jdbc:derby:;shutdown=true';"
-        rm_rf path_to(:target, "derby") rescue nil
-        # Create a new database, and load all the prerequisites.
-        stdin.puts "connect 'jdbc:derby:#{task.name}/jpadb;create=true;user=sa'"
-        stdin.puts "set schema sa"
-        stdin.puts "autocommit on;"
-        #puts "Going to write prereqs: #{prereq.to_s}"
-        task.prerequisites.each { |prereq| stdin.write File.read(prereq.to_s) }
-        # Exiting will shutdown the database so we can copy the files around.
-        stdin.puts "exit"
-        stdin.close
-        # Helps when dignosing SQL errors.
-        returning(stdout.read) { |output| puts output if Rake.application.options.trace }
-      end
-      # Copy the SQL files into the database directory.
-      filter(task.prerequisites).into("#{task.name}/jpadb").invoke
-      # Tell other tasks we're refreshed, this also prevents running task
-      # due to time differences between derby and jpadb directories.
-      touch task.name 
-    end
-
-    build derby_db
-    package :zip, :include=>path_to(:target_dir, "derby/*")
+    build derby_db = Derby.create(path_to(:target_dir, "derby/jpadb")=>derby_sql)
+    package :zip, :include=>derby_db
   end
 
   desc "ODE Axis2 Based Distribution"
@@ -447,7 +418,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Utils"
   define "utils" do
-    compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES
+    compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
     package :jar
   end
 
