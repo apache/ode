@@ -218,14 +218,14 @@ public class Messages extends MessageBundle {
         return new IllegalArgumentException(s);
     }
 
-    public Throwable msgUndefinedFault(QName serviceName, String portName, String name, QName faultName) {
-        String s = format("Undefined fault: service {0} port {1} name {2} fault {3}.", serviceName, portName, name, faultName);
+    public Throwable msgUndefinedFault(QName serviceName, String portName, String opname, QName faultName) {
+        String s = format("Undefined fault: service {0} port {1} operation {2} fault {3}.", serviceName, portName, opname, faultName);
         return new IllegalArgumentException(s);
     }
 
-    public Throwable msgOdeMessagePartMissingRequiredElement(QName serviceName, String portName, String name, QName elementName) {
-        String s = format("Message part is missing required element: service {0} port {1} name {2} element {3}.",
-                          serviceName, portName, name, elementName);
+    public Throwable msgOdeMessagePartMissingRequiredElement(QName serviceName, String portName, String opname, QName elementName) {
+        String s = format("Message part is missing required element: service {0} port {1} operation {2} element {3}.",
+                          serviceName, portName, opname, elementName);
         return new IllegalArgumentException(s);
     }
 
