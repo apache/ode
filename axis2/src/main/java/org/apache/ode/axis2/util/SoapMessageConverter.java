@@ -104,7 +104,9 @@ public class SoapMessageConverter {
 
         _soapFactory = soapFactory;
         _def = def;
-
+        _serviceName = serviceName;
+        _portName = portName;
+        
         _serviceDef = _def.getService(serviceName);
         if (_serviceDef == null)
             throw new OdeFault(__msgs.msgServiceDefinitionNotFound(serviceName));
