@@ -41,7 +41,7 @@ public class BpelCompiler20 extends BpelCompiler {
         registerActivityCompiler(AssignActivity.class, new AssignGenerator());
         registerActivityCompiler(ThrowActivity.class, new ThrowGenerator());
         registerActivityCompiler(WhileActivity.class, new WhileGenerator());
-        //registerActivityCompiler(RepeatUntilActivity.class, new RepeatUntilGenerator());
+        registerActivityCompiler(RepeatUntilActivity.class, new RepeatUntilGenerator());
         registerActivityCompiler(IfActivity.class, new IfGenerator());
         registerActivityCompiler(PickActivity.class, new PickGenerator());
         registerActivityCompiler(ReplyActivity.class, new ReplyGenerator());
