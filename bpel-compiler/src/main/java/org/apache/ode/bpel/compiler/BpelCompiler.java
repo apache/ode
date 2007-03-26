@@ -18,28 +18,6 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -111,6 +89,27 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Node;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Compiler for converting BPEL process descriptions (and their associated WSDL
@@ -581,8 +580,11 @@ abstract class BpelCompiler implements CompilerContext {
         case BPEL11:
             bpelVersionUri = Bpel11QNames.NS_BPEL4WS_2003_03;
             break;
-        case BPEL20:
+        case BPEL20_DRAFT:
             bpelVersionUri = Bpel20QNames.NS_WSBPEL2_0;
+            break;
+        case BPEL20:
+            bpelVersionUri = Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC;
             break;
         default:
             throw new IllegalStateException("Bad bpel version: " + process.getBpelVersion());
@@ -1166,6 +1168,7 @@ abstract class BpelCompiler implements CompilerContext {
                 case BPEL11:
                     oevent.variable = resolveMessageVariable(onEvent.getVariable());
                     break;
+                case BPEL20_DRAFT:
                 case BPEL20:
                     if (onEvent.getMessageType() == null && onEvent.getElementType() == null)
                         throw new CompilationException(__cmsgs.errVariableDeclMissingType(onEvent.getVariable())
@@ -1377,6 +1380,7 @@ abstract class BpelCompiler implements CompilerContext {
                                         throw new CompilationException(__cmsgs.errMessageVariableRequired(
                                                 catchSrc.getFaultVariable()).setSource(catchSrc));
                                     break;
+                                case BPEL20_DRAFT:
                                 case BPEL20:
                                     if (catchSrc.getFaultVariableMessageType() == null
                                             && catchSrc.getFaultVariableElementType() == null)

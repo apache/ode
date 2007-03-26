@@ -18,10 +18,10 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import org.w3c.dom.Element;
+
 import java.util.List;
 import java.util.Set;
-
-import org.w3c.dom.Element;
 
 /**
  * BPEL Object Model (BOM) representation of a BPEL process.
@@ -30,6 +30,7 @@ public class Process extends Scope {
 
     public enum Version {
         BPEL11,
+        BPEL20_DRAFT,
         BPEL20
     }
 
@@ -50,7 +51,9 @@ public class Process extends Scope {
      * Get the BPEL version of this process.
      */
     public Version getBpelVersion() {
-        return is11() ? Version.BPEL11 : Version.BPEL20;
+        if (is11()) return Version.BPEL11;
+        if (is20Draft()) return Version.BPEL20_DRAFT;
+        return Version.BPEL20;
     }
 
     /**

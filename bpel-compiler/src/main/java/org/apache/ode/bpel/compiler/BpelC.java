@@ -24,7 +24,6 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
-import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.o.OProcess;
@@ -35,7 +34,12 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
 
@@ -212,6 +216,14 @@ public class BpelC {
             switch (process.getBpelVersion()) {
                 case BPEL20:
                     compiler = new BpelCompiler20();
+                    compiler.setResourceFinder(wf);
+                    if (_bpel11wsdl != null) {
+                        CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
+                        logCompilationMessage(cmsg);
+                    }
+                    break;
+                case BPEL20_DRAFT:
+                    compiler = new BpelCompiler20Draft();
                     compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();

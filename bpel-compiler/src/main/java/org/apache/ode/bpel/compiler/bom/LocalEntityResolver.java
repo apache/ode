@@ -19,15 +19,15 @@
 
 package org.apache.ode.bpel.compiler.bom;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
 
 /**
  * Resolver implementation that restricts us to a known set of resources.
@@ -65,7 +65,7 @@ class LocalEntityResolver implements EntityResolver {
     if (id == null)
       throw new NullPointerException("id arg must not be null!");
     if (location == null)
-      throw new NullPointerException("location arg must not be null");
+      throw new NullPointerException("location arg must not be null for id " + id);
     
     if (__log.isDebugEnabled())
       __log.debug("mapping " + id + " ==> " + location);
