@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.compiler;
+
+package org.apache.ode.bpel.elang.xpath10.compiler;
 
 import org.apache.ode.utils.Namespaces;
 
-
 /**
- * XPath 2.0 compiler for the BPEL 2.0 final spec. 
- * @author mriou <mriou at apache dot org>
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-public class XPath20ExpressionCompilerBPEL20 extends XPath20ExpressionCompilerImpl {
+public class XPath10ExpressionCompilerBPEL20Draft extends XPath10ExpressionCompilerBPEL20 {
 
-    public XPath20ExpressionCompilerBPEL20() {
-        super(Namespaces.WSBPEL2_0_FINAL_EXEC);
+    public XPath10ExpressionCompilerBPEL20Draft() {
+        super(Namespaces.WS_BPEL_20_NS);
     }
+
 }

@@ -18,14 +18,14 @@
  */
 package org.apache.ode.bpel.compiler.wsdl;
 
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
+
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 
 /**
  * Factory for {@link WSDLFactory} objects that are pre-configured to handle
@@ -37,7 +37,8 @@ public class WSDLFactoryBPEL20 extends WSDLFactoryImpl implements WSDLFactory4BP
     private BpelExtensionSerializer _bs;
 
     public WSDLFactoryBPEL20() {
-        super(Bpel20QNames.NS_WSBPEL2_0, Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03);
+        super(Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC, Bpel20QNames.NS_WSBPEL2_0_FINAL_PLINK
+                , Bpel20QNames.NS_WSBPEL2_0_FINAL_VARPROP);
         _bomf = BpelObjectFactory.getInstance();
         _bs = new BpelExtensionSerializer(_bomf);
     }
@@ -49,11 +50,10 @@ public class WSDLFactoryBPEL20 extends WSDLFactoryImpl implements WSDLFactory4BP
     public ExtensionRegistry newPopulatedExtensionRegistry() {
         ExtensionRegistry extRegistry;
         extRegistry = super.newPopulatedExtensionRegistry();
-        extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "property"),_bs);
-        extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "propertyAlias"), _bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_propNS, "property"),_bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_propNS, "propertyAlias"), _bs);
         extRegistry.registerDeserializer(Types.class, XMLSchemaType.QNAME, new XMLSchemaTypeSerializer());
-        extRegistry.registerDeserializer(Definition.class, new QName(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03,
-                "partnerLinkType"),_bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_plnkNS, "partnerLinkType"),_bs);
         return extRegistry;
 
     }

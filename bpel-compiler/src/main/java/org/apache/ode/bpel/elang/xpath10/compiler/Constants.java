@@ -44,9 +44,4 @@ class Constants {
    */
   public static final String EXT_FUNCTION_DOXSLTRANSFORM = "doXslTransform";
 
-  public static final String BPEL20_NS = "http://schemas.xmlsoap.org/ws/2004/03/business-process/";
-  public static final String BPEL11_NS = "http://schemas.xmlsoap.org/ws/2003/03/business-process/";
-
-  public static final String NS_ODE_MESSAGE = "http://www.fivesight.com/ode/message";
-
 }

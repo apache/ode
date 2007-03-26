@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.ConfigurationException;
@@ -166,7 +165,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             net.sf.saxon.xpath.XPathFactoryImpl xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
 
             OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
-            xpf.setXPathFunctionResolver(new JaxpFunctionResolver(ctx, oxpath20, Constants.BPEL20_NS));
+            xpf.setXPathFunctionResolver(new JaxpFunctionResolver(ctx, oxpath20));
             xpf.setXPathVariableResolver(new JaxpVariableResolver(ctx, oxpath20));
             XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
             xpe.setNamespaceContext(oxpath20.namespaceCtx);

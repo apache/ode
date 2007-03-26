@@ -35,9 +35,12 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
   protected String _bpwsNS;
 
   /** Partner Link Namespace (<code>plnk</code>). */
-  private String _plnkNS;
+  protected String _plnkNS;
 
-  WSDLFactoryImpl(String bpwsNS, String plnkNS)  {
+  /** Property and Alias Namespace (<code>plnk</code>). */
+  protected String _propNS;
+
+  WSDLFactoryImpl(String bpwsNS, String plnkNS, String propNS)  {
     try {
       _wsdlFactory  = WSDLFactory.newInstance();
     } catch (WSDLException e) {
@@ -46,7 +49,7 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
     
     _bpwsNS = bpwsNS;
     _plnkNS = plnkNS;
-
+    _propNS = propNS;
   }
 
   /**
@@ -58,13 +61,13 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
   public Definition4BPEL narrow(Definition wsdlDef) {
     if (wsdlDef instanceof Definition4BPEL)
       return (Definition4BPEL) wsdlDef;
-    return new Definition4BPELImpl(wsdlDef, _bpwsNS, _plnkNS);
+    return new Definition4BPELImpl(wsdlDef, _bpwsNS, _plnkNS, _propNS);
   }
 
   public Definition newDefinition() {
     Definition def = _wsdlFactory.newDefinition();
     def.setExtensionRegistry(newPopulatedExtensionRegistry());
-    return new Definition4BPELImpl(def, _bpwsNS, _plnkNS);
+    return new Definition4BPELImpl(def, _bpwsNS, _plnkNS, _propNS);
   }
 
 

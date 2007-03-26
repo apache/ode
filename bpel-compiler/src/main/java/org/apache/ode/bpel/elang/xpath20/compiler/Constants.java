@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
+import org.apache.ode.utils.Namespaces;
+
 /**
  * XPath-4-BPEL related constants.
  */
@@ -44,11 +46,9 @@ public class Constants {
    */
   public static final String EXT_FUNCTION_DOXSLTRANSFORM = "doXslTransform";
 
-  public static final String BPEL20_NS = "http://schemas.xmlsoap.org/ws/2004/03/business-process/";
-  public static final String BPEL11_NS = "http://schemas.xmlsoap.org/ws/2003/03/business-process/";
-
   public static boolean isBpelNamespace(String uri){
-    return BPEL20_NS.equals(uri) || BPEL11_NS.equals(uri);
+    return Namespaces.WS_BPEL_20_NS.equals(uri) || Namespaces.WSBPEL2_0_FINAL_EXEC.equals(uri)
+             || Namespaces.BPEL11_NS.equals(uri);
   }
 
 }

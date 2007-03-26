@@ -19,9 +19,10 @@
 
 package org.apache.ode.bpel.iapi;
 
-import javax.xml.namespace.QName;
-
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
+
+import javax.xml.namespace.QName;
 
 /**
  * Encapsulation of an end-point reference. Implementation of this interface
@@ -32,8 +33,7 @@ import org.w3c.dom.Document;
  */
 public interface EndpointReference {
 
-  public static final QName SERVICE_REF_QNAME =
-    new QName("http://schemas.xmlsoap.org/ws/2004/03/business-process/", "service-ref");
+  public static final QName SERVICE_REF_QNAME = new QName(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
 
   /**
    * Convert the EPR to an XML representation. The XML
