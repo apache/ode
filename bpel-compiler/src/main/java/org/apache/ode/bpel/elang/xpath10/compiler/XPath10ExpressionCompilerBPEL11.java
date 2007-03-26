@@ -23,13 +23,14 @@ import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.utils.Namespaces;
 
 /**
  * XPath 1.0 expression compiler for BPEL v1.1.
  */
 public class XPath10ExpressionCompilerBPEL11 extends XPath10ExpressionCompilerImpl {
   public XPath10ExpressionCompilerBPEL11() {
-    super(Constants.BPEL11_NS);
+    super(Namespaces.BPEL11_NS);
   }
   
   /**

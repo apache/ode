@@ -57,11 +57,13 @@ class Definition4BPELImpl implements Definition4BPEL {
     Definition _def;
     private String _bpwsNS;
     private String _plnkNS;
+    private String _propNS;
 
-    Definition4BPELImpl(Definition wsdlDef, String bpwsNS, String plnkNS) {
+    Definition4BPELImpl(Definition wsdlDef, String bpwsNS, String plnkNS, String propNS) {
         _def = wsdlDef;
         _bpwsNS = bpwsNS;
         _plnkNS = plnkNS;
+        _propNS = propNS;
     }
 
     /**
@@ -79,7 +81,7 @@ class Definition4BPELImpl implements Definition4BPEL {
      * @return {@link List} of {@link PartnerLinkType} objects
      */
     public List<Property> getProperties() {
-        return getElementsForType(new QName(_bpwsNS, "property"), Property.class);
+        return getElementsForType(new QName(_propNS, "property"), Property.class);
     }
 
     /**
@@ -88,7 +90,7 @@ class Definition4BPELImpl implements Definition4BPEL {
      * @return {@link List} of {@link PropertyAlias} objects
      */
     public List<PropertyAlias> getPropertyAliases() {
-        return getElementsForType(new QName(_bpwsNS, "propertyAlias"), PropertyAlias.class);
+        return getElementsForType(new QName(_propNS, "propertyAlias"), PropertyAlias.class);
     }
 
     public Property getProperty(final QName name) {

@@ -30,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +140,13 @@ public class BpelObject implements SourceLocation {
             (getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_2003_03)
                     || getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05)); 
     }
-    
+
+    public boolean is20Draft() {
+        return getType().getNamespaceURI() != null &&
+            (getType().getNamespaceURI().equals(Bpel20QNames.NS_WSBPEL2_0)
+                    || getType().getNamespaceURI().equals(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03)); 
+    }
+
     protected boolean isAttributeSet(String attrname) {
         return null != getAttribute(attrname, null);
     }

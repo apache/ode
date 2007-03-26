@@ -19,14 +19,14 @@
 
 package org.apache.ode.bpel.epr;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -122,7 +122,7 @@ public class WSAEndpoint implements MutableEndpoint {
             if (elmt.getLocalName().equals(SERVICE_REF_QNAME.getLocalPart())
                     && elmt.getNamespaceURI().equals(SERVICE_REF_QNAME.getNamespaceURI()))
                 elmt = DOMUtils.getFirstChildElement(elmt);
-            if (elmt.getLocalName().equals("EndpointReference")
+            if (elmt != null && elmt.getLocalName().equals("EndpointReference")
                     && elmt.getNamespaceURI().equals(Namespaces.WS_ADDRESSING_NS))
                 return true;
         }

@@ -19,22 +19,7 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionException;
-import javax.xml.xpath.XPathFunctionResolver;
-
 import net.sf.saxon.dom.NodeWrapper;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -49,11 +34,25 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+
+import javax.xml.namespace.QName;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPathFunction;
+import javax.xml.xpath.XPathFunctionException;
+import javax.xml.xpath.XPathFunctionResolver;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -64,19 +63,18 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 
     private EvaluationContext _ectx;
     private OXPath20ExpressionBPEL20 _oxpath;
-    private String _bpelNS;
 
-    public JaxpFunctionResolver(EvaluationContext ectx, OXPath20ExpressionBPEL20 oxpath, String bpelNS) {
+    public JaxpFunctionResolver(EvaluationContext ectx, OXPath20ExpressionBPEL20 oxpath) {
         _ectx = ectx;
         _oxpath = oxpath;
-        _bpelNS = bpelNS;
     }
 
     public XPathFunction resolveFunction(QName functionName, int arity) {
         __log.debug("Resolving function " + functionName);
         if (functionName.getNamespaceURI() == null) {
             throw new WrappedResolverException("Undeclared namespace for " + functionName);
-        } else if (functionName.getNamespaceURI().equals(_bpelNS)) {
+        } else if (functionName.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS) ||
+                functionName.getNamespaceURI().equals(Namespaces.WSBPEL2_0_FINAL_EXEC)) {
             String localName = functionName.getLocalPart();
             if (Constants.EXT_FUNCTION_GETVARIABLEDATA.equals(localName)) {
                 return new GetVariableData();

@@ -55,7 +55,9 @@ public class WSDL11Endpoint implements MutableEndpoint {
   public boolean accept(Node node) {
     if (node.getNodeType() == Node.ELEMENT_NODE) {
       Element elmt = (Element) node;
-      if (elmt.getLocalName().equals("service-ref") && elmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS))
+      if (elmt.getLocalName().equals("service-ref") &&
+              (elmt.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS) ||
+               elmt.getNamespaceURI().equals(Namespaces.WSBPEL2_0_FINAL_SERVREF)))
         elmt= DOMUtils.getFirstChildElement(elmt);
       if (elmt.getLocalName().equals("service") && elmt.getNamespaceURI().equals(Namespaces.WSDL_11))
         return true;
@@ -73,7 +75,7 @@ public class WSDL11Endpoint implements MutableEndpoint {
   public Document toXML() {
     // Wrapping
     Document doc = DOMUtils.newDocument();
-    Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+    Element serviceRef = doc.createElementNS(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
     doc.appendChild(serviceRef);
     serviceRef.appendChild(doc.importNode(_serviceElmt, true));
     return _serviceElmt.getOwnerDocument();

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
@@ -37,19 +38,19 @@ import org.apache.ode.bpel.compiler.bom.ThrowActivity;
 import org.apache.ode.bpel.compiler.bom.WaitActivity;
 import org.apache.ode.bpel.compiler.bom.WhileActivity;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20Draft;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20Draft;
 
 /**
- * OASIS BPEL V2.0 Compiler
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-public class BpelCompiler20 extends BpelCompiler {
+public class BpelCompiler20Draft extends BpelCompiler {
 
     public static final String OASIS_EXPLANG_XPATH_1_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
     public static final String OASIS_EXPLANG_XPATH_2_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0";
 
-    public BpelCompiler20() throws Exception {
-        super((WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance());
+    public BpelCompiler20Draft() throws Exception {
+        super((WSDLFactory4BPEL) WSDLFactoryBPEL20Draft.newInstance());
 
         registerActivityCompiler(EmptyActivity.class, new EmptyGenerator());
         registerActivityCompiler(CompensateActivity.class, new CompensateGenerator());
@@ -69,22 +70,21 @@ public class BpelCompiler20 extends BpelCompiler {
         registerActivityCompiler(RethrowActivity.class, new RethrowGenerator());
         registerActivityCompiler(ForEachActivity.class, new ForEachGenerator());
 
-        registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20());
-        
+        registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20Draft());
         try {
             registerExpressionLanguage(OASIS_EXPLANG_XPATH_2_0,
-                    "org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20");
+                    "org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft");
         } catch (Exception e) {
             __log.error("Error loading XPath 2.0 Expression Language: it will not be available.");
         }
-        
     }
 
     protected String getBpwsNamespace() {
-        return Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC;
+        return Bpel20QNames.NS_WSBPEL2_0;
     }
 
     protected String getDefaultExpressionLanguage() {
         return OASIS_EXPLANG_XPATH_1_0;
     }
+
 }

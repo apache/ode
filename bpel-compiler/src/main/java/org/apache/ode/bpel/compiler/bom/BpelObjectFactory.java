@@ -18,14 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.bom.IfActivity.Case;
@@ -36,6 +28,13 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BpelObjectFactory {
 
@@ -51,8 +50,81 @@ public class BpelObjectFactory {
 
     public BpelObjectFactory() {
         
-        // 
-        // BPEL 2.0 Mappings
+        //
+        // BPEL 2.0 Final Mappings
+        //
+        _mappings.put(Bpel20QNames.FINAL_PROCESS, Process.class);
+        _mappings.put(Bpel20QNames.FINAL_ASSIGN, AssignActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_EMPTY, EmptyActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_INVOKE, InvokeActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_RECEIVE, ReceiveActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_REPLY, ReplyActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_WAIT, WaitActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_THROW, ThrowActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_RETHROW, RethrowActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_EXIT, TerminateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_FLOW, FlowActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_SWITCH, IfActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_IF, IfActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_WHILE, WhileActivity.class);
+        //_mappings.put(Bpel20QNames.FINAL_REPEATUNTIL,RepeatUntilActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_SEQUENCE, SequenceActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_PICK, PickActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_SCOPE, ScopeActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_FOREACH, ForEachActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COPY, Copy.class);
+        _mappings.put(Bpel20QNames.FINAL_CATCH, Catch.class);
+        _mappings.put(Bpel20QNames.FINAL_CATCHALL, Catch.class);
+        _mappings.put(Bpel20QNames.FINAL_TO, To.class);
+        _mappings.put(Bpel20QNames.FINAL_FROM, From.class);
+        _mappings.put(Bpel20QNames.FINAL_START_COUNTER_VALUE, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_FINAL_COUNTER_VALUE, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_CORRELATION, Correlation.class);
+        _mappings.put(Bpel20QNames.FINAL_CORRELATIONSET, CorrelationSet.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATIONHANDLER, CompensationHandler.class);
+        _mappings.put(Bpel20QNames.FINAL_FAULTHANDLERS, FaultHandler.class);
+        _mappings.put(Bpel20QNames.FINAL_TERMINATIONHANDLER, TerminationHandler.class);
+        _mappings.put(Bpel20QNames.FINAL_CASE, IfActivity.Case.class);
+        _mappings.put(Bpel20QNames.FINAL_CONDITION, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_UNTIL, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_FOR, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_REPEAT_EVERY, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_ONALARM, OnAlarm.class);
+        _mappings.put(Bpel20QNames.FINAL_ONEVENT, OnEvent.class);
+        _mappings.put(Bpel20QNames.FINAL_ONMESSAGE, OnMessage.class);
+        _mappings.put(Bpel20QNames.FINAL_LITERAL, LiteralVal.class);
+        _mappings.put(Bpel20QNames.FINAL_PLINKTYPE, PartnerLinkType.class);
+        _mappings.put(Bpel20QNames.FINAL_PLINKROLE, PartnerLinkType.Role.class);
+        _mappings.put(Bpel20QNames.FINAL_PROPALIAS, PropertyAlias.class);
+        _mappings.put(Bpel20QNames.FINAL_PROPQUERY, Query.class);
+        _mappings.put(Bpel20QNames.FINAL_PROPERTY,  Property.class);
+        _mappings.put(Bpel20QNames.FINAL_VARIABLES, Variables.class);
+        _mappings.put(Bpel20QNames.FINAL_VARIABLE, Variable.class);
+        _mappings.put(Bpel20QNames.FINAL_PARTNERLINKS, PartnerLinks.class);
+        _mappings.put(Bpel20QNames.FINAL_PARTNERLINK, PartnerLink.class);
+        _mappings.put(Bpel20QNames.FINAL_CORRELATIONSETS, CorrelationSets.class);
+        _mappings.put(Bpel20QNames.FINAL_JOIN_CONDITION, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_LINKS, Links.class );
+        _mappings.put(Bpel20QNames.FINAL_LINK, Link.class);
+        _mappings.put(Bpel20QNames.FINAL_SOURCE, LinkSource.class);
+        _mappings.put(Bpel20QNames.FINAL_TARGET, LinkTarget.class);
+        _mappings.put(Bpel20QNames.FINAL_SOURCES, BpelObject.class);
+        _mappings.put(Bpel20QNames.FINAL_TARGETS, BpelObject.class);
+        _mappings.put(Bpel20QNames.FINAL_IMPORT, Import.class);
+        _mappings.put(Bpel20QNames.FINAL_QUERY, Query.class);
+        _mappings.put(Bpel20QNames.FINAL_TRANSITION_CONDITION, Expression.class);
+        _mappings.put(Bpel20QNames.FINAL_THEN, Case.class);
+        _mappings.put(Bpel20QNames.FINAL_ELSE, Case.class);
+        _mappings.put(Bpel20QNames.FINAL_ELSEIF, Case.class);
+        _mappings.put(Bpel20QNames.FINAL_CORRELATIONS, Correlations.class);
+        _mappings.put(Bpel20QNames.FINAL_EVENTHANDLERS, BpelObject.class);
+        _mappings.put(Bpel20QNames.FINAL_TARGETS,Targets.class);
+        _mappings.put(Bpel20QNames.FINAL_SOURCES,Sources.class);
+
+        //
+        // BPEL 2.0 draft Mappings
         //
         _mappings.put(Bpel20QNames.PROCESS, Process.class);
         _mappings.put(Bpel20QNames.ASSIGN, AssignActivity.class);
@@ -123,7 +195,6 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.SOURCES,Sources.class);
         _mappings.put(Bpel20QNames.RDF_LABEL,RdfLabel.class);
-        
 
         //
         // BPEL 1.1 Mappings
@@ -217,6 +288,11 @@ public class BpelObjectFactory {
         LocalEntityResolver resolver = new LocalEntityResolver();
         resolver.register(Bpel11QNames.NS_BPEL4WS_2003_03, getClass().getResource("/bpel4ws_1_1-fivesight.xsd"));
         resolver.register(Bpel20QNames.NS_WSBPEL2_0, getClass().getResource("/wsbpel_main-draft-Apr-29-2006.xsd"));
+        resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_ABSTRACT, getClass().getResource("/ws-bpel_abstract_common_base.xsd"));
+        resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC, getClass().getResource("/ws-bpel_executable.xsd"));
+        resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_PLINK, getClass().getResource("/ws-bpel_plnktype.xsd"));
+        resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_SERVREF, getClass().getResource("/ws-bpel_serviceref.xsd"));
+        resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_VARPROP, getClass().getResource("/ws-bpel_varprop.xsd"));
         resolver.register(XML, getClass().getResource("/xml.xsd"));
         resolver.register(WSDL,getClass().getResource("/wsdl.xsd"));
         resolver.register(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03, 
