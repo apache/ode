@@ -25,6 +25,7 @@ import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 
 import javax.xml.namespace.QName;
@@ -35,57 +36,58 @@ import javax.xml.transform.TransformerFactory;
  */
 public class XPath10ExpressionCompilerBPEL20 extends XPath10ExpressionCompilerImpl {
 
-  protected QName _qnDoXslTransform;
+    protected QName _qnDoXslTransform;
 
-  public XPath10ExpressionCompilerBPEL20() {
-    super(Constants.BPEL20_NS);
-    TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
-    XslTransformHandler.getInstance().setTransformerFactory(trsf);
+    public XPath10ExpressionCompilerBPEL20() {
+        this(Namespaces.WSBPEL2_0_FINAL_EXEC);
+    }
 
-    _qnDoXslTransform = new QName(Constants.BPEL20_NS, "doXslTransform");
-  }
+    public XPath10ExpressionCompilerBPEL20(String bpelNS) {
+        super(bpelNS);
+        TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+        XslTransformHandler.getInstance().setTransformerFactory(trsf);
 
-  /**
-   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
-   */
-  public OExpression compileJoinCondition(Object source) throws CompilationException {
-    return _compile((Expression)source, true);
-  }
+        _qnDoXslTransform = new QName(bpelNS, "doXslTransform");
+    }
 
-  @Override
-  public void setCompilerContext(CompilerContext ctx) {
-      super.setCompilerContext(ctx);
-      XslCompilationErrorListener xe = new XslCompilationErrorListener(ctx);
-      XslTransformHandler.getInstance().setErrorListener(xe);
-  }
-  /**
-   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
-   */
-  public OExpression compile(Object source) throws CompilationException {
-    return _compile((Expression)source, false);
-  }
-  /**
-   * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
-   */
-  public OLValueExpression compileLValue(Object source) throws CompilationException {
-    return (OLValueExpression)_compile((Expression)source, false);
-  }
+    /**
+     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
+     */
+    public OExpression compileJoinCondition(Object source) throws CompilationException {
+        return _compile((Expression)source, true);
+    }
 
-  /**
-   * @see org.apache.ode.bpel.capi.ExpressionCompiler#compile(java.lang.Object)
-   */
-  private OExpression _compile(Expression xpath, boolean isJoinCondition) throws CompilationException {
-    OXPath10Expression oexp = new OXPath10ExpressionBPEL20(
-            _compilerContext.getOProcess(),
-            _qnFnGetVariableData,
-            _qnFnGetVariableProperty,
-            _qnFnGetLinkStatus,
-            _qnDoXslTransform,
-            isJoinCondition);
-    oexp.namespaceCtx = xpath.getNamespaceContext();
-    doJaxenCompile(oexp, xpath);
-    return oexp;
-  }
+    @Override
+    public void setCompilerContext(CompilerContext ctx) {
+        super.setCompilerContext(ctx);
+        XslCompilationErrorListener xe = new XslCompilationErrorListener(ctx);
+        XslTransformHandler.getInstance().setErrorListener(xe);
+    }
+    /**
+     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
+     */
+    public OExpression compile(Object source) throws CompilationException {
+        return _compile((Expression)source, false);
+    }
+    /**
+     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
+     */
+    public OLValueExpression compileLValue(Object source) throws CompilationException {
+        return (OLValueExpression)_compile((Expression)source, false);
+    }
+
+    private OExpression _compile(Expression xpath, boolean isJoinCondition) throws CompilationException {
+        OXPath10Expression oexp = new OXPath10ExpressionBPEL20(
+                _compilerContext.getOProcess(),
+                _qnFnGetVariableData,
+                _qnFnGetVariableProperty,
+                _qnFnGetLinkStatus,
+                _qnDoXslTransform,
+                isJoinCondition);
+        oexp.namespaceCtx = xpath.getNamespaceContext();
+        doJaxenCompile(oexp, xpath);
+        return oexp;
+    }
 
 
 }

@@ -430,7 +430,7 @@ class ASSIGN extends ACTIVITY {
         if (rvalue.getNodeType() == Node.TEXT_NODE ||
                 (rvalue.getNodeType() == Node.ELEMENT_NODE && !rvalue.getLocalName().equals("service-ref"))) {
             Document doc = DOMUtils.newDocument();
-            Element serviceRef = doc.createElementNS(Namespaces.WS_BPEL_20_NS, "service-ref");
+            Element serviceRef = doc.createElementNS(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
             doc.appendChild(serviceRef);
             NodeList children = rvalue.getChildNodes();
             for (int m = 0; m < children.getLength(); m++) {

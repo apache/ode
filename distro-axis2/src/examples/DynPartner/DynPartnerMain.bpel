@@ -2,8 +2,9 @@
 
 <process name="DynPartnerMain"
          targetNamespace="http://ode/bpel/unit-test"
-         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref"
          xmlns:tns="http://ode/bpel/unit-test"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -78,9 +79,9 @@
       <copy>
         <from>
           <literal>
-            <service-ref>
+            <sref:service-ref>
               <soap:address location="http://localhost:8080/ode/processes/DynResponderService"/>
-            </service-ref>
+            </sref:service-ref>
           </literal>
         </from>
         <to partnerLink="responderPartnerLink"/>

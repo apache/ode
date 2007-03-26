@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.ode.bpel.compiler.wsdl;
 
-import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 
 import javax.wsdl.Definition;
@@ -28,34 +29,30 @@ import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
 
 /**
- * Factory for {@link WSDLFactory} objects that are pre-configured to handle
- * BPEL 2.0 extension elements.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-public class WSDLFactoryBPEL11 extends WSDLFactoryImpl implements WSDLFactory4BPEL {
+public class WSDLFactoryBPEL20Draft extends WSDLFactoryImpl implements WSDLFactory4BPEL {
 
     private BpelObjectFactory _bomf;
-
     private BpelExtensionSerializer _bs;
 
-    public WSDLFactoryBPEL11() {
-        super(Bpel11QNames.NS_BPEL4WS_2003_03, Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05,
-                Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05);
+    public WSDLFactoryBPEL20Draft() {
+        super(Bpel20QNames.NS_WSBPEL2_0, Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03, Bpel20QNames.NS_WSBPEL2_0);
         _bomf = BpelObjectFactory.getInstance();
         _bs = new BpelExtensionSerializer(_bomf);
     }
 
     public static WSDLFactory newInstance() {
-        return new WSDLFactoryBPEL11();
+        return new WSDLFactoryBPEL20Draft();
     }
 
     public ExtensionRegistry newPopulatedExtensionRegistry() {
         ExtensionRegistry extRegistry;
         extRegistry = super.newPopulatedExtensionRegistry();
-        extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "property"), _bs);
-        extRegistry.registerDeserializer(Definition.class, new QName(_bpwsNS, "propertyAlias"), _bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_propNS, "property"),_bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_propNS, "propertyAlias"), _bs);
         extRegistry.registerDeserializer(Types.class, XMLSchemaType.QNAME, new XMLSchemaTypeSerializer());
-        extRegistry.registerDeserializer(Definition.class, new QName(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05,
-                "partnerLinkType"), _bs);
+        extRegistry.registerDeserializer(Definition.class, new QName(_plnkNS, "partnerLinkType"),_bs);
         return extRegistry;
 
     }
