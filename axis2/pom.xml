@@ -48,10 +48,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-minerva</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-api</artifactId>
         </dependency>
         <dependency>
@@ -76,7 +72,7 @@
             <artifactId>ode-dao-jpa</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2</artifactId>
@@ -101,28 +97,23 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
         </dependency>
-        <dependency>
-            <groupId>jotm</groupId>
-            <artifactId>jotm</artifactId>
-        </dependency>
 
         <!-- The following are needed for Geronimo transactions mgr lookup -->
         <dependency>
-            <groupId>geronimo</groupId>
+            <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-kernel</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>geronimo</groupId>
+            <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-transaction</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.jencks</groupId>
             <artifactId>jencks</artifactId>
         </dependency>
 
-    <!-- The following are needed by JOTM -->
         <dependency>
              <groupId>org.apache.geronimo.specs</groupId>
              <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
@@ -134,8 +125,6 @@
              <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
              <scope>compile</scope>
         </dependency>
-	<!-- ################################ -->
-
 
         <dependency>
             <groupId>javax.activation</groupId>

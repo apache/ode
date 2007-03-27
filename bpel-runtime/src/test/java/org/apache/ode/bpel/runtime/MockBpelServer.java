@@ -34,11 +34,10 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.objectweb.jotm.Jotm;
-import org.opentools.minerva.MinervaPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -64,8 +63,7 @@ class MockBpelServer {
     BpelServerImpl            _server;
     ProcessStoreImpl          _store;
     TransactionManager        _txManager;
-    Jotm                      _jotm;
-    MinervaPool               _minervaPool;
+    Database                  _database;
     DataSource                _dataSource;
     SchedulerWrapper          _scheduler;
     BpelDAOConnectionFactory  _daoCF;
@@ -154,7 +152,7 @@ class MockBpelServer {
         _server.stop();
         _scheduler.stop();
         _scheduler.shutdown();
-        _jotm.stop();
+        // TODO stop transaction manager
         try {
             DriverManager.getConnection("jdbc:derby:target/test-classes/derby-db/jpadb;shutdown=true");
         } catch (Exception ex) {
@@ -165,8 +163,8 @@ class MockBpelServer {
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
-        _jotm = new Jotm(true, false);
-        _txManager = _jotm.getTransactionManager();
+        EmbeddedTransactionManager factory = new EmbeddedTransactionManager();
+        _txManager = factory.getTransactionManager();
         _txManager.setTransactionTimeout(30);
         return _txManager;
     }
@@ -175,16 +173,20 @@ class MockBpelServer {
         if (_txManager == null)
             throw new RuntimeException("No transaction manager");
         String url = "jdbc:derby:target/test-classes/derby-db/jpadb";
-        _minervaPool = new MinervaPool();
-        _minervaPool.setTransactionManager(_txManager);
-        _minervaPool.getConnectionFactory().setConnectionURL(url);
-        _minervaPool.getConnectionFactory().setUserName("sa");
-        _minervaPool.getConnectionFactory().setDriver(org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-        _minervaPool.getPoolParams().minSize = 0;
-        _minervaPool.getPoolParams().maxSize = 10;
-        _minervaPool.setType(MinervaPool.PoolType.MANAGED);
-        _minervaPool.start();
-        _dataSource = _minervaPool.createDataSource();
+
+        Properties props = new Properties();
+        props.put("test."+OdeConfigProperties.PROP_DB_MODE, "internal");
+        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_DRIVER, org.apache.derby.jdbc.EmbeddedDriver.class.getName());
+        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_URL, url);
+        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_USER, "sa");
+        props.put("test."+OdeConfigProperties.PROP_POOL_MIN, "0");
+        props.put("test."+OdeConfigProperties.PROP_POOL_MAX, "10");
+
+        OdeConfigProperties odeConfig = new OdeConfigProperties(props, "test");
+        _database = new Database(odeConfig);
+        _database.setTransactionManager(_txManager);
+        _database.start();
+        _dataSource = _database.getDataSource();
         return _dataSource;
     }
 
@@ -308,7 +310,7 @@ class MockBpelServer {
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _quartz.execTransaction(transaction);
         }
-        
+
         public <T> Future<T> execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _quartz.execIsolatedTransaction(transaction);
         }

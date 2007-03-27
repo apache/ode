@@ -69,7 +69,7 @@ public class Messages extends MessageBundle {
     }
 
     public String msgOdeDbPoolStartupFailed(String url) {
-        return format("Error starting Minerva connection pool for \"{0}\".", url);
+        return format("Error starting connection pool for \"{0}\".", url);
     }
 
     public String msgOdeBpelServerStartFailure() {
