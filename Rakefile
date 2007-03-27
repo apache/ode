@@ -118,11 +118,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES, XMLBEANS
 
-    resources filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources"))
-    resources filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
+    # resources filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources"))
+    # resources filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
     
     package(:war).with(:libs=>libs).path("WEB-INF").
       merge(project("ode:dao-jpa-ojpa-derby").package(:zip))
+    package(:war).path("WEB-INF").include project("ode:axis2").path_to("src/main/wsdl/*")
+    package(:war).path("WEB-INF").include project("ode:bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
 
     webserve.using(:war_path=>package(:war).name, :context_path=>"/ode", 
                    :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
@@ -337,7 +339,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       filter(path_to(:src_dir, "examples")).into(path_to(:target_dir, "stage"))
     )
 
-    returning(package(:zip)) do |zip|
+    returning(package(:zip, path_to(:target_dir, "apache-ode-#{VERSION_NUMBER}-incubating-war.zip"))) do |zip|
       zip.include path_to(:target_dir, "stage/*")
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
         COMMONS.pool, COMMONS.collections, JAXEN,
