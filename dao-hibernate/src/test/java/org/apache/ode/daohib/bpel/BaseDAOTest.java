@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.objectweb.jotm.Jotm;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 
 /**
  * Testing BpelDAOConnectionImpl.listInstance. We're just producing a lot
@@ -35,28 +35,33 @@ import org.objectweb.jotm.Jotm;
 public class BaseDAOTest extends TestCase {
 
   protected BpelDAOConnection daoConn;
-  private Jotm jotm;
+  private TransactionManager txm;
   private DataSource ds;
-  
+
   protected void initTM() throws Exception {
-    
-    jotm = new Jotm(true, false);
+
+    EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+    txm = factory.getTransactionManager();
     ds = getDataSource();
-    jotm.getTransactionManager().begin();
+    txm.begin();
 
     BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl();
-    factoryImpl.setTransactionManager(jotm.getTransactionManager());
+    factoryImpl.setTransactionManager(txm);
     factoryImpl.setDataSource(ds);
 
     daoConn = factoryImpl.getConnection();
   }
 
   protected void stopTM() throws Exception {
-    jotm.getTransactionManager().commit();
+    txm.commit();
   }
 
-  private DataSource getDataSource() {
+  protected DataSource getDataSource() {
     throw new Error("Not implemented");
+  }
+
+  protected TransactionManager getTransactionManager() {
+    return txm;
   }
 
 }

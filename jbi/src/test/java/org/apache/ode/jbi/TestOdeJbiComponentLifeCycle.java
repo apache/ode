@@ -8,11 +8,11 @@ import javax.jbi.messaging.InOut;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.servicemix.client.DefaultServiceMixClient;
 import org.apache.servicemix.jbi.container.ActivationSpec;
 import org.apache.servicemix.jbi.container.JBIContainer;
-import org.objectweb.jotm.Jotm;
 import org.xml.sax.InputSource;
 
 import junit.framework.TestCase;
@@ -21,24 +21,24 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
 
     JBIContainer container;
     File rootDir, installDir, odeDir;
-    Jotm jotm;
+    TransactionManager txm;
     private OdeComponent component;
 
     protected void setUp() throws Exception {
         rootDir = File.createTempFile("smixInstallDir","");
         installDir = new File(rootDir,"install");
         installDir.mkdir();
-        jotm = new Jotm(true,false);
+        txm = new EmbeddedGeronimoFactory().getTransactionManager();
         odeDir = new File(installDir,"ODE");
         odeDir.mkdir();
-        
+
         container = new JBIContainer();
         container.setUseMBeanServer(false);
         container.setCreateMBeanServer(false);
         container.setEmbedded(true);
-        
-        
-        container.setTransactionManager(jotm.getTransactionManager());
+
+
+        container.setTransactionManager(txm);
         container.init();
         container.start();
 
@@ -53,15 +53,15 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
         } catch (Exception ex) {
             ;//ok ignore
         }
-        
+
         if (container != null) {
             container.shutDown();
             container = null;
         }
-        
+
         component = null;
-        
-      
+
+
     }
 
     public void testComponentLifeCycle() throws Exception {
@@ -72,7 +72,7 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
     public void testProcessLifeCycle() throws Exception {
         container.activateComponent(component, "ODE");
         container.start();
-        
+
         // For lack of a better way of doing this:
         component.getServiceUnitManager().deploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
         component.getServiceUnitManager().init("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
@@ -81,16 +81,16 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
         component.getServiceUnitManager().undeploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
 
         container.deactivateComponent("ODE");
-        
+
         container.stop();
-    
+
     }
 
-    
+
     public void testHelloWorld() throws Exception {
         OdeComponent component = new OdeComponent();
-        container.activateComponent(component, "ODE");        
-        
+        container.activateComponent(component, "ODE");
+
         // For lack of a better way of doing this:
         component.getServiceUnitManager().deploy("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
         component.getServiceUnitManager().init("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
@@ -104,8 +104,8 @@ public class TestOdeJbiComponentLifeCycle extends TestCase {
         assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
         assertNotNull(io.getOutMessage());
         assertNotNull(io.getOutMessage().getContent());
-        
+
     }
-    
+
 
 }

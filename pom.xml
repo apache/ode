@@ -65,14 +65,14 @@
         <commonsLoggingVersion>1.0.3</commonsLoggingVersion>
         <commonsPoolVersion>1.2</commonsPoolVersion>
         <geronimoSpecsVersion>1.0</geronimoSpecsVersion>
-        <geronimoVersion>1.1</geronimoVersion>
+        <geronimoVersion>1.2-beta</geronimoVersion>
+        <tranqlVersion>1.1</tranqlVersion>
         <hibernateVersion>3.1.2</hibernateVersion>
         <jaxenVersion>1.1-beta-8</jaxenVersion>
         <jettyVersion>5.1.9</jettyVersion>
         <jencksVersion>1.3</jencksVersion>
         <jasperVersion>4.2.20RC0</jasperVersion>
         <jmockVersion>1.1.0</jmockVersion>
-        <jotmVersion>2.0.10</jotmVersion>
         <junitVersion>3.8.1</junitVersion>
         <log4jVersion>1.2.13</log4jVersion>
         <saxonVersion>8.7</saxonVersion>
@@ -111,7 +111,6 @@
         <module>axis2-war</module>
 
         <module>utils</module>
-        <module>minerva</module>
 
         <module>jacob</module>
         <module>jacob-ap</module>
@@ -330,7 +329,7 @@
         </repository>
 
 
-<!-- Rely only on Intalio repository, prevents maven madness. 
+<!-- Rely only on Intalio repository, prevents maven madness.
         <repository>
             <id>central-maven</id>
             <name>Maven Repository Switchboard</name>
@@ -562,11 +561,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-minerva</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -608,20 +602,20 @@
 	  	   <exclusion>
 		      <groupId>commons-dbcp</groupId>
                       <artifactId>commons-dbcp</artifactId>
-		   </exclusion>	
+		   </exclusion>
 	  	   <exclusion>
 		      <groupId>javax.mail</groupId>
                       <artifactId>mail</artifactId>
-		   </exclusion>	
+		   </exclusion>
 	  	   <exclusion>
 		      <groupId>javax.servlet</groupId>
                       <artifactId>servlet</artifactId>
-		   </exclusion>	
+		   </exclusion>
 	  	   <exclusion>
 		      <groupId>javax.ejb</groupId>
                       <artifactId>ejb</artifactId>
-		   </exclusion>	
-                </exclusions>	
+		   </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -835,42 +829,6 @@
             </dependency>
 
             <dependency>
-                <groupId>jotm</groupId>
-                <artifactId>jotm</artifactId>
-                <version>${jotmVersion}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>junit</artifactId>
-                        <groupId>junit</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>jta</artifactId>
-                        <groupId>javax.transaction</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>javax.jts</artifactId>
-                        <groupId>jts</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.resource</groupId>
-                        <artifactId>connector</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4jVersion}</version>
@@ -907,16 +865,73 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>geronimo</groupId>
+                <groupId>org.apache.geronimo.modules</groupId>
                 <artifactId>geronimo-kernel</artifactId>
                 <version>${geronimoVersion}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>geronimo</groupId>
-                <artifactId>geronimo-transaction</artifactId>
-                <version>${geronimoVersion}</version>
-                <scope>provided</scope>
+              <groupId>org.apache.geronimo.modules</groupId>
+              <artifactId>geronimo-transaction</artifactId>
+              <version>${geronimoVersion}</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-j2ee</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-core</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.geronimo.modules</groupId>
+              <artifactId>geronimo-connector</artifactId>
+              <version>${geronimoVersion}</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-kernel</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-system</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-security</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-core</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-j2ee</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-common</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-management</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-naming</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.apache.geronimo.modules</groupId>
+                  <artifactId>geronimo-deployment</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>tranql</groupId>
+              <artifactId>tranql-connector</artifactId>
+              <version>${tranqlVersion}</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.saxon</groupId>
