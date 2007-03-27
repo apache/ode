@@ -44,21 +44,25 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-api</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>wsdl4j</groupId>
             <artifactId>wsdl4j</artifactId>
         </dependency>
-	<dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-minerva</artifactId>
-        </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
         </dependency>
         <dependency>
-           <groupId>geronimo</groupId>
-           <artifactId>geronimo-transaction</artifactId>
+          <groupId>org.apache.geronimo.modules</groupId>
+          <artifactId>geronimo-transaction</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.geronimo.modules</groupId>
+          <artifactId>geronimo-connector</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>tranql</groupId>
+          <artifactId>tranql-connector</artifactId>
         </dependency>
 
     </dependencies>

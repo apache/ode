@@ -50,7 +50,7 @@
                                     <targetPath>WEB-INF</targetPath>
                                 </resource>
                             </webResources>
-                            <dependentWarExcludes>WEB-INF/web.xml</dependentWarExcludes> 
+                            <dependentWarExcludes>WEB-INF/web.xml</dependentWarExcludes>
                         </configuration>
                     </execution>
                 </executions>
@@ -80,7 +80,7 @@
                                         <execution>
                                                 <id>unpack-jpa</id>
                                                 <phase>generate-resources</phase>
-                                                <goals> 
+                                                <goals>
                                                         <goal>unpack</goal>
                                                 </goals>
                                                 <configuration>
@@ -91,7 +91,7 @@
                                                                         <artifactId>ode-jpa-ojpa-derby</artifactId>
                                                                         <version>${pom.version}</version>
                                                                         <type>tar</type>
-                                                                </artifactItem>         
+                                                                </artifactItem>
                                                         </artifactItems>
                                                 </configuration>
                                         </execution>
@@ -99,7 +99,7 @@
           <execution>
                                                 <id>unpack-hib</id>
                                                 <phase>generate-resources</phase>
-                                                <goals> 
+                                                <goals>
                                                         <goal>unpack</goal>
                                                 </goals>
                                                 <configuration>
@@ -110,7 +110,7 @@
                                                                         <artifactId>ode-dao-hibernate-db-derby</artifactId>
                                                                         <version>${pom.version}</version>
                                                                         <type>tar</type>
-                                                                </artifactItem>         
+                                                                </artifactItem>
                                                         </artifactItems>
                                                 </configuration>
        	                                 </execution>
@@ -299,11 +299,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-minerva</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-utils</artifactId>
             <scope>runtime</scope>
         </dependency>
@@ -389,16 +384,16 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>geronimo</groupId>
+            <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-kernel</artifactId>
             <version>${geronimoVersion}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>geronimo</groupId>
+            <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-transaction</artifactId>
             <version>${geronimoVersion}</version>
-            <scope>provided</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.jencks</groupId>
