@@ -63,13 +63,8 @@
             <version>1.6.1</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>jotm</groupId>
-            <artifactId>jotm</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -83,7 +78,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <hibernatedoclet destdir="${basedir}/target/generated-resources/xdoclet" excludedtags="@version,@author,@todo" force="false" verbose="false"> 
+                                <hibernatedoclet destdir="${basedir}/target/generated-resources/xdoclet" excludedtags="@version,@author,@todo" force="false" verbose="false">
                                     <hibernate version="3.0" destdir="${basedir}/target/generated-resources/xdoclet" />
                                     <fileset dir="${basedir}/src/main/java" includes="**/*.java"/>
                                 </hibernatedoclet>

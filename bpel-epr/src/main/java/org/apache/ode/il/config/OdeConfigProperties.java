@@ -30,7 +30,7 @@ import java.util.Properties;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
- * 
+ *
  * @author mszefler
  */
 public class OdeConfigProperties {
@@ -39,46 +39,46 @@ public class OdeConfigProperties {
 
     private static final Log __log = LogFactory.getLog(OdeConfigProperties.class);
 
-    private static final String PROP_DB_MODE = "db.mode";
+    public static final String PROP_DB_MODE = "db.mode";
 
-    private static final String PROP_DB_EXTERNAL_DS = "db.ext.dataSource";
+    public static final String PROP_DB_EXTERNAL_DS = "db.ext.dataSource";
 
-    private static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
+    public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
 
-    private static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
+    public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
 
-    private static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
+    public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
 
-    private static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";
+    public static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";
 
-    private static final String PROP_DB_INTERNAL_USER = "db.int.username";
+    public static final String PROP_DB_INTERNAL_USER = "db.int.username";
 
-    private static final String PROP_DB_LOGGING = "db.logging";
+    public static final String PROP_DB_LOGGING = "db.logging";
 
-    private static final String PROP_TX_FACTORY_CLASS = "tx.factory.class";
+    public static final String PROP_TX_FACTORY_CLASS = "tx.factory.class";
 
-    private static final String PROP_POOL_MAX = "db.pool.max";
+    public static final String PROP_POOL_MAX = "db.pool.max";
 
-    private static final String PROP_POOL_MIN = "db.pool.min";
+    public static final String PROP_POOL_MIN = "db.pool.min";
 
-    private static final String PROP_DB_POOL_BLOCKING = "db.pool.blocking";
+    public static final String PROP_DB_POOL_BLOCKING = "db.pool.blocking";
 
-    private static final String PROP_THREAD_POOL_SIZE = "threads.pool.size";
-    
-    private static final String PROP_CONNECTOR_PORT = "jca.port";
+    public static final String PROP_THREAD_POOL_SIZE = "threads.pool.size";
 
-    private static final String PROP_CONNECTOR_NAME = "jca.name";
+    public static final String PROP_CONNECTOR_PORT = "jca.port";
 
-    private static final String PROP_WORKING_DIR = "working.dir";
+    public static final String PROP_CONNECTOR_NAME = "jca.name";
 
-    private static final String PROP_REPLICATE_EMPTYNS = "message.replicate.emptyns";
+    public static final String PROP_WORKING_DIR = "working.dir";
 
-    private static final String PROP_EVENT_LISTENERS = "event.listeners";
+    public static final String PROP_REPLICATE_EMPTYNS = "message.replicate.emptyns";
 
-    private static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
+    public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
-    private static final String PROP_DAOCF = "dao.factory";
+    public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
+
+    public static final String PROP_DAOCF = "dao.factory";
 
     private File _cfgFile;
 
@@ -92,12 +92,12 @@ public class OdeConfigProperties {
 
     static {
         String odep = System.getProperty("ode.persistence");
-        if (odep != null && 
+        if (odep != null &&
                 "hibernate".equalsIgnoreCase(odep)) {
             __log.debug("Using HIBERNATE due to system property override!");
             __dbEmbName = "hibdb";
             __daoCfClass = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
-            
+
         }
     }
     /**
@@ -107,10 +107,10 @@ public class OdeConfigProperties {
         /** External data-source (managed by app server) */
         EXTERNAL,
 
-        /** Internal data-source (managed by us--Minerva) */
+        /** Internal data-source (User provides database info, Ode provides connection pool) */
         INTERNAL,
 
-        /** Embedded database (managed by us--Minerva) */
+        /** Embedded database (Ode provides default embedded database with connection pool) */
         EMBEDDED
     }
 
@@ -120,10 +120,16 @@ public class OdeConfigProperties {
         _props = new Properties();
     }
 
+    public OdeConfigProperties(Properties props, String prefix) {
+        _cfgFile = null;
+        _prefix = prefix;
+        _props = props;
+    }
+
     public File getFile() {
         return _cfgFile;
     }
-    
+
     public void load() throws IOException {
         if (_cfgFile.exists()) {
             __log.debug("config file exists: " + _cfgFile);
@@ -147,21 +153,21 @@ public class OdeConfigProperties {
 
     /**
      * Should the internal database be used, or are the datasources provided?
-     * 
+     *
      * @return db mode
      */
     public String getDbEmbeddedName() {
-        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName); 
-                
-    }  
-    
+        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName);
+
+    }
+
     public DatabaseMode getDbMode() {
         return DatabaseMode.valueOf(getProperty(OdeConfigProperties.PROP_DB_MODE, DatabaseMode.EMBEDDED.toString()).trim()
                 .toUpperCase());
     }
-    
+
     public String getDAOConnectionFactory() {
-        return getProperty(PROP_DAOCF, __daoCfClass);        
+        return getProperty(PROP_DAOCF, __daoCfClass);
     }
 
     public String getDbDataSource() {
@@ -174,13 +180,13 @@ public class OdeConfigProperties {
 
     /**
      * JDBC driver class (for use in INTERNAL mode).
-     * 
+     *
      * @return
      */
     public String getDbInternalJdbcDriverClass() {
         return getProperty(OdeConfigProperties.PROP_DB_INTERNAL_DRIVER, "org.apache.derby.jdbc.ClientDriver");
     }
-    
+
     public boolean getPoolBlocking() {
         return Boolean.valueOf(getProperty(PROP_DB_POOL_BLOCKING,"false"));
     }
@@ -200,7 +206,7 @@ public class OdeConfigProperties {
     public int getConnectorPort() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_CONNECTOR_PORT, "2099"));
     }
-    
+
     public String getConnectorName() {
         return getProperty(OdeConfigProperties.PROP_CONNECTOR_NAME, "ode");
     }
@@ -210,7 +216,7 @@ public class OdeConfigProperties {
     }
 
     public String getTxFactoryClass() {
-        return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.axis2.util.JotmFactory");
+        return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.il.EmbeddedGeronimoFactory");
     }
 
     public boolean isReplicateEmptyNS() {

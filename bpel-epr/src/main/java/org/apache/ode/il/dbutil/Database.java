@@ -11,16 +11,19 @@ import javax.transaction.TransactionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
+import org.apache.geronimo.connector.outbound.GenericConnectionManager;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.LoggingDataSourceWrapper;
-import org.opentools.minerva.MinervaPool;
+import org.tranql.connector.jdbc.JDBCDriverMCF;
 
 /**
  * Does the dirty work of setting up / obtaining a DataSource based on the configuration in the {@link OdeConfigProperties} object.
- * 
- * @author mszefler
- * 
+ *
  */
 public class Database {
     private static final Log __log = LogFactory.getLog(Database.class);
@@ -29,11 +32,15 @@ public class Database {
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
+    private static final int CONNECTION_MAX_WAIT_MILLIS = 30000;
+
+    private static final int CONNECTION_MAX_IDLE_MINUTES = 5;
+
     private OdeConfigProperties _odeConfig;
 
     private boolean _started;
 
-    private MinervaPool _minervaPool;
+    private GenericConnectionManager _connectionManager;
 
     private TransactionManager _txm;
 
@@ -63,11 +70,11 @@ public class Database {
     public synchronized void start() throws DatabaseConfigException {
         if (_started)
             return;
-        
+
         _needDerbyShutdown = false;
         _datasource = null;
-        _minervaPool = null;
-        
+        _connectionManager = null;
+
         initDataSource();
         _started = true;
     }
@@ -76,15 +83,14 @@ public class Database {
         if (!_started)
             return;
 
-        if (_minervaPool != null)
+        if (_connectionManager != null)
             try {
-                __log.debug("shutting down minerva pool.");
-                _minervaPool.stop();
-                _minervaPool = null;
+                __log.debug("Stopping connection manager");
+                _connectionManager.doStop();
             } catch (Throwable t) {
-                __log.debug("Exception in minervaPool.stop()");
+                __log.warn("Exception while stopping connection manager: " + t.getMessage());
             } finally {
-                _minervaPool = null;
+                _connectionManager = null;
             }
 
         if (_needDerbyShutdown) {
@@ -145,34 +151,47 @@ public class Database {
 
     }
 
-    private void initInternalDb(String url, String driverClass,String username,String password) throws DatabaseConfigException {
+    private void initInternalDb(String url, String driverClass, String username,String password) throws DatabaseConfigException {
 
-        __log.debug("Creating Minerva DataSource/Pool for " + url + " with driver " + driverClass);
+        __log.debug("Creating connection pool for " + url + " with driver " + driverClass);
 
-        _minervaPool = new MinervaPool();
-        _minervaPool.setTransactionManager(_txm);
-        _minervaPool.getConnectionFactory().setConnectionURL(url);
-        if (username != null)
-            _minervaPool.getConnectionFactory().setUserName(username);
-        if (password != null)
-            _minervaPool.getConnectionFactory().setPassword(password);
-        _minervaPool.getConnectionFactory().setDriver(driverClass);
+        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
 
-        _minervaPool.getPoolParams().maxSize = _odeConfig.getPoolMaxSize();
-        _minervaPool.getPoolParams().minSize = _odeConfig.getPoolMinSize();
-        _minervaPool.getPoolParams().blocking = _odeConfig.getPoolBlocking();
-        _minervaPool.setType(MinervaPool.PoolType.MANAGED);
+        PoolingSupport poolingSupport = new SinglePool(
+                _odeConfig.getPoolMaxSize(),
+                _odeConfig.getPoolMinSize(),
+                CONNECTION_MAX_WAIT_MILLIS,
+                CONNECTION_MAX_IDLE_MINUTES,
+                true, // match one
+                false, // match all
+                false); // select one assume match
 
+        _connectionManager = new GenericConnectionManager(
+                    transactionSupport,
+                    poolingSupport,
+                    false, // no container-managed security
+                    null, // no connection tracker
+                    _txm,
+                    getClass().getName(),
+                    getClass().getClassLoader());
+
+        JDBCDriverMCF mcf = new JDBCDriverMCF();
         try {
-            _minervaPool.start();
+            mcf.setDriver(driverClass);
+            mcf.setConnectionURL(url);
+            if (username != null) {
+                mcf.setUserName(username);
+            }
+            if (password != null) {
+                mcf.setPassword(password);
+            }
+            _connectionManager.doStart();
+            _datasource = (DataSource) mcf.createConnectionFactory(_connectionManager);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
             __log.error(errmsg, ex);
             throw new DatabaseConfigException(errmsg, ex);
         }
-
-        _datasource = _minervaPool.createDataSource();
-
     }
 
     /**
