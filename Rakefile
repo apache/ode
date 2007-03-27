@@ -11,7 +11,7 @@ AXIS2               = "org.apache.axis2:axis2:jar:1.1"
 AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-kernel", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.1")
-BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:2.1"
+BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = OpenStruct.new(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.1",
@@ -25,8 +25,9 @@ DERBY               = "org.apache.derby:derby:jar:10.1.2.1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.1.2.1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = OpenStruct.new(
-  :kernel           =>"geronimo:geronimo-kernel:jar:1.1",
-  :transaction      =>"geronimo:geronimo-transaction:jar:1.1"
+  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:1.2-beta",
+  :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
+  :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
 )
 HIBERNATE           = "org.hibernate:hibernate:jar:3.1.2"
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
@@ -44,13 +45,12 @@ JAVAX               = OpenStruct.new(
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
-JOTM                = [ "jotm:jotm:jar:2.0.10", "jotm:jotm_jrmp_stubs:jar:2.0.10",
-                        "org.objectweb.carol:carol:jar:2.0.5", "howl:howl-logger:jar:0.1.11" ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT", 
+OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT",
                        "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
+TRANQL              = "tranql:tranql-connector:jar:1.1"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
@@ -81,52 +81,52 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-dao"), project("ode:bpel-epr"),
       project("ode:bpel-runtime"), project("ode:bpel-scheduler-quartz"),
       project("ode:bpel-schemas"), project("ode:bpel-store"),
-      project("ode:minerva"), project("ode:utils"),
+      project("ode:utils"),
       AXIOM, AXIS2, COMMONS.logging, COMMONS.collections,
       DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream,
-      JAVAX.transaction, JENCKS, JOTM, WSDL4J, XMLBEANS
+      JAVAX.transaction, JENCKS, WSDL4J, XMLBEANS
 
 =begin
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:tools")
 =end
-    
+
     package :jar
   end
 
   desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
     libs = project("ode:axis2"), project("ode:bpel-api"),
-      project("ode:bpel-compiler"), project("ode:bpel-connector"), project("ode:bpel-dao"), 
+      project("ode:bpel-compiler"), project("ode:bpel-connector"), project("ode:bpel-dao"),
       project("ode:bpel-epr"), project("ode:bpel-obj"),
       project("ode:bpel-ql"), project("ode:bpel-runtime"),
       project("ode:bpel-scheduler-quartz"), project("ode:bpel-schemas"),
       project("ode:bpel-store"),
-      project("ode:dao-hibernate"), project("ode:jacob"), 
+      project("ode:dao-hibernate"), project("ode:jacob"),
       project("ode:jca-ra"), project("ode:jca-server"),
-      project("ode:minerva"), project("ode:utils"),
+      project("ode:utils"),
       project("ode:dao-jpa"), project("ode:dao-jpa-ojpa-derby"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec,
-      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient, 
+      COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS,
       JAXEN,
       JAVAX.activation, JAVAX.javamail, JAVAX.connector, JAVAX.jms,
       JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
-      JOTM, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ, 
-      SAXON, WOODSTOX, WSDL4J,
+      GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ,
+      SAXON, TRANQL, WOODSTOX, WSDL4J,
       WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema,
       XALAN, XERCES, XMLBEANS
 
     # resources filter(path_to(:base_dir, "../axis2/src/main/wsdl/*")).into(path_to(:target_dir, "resources"))
     # resources filter(path_to(:base_dir, "../bpel-schemas/src/main/xsd/pmapi.xsd")).into(path_to(:target_dir, "resources"))
-    
+
     package(:war).with(:libs=>libs).path("WEB-INF").
       merge(project("ode:dao-jpa-ojpa-derby").package(:zip))
     package(:war).path("WEB-INF").include project("ode:axis2").path_to("src/main/wsdl/*")
     package(:war).path("WEB-INF").include project("ode:bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
 
-    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode", 
+    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode",
                    :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
                                     "DynPartner"=>"distro-axis2/src/examples/DynPartner",
                                     "MagicSession"=>"distro-axis2/src/examples/MagicSession"}
@@ -171,8 +171,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Interface Layers Common"
   define "bpel-epr" do
     compile.with project("ode:utils"), project("ode:bpel-dao"),
-      project("ode:bpel-api"), project("ode:minerva"),
-      COMMONS.logging, DERBY, JAVAX.transaction
+      project("ode:bpel-api"),
+      COMMONS.logging, DERBY, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL,
+      JAVAX.connector
     package :jar
   end
 
@@ -184,7 +185,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
-    jjtree_src = path_to(:src_dir, "main/jjtree") 
+    jjtree_src = path_to(:src_dir, "main/jjtree")
     jjtree_out = path_to(:target_dir, "generated/jjtree")
     javacc_out = path_to(:target_dir, "generated/javacc")
 
@@ -195,7 +196,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-obj"), project("ode:jacob"), project("ode:utils"),
       jjtree_out, javacc_out
     compile.from jjtree_out, javacc_out
-      
+
     package :jar
   end
 
@@ -217,7 +218,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.from generated
 
 =begin
-    tests.resources do |task| 
+    tests.resources do |task|
       #rm_rf path_to(:test_target_dir, "derby-db")
       if tests.compile.compiled?
         unzip(artifact("#{group}:ode-dao-jpa-ojpa-derby:zip:#{version}")).into(path_to(:test_target_dir, "derby-db")).invoke
@@ -225,9 +226,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-scheduler-quartz"),
-      project("ode:dao-jpa"), project("ode:minerva"),
+      project("ode:dao-jpa"),
       COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
-      JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
+      LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
 =end
 
     package :jar
@@ -248,7 +249,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       using(:javasource=>compile.options.source,
             :classes=>path_to(:java_target_dir),
             :jar=>path_to(:target_dir, "xmlbeans.jar"))
-            
+
     package :jar
   end
 
@@ -275,7 +276,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE BPEL Tests"
   define "bpel-test" do
-    compile.with project("ode:bpel-api"), project("ode:bpel-compiler"), 
+    compile.with project("ode:bpel-api"), project("ode:bpel-compiler"),
       project("ode:bpel-dao"), project("ode:bpel-runtime"),
       project("ode:bpel-store"), project("ode:utils"),
       DERBY, WSDL4J
@@ -283,10 +284,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     tests.resources.into(path_to(:test_target_dir))
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-schemas"), project("ode:bpel-scheduler-quartz"),
-      project("ode:bpel-obj"), project("ode:dao-jpa"), project("ode:minerva"),
+      project("ode:bpel-obj"), project("ode:dao-jpa"),
       project("ode:jacob"),
-      COMMONS.pool, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, 
-      JAVAX.transaction, JAVAX.stream, JAXEN, HSQLDB, JOTM, LOG4J, XERCES, OpenJPA::REQUIRES, 
+      COMMONS.pool, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
+      JAVAX.transaction, JAVAX.stream, JAXEN, HSQLDB, LOG4J, XERCES, OpenJPA::REQUIRES,
       QUARTZ, SAXON, XALAN, XMLBEANS
 =end
     package :jar
@@ -303,9 +304,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE OpenJPA DAO Implementation"
   define "dao-jpa" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"), project("ode:utils"),
-      COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction, 
+      COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction,
       OPENJPA, XERCES
-    
+
     compile do |task|
       OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
         :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
@@ -391,12 +392,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
-  desc "ODE Minerva Connection Pool"
-  define "minerva" do
-    compile.with COMMONS.logging, JAVAX.connector, JAVAX.transaction
-    package :jar
-  end
-
   desc "ODE Tools"
   define "tools" do
     compile.with project("ode:bpel-compiler"), project("ode:utils"),
@@ -413,7 +408,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
     # Copy docs over.
     docs = filter(path_to(:src_dir, "main/dist/doc/*")).into(path_to(:target_dir, "doc"))
-      
+
     build bins, docs
     package :zip, :include=>[path_to(:target_dir, "bin"), path_to(:target_dir, "doc")]
   end
