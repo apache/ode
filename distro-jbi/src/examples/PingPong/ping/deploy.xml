@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
         xmlns:process="urn:/Ping.bpel"
         xmlns:ping="urn:/Ping.wsdl"
         xmlns:pong="urn:/Pong.wsdl">
