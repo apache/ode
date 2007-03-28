@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.util.List;
-
 import org.w3c.dom.Element;
+
+import java.util.List;
 
 /**
  * Representation of the BPEL <code>&lt;switch&gt;</code> activity.
@@ -34,6 +34,16 @@ public class IfActivity extends Activity {
         return getFirstChild(Expression.class);
     }
     
+    /**
+     * Get the activity for this if. BPEL 2.0 draft mandated the inclusion of the
+     * condition success activity in a <then> element. In that case this will be
+     * null. For BPEL 2.0 final this should return the condition success activity.
+     *
+     * @return activity enabled when case is satisfied
+     */
+    public Activity getActivity() {
+        return getFirstChild(Activity.class);
+    }
 
     /**
      * Get the cases for this switch.
