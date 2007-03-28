@@ -29,11 +29,11 @@ import org.apache.ode.utils.msg.MessageBundle;
 public class VersionMessages extends MessageBundle {
 
   public String msgVersionInfo(String versionName, String buildDate) {
-    return this.format("FiveSight ODE version {0} (build date: {1})", versionName, buildDate);
+    return this.format("Apache ODE version {0} (build date: {1})", versionName, buildDate);
   }
 
   public String msgGetCopyright() {
-    return this.format("Copyright (c) 2003-2005 FiveSight Technologies, Inc.");
+    return this.format("Copyright (c) 2006-2007 Apache Sooftware Foundation.");
   }
 
 }
