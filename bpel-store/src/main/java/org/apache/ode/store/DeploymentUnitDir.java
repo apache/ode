@@ -13,15 +13,25 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -168,7 +178,13 @@ class DeploymentUnitDir  {
         if (_dd == null) {
             File ddLocation = new File(_duDirectory, "deploy.xml");
             try {
-                _dd = DeployDocument.Factory.parse(ddLocation);
+                XmlOptions options = new XmlOptions();
+                HashMap otherNs = new HashMap();
+
+                otherNs.put("http://ode.fivesight.com/schemas/2006/06/27/dd",
+                        "http://www.apache.org/ode/schemas/dd/2007/03");
+                options.setLoadSubstituteNamespaces(otherNs);
+                _dd = DeployDocument.Factory.parse(ddLocation, options);
             } catch (Exception e) {
                 throw new ContextException("Couldn't read deployment descriptor at location "
                         + ddLocation.getAbsolutePath(), e);
