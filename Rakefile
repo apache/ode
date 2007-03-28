@@ -44,6 +44,7 @@ JAVAX               = OpenStruct.new(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
+JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
@@ -95,6 +96,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     package :jar
   end
+
+  desc "ODE JBI Integration Layer"
+  define "jbi" do
+    compile.with project("ode:bpel-api"), project("ode:bpel-connector"),
+      project("ode:bpel-dao"), project("ode:bpel-epr"), project("ode:bpel-obj"),
+      project("ode:bpel-runtime"), project("ode:bpel-scheduler-quartz"),
+      project("ode:bpel-schemas"), project("ode:bpel-store"),
+      project("ode:utils"),
+      COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
+    package :jar
+  end
+
 
   desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
