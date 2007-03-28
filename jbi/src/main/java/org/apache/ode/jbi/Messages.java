@@ -19,11 +19,10 @@
 
 package org.apache.ode.jbi;
 
-import java.io.File;
+import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
-
-import org.apache.ode.utils.msg.MessageBundle;
+import java.io.File;
 
 public class Messages extends MessageBundle {
 
@@ -145,5 +144,10 @@ public class Messages extends MessageBundle {
     public String msgOdeDbConfigError() {
         return format("Database configuration error.");
     }
+
+    public String msgBpelEventListenerRegistered(String listenerCN) {
+        return format("Registered custom BPEL event listener: {0}", listenerCN);
+    }
+
 
 }
