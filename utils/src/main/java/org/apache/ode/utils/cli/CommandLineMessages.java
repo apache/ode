@@ -41,8 +41,8 @@ public class CommandLineMessages extends MessageBundle {
    * Technologies, Inc.
    */
   public String msgCliHeader(String cmd, String version, String date) {
-    return this.format("{0} - FiveSight ODE v{1} ({2})" + SystemUtils.lineSeparator()
-        + "Copyright (c) 2003-2005 FiveSight Technologies, Inc.", cmd, version, date);
+    return this.format("{0} - Apache ODE v{1} ({2})" + SystemUtils.lineSeparator()
+        + "Copyright (c) 2006-2007 Apache ODE.", cmd, version, date);
   }
 
   /**
