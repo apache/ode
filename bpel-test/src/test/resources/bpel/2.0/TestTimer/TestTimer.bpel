@@ -69,9 +69,6 @@
 		
 		<invoke name="probe2" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
 		
-		<!-- block until request message is sent -->
-		<receive name="receive2" partnerLink="request" portType="wns:testTimerPT" operation="continue" variable="request"/>
-		
 		<!-- Copy input variables to internal accumulators -->
 		<assign name="assign2">
 			<copy>
