@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
@@ -40,6 +41,7 @@ import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
 /**
@@ -102,6 +104,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
             __log.debug("Starting BPEL server.");
             initBpelServer();
+
+            // Register BPEL event listeners configured in ode-jbi.properties.
+            registerEventListeners();
 
             __log.debug("Starting JCA connector.");
             initConnector();
@@ -246,7 +251,22 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
- 
+    private void registerEventListeners() {
+        String listenersStr = _ode._config.getEventListeners();
+        if (listenersStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String listenerCN = tokenizer.nextToken();
+                try {
+                    _ode._server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
+                    __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
+                            + "loaded properly.");
+                }
+            }
+        }
+    }
+
 
     public synchronized void start() throws JBIException {
         if (_started)
