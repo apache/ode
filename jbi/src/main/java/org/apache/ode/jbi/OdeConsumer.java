@@ -210,8 +210,8 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     }
 
     private void outResponse(final InOut jbiMex) {
-        final PartnerRoleMessageExchange pmex = _outstandingExchanges.remove(jbiMex.getExchangeId());
-        if (pmex == null) {
+        final PartnerRoleMessageExchange outstanding = _outstandingExchanges.remove(jbiMex.getExchangeId());
+        if (outstanding == null) {
             __log.warn("Received a response for unknown JBI message exchange " + jbiMex.getExchangeId());
             return;
         }
@@ -220,6 +220,12 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
             _ode._scheduler.execTransaction(new Callable<Boolean>() {
                 @SuppressWarnings("unchecked")
                 public Boolean call() throws Exception {
+                    // need to reload mex since we're in a different transaction
+                    PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getEngine().getMessageExchange(outstanding.getMessageExchangeId());
+                    if (pmex == null) {
+                        __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
+                        return Boolean.FALSE;
+                    }
                     String mapperName = pmex.getProperty(Mapper.class.getName());
                     Mapper mapper = mapperName == null ? _ode.getDefaultMapper() : _ode.getMapper(mapperName);
                     if (mapper == null) {
@@ -230,8 +236,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                         try {
                             Fault jbiFlt = jbiMex.getFault();
                             if (jbiFlt != null) {
-                                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt, (Collection<javax.wsdl.Fault>) pmex
-                                        .getOperation().getFaults().values());
+                                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt, (Collection<javax.wsdl.Fault>) pmex.getOperation().getFaults().values());
                                 if (wsdlFlt == null) {
                                     pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Unrecognized fault message.", null);
                                 } else {
