@@ -18,9 +18,9 @@
   -->
 
 <xb:config xmlns:xb="http://xml.apache.org/xmlbeans/2004/02/xbean/config"
-           xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
+           xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03">
 
-  <xb:namespace uri="http://ode.fivesight.com/schemas/2006/06/27/dd">
+  <xb:namespace uri="http://www.apache.org/ode/schemas/dd/2007/03">
     <xb:package>org.apache.ode.bpel.dd</xb:package>
   </xb:namespace> 
   

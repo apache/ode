@@ -19,8 +19,8 @@
   -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="http://ode.fivesight.com/schemas/2006/06/27/dd"
-           xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+           targetNamespace="http://www.apache.org/ode/schemas/dd/2007/03"
+           xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
            elementFormDefault="qualified">
 
     <xs:element name="deploy" id="deploy" type="dd:tDeployment"/>
