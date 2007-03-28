@@ -48,6 +48,13 @@ public class TestScheduler implements Scheduler {
     };
 
     public String schedulePersistedJob(Map<String, Object> detail, Date date) throws ContextException {
+        if (date != null) {
+            try {
+                while(new Date().before(date)) Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         return scheduleVolatileJob(true, detail);
     }
 
