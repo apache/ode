@@ -85,12 +85,8 @@ public interface MessageExchangeDAO {
 
     /**
      * Set state of last message sent/received.
-<<<<<<< .mine
      *
      * @param status state to be set
-=======
-     * @param string state to be set
->>>>>>> .r511955
      */
     void setStatus(String status);
 
