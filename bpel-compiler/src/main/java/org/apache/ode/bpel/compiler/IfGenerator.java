@@ -21,32 +21,47 @@
 
 package org.apache.ode.bpel.compiler;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.IfActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.utils.msg.MessageBundle;
 
 
 /**
  * Generates code for the <code>&lt;switch&gt;</code> activities.
  */
 class IfGenerator extends DefaultActivityGenerator {
-  public OActivity newInstance(Activity src) {
+    private static final IfGeneratorMessages __cmsgs = MessageBundle.getMessages(IfGeneratorMessages.class);
+
+    public OActivity newInstance(Activity src) {
         return new OSwitch(_context.getOProcess(), _context.getCurrent());
-  }
-
-  public void compile(OActivity output, Activity src) {
-    OSwitch oswitch = (OSwitch) output;
-    IfActivity switchDef = (IfActivity)src;
-
-    boolean first = true;
-    for (IfActivity.Case ccase : switchDef.getCases()) {
-      OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
-      ocase.activity = _context.compile(ccase.getActivity());
-      ocase.expression = first ? _context.compileExpr(switchDef.getCondition())
-              : (ccase.getCondition() == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
-      oswitch.addCase(ocase);
-      first = false;
     }
-  }
+
+    public void compile(OActivity output, Activity src) {
+        OSwitch oswitch = (OSwitch) output;
+        IfActivity switchDef = (IfActivity)src;
+
+        if (switchDef.getCondition() == null)
+            throw new CompilationException(__cmsgs.errIfWithNoCondition());
+
+        boolean first = true;
+        if (switchDef.getActivity() != null) {
+            OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
+            ocase.activity = _context.compile(switchDef.getActivity());
+            ocase.expression = _context.compileExpr(switchDef.getCondition());
+            oswitch.addCase(ocase);
+            first = false;
+        }
+
+        for (IfActivity.Case ccase : switchDef.getCases()) {
+            OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
+            ocase.activity = _context.compile(ccase.getActivity());
+            ocase.expression = first ? _context.compileExpr(switchDef.getCondition())
+                    : (ccase.getCondition() == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
+            oswitch.addCase(ocase);
+            first = false;
+        }
+    }
 }
