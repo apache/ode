@@ -225,7 +225,7 @@ public abstract class BPELTestAbstract extends TestCase {
                     throw e;
                 }
 
-                running.get(20000, TimeUnit.MILLISECONDS);
+                running.get(200000, TimeUnit.MILLISECONDS);
 
                 switch (mex.getStatus()) {
                     case RESPONSE:
