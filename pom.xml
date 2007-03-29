@@ -130,7 +130,7 @@
 
         <module>dao-hibernate</module>
         <module>bpel-store</module>
-        <module>dao-hibernate-db-derby</module>
+        <module>dao-hibernate-db</module>
 
         <module>jbi</module>
         <module>jca-ra</module>
