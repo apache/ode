@@ -49,6 +49,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
+    private int _executionCount = 0;
 
     private String _guid;
 
@@ -100,6 +101,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public ProcessInstanceDAO createInstance(CorrelatorDAO correlator) {
         ProcessInstanceDaoImpl newInstance = new ProcessInstanceDaoImpl(_conn, this, correlator);
         _instances.put(newInstance.getInstanceId(), newInstance);
+        _executionCount++;
         return newInstance;
     }
 
@@ -155,7 +157,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public int getNumInstances() {
-        return _instances.size();
+        // Instances are removed after execution, using a counter instead
+        return _executionCount;
     }
 
     public ProcessInstanceDAO getInstanceWithLock(Long iid) {
