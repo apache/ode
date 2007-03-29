@@ -152,6 +152,11 @@ public class StreamUtils {
     oos.flush();
   }
 
+  public static Object readObj(InputStream is) throws IOException,ClassNotFoundException {
+      ObjectInputStream iis = new ObjectInputStream(is);
+      return iis.readObject();
+  }
+  
   /**
    * Expand a Jar input stream.
    */
