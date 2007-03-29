@@ -20,8 +20,8 @@
 
 <project>
     <groupId>org.apache.ode</groupId>
-    <artifactId>ode-dao-hibernate-db-derby</artifactId>
-    <name>ODE :: Hibernate DAO Derby Database</name>
+    <artifactId>ode-dao-hibernate-db</artifactId>
+    <name>ODE :: Hibernate DAO Database Generator</name>
     <packaging>pom</packaging>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,6 +35,10 @@
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-dao-hibernate</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-store</artifactId>
         </dependency>
         <dependency>
            <groupId>org.apache.derby</groupId>
@@ -95,7 +99,12 @@
               <artifactId>ode-bpel-store</artifactId>
               <version>${project.version}</version>
             </dependency>
-    
+            
+            <dependency>
+              <groupId>dom4j</groupId>
+              <artifactId>dom4j</artifactId>
+              <version>${dom4jVersion}</version>
+            </dependency>
           </dependencies>
         </plugin>
 
