@@ -34,7 +34,7 @@ import javax.persistence.Table;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 @Entity
-@Table(name="ODE_XML_DATA")
+@Table(name="ODE_XML_DATA_PROP")
 public class XmlDataProperty {
 
     @Id @Column(name="ID")
