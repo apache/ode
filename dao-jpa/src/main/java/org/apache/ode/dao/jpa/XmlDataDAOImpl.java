@@ -37,10 +37,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.Collection;
 
+/**
+ * @author Matthieu Riou <mriou at apache dot org>
+ */
 @Entity
 @Table(name="ODE_XML_DATA")
 public class XmlDataDAOImpl implements XmlDataDAO {
@@ -56,8 +61,9 @@ public class XmlDataDAOImpl implements XmlDataDAO {
     private boolean _isSimpleType;
 	@Basic @Column(name="NAME")
     private String _name;
-	@Basic @Column(name="PROPERTIES")
-    private Properties _props = new Properties();
+
+    @OneToMany(targetEntity=XmlDataProperty.class,mappedBy="_xmlData",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
+    private Collection<XmlDataProperty> _props = new ArrayList<XmlDataProperty>();
 
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
 	private ScopeDAOImpl _scope;
@@ -97,7 +103,10 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	}
 
 	public String getProperty(String propertyName) {
-		return _props.getProperty(propertyName);
+        for (XmlDataProperty prop : _props) {
+            if (prop.getPropertyKey().equals(propertyName)) return prop.getPropertyValue();
+        }
+        return null;
 	}
 
 	public ScopeDAO getScopeDAO() {
@@ -124,7 +133,7 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	}
 
 	public void setProperty(String pname, String pvalue) {
-		_props.setProperty(pname, pvalue);
+        _props.add(new XmlDataProperty(pname, pvalue, this));
 	}
 
 }
