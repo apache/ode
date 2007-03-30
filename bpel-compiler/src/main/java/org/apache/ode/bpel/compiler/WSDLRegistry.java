@@ -18,24 +18,6 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.StringReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Import;
-import javax.wsdl.Message;
-import javax.wsdl.PortType;
-import javax.wsdl.Types;
-import javax.wsdl.extensions.ExtensibilityElement;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -53,6 +35,23 @@ import org.apache.ode.utils.xsd.XsdException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import javax.wsdl.Definition;
+import javax.wsdl.Import;
+import javax.wsdl.Message;
+import javax.wsdl.PortType;
+import javax.wsdl.Types;
+import javax.wsdl.extensions.ExtensibilityElement;
+import javax.xml.namespace.QName;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
@@ -66,6 +65,7 @@ class WSDLRegistry {
     private final HashMap<String, ArrayList<Definition4BPEL>> _definitions = new HashMap<String, ArrayList<Definition4BPEL>>();
 
     private final Map<URI, byte[]> _schemas = new HashMap<URI,byte[]>();
+    private final Map<URI, String> _internalSchemas = new HashMap<URI, String>();
 
     private SchemaModel _model;
 
@@ -201,19 +201,16 @@ class WSDLRegistry {
                     String schema = ((XMLSchemaType)ee).getXMLSchema();
                     Map<URI, byte[]> capture = null;
 
-                    WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri);
+                    WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas);
                     try {
-                        
                         capture = XSUtils.captureSchema(defuri, schema, resolver);
-
-                        // Add new schemas to our list.
                         _schemas.putAll(capture);
 
                         try {
                             Document doc = DOMUtils.parse(new InputSource(new StringReader(schema)));
                             String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
                             if (schemaTargetNS != null && schemaTargetNS.length() > 0)
-                                resolver.addInternalResource(new URI(schemaTargetNS), schema);
+                                _internalSchemas.put(new URI(schemaTargetNS), schema);
                         } catch (Exception e) {
                             throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
                         }
