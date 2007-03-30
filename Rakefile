@@ -259,11 +259,14 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "bpel-schemas" do
     schemas = [ path_to(:src_dir, "main/xsd/pmapi.xsdconfig"),
                 path_to(:src_dir, "main/xsd/dd.xsdconfig"), path_to(:src_dir, "main/xsd") ]
-    prepare XMLBeans.compile_task(path_to(:target_dir, "generated")=>schemas).
+    generated = path_to(:target_dir, "generated")
+    prepare XMLBeans.compile_task(generated=>schemas).
       using(:javasource=>compile.options.source,
             :classes=>path_to(:java_target_dir),
             :jar=>path_to(:target_dir, "xmlbeans.jar"))
 
+    compile.from generated
+    compile.with JAVAX.stream, XMLBEANS
     package :jar
   end
 
@@ -318,7 +321,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE OpenJPA DAO Implementation"
   define "dao-jpa" do
     compile.with project("ode:bpel-api"), project("ode:bpel-dao"), project("ode:utils"),
-      COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction,
+      COMMONS.collections, COMMONS.logging, JAVAX.connector, JAVAX.persistence, JAVAX.transaction,
       OPENJPA, XERCES
 
     compile do |task|
