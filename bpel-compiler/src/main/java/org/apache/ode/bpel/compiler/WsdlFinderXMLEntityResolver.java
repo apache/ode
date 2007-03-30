@@ -18,19 +18,20 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Xerces {@link XMLEntityResolver} implementation that defers to  our own
@@ -54,7 +55,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
     private boolean _failIfNotFound = true;
 
     private ResourceFinder _wsdlFinder;
-    private HashMap<URI,String> _internalResources = new HashMap<URI, String>();
+    private Map<URI, String> _internalSchemas = new HashMap<URI, String>();
     private URI _baseURI;
     
     /**
@@ -64,9 +65,10 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
      *                typically this is the system URI of the WSDL containing an 
      *                embedded schema
      */
-    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI) {
+    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, String> internalSchemas) {
         _wsdlFinder = finder;
         _baseURI = baseURI;
+        _internalSchemas = internalSchemas;
     }
 
     public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier)
@@ -101,8 +103,8 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             __log.debug("resolveEntity: Expecting to find " + resourceIdentifier.getNamespace()
                     + " at " + location);
 
-        if (_internalResources.get(location) != null) {
-            src.setByteStream(new ByteArrayInputStream(_internalResources.get(location).getBytes()));
+        if (_internalSchemas.get(location) != null) {
+            src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(location).getBytes()));
             return src;
         }
 
@@ -130,16 +132,6 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         }
 
         return src;
-    }
-
-    /**
-     * Register a previously loaded resource with the finder; this is used to make 
-     * accessible the schema in-lined into a WSDL document. 
-     * @param location/namespace location/namespace of the resource
-     * @param source text of the resource
-     */
-    public void addInternalResource(URI location, String source) {
-        _internalResources.put(location, source);
     }
 
 }
