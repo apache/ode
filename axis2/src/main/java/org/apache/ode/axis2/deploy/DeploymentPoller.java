@@ -142,7 +142,7 @@ public class DeploymentPoller {
 
             try {
                 Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                __log.info("Deployment of artifact " + file.getName() + " successful.");
+                __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
             } catch (Exception e) {
                 __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
             }
