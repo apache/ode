@@ -21,7 +21,6 @@ package org.apache.ode.bpel.o;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 

@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import javax.wsdl.xml.WSDLLocator;
-
 /**
  * General interace for retrieving resources identified by a URI.
  * 
