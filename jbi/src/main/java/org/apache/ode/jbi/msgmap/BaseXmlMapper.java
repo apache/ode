@@ -24,11 +24,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

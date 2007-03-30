@@ -32,7 +32,6 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.utils.GUID;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>

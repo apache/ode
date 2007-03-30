@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.xml.transform.SourceLocator;
 

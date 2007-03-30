@@ -23,7 +23,6 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessStore;
 
 /**
  * Hook into the BPEL server that enables intercepting of message exchange

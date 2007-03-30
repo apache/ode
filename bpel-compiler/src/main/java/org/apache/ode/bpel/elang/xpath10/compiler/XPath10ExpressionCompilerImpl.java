@@ -28,7 +28,6 @@ import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.jaxen.saxpath.SAXPathException;
 import org.jaxen.saxpath.XPathReader;
