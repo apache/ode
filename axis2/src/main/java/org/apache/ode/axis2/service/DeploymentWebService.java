@@ -62,18 +62,6 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
 
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 /**
  * Axis wrapper for process deployment.
  */

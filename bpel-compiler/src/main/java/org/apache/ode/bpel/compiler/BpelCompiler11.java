@@ -23,7 +23,6 @@ import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
 import org.apache.ode.bpel.compiler.bom.EmptyActivity;
 import org.apache.ode.bpel.compiler.bom.FlowActivity;
-import org.apache.ode.bpel.compiler.bom.IfActivity;
 import org.apache.ode.bpel.compiler.bom.InvokeActivity;
 import org.apache.ode.bpel.compiler.bom.PickActivity;
 import org.apache.ode.bpel.compiler.bom.ReceiveActivity;

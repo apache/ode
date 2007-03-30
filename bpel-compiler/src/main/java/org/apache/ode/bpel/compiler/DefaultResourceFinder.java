@@ -25,12 +25,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 
 /**
  * Basic implementation of the {@link ResourceFinder} interface. Resolves
