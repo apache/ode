@@ -225,7 +225,7 @@ class WSDLRegistry {
 
                         for (XsdException ex : exceptions) {
                             // TODO: the line number here is going to be wrong for the in-line schema.
-                            String location = ex.getSystemId() + ":"  + ex.getLineNumber();
+                            // String location = ex.getSystemId() + ":"  + ex.getLineNumber();
                             CompilationException ce = new CompilationException(
                                     __cmsgs.errSchemaError(ex.getDetailMessage()).setSource(new SourceLocationImpl(defuri)));
                             if (_ctx != null)

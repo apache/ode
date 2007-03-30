@@ -60,7 +60,8 @@ public class LoggingStatementWrapper implements CallableStatement {
         return ((CallableStatement)_stmt).getBigDecimal(parameterIndex);
     }
 
-    public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
         return ((CallableStatement)_stmt).getBigDecimal(parameterIndex, scale);
     }
 
@@ -553,7 +554,8 @@ public class LoggingStatementWrapper implements CallableStatement {
         _stmt.setTimestamp(parameterIndex, x, cal);
     }
 
-    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
         _paramsIdxr.put(parameterIndex, x);
         _stmt.setUnicodeStream(parameterIndex, x, length);
     }
