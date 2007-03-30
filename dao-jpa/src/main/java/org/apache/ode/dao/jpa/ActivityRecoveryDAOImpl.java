@@ -55,6 +55,8 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 	@Basic @Column(name="RETRIES")
     private int _retries;
 
+    // _instances is unused because this is a one-way relationship at the database level
+    @SuppressWarnings("unused")
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE_ID")
     private ProcessDAOImpl _instance;
 
