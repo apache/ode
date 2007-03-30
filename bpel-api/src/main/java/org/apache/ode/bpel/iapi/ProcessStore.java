@@ -99,7 +99,6 @@ public interface ProcessStore {
      * Marks a process as active / retired or disabled
      * @param pid
      * @param state true for active, false for inactive
-     * @deprecated
      */
     void setState(QName pid, ProcessState state);
 
