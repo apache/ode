@@ -18,6 +18,12 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -27,7 +33,6 @@ import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
@@ -37,14 +42,6 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.sun.org.apache.xalan.internal.xsltc.DOM;
-
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-
-import javax.xml.namespace.QName;
 
 /**
  * Template for the BPEL <code>pick</code> activity.
