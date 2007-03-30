@@ -208,7 +208,7 @@ public class OMUtils {
             int colonIdx = elmt.getText().indexOf(":");
             String localpart = elmt.getText().substring(colonIdx + 1, elmt.getText().length());
             String prefix = elmt.getText().substring(0, colonIdx);
-            String ns = elmt.findNamespaceURI(prefix).getName();
+            String ns = elmt.findNamespaceURI(prefix).getNamespaceURI();
             qname = new QName(ns, localpart, prefix);
         }
         return qname;
