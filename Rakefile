@@ -421,7 +421,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-schemas"), project("ode:bpel-store"),
       project("ode:utils"),
       COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
-    package :jar
+
+    libs = [ package(:jar) ] # Insert more stuff here
+    package(:jbi).tap do |jbi|
+      jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
+      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :delegation=>:self, :libs=>libs
+      jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
+      jbi.merge project("ode:dao-hibernate-db").package(:zip)
+      jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
+    end
   end
 
   desc "ODE JCA Resource Archive"
@@ -493,3 +501,28 @@ end
 task("jetty:bounce" => ["ode:axis2-war:jetty:bounce"])
 task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
 
+
+
+def jbi_descriptor(args)
+  delegation = lambda { |key| "#{key || :parent}-first" }
+  xml = Builder::XmlMarkup.new(:target=>$stdout, :indent=>2)
+  xml.instruct!
+  xml.jbi :xmlns=>"http://java.sun.com/xml/ns/jbi", :version=>"1.0" do
+    xml.component :type=>args[:type].to_s.sub("_", "-"),
+      "component-class-loader-delegation"=>delegation[args[:component][:delegation]],
+      "bootstrap-class-loader-delegation"=>delegation[args[:bootstrap][:delegation]] do
+      xml.identification do
+        xml.name args[:name]
+        xml.description args[:description]
+      end
+      xml.tag! "component-class-name", args[:component][:class]
+      xml.tag! "component-class-path" do
+        args[:component][:path].each { |path| xml.tag! "path-element", path }
+      end
+      xml.tag! "bootstrap-class-name", args[:bootstrap][:class]
+      xml.tag! "bootstrap-class-path" do
+        args[:bootstrap][:path].each { |path| xml.tag! "path-element", path }
+      end
+    end
+  end
+end
