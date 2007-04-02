@@ -19,11 +19,6 @@
 
 package org.apache.ode.utils.xsl;
 
-import java.io.StringReader;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
@@ -35,6 +30,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Singleton wrapping the basic <code>javax.xml.transform</code> operations. The
@@ -129,7 +128,7 @@ public class XslTransformHandler {
       tf.setURIResolver(resolver);
       if (parameters != null) {
         for (Map.Entry<QName, Object> param : parameters.entrySet()) {
-          tf.setParameter("{" + param.getKey().getNamespaceURI() + "}" + param.getKey().getLocalPart(), param.getValue());
+          tf.setParameter(param.getKey().getLocalPart(), param.getValue());
         }
       }
       tf.transform(source, result);

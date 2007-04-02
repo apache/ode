@@ -20,8 +20,13 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -80,4 +85,8 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
 	return null;
   }
 
+    public boolean narrowTypes() {
+        return true;
+    }
+    
 }
