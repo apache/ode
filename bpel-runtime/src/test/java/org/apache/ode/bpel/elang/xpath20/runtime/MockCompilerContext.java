@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
@@ -199,5 +200,8 @@ public class MockCompilerContext implements CompilerContext {
     public OScope compileSLC(ScopeLikeActivity child, Variable[] variables) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void recoveredFromError(SourceLocation location, CompilationException error) {
     }
 }
