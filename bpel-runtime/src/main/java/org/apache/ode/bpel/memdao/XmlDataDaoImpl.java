@@ -24,9 +24,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.util.Properties;
 
 
@@ -61,6 +59,10 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
         Document doc = DOMUtils.newDocument();
         Node copy = doc.importNode(_data, true);
         if (_data instanceof Element) doc.appendChild(copy);
+        else {
+            Element wrapper = doc.createElement("wrapper");
+            wrapper.appendChild(copy);
+        }
         return copy;
     }
 
@@ -83,14 +85,9 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
         // spot where it exactly comes from, this fixes it.
         // The weirdness lies in elements being in xmlns="" when printed with a DOMWriter
         // but having a ns when the elements are queried directly.
-        try {
-            _data = DOMUtils.stringToDOM(DOMUtils.domToString(val));
-        } catch (SAXException e) {
-            // Should never happen but life is full of surprises
-            throw new RuntimeException("Couldn't reread!", e);
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't reread!", e);
-        }
+        Document doc = DOMUtils.newDocument();
+        _data = doc.importNode(val, true);
+        doc.appendChild(_data);
     }
 
     /**

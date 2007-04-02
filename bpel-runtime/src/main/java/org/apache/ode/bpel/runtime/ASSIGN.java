@@ -633,6 +633,10 @@ class ASSIGN extends ACTIVITY {
         public Long getProcessId() {
             return _ctx.getProcessId();
         }
+
+        public boolean narrowTypes() {
+            return false;
+        }
     }
 
 }

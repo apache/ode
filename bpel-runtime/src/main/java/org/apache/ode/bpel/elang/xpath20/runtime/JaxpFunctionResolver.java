@@ -228,6 +228,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                         paramElmt = paramDoc;
                         if (__log.isDebugEnabled())
                             __log.debug("Passing parameter " + keyQName + " " + DOMUtils.domToString(paramDoc));
+                    } else if (args.get(idx + 1) instanceof List) {
+                        paramElmt = ((List) args.get(idx + 1)).get(0);
                     } else paramElmt = args.get(idx + 1);
 
                     parametersMap.put(keyQName, paramElmt);
@@ -250,6 +252,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             try {
                 XslTransformHandler.getInstance().transform(xslUri, source, result, parametersMap, resolver);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
                                 e.toString()));

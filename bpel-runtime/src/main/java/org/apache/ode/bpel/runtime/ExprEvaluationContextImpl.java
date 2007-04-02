@@ -22,8 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.o.OConstantVarType;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -116,6 +121,10 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
     public Long getProcessId() {
         return _native.getPid();
+    }
+
+    public boolean narrowTypes() {
+        return true;
     }
 
 }
