@@ -297,7 +297,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:bpel-dao"), project("ode:bpel-runtime"),
       project("ode:bpel-store"), project("ode:utils"),
       DERBY, WSDL4J
-=begin
+    
     tests.resources.into(path_to(:test_target_dir))
     tests.compile.with *compile.classpath
     tests.compile.with project("ode:bpel-schemas"), project("ode:bpel-scheduler-quartz"),
@@ -306,7 +306,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.pool, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
       JAVAX.transaction, JAVAX.stream, JAXEN, HSQLDB, LOG4J, XERCES, OpenJPA::REQUIRES,
       QUARTZ, SAXON, XALAN, XMLBEANS
-=end
+
     package :jar
   end
 
@@ -464,3 +464,4 @@ end
 # Lazy ass aliasing
 task("jetty:bounce" => ["ode:axis2-war:jetty:bounce"])
 task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
+

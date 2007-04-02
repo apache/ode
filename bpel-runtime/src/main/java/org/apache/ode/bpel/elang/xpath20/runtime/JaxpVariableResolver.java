@@ -92,12 +92,14 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             try{
                 Node variableNode = _ectx.readVariable(variable, part);
                 if (variableNode == null)
-                    throw new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + variableName.getLocalPart());
-                if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple) 
-                	return getSimpleContent(variableNode,((OXsdTypeVarType)variable.type).xsdType);
-                if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
-                	return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
-
+                    throw new FaultException(variable.getOwner().constants.qnSelectionFailure,
+                            "Unknown variable " + variableName.getLocalPart());
+                if (_ectx.narrowTypes()) {
+                    if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple)
+                        return getSimpleContent(variableNode,((OXsdTypeVarType)variable.type).xsdType);
+                    if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
+                        return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
+                }
 
                 // Saxon expects a node list, this nodelist should contain exactly one item, the attribute
                 // value

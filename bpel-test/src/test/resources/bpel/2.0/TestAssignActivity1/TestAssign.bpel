@@ -83,7 +83,7 @@
                 <to variable="intVar"/>
             </copy>
             <copy>
-                <from>$intVar = 4</from>
+                <from>$intVar = 5</from>
                 <to variable="boolVar"/>
             </copy>
             <copy>
