@@ -18,13 +18,7 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
-
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
@@ -40,6 +34,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Map;
 
 public class XPath20ExpressionRuntimeTest extends TestCase implements EvaluationContext {
     
@@ -141,8 +139,11 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         // TODO Auto-generated method stub
         return null;
     }
-    
 
+    public boolean narrowTypes() {
+        return true;
+    }
+    
     private OXPath20ExpressionBPEL20 compile(String xpath) {
         Document doc = DOMUtils.newDocument();
         Element e = doc.createElementNS(null, "expression");

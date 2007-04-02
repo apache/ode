@@ -19,15 +19,15 @@
 
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.TransformerException;
 
 
 /**
@@ -77,6 +77,9 @@ public class XslCompilationErrorListener implements ErrorListener {
     cmsg.messageText = exception.getMessageAndLocation();
     CompilationException ce = new CompilationException(cmsg, exception);
     SourceLocation loc = exception.getLocator() != null ? new SourceLocatorWrapper(exception.getLocator()) : null;
-    _cc.recoveredFromError(loc,ce);
+      if (_cc != null)
+        _cc.recoveredFromError(loc,ce);
+      else
+      __log.error("XSL stylesheet parsing error! ", exception);
   }
 }
