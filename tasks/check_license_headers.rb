@@ -1,65 +1,29 @@
-module FileBrowser
-  def browse(root)
-    queue = Array.new.push(root)
-    while !queue.empty?
-      filename = queue.pop
-      if File.file?(filename)
-        yield(filename)
-      else
-        Dir.new(filename).each do |child|
-          unless ['..', '.','.svn'].include? child
-            queue.push(filename + "/" + child)
-          end
-        end
-      end
-    end
-  end
-end
-
 class HeadersCheck
-  EXT = ['java', 'xml', 'bpel', 'wsdl', 'c', 'cpp']
 
-  include FileBrowser
-
-  def check_files(dir, dry_run)
-    count = 0
-    browse(dir) do |filename|
-      if /\.#{EXT.join('$|\.')}$/ =~ filename
+  def check_files(dir)
+    count = FileList["**/*.{java,xml,bpel,wsdl}"].inject(0) do |count, filename|
         match = nil
-        f = File.new(filename)
-        # Checking for the Apache header in the 4 first lines
-        4.times do 
-          match ||= (/Licensed to the Apache Software Foundation/ =~ f.readline) rescue nil
-            #puts("File #{filename} too short to check.")
+        File.open(filename) do |f|
+          # Checking for the Apache header in the 4 first lines
+          4.times { match ||= (/Licensed to the Apache Software Foundation/ =~ f.readline) rescue nil }
         end
-        f.close
-        unless match
-          if dry_run
-            puts "Missing header in #{filename}"
-          else
-            add_header(filename)
-          end
-          count += 1
-        end
-      end
+        when_writing("Missing header in #{filename}") { add_header(filename); count+= 1 }
+        count
     end
-    if dry_run
-      puts "#{count} files don't have an Apache license header."
-    else
-      puts "#{count} files have been changed to include the Apache license header."
-    end
+
+    puts "#{count} files don't have been checked."
   end
 
   def add_header(filename)
     ext = /\.([^\.]*)$/.match(filename[1..-1])[1]
-    header = HEADERS[ext]
-    content = File.new(filename, 'r').read
+    header, content = HEADERS[ext], ''
+    File.open(filename, 'r') { |file| content = file.read }
     if content[0..4] == '<?xml'
       content = content[0..content.index("\n")] + header + content[(content.index("\n") + 1)..-1]
     else
       content = header + content
     end
-    File.new(filename, 'w').write(content)
+    File.open(filename, 'w') { |file| file.write(content) }
   end
 
 end
