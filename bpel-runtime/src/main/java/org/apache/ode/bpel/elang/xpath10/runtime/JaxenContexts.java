@@ -28,6 +28,7 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
@@ -170,7 +171,10 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 if (variableNode == null)
                     throw new WrappedFaultException.JaxenUnresolvableException(
                             new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + localName));
-                if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple) {
+                OVarType type = variable.type;
+                if (type instanceof OMessageVarType) type = ((OMessageVarType)type).parts.get(partName).type;
+
+                if (type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
                     String text = variableNode.getTextContent();
                     try {
                         return XSTypes.toJavaObject(((OXsdTypeVarType)variable.type).xsdType,
