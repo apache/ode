@@ -18,17 +18,14 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
 import org.apache.ode.utils.xsd.SchemaModel;
 
-import java.net.URL;
-
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
-
-import junit.framework.TestCase;
+import java.net.URL;
 
 public class WSDLRegistryTest extends TestCase {
 
