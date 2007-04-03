@@ -190,16 +190,55 @@ public abstract class BPELTestAbstract extends TestCase {
             // Running tests in separate threads to allow concurrent invocation
             // (otherwise the first receive/reply invocation is going to block
             // everybody).
-            Thread testRun = new Thread(new Runnable() {
-                public void run() {
-                    doInvoke(testProps, serviceId, operation);
-                }
-            });
-            
-            testThreads.add(testRun);
-            testRun.start();
+            for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
+                MyRoleMessageExchange mex = null;
+                Future running = null;
+                String responsePattern = null;
+                try {
+                    scheduler.begin();
 
-            Thread.sleep(200);
+                    mex = server.getEngine().createMessageExchange(new GUID().toString(), serviceId, operation);
+
+                    String in = testProps.getProperty("request" + i);
+                    responsePattern = testProps.getProperty("response" + i);
+
+                    mexContext.clearCurrentResponse();
+
+                    Message request = mex.createMessage(null);
+
+                    Element elem = DOMUtils.stringToDOM(in);
+                    request.setMessage(elem);
+
+
+                    running = mex.invoke(request);
+                    scheduler.commit();
+                } catch ( Throwable e ) {
+                    e.printStackTrace();
+                    scheduler.rollback();
+                    fail();
+                }
+
+                Thread testRun = null;
+                if (!responsePattern.equals("ASYNC")) {
+                    final Future frunning = running;
+                    final MyRoleMessageExchange fmex = mex;
+                    final String fpattern = responsePattern;
+                    final String frequestName = "request" + i;
+                    testRun = new Thread(new Runnable() {
+                        public void run() {
+                            processReply(frunning, fmex, fpattern, frequestName);
+                        }
+                    });
+                }
+
+                if (testRun != null) {
+                    testThreads.add(testRun);
+                    testRun.start();
+                    Thread.sleep(100);
+                }
+
+            }
+
             propsFileCnt++;
             testPropsFile = new File(deployDir + "/test" + propsFileCnt
                     + ".properties");
@@ -248,94 +287,63 @@ public abstract class BPELTestAbstract extends TestCase {
      * responseN=ASYNC responseN=ONE_WAY responseN=COMPLETED_OK
      *
      */
-    private void doInvoke(Properties testProps, QName serviceId, String operation) {
-        for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
-            MyRoleMessageExchange mex = null;
-            Future running = null;
-            String responsePattern = null;
+    private void processReply(Future running, MyRoleMessageExchange mex, String responsePattern, String requestName) {
             try {
-                scheduler.begin();
-
-                mex = server.getEngine().createMessageExchange(new GUID().toString(), serviceId, operation);
-
-                String in = testProps.getProperty("request" + i);
-                responsePattern = testProps.getProperty("response" + i);
-
-                mexContext.clearCurrentResponse();
-
-                Message request = mex.createMessage(null);
-
-                Element elem = DOMUtils.stringToDOM(in);
-                request.setMessage(elem);
-
-
-                running = mex.invoke(request);
-                scheduler.commit();
-            } catch ( Throwable e ) {
-                e.printStackTrace();
-                scheduler.rollback();
+                running.get(200000, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                System.out.println("TIMEOUT!");
                 fail();
             }
 
-            if (!responsePattern.equals("ASYNC")) {
-                try {
-                    running.get(200000, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    System.out.println("TIMEOUT!");
-                    fail();
-                }
+            switch (mex.getStatus()) {
+                case RESPONSE:
+                    testResponsePattern(requestName, mex.getResponse(), responsePattern);
+                    // TODO: test for response fault
+                    break;
+                case ASYNC:
 
-                switch (mex.getStatus()) {
-                    case RESPONSE:
-                        testResponsePattern("request" + i, mex.getResponse(), responsePattern);
-                        // TODO: test for response fault
-                        break;
-                    case ASYNC:
-
-                        switch (mex.getMessageExchangePattern()) {
-                            case REQUEST_ONLY:
-                                if (!responsePattern.equals("ASYNC"))
-                                    fail();
-                                break;
-                            case REQUEST_RESPONSE:
-                                testResponsePattern("request" + i, mexContext.getCurrentResponse(),
-                                        responsePattern);
-                            default:
-                                break;
-                        }
-
-                        break;
-                    case COMPLETED_OK:
-                        if (!responsePattern.equals("COMPLETED_OK"))
-                            testResponsePattern("request" + i, mexContext.getCurrentResponse(),
+                    switch (mex.getMessageExchangePattern()) {
+                        case REQUEST_ONLY:
+                            if (!responsePattern.equals("ASYNC"))
+                                fail();
+                            break;
+                        case REQUEST_RESPONSE:
+                            testResponsePattern(requestName, mexContext.getCurrentResponse(),
                                     responsePattern);
-                        break;
-                    case FAULT:
-                        // TODO: handle Fault
-                        System.out.println("=> " + mex.getFault() + " " + mex.getFaultExplanation());
-                        fail();
-                        break;
-                    case COMPLETED_FAILURE:
-                        // TODO: handle Failure
-                        System.out.println("=> " + mex.getFaultExplanation());
-                        fail();
-                        break;
-                    case COMPLETED_FAULT:
-                        // TODO: handle Failure
-                        System.out.println("=> " + mex.getFaultExplanation());
-                        fail();
-                        break;
-                    case FAILURE:
-                        // TODO: handle Faulure
-                        System.out.println("=> " + mex.getFaultExplanation());
-                        fail();
-                        break;
-                    default:
-                        fail();
-                        break;
-                }
+                        default:
+                            break;
+                    }
+
+                    break;
+                case COMPLETED_OK:
+                    if (!responsePattern.equals("COMPLETED_OK"))
+                        testResponsePattern(requestName, mexContext.getCurrentResponse(),
+                                responsePattern);
+                    break;
+                case FAULT:
+                    // TODO: handle Fault
+                    System.out.println("=> " + mex.getFault() + " " + mex.getFaultExplanation());
+                    fail();
+                    break;
+                case COMPLETED_FAILURE:
+                    // TODO: handle Failure
+                    System.out.println("=> " + mex.getFaultExplanation());
+                    fail();
+                    break;
+                case COMPLETED_FAULT:
+                    // TODO: handle Failure
+                    System.out.println("=> " + mex.getFaultExplanation());
+                    fail();
+                    break;
+                case FAILURE:
+                    // TODO: handle Faulure
+                    System.out.println("=> " + mex.getFaultExplanation());
+                    fail();
+                    break;
+                default:
+                    fail();
+                    break;
             }
-        }
     }
 
     protected static class Failure {
