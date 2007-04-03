@@ -40,6 +40,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -56,8 +57,11 @@ public abstract class BPELTestAbstract extends TestCase {
     protected TestScheduler scheduler;
     protected BpelDAOConnectionFactory _cf;
 
+    protected ArrayList<Failure> failures;
+
     @Override
     protected void setUp() throws Exception {
+        failures = new ArrayList<Failure>();
         server = new BpelServerImpl();
         mexContext = new MessageExchangeContextImpl();
 
@@ -114,6 +118,7 @@ public abstract class BPELTestAbstract extends TestCase {
         if ( em != null ) em.close();
         if ( emf != null ) emf.close();
         server.stop();
+        failures = null;
     }
 
     protected void negative(String deployDir) throws Throwable {
@@ -164,72 +169,125 @@ public abstract class BPELTestAbstract extends TestCase {
             testProps.load(testPropsFile.toURL().openStream());
             String responsePattern = testProps.getProperty("response1");
             bpelE.printStackTrace();
-            testResponsePattern(bpelE.getMessage(), responsePattern);
+            testResponsePattern("init", bpelE.getMessage(), responsePattern);
             return;
         } catch ( Exception e ) {
             e.printStackTrace();
             fail();
         }
         scheduler.commit();
+        
+        ArrayList<Thread> testThreads = new ArrayList<Thread>();
 
         while (testPropsFile.exists()) {
 
-            Properties testProps = new Properties();
+            final Properties testProps = new Properties();
             testProps.load(testPropsFile.toURL().openStream());
-
-            QName serviceId = new QName(testProps.getProperty("namespace"),
+            final QName serviceId = new QName(testProps.getProperty("namespace"),
                     testProps.getProperty("service"));
-            String operation = testProps.getProperty("operation");
+            final String operation = testProps.getProperty("operation");
 
-
-            /**
-             * Each property file must contain at least one request/response
-             * property tuple.
-             *
-             * The request/response tuple should be in the form
-             *
-             * requestN=<message>some XML input message</message>
-             * responseN=.*some response message.*
-             *
-             * Where N is a monotonic integer beginning with 1.
-             *
-             * If a specific MEP is expected in lieu of a response message use:
-             * responseN=ASYNC responseN=ONE_WAY responseN=COMPLETED_OK
-             *
-             */
-            for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
-                MyRoleMessageExchange mex = null;
-                Future running = null;
-                String responsePattern = null;
-                try {
-                    scheduler.begin();
-
-                    mex = server.getEngine().createMessageExchange(new GUID().toString(), serviceId, operation);
-
-                    String in = testProps.getProperty("request" + i);
-                    responsePattern = testProps.getProperty("response" + i);
-
-                    mexContext.clearCurrentResponse();
-
-                    Message request = mex.createMessage(null);
-
-                    Element elem = DOMUtils.stringToDOM(in);
-                    request.setMessage(elem);
-
-
-                    running = mex.invoke(request);
-                    scheduler.commit();
-                } catch ( Throwable e ) {
-                    e.printStackTrace();
-                    scheduler.rollback();
-                    throw e;
+            // Running tests in separate threads to allow concurrent invocation
+            // (otherwise the first receive/reply invocation is going to block
+            // everybody).
+            Thread testRun = new Thread(new Runnable() {
+                public void run() {
+                    doInvoke(testProps, serviceId, operation);
                 }
+            });
+            
+            testThreads.add(testRun);
+            testRun.start();
 
-                running.get(200000, TimeUnit.MILLISECONDS);
+            Thread.sleep(200);
+            propsFileCnt++;
+            testPropsFile = new File(deployDir + "/test" + propsFileCnt
+                    + ".properties");
+        }
+
+        // Waiting for all the test threads to finish.
+        for (Thread testThread : testThreads) {
+            testThread.join();
+        }
+
+        // Displaying result
+        for (Failure failure : failures) {
+            System.out.println("A test failure occured in message exchange request " + failure.requestName);
+            System.out.println("=> Expected Response Pattern >> " + failure.expected);
+            System.out.println("=> Actual Response >> " + failure.actual);            
+        }
+        assertTrue(failures.size() == 0);
+    }
+
+    private void testResponsePattern(String requestName, Message response, String responsePattern) {
+        String resp = (response == null) ? "null" : DOMUtils
+                .domToString(response.getMessage());
+        testResponsePattern(requestName, resp, responsePattern);
+    }
+
+    private void testResponsePattern(String requestName, String resp, String responsePattern) {
+        boolean testValue = Pattern.compile(responsePattern, Pattern.DOTALL)
+                .matcher(resp).matches();
+        if (!testValue) {
+            failures.add(new Failure(requestName, resp, responsePattern));
+        }
+    }
+
+    /**
+     * Each property file must contain at least one request/response
+     * property tuple.
+     *
+     * The request/response tuple should be in the form
+     *
+     * requestN=<message>some XML input message</message>
+     * responseN=.*some response message.*
+     *
+     * Where N is a monotonic integer beginning with 1.
+     *
+     * If a specific MEP is expected in lieu of a response message use:
+     * responseN=ASYNC responseN=ONE_WAY responseN=COMPLETED_OK
+     *
+     */
+    private void doInvoke(Properties testProps, QName serviceId, String operation) {
+        for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
+            MyRoleMessageExchange mex = null;
+            Future running = null;
+            String responsePattern = null;
+            try {
+                scheduler.begin();
+
+                mex = server.getEngine().createMessageExchange(new GUID().toString(), serviceId, operation);
+
+                String in = testProps.getProperty("request" + i);
+                responsePattern = testProps.getProperty("response" + i);
+
+                mexContext.clearCurrentResponse();
+
+                Message request = mex.createMessage(null);
+
+                Element elem = DOMUtils.stringToDOM(in);
+                request.setMessage(elem);
+
+
+                running = mex.invoke(request);
+                scheduler.commit();
+            } catch ( Throwable e ) {
+                e.printStackTrace();
+                scheduler.rollback();
+                fail();
+            }
+
+            if (!responsePattern.equals("ASYNC")) {
+                try {
+                    running.get(200000, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    System.out.println("TIMEOUT!");
+                    fail();
+                }
 
                 switch (mex.getStatus()) {
                     case RESPONSE:
-                        testResponsePattern(mex.getResponse(), responsePattern);
+                        testResponsePattern("request" + i, mex.getResponse(), responsePattern);
                         // TODO: test for response fault
                         break;
                     case ASYNC:
@@ -240,7 +298,7 @@ public abstract class BPELTestAbstract extends TestCase {
                                     fail();
                                 break;
                             case REQUEST_RESPONSE:
-                                testResponsePattern(mexContext.getCurrentResponse(),
+                                testResponsePattern("request" + i, mexContext.getCurrentResponse(),
                                         responsePattern);
                             default:
                                 break;
@@ -249,12 +307,12 @@ public abstract class BPELTestAbstract extends TestCase {
                         break;
                     case COMPLETED_OK:
                         if (!responsePattern.equals("COMPLETED_OK"))
-                            testResponsePattern(mexContext.getCurrentResponse(),
+                            testResponsePattern("request" + i, mexContext.getCurrentResponse(),
                                     responsePattern);
                         break;
                     case FAULT:
                         // TODO: handle Fault
-                        System.out.println("=> " + mex.getFaultExplanation());
+                        System.out.println("=> " + mex.getFault() + " " + mex.getFaultExplanation());
                         fail();
                         break;
                     case COMPLETED_FAILURE:
@@ -277,28 +335,19 @@ public abstract class BPELTestAbstract extends TestCase {
                         break;
                 }
             }
-            propsFileCnt++;
-            testPropsFile = new File(deployDir + "/test" + propsFileCnt
-                    + ".properties");
         }
     }
 
-    private void testResponsePattern(Message response, String responsePattern) {
-        String resp = (response == null) ? "null" : DOMUtils
-                .domToString(response.getMessage());
-        testResponsePattern(resp, responsePattern);
-    }
+    protected static class Failure {
+        String requestName;
+        String expected;
+        String actual;
 
-    private void testResponsePattern(String resp, String responsePattern) {
-        boolean testValue = Pattern.compile(responsePattern, Pattern.DOTALL)
-                .matcher(resp).matches();
-
-        if (!testValue) {
-            System.out.println("=> Expected Response Pattern >> "
-                    + responsePattern);
-            System.out.println("=> Acutal Response >> " + resp);
+        public Failure(String requestName, String actual, String expected) {
+            this.actual = actual;
+            this.expected = expected;
+            this.requestName = requestName;
         }
-        assertTrue(testValue);
     }
 
 }

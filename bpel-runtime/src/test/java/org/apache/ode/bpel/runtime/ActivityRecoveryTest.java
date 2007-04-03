@@ -18,29 +18,15 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-
-import javax.xml.namespace.QName;
-
-import org.jmock.*;
-import org.jmock.core.*;
-import org.jmock.core.matcher.StatelessInvocationMatcher;
-import org.jmock.core.stub.CustomStub;
-import org.jmock.core.stub.StubSequence;
-
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
-import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
-import org.apache.ode.bpel.pmapi.TFaultInfo;
 import org.apache.ode.bpel.pmapi.TFailureInfo;
 import org.apache.ode.bpel.pmapi.TFailuresInfo;
 import org.apache.ode.bpel.pmapi.TInstanceInfo;
@@ -49,8 +35,20 @@ import org.apache.ode.bpel.pmapi.TInstanceStatus;
 import org.apache.ode.bpel.pmapi.TInstanceSummary;
 import org.apache.ode.bpel.pmapi.TScopeInfo;
 import org.apache.ode.bpel.pmapi.TScopeRef;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.utils.DOMUtils;
+import org.jmock.Mock;
+import org.jmock.MockObjectTestCase;
+import org.jmock.core.Invocation;
+import org.jmock.core.InvocationMatcher;
+import org.jmock.core.Stub;
+import org.jmock.core.matcher.StatelessInvocationMatcher;
+import org.jmock.core.stub.CustomStub;
+import org.jmock.core.stub.StubSequence;
+
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * Test activity recovery and failure handling.
