@@ -49,8 +49,7 @@ public class InterceptorContextImpl implements InterceptorContext{
     }
 
     public ProcessConf getProcessConf() {
-        // TODO Auto-generated method stub
-        return null;
+        return _pconf;
     }
 
 }
