@@ -20,24 +20,6 @@
 package org.apache.ode.axis2.service;
 
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
@@ -61,6 +43,23 @@ import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.utils.fs.FileUtils;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -127,7 +126,7 @@ public class DeploymentWebService {
                         // it to hold on for a while.
                         _poller.hold();
 
-                        File dest = new File(_deployPath, namePart.getText() + "-" + (_store.getCurrentVersion() + 1));
+                        File dest = new File(_deployPath, namePart.getText() + "-" + _store.getCurrentVersion());
                         dest.mkdir();
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
