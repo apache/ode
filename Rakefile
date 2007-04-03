@@ -16,11 +16,13 @@ BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0
 COMMONS             = OpenStruct.new(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.1",
+  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.1",
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.0",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
   :lang             =>"commons-lang:commons-lang:jar:2.1",
   :logging          =>"commons-logging:commons-logging:jar:1.0.3",
-  :pool             =>"commons-pool:commons-pool:jar:1.2"
+  :pool             =>"commons-pool:commons-pool:jar:1.2",
+  :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
 DERBY               = "org.apache.derby:derby:jar:10.1.2.1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.1.2.1"
@@ -30,7 +32,9 @@ GERONIMO            = OpenStruct.new(
   :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
   :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
 )
-HIBERNATE           = "org.hibernate:hibernate:jar:3.1.2"
+HIBERNATE           = [ "org.hibernate:hibernate:jar:3.1.2", "asm:asm:jar:1.5.3",
+                        "antlr:antlr:jar:2.7.6rc1", "cglib:cglib:jar:2.1_3", "ehcache:ehcache:jar:1.1" ]
+HOWL_LOGGER         = "howl:howl-logger:jar:0.1.11"
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = OpenStruct.new(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -53,7 +57,8 @@ OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAP
                        "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
-TRANQL              = "tranql:tranql-connector:jar:1.1"
+TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
+"regexp:regexp:jar:1.3"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
@@ -422,8 +427,20 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       project("ode:utils"),
       COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
-    libs = [ package(:jar) ] # Insert more stuff here
+    package(:jar)
     package(:jbi).tap do |jbi|
+      libs = artifacts(package(:jar), project("ode:bpel-api"), project("ode:bpel-api-jca"),
+        project("ode:bpel-compiler"), project("ode:bpel-connector"), project("ode:bpel-dao"),
+        project("ode:bpel-epr"), project("ode:jca-ra"), project("ode:jca-server"),
+        project("ode:bpel-obj"), project("ode:bpel-ql"), project("ode:bpel-runtime"),
+        project("ode:bpel-scheduler-quartz"), project("ode:bpel-schemas"), project("ode:bpel-store"),
+        project("ode:dao-hibernate"), project("ode:dao-jpa"), project("ode:jacob"), project("ode:jacob-ap"),
+        project("ode:utils"),
+        ANT, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+        COMMONS.primitives, DOM4J, HIBERNATE, HSQLDB, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
+        JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, QUARTZ, SAXON, TRANQL,
+        XALAN, XMLBEANS, XSTREAM, WSDL4J)
+
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
       jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :delegation=>:self, :libs=>libs
       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
@@ -526,3 +543,10 @@ def jbi_descriptor(args)
     end
   end
 end
+
+
+
+
+
+
+
