@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ode.bpel.common.ProcessFilter;
-
 /**
  * Testing BpelDAOConnectionImpl.listAllProcesses. We're just producing a lot
  * of different filter combinations and test if they execute ok. To really
