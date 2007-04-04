@@ -18,7 +18,7 @@
  */
 package org.apache.ode.utils;
 
-import common.TestResources;
+import org.apache.ode.utils.TestResources;
 
 import java.io.InputStream;
 
