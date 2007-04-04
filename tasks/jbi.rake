@@ -53,7 +53,10 @@ module Buildr
     def create(zip)
       zip.mkdir "META-INF"
       zip.file.open("META-INF/jbi.xml", "w") { |output| output.write descriptor }
-      path("lib").include component.libs.flatten, bootstrap.libs.flatten
+      (component.libs + bootstrap.libs).flatten.uniq.tap do |libs|
+        libs.each { |lib| lib.invoke if lib.respond_to?(:invoke) }
+        path("lib").include *libs
+      end
       super zip
     end
 

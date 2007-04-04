@@ -84,6 +84,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   compile.options.source = "1.5"
   compile.options.target = "1.5"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
+  meta_inf.concat ["DISCLAIMER", "LICENSE", "NOTICE"].map { |f| path_to(f) }
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
@@ -374,25 +375,38 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Axis2 Based Distribution"
   define "distro-axis2" do
-    resources(
-      filter(["RELEASE_NOTES", "README", "LICENSE", "NOTICE", "DISCLAIMER"].map { |f| path_to("..", f) }).into(path_to(:target_dir, "stage")),
-      filter(path_to(:src_dir, "examples")).into(path_to(:target_dir, "stage"))
-    )
-
-    returning(package(:zip, path_to(:target_dir, "apache-ode-#{VERSION_NUMBER}-incubating-war.zip"))) do |zip|
+    package(:zip, path_to(:target_dir, "apache-ode-#{VERSION_NUMBER}-incubating-war.zip")).tap do |zip|
+      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| parent.path_to(f) }
+      zip.path("examples").include FileList[path_to(:src_dir, "examples", "**")]
       zip.include path_to(:target_dir, "stage/*")
+      zip.merge project("ode:tools-bin").package(:zip)
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
         COMMONS.pool, COMMONS.collections, JAXEN,
         SAXON, LOG4J, WSDL4J)
-      zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
-      zip.merge project("ode:tools-bin").package(:zip)
       projects("ode:utils", "ode:tools", "ode:bpel-compiler",
                "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
-      #[ "ode:utils", "ode:tools", "ode:bpel-compiler",
-      #  "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas" ].
         map(&:packages).flatten.each do |pkg|
         zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
       end
+      zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
+    end
+  end
+
+  desc "ODE JBI Based Distribution"
+  define "distro-jbi" do
+    package(:zip).tap do |zip|
+      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| parent.path_to(f) }
+      zip.path("examples").include FileList[path_to(:src_dir, "examples", "**")]
+      zip.merge project("ode:tools-bin").package(:zip)
+      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+        COMMONS.pool, COMMONS.collections, JAXEN,
+        SAXON, LOG4J, WSDL4J)
+      projects("ode:utils", "ode:tools", "ode:bpel-compiler",
+               "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
+        map(&:packages).flatten.each do |pkg|
+        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+      end
+      zip.path("jbi-component").include project("ode:jbi").package(:zip)
     end
   end
 
@@ -517,36 +531,3 @@ end
 # Lazy ass aliasing
 task("jetty:bounce" => ["ode:axis2-war:jetty:bounce"])
 task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
-
-
-
-def jbi_descriptor(args)
-  delegation = lambda { |key| "#{key || :parent}-first" }
-  xml = Builder::XmlMarkup.new(:target=>$stdout, :indent=>2)
-  xml.instruct!
-  xml.jbi :xmlns=>"http://java.sun.com/xml/ns/jbi", :version=>"1.0" do
-    xml.component :type=>args[:type].to_s.sub("_", "-"),
-      "component-class-loader-delegation"=>delegation[args[:component][:delegation]],
-      "bootstrap-class-loader-delegation"=>delegation[args[:bootstrap][:delegation]] do
-      xml.identification do
-        xml.name args[:name]
-        xml.description args[:description]
-      end
-      xml.tag! "component-class-name", args[:component][:class]
-      xml.tag! "component-class-path" do
-        args[:component][:path].each { |path| xml.tag! "path-element", path }
-      end
-      xml.tag! "bootstrap-class-name", args[:bootstrap][:class]
-      xml.tag! "bootstrap-class-path" do
-        args[:bootstrap][:path].each { |path| xml.tag! "path-element", path }
-      end
-    end
-  end
-end
-
-
-
-
-
-
-
