@@ -18,7 +18,7 @@
  */
 package org.apache.ode.utils.xsd;
 
-import common.TestResources;
+import org.apache.ode.utils.TestResources;
 
 import java.net.URI;
 import java.util.Map;
