@@ -20,6 +20,7 @@ package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.iapi.Scheduler;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -32,8 +33,14 @@ import java.util.Properties;
 public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     private static final Map<QName, ProcessDaoImpl> __StateStore = new HashMap<QName, ProcessDaoImpl>();
 
+    private Scheduler _scheduler;
+
+    public BpelDAOConnectionFactoryImpl(Scheduler sched) {
+        _scheduler = sched;
+    }
+
     public BpelDAOConnection getConnection() {
-        return new BpelDAOConnectionImpl(__StateStore);
+        return new BpelDAOConnectionImpl(__StateStore, _scheduler);
     }
 
     /**

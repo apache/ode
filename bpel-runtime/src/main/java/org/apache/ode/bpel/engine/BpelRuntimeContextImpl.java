@@ -138,7 +138,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("BpelRuntimeContextImpl created. INDEXED STATE=" + soup.getIndex());
+            __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + soup.getIndex());
         }
     }
 
@@ -827,6 +827,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 throw new RuntimeException(ex);
             }
             _dao.setExecutionState(bos.toByteArray());
+            __log.debug("Setting execution state on instance " + _iid);
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
                 // Max time exceeded (possibly an infinite loop).

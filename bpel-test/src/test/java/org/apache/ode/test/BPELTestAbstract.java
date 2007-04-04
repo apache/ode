@@ -91,11 +91,11 @@ public abstract class BPELTestAbstract extends TestCase {
 
             };
         } else {
-            _cf = new BpelDAOConnectionFactoryImpl();
-            server.setDaoConnectionFactory(_cf);
             scheduler = new TestScheduler();
+            _cf = new BpelDAOConnectionFactoryImpl(scheduler);
+            server.setDaoConnectionFactory(_cf);
         }
-        server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl());
+        server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(scheduler));
         server.setScheduler(scheduler);
         server.setBindingContext(new BindingContextImpl());
         server.setMessageExchangeContext(mexContext);
@@ -234,7 +234,7 @@ public abstract class BPELTestAbstract extends TestCase {
                 if (testRun != null) {
                     testThreads.add(testRun);
                     testRun.start();
-                    Thread.sleep(100);
+//                    Thread.sleep(100);
                 }
 
             }
