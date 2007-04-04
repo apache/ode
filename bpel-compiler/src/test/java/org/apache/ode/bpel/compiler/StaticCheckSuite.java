@@ -28,7 +28,7 @@ public class StaticCheckSuite extends TestSuite {
 
   public static Test suite() throws Exception {
     TestSuite suite = new StaticCheckSuite();
-    suite.addTest(new StaticCheckTCase("BpelParseErr"));
+    suite.addTest(new StaticCheckTCase("NoRootActivity"));
     suite.addTest(new StaticCheckTCase("PortTypeMismatch"));
     suite.addTest(new StaticCheckTCase("UndeclaredPropertyAlias"));
     suite.addTest(new StaticCheckTCase("UnknownBpelFunction"));
