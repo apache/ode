@@ -18,14 +18,19 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import junit.framework.TestCase;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
 import org.apache.ode.utils.xsd.SchemaModel;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
-import java.net.URL;
+
+import junit.framework.TestCase;
 
 public class WSDLRegistryTest extends TestCase {
 
@@ -64,9 +69,10 @@ public class WSDLRegistryTest extends TestCase {
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
     WSDLReader reader = factory.newWSDLReader();
-    ResourceFinder finder = new DefaultResourceFinder();
-    //Definition4BPEL def = finder.loadDefinition(reader, null, wsd.toURI());
-    //_registry.addDefinition(def);
+    ResourceFinder finder = new DefaultResourceFinder(new File(wsd.getPath()).getParentFile());
+    WSDLLocatorImpl loc = new WSDLLocatorImpl(finder,wsd.toURI());
+    Definition4BPEL wsdl = (Definition4BPEL) reader.readWSDL(loc);
+    _registry.addDefinition(wsdl, finder, wsd.toURI());
 
     // access model
     SchemaModel m = _registry.getSchemaModel();
