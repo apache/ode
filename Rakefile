@@ -85,7 +85,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   compile.options.source = "1.5"
   compile.options.target = "1.5"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
-  meta_inf.concat ["DISCLAIMER", "LICENSE", "NOTICE"].map { |f| path_to(f) }
+  meta_inf << file("DISCLAIMER") << file("NOTICE")
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
