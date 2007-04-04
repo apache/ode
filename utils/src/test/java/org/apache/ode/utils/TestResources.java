@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package common;
+package org.apache.ode.utils;
 
 import org.apache.ode.utils.SchemaBucket;
 
