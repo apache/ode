@@ -38,20 +38,19 @@
 
 package org.apache.ode.test;
 
-import java.io.IOException;
-
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
+import java.io.IOException;
 
 /**
  * This is a simple MessageExchangeContext implementation
@@ -160,12 +159,12 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		responseMsg.setMessage(response);
 		
 		if ( ind1.equals("yes")){
-			prmx.replyWithFault(new QName(null,"FaultMessage1"), faultMsg);
+			prmx.replyWithFault(new QName(FAULT_NS,"FaultMessage1"), faultMsg);
 		} else {
 			if ( ind2.equals("yes")){
-				prmx.replyWithFault(new QName(null,"FaultMessage2"), faultMsg);
+				prmx.replyWithFault(new QName(FAULT_NS,"FaultMessage2"), faultMsg);
 			} else {
-				prmx.replyWithFault(new QName(null,"UnKnownFault"), faultMsg);
+				prmx.replyWithFault(new QName(FAULT_NS,"UnKnownFault"), faultMsg);
 			}
 		}
 
