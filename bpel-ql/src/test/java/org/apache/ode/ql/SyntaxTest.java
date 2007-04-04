@@ -29,7 +29,7 @@ import org.apache.ode.ql.tree.BuilderFactory;
 
 public class SyntaxTest extends TestCase {
 
-  private final static String TESTS_DIR = "./test/test-cases";
+  private final static String TESTS_DIR = "target/test-classes";
   
   private File[] casesFiles = new File(TESTS_DIR).listFiles();
   
@@ -45,7 +45,9 @@ public class SyntaxTest extends TestCase {
   
   public void test() throws Exception {
       for(File caseFile : casesFiles) {
+      if (caseFile.isFile()) {
         doTestCaseFile(caseFile);
+        }
       }
   }
   
