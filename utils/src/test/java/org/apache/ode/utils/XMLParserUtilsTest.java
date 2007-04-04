@@ -18,7 +18,7 @@
  */
 package org.apache.ode.utils;
 
-import common.TestResources;
+import org.apache.ode.utils.TestResources;
 import junit.framework.TestCase;
 import org.apache.ode.utils.sax.FailOnErrorErrorHandler;
 import org.apache.xerces.parsers.DOMParser;
