@@ -1,6 +1,8 @@
 module Buildr
   class JBITask < ZipTask
 
+    attr_accessor :jbi_xml
+
     class Component
       attr_accessor :name
       attr_accessor :type
@@ -48,15 +50,25 @@ module Buildr
       @bootstrap
     end
 
+    def prerequisites()
+      super + (component.libs + bootstrap.libs).flatten.uniq
+    end
+
   protected
 
     def create(zip)
       zip.mkdir "META-INF"
-      zip.file.open("META-INF/jbi.xml", "w") { |output| output.write descriptor }
-      (component.libs + bootstrap.libs).flatten.uniq.tap do |libs|
-        libs.each { |lib| lib.invoke if lib.respond_to?(:invoke) }
-        path("lib").include *libs
+      zip.file.open("META-INF/jbi.xml", "w") do |file|
+        case jbi_xml
+        when String
+          file.write File.read(jbi_xml)
+        when nil, true
+          file.write descriptor
+        when Proc, Method
+          file.write jbi_xml.call
+        end
       end
+      path("lib").include((component.libs + bootstrap.libs).flatten.uniq)
       super zip
     end
 
@@ -92,9 +104,9 @@ module Buildr
       args[:type] = :zip
       file_name = args[:file] || path_to(:target_dir, Artifact.hash_to_file_name(args))
       unless Rake::Task.task_defined?(file_name)
-        JBITask.define_task(file_name).tap { |task| package_extend task, args }
+        JBITask.define_task(file_name).tap { |jbi| package_extend jbi, args }
       end
-      file(file_name).tap { |task| task.include args[:include] if args[:include] }
+      file(file_name).tap { |jbi| jbi.include args[:include] if args[:include] }
     end
   end
 end
