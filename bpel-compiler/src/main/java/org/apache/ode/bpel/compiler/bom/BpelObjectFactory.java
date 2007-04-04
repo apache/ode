@@ -232,7 +232,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.PLINKTYPE, PartnerLinkType.class);
         _mappings.put(Bpel11QNames.PLINKROLE, PartnerLinkType.Role11.class);
         _mappings.put(Bpel11QNames.PORTTYPE, PartnerLinkType.Role11.PortType11.class);
-        _mappings.put(Bpel11QNames.PROPALIAS, PropertyAlias.class);
+        _mappings.put(Bpel11QNames.PROPALIAS, PropertyAlias11.class);
         _mappings.put(Bpel11QNames.PROPERTY,  Property.class);
         _mappings.put(Bpel11QNames.VARIABLES, Variables.class);
         _mappings.put(Bpel11QNames.VARIABLE, Variable.class);
