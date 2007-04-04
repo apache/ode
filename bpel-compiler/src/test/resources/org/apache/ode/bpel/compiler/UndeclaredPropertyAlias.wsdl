@@ -38,7 +38,7 @@
             <wsdl:output message="tns:TestMessage" name="TestOut"/>
         </wsdl:operation>    
     </wsdl:portType> 
-   <bpws:property name="testProp"
+    <bpws:property name="testProp"
                    type="xsd:string"/>
    
     
