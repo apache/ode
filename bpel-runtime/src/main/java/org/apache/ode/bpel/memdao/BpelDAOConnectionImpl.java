@@ -30,6 +30,7 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
@@ -53,19 +54,16 @@ import java.util.concurrent.atomic.AtomicLong;
 class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
+    private Scheduler _scheduler;
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
 
-
-    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store) {
+    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, Scheduler scheduler) {
         _store = store;
+        _scheduler = scheduler;
     }
-
-//    private synchronized String getId() {
-//        return Long.toString(counter++);
-//    }
 
     public ProcessDAO getProcess(QName processId) {
         return _store.get(processId);
@@ -300,5 +298,15 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         MessageExchangeDAO mex = _mexStore.remove(mexId);
         if (mex == null)
             __log.warn("Couldn't find mex " + mexId + " for cleanup.");
+    }
+
+    public void differ(final Runnable runnable) {
+        _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+            }
+            public void beforeCompletion() {
+                runnable.run();
+            }
+        });
     }
 }

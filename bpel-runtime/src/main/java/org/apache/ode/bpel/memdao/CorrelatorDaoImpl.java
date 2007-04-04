@@ -43,11 +43,13 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
     private String _correlatorId;
     private List<MsgQueueEntry> _messages;
     private List<MessageRouteDaoImpl> _routes;
+    private BpelDAOConnectionImpl _conn;
 
-    CorrelatorDaoImpl(String correlatorId) {
+    CorrelatorDaoImpl(String correlatorId, BpelDAOConnectionImpl conn) {
         _messages = new ArrayList<MsgQueueEntry>();
         _routes = new ArrayList<MessageRouteDaoImpl>();
         _correlatorId = correlatorId;
+        _conn = conn;
     }
 
     public MessageExchangeDAO dequeueMessage(CorrelationKey key) {
@@ -103,8 +105,12 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
             __log.debug("addRoute: target=" + target + " correlationKey=" + key);
         }
 
-        MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx);
-        _routes.add(mr);
+        final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx);
+        _conn.differ(new Runnable() {
+            public void run() {
+                _routes.add(mr);
+            }
+        });
     }
 
 

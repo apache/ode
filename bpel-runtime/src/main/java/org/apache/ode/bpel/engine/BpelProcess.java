@@ -472,7 +472,7 @@ public class BpelProcess {
         if (enabled) {
             ProcessInstanceDAO instanceDao = getProcessDAO().getInstance(event.getProcessInstanceId());
             if (instanceDao != null) saveEvent(event, instanceDao);
-            else __log.warn("Couldn't find instance to save event, no event generated!");
+            else __log.debug("Couldn't find instance to save event, no event generated!");
         }
     }
 
