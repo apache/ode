@@ -35,6 +35,7 @@ import org.apache.ode.bpel.compiler.bom.CompensationHandler;
 import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.Expression11;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -492,8 +493,9 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public OExpression compileExpr(String expr, NSContext nc) {
-        throw new UnsupportedOperationException("todo");
-        // TODO fix this for BPEL11
+        // Does this really work?
+        BpelObject cur = _structureStack.topSource();
+        return compileExpr(new Expression11(cur.getElement(),cur.getElement().getOwnerDocument().createTextNode(expr)),false,false);
     }
 
     private OExpression compileExpr(Expression expression, boolean isJoinCondition, boolean isLValue) {
@@ -988,7 +990,7 @@ abstract class BpelCompiler implements CompilerContext {
 
     public void compile(OActivity context, BpelObject source, Runnable run) {
         DefaultActivityGenerator.defaultExtensibilityElements(context, source);
-        _structureStack.push(context);
+        _structureStack.push(context,source);
         try {
             run.run();
         } finally {
@@ -1571,9 +1573,15 @@ abstract class BpelCompiler implements CompilerContext {
 
     private static class StructureStack {
         private Stack<OActivity> _stack = new Stack<OActivity>();
-
-        public void push(OActivity act) {
+        private Map<OActivity,BpelObject> _srcMap = new HashMap<OActivity,BpelObject>();
+        
+        public void push(OActivity act, BpelObject src) {
             _stack.push(act);
+            _srcMap.put(act,src);
+        }
+
+        public BpelObject topSource() {
+            return _srcMap.get(topActivity());
         }
 
         public OScope topScope() {

@@ -41,7 +41,9 @@ import org.apache.ode.utils.NSContext;
 
 
 /**
- * Interface providing access to the compiler .
+ * Interface providing access to the compiler.
+ * 
+ * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public interface CompilerContext {
 
@@ -56,7 +58,15 @@ public interface CompilerContext {
     OLValueExpression compileLValueExpr(Expression expr)
             throws CompilationException;
 
-    OExpression compileExpr(String locationstr, NSContext nsContext);
+    /**
+     * BPEL 1.1 legacy. 
+     * @param locationstr
+     * @param nsContext
+     * @return
+     * @throws CompilationException
+     */
+    OExpression compileExpr(String locationstr, NSContext nsContext)
+            throws CompilationException;
 
     OXslSheet compileXslt(String docStrUri)
             throws CompilationException;
