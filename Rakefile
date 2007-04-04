@@ -57,6 +57,7 @@ OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAP
                        "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
+SERVICEMIX          = group("servicemix-core", "servicemix-shared", :under=>"org.apache.servicemix", :version=>"3.1-incubating")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 "regexp:regexp:jar:1.3"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
@@ -237,7 +238,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
     compile do |task|
-      Java::OpenJPA.enhance(:output=>compile.target, :classpath=>compile.classpath,
+      Java::OpenJPA.enhance(:output=>compile.target, :classpath=>[compile.classpath, path_to(:java_target_dir)],
         :properties=>path_to(:resources_dir, "META-INF/persistence.xml"))
     end
 
@@ -310,7 +311,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       OPENJPA, XERCES
 
     compile do |task|
-      Java::OpenJPA.enhance :output=>compile.target, :classpath=>compile.classpath,
+      Java::OpenJPA.enhance :output=>compile.target, :classpath=>[compile.classpath, path_to(:java_target_dir)],
         :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
     end
     package :jar
@@ -410,6 +411,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       jbi.merge project("ode:dao-hibernate-db").package(:zip)
       jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
     end
+    tests.compile.with SERVICEMIX
   end
 
   desc "ODE JCA Resource Archive"
