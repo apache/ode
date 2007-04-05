@@ -11,6 +11,7 @@ module Buildr
                                 "xdoclet:xdoclet:jar:1.2.3", "xdoclet:xjavadoc:jar:1.1-j5" ]
 
       class << self
+        include Ant
 
         def xdoclet(options)
           ant("hibernatedoclet") do |ant|
