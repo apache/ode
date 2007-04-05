@@ -58,6 +58,7 @@ OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAP
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services", :under=>"org.apache.servicemix", :version=>"3.1-incubating")
+SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx", :under=>"org.springframework", :version=>"2.0.1")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 "regexp:regexp:jar:1.3"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
@@ -70,6 +71,7 @@ WS_COMMONS          = OpenStruct.new(
   :neethi           =>"org.apache.ws.commons.neethi:neethi:jar:2.0",
   :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.2"
 )
+XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring", :under=>"org.apache.xbean", :version=>"2.8")
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 
@@ -389,8 +391,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       jbi.merge project("ode:dao-hibernate-db").package(:zip)
       jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
     end
+
     tests.compile.with SERVICEMIX, GERONIMO.kernel, GERONIMO.transaction, 
-      JAVAX.transaction, JAVAX.connector, JBI, BACKPORT
+      JAVAX.transaction, JAVAX.connector, JBI
+    tests.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(:target_dir, "smixInstallDir/install/ODE"))
+    tests.run.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra", "ode:jca-server",
+      "ode:jacob"), 
+      BACKPORT, SPRING, XBEAN, GERONIMO.connector, 
+      DERBY, TRANQL, OPENJPA, JAVAX.persistence, JAVAX.ejb, JAVAX.stream, COMMONS.lang, COMMONS.collections, 
+      JAXEN, SAXON, QUARTZ, XALAN, XMLBEANS, XSTREAM
   end
 
   desc "ODE JCA Resource Archive"
