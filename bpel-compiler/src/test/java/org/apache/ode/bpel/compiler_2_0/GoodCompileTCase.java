@@ -24,6 +24,8 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -37,6 +39,7 @@ import org.apache.ode.utils.StreamUtils;
  */
 class GoodCompileTCase extends TestCase implements CompileListener {
 
+    protected final Log __log = LogFactory.getLog(getClass());
     private BpelC _compiler;
     private ArrayList<CompilationMessage> _errors = new ArrayList<CompilationMessage>();
     private File  _bpel;
@@ -65,7 +68,7 @@ class GoodCompileTCase extends TestCase implements CompileListener {
 
     public void onCompilationMessage(CompilationMessage compilationMessage) {
         _errors.add(compilationMessage);
-        System.err.println(compilationMessage.toString());
+        __log.debug(compilationMessage.toString());
     }
 
 }
