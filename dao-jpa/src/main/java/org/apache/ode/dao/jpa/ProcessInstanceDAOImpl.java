@@ -106,9 +106,10 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 			String reason, Date dateTime, Element data, String[] actions,
 			int retries) {
 
-		ActivityRecoveryDAO ar = new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries);
+		ActivityRecoveryDAOImpl ar = new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries);
 		_recoveries.add(ar);
-		_lastRecovery = dateTime;
+        ar.setInstance(this);
+        _lastRecovery = dateTime;
 	}
 
 	public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {

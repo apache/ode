@@ -58,7 +58,7 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
     // _instances is unused because this is a one-way relationship at the database level
     @SuppressWarnings("unused")
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE_ID")
-    private ProcessDAOImpl _instance;
+    private ProcessInstanceDAOImpl _instance;
 
 	
     public ActivityRecoveryDAOImpl() {}
@@ -77,8 +77,7 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
             alist += " " + actions[i];
 		_actions = alist;
 		
-		_retries = retries;
-		
+		_retries = retries;		
 	}
 	
 	public String getActions() {
@@ -121,4 +120,11 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 		return _retries;
 	}
 
+    public ProcessInstanceDAOImpl getInstance() {
+        return _instance;
+    }
+
+    public void setInstance(ProcessInstanceDAOImpl instance) {
+        _instance = instance;
+    }
 }

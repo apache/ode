@@ -18,24 +18,20 @@
  */
 package org.apache.ode.jbi;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-
-import javax.jbi.messaging.ExchangeStatus;
-import javax.jbi.messaging.InOut;
-import javax.xml.namespace.QName;
-import javax.xml.transform.stream.StreamSource;
-
+import junit.framework.TestCase;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.servicemix.client.DefaultServiceMixClient;
 import org.apache.servicemix.jbi.container.ActivationSpec;
 import org.apache.servicemix.jbi.container.JBIContainer;
-import org.xml.sax.InputSource;
 
-import junit.framework.TestCase;
+import javax.jbi.messaging.ExchangeStatus;
+import javax.jbi.messaging.InOut;
+import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 
-public class TestOdeJbiComponentLifeCycle extends TestCase {
+public class OdeJbiComponentLifeCycleTest extends TestCase {
 
     JBIContainer container;
     File rootDir, installDir, odeDir;
