@@ -32,64 +32,69 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.hsqldb.jdbc.jdbcDataSource;
 import org.xml.sax.SAXException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 
 public class InsertObjectTest extends TestCase {
 	
-	private EntityManager em;
 	private static final String TEST_NS = "http://org.apache.ode.jpa.test";
 	private static final String CORRELATOR_ID1 = "testCorrelator1";
 	private static final String CORRELATOR_ID2 = "testCorrelator2";
 	private static final Calendar cal = new GregorianCalendar();
 
-	
-	
-	@Override
+    TransactionManager _txm;
+    DataSource _ds;
+    BPELDAOConnectionFactoryImpl factory;
+
+    @Override
 	protected void setUp() throws Exception {
-		
-		try {
-			EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-unit-test");
-			em = emf.createEntityManager();
-		
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			fail();
-		}
-		
-		
-	}
+        jdbcDataSource hsqlds = new jdbcDataSource();
+        hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+        hsqlds.setUser("sa");
+        hsqlds.setPassword("");
+        _ds = hsqlds;
+
+        _txm = new EmbeddedGeronimoFactory().getTransactionManager();
+
+        factory = new BPELDAOConnectionFactoryImpl();
+        factory.setDataSource(_ds);
+        factory.setTransactionManager(_txm);
+        Properties props = new Properties();
+        props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
+        factory.init(props);
+
+        _txm.begin();
+    }
 	
 	public void testStart() throws Exception {
+        createStuff(factory);
+    }
 
-		em.getTransaction().begin();
-		
-		BPELDAOConnectionFactoryImpl factory = new BPELDAOConnectionFactoryImpl(em);
-		BpelDAOConnection conn = factory.getConnection();
-		
-		ProcessDAO p1 = createProcess(conn,"testPID1","testType");
+    void createStuff(BPELDAOConnectionFactoryImpl factory) throws Exception {
+        BpelDAOConnection conn = factory.getConnection();
+
+        ProcessDAO p1 = createProcess(conn,"testPID1","testType");
 		ProcessInstanceDAO pi1 = createProcessInstance(p1, CORRELATOR_ID1);
-		
-		
-		em.persist(conn);
-				
-		//em.flush();
-		em.getTransaction().commit();
-		
-	}
+    }
 
-	@Override
+    @Override
 	protected void tearDown() throws Exception {
-		em.close();
-	}
+        _txm.commit();
+		_ds = null;
+        _txm = null;
+    }
 	
 	private MessageExchangeDAO createMessageExchange(ProcessDAO p, ProcessInstanceDAO pi, PartnerLinkDAO pl ) throws SAXException, IOException {
 		MessageExchangeDAO me = pi.getConnection().createMessageExchange('0');
@@ -99,7 +104,7 @@ public class InsertObjectTest extends TestCase {
 		me.setCorrelationId("testCorrelationId");
 		me.setCorrelationStatus("testCorrelationStatus");
 		me.setEPR(DOMUtils.stringToDOM("<testEPR>EPR</testEPR>"));
-		me.setFault("testFault");
+		me.setFault(new QName("testFault"));
 		me.setFaultExplanation("testFaultExplanation");
 		me.setInstance(pi);
 		me.setOperation("testOperation");
@@ -128,12 +133,9 @@ public class InsertObjectTest extends TestCase {
 	
 	private ProcessDAO createProcess(BpelDAOConnection conn, String pid, String type) {
 		ProcessDAO p = null;
-		
-		p = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1");
+		p = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1",1);
 		p.addCorrelator(CORRELATOR_ID1);
 		p.addCorrelator(CORRELATOR_ID2);
-		
-		
 		return p;
 	}
 	
