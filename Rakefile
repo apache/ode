@@ -57,7 +57,7 @@ OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAP
                        "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
-SERVICEMIX          = group("servicemix-core", "servicemix-shared", :under=>"org.apache.servicemix", :version=>"3.1-incubating")
+SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services", :under=>"org.apache.servicemix", :version=>"3.1-incubating")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 "regexp:regexp:jar:1.3"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
@@ -331,8 +331,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_sql = concat(path_to(:target_dir, "derby.sql")=>[partial_sql, quartz_sql])
     derby_db = Derby.create(path_to(:target_dir, "derby/jpadb")=>derby_sql)
 
-    tests.compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", "ode:dao-jpa", "ode:utils"),
-      COMMONS.collections, COMMONS.logging, JAVAX.persistence, JAVAX.transaction, OPENJPA, XERCES, WSDL4J
+    tests.compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", 
+      "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
+      HSQLDB, COMMONS.collections, COMMONS.logging, JAVAX.persistence, 
+      JAVAX.transaction, OPENJPA, XERCES, WSDL4J
+    tests.run.with GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector,
+      BACKPORT, JAVAX.connector, JAVAX.ejb, COMMONS.lang, LOG4J
 
     build derby_db
     package :zip, :include=>derby_db
@@ -411,7 +415,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       jbi.merge project("ode:dao-hibernate-db").package(:zip)
       jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
     end
-    tests.compile.with SERVICEMIX
+    tests.compile.with SERVICEMIX, GERONIMO.kernel, GERONIMO.transaction, 
+      JAVAX.transaction, JAVAX.connector, JBI, BACKPORT
   end
 
   desc "ODE JCA Resource Archive"
