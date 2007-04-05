@@ -94,8 +94,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       AXIOM, AXIS2, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, XMLBEANS
 
-    tests.compile.with project("ode:tools")
-    tests.run.with XERCES, WOODSTOX, AXIOM, WS_COMMONS.xml_schema, JAVAX.javamail
+    tests do
+      compile.with project("ode:tools")
+      run.with XERCES, WOODSTOX, AXIOM, WS_COMMONS.xml_schema, JAVAX.javamail
+    end
 
     package :jar
   end
@@ -171,38 +173,27 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
-    jjtree_src = path_to(:src_dir, "main/jjtree")
-    jjtree_out = path_to(:target_dir, "generated/jjtree")
-    javacc_out = path_to(:target_dir, "generated/javacc")
-
-    prepare Java::JavaCC.jjtree_task(path_to(jjtree_out, "org/apache/ode/ql/jcc")=>jjtree_src).using(:build_node_files=>false)
-    prepare Java::JavaCC.javacc_task(path_to(javacc_out, "org/apache/ode/ql/jcc")=>jjtree_out)
-
-    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-obj", "ode:jacob", "ode:utils"),
-      jjtree_out, javacc_out
-    compile.from jjtree_out, javacc_out
+    pkg_name = "org.apache.ode.ql.jcc"
+    jjtree = jjtree(path_to(:src_dir, "main/jjtree"), :in_package=>pkg_name)
+    compile.from javacc(jjtree, :in_package=>pkg_name), jjtree
+    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-obj", "ode:jacob", "ode:utils")
 
     package :jar
   end
 
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
+    compile.from apt
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-schemas",
       "ode:bpel-store", "ode:jacob", "ode:jacob-ap", "ode:utils"),
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
-    # Prepare before compile, but we use the same classpath,
-    # so define this after compile.with.
-    generated = path_to(:target_dir, "generated")
-    prepare Java.apt_task(generated=>path_to(:java_src_dir, "org/apache/ode/bpel/runtime/channels")).
-      using(:classpath=>compile.classpath, :source=>compile.options.source)
-    # Include the generated sources.
-    compile.from generated
-
-    tests.compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
-      COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
-      LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
-    tests.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(:test_target_dir, "derby-db"))
+    tests do
+      compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
+        COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
+        LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
+      resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(:test_target_dir, "derby-db"))
+    end
 
     package :jar
   end
@@ -215,14 +206,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Schemas"
   define "bpel-schemas" do
-    schemas = [ path_to(:src_dir, "main/xsd/pmapi.xsdconfig"),
-                path_to(:src_dir, "main/xsd/dd.xsdconfig"), path_to(:src_dir, "main/xsd") ]
-    generated = path_to(:target_dir, "generated")
-    prepare Java::XMLBeans.compile_task(generated=>schemas).
-      using(:javasource=>compile.options.source, :classes=>path_to(:java_target_dir))
-
-    compile.from generated
-    compile.with JAVAX.stream, XMLBEANS
+    xsd = path_to(:src_dir, "main", "xsd")
+    compile_xml_beans path_to(xsd, "pmapi.xsdconfig"), path_to(xsd, "dd.xsdconfig"), xsd
     package :jar
   end
 
@@ -237,11 +222,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:dao-hibernate", "ode:utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    compile do |task|
-      Java::OpenJPA.enhance(:output=>compile.target, :classpath=>[compile.classpath, path_to(:java_target_dir)],
-        :properties=>path_to(:resources_dir, "META-INF/persistence.xml"))
-    end
-
+    compile { open_jpa_enhance }
     tests.run.with DOM4J
 
     package :jar
@@ -252,10 +233,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:utils"),
       DERBY, WSDL4J
 
-    tests.compile.with project("ode:dao-jpa"), JAVAX.persistence
-    tests.run.with projects("ode:bpel-obj", "ode:jacob", "ode:bpel-schemas", "ode:dao-jpa"),
-      COMMONS.collections, COMMONS.lang, COMMONS.logging, JAVAX.connector, JAVAX.stream, JAVAX.transaction,
-      JAXEN, HSQLDB, LOG4J, OPENJPA, SAXON, XERCES, XMLBEANS, XALAN
+    tests do
+      compile.with project("ode:dao-jpa"), JAVAX.persistence
+      run.with projects("ode:bpel-obj", "ode:jacob", "ode:bpel-schemas", "ode:bpel-scripts", "ode:bpel-scheduler-quartz"),
+        COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction,
+        JAXEN, HSQLDB, LOG4J, OPENJPA, SAXON, XERCES, XMLBEANS, XALAN
+    end
 
     package :jar
   end
@@ -309,16 +292,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:utils"),
       COMMONS.collections, COMMONS.logging, JAVAX.connector, JAVAX.persistence, JAVAX.transaction,
       OPENJPA, XERCES
-
-    compile do |task|
-      Java::OpenJPA.enhance :output=>compile.target, :classpath=>[compile.classpath, path_to(:java_target_dir)],
-        :properties=>path_to(:resources_dir, "META-INF/persistence.xml" )
-    end
+    compile { open_jpa_enhance }
     package :jar
   end
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
+    # TODO: find if there's any way to simplify all of this.
     # Create the Derby SQL file using the OpenJPA mapping tool, and
     # append the Quartz DDL at the end.
     derby_xml = path_to(:src_dir, "main/descriptors/persistence.derby.xml")
@@ -374,13 +354,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with projects("ode:utils", "ode:jacob-ap"), COMMONS.logging
-    # Prepare before compile, but we use the same classpath,
-    # so define this after compile.with.
-    generated = path_to(:target_dir, "generated")
-    prepare Java.apt_task(generated=>path_to(:java_src_dir)).
-      using(:classpath=>compile.classpath, :source=>compile.options.source)
-    # Include the generated sources.
-    compile.from generated
+    compile.from apt
 
     package :jar
   end
