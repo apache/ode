@@ -23,6 +23,8 @@ import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.servicemix.client.DefaultServiceMixClient;
 import org.apache.servicemix.jbi.container.ActivationSpec;
 import org.apache.servicemix.jbi.container.JBIContainer;
+import org.apache.servicemix.jbi.framework.ComponentContextImpl;
+import org.apache.servicemix.jbi.framework.ComponentNameSpace;
 
 import javax.jbi.messaging.ExchangeStatus;
 import javax.jbi.messaging.InOut;
@@ -39,7 +41,8 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
     private OdeComponent component;
 
     protected void setUp() throws Exception {
-        rootDir = File.createTempFile("smixInstallDir","");
+        rootDir = new File("target/smixInstallDir");
+        rootDir.mkdir();
         installDir = new File(rootDir,"install");
         installDir.mkdir();
         txm = new EmbeddedGeronimoFactory().getTransactionManager();
@@ -48,16 +51,17 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
 
         container = new JBIContainer();
         container.setUseMBeanServer(false);
+        container.setInstallationDirPath(installDir.getAbsolutePath());
+        container.setDeploymentDirPath(odeDir.getAbsolutePath());
+        container.setRootDir(rootDir.getAbsolutePath());
         container.setCreateMBeanServer(false);
         container.setEmbedded(true);
-
 
         container.setTransactionManager(txm);
         container.init();
         container.start();
 
         component = new OdeComponent();
-
     }
 
     protected void tearDown() throws Exception {
@@ -67,24 +71,22 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         } catch (Exception ex) {
             ;//ok ignore
         }
-
         if (container != null) {
             container.shutDown();
             container = null;
         }
-
         component = null;
-
-
     }
 
     public void testComponentLifeCycle() throws Exception {
-        container.activateComponent(component,"ODE");
+        activateComponent();
+        container.start();
+
         container.deactivateComponent("ODE");
     }
 
     public void testProcessLifeCycle() throws Exception {
-        container.activateComponent(component, "ODE");
+        activateComponent();
         container.start();
 
         // For lack of a better way of doing this:
@@ -97,17 +99,16 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         container.deactivateComponent("ODE");
 
         container.stop();
-
     }
 
 
     public void testHelloWorld() throws Exception {
-        OdeComponent component = new OdeComponent();
-        container.activateComponent(component, "ODE");
+        activateComponent();
+        container.start();
 
         // For lack of a better way of doing this:
-        component.getServiceUnitManager().deploy("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
-        component.getServiceUnitManager().init("HelloWorld", "../jbi-examples/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().deploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process/");
+        component.getServiceUnitManager().init("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process/");
         component.getServiceUnitManager().start("HelloWorld");
         DefaultServiceMixClient client = new DefaultServiceMixClient(container);
         InOut io = client.createInOutExchange();
@@ -121,5 +122,12 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
 
     }
 
+    private void activateComponent() throws Exception {
+        ComponentContextImpl cc = new ComponentContextImpl(container, new ComponentNameSpace(container.getName(), "ODE"));
+        ActivationSpec activationSpec = new ActivationSpec();
+        activationSpec.setComponent(component);
+        activationSpec.setComponentName("ODE");
+        container.activateComponent(odeDir, component, "", cc, activationSpec,  true, false, false, null);
+    }
 
 }
