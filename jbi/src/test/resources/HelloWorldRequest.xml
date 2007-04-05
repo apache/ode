@@ -16,6 +16,10 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<HelloRequest xmlns="urn:/HelloWorld2.wsdl">
-	<text>hello</text>
-</HelloRequest>
+  <message xmlns="http://java.sun.com/xml/ns/jbi/wsdl-11-wrapper"> 
+	  <part> 
+  <HelloRequest xmlns="urn:/HelloWorld2.wsdl">
+    <text>hello</text>
+  </HelloRequest>
+  </part>
+</message>
