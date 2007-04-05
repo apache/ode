@@ -35,12 +35,17 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
+import org.apache.ode.utils.GUID;
+import org.hsqldb.jdbc.jdbcDataSource;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.Properties;
 
 public class SelectObjectTest extends TestCase {
 	
@@ -52,27 +57,37 @@ public class SelectObjectTest extends TestCase {
 	private static final String CORRELATOR_ID1 = "testCorrelator1";
 	private static final String CORRELATOR_ID2 = "testCorrelator2";
 
+    TransactionManager _txm;
+    DataSource _ds;
+    BPELDAOConnectionFactoryImpl factory;
 
-
-	@Override
+    @Override
 	protected void setUp() throws Exception {
-		
-		try {
-			EntityManagerFactory emf = Persistence.createEntityManagerFactory("ode-unit-test");
-			em = emf.createEntityManager();
-		
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			fail();
-		}
-		
-		
+        jdbcDataSource hsqlds = new jdbcDataSource();
+        hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+        hsqlds.setUser("sa");
+        hsqlds.setPassword("");
+        _ds = hsqlds;
+
+        _txm = new EmbeddedGeronimoFactory().getTransactionManager();
+
+        factory = new BPELDAOConnectionFactoryImpl();
+        factory.setDataSource(_ds);
+        factory.setTransactionManager(_txm);
+        Properties props = new Properties();
+        props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
+        factory.init(props);
+
+        _txm.begin();
 	}
 	
 	public void testGetObject() throws Exception {
-		
-		BPELDAOConnectionFactoryImpl factory = new BPELDAOConnectionFactoryImpl(em);
-		BpelDAOConnection conn = factory.getConnection();
+        new InsertObjectTest().createStuff(factory);
+
+        _txm.commit();
+        _txm.begin();        
+
+        BpelDAOConnection conn = factory.getConnection();
 		
 		// Assert the ProcessDAO
 		ProcessDAO p = conn.getProcess(new QName(TEST_NS,"testPID1"));
@@ -111,7 +126,6 @@ public class SelectObjectTest extends TestCase {
 			Long mon = inst.genMonotonic();
 			assertEquals(inst.getActivityFailureCount() , 2);
 			assertNotNull(inst.getActivityFailureDateTime() );
-			assertSame(inst.getConnection() , conn);
 			assertNotNull(inst.getCreateTime() );
 			assertTrue(inst.getExecutionState().length > 0 );
 			assertNotNull(inst.getLastActiveTime() );
@@ -267,16 +281,14 @@ public class SelectObjectTest extends TestCase {
 			assertEquals(vars[0].getProperty("key1"),"prop1");
 			assertSame(vars[0].getScopeDAO(),childS);
 			
-		} 
-		
-		
-		conn.close();
-
+		}
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		em.close();
-	}
+        _txm.commit();
+		_txm = null;
+        _ds = null;
+    }
 	
 }

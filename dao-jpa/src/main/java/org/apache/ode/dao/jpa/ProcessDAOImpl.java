@@ -48,7 +48,7 @@ import java.util.List;
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
-    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._instance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey"),
+    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._processInstance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey"),
     @NamedQuery(name="CorrelatorByKey", query="SELECT c FROM CorrelatorDAOImpl as c WHERE c._correlatorKey = :ckey")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
