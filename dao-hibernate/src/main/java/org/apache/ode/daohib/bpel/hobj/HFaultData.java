@@ -70,7 +70,7 @@ public class HFaultData extends HObject {
   }
 
   /**
-   * @hibernate.property column="LINENO"
+   * @hibernate.property column="LINE_NUM"
    */
   public int getLineNo() {
     return _lineNo;
