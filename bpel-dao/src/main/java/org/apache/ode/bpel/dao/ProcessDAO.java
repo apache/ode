@@ -106,7 +106,7 @@ public interface ProcessDAO {
      */
     void delete();
 
-    void addCorrelator(String correlator);
+    CorrelatorDAO addCorrelator(String correlator);
 
     String getGuid();
 

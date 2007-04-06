@@ -130,7 +130,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return _process.getVersion();
     }
 
-    public void addCorrelator(String corrid) {
+    public CorrelatorDAO addCorrelator(String corrid) {
         HCorrelator correlator = new HCorrelator();
         correlator.setCorrelatorId(corrid);
         correlator.setProcess(_process);
@@ -138,6 +138,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         _process.getCorrelators().add(correlator);
         getSession().save(correlator);
         getSession().saveOrUpdate(_process);
+        return correlator;
     }
 
 	public int getNumInstances() {

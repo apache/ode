@@ -91,7 +91,9 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	public void setValue(QName[] names, CorrelationKey values) {
 		_correlationKey = values.toCanonicalString();
 	    for (int m = 0; m < names.length; m++) {
-            _props.add(new CorrSetProperty(names[m].toString(), values.getValues()[m]));
+            CorrSetProperty prop = new CorrSetProperty(names[m].toString(), values.getValues()[m]);
+            _props.add(prop);
+            prop.setCorrSet(this);
         }
 	}
 }
