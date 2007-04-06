@@ -1,99 +1,130 @@
 module Buildr
-  class JBITask < ZipTask
+  module Java
+    # This task creates a JBI package based on the component/bootstrap specification.
+    # It extends ZipTask, and all its over lovely options.
+    #
+    # The easiest way to use this task is through the Project#package method. For example:
+    #   package(:jbi).tap do |jbi|
+    #     jbi.component :type=>:service_engine=>"MyEngine", :description=>self.comment
+    #     jbi.component :class_name=>"com.example.MyComponent", :delegation=>:self, :libs=>libs
+    #     jbi.bootstrap :class_name=>"com.example.MyBootstrap", :delegation=>:parent, :libs=>libs
+    #   end
+    class JBITask < ZipTask
 
-    attr_accessor :jbi_xml
+      # Specifies the name of a jbi.xml file to use, or a Proc/Method returning
+      # the contents of jbi.xml. Leave empty if you want to use #component and
+      # bootstrap instead.
+      attr_accessor :jbi_xml
 
-    class Component
-      attr_accessor :name
-      attr_accessor :type
-      attr_accessor :description
-      attr_accessor :delegation
-      attr_accessor :class_name
-      attr_writer   :libs
-      def libs()
-        @libs ||= []
+      # Component specification.
+      class Component
+        # Component name.
+        attr_accessor :name
+        # Component type, e.g. :service_engine.
+        attr_accessor :type
+        # Description of component.
+        attr_accessor :description
+        # Delegation method. Default is :parent.
+        attr_accessor :delegation
+        # Component class name.
+        attr_accessor :class_name
+        # Array of libraries used by component.
+        attr_accessor :libs
+
+        def initialize()
+          @libs = []
+        end
       end
-    end
 
-    class Bootstrap
-      attr_accessor :delegation
-      attr_accessor :class_name
-      attr_writer   :libs
-      def libs()
-        @libs ||= []
+      # Bootstrap specification.
+      class Bootstrap
+        # Delegation method. Default is :parent.
+        attr_accessor :delegation
+        # Bootstrap class name.
+        attr_accessor :class_name
+        # Array of libraries used for bootstrapping.
+        attr_accessor :libs
+
+        def initialize()
+          @libs = []
+        end
       end
-    end
 
-    def []=(key, value)
-      case key.to_sym
-      when :name, :description, :type
-        self.component.send "#{name}=", value
-      when :component
-        self.component value
-      when :bootstrap
-        self.bootstrap value
-      else
-        super key, value
+      def []=(key, value)
+        case key.to_sym
+        when :name, :description, :type
+          self.component.send "#{name}=", value
+        when :component, :bootstrap
+          self.send key, value
+        else
+          super key, value
+        end
+        value
       end
-      value
-    end
 
-    def component(args = nil)
-      @component ||= Component.new
-      args.each { |k, v| @component.send "#{k}=", v } if args
-      @component
-    end
+      # Returns the component specification for this JBI package.
+      # You can call accessor methods to configure the component
+      # specification, you can also pass a hash of settings, for example:
+      #   jbi.component :type=>:service_engine, :name=>"MyEngine"
+      def component(args = nil)
+        (@component ||= Component.new).tap do |component|
+          args.each { |k, v| component.send "#{k}=", v } if args
+        end
+      end
 
-    def bootstrap(args = nil)
-      @bootstrap ||= Bootstrap.new
-      args.each { |k, v| @bootstrap.send "#{k}=", v } if args
-      @bootstrap
-    end
+      # Returns the bootstrap specification for this JBI package.
+      # You can call accessor methods to configure the bootstrap
+      # specification, you can also pass a hash of settings, for example:
+      #   jbi.bootstrap :class_name=>"com.example.jbi.MyBootstrap", :libs=>libs
+      def bootstrap(args = nil)
+        (@bootstrap ||= Bootstrap.new).tap do |bootstrap|
+          args.each { |k, v| bootstrap.send "#{k}=", v } if args
+        end
+      end
 
-    def prerequisites()
-      super + (component.libs + bootstrap.libs).flatten.uniq
-    end
+      def prerequisites()
+        super + (component.libs + bootstrap.libs).flatten.uniq
+      end
 
-  protected
+    protected
 
-    def create(zip)
-      zip.mkdir "META-INF"
-      zip.file.open("META-INF/jbi.xml", "w") do |file|
-        case jbi_xml
+      def create(zip)
+        zip.mkdir "META-INF"
+        # Create the jbi.xml file from provided file/code or by creating a descriptor.
+        jbi_xml_content = case jbi_xml
         when String
-          file.write File.read(jbi_xml)
+          File.read(jbi_xml)
         when nil, true
-          file.write descriptor
+          descriptor
         when Proc, Method
-          file.write jbi_xml.call
+          jbi_xml.call.to_s
         end
+        zip.file.open("META-INF/jbi.xml", "w") { |file| file.write jbi_xml_content }
+        path("lib").include((component.libs + bootstrap.libs).flatten.uniq)
+        super zip
       end
-      path("lib").include((component.libs + bootstrap.libs).flatten.uniq)
-      super zip
-    end
 
-    def descriptor()
-      delegation = lambda { |key| "#{key || :parent}-first" }
-      xml = Builder::XmlMarkup.new(:indent=>2)
-      xml.instruct!
-      xml.jbi :xmlns=>"http://java.sun.com/xml/ns/jbi", :version=>"1.0" do
-        xml.component :type=>component.type.to_s.sub("_", "-"),
-          "component-class-loader-delegation"=>delegation[component.delegation],
-          "bootstrap-class-loader-delegation"=>delegation[bootstrap.delegation] do
-          xml.identification do
-            xml.name component.name
-            xml.description component.description
-          end
-          xml.tag! "component-class-name", component.class_name
-          xml.tag! "component-class-path" do
-            component.libs.each { |lib| xml.tag! "path-element", lib.to_s }
-          end
-          xml.tag! "bootstrap-class-name", bootstrap.class_name
-          xml.tag! "bootstrap-class-path" do
-            bootstrap.libs.each { |lib| xml.tag! "path-element", lib.to_s }
+      # Create a JBI descriptor (jbi.xml) from the component/bootstrap specification.
+      def descriptor()
+        delegation = lambda { |key| "#{key || :parent}-first" }
+        xml = Builder::XmlMarkup.new(:indent=>2)
+        xml.instruct!
+        xml.jbi :xmlns=>"http://java.sun.com/xml/ns/jbi", :version=>"1.0" do
+          xml.component :type=>component.type.to_s.sub("_", "-"),
+            "component-class-loader-delegation"=>delegation[component.delegation],
+            "bootstrap-class-loader-delegation"=>delegation[bootstrap.delegation] do
+            xml.identification do
+              xml.name component.name
+              xml.description component.description
+            end
+            xml.tag!("component-class-name", component.class_name)
+            xml.tag!("component-class-path") { component.libs.each { |lib| xml.tag! "path-element", lib.to_s } }
+            xml.tag!("bootstrap-class-name", bootstrap.class_name)
+            xml.tag!("bootstrap-class-path") { bootstrap.libs.each { |lib| xml.tag! "path-element", lib.to_s } }
           end
         end
       end
+
     end
 
   end
@@ -108,6 +139,6 @@ module Buildr
       end
       file(file_name).tap { |jbi| jbi.include args[:include] if args[:include] }
     end
+
   end
 end
-
