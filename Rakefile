@@ -313,12 +313,14 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_sql = concat(path_to(:target_dir, "derby.sql")=>[partial_sql, quartz_sql])
     derby_db = Derby.create(path_to(:target_dir, "derby/jpadb")=>derby_sql)
 
-    tests.compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", 
-      "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
-      HSQLDB, COMMONS.collections, COMMONS.logging, JAVAX.persistence, 
-      JAVAX.transaction, OPENJPA, XERCES, WSDL4J
-    tests.run.with GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector,
-      BACKPORT, JAVAX.connector, JAVAX.ejb, COMMONS.lang, LOG4J
+    tests do
+      compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", 
+        "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
+        HSQLDB, COMMONS.collections, COMMONS.logging, JAVAX.persistence, 
+        JAVAX.transaction, OPENJPA, XERCES, WSDL4J
+      run.with GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector,
+        BACKPORT, JAVAX.connector, JAVAX.ejb, COMMONS.lang, LOG4J
+    end
 
     build derby_db
     package :zip, :include=>derby_db
