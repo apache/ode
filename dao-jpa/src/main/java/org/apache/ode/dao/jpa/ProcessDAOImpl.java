@@ -79,10 +79,11 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         _version = version;
     }
 	
-	public void addCorrelator(String correlator) {
+	public CorrelatorDAO addCorrelator(String correlator) {
 		CorrelatorDAOImpl corr = new CorrelatorDAOImpl(correlator);
 		_correlators.add(corr);
-	}
+        return corr;
+    }
 
     public CorrelatorDAO getCorrelator(String correlatorId) {
         Query qry = getEM().createNamedQuery("CorrelatorByKey");

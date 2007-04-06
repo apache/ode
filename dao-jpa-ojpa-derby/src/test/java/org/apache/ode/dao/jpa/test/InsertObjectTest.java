@@ -57,6 +57,7 @@ public class InsertObjectTest extends TestCase {
     TransactionManager _txm;
     DataSource _ds;
     BPELDAOConnectionFactoryImpl factory;
+    ProcessDAO _process;
 
     @Override
 	protected void setUp() throws Exception {
@@ -85,8 +86,8 @@ public class InsertObjectTest extends TestCase {
     void createStuff(BPELDAOConnectionFactoryImpl factory) throws Exception {
         BpelDAOConnection conn = factory.getConnection();
 
-        ProcessDAO p1 = createProcess(conn,"testPID1","testType");
-		ProcessInstanceDAO pi1 = createProcessInstance(p1, CORRELATOR_ID1);
+        CorrelatorDAO corr = createProcess(conn,"testPID1","testType");
+		ProcessInstanceDAO pi1 = createProcessInstance(_process, corr);
     }
 
     @Override
@@ -131,15 +132,14 @@ public class InsertObjectTest extends TestCase {
 		return m;
 	}
 	
-	private ProcessDAO createProcess(BpelDAOConnection conn, String pid, String type) {
-		ProcessDAO p = null;
-		p = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1",1);
-		p.addCorrelator(CORRELATOR_ID1);
-		p.addCorrelator(CORRELATOR_ID2);
-		return p;
+	private CorrelatorDAO createProcess(BpelDAOConnection conn, String pid, String type) {
+		_process = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1",1);
+		CorrelatorDAO corr = _process.addCorrelator(CORRELATOR_ID1);
+		_process.addCorrelator(CORRELATOR_ID2);
+		return corr;
 	}
 	
-	private ProcessInstanceDAO createProcessInstance(ProcessDAO process, String correlator_id) throws SAXException, IOException {
+	private ProcessInstanceDAO createProcessInstance(ProcessDAO process, CorrelatorDAO corr) throws SAXException, IOException {
 		ProcessInstanceDAO pi = null;
 		String[] actions = { "action1","action2" };
 		String[] correlationKeys = { "key1", "key2" };
@@ -147,8 +147,8 @@ public class InsertObjectTest extends TestCase {
 		CorrelationKey key2 = new CorrelationKey(2,correlationKeys);
 		CorrelationKey[] corrkeys = {key1,key2}; 
 		QName[] names = { new QName(TEST_NS,"name1"), new QName(TEST_NS,"name2") };
-		
-		pi = process.createInstance(process.getCorrelator(correlator_id));
+
+        pi = process.createInstance(corr);
 		
 		pi.setExecutionState(new String("test execution state").getBytes());
 		pi.setFault(new QName(TEST_NS,"testFault"), "testExplanation", 1, 1, DOMUtils.stringToDOM("<testFaultMessage>testMessage</testFaultMessage>"));
@@ -183,9 +183,8 @@ public class InsertObjectTest extends TestCase {
 		
 		MessageExchangeDAO mex = createMessageExchange(process,pi,pl1);
 		
-		CorrelatorDAO corr1 = process.getCorrelator(CORRELATOR_ID1);
-		corr1.addRoute("testRoute", pi, 1, key1);
-		corr1.enqueueMessage(mex, corrkeys);
+		corr.addRoute("testRoute", pi, 1, key1);
+		corr.enqueueMessage(mex, corrkeys);
 		
 		return pi;
 	}

@@ -318,7 +318,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	public Collection<CorrelationKey> getCorrelationKeys() {
         ArrayList<CorrelationKey> correlationKeys = new ArrayList<CorrelationKey>();
         if (_correlationKeys.indexOf("^") > 0) {
-            for (StringTokenizer tokenizer = new StringTokenizer(_correlationId, "^"); tokenizer.hasMoreTokens();) {
+            for (StringTokenizer tokenizer = new StringTokenizer(_correlationKeys, "^"); tokenizer.hasMoreTokens();) {
                 String corrStr = tokenizer.nextToken();
                 correlationKeys.add(new CorrelationKey(corrStr));
             }
@@ -330,5 +330,13 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void release() {
         // no-op for now, could be used to do some cleanup
+    }
+
+    public CorrelatorDAOImpl getCorrelator() {
+        return _correlator;
+    }
+
+    public void setCorrelator(CorrelatorDAOImpl correlator) {
+        _correlator = correlator;
     }
 }
