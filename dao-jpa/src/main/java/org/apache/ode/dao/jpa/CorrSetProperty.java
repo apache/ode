@@ -69,4 +69,12 @@ public class CorrSetProperty {
     public void setPropertyValue(String propertyValue) {
         this.propertyValue = propertyValue;
     }
+
+    public CorrelationSetDAOImpl getCorrSet() {
+        return _corrSet;
+    }
+
+    public void setCorrSet(CorrelationSetDAOImpl corrSet) {
+        _corrSet = corrSet;
+    }
 }

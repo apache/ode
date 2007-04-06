@@ -148,9 +148,10 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         return _type;
     }
 
-    public void addCorrelator(String correlator) {
+    public CorrelatorDAO addCorrelator(String correlator) {
         CorrelatorDaoImpl corr = new CorrelatorDaoImpl(correlator, _conn);
         _correlators.put(corr.getCorrelatorId(), corr);
+        return corr;
     }
 
     /**
