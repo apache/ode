@@ -80,10 +80,12 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
 
     public void enqueueMessage(MessageExchangeDAO mex,
                                CorrelationKey[] correlationKeys) {
+        MessageExchangeDAOImpl mexImpl = (MessageExchangeDAOImpl) mex;
         for (CorrelationKey key : correlationKeys ) {
-            ((MessageExchangeDAOImpl)mex).addCorrelationKey(key);
+            mexImpl.addCorrelationKey(key);
         }
-        _exchanges.add((MessageExchangeDAOImpl)mex);
+        _exchanges.add(mexImpl);
+        mexImpl.setCorrelator(this);
 
     }
 

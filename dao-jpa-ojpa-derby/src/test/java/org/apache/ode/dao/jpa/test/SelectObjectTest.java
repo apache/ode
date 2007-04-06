@@ -75,6 +75,7 @@ public class SelectObjectTest extends TestCase {
         factory.setDataSource(_ds);
         factory.setTransactionManager(_txm);
         Properties props = new Properties();
+        props.put("openjpa.Log", "DefaultLevel=TRACE");
         props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
         factory.init(props);
 
@@ -206,7 +207,7 @@ public class SelectObjectTest extends TestCase {
 			//assertNotNull(me.getCreateTime());
 			assertEquals(me.getDirection(),'0');
 			assertNotNull(me.getEPR());
-			assertEquals(me.getFault(),"testFault");
+			assertEquals(me.getFault().toString(),"testFault");
 			assertEquals(me.getFaultExplanation(),"testFaultExplanation");
 			assertSame(me.getInstance(),inst);
 			assertEquals(me.getOperation(),"testOperation");
