@@ -36,14 +36,13 @@ public class DeploymentUnitTest  extends TestCase {
      * Test some complicated xsd/wsdl loading. 
      */
     public void setUp() throws Exception {
-//        File dir = new File(getClass().getResource("/complexImport/deploy.xml").getPath()).getParentFile();
-        File dir = new File("/tmp/relative-include/build/");
+        File dir = new File(getClass().getResource("/complexImport/deploy.xml").getPath()).getParentFile();
         du = new DeploymentUnitDir(dir);
     }
     
     public void testRegistry() {
         DocumentRegistry dr = du.getDocRegistry();
-        //assertNotNull(dr.getDefinitionForPortType(new QName("http://ode/bpel/unit-test.wsdl","HelloPortType")));
+        assertNotNull(dr.getDefinitionForPortType(new QName("http://ode/bpel/unit-test.wsdl","HelloPortType")));
     }
     
     public void testCompile() {
