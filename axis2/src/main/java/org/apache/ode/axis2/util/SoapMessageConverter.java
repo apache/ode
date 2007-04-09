@@ -70,8 +70,11 @@ public class SoapMessageConverter {
 
     private static final Log __log = LogFactory.getLog(SoapMessageConverter.class);
 
-    /** Namespace (in the ODE <message>) for parts that are in the header but not in the payload message. */
-    private static final String FOREIGN_HEADER_PART_NS = "urn:ode.apache.org/axis2-il/header";
+    /** Namespace (in the ODE <message>) for received parts that are in the header but not in the payload. */
+    private static final QName FOREIGN_HEADER_IN = new QName("urn:ode.apache.org/axis2-il/headers/","in");
+
+    /** Namespace (in the ODE <message>) for headers that should be sent but are not in the payload. */
+    private static final QName FOREIGN_HEADER_OUT = new QName("urn:ode.apache.org/axis2-il/headers/","out");
 
     SOAPFactory _soapFactory;
 
@@ -202,8 +205,16 @@ public class SoapMessageConverter {
         if (payloadMessageHeader && msgdef.getPart(headerdef.getPart()) == null)
             throw new OdeFault(__msgs.msgSoapHeaderReferencesUnkownPart(headerdef.getPart()));
 
-        Element srcPartEl = DOMUtils.findChildByName(message, new QName(payloadMessageHeader
-                ? null : FOREIGN_HEADER_PART_NS, headerdef.getPart()));
+        Element srcPartEl = null;
+        if (payloadMessageHeader)
+            srcPartEl = DOMUtils.findChildByName(message, new QName(null, headerdef.getPart()));
+        else {
+            Element fho = DOMUtils.findChildByName(message, FOREIGN_HEADER_OUT);
+            if (fho != null) {
+                srcPartEl = DOMUtils.findChildByName(fho, headerdef.getElementType());
+            }
+        }
+            
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.
@@ -380,12 +391,26 @@ public class SoapMessageConverter {
         if (headerEl == null)
             return;
 
-        Element destPart = odeMessage.getOwnerDocument().createElementNS(
-                payloadMessageHeader ? null : FOREIGN_HEADER_PART_NS, headerdef.getPart());
-        odeMessage.appendChild(destPart);
+        
+        Element destPart = getForeignIn(odeMessage);
         destPart.appendChild(odeMessage.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
 
     }
+
+    /**
+     * Get the "FOREIGN_IN" message extension if it exists, otherwise create it. 
+     * @param odeMessage
+     * @return the FOREING_IN extension element.
+     */
+    private Element getForeignIn(Element odeMessage) {
+        Element fi = DOMUtils.findChildByName(odeMessage, FOREIGN_HEADER_IN);
+        if (fi == null) {
+            fi = odeMessage.getOwnerDocument().createElementNS(FOREIGN_HEADER_IN.getNamespaceURI(),FOREIGN_HEADER_IN.getLocalPart());
+            odeMessage.appendChild(fi);
+        }
+        return fi;
+    }
+    
 
     public static SOAPBody getSOAPBody(ElementExtensible ee) {
         return getFirstExtensibilityElement(ee, SOAPBody.class);
