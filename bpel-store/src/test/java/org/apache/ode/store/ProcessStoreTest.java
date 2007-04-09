@@ -35,6 +35,7 @@ public class ProcessStoreTest extends TestCase {
     private File _testdd;
     
     public void setUp() throws Exception {
+        System.setProperty("openjpa.properties", "/openjpa.xml");
         _ps = new ProcessStoreImpl();
         _ps.loadAll();
         URL tdd= getClass().getResource("/testdd/deploy.xml");
