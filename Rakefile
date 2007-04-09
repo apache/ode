@@ -112,7 +112,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:utils", "ode:dao-jpa"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
-      JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream, JENCKS, JIBX,
+      JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ, SAXON, TRANQL,
       WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS
 
@@ -123,10 +123,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       web_inf.include project("ode:bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
 
-    webserve.using(:war_path=>package(:war).name, :context_path=>"/ode",
-      :process_alias=>{"HelloWorld2"=>"distro-axis2/src/examples/HelloWorld2",
-                       "DynPartner"=>"distro-axis2/src/examples/DynPartner",
-                       "MagicSession"=>"distro-axis2/src/examples/MagicSession"} )
+    task("start"=>[package(:war), jetty.use]) do |task|
+      class << task ; attr_accessor :url, :path ; end
+      task.url = "http://localhost:8080/ode"
+      task.path = jetty.deploy(task.url, task.prerequisites.first)
+      jetty.teardown task("stop")
+    end
+
+    task("stop") do |task|
+      if url = task("start").url rescue nil
+        jetty.undeploy url
+      end
+    end
   end
 
   desc "ODE APIs"
@@ -250,8 +258,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-ql", "ode:utils"),
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
     compile do
-      Java::Hibernate.xdoclet :source=>compile.sources, :include=>"**/*.java",
-        :target=>compile.target, :excludedtags=>"@version,@author,@todo"
+      Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
     end
 
     tests do
@@ -351,6 +358,16 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       distro_common.call(self, zip)
       zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
     end
+
+    project("ode:axis2-war").task("start").enhance do |task|
+      target = task.path + "/webapp/WEB-INF/processes"
+      puts "Deploying processes to #{target}" if verbose
+      verbose(false) do
+        mkpath target
+        cp_r FileList[path_to(:src_dir, "examples/*")].to_a, target
+        rm Dir.glob("#{target}/*.deployed")
+      end
+    end
   end
 
   desc "ODE JBI Based Distribution"
@@ -447,30 +464,3 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
 end
-
-desc "Deploys a process in the running Jetty daemon (started using jetty:bounce)."
-task("jetty:process") do
-  fail "A process should be provided by specifying PROCESS=/path/to/process." unless ENV['PROCESS']
-
-  options = project("ode:axis2-war").task("jetty:bounce").options
-  res = Jetty.jetty_call('/war', :get, options)
-  case res
-  when Net::HTTPSuccess
-    # Copying process dir
-    process_target = res.body.chomp + '/webapp/WEB-INF/processes'
-    process_source = options[:process_alias][ENV['PROCESS']] || ENV['PROCESS']
-    verbose { puts "Copying #{process_source} to #{process_target} " }
-    cp_r(process_source, process_target)
-
-    # Removing marker files to force redeploy
-    rm Dir.glob("#{process_target}/*.deployed")
-
-    puts "Process deployed."
-  else
-    puts "Unknown response from server: #{res}"
-  end
-end
-
-# Lazy ass aliasing
-task("jetty:bounce" => ["ode:axis2-war:jetty:bounce"])
-task("jetty:shutdown" => ["ode:axis2-war:jetty:shutdown"])
