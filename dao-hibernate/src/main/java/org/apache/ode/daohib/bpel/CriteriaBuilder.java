@@ -113,11 +113,11 @@ class CriteriaBuilder {
         }
 
         if ("name".equals(orderKey)) {
-          if (ascending) processCrit.addOrder(Property.forName("processName").asc());
-          else processCrit.addOrder(Property.forName("processName").desc());
+          if (ascending) processCrit.addOrder(Property.forName("typeName").asc());
+          else processCrit.addOrder(Property.forName("typeName").desc());
         } else if ("namespace".equals(orderKey)) {
-          if (ascending) processCrit.addOrder(Property.forName("processNamespace").asc());
-          else processCrit.addOrder(Property.forName("processNamespace").desc());
+          if (ascending) processCrit.addOrder(Property.forName("typeNamespace").asc());
+          else processCrit.addOrder(Property.forName("typeNamespace").desc());
         } else if ("pid".equals(orderKey)) {
           if (ascending) processCrit.addOrder(Property.forName("processId").asc());
           else processCrit.addOrder(Property.forName("processId").desc());
