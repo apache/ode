@@ -33,6 +33,29 @@ public class ToFrom extends BpelObject {
         return null;
     }
     
+    /**
+     * Cast this tofrom to an "extension" to/from. This is NOT part of the BPEL spec, and 
+     * is used to provide access to custom extensions (for example reading/writing SOAP
+     * message headers)... Yes. it's evil. 
+     * 
+     * @author mszefler
+     * @return the object cast to {@link ExtensionVal} if appropriate, null otherwise.
+     */
+    public ExtensionVal getAsExtensionVal() {
+        if (getAttribute("extension",null) != null)
+            return new ExtensionVal(getElement());
+        return null;
+    }
+    
+    /**
+     * Test whether this to/from is an "extension" to-from (i.e. does it have the "extension" 
+     * attribute). 
+     * @return
+     */
+    public boolean isExtensionVal() {
+        return getAsExtensionVal() != null;
+    }
+
     public boolean isVariableVal() {
         return getAsVariableVal() != null;
     }
