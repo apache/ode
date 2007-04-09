@@ -254,6 +254,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
         :target=>compile.target, :excludedtags=>"@version,@author,@todo"
     end
 
+    tests do
+      compile.with project("ode:bpel-epr"), SPRING, HSQLDB
+      run.with BACKPORT, COMMONS.collections, COMMONS.lang, GERONIMO.transaction, 
+        GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb
+    end
+
     package :jar
   end
 
