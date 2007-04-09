@@ -24,6 +24,7 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
 import org.apache.ode.bpel.compiler.bom.Copy;
+import org.apache.ode.bpel.compiler.bom.ExtensionVal;
 import org.apache.ode.bpel.compiler.bom.From;
 import org.apache.ode.bpel.compiler.bom.LiteralVal;
 import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
@@ -35,6 +36,7 @@ import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OAssign.RValue;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
@@ -43,9 +45,9 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 /**
- * Generates code for <code>&lt;assign&gt;</code> activities. This class
- * simply extends {@link DefaultActivityGenerator} as the default implentation
- * suffices.
+ * Generates code for <code>&lt;assign&gt;</code> activities. 
+ * 
+ * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class AssignGenerator extends DefaultActivityGenerator {
     private static final Log __log = LogFactory.getLog(AssignGenerator.class);
@@ -149,7 +151,9 @@ class AssignGenerator extends DefaultActivityGenerator {
     private OAssign.RValue compileFrom(From from) {
         assert from != null;
         try {
-            if (from.isLiteralVal()) {
+            if (from.isExtensionVal()) {
+                return compileExtensionVal(from.getAsExtensionVal());
+            } else if (from.isLiteralVal()) {
                 return compileLiteral(from.getAsLiteralVal());
             } else if (from.isPropertyVal()) {
                 OAssign.PropertyRef pref = new OAssign.PropertyRef(_context.getOProcess());
@@ -187,6 +191,20 @@ class AssignGenerator extends DefaultActivityGenerator {
                 ce.getCompilationMessage().source = from;
             throw ce;
         }
+    }
+
+    /**
+     * Compile an extension to/from-spec. Extension to/from-specs are compiled into 
+     * "DirectRef"s. 
+     * 
+     * @param extVal source representation
+     * @return compiled representation
+     */
+    private RValue compileExtensionVal(ExtensionVal extVal) {
+        OAssign.DirectRef dref = new OAssign.DirectRef(_context.getOProcess());
+        dref.variable = _context.resolveVariable(extVal.getVariable());
+        dref.elName =  extVal.getExtension();
+        return dref;
     }
 
     private OAssign.RValue compileLiteral(LiteralVal from) {
