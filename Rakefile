@@ -232,9 +232,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:dao-hibernate", "ode:utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    compile { open_jpa_enhance }
-    tests.run.with DOM4J
-
+    compile do 
+      Java::Hibernate.xdoclet :source=>compile.sources, :include=>"**/*.java",
+        :target=>compile.target, :excludedtags=>"@version,@author,@todo"
+      open_jpa_enhance
+    end
+    tests do
+      run.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J, 
+        XERCES, XALAN, JAXEN, SAXON, OPENJPA
+    end
     package :jar
   end
 

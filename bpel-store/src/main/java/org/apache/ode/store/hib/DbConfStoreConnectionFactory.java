@@ -71,7 +71,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         // Sybase SQL Server
         // Informix Dynamic Server
         // Oracle 8 and Oracle >8
-        HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.DerbyDialect"));
+        HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(DEFAULT_HIBERNATE_DIALECT));
     }
 
     private final DataSource _ds;
