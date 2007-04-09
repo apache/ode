@@ -18,6 +18,11 @@
  */
 package org.apache.ode.bpel.common;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.pmapi.InvalidRequestException;
+import org.apache.ode.utils.ISO8601DateParser;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -25,11 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.pmapi.InvalidRequestException;
-import org.apache.ode.utils.ISO8601DateParser;
 
 /**
  * Holds a filter that will get interpreted when listing processe instances. The
@@ -159,7 +159,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
     }
 
     public enum StatusKeys {
-        ACTIVE, SUSPENDED, ERROR, COMPLETED, TERMINATED, FAILED;
+        ACTIVE, SUSPENDED, ERROR, COMPLETED, TERMINATED, FAILED, FAULTED;
     }
 
     /**
