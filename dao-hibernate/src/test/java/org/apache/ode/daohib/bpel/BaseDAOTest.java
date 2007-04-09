@@ -20,11 +20,17 @@
 package org.apache.ode.daohib.bpel;
 
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
+import org.apache.ode.utils.GUID;
+import org.hsqldb.jdbc.jdbcDataSource;
+import org.hibernate.cfg.Environment;
+
+import java.util.Properties;
 
 /**
  * Testing BpelDAOConnectionImpl.listInstance. We're just producing a lot
@@ -34,34 +40,43 @@ import org.apache.ode.il.EmbeddedGeronimoFactory;
  */
 public class BaseDAOTest extends TestCase {
 
-  protected BpelDAOConnection daoConn;
-  private TransactionManager txm;
-  private DataSource ds;
+    protected BpelDAOConnection daoConn;
+    private TransactionManager txm;
+    private DataSource ds;
 
-  protected void initTM() throws Exception {
+    protected void initTM() throws Exception {
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        txm = factory.getTransactionManager();
+        ds = getDataSource();
+        txm.begin();
 
-    EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-    txm = factory.getTransactionManager();
-    ds = getDataSource();
-    txm.begin();
+        BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl();
+        factoryImpl.setTransactionManager(txm);
+        factoryImpl.setDataSource(ds);
+        Properties props = new Properties();
+        props.put(Environment.HBM2DDL_AUTO, "create-drop");
+        factoryImpl.init(props);
 
-    BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl();
-    factoryImpl.setTransactionManager(txm);
-    factoryImpl.setDataSource(ds);
+        daoConn = factoryImpl.getConnection();
+    }
 
-    daoConn = factoryImpl.getConnection();
-  }
+    protected void stopTM() throws Exception {
+        txm.commit();
+    }
 
-  protected void stopTM() throws Exception {
-    txm.commit();
-  }
+    protected DataSource getDataSource() {
+        if (ds == null) {
+            jdbcDataSource hsqlds = new jdbcDataSource();
+            hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+            hsqlds.setUser("sa");
+            hsqlds.setPassword("");
+            ds = hsqlds;
+        }
+        return ds;
+    }
 
-  protected DataSource getDataSource() {
-    throw new Error("Not implemented");
-  }
-
-  protected TransactionManager getTransactionManager() {
-    return txm;
-  }
+    protected TransactionManager getTransactionManager() {
+        return txm;
+    }
 
 }
