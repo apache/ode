@@ -32,7 +32,7 @@ import org.apache.ode.bpel.common.InstanceFilter;
  * test that the result is the one expected would take a huge test database
  * (with at least a process and an instance for every possible combination).
  */
-public class ListInstanceTest extends BaseDAOTest {
+public class ListInstanceTest extends BaseTestDAO {
 
   private Map<String, List> filterElmts;
   private ArrayList<String> order;
