@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
     
@@ -137,6 +139,29 @@ public class OAssign extends OActivity {
         }
     }
 
+
+    /**
+     * Direct reference: selects named child of the message document element. 
+     * This is used for access to extensions (SOAP headers for example).
+     * @author mszefler
+     */
+    public static class DirectRef extends OBase implements RValue, LValue {
+        private static final long serialVersionUID = 1L;
+        public DirectRef(OProcess owner) {
+            super(owner);
+        }
+
+        /** Referenced Variable */
+        public OScope.Variable variable;
+        
+        /** Name of the element referenced. */
+        public QName elName;
+
+        public Variable getVariable() {
+            return variable;
+        }
+    }
+    
     public static class VariableRef extends OBase implements RValue, LValue {
         private static final long serialVersionUID = 1L;
         public OScope.Variable variable;
