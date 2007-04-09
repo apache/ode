@@ -27,6 +27,7 @@ import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OAssign;
+import org.apache.ode.bpel.o.OAssign.DirectRef;
 import org.apache.ode.bpel.o.OAssign.LValueExpression;
 import org.apache.ode.bpel.o.OAssign.PropertyRef;
 import org.apache.ode.bpel.o.OAssign.VariableRef;
@@ -153,7 +154,12 @@ class ASSIGN extends ACTIVITY {
             __log.debug("Evaluating FROM expression \"" + from + "\".");
 
         Node retVal;
-        if (from instanceof OAssign.VariableRef) {
+        if (from instanceof DirectRef) {
+            OAssign.DirectRef dref = (OAssign.DirectRef) from;
+            Node data = getBpelRuntimeContext().fetchVariableData(
+                    _scopeFrame.resolve(dref.variable), false);
+            retVal = DOMUtils.findChildByName((Element)data, dref.elName);
+        } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
             Node data = getBpelRuntimeContext().fetchVariableData(
                     _scopeFrame.resolve(varRef.variable), false);
@@ -357,7 +363,15 @@ class ASSIGN extends ACTIVITY {
             // Get a pointer within the lvalue.
             Node lvaluePtr = lvalue;
 
-            if (ocopy.to instanceof OAssign.VariableRef) {
+            if (ocopy.to instanceof OAssign.DirectRef) {
+                DirectRef dref = ((DirectRef) ocopy.to);
+                Element el = DOMUtils.findChildByName((Element)lvalue, dref.elName);
+                if (el == null) {
+                    el = (Element) ((Element)lvalue).appendChild(lvalue.getOwnerDocument()
+                            .createElementNS(dref.elName.getNamespaceURI(), dref.elName.getLocalPart()));
+                }
+                lvaluePtr = el;
+            } else if (ocopy.to instanceof OAssign.VariableRef) {
                 VariableRef varRef = ((VariableRef) ocopy.to);
                 lvaluePtr = evalQuery(
                         lvalue,
