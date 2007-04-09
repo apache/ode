@@ -37,7 +37,6 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     public DbConfStoreConnectionFactory(DataSource ds, boolean auto) {
         _ds = ds;
-        System.out.println(getClass().getResource("/META-INF/persistence.xml"));
         HashMap propMap = new HashMap();
         propMap.put("javax.persistence.nonJtaDataSource", ds);
         propMap.put("openjpa.Log", "log4j");
