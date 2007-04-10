@@ -133,7 +133,7 @@ module Buildr
 
     def package_as_jbi(args)
       args[:type] = :zip
-      file_name = args[:file] || path_to(:target_dir, Artifact.hash_to_file_name(args))
+      file_name = args[:file] || path_to(args[:path], Artifact.hash_to_file_name(args))
       unless Rake::Task.task_defined?(file_name)
         JBITask.define_task(file_name).tap { |jbi| package_extend jbi, args }
       end
