@@ -184,7 +184,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
     pkg_name = "org.apache.ode.ql.jcc"
-    jjtree = jjtree(path_to(:src_dir, "main/jjtree"), :in_package=>pkg_name)
+    jjtree = jjtree("src/main/jjtree", :in_package=>pkg_name)
     compile.from javacc(jjtree, :in_package=>pkg_name), jjtree
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-obj", "ode:jacob", "ode:utils")
 
@@ -202,7 +202,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
         COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
-      resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(:test_target_dir, "derby-db"))
+      resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(compile.target, "derby-db"))
     end
 
     package :jar
@@ -216,8 +216,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Schemas"
   define "bpel-schemas" do
-    xsd = path_to(:src_dir, "main", "xsd")
-    compile_xml_beans path_to(xsd, "pmapi.xsdconfig"), path_to(xsd, "dd.xsdconfig"), xsd
+    compile_xml_beans "src/main/xsd/*.xsdconfig", "src/main/xsd"
     package :jar
   end
 
@@ -279,8 +278,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Hibernate Compatible Databases"
   define "dao-hibernate-db" do
 
-    predefined_for = lambda { |name| file(path_to(:src_dir, "main", "sql", "tables_#{name}.sql")) }
-    properties_for = lambda { |name| file(path_to(:src_dir, "main", "sql", "ode.#{name}.properties")) }
+    predefined_for = lambda { |name| file("src/main/sql/tables_#{name}.sql") }
+    properties_for = lambda { |name| file("src/main/sql/ode.#{name}.properties") }
 
     dao_hibernate = project("ode:dao-hibernate").compile.target
     bpel_store = project("ode:bpel-store").compile.target
@@ -294,15 +293,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       file_create(target.to_s) { export_task.invoke }
     end
 
-    build file_create(path_to(:target_dir)) { |task| mkpath task.name }
-    runtime_sql = export.call(properties_for[:derby], dao_hibernate, path_to(:target_dir, "runtime.sql")) 
-    store_sql = export.call(properties_for[:derby], bpel_store, path_to(:target_dir, "store.sql")) 
-    derby_sql = concat(path_to(:target_dir, "derby.sql")=>[ predefined_for[:derby], runtime_sql, store_sql ]) 
+    build file_create("target") { |task| mkpath task.name }
+    runtime_sql = export.call(properties_for[:derby], dao_hibernate, "target/runtime.sql") 
+    store_sql = export.call(properties_for[:derby], bpel_store, "target/store.sql") 
+    derby_sql = concat(path_to("target/derby.sql")=>[ predefined_for[:derby], runtime_sql, store_sql ])
     %w{ firebird hsql postgres sqlserver }.each do |db|
-      partial = export.call(properties_for[db], dao_hibernate, path_to(:target_dir, "partial.#{db}.sql"))
-      build concat(path_to(:target_dir, "#{db}.sql")=>[ predefined_for[db], partial ])
+      partial = export.call(properties_for[db], dao_hibernate, "target/partial.#{db}.sql")
+      build concat(path_to("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
-    derby_db = Derby.create(path_to(:target_dir, "derby/hibdb")=>derby_sql)
+    derby_db = Derby.create("target/derby/hibdb"=>derby_sql)
 
     build derby_db
     package :zip, :include=>derby_db
@@ -322,15 +321,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     # TODO: find if there's any way to simplify all of this.
     # Create the Derby SQL file using the OpenJPA mapping tool, and
     # append the Quartz DDL at the end.
-    derby_xml = path_to(:src_dir, "main/descriptors/persistence.derby.xml")
-    quartz_sql = path_to(:src_dir, "main/scripts/quartz-derby.sql")
-    partial_sql = file(path_to(:target_dir, "partial.sql")=>derby_xml) do |task|
-      mkpath path_to(:target_dir), :verbose=>false
+    derby_xml = "src/main/descriptors/persistence.derby.xml"
+    quartz_sql = "src/main/scripts/quartz-derby.sql"
+    partial_sql = file("target/partial.sql"=>derby_xml) do |task|
+      mkpath "target", :verbose=>false
       Java::OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
         :classpath=>projects("ode:bpel-store", "ode:dao-jpa", "ode:bpel-api", "ode:bpel-dao", "ode:utils" )
     end
-    derby_sql = concat(path_to(:target_dir, "derby.sql")=>[partial_sql, quartz_sql])
-    derby_db = Derby.create(path_to(:target_dir, "derby/jpadb")=>derby_sql)
+    derby_sql = concat("target/derby.sql"=>[partial_sql, quartz_sql])
+    derby_db = Derby.create("target/derby/jpadb"=>derby_sql)
 
     tests do
       compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", 
@@ -347,7 +346,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   distro_common = lambda do |project, zip|
     zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| project.parent.path_to(f) }
-    zip.path("examples").include FileList[project.path_to(:src_dir, "examples", "**")]
+    zip.path("examples").include FileList["src/examples/**"]
     zip.merge project("ode:tools-bin").package(:zip)
     zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
       COMMONS.pool, COMMONS.collections, JAXEN,
@@ -366,11 +365,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
 
     project("ode:axis2-war").task("start").enhance do |task|
-      target = task.path + "/webapp/WEB-INF/processes"
+      target = "#{task.path}/webapp/WEB-INF/processes"
       puts "Deploying processes to #{target}" if verbose
       verbose(false) do
         mkpath target
-        cp_r FileList[path_to(:src_dir, "examples/*")].to_a, target
+        cp_r FileList["src/examples/*"].to_a, target
         rm Dir.glob("#{target}/*.deployed")
       end
     end
@@ -425,7 +424,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     tests.compile.with SERVICEMIX, GERONIMO.kernel, GERONIMO.transaction, 
       JAVAX.transaction, JAVAX.connector, JBI
-    tests.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(:target_dir, "smixInstallDir/install/ODE"))
+    tests.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to("target/smixInstallDir/install/ODE"))
     tests.run.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra", "ode:jca-server",
       "ode:jacob"), 
       BACKPORT, SPRING, XBEAN, GERONIMO.connector, 
@@ -454,10 +453,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Tools Binaries"
   define "tools-bin" do
     # Copy binary files over, set permissions on Linux files.
-    bins = filter(path_to(:src_dir, "main/dist/bin/*")).into(path_to(:target_dir, "bin")).
+    bins = filter("src/main/dist/bin/*").into("target/bin").
       enhance { |task| chmod 0755, FileList[task.target.to_s + "/*.sh"], :verbose=>false }
     # Copy docs over.
-    docs = filter(path_to(:src_dir, "main/dist/doc/*")).into(path_to(:target_dir, "doc"))
+    docs = filter("src/main/dist/doc/*").into("target/doc")
 
     build bins, docs
     package(:zip).include bins.target, docs.target
