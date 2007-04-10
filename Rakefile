@@ -232,8 +232,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
     compile do 
-      Java::Hibernate.xdoclet :source=>compile.sources, :include=>"**/*.java",
-        :target=>compile.target, :excludedtags=>"@version,@author,@todo"
+      Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
       open_jpa_enhance
     end
     tests do
@@ -285,18 +284,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     bpel_store = project("ode:bpel-store").compile.target
 
     export_task = Java::Hibernate.schemaexport_task
-    export = lambda do |properties, sources, target|
-      export_task.enhance([properties, sources]) do |task| 
+    export = lambda do |properties, source, target|
+      export_task.enhance([properties, source]) do |task| 
         task.ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-          :drop=>"no", :create=>"yes", :output=>target.to_s) { fileset(:dir=>sources.to_s) { include :name=>"**/*.hbm.xml" } }
+          :drop=>"no", :create=>"yes", :output=>path_to(target)) { fileset(:dir=>source.to_s) { include :name=>"**/*.hbm.xml" } }
       end
-      file_create(target.to_s) { export_task.invoke }
+      file(target.to_s=>[properties, source]) { export_task.invoke }
     end
 
     build file_create("target") { |task| mkpath task.name }
     runtime_sql = export.call(properties_for[:derby], dao_hibernate, "target/runtime.sql") 
     store_sql = export.call(properties_for[:derby], bpel_store, "target/store.sql") 
-    derby_sql = concat(path_to("target/derby.sql")=>[ predefined_for[:derby], runtime_sql, store_sql ])
+    derby_sql = concat("target/derby.sql"=>[ predefined_for[:derby], runtime_sql, store_sql ])
     %w{ firebird hsql postgres sqlserver }.each do |db|
       partial = export.call(properties_for[db], dao_hibernate, "target/partial.#{db}.sql")
       build concat(path_to("target/#{db}.sql")=>[ predefined_for[db], partial ])
