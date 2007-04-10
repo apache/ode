@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.evt.BpelEvent;
 
 import java.util.Collection;
@@ -108,7 +107,7 @@ public interface ScopeDAO  {
      * Get an ordered list of events associated with this scope.
      * @return collection of bpel events.
      */
-    List<BpelEvent> listEvents(BpelEventFilter efilter);
+    List<BpelEvent> listEvents();
 
     /**
      * Create a storage space for partner link values for the scope.

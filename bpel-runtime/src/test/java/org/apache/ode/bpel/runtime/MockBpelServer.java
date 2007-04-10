@@ -32,12 +32,15 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
+import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
+import org.apache.ode.il.MockScheduler;
+import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -46,7 +49,6 @@ import javax.transaction.TransactionManager;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 import java.io.File;
-import java.sql.DriverManager;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,9 +85,9 @@ class MockBpelServer {
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
             _server.setDaoConnectionFactory(_daoCF);
+            _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
-            //_store = new ProcessStoreImpl(new File("."), _dataSource, _txManager);
             _store = new ProcessStoreImpl(_dataSource,"jpa", true);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
@@ -152,41 +154,21 @@ class MockBpelServer {
         _server.stop();
         _scheduler.stop();
         _scheduler.shutdown();
-        // TODO stop transaction manager
-        try {
-            DriverManager.getConnection("jdbc:derby:target/test-classes/derby-db/jpadb;shutdown=true");
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-        }
-
-
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
-        EmbeddedTransactionManager factory = new EmbeddedTransactionManager();
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
         _txManager = factory.getTransactionManager();
         _txManager.setTransactionTimeout(30);
         return _txManager;
     }
 
     protected DataSource createDataSource() throws Exception {
-        if (_txManager == null)
-            throw new RuntimeException("No transaction manager");
-        String url = "jdbc:derby:target/test-classes/derby-db/jpadb";
-
-        Properties props = new Properties();
-        props.put("test."+OdeConfigProperties.PROP_DB_MODE, "internal");
-        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_DRIVER, org.apache.derby.jdbc.EmbeddedDriver.class.getName());
-        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_URL, url);
-        props.put("test."+OdeConfigProperties.PROP_DB_INTERNAL_USER, "sa");
-        props.put("test."+OdeConfigProperties.PROP_POOL_MIN, "0");
-        props.put("test."+OdeConfigProperties.PROP_POOL_MAX, "10");
-
-        OdeConfigProperties odeConfig = new OdeConfigProperties(props, "test");
-        _database = new Database(odeConfig);
-        _database.setTransactionManager(_txManager);
-        _database.start();
-        _dataSource = _database.getDataSource();
+        jdbcDataSource hsqlds = new jdbcDataSource();
+        hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+        hsqlds.setUser("sa");
+        hsqlds.setPassword("");
+        _dataSource = hsqlds;
         return _dataSource;
     }
 
@@ -210,7 +192,10 @@ class MockBpelServer {
         BpelDAOConnectionFactoryJDBC daoCF = new BPELDAOConnectionFactoryImpl();
         daoCF.setDataSource(_dataSource);
         daoCF.setTransactionManager(_txManager);
-        daoCF.init(new Properties());
+        Properties props = new Properties();
+        props.put("openjpa.Log", "DefaultLevel=TRACE");
+        props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
+        daoCF.init(props);
         _daoCF = daoCF;
 
         return _daoCF;
@@ -278,57 +263,54 @@ class MockBpelServer {
 
     private class SchedulerWrapper implements Scheduler {
 
-        QuartzSchedulerImpl _quartz;
+        MockScheduler _scheduler;
         long                _nextSchedule;
 
         SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
             ExecutorService executorService = Executors.newCachedThreadPool();
-            _quartz = new QuartzSchedulerImpl();
-            _quartz.setJobProcessor(server);
-            _quartz.setExecutorService(executorService, 20);
-            _quartz.setTransactionManager(txManager);
-            _quartz.setDataSource(dataSource);
-            _quartz.init();
+            _scheduler = new MockScheduler(_txManager);
+            _scheduler.setExecutorSvc(executorService);
+            _scheduler.setJobProcessor(server);
         }
 
         public String schedulePersistedJob(Map<String,Object>jobDetail,Date when) throws ContextException {
-            String jobId = _quartz.schedulePersistedJob(jobDetail, when);
+            String jobId = _scheduler.schedulePersistedJob(jobDetail, when);
             _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
             return jobId;
         }
 
         public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException {
-            String jobId = _quartz.scheduleVolatileJob(transacted, jobDetail);
+            String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail);
             _nextSchedule = System.currentTimeMillis();
             return jobId;
         }
 
         public void cancelJob(String jobId) throws ContextException {
-            _quartz.cancelJob(jobId);
+            _scheduler.cancelJob(jobId);
         }
 
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-            return _quartz.execTransaction(transaction);
+            return _scheduler.execTransaction(transaction);
         }
 
         public <T> Future<T> execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
-            return _quartz.execIsolatedTransaction(transaction);
+            return _scheduler.execIsolatedTransaction(transaction);
         }
 
         public boolean isTransacted() {
-            return _quartz.isTransacted();
+            return _scheduler.isTransacted();
         }
 
-        public void start() { _quartz.start(); }
-        public void stop() { _quartz.stop(); }
-        public void shutdown() { _quartz.shutdown(); }
+        public void start() { _scheduler.start(); }
+        public void stop() { _scheduler.stop(); }
+        public void shutdown() { _scheduler.shutdown(); }
 
         public void registerSynchronizer(Synchronizer synch) throws ContextException {
-            _quartz.registerSynchronizer(synch);
+            _scheduler.registerSynchronizer(synch);
         }
 
         public void setJobProcessor(JobProcessor processor) throws ContextException {
-            _quartz.setJobProcessor(processor);
+            _scheduler.setJobProcessor(processor);
 
         }
     }

@@ -29,8 +29,8 @@ import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.MockScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.test.scheduler.TestScheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.w3c.dom.Element;
@@ -54,7 +54,7 @@ public abstract class BPELTestAbstract extends TestCase {
     protected MessageExchangeContextImpl mexContext;
     protected EntityManager em;
     protected EntityManagerFactory emf;
-    protected TestScheduler scheduler;
+    protected MockScheduler scheduler;
     protected BpelDAOConnectionFactory _cf;
 
     protected ArrayList<Failure> failures;
@@ -71,7 +71,7 @@ public abstract class BPELTestAbstract extends TestCase {
             String pr = Persistence.PERSISTENCE_PROVIDER;
             _cf = new BPELDAOConnectionFactoryImpl();
             server.setDaoConnectionFactory(_cf);
-            scheduler = new TestScheduler() {
+            scheduler = new MockScheduler() {
                 @Override
                 public void begin() {
                     super.begin();
@@ -91,7 +91,7 @@ public abstract class BPELTestAbstract extends TestCase {
 
             };
         } else {
-            scheduler = new TestScheduler();
+            scheduler = new MockScheduler();
             _cf = new BpelDAOConnectionFactoryImpl(scheduler);
             server.setDaoConnectionFactory(_cf);
         }

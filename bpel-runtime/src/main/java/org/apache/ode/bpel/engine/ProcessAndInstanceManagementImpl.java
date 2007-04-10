@@ -938,7 +938,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             Collection<ActivityRecoveryDAO> recoveries = scope.getProcessInstance().getActivityRecoveries();
 
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
-            List<BpelEvent> events = scope.listEvents(null);
+            List<BpelEvent> events = scope.listEvents();
             ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
             for (BpelEvent e : events)
                 b.onEvent(e);
