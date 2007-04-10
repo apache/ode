@@ -75,7 +75,6 @@ public class SelectObjectTest extends TestCase {
         factory.setDataSource(_ds);
         factory.setTransactionManager(_txm);
         Properties props = new Properties();
-        props.put("openjpa.Log", "DefaultLevel=TRACE");
         props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
         factory.init(props);
 

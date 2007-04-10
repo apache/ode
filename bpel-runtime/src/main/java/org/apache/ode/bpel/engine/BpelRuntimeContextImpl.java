@@ -992,7 +992,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine.fireEvent(event);
 
         // saving
-        _bpelProcess.saveEvent(event);
+        _bpelProcess.saveEvent(event, _dao);
     }
 
     private void initVPU() {

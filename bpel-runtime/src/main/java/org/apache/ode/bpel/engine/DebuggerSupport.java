@@ -25,7 +25,13 @@ import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.evt.*;
+import org.apache.ode.bpel.evt.ActivityExecStartEvent;
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.evt.ProcessCompletionEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
+import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.ManagementException;
@@ -35,7 +41,12 @@ import org.apache.ode.utils.ArrayUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class providing functions used to support debugging funtionality
@@ -231,7 +242,7 @@ class DebuggerSupport {
                         changeEvent.setProcessName(process.getType());
                         changeEvent.setProcessId(_db.getProcessId());
 
-                        _process.saveEvent(changeEvent);
+                        _process.saveEvent(changeEvent, instance);
                         onEvent(changeEvent);
                     }
                 } catch (Exception dce) {
