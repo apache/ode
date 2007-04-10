@@ -13,7 +13,7 @@ module Buildr
       #   Derby.create "mydb"=>derby.sql
       def create(args)
         db, prereqs = Rake.application.resolve_args(args)
-        file(db=>prereqs) do |task|
+        file(File.expand_path(db)=>prereqs) do |task|
           cmd = [ Java.path_to_bin('java'), "-cp", requires, "org.apache.derby.tools.ij" ]
           Open3.popen3(*cmd) do |stdin, stdout, stderr|
             # Shutdown so if a database already exists, we can remove it.
