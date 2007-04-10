@@ -19,7 +19,6 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -49,7 +48,8 @@ import java.util.List;
 @Entity
 @Table(name="ODE_SCOPE")
 @NamedQueries({
-    @NamedQuery(name="PLinkByModelId", query="SELECT pl FROM PartnerLinkDAOImpl as pl WHERE pl._partnerLinkModelId = :mid")
+    @NamedQuery(name="PLinkByModelId", query="SELECT pl FROM PartnerLinkDAOImpl as pl WHERE pl._partnerLinkModelId = :mid"),
+    @NamedQuery(name="ScopeEvents", query="SELECT se FROM EventDAOImpl as se WHERE se._scopeId = :sid")
         })
 public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 
@@ -175,10 +175,15 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 		return _variables;
 	}
 
-	public List<BpelEvent> listEvents(BpelEventFilter efilter) {
-		// TODO Implement me
-		return new ArrayList<BpelEvent>();
-	}
+	public List<BpelEvent> listEvents() {
+        List<BpelEvent> result = new ArrayList<BpelEvent>();
+        Query qry = getEM().createNamedQuery("ScopeEvents");
+        qry.setParameter("sid", _scopeInstanceId);
+        for (Object eventDao : qry.getResultList()) {
+            result.add(((EventDAOImpl)eventDao).getEvent());
+        }
+        return result;
+    }
 
 	public void setState(ScopeStateEnum state) {
 		_scopeState = state.toString();

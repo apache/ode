@@ -18,11 +18,19 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.*;
+import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
+import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
+import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
+import org.apache.ode.daohib.bpel.hobj.HScope;
+import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.apache.ode.utils.SerializableUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
@@ -31,7 +39,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hibernate-based {@link ScopeDAO} implementation.
@@ -216,12 +229,12 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public List<BpelEvent> listEvents(BpelEventFilter efilter) {
+    public List<BpelEvent> listEvents() {
 
         CriteriaBuilder cb = new CriteriaBuilder();
         Criteria crit = _sm.getSession().createCriteria(HBpelEvent.class);
-        if (efilter != null)
-            cb.buildCriteria(crit, efilter);
+//        if (efilter != null)
+//            cb.buildCriteria(crit, efilter);
         crit.add(Restrictions.eq("scopeId",_scope.getId()));
 
         List<HBpelEvent> hevents = crit.list();

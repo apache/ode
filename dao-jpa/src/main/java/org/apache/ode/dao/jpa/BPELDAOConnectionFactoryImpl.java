@@ -143,6 +143,9 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         }
         public void setRollbackOnly(Throwable cause) throws Exception {
             // there is no generic support for setting the rollback cause
+            System.out.println("#################################################");
+            System.out.println("setRollbackOnly");
+            System.out.println("#################################################");
             getTransactionManager().getTransaction().setRollbackOnly();
         }
         public Throwable getRollbackCause() throws Exception {
