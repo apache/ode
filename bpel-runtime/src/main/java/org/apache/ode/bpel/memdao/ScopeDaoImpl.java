@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
@@ -152,7 +151,7 @@ class ScopeDaoImpl extends DaoBaseImpl implements ScopeDAO {
         return _variables.values();
     }
 
-    public List<BpelEvent> listEvents(BpelEventFilter efilter) {
+    public List<BpelEvent> listEvents() {
         // TODO: provide a better implementation.
         return new ArrayList<BpelEvent>();
     }

@@ -60,6 +60,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     MockBpelServer        _server;
     BpelManagementFacade  _management;
     QName                 _processQName;
+    QName                 _processId;
     private Mock _testService;
 
 
@@ -69,11 +70,8 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * If the process completes, it calls the completed method.
      */
     interface TestService {
-
         public boolean invoke(); 
-
         public void completed();
-
     }
 
 
@@ -293,6 +291,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         _management.delete(null);
         // We need the process QName to make assertions on its state.
         _processQName = new QName(NAMESPACE, process);
+        _processId = new QName(NAMESPACE, process + "-1");
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
     }
@@ -300,7 +299,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     protected void assertNoFailures() {
         TFailuresInfo failures = lastInstance().getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
-        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
+        failures = _management.getProcessInfo(_processId).getProcessInfo().getInstanceSummary().getFailures();
         assertTrue(failures == null || failures.getCount() == 0);
     }
 
@@ -318,7 +317,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         // Tests here will only generate one failure.
         TFailuresInfo failures = lastInstance().getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
-        failures = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary().getFailures();
+        failures = _management.getProcessInfo(_processId).getProcessInfo().getInstanceSummary().getFailures();
         assertTrue(failures != null && failures.getCount() == 1);
         // Look for individual activities inside the process instance.
         @SuppressWarnings("unused")

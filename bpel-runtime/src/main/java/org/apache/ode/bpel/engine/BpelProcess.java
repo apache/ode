@@ -460,23 +460,21 @@ public class BpelProcess {
         return prole._channel;
     }
 
-    public void saveEvent(ProcessInstanceEvent event) {
+    public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
         markused();
-        boolean enabled = false;
         List<String> scopeNames = null;
         if (event instanceof ScopeEvent) {
             scopeNames = ((ScopeEvent) event).getParentScopesNames();
         }
 
-        enabled = _pconf.isEventEnabled(scopeNames, event.getType());
+        boolean enabled = _pconf.isEventEnabled(scopeNames, event.getType());
         if (enabled) {
-            ProcessInstanceDAO instanceDao = getProcessDAO().getInstance(event.getProcessInstanceId());
-            if (instanceDao != null) saveEvent(event, instanceDao);
+            if (instanceDao != null) saveInstanceEvent(event, instanceDao);
             else __log.debug("Couldn't find instance to save event, no event generated!");
         }
     }
 
-    void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
+    void saveInstanceEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
         instanceDao.insertBpelEvent(event);
     }
 
