@@ -169,6 +169,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     public void testInstanceSummary() throws Exception {
         _processQName = new QName(NAMESPACE, "FailureToRecovery");
+        _processId = new QName(NAMESPACE, "FailureToRecovery-1");
         // Failing the first three times and recovering, the process completes.
         _testService.expects(exactly(4)).method("invoke").will(failTheFirst(3));
         _testService.expects(once()).method("completed").after("invoke");
@@ -186,7 +187,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         _server.waitForBlocking(); // Active, recovery.
         // Stay active, awaiting recovery.
 
-        TInstanceSummary summary = _management.getProcessInfo(_processQName).getProcessInfo().getInstanceSummary();
+        TInstanceSummary summary = _management.getProcessInfo(_processId).getProcessInfo().getInstanceSummary();
         for (TInstanceSummary.Instances instances : summary.getInstancesList()) {
             switch (instances.getState().intValue()) {
               case TInstanceStatus.INT_COMPLETED:
