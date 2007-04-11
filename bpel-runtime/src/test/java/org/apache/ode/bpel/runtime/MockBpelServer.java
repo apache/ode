@@ -193,7 +193,7 @@ class MockBpelServer {
         daoCF.setDataSource(_dataSource);
         daoCF.setTransactionManager(_txManager);
         Properties props = new Properties();
-        props.put("openjpa.Log", "DefaultLevel=TRACE");
+        props.put("openjpa.Log", "log4j");
         props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
         daoCF.init(props);
         _daoCF = daoCF;
