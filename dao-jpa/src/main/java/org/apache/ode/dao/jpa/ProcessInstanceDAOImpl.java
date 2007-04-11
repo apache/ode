@@ -128,13 +128,19 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public void deleteActivityRecovery(String channel) {
+        ActivityRecoveryDAOImpl toRemove = null;
         for (ActivityRecoveryDAO _recovery : _recoveries) {
             ActivityRecoveryDAOImpl arElement = (ActivityRecoveryDAOImpl) _recovery;
             if (arElement.getChannel().equals(channel)) {
-                getEM().remove(arElement);
-                return;
+                toRemove = arElement;
+                break;
             }
         }
+        if (toRemove != null) {
+            getEM().remove(toRemove);
+            _recoveries.remove(toRemove);
+        }
+
     }
 
 	public void finishCompletion() {
