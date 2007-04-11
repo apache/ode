@@ -139,7 +139,6 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 }
             }
         }
-        System.out.println("EXECUTING INSTANCE QUERY " + query.toString());
         return _em.createQuery(query.toString()).getResultList();
 	}
 
