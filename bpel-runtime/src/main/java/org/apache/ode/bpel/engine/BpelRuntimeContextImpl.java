@@ -1223,7 +1223,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             reason = "Unspecified";
         if (dateTime == null)
             dateTime = new Date();
-        __log.info("ActivityRecovery: Registering activity " + activityId + ", failure reason: " + reason);
+        __log.info("ActivityRecovery: Registering activity " + activityId + ", failure reason: " + reason +
+                " on channel " + channel.export());
         _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, details, actions, retries);
     }
 
@@ -1237,7 +1238,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
             public void run() {
                 ActivityRecoveryChannel recovery = importChannel(channel, ActivityRecoveryChannel.class);
-                __log.info("ActivityRecovery: Recovering activity " + activityId + " with action " + action);
+                __log.info("ActivityRecovery: Recovering activity " + activityId + " with action " + action +
+                        " on channel " + recovery);
                 if (recovery != null) {
                     if ("cancel".equals(action))
                         recovery.cancel();
