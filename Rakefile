@@ -195,9 +195,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:bpel-store", "ode:jacob", "ode:jacob-ap", "ode:utils"),
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
-    test.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
-        COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
+    test.compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa", "ode:dao-hibernate", "ode:bpel-epr"),
+        BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction, 
+        GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
+    test.run.with HIBERNATE, DOM4J
     test.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(compile.target, "derby-db"))
 
     package :jar
