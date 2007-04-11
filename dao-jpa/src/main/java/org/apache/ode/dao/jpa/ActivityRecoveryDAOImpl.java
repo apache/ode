@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -40,7 +42,11 @@ import java.util.Date;
 @Table(name="ODE_ACTIVITY_RECOVERY")
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 
-	@Id @Column(name="ACTIVITY_ID")
+    @Id @Column(name="ID")
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long _id;
+
+	@Basic @Column(name="ACTIVITY_ID")
     private long _activityId;
 	@Basic @Column(name="CHANNEL")
     private String _channel;
