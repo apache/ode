@@ -106,9 +106,12 @@ public class MockScheduler implements Scheduler {
         begin();
         try {
             T retval = transaction.call();
-            return retval;
-        } finally {
             commit();
+            return retval;
+        } catch (Throwable t) {
+            __log.error("Caught an exception during transaction", t);
+            rollback();
+            throw new ContextException("Error in tx", t);
         }
     }
 
