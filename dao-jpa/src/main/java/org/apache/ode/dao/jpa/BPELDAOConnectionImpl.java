@@ -32,6 +32,7 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import javax.persistence.EntityManager;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -110,8 +111,36 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
-        // TODO
-        return _em.createQuery("select x from ProcessInstanceDAOImpl x").getResultList();
+        StringBuffer query = new StringBuffer();
+        query.append("select pi from ProcessInstanceDAOImpl as pi");
+
+        // TODO Continue implementing me
+        if (criteria != null) {
+            // Building each clause
+            ArrayList<String> clauses = new ArrayList<String>();
+            if (criteria.getPidFilter() != null)
+                clauses.add(" pi._process._processId = '" + criteria.getPidFilter() + "'");
+            if (criteria.getStatusFilter() != null) {
+                StringBuffer filters = new StringBuffer();
+                List<Short> states = criteria.convertFilterState();
+                for (int m = 0; m < states.size(); m++) {
+                    filters.append(" pi._state = ").append(states.get(m));
+                    if (m < states.size() - 1) filters.append(" or");
+                }
+                clauses.add(" (" + filters.toString() + ")");
+            }
+
+            // Preparing the statement
+            if (clauses.size() > 0) {
+                query.append(" where");
+                for (int m = 0; m < clauses.size(); m++) {
+                    query.append(clauses.get(m));
+                    if (m < clauses.size() - 1) query.append(" and");
+                }
+            }
+        }
+        System.out.println("EXECUTING INSTANCE QUERY " + query.toString());
+        return _em.createQuery(query.toString()).getResultList();
 	}
 
    
