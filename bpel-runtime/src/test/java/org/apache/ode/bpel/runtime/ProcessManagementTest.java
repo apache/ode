@@ -18,19 +18,17 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.File;
-import java.net.URI;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
-
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
 import org.apache.ode.bpel.pmapi.TProcessInfo;
 import org.apache.ode.utils.DOMUtils;
+
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.net.URI;
+import java.util.List;
 
 /**
  * Test activity recovery and failure handling.
@@ -51,7 +49,7 @@ public class ProcessManagementTest extends TestCase {
         pilist = _management.listProcesses("name=FailureInh*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(1,pilist.size());
         
-        pilist = _management.listProcesses("name=FailureToRecovery",null).getProcessInfoList().getProcessInfoList();
+        pilist = _management.listProcesses("name=FailureToRecovery*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(1,pilist.size());
         
         pilist = _management.listProcesses("name=foobaz*",null).getProcessInfoList().getProcessInfoList();
