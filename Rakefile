@@ -96,10 +96,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       AXIOM, AXIS2, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, XMLBEANS
 
-    tests do
-      compile.with project("ode:tools")
-      run.with XERCES, WOODSTOX, AXIOM, WS_COMMONS.xml_schema, JAVAX.javamail
-    end
+    test.with project("ode:tools"), XERCES, WOODSTOX, AXIOM, WS_COMMONS.xml_schema, JAVAX.javamail
 
     package :jar
   end
@@ -198,12 +195,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:bpel-store", "ode:jacob", "ode:jacob-ap", "ode:utils"),
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
-    tests do
-      compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
+    test.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa"),
         COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
-      resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(compile.target, "derby-db"))
-    end
+    test.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(compile.target, "derby-db"))
 
     package :jar
   end
@@ -235,10 +230,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
       open_jpa_enhance
     end
-    tests do
-      run.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J, 
-        XERCES, XALAN, JAXEN, SAXON, OPENJPA
-    end
+    test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J, 
+      XERCES, XALAN, JAXEN, SAXON, OPENJPA
     package :jar
   end
 
@@ -247,12 +240,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:utils"),
       DERBY, WSDL4J
 
-    tests do
-      compile.with project("ode:dao-jpa"), JAVAX.persistence
-      run.with projects("ode:bpel-obj", "ode:jacob", "ode:bpel-schemas", "ode:bpel-scripts", "ode:bpel-scheduler-quartz"),
-        COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction,
-        JAXEN, HSQLDB, LOG4J, OPENJPA, SAXON, XERCES, XMLBEANS, XALAN
-    end
+    test.with projects("ode:bpel-obj", "ode:dao-jpa", "ode:jacob", "ode:bpel-schemas",
+      "ode:bpel-scripts", "ode:bpel-scheduler-quartz"),
+      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, JAVAX.persistence,
+      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, OPENJPA, SAXON, XERCES, XMLBEANS, XALAN
 
     package :jar
   end
@@ -265,11 +256,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
     end
 
-    tests do
-      compile.with project("ode:bpel-epr"), SPRING, HSQLDB
-      run.with BACKPORT, COMMONS.collections, COMMONS.lang, GERONIMO.transaction, 
-        GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb
-    end
+    test.with project("ode:bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
+      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
 
     package :jar
   end
@@ -330,14 +318,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_sql = concat("target/derby.sql"=>[partial_sql, quartz_sql])
     derby_db = Derby.create("target/derby/jpadb"=>derby_sql)
 
-    tests do
-      compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", 
-        "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
-        HSQLDB, COMMONS.collections, COMMONS.logging, JAVAX.persistence, 
-        JAVAX.transaction, OPENJPA, XERCES, WSDL4J
-      run.with GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector,
-        BACKPORT, JAVAX.connector, JAVAX.ejb, COMMONS.lang, LOG4J
-    end
+    test.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
+      BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
+      GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
+      JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
     package :zip, :include=>derby_db
@@ -421,14 +405,14 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
     end
 
-    tests.compile.with SERVICEMIX, GERONIMO.kernel, GERONIMO.transaction, 
-      JAVAX.transaction, JAVAX.connector, JBI
-    tests.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to("target/smixInstallDir/install/ODE"))
-    tests.run.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra", "ode:jca-server",
-      "ode:jacob"), 
-      BACKPORT, SPRING, XBEAN, GERONIMO.connector, 
-      DERBY, TRANQL, OPENJPA, JAVAX.persistence, JAVAX.ejb, JAVAX.stream, COMMONS.lang, COMMONS.collections, 
-      JAXEN, SAXON, QUARTZ, XALAN, XMLBEANS, XSTREAM
+    test.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra",
+      "ode:jca-server", "ode:jacob"), 
+      BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
+      GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
+      JAVAX.transaction, JAXEN, JBI, OPENJPA, QUARTZ, SAXON, SERVICEMIX, SPRING, TRANQL,
+      XALAN, XBEAN, XMLBEANS, XSTREAM
+    test.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to("target/smixInstallDir/install/ODE"))
+
   end
 
   desc "ODE JCA Resource Archive"
