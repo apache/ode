@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -105,12 +104,11 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	public void createActivityRecovery(String channel, long activityId,
 			String reason, Date dateTime, Element data, String[] actions,
 			int retries) {
-
 		ActivityRecoveryDAOImpl ar = new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries);
-		_recoveries.add(ar);
+        _recoveries.add(ar);
         ar.setInstance(this);
         _lastRecovery = dateTime;
-	}
+    }
 
 	public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
 		ScopeDAOImpl ret = new ScopeDAOImpl((ScopeDAOImpl)parentScope,name,scopeModelId,this);
@@ -130,14 +128,14 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public void deleteActivityRecovery(String channel) {
-		for (Iterator itr=_recoveries.iterator(); itr.hasNext(); ) {
-			ActivityRecoveryDAO arElement = (ActivityRecoveryDAO)itr.next();
-			if ( arElement.getChannel().equals(channel)) {
-				itr.remove();
-				return;
-			}
-		}
-	}
+        for (ActivityRecoveryDAO _recovery : _recoveries) {
+            ActivityRecoveryDAOImpl arElement = (ActivityRecoveryDAOImpl) _recovery;
+            if (arElement.getChannel().equals(channel)) {
+                getEM().remove(arElement);
+                return;
+            }
+        }
+    }
 
 	public void finishCompletion() {
 	    // make sure we have completed.
