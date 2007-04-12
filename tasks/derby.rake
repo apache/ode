@@ -13,12 +13,13 @@ module Buildr
       #   Derby.create "mydb"=>derby.sql
       def create(args)
         db, prereqs = Rake.application.resolve_args(args)
+        # Copy the SQL files into the database directory.
         file(File.expand_path(db)=>prereqs) do |task|
           cmd = [ Java.path_to_bin('java'), "-cp", requires, "org.apache.derby.tools.ij" ]
           Open3.popen3(*cmd) do |stdin, stdout, stderr|
             # Shutdown so if a database already exists, we can remove it.
             stdin.puts "connect 'jdbc:derby:;shutdown=true';"
-            rm_rf task.to_s if File.exist?(task.to_s)
+            rm_rf task.name if File.exist?(task.name)
             # Create a new database, and load all the prerequisites.
             stdin.puts "connect 'jdbc:derby:#{task.to_s};create=true;user=sa'"
             stdin.puts "set schema sa"
@@ -30,11 +31,8 @@ module Buildr
             # Helps when dignosing SQL errors.
             stdout.read.tap { |output| puts output if Rake.application.options.trace }
           end
-          # Copy the SQL files into the database directory.
-          filter(task.prerequisites).into(db).invoke
-          # Tell other tasks we're refreshed, this also prevents running task
-          # due to time differences between parent directory and db directory.
-          touch task.to_s 
+          filter(prereqs).into(task.name).run
+          touch task.name, :verbose=>false
         end
       end
 
