@@ -213,7 +213,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
     test.junit.with HIBERNATE, DOM4J
-    test.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to(compile.target, "derby-db"))
 
     package :jar
   end
@@ -300,14 +299,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     runtime_sql = export[ properties_for[:derby], dao_hibernate, "target/runtime.sql" ]
     store_sql = export[ properties_for[:derby], bpel_store, "target/store.sql" ]
     derby_sql = concat("target/derby.sql"=>[ predefined_for[:derby], runtime_sql, store_sql ])
-    build Derby.create("target/derby/hibdb"=>derby_sql)
+    derby_db = Derby.create("target/derby/hibdb"=>derby_sql)
+    build derby_db
 
     %w{ firebird hsql postgres sqlserver }.each do |db|
       partial = export[ properties_for[db], dao_hibernate, "target/partial.#{db}.sql" ]
       build concat("target/#{db}.sql"=>[ predefined_for[db], partial ])
     end
 
-    package :zip
+    package :zip, :include=>derby_db
   end
 
   desc "ODE OpenJPA DAO Implementation"
@@ -427,7 +427,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, QUARTZ, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.resources unzip(project("ode:dao-jpa-ojpa-derby").package(:zip)).into(path_to("target/smixInstallDir/install/ODE"))
+    test.resources unzip(path_to("target/smixInstallDir/install/ODE")=>project("ode:dao-jpa-ojpa-derby").package(:zip))
 
   end
 
