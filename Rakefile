@@ -267,34 +267,34 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Hibernate Compatible Databases"
   define "dao-hibernate-db" do
-
     predefined_for = lambda { |name| file("src/main/sql/tables_#{name}.sql") }
     properties_for = lambda { |name| file("src/main/sql/ode.#{name}.properties") }
 
     dao_hibernate = project("ode:dao-hibernate").compile.target
     bpel_store = project("ode:bpel-store").compile.target
 
-    export_task = Java::Hibernate.schemaexport_task
+    schemaexport = Java::Hibernate.schemaexport
     export = lambda do |properties, source, target|
-      export_task.enhance([properties, source]) do |task| 
-        task.ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-          :drop=>"no", :create=>"yes", :output=>path_to(target)) { fileset(:dir=>source.to_s) { include :name=>"**/*.hbm.xml" } }
+      file(target=>[properties, source]) do |task|
+        mkpath File.dirname(target), :verbose=>false
+        schemaexport.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
+          :drop=>"no", :create=>"yes", :output=>target) do
+          fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml"
+        end
       end
-      file(target.to_s=>[properties, source]) { export_task.invoke }
     end
 
-    build file_create("target") { |task| mkpath task.name }
-    runtime_sql = export.call(properties_for[:derby], dao_hibernate, "target/runtime.sql") 
-    store_sql = export.call(properties_for[:derby], bpel_store, "target/store.sql") 
+    runtime_sql = export[ properties_for[:derby], dao_hibernate, "target/runtime.sql" ]
+    store_sql = export[ properties_for[:derby], bpel_store, "target/store.sql" ]
     derby_sql = concat("target/derby.sql"=>[ predefined_for[:derby], runtime_sql, store_sql ])
-    %w{ firebird hsql postgres sqlserver }.each do |db|
-      partial = export.call(properties_for[db], dao_hibernate, "target/partial.#{db}.sql")
-      build concat(path_to("target/#{db}.sql")=>[ predefined_for[db], partial ])
-    end
-    derby_db = Derby.create("target/derby/hibdb"=>derby_sql)
+    build Derby.create("target/derby/hibdb"=>derby_sql)
 
-    build derby_db
-    package :zip, :include=>derby_db
+    %w{ firebird hsql postgres sqlserver }.each do |db|
+      partial = export[ properties_for[db], dao_hibernate, "target/partial.#{db}.sql" ]
+      build concat("target/#{db}.sql"=>[ predefined_for[db], partial ])
+    end
+
+    package :zip
   end
 
   desc "ODE OpenJPA DAO Implementation"
@@ -379,7 +379,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
-    compile.with Java.tools
+    compile.with Java.tools_jar
     package :jar
   end
 
@@ -439,13 +439,17 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Tools Binaries"
   define "tools-bin" do
     # Copy binary files over, set permissions on Linux files.
-    bins = filter("src/main/dist/bin/*").into("target/bin").
-      enhance { |task| chmod 0755, FileList[task.target.to_s + "/*.sh"], :verbose=>false }
+    bins = file("target/bin"=>FileList["src/main/dist/bin/*"]) do |task|
+      filter(task.prerequisites).into(task.name).run
+      chmod 0755, FileList[task.name + "/*.sh"], :verbose=>false
+    end
     # Copy docs over.
-    docs = filter("src/main/dist/doc/*").into("target/doc")
+    docs = file("target/doc"=>FileList["src/main/dist/doc/*"]) do |task|
+      filter(task.prerequisites).into(task.name).run
+    end
 
     build bins, docs
-    package(:zip).include bins.target, docs.target
+    package(:zip).include bins, docs
   end
 
   desc "ODE Utils"
