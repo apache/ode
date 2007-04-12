@@ -23,9 +23,9 @@ module Buildr
         #  Java::Hibernate.xdoclet :sources=>compile.sources,
         #    :target=>compile.target, :excludedtags=>"@version,@author,@todo"
         def xdoclet(options)
-          ant("hibernatedoclet") do |ant|
-            ant.taskdef :name=>"hibernatedoclet", :classname=>"xdoclet.modules.hibernate.HibernateDocletTask", :classpath=>requires
-            ant.hibernatedoclet :destdir=>options[:target].to_s, :excludedtags=>options[:excludedtags], :force=>"true" do
+          ant("hibernatedoclet") do |doclet|
+            doclet.taskdef :name=>"hibernatedoclet", :classname=>"xdoclet.modules.hibernate.HibernateDocletTask", :classpath=>requires
+            doclet.hibernatedoclet :destdir=>options[:target].to_s, :excludedtags=>options[:excludedtags], :force=>"true" do
               hibernate :version=>"3.0"
               options[:sources].to_a.each do |source|
                 fileset :dir=>source.to_s, :includes=>"**/*.java"
@@ -36,8 +36,8 @@ module Buildr
 
         # Returns a new AntProject that supports the schemaexport task.
         def schemaexport(name = "schemaexport")
-          ant(name) do |ant|
-            ant.taskdef :name=>"schemaexport", :classname=>"org.hibernate.tool.hbm2ddl.SchemaExportTask", :classpath=>requires
+          ant(name) do |export|
+            export.taskdef :name=>"schemaexport", :classname=>"org.hibernate.tool.hbm2ddl.SchemaExportTask", :classpath=>requires
           end
         end
 
