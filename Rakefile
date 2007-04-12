@@ -392,7 +392,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
-    compile.with Java.tools
+    compile.with Java.tools_jar
     package :jar
   end
 
