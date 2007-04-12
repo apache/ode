@@ -105,8 +105,10 @@ public class ExternalService implements PartnerRoleChannel {
 
             Options options = new Options();
             EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
-            __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
-            __log.debug("Message: " + soapEnv);
+            if (__log.isDebugEnabled()) {
+                __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
+                __log.debug("Message: " + soapEnv);
+            }
             options.setTo(axisEPR);
             String soapAction = _converter.getSoapAction(odeMex.getOperationName());
             options.setAction(soapAction);
@@ -178,7 +180,9 @@ public class ExternalService implements PartnerRoleChannel {
         String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
 
         if (partnerSessionId != null) {
-            __log.debug("Partner session identifier found for WSA endpoint: " + partnerSessionId);
+            if (__log.isDebugEnabled()) {
+                __log.debug("Partner session identifier found for WSA endpoint: " + partnerSessionId);
+            }
             targetEPR.setSessionId(partnerSessionId);
         }
         options.setProperty("targetSessionEndpoint", targetEPR);
@@ -187,7 +191,9 @@ public class ExternalService implements PartnerRoleChannel {
 
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
-                __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);
+                }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
 
@@ -206,7 +212,7 @@ public class ExternalService implements PartnerRoleChannel {
     }
 
     public void close() {
-        // TODO Auto-generated method stub
+        // nothing
     }
 
     public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
@@ -272,19 +278,27 @@ public class ExternalService implements PartnerRoleChannel {
                             .getMessage().getQName()) : odeMex.createMessage(odeMex.getOperation().getOutput().getMessage()
                             .getQName());
                     try {
-                        __log.debug("Received response for MEX " + odeMex);
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Received response for MEX " + odeMex);
+                        }
                         response.setMessage(odeMsgEl);
                         if (fault) {
                             if (faultType != null) {
-                                __log.debug("FAULT RESPONSE(" + faultType + "): " + DOMUtils.domToString(odeMsgEl));
+                                if (__log.isDebugEnabled()) {
+                                    __log.debug("FAULT RESPONSE(" + faultType + "): " + DOMUtils.domToString(odeMsgEl));
+                                }
                                 odeMex.replyWithFault(faultType, response);
                             } else {
-                                __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
+                                if (__log.isDebugEnabled()) {
+                                    __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
+                                }
                                 odeMex.replyWithFailure(FailureType.FORMAT_ERROR, reply.getEnvelope().getBody().getFault()
                                         .getText(), null);
                             }
                         } else {
-                            __log.debug("RESPONSE (NORMAL): " + DOMUtils.domToString(odeMsgEl));
+                            if (__log.isDebugEnabled()) {
+                                __log.debug("RESPONSE (NORMAL): " + DOMUtils.domToString(odeMsgEl));
+                            }
                             odeMex.reply(response);
 
                         }
