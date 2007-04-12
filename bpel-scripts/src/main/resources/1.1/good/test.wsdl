@@ -35,7 +35,7 @@
 
   <wsdl:types>
     <xsd:schema xmlns="uri:testing" targetNamespace="uri:testing">
-      <xsd:import namespace="uri:test1" schemaLocation="test1.xsd" />
+      <xsd:import namespace="uri:test1" schemaLocation="urn:/test1.xsd" />
       <xsd:complexType name="TComplex1">
         <xsd:sequence>
           <xsd:element name="StringElement" type="xsd:string" maxOccurs="1" minOccurs="0"/>
