@@ -149,9 +149,21 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE BPEL Compiler"
   define "bpel-compiler" do
-    compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:bpel-scripts", "ode:utils"),
+    compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
     package :jar
+    test.resources do 
+      # Need to copy a full directory structure without .svn
+      # Neither FileList nor FileUtils make that easy.
+      current = Dir.pwd
+      Dir.chdir("../bpel-scripts/src/main/resources") do
+        files = FileList['**/*'].exclude('.svn').to_a
+        # Creating directories
+        files.each { |f| target = "#{current}/target/test-classes/#{f}"; mkdir target if File.directory?(f) && !File.exist?(target) }
+        # Copying files
+        files.each { |f| cp f, "#{current}/target/test-classes/#{f}" if File.file?(f) }
+      end
+    end
   end
 
   desc "ODE JCA Connector Implementation"
@@ -240,7 +252,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE BPEL Tests"
   define "bpel-test" do
-    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:utils"),
+    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime", 
+      "ode:bpel-store", "ode:utils", "ode:bpel-epr"),
       DERBY, WSDL4J
 
     test.with projects("ode:bpel-obj", "ode:dao-jpa", "ode:jacob", "ode:bpel-schemas",
