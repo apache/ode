@@ -152,7 +152,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
     package :jar
-    test.resources do 
+    test.resources do
       # Need to copy a full directory structure without .svn
       # Neither FileList nor FileUtils make that easy.
       current = Dir.pwd
@@ -209,7 +209,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
     test.compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa", "ode:dao-hibernate", "ode:bpel-epr"),
-        BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction, 
+        BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
     test.junit.with HIBERNATE, DOM4J
@@ -240,18 +240,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:dao-hibernate", "ode:utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    compile do 
+    compile do
       Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
       open_jpa_enhance
     end
-    test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J, 
+    test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
       XERCES, XALAN, JAXEN, SAXON, OPENJPA
     package :jar
   end
 
   desc "ODE BPEL Tests"
   define "bpel-test" do
-    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime", 
+    compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-runtime",
       "ode:bpel-store", "ode:utils", "ode:bpel-epr"),
       DERBY, WSDL4J
 
@@ -392,7 +392,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
-    compile.with Java.tools_jar
+    compile.with Java.tools
     package :jar
   end
 
@@ -422,7 +422,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
 
     test.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra",
-      "ode:jca-server", "ode:jacob"), 
+      "ode:jca-server", "ode:jacob"),
       BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, QUARTZ, SAXON, SERVICEMIX, SPRING, TRANQL,
