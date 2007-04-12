@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 public class SchemaCaptureTest extends TestCase {
 
   public void testSchemaCapture() throws Exception {
+      System.out.println("GETTING RESOURCE " + TestResources.getRetailerSchema());
     String initialURI = TestResources.getRetailerSchema().toExternalForm();
     Map<URI, byte[]> s = XSUtils.captureSchema(initialURI, new DefaultXMLEntityResolver());
     // we expect the root schema and three includes
