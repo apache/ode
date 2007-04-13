@@ -376,7 +376,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "distro-jbi" do
     package(:zip).path("#{id}-#{version}").tap do |zip|
       distro_common.call(self, zip)
-      zip.path("jbi-component").include project("ode:jbi").package(:zip)
+      zip.include project("ode:jbi").package(:zip)
     end
   end
 
