@@ -946,7 +946,10 @@ abstract class BpelCompiler implements CompilerContext {
                 if (myRole == null)
                     throw new CompilationException(__cmsgs.errUndeclaredRole(plink.getMyRole(), plinkType.getName()));
                 oplink.myRoleName = myRole.getName();
-                oplink.myRolePortType = resolvePortType(myRole.getPortType());
+                QName portType = myRole.getPortType();
+                if (portType == null)
+                    throw new CompilationException(__cmsgs.errMissingMyRolePortType(portType, plink.getMyRole(), plinkType.getName()));
+                oplink.myRolePortType = resolvePortType(portType);
             }
 
             if (plink.isInitializePartnerRole() && !plink.hasPartnerRole()) {
@@ -958,7 +961,10 @@ abstract class BpelCompiler implements CompilerContext {
                     throw new CompilationException(__cmsgs.errUndeclaredRole(plink.getPartnerRole(), plinkType
                             .getName()));
                 oplink.partnerRoleName = partnerRole.getName();
-                oplink.partnerRolePortType = resolvePortType(partnerRole.getPortType());
+                QName portType = partnerRole.getPortType();
+                if (portType == null)
+                    throw new CompilationException(__cmsgs.errMissingPartnerRolePortType(portType, plink.getPartnerRole(), plinkType.getName()));
+                oplink.partnerRolePortType = resolvePortType(portType);
             }
 
             oplink.declaringScope = _structureStack.topScope();
