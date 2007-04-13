@@ -1,0 +1,7 @@
+bpel=Throw7-2.0.bpel
+wsdl=test.wsdl
+request.1.partnerlink=testPartnerLink
+request.1.operation=testOperation2
+request.1.msg=inMsg2.xml
+postConditionNamespace=t=http://ode/bpel/unit-test.wsdl
+postCondition=/message/ElementPart/t:TestElement/text()='success'

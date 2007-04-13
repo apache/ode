@@ -1,26 +1,29 @@
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.ode.utils;
 
-import com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl;
-import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
-import com.sun.org.apache.xerces.internal.parsers.SAXParser;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.xerces.jaxp.SAXParserFactoryImpl;
+import org.apache.xerces.parsers.DOMParser;
+import org.apache.xerces.parsers.SAXParser;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.xml.sax.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,16 +50,6 @@ public class XMLParserUtils {
     XERCES_P_ROOT + "external-schemaLocation";
   private static final String EXTERNAL_SCHEMA_NNS_LOC_XERCESP = 
     XERCES_P_ROOT + "external-noNamespaceSchemaLocation";
-
-  /**
-   * Set the necessary system properties to use the correct XML parsers
-   */
-  static {
-    System.setProperty("javax.xml.parsers.SAXParserFactory", 
-        "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
-    System.setProperty("javax.xml.parsers.DocumentBuilderFactory", 
-        "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl"); 
-  }
 
   /**
    * <p>

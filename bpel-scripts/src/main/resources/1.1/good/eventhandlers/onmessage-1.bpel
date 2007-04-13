@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!--
+Test the onAlarm functionality of eventHandlers
+-->
+<bp11:process xmlns:bp11="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  name="onalarm-1-1.1"
+  targetNamespace="http://www.fivesight.com/tests/1.1/eventHandlers/onalarm-1-1.1"
+  xmlns:foo="http://test.ns"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  
+  <bp11:partnerLinks>
+    <bp11:partnerLink name="harness" 
+      partnerLinkType="foo:outcomePartnerType"
+      myRole="outcomeRole"/>
+  </bp11:partnerLinks>
+  
+  <bp11:variables>
+    <bp11:variable name="v" messageType="foo:stringWrapperMessage" />
+    <bp11:variable name="bucket" messageType="foo:stringWrapperMessage" />
+    <bp11:variable name="v2" type="xsd:int" />
+  </bp11:variables>
+  
+  <bp11:correlationSets>
+    <bp11:correlationSet properties="foo:y" name="cset"/>
+  </bp11:correlationSets>
+  
+  <bp11:sequence>
+    <bp11:receive partnerLink="harness"
+      createInstance="yes"
+      portType="foo:testPort"
+      operation="testOperation"
+      variable="v">
+      <bp11:correlations>
+        <bp11:correlation set="cset" initiate="yes"/>
+      </bp11:correlations>
+    </bp11:receive>
+    <bp11:assign>
+      <bp11:copy>
+        <bp11:from expression="0" />
+        <bp11:to variable="v2" />
+      </bp11:copy>
+      <bp11:copy>
+        <bp11:from expression="'fail'" />
+        <bp11:to variable="v"
+          part="stringPart" />
+      </bp11:copy>
+    </bp11:assign>
+    <bp11:scope>
+      <bp11:eventHandlers>
+        <bp11:onMessage partnerLink="harness"
+          portType="foo:testPort"
+          operation="oneWayOperation"
+          variable="bucket">
+          <bp11:correlations>
+            <bp11:correlation set="cset" />
+          </bp11:correlations>
+          <bp11:sequence>
+            <bp11:assign>
+              <bp11:copy>
+                <bp11:from expression="bp11:getVariableData('v2') + 1" />
+                <bp11:to variable="v2" />
+              </bp11:copy>
+            </bp11:assign>
+          </bp11:sequence>
+        </bp11:onMessage>
+
+      </bp11:eventHandlers>
+      <bp11:sequence>
+
+        <bp11:wait for="'PT10S'" />
+        <bp11:switch>
+          <bp11:case condition="bp11:getVariableData('v2') &gt; 2">
+            <bp11:reply partnerLink="harness"
+              portType="foo:testPort"
+              operation="testOperation"
+              variable="bucket">
+            </bp11:reply>
+          </bp11:case>
+          <bp11:otherwise>
+            <bp11:reply partnerLink="harness"
+              portType="foo:testPort"
+              operation="testOperation"
+              variable="v" />
+          </bp11:otherwise>
+        </bp11:switch>
+      </bp11:sequence>
+    </bp11:scope>
+  </bp11:sequence>
+
+</bp11:process>
