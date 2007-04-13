@@ -1,9 +1,8 @@
 require "buildr/lib/buildr.rb"
 
-
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "2.0-SNAPSHOT"
-NEXT_VERSION = "2.1"
+VERSION_NUMBER = "1.0-RC1-incubating-SNAPSHOT"
+NEXT_VERSION = "1.0-RC1-incubating"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -79,8 +78,7 @@ repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
-repositories.deploy_to[:url] ||= "sftp://ode.intalio.org/var/www/public/maven2"
-
+repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
@@ -457,12 +455,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       chmod 0755, FileList[task.name + "/*.sh"], :verbose=>false
     end
     # Copy docs over.
-    docs = file("target/doc"=>FileList["src/main/dist/doc/*"]) do |task|
-      filter(task.prerequisites).into(task.name).run
-    end
+    # docs = file("target/doc"=>FileList["src/main/dist/doc/*"]) do |task|
+    #   filter(task.prerequisites).into(task.name).run
+    # end
 
-    build bins, docs
-    package(:zip).include bins, docs
+    build bins # , docs
+    package(:zip).include bins # , docs
   end
 
   desc "ODE Utils"
