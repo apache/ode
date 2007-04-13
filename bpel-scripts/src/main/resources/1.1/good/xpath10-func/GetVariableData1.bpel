@@ -1,0 +1,69 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!--
+bpws:getVariableData(varname, partname) Test Case
+- Test the XPath 1.0 function.
+- Uses varname,partname (non-query) signature
+- getVariableData function returns simple type
+-->
+
+<process name="GetVariableData1"
+  targetNamespace="http://ode/bpel/unit-test"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:test="uri:testing">
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+      partnerLinkType="test:PartnerLinkType1"
+      myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:Message1"/>
+    <variable name="var2" type="xsd:string"/>
+  </variables>
+
+  <sequence>
+    <receive
+      createInstance="yes"
+      name="startReceive"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      operation="opTwoWay"
+      variable="var1"/>
+
+    <assign name="assign1">
+
+      <copy>
+        <from expression="bpws:getVariableData('var1','StringPart1') "/>
+        <to variable="var1" part="StringPart2"/>
+      </copy>
+    </assign>
+
+    <reply name="endReply"
+      operation="opTwoWay"
+      partnerLink="testPartnerLink"
+      portType="test:PortType1"
+      variable="var1"/>
+
+  </sequence>
+
+</process>

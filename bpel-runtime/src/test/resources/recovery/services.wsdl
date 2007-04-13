@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<definitions targetNamespace="http://ode.apache.org/bpel/unit-test" 
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://ode.apache.org/bpel/unit-test"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+             xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema">
+      <import namespace="http://ode.apache.org/bpel/unit-test" schemaLocation="types.xsd"/>
+    </xsd:schema>
+  </types>
+
+  <message name="Request">
+    <part name="main" element="tns:RequestElement"/>
+  </message>
+  <message name="Response">
+    <part name="main" element="tns:ResponseElement"/>
+  </message>
+
+  <portType name="InstantiatingPortType">
+    <operation name="instantiate">
+      <input message="tns:Request"/>
+    </operation>
+  </portType>
+  <portType name="FailingPortType">
+    <operation name="invoke">
+      <input message="tns:Request"/>
+      <output message="tns:Response"/>
+    </operation>
+  </portType>
+  <portType name="ResponsePortType">
+    <operation name="respond">
+      <input message="tns:Response"/>
+    </operation>
+  </portType>
+
+  <binding name="InstantiatingBinding" type="tns:InstantiatingPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="instantiate">
+      <soap:operation/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+  </binding>
+
+  <binding name="FailingBinding" type="tns:FailingPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="invoke">
+      <soap:operation/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <binding name="ResponseBinding" type="tns:ResponsePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="respond">
+      <soap:operation/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+  </binding>
+
+  <service name="FailingService">
+    <port name="soap" binding="tns:FailingBinding">
+      <soap:address location="http://localhost/FailingEndpoint"/>
+    </port>
+  </service>
+
+  <service name="FailureToRecovery">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToRecovery"/>
+    </port>
+  </service>
+
+  <service name="FailureToCancel">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToCancel"/>
+    </port>
+  </service>
+
+  <service name="FailureToFault">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureToFault"/>
+    </port>
+  </service>
+
+  <service name="FailureInheritence">
+    <port name="soap" binding="tns:InstantiatingBinding">
+      <soap:address location="http://localhost/pxe/soap/FailureInheritence"/>
+    </port>
+  </service>
+
+  <service name="ResponseService">
+    <port name="soap" binding="tns:ResponseBinding">
+      <soap:address location="http://localhost/ResponseEndpoint"/>
+    </port>
+  </service>
+
+  <plnk:partnerLinkType name="FailingPartnerLinkType">
+    <plnk:role name="partner" portType="tns:FailingPortType"/>
+  </plnk:partnerLinkType>
+
+  <plnk:partnerLinkType name="InstantiatingPartnerLinkType">
+    <plnk:role name="me" portType="tns:InstantiatingPortType"/>
+    <plnk:role name="partner" portType="tns:ResponsePortType"/>
+  </plnk:partnerLinkType>
+
+</definitions>

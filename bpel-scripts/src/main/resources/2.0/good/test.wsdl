@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions
+  targetNamespace="uri:testing"
+  xmlns:tns="uri:testing"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+  xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+
+  <wsdl:documentation>
+    WSDL filed used by a lot of the test cases. Provides a message type
+    that features a cornucopia of various part types.
+  </wsdl:documentation>
+
+  <wsdl:types>
+    <xsd:schema xmlns="uri:testing" targetNamespace="uri:testing">
+      <xsd:complexType name="TComplex1">
+        <xsd:sequence>
+          <xsd:element name="StringElement" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="IntElement" type="xsd:int" maxOccurs="1" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:element name="Complex1" type="TComplex1"/>
+    </xsd:schema>
+  </wsdl:types>
+
+
+  <wsdl:message name="Message1">
+    <wsdl:documentation>
+      Message used to communicate with the test processes.
+      This message contains an assortment of different part types.
+    </wsdl:documentation>
+
+    <!-- The following parts appear as "virtual" ODE elements -->
+    <wsdl:part name="StringPart1" type="xsd:string"/>
+    <wsdl:part name="StringPart2" type="xsd:string"/>
+    <wsdl:part name="IntPart1" type="xsd:int"/>
+    <wsdl:part name="IntPart2" type="xsd:int"/>
+    <wsdl:part name="TComplex1Part1" type="tns:TComplex1"/>
+    <wsdl:part name="TComplex1Part2" type="tns:TComplex1"/>
+
+    <!-- The following parts appear as elements (note, the element name
+    is tns:Complex1 !)  -->
+    <wsdl:part name="Complex1Part1" element="tns:Complex1"/>
+  </wsdl:message>
+
+
+  <wsdl:portType name="PortType1">
+    <wsdl:documentation>
+      PortType exposed by the test processes.
+    </wsdl:documentation>
+
+    <wsdl:operation name="opTwoWay">
+      <wsdl:input  message="tns:Message1" name="Request"/>
+      <wsdl:output message="tns:Message1" name="Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="opOneWay">
+      <wsdl:input  message="tns:Message1" name="Request"/>
+    </wsdl:operation>
+
+  </wsdl:portType>
+
+  <bpws:property name="testProp" type="xsd:string" />
+  <bpws:propertyAlias
+      propertyName="tns:testProp"
+      messageType="tns:Message1"
+      part="StringPart1">
+  </bpws:propertyAlias>
+  <bpws:property name="testProp2" type="xsd:string" />
+  <bpws:propertyAlias
+      propertyName="tns:testProp2"
+      messageType="tns:Message1"
+      part="StringPart2">
+  </bpws:propertyAlias>
+
+  <plnk:partnerLinkType name="PartnerLinkType1">
+    <plnk:role name="me" portType="tns:PortType1"/>
+    <plnk:role name="you" portType="tns:PortType1"/>
+  </plnk:partnerLinkType>
+
+</wsdl:definitions>
+

@@ -1,0 +1,58 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!-- ANT Build File used for building JBI examples. This file
+     is imported from each example directory, and should not
+     be used directly. -->
+
+<project name="base-sa" >
+    <import file="base.xml" />
+
+    <property name="safilename" value="${ant.project.name}-sa.zip" />
+    <property name="safile" location="${build.dir}/${safilename}" />
+    <property name="sus.dir" location="${build.dir}/su" />
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <subant target="clean">
+            <fileset dir="${basedir}" includes="*/build.xml"/>
+        </subant>
+    </target>
+ 
+    <target name="service-units" depends="init" >
+        <subant target="service-unit">
+            <property name="dist.dir" value="${sus.dir}" />
+            <property name="ode.home" value="${ode.home}" />
+            <fileset dir="." includes="*/build.xml"/>
+        </subant>
+    </target>
+
+    <target name="init" depends="base.init">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${sus.dir}" />
+    </target>
+
+    <target name="assembly" depends="init,service-units">
+
+        <zip destfile="${safile}">
+            <fileset dir="${sus.dir}" includes="*" />
+            <zipfileset dir="." includes="jbi.xml" prefix="META-INF/" />
+        </zip>
+    </target>
+</project>
