@@ -131,13 +131,16 @@ module Buildr
 
   class Project
 
-    def package_as_jbi(args)
-      args[:type] = :zip
-      file_name = args[:file] || path_to(args[:path], Artifact.hash_to_file_name(args))
+    def package_as_jbi(file_name, options)
+      file_name = file_name.ext("zip")
       unless Rake::Task.task_defined?(file_name)
-        JBITask.define_task(file_name).tap { |jbi| package_extend jbi, args }
+        JBITask.define_task(file_name).tap do |jbi|
+          jbi.include options[:include] if options[:include]
+          [:component, :bootstrap].each { |key| jbi[key] = options[key] if options[key] }
+          yield jbi
+        end
       end
-      file(file_name).tap { |jbi| jbi.include args[:include] if args[:include] }
+      file(file_name)
     end
 
   end
