@@ -61,8 +61,12 @@ Testing
 
 Copy the content of examples directory in the distribution (the 3 sub-directories) to _tomcat/webapps/ode/WEB-INF/processes_, this will automatically deploy the 3 example processes. Use the sendsoap command located in the distribution _bin_ directory to send test messages. The messages to run each of the 3 examples are provided in their respective directory (testRequest.soap). For each example type:
 
-sendsoap http://localhost:8080/ode/processes/helloWorld axis2-examples/src/examples/HelloWorld2/testRequest.soap
+bin/sendsoap http://localhost:8080/ode/processes/helloWorld examples/HelloWorld2/testRequest.soap
 
-The sendsoap executable can be found in the distribution _bin_ directory. The URLs should be updated according to the address defined in the WSDL file for the process service.
+or
+
+bin/sendsoap.sh http://localhost:8080/ode/processes/helloWorld examples/HelloWorld2/testRequest.soap
+
+The URLs should be updated according to the address defined in the WSDL file for the process service.
 
 If you want to use an IDE to explore the PXE sources or debug PXE executables, Eclipse .project and .classpath files are present in all the modules; simply choose File|Import from the Eclipse menu, and select the root ODE directory. You may also use Maven to generate project files for other IDEs. See the Maven documentation for details.
