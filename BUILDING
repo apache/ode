@@ -1,1 +1,68 @@
-Empty for now but meant to be the building instructions including in the source release.
+================================
+Building Apache ODE from Sources
+================================
+
+If you downloaded the source distribution of ODE you can safely ignore the first paragraph. It's only useful if you want the bleeding edge of ODE.
+
+Getting the source code
+-----------------------
+
+First you will have to make sure that you have [Subversion|http://svn.tigris.org]. If you don't know what Subversion is or don't  have it installed, check [here|http://svnbook.red-bean.com]. Once installed run:
+
+svn checkout http://svn.apache.org/repos/asf/incubator/ode/trunk ode
+
+For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://incubator.apache.org/ode/source-code.html).
+
+Building With Maven2
+--------------------
+
+You'll need to install Maven2 (http://maven.apache.org/) to build Ode. Just follow the installation instructions (http://maven.apache.org/download.html#Installation). Then open a command in the source root and type:
+
+mvn install
+
+This will compile and install all necessary artifacts in your local repository.
+
+You may find that the optimistic claim made above is---well, let's just say, not reflected by reality. In fact you are likely to experience the following problems:
+    * tools.jar library cannot be found: make sure JAVA_HOME points to a Java JDK, /not/ a JRE.
+    * OpenJPA enhancer cannot find necessary libraries: re-run the mvn install and all should be well.
+    * Build fails because you're missing dao-jpa-ojpa-derby or dao-hibernate-db-derby. Go into the directory of the missing module, run mvn install, go back to the root directory and run Maven again.
+
+After everything has been compiled, it's rather easy to produce a standalone distribution of ODE. Just go into the _distro-axis2_ directory (or distro-jbi if you're interested in the JBI integration) and type: 
+
+mvn install
+
+Building With Buildr
+--------------------
+
+If you already have Ruby installed on your machine (which is true for most Linux and Mac computers), you will probably find building with Buildr easier. You will need to following things:
+
+ * Ruby 1.9 or later with RubyGems 0.9 or later. As mentioned, you probably already have this installed. For Windows users using the Ruby One-Click Installer is the easiest (http://rubyforge.org/projects/rubyinstaller/).
+ * Buildr. Just install it by running 'gem install buildr' (and accept all dependencies).
+
+Building is then pretty simple. Open a command in the source root directory and run:
+
+rake package
+
+To try the test cases bundled with ODE:
+
+rake test
+
+It just works! For more information about buildr see http://buildr.rubyforge.org/.
+
+Running in Tomcat
+-----------------
+
+You should find the full distribution in the distro-axis/target directory. Unzip it somewhere on your disk, everything needed is inside.
+
+Get the WAR file in the distribution root directory, rename it to *ode.war* and copy this file to Tomcat's webapp directory. You should get a blank page under http://localhost:8080/ode. The Ode WAR includes its own embedded database (Derby - http://db.apache.org/derby) so you don't have to worry about configuring any external database for now.
+
+Testing
+-------
+
+Copy the content of examples directory in the distribution (the 3 sub-directories) to _tomcat/webapps/ode/WEB-INF/processes_, this will automatically deploy the 3 example processes. Use the sendsoap command located in the distribution _bin_ directory to send test messages. The messages to run each of the 3 examples are provided in their respective directory (testRequest.soap). For each example type:
+
+sendsoap http://localhost:8080/ode/processes/helloWorld axis2-examples/src/examples/HelloWorld2/testRequest.soap
+
+The sendsoap executable can be found in the distribution _bin_ directory. The URLs should be updated according to the address defined in the WSDL file for the process service.
+
+If you want to use an IDE to explore the PXE sources or debug PXE executables, Eclipse .project and .classpath files are present in all the modules; simply choose File|Import from the Eclipse menu, and select the root ODE directory. You may also use Maven to generate project files for other IDEs. See the Maven documentation for details.
