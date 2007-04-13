@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.o;
 
-import javax.xml.namespace.QName;
-
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
 
 /**
  * XSD-typed variable type.
@@ -42,7 +42,7 @@ public class OXsdTypeVarType extends OVarType {
         if (simple)
             return doc.createTextNode("");
         else {
-            Element el = doc.createElement("xsd-complex-type-wrapper");
+            Element el = doc.createElementNS(null, "xsd-complex-type-wrapper");
             return el;
         }
     }

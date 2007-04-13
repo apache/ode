@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:tns="http://www.example.org/Assignment" xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:Client="http://example.com/ComplexVariables/Client" xmlns:diag="http://example.com/ComplexVariables" xmlns:Variable="http://example.com/ComplexVariables/Variable" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://example.com/ComplexVariables">
+    <wsdl:import namespace="http://example.com/ComplexVariables/Variable" location="ComplexVariables-Variable.wsdl"/>
+    <pnlk:partnerLinkType name="ClientAndVariablePlk">
+        <pnlk:role name="Variable_for_Client" portType="Variable:ForClient"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

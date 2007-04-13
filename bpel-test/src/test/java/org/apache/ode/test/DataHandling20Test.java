@@ -35,6 +35,9 @@ public class DataHandling20Test extends BPELTestAbstract {
     public void testAssignActivity2() throws Throwable {
         go("src/test/resources/bpel/2.0/TestAssignActivity2");
     }
+    public void testAssignComplex() throws Throwable {
+        go("src/test/resources/bpel/2.0/TestAssignComplex");
+    }
     public void testSimpleTypeParts() throws Throwable {
     	go("target/test-classes/bpel/2.0/TestSimpleTypeParts");
     }
