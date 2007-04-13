@@ -433,4 +433,13 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
     public CompilationMessage errProcessNamespaceNotSpecified() {
         return this.formatCompilationMessage("The process namespace was not specified.");
     }
+
+    public CompilationMessage errMissingMyRolePortType(QName portType, String myRole, QName plnkType) {
+        return formatCompilationMessage("Missing portType {0} on partnerLinkType {1} for myRole {2}", portType, plnkType, myRole);
+    }
+
+    public CompilationMessage errMissingPartnerRolePortType(QName portType, String partnerRole, QName plnkType) {
+        return formatCompilationMessage("Missing portType {0} on partnerLinkType {1} for partnerRole {2}", portType, plnkType, partnerRole);
+    }
+
 }
