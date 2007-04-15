@@ -132,7 +132,10 @@ module Buildr
   class Project
 
     def package_as_jbi(file_name, options)
+      # The file name extension is zip, not jbi. And we also need to reset
+      # the type on the artifact specification.
       file_name = file_name.ext("zip")
+      options[:type] = :zip
       unless Rake::Task.task_defined?(file_name)
         JBITask.define_task(file_name).tap do |jbi|
           jbi.include options[:include] if options[:include]
