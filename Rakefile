@@ -1,8 +1,8 @@
 require "buildr/lib/buildr.rb"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.0-RC1-incubating-SNAPSHOT"
-NEXT_VERSION = "1.0-RC1-incubating"
+VERSION_NUMBER = "1.3"
+NEXT_VERSION = "1.4"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -80,6 +80,7 @@ repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
 
+desc "Apache ODE"
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   compile.options.source = "1.5"
@@ -468,5 +469,14 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
     package :jar
   end
+
+  package(:zip, :id=>"#{id}-#{version}", :classifier=>"sources").tap do |zip|
+    `svn status -v`.reject { |l| l[0] == ?? }.
+      map { |l| l.split.last }.reject { |f| File.directory?(f) }.
+      each { |f| zip.include f, :as=>f }
+  end
+
+  javadoc projects("ode:bpel-api", "ode:bpel-epr")
+  package :zip, :id=>"#{id}-#{version}", :classifier=>"docs", :include=>javadoc.target
 
 end
