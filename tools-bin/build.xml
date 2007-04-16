@@ -25,10 +25,8 @@
 
     <property name="src" value="src/main" />
     <property name="src.bin" value="${src}/dist/bin" />
-    <property name="src.doc" value="${src}/dist/doc" />
     <property name="stage" location="target/stage" />
     <property name="stage.bin" location="${stage}/bin" />
-    <property name="stage.doc" location="${stage}/doc" />
 
 
     <target name="tarball" depends="stage">
@@ -38,7 +36,7 @@
         </tar>
     </target>
 
-    <target name="stage" depends="stage_executables, stage_doc" description="stage a distribution"/>
+    <target name="stage" depends="stage_executables" description="stage a distribution"/>
 
     <!-- Make all the UNIX/Windows executables. -->
     <target name="stage_executables">
@@ -52,12 +50,12 @@
         <chmod perm="755" dir="${stage.bin}" includes="*" excludes="*.bat" />
     </target>
 
-    <target name="stage_doc">
+    <!-- target name="stage_doc">
         <copy todir="${stage.doc}" overwrite="true">
             <fileset dir="${src.doc}">
                 <include name="*.*" />
             </fileset>
         </copy>
-    </target>
+    </target -->
 
 </project>
