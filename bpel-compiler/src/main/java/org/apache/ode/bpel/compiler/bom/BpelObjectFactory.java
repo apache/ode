@@ -62,6 +62,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_WAIT, WaitActivity.class);
         _mappings.put(Bpel20QNames.FINAL_THROW, ThrowActivity.class);
         _mappings.put(Bpel20QNames.FINAL_COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATE_SCOPE, CompensateActivity.class);
         _mappings.put(Bpel20QNames.FINAL_RETHROW, RethrowActivity.class);
         _mappings.put(Bpel20QNames.FINAL_EXIT, TerminateActivity.class);
         _mappings.put(Bpel20QNames.FINAL_FLOW, FlowActivity.class);

@@ -56,6 +56,7 @@ public abstract class Bpel20QNames {
     public static final QName FINAL_COMPENSATIONHANDLER = newFinalQName("compensationHandler");
     public static final QName FINAL_TERMINATIONHANDLER = newFinalQName("terminationHandler");
     public static final QName FINAL_COMPENSATE = newFinalQName("compensate");
+    public static final QName FINAL_COMPENSATE_SCOPE = newFinalQName("compensateScope");
     public static final QName FINAL_EVENTHANDLERS = newFinalQName("eventHandlers");
     public static final QName FINAL_ONEVENT = newFinalQName("onEvent");
     public static final QName FINAL_ONMESSAGE = newFinalQName("onMessage");
