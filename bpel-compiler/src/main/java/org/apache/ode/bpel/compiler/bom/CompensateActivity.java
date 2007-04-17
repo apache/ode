@@ -36,7 +36,7 @@ public class CompensateActivity extends Activity {
      * @return scope compensated by this activity
      */
     public String getScopeToCompensate() {
-        return getAttribute("scope", null);
+        return getAttribute("target", getAttribute("scope", null));
     }
 
 }
