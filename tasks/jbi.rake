@@ -107,6 +107,9 @@ module Buildr
       # Create a JBI descriptor (jbi.xml) from the component/bootstrap specification.
       def descriptor()
         delegation = lambda { |key| "#{key || :parent}-first" }
+        path_elements = lambda do |xml, libs|
+          libs.each { |lib| xml.tag! "path-element", "lib/#{lib.to_s.pathmap('%f')}" }
+        end
         xml = Builder::XmlMarkup.new(:indent=>2)
         xml.instruct!
         xml.jbi :xmlns=>"http://java.sun.com/xml/ns/jbi", :version=>"1.0" do
@@ -118,9 +121,9 @@ module Buildr
               xml.description component.description
             end
             xml.tag!("component-class-name", component.class_name)
-            xml.tag!("component-class-path") { component.libs.each { |lib| xml.tag! "path-element", File.basename(lib.to_s) } }
+            xml.tag!("component-class-path") { path_elements[xml, component.libs] }
             xml.tag!("bootstrap-class-name", bootstrap.class_name)
-            xml.tag!("bootstrap-class-path") { bootstrap.libs.each { |lib| xml.tag! "path-element", File.basename(lib.to_s) } }
+            xml.tag!("bootstrap-class-path") { path_elements[xml, bootstrap.libs] }
           end
         end
       end
