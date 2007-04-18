@@ -31,13 +31,13 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Basic implementation of the {@link ResourceFinder} interface. Resolves
  * URIs relative to a base URI specified at the time of construction.
- *  
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */
 public class DefaultResourceFinder implements ResourceFinder {
-    private static final Log __log = LogFactory.getLog(DefaultResourceFinder.class); 
-    
+    private static final Log __log = LogFactory.getLog(DefaultResourceFinder.class);
+
     private File _suDir;
 
     /**
@@ -58,21 +58,30 @@ public class DefaultResourceFinder implements ResourceFinder {
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
         URI suURI = _suDir.toURI();
-        
-        // Note that if we get an absolute URI, the relativize operation will simply 
-        // return the absolute URI. 
+
+        if (uri.isAbsolute() && uri.getScheme().equals("file")) {
+            try {
+                return uri.toURL().openStream();
+            } catch (Exception except) {
+                __log.fatal("openResource: unable to open file URL " + uri + "; " + except.toString());
+                return null;
+            }
+        }
+
+        // Note that if we get an absolute URI, the relativize operation will simply
+        // return the absolute URI.
         URI relative = suURI.relativize(uri);
         if (relative.isAbsolute() && !relative.getScheme().equals("urn")) {
            __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
            return null;
         }
-        
+
         File f = new File(suURI.getPath(),relative.getPath());
         if (!f.exists()) {
             __log.debug("fileNotFound: " + f);
             return null;
         }
-        
+
         return new FileInputStream(f);
     }
 
