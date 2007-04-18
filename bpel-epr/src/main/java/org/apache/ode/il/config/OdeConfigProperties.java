@@ -21,6 +21,7 @@ package org.apache.ode.il.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.SystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -148,6 +149,11 @@ public class OdeConfigProperties {
         } else {
             __log.debug("config file does not exists: " + _cfgFile);
             throw new FileNotFoundException("" + _cfgFile);
+        }
+        for (Object key : _props.keySet()) {
+        	String value = (String) _props.get(key);
+        	value = SystemUtils.replaceSystemProperties(value);
+        	_props.put(key, value);
         }
     }
 
