@@ -118,9 +118,9 @@ module Buildr
               xml.description component.description
             end
             xml.tag!("component-class-name", component.class_name)
-            xml.tag!("component-class-path") { component.libs.each { |lib| xml.tag! "path-element", lib.to_s } }
+            xml.tag!("component-class-path") { component.libs.each { |lib| xml.tag! "path-element", File.basename(lib.to_s) } }
             xml.tag!("bootstrap-class-name", bootstrap.class_name)
-            xml.tag!("bootstrap-class-path") { bootstrap.libs.each { |lib| xml.tag! "path-element", lib.to_s } }
+            xml.tag!("bootstrap-class-path") { bootstrap.libs.each { |lib| xml.tag! "path-element", File.basename(lib.to_s) } }
           end
         end
       end
