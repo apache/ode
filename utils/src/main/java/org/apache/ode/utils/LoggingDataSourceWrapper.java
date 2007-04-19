@@ -40,13 +40,13 @@ public class LoggingDataSourceWrapper implements DataSource {
 
     public Connection getConnection() throws SQLException {
         Connection conn = new LoggingConnectionWrapper(_wrapped.getConnection(), _log);
-        print("getConnection (tx=" + conn.getTransactionIsolation() + ")");
+        if (shouldPrint()) print("getConnection (tx=" + conn.getTransactionIsolation() + ")");
         return conn;
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
         Connection conn =  new LoggingConnectionWrapper(_wrapped.getConnection(username, password), _log);
-        print("getConnection (tx=" + conn.getTransactionIsolation() + ")");
+        if (shouldPrint()) print("getConnection (tx=" + conn.getTransactionIsolation() + ")");
         return conn;
     }
 
@@ -64,6 +64,12 @@ public class LoggingDataSourceWrapper implements DataSource {
 
     public void setLogWriter(PrintWriter out) throws SQLException {
         _wrapped.setLogWriter(out);
+    }
+
+    private boolean shouldPrint() {
+        if (_log != null)
+            return _log.isDebugEnabled();
+        else return true;
     }
 
     private void print(String str) {
