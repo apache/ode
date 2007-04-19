@@ -68,7 +68,6 @@ public abstract class BPELTestAbstract extends TestCase {
         if ( Boolean.getBoolean("org.apache.ode.test.persistent")) {
             emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
             em = emf.createEntityManager();
-            String pr = Persistence.PERSISTENCE_PROVIDER;
             _cf = new BPELDAOConnectionFactoryImpl();
             server.setDaoConnectionFactory(_cf);
             scheduler = new MockScheduler() {
