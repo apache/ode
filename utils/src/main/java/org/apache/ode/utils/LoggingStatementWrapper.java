@@ -729,14 +729,14 @@ public class LoggingStatementWrapper implements CallableStatement {
             buf.append("bound ");
             for (Map.Entry<Integer, Object> entry : _paramsIdxr.entrySet()) {
                 try {
-                    buf.append("(").append(entry.getKey()).append(",").append(entry.getValue().toString()).append(") ");
+                    buf.append("(").append(entry.getKey()).append(",").append(entry.getValue()).append(") ");
                 } catch (Throwable e) {
                     // We don't want to mess with the connection just for logging
                 }
             }
             for (Map.Entry<String, Object> entry : _paramsStr.entrySet()) {
                 try {
-                    buf.append("(").append(entry.getKey()).append(",").append(entry.getValue().toString()).append(") ");
+                    buf.append("(").append(entry.getKey()).append(",").append(entry.getValue()).append(") ");
                 } catch (Throwable e) {
                     // We don't want to mess with the connection just for logging
                 }
