@@ -470,13 +470,13 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
-  package(:zip, :id=>"#{id}-#{version}", :classifier=>"sources").tap do |zip|
+  package(:zip, :classifier=>"sources").tap do |zip|
     `svn status -v`.reject { |l| l[0] == ?? }.
       map { |l| l.split.last }.reject { |f| File.directory?(f) }.
       each { |f| zip.include f, :as=>f }
   end
 
   javadoc projects("ode:bpel-api", "ode:bpel-epr")
-  package :zip, :id=>"#{id}-#{version}", :classifier=>"docs", :include=>javadoc.target
+  package :zip, :classifier=>"docs", :include=>javadoc.target
 
 end
