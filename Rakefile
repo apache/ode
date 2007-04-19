@@ -151,18 +151,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
     package :jar
-    test.resources do
-      # Need to copy a full directory structure without .svn
-      # Neither FileList nor FileUtils make that easy.
-      current = Dir.pwd
-      Dir.chdir("../bpel-scripts/src/main/resources") do
-        files = FileList['**/*'].exclude('.svn').to_a
-        # Creating directories
-        files.each { |f| target = "#{current}/target/test-classes/#{f}"; mkdir target if File.directory?(f) && !File.exist?(target) }
-        # Copying files
-        files.each { |f| cp f, "#{current}/target/test-classes/#{f}" if File.file?(f) }
-      end
-    end
+    test.resources.include project("ode:bpel-scripts").path_to("src/main/resources/*")
   end
 
   desc "ODE JCA Connector Implementation"
