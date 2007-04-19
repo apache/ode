@@ -70,7 +70,8 @@ public class SyntaxTest extends TestCase {
   
   public void doTest(String query) throws Exception {
     Builder<String> builder = BuilderFactory.getInstance().createBuilder();
-    final org.apache.ode.ql.tree.nodes.Node rootNode = builder.build(query);
+    @SuppressWarnings("unused")
+	final org.apache.ode.ql.tree.nodes.Node rootNode = builder.build(query);
   }
   
 }

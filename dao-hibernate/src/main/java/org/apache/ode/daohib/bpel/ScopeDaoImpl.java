@@ -231,7 +231,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     @SuppressWarnings("unchecked")
     public List<BpelEvent> listEvents() {
 
-        CriteriaBuilder cb = new CriteriaBuilder();
+//        CriteriaBuilder cb = new CriteriaBuilder();
         Criteria crit = _sm.getSession().createCriteria(HBpelEvent.class);
 //        if (efilter != null)
 //            cb.buildCriteria(crit, efilter);

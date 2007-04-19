@@ -19,9 +19,7 @@
 package org.apache.ode.bpel.compiler;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,16 +28,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
-import org.xml.sax.InputSource;
 
 
 /**
