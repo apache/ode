@@ -48,7 +48,6 @@ import java.util.List;
 @Entity
 @Table(name="ODE_SCOPE")
 @NamedQueries({
-    @NamedQuery(name="PLinkByModelId", query="SELECT pl FROM PartnerLinkDAOImpl as pl WHERE pl._partnerLinkModelId = :mid"),
     @NamedQuery(name="ScopeEvents", query="SELECT se FROM EventDAOImpl as se WHERE se._scopeId = :sid")
         })
 public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
@@ -137,9 +136,12 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 	}
 
 	public PartnerLinkDAO getPartnerLink(int plinkModelId) {
-        Query qry = getEM().createNamedQuery("PLinkByModelId");
-        qry.setParameter("mid", plinkModelId);        
-        return getSingleResult(qry);
+        for (PartnerLinkDAO pLink : getPartnerLinks()) {
+            if (pLink.getPartnerLinkModelId() == plinkModelId) {
+                return pLink;
+            }
+        }
+        return null;
 	}
 
 	public Collection<PartnerLinkDAO> getPartnerLinks() {
