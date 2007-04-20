@@ -29,7 +29,7 @@ public class SystemUtilsTest extends TestCase {
 
 	static final String REPLACE = "${" + PROP + "}";
 
-	static final String VALUE = "foo";
+	static final String VALUE = "foo\bar$bar";
 
 	public void setUp() {
 		System.getProperties().setProperty(PROP, VALUE);
@@ -42,6 +42,9 @@ public class SystemUtilsTest extends TestCase {
 	public void testReplaceSystemProperties() throws Exception {
 		// no replacement
 		assertReplace("xxx", "xxx");
+
+		// no substitutions for special characters
+		assertReplace("\\aaa\\\\bbb$$$ccc$", "\\aaa\\\\bbb$$$ccc$");
 
 		// empty replacement
 		assertReplace("${}", "${}");
