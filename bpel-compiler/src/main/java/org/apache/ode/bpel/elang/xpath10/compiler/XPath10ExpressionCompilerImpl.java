@@ -111,6 +111,9 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
 
         xpathStr = node.getNodeValue();
         xpathStr = xpathStr.trim();
+        if (xpathStr.length() == 0) {
+        	throw new CompilationException(__msgs.errXPathSyntax(xpathStr));
+        }
 
         try {
             XPathReader reader = XPathReaderFactory.createReader();
