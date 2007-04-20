@@ -20,11 +20,17 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axis2.AxisFault;
-import org.apache.ode.bpel.iapi.*;
-
+import javax.wsdl.Definition;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
+
+import org.apache.axis2.AxisFault;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.ProcessStore;
 
 /**
  * AXIS2 implementation of the {@link org.apache.ode.bpel.iapi.BindingContext}
@@ -44,8 +50,11 @@ public class BindingContextImpl implements BindingContext {
 
     public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         try {
-            ODEService svc = _server.createService(_store.getProcessConfiguration(processId).getDefinitionForService(myRoleEndpoint.serviceName)
-                    , myRoleEndpoint.serviceName, myRoleEndpoint.portName);
+        	Definition wsdl = _store.getProcessConfiguration(processId).getDefinitionForService(myRoleEndpoint.serviceName);
+        	if (wsdl == null)
+        		throw new ContextException("Unable to access WSDL definition to activate MyRole endpoint for service " + myRoleEndpoint.serviceName
+        				+ " and port " + myRoleEndpoint.portName);
+            ODEService svc = _server.createService(wsdl, myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {
             throw new ContextException("Could not activate endpoint for service " + myRoleEndpoint.serviceName
