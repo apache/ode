@@ -155,7 +155,7 @@ public class SystemUtils {
 			String property = str.substring(match.start() + 2, match.end() - 1);
 			String value = System.getProperty(property);
 			if (value != null) {
-				str = match.replaceFirst(value);
+				str = match.replaceFirst(Matcher.quoteReplacement(value));
 			} else {
 				// if the system property doesn't exist, no substitution and skip to next
 				start = match.end();
