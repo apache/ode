@@ -96,7 +96,7 @@
         <saxonVersion>8.7</saxonVersion>
         <staxApiVersion>1.0</staxApiVersion>
         <staxVersion>1.1.2-dev</staxVersion>
-        <wsdl4jVersion>1.5.2</wsdl4jVersion>
+        <wsdl4jVersion>1.6.1</wsdl4jVersion>
         <xapoolVersion>1.4</xapoolVersion>
         <xercesVersion>2.8.0</xercesVersion>
         <xmlResolverVersion>1.1</xmlResolverVersion>
