@@ -1,8 +1,8 @@
-require "buildr/lib/buildr.rb"
+require "buildr"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3"
-NEXT_VERSION = "1.4"
+VERSION_NUMBER = "1.0-SNAPSHOT"
+NEXT_VERSION = "1.0"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -407,6 +407,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
       jbi.merge project("ode:dao-hibernate-db").package(:zip)
       jbi.merge project("ode:dao-jpa-ojpa-derby").package(:zip)
+      jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
     test.with projects("ode:dao-jpa", "ode:bpel-compiler", "ode:bpel-api-jca", "ode:jca-ra",
