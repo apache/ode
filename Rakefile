@@ -150,8 +150,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "bpel-compiler" do
     compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
+    test.resources { filter(test.resources.target=>project("ode:bpel-scripts").path_to("src/main/resources")).run }
     package :jar
-    test.resources.include project("ode:bpel-scripts").path_to("src/main/resources/*")
   end
 
   desc "ODE JCA Connector Implementation"
