@@ -337,7 +337,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     zip.merge project("ode:tools-bin").package(:zip)
     zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
       COMMONS.pool, COMMONS.collections, JAXEN,
-      SAXON, LOG4J, WSDL4J)
+      SAXON, LOG4J, WSDL4J, XERCES)
     projects("ode:utils", "ode:tools", "ode:bpel-compiler", "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
       map(&:packages).flatten.each do |pkg|
       zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
