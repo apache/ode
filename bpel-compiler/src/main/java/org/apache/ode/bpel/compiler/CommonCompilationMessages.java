@@ -85,6 +85,11 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("Must specify an import type.");
     }
 
+    /** Missing import location. */
+    public CompilationMessage errMissingImportLocation() {
+        return this.formatCompilationMessage("Missing import location.");
+    }
+
     /** Attempt to reference undeclared property "{0}". */
     public CompilationMessage errUndeclaredProperty(QName propertyName) {
         return this.formatCompilationMessage("Attempt to reference undeclared property \"{0}\".",
