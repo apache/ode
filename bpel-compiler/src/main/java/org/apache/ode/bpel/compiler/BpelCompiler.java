@@ -764,6 +764,9 @@ abstract class BpelCompiler implements CompilerContext {
             if (imprt.getImportType() == null)
                 throw new CompilationException(__cmsgs.errUnspecifiedImportType().setSource(imprt));
 
+            if (imprt.getLocation() == null)
+                throw new CompilationException(__cmsgs.errMissingImportLocation().setSource(imprt));
+
             if (Import.IMPORTTYPE_WSDL11.equals(imprt.getImportType())) {
                 addWsdlImport(current, imprt.getLocation(), imprt);
             } else if (Import.IMPORTTYPE_XMLSCHEMA10.equals(imprt.getImportType())) {

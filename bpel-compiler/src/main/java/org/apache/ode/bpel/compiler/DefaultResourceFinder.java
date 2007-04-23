@@ -52,6 +52,12 @@ public class DefaultResourceFinder implements ResourceFinder {
      * @param suDir base path for relative URIs.
      */
     public DefaultResourceFinder(File suDir) {
+        if (suDir == null) {
+            throw new IllegalArgumentException("Argument 'suDir' is null");
+        }
+        if (!suDir.exists()) {
+            throw new IllegalArgumentException("Directory does not exist: " + suDir);
+        }
         _suDir = suDir;
     }
 
