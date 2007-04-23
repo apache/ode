@@ -199,7 +199,7 @@ public class BpelC {
         if (_wsdlFinder != null) {
             wf = _wsdlFinder;
         } else {
-            wf = new DefaultResourceFinder(_bpelFile.getParentFile());
+            wf = new DefaultResourceFinder(_bpelFile.getAbsoluteFile().getParentFile());
         }
 
         CompileListener clistener = new CompileListener() {
