@@ -40,7 +40,8 @@ public class SyntaxTest extends TestCase {
   protected void setUp() throws Exception {
       super.setUp();
       
-      casesFiles = new File(TESTS_DIR).listFiles();
+      casesFiles = new File(System.getProperty("baseDir")).listFiles();
+      //casesFiles = new File(TESTS_DIR).listFiles();
   }
   
   public void test() throws Exception {

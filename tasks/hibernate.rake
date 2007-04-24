@@ -70,4 +70,13 @@ module Buildr
 
     end
   end
+
+  class Project
+  
+    def hibernate_doclet(options = {})
+      Java::Hibernate.xdoclet({ :sources=>compile.sources, :target=>compile.target }.merge(options))
+    end
+
+  end
+
 end

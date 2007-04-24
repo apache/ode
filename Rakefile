@@ -150,7 +150,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "bpel-compiler" do
     compile.with projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas", "ode:utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
-    test.resources { filter(test.resources.target=>project("ode:bpel-scripts").path_to("src/main/resources")).run }
+    test.resources { filter(project("ode:bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
     package :jar
   end
 
@@ -182,7 +182,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
     pkg_name = "org.apache.ode.ql.jcc"
-    jjtree = jjtree("src/main/jjtree", :in_package=>pkg_name)
+    jjtree = jjtree(_("src/main/jjtree"), :in_package=>pkg_name)
     compile.from javacc(jjtree, :in_package=>pkg_name), jjtree
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-obj", "ode:jacob", "ode:utils")
 
@@ -213,7 +213,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Schemas"
   define "bpel-schemas" do
-    compile_xml_beans "src/main/xsd/*.xsdconfig", "src/main/xsd"
+    compile_xml_beans _("src/main/xsd/*.xsdconfig"), _("src/main/xsd")
     package :jar
   end
 
@@ -228,10 +228,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:dao-hibernate", "ode:utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
 
-    compile do
-      Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
-      open_jpa_enhance
-    end
+    compile { hibernate_doclet :excludedtags=>"@version,@author,@todo" }
+    compile { open_jpa_enhance }
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
       XERCES, XALAN, JAXEN, SAXON, OPENJPA
     package :jar
@@ -255,9 +253,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "dao-hibernate" do
     compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-ql", "ode:utils"),
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
-    compile do
-      Java::Hibernate.xdoclet :sources=>compile.sources, :target=>compile.target, :excludedtags=>"@version,@author,@todo"
-    end
+    compile { hibernate_doclet :excludedtags=>"@version,@author,@todo" }
 
     test.with project("ode:bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
@@ -267,8 +263,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Hibernate Compatible Databases"
   define "dao-hibernate-db" do
-    predefined_for = lambda { |name| file("src/main/sql/tables_#{name}.sql") }
-    properties_for = lambda { |name| file("src/main/sql/ode.#{name}.properties") }
+    predefined_for = lambda { |name| _("src/main/sql/tables_#{name}.sql") }
+    properties_for = lambda { |name| _("src/main/sql/ode.#{name}.properties") }
 
     dao_hibernate = project("ode:dao-hibernate").compile.target
     bpel_store = project("ode:bpel-store").compile.target
@@ -284,15 +280,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       end
     end
 
-    runtime_sql = export[ properties_for[:derby], dao_hibernate, "target/runtime.sql" ]
-    store_sql = export[ properties_for[:derby], bpel_store, "target/store.sql" ]
-    derby_sql = concat("target/derby.sql"=>[ predefined_for[:derby], runtime_sql, store_sql ])
-    derby_db = Derby.create("target/derby/hibdb"=>derby_sql)
+    runtime_sql = export[ properties_for[:derby], dao_hibernate, _("target/runtime.sql") ]
+    store_sql = export[ properties_for[:derby], bpel_store, _("target/store.sql") ]
+    derby_sql = concat(_("target/derby.sql")=>[ predefined_for[:derby], runtime_sql, store_sql ])
+    derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
     build derby_db
 
     %w{ firebird hsql postgres sqlserver }.each do |db|
-      partial = export[ properties_for[db], dao_hibernate, "target/partial.#{db}.sql" ]
-      build concat("target/#{db}.sql"=>[ predefined_for[db], partial ])
+      partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
+      build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
 
     package :zip, :include=>derby_db
@@ -309,18 +305,15 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    # TODO: find if there's any way to simplify all of this.
-    # Create the Derby SQL file using the OpenJPA mapping tool, and
-    # append the Quartz DDL at the end.
-    derby_xml = "src/main/descriptors/persistence.derby.xml"
-    quartz_sql = "src/main/scripts/quartz-derby.sql"
+    derby_xml = _("src/main/descriptors/persistence.derby.xml")
+    quartz_sql = _("src/main/scripts/quartz-derby.sql")
     partial_sql = file("target/partial.sql"=>derby_xml) do |task|
-      mkpath "target", :verbose=>false
+      mkpath _("target"), :verbose=>false
       Java::OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
         :classpath=>projects("ode:bpel-store", "ode:dao-jpa", "ode:bpel-api", "ode:bpel-dao", "ode:utils" )
     end
-    derby_sql = concat("target/derby.sql"=>[partial_sql, quartz_sql])
-    derby_db = Derby.create("target/derby/jpadb"=>derby_sql)
+    derby_sql = concat(_("target/derby.sql")=>[partial_sql, quartz_sql])
+    derby_db = Derby.create(_("target/derby/jpadb")=>derby_sql)
 
     test.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
@@ -333,7 +326,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   distro_common = lambda do |project, zip|
     zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| project.parent.path_to(f) }
-    zip.path("examples").include FileList["src/examples/**"]
+    zip.path("examples").include project.path_to("src/examples"), :as=>"."
     zip.merge project("ode:tools-bin").package(:zip)
     zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
       COMMONS.pool, COMMONS.collections, JAXEN,
@@ -356,7 +349,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       puts "Deploying processes to #{target}" if verbose
       verbose(false) do
         mkpath target
-        cp_r FileList["src/examples/*"].to_a, target
+        cp_r FileList[_("src/examples/*")].to_a, target
         rm Dir.glob("#{target}/*.deployed")
       end
     end
@@ -416,7 +409,8 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, QUARTZ, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.resources unzip(path_to("target/smixInstallDir/install/ODE")=>project("ode:dao-jpa-ojpa-derby").package(:zip))
+    test.junit.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
+    test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("ode:dao-jpa-ojpa-derby").package(:zip))
 
   end
 
@@ -441,14 +435,11 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   desc "ODE Tools Binaries"
   define "tools-bin" do
     # Copy binary files over, set permissions on Linux files.
-    bins = file("target/bin"=>FileList["src/main/dist/bin/*"]) do |task|
-      filter(task.prerequisites).into(task.name).run
+    bins = file("target/bin"=>FileList[_("src/main/dist/bin/*")]) do |task|
+      mkpath task.name
+      cp task.prerequisites, task.name
       chmod 0755, FileList[task.name + "/*.sh"], :verbose=>false
     end
-    # Copy docs over.
-    # docs = file("target/doc"=>FileList["src/main/dist/doc/*"]) do |task|
-    #   filter(task.prerequisites).into(task.name).run
-    # end
 
     build bins # , docs
     package(:zip).include bins # , docs
@@ -461,12 +452,18 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   end
 
   package(:zip, :classifier=>"sources").tap do |zip|
-    `svn status -v`.reject { |l| l[0] == ?? }.
+    `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
       map { |l| l.split.last }.reject { |f| File.directory?(f) }.
       each { |f| zip.include f, :as=>f }
   end
 
   javadoc projects("ode:bpel-api", "ode:bpel-epr")
   package :zip, :classifier=>"docs", :include=>javadoc.target
+
+  task "jdepend" do
+    paths = projects(:in=>self).map { |prj| prj.path_to("target/classes") }.each { |path| file(path).invoke }.
+      select { |path| File.exist?(path) }
+    java "jdepend.swingui.JDepend", paths, :classpath=>"jdepend:jdepend:jar:2.9.1"
+  end
 
 end
