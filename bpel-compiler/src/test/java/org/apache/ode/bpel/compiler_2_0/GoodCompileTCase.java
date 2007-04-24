@@ -46,7 +46,7 @@ class GoodCompileTCase extends TestCase implements CompileListener {
 
     GoodCompileTCase(String bpel) {
         super(bpel);
-        _bpel = new File("../bpel-scripts/src/main/resources", bpel);
+        _bpel = new File(getClass().getResource(bpel).getPath());
     }
 
     protected void setUp() throws Exception {
