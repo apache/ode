@@ -119,6 +119,9 @@ public class DeploymentWebService {
                         throw new OdeFault("Your message should contain a part named 'package' with a zip element");
 
                     OMText binaryNode = (OMText) zip.getFirstOMChild();
+                    if (binaryNode == null) {
+                        throw new OdeFault("Empty binary node under <zip> element");
+                    }
                     binaryNode.setOptimize(true);
                     try {
                         // We're going to create a directory under the deployment root and put
