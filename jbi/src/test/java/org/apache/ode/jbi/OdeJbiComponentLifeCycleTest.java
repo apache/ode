@@ -41,12 +41,12 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
     private OdeComponent component;
 
     protected void setUp() throws Exception {
-        rootDir = new File("target/smixInstallDir");
+        rootDir = new File(System.getProperty("jbi.install"));
         rootDir.mkdir();
-        installDir = new File(rootDir,"install");
+        installDir = new File(rootDir, "install");
         installDir.mkdir();
         txm = new EmbeddedGeronimoFactory().getTransactionManager();
-        odeDir = new File(installDir,"ODE");
+        odeDir = new File(installDir, "ODE");
         odeDir.mkdir();
 
         container = new JBIContainer();
@@ -89,12 +89,13 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         activateComponent();
         container.start();
 
+        String examples = System.getProperty("jbi.examples");
         // For lack of a better way of doing this:
-        component.getServiceUnitManager().deploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
-        component.getServiceUnitManager().init("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().deploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().init("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
         component.getServiceUnitManager().start("HelloWorld");
         component.getServiceUnitManager().stop("HelloWorld");
-        component.getServiceUnitManager().undeploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().undeploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
 
         container.deactivateComponent("ODE");
 
@@ -106,9 +107,10 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         activateComponent();
         container.start();
 
+        String examples = System.getProperty("jbi.examples");
         // For lack of a better way of doing this:
-        component.getServiceUnitManager().deploy("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process/");
-        component.getServiceUnitManager().init("HelloWorld", "../distro-jbi/src/examples/HelloWorld2/HelloWorld2-process/");
+        component.getServiceUnitManager().deploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process/");
+        component.getServiceUnitManager().init("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process/");
         component.getServiceUnitManager().start("HelloWorld");
         DefaultServiceMixClient client = new DefaultServiceMixClient(container);
         InOut io = client.createInOutExchange();

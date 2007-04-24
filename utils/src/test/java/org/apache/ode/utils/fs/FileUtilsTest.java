@@ -57,7 +57,7 @@ public class FileUtilsTest extends TestCase {
 
   public void testDirectoryEntriesInPathWithDirectory() throws IOException {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"), "root.tmp");
-    assertTrue(tmpDir.mkdir());
+    tmpDir.mkdir();
     tmpDir.deleteOnExit();
 
     File tmpFile = File.createTempFile("file", "tmp", tmpDir);
