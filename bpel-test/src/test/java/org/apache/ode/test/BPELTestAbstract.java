@@ -40,6 +40,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
@@ -143,29 +144,28 @@ public abstract class BPELTestAbstract extends TestCase {
          * with 1.
          *
          */
-
         int propsFileCnt = 0;
-        File testPropsFile = new File(deployDir + "/test.properties");
+        URL testPropsFile = getClass().getResource(deployDir + "/test.properties");
 
-        if (!testPropsFile.exists()) {
+        if (testPropsFile == null) {
             propsFileCnt++;
-            testPropsFile = new File(deployDir + "/test" + propsFileCnt
+            testPropsFile = getClass().getResource(deployDir + "/test" + propsFileCnt
                     + ".properties");
-            if (!testPropsFile.exists()) {
-                System.err.println("can't find " + testPropsFile.toString());
+            if (testPropsFile == null) {
+                System.err.println("can't find " + testPropsFile);
             }
         }
 
         scheduler.begin();
         try {
-            Collection<QName> procs =  store.deploy(new File(deployDir));
+            Collection<QName> procs =  store.deploy(new File(testPropsFile.getPath()).getParentFile());
             for (QName procName : procs) {
                 server.register(store.getProcessConfiguration(procName));
             }
 
         } catch (ContextException bpelE) {
             Properties testProps = new Properties();
-            testProps.load(testPropsFile.toURL().openStream());
+            testProps.load(testPropsFile.openStream());
             String responsePattern = testProps.getProperty("response1");
             bpelE.printStackTrace();
             testResponsePattern("init", bpelE.getMessage(), responsePattern);
@@ -178,10 +178,10 @@ public abstract class BPELTestAbstract extends TestCase {
         
         ArrayList<Thread> testThreads = new ArrayList<Thread>();
 
-        while (testPropsFile.exists()) {
+        while (testPropsFile != null) {
 
             final Properties testProps = new Properties();
-            testProps.load(testPropsFile.toURL().openStream());
+            testProps.load(testPropsFile.openStream());
             final QName serviceId = new QName(testProps.getProperty("namespace"),
                     testProps.getProperty("service"));
             final String operation = testProps.getProperty("operation");
@@ -239,7 +239,7 @@ public abstract class BPELTestAbstract extends TestCase {
             }
 
             propsFileCnt++;
-            testPropsFile = new File(deployDir + "/test" + propsFileCnt
+            testPropsFile = getClass().getResource(deployDir + "/test" + propsFileCnt
                     + ".properties");
         }
 

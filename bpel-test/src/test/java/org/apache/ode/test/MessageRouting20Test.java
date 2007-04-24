@@ -20,27 +20,27 @@ package org.apache.ode.test;
 
 public class MessageRouting20Test extends BPELTestAbstract {
 
-	public void testCorrelation() throws Throwable {
-		go("target/test-classes/bpel/2.0/TestCorrelation");
-	}
-	public void testCorrelation1() throws Throwable {
-		go("target/test-classes/bpel/2.0/TestCorrelation1");
-	}
+    public void testCorrelation() throws Throwable {
+        go("/bpel/2.0/TestCorrelation");
+    }
+    public void testCorrelation1() throws Throwable {
+        go("/bpel/2.0/TestCorrelation1");
+    }
 //    TODO Fix me, we need to capture the session id to send it in the second test message
 //	public void testCorrelationOpaque() throws Throwable {
-//		go("target/test-classes/bpel/2.0/TestCorrelationOpaque");
+//		go("/bpel/2.0/TestCorrelationOpaque");
 //	}
     public void testDynamicPick() throws Throwable {
-    	go("target/test-classes/bpel/2.0/TestDynamicPick");
+        go("/bpel/2.0/TestDynamicPick");
     }
     public void testInstPick() throws Throwable {
-        go("target/test-classes/bpel/2.0/TestInstantiatingPick");
+        go("/bpel/2.0/TestInstantiatingPick");
     }
     public void testStaticOnMessage() throws Throwable {
-    	go("target/test-classes/bpel/2.0/TestStaticOnMessage");
+        go("/bpel/2.0/TestStaticOnMessage");
     }
     public void testStaticPick() throws Throwable {
-    	go("target/test-classes/bpel/2.0/TestStaticPick");
+        go("/bpel/2.0/TestStaticPick");
     }
 
 
