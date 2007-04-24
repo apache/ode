@@ -35,18 +35,18 @@ public class VersionedRedeployTest extends BPELTestAbstract {
     QName qName3 = new QName("http://ode/bpel/unit-test", "HelloWorld2-3");
 
     public void testRetireOld() throws Throwable {
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         ProcessConf conf = store.getProcessConfiguration(qName1);
         assertEquals(ProcessState.ACTIVE, conf.getState());
 
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
         // Now 1 should be retired and 2 active
         conf = store.getProcessConfiguration(qName1);
         assertEquals(ProcessState.RETIRED, conf.getState());
         conf = store.getProcessConfiguration(qName2);
         assertEquals(ProcessState.ACTIVE, conf.getState());
 
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
         // 1 and 2 should be retired and 3 active
         conf = store.getProcessConfiguration(qName1);
         assertEquals(ProcessState.RETIRED, conf.getState());
@@ -59,21 +59,21 @@ public class VersionedRedeployTest extends BPELTestAbstract {
     public void testInstancePersistence() throws Throwable {
         // Checking for each step that all instances still exist and that each process got one execution
         // so no instance has been created after a process has been retired.
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
         assertEquals(1, _cf.getConnection().getProcess(qName3).getNumInstances());
     }
 
     public void testVersionedUndeployDeploy() throws Throwable {
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
-        store.undeploy(new File("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-1"));
-        go("target/test-classes/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
+        store.undeploy(new File(getClass().getResource("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1").getPath()));
+        go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         // We should have a brand new version 1 with no version 2
         assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
         assertNull(store.getProcessConfiguration(qName1));
