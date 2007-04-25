@@ -1,4 +1,5 @@
 namespace "check" do
+
   desc "Checks license headers."
   task("headers") do
     # Define license headers based on the filename extension.
@@ -65,4 +66,5 @@ EOF
       puts "All #{extensions} files checked and have the license in them."
     end
   end
+
 end

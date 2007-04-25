@@ -1,4 +1,5 @@
-require "buildr"
+#require "buildr"
+require "buildr/lib/buildr"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.0-SNAPSHOT"
@@ -79,6 +80,7 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
+
 
 desc "Apache ODE"
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -199,7 +201,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     test.compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa", "ode:dao-hibernate", "ode:bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
-        LOG4J, XERCES, Java::OpenJPA::REQUIRES, QUARTZ, XALAN
+        LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
     test.junit.with HIBERNATE, DOM4J
 
     package :jar
@@ -269,7 +271,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     dao_hibernate = project("ode:dao-hibernate").compile.target
     bpel_store = project("ode:bpel-store").compile.target
 
-    schemaexport = Java::Hibernate.schemaexport
+    schemaexport = Hibernate.schemaexport
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
@@ -309,7 +311,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     quartz_sql = _("src/main/scripts/quartz-derby.sql")
     partial_sql = file("target/partial.sql"=>derby_xml) do |task|
       mkpath _("target"), :verbose=>false
-      Java::OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
+      OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
         :classpath=>projects("ode:bpel-store", "ode:dao-jpa", "ode:bpel-api", "ode:bpel-dao", "ode:utils" )
     end
     derby_sql = concat(_("target/derby.sql")=>[partial_sql, quartz_sql])
