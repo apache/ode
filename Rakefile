@@ -7,11 +7,11 @@ NEXT_VERSION = "1.0"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
-AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2")
-AXIS2               = "org.apache.axis2:axis2:jar:1.1"
+AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.4")
+AXIS2               = "org.apache.axis2:axis2:jar:1.1.1"
 AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-kernel", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.1")
+                        :under=>"org.apache.axis2", :version=>"1.1.1")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = OpenStruct.new(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -61,7 +61,7 @@ SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-
 SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx", :under=>"org.springframework", :version=>"2.0.1")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 "regexp:regexp:jar:1.3"
-WOODSTOX            = "woodstox:wstx-asl:jar:3.0.1"
+WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
 XERCES              = "xerces:xercesImpl:jar:2.8.0"
