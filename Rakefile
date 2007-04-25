@@ -462,10 +462,4 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   javadoc projects("ode:bpel-api", "ode:bpel-epr")
   package :zip, :classifier=>"docs", :include=>javadoc.target
 
-  task "jdepend" do
-    paths = projects(:in=>self).map { |prj| prj.path_to("target/classes") }.each { |path| file(path).invoke }.
-      select { |path| File.exist?(path) }
-    java "jdepend.swingui.JDepend", paths, :classpath=>"jdepend:jdepend:jar:2.9.1"
-  end
-
 end
