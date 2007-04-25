@@ -29,8 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEService;
 
-import java.util.concurrent.ExecutorService;
-
 /**
  * Receives messages forwarded by Axis.
  */
@@ -39,37 +37,29 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
   private static final Log __log = LogFactory.getLog(ODEMessageReceiver.class);
 
   private ODEService _service;
-  @SuppressWarnings("unused")
-  private ExecutorService _executorService;
 
   public final void receive(final MessageContext msgContext) throws AxisFault {
-    if (__log.isDebugEnabled())
-      __log.debug("Received message for " + msgContext.getAxisService().getName() +
-              "." + msgContext.getAxisOperation().getName());
     if (hasResponse(msgContext.getAxisOperation())) {
+            if (__log.isDebugEnabled())
+                __log.debug("Received request message for " + msgContext.getAxisService().getName() + "."
+                        + msgContext.getAxisOperation().getName());
       // Client is expecting a response, running in the same thread
       MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
       outMsgContext.getOperationContext().addMessageContext(outMsgContext);
       invokeBusinessLogic(msgContext, outMsgContext);
       if (__log.isDebugEnabled()) {
-        __log.debug("Reply for " + msgContext.getAxisService().getName() +
-              "." + msgContext.getAxisOperation().getName());
+                __log.debug("Reply for " + msgContext.getAxisService().getName() + "."
+                        + msgContext.getAxisOperation().getName());
         __log.debug("Reply message " + outMsgContext.getEnvelope());
       }
-      AxisEngine engine = new AxisEngine(
-              msgContext.getOperationContext().getServiceContext().getConfigurationContext());
+            AxisEngine engine = new AxisEngine(msgContext.getOperationContext().getServiceContext()
+                    .getConfigurationContext());
       engine.send(outMsgContext);
     } else {
-      // No response expected, this thread doesn't need us
-      _executorService.submit(new Runnable() {
-        public void run() {
-          try {
+            if (__log.isDebugEnabled())
+                __log.debug("Received one-way message for " + msgContext.getAxisService().getName() + "."
+                        + msgContext.getAxisOperation().getName());
             invokeBusinessLogic(msgContext, null);
-          } catch (AxisFault axisFault) {
-            __log.error("Error processing in-only message.", axisFault);
-          }
-        }
-      });
     }
   }
 
@@ -82,17 +72,18 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
     _service = service;
   }
 
-  public void setExecutorService(ExecutorService executorService) {
-    _executorService = executorService;
-  }
-
   private boolean hasResponse(AxisOperation op) {
-    switch(op.getAxisSpecifMEPConstant()) {
-      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_IN_OUT: return true;
-      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_ONLY: return true;
-      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_OPTIONAL_IN: return true;
-      case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
-      default: return false;
+        switch (op.getAxisSpecifMEPConstant()) {
+        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_IN_OUT:
+            return true;
+        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_ONLY:
+            return true;
+        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_OPTIONAL_IN:
+            return true;
+        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_ROBUST_OUT_ONLY:
+            return true;
+        default:
+            return false;
     }
   }
 }
