@@ -19,6 +19,17 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
@@ -41,16 +52,6 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.xml.namespace.QName;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and our
@@ -89,7 +90,7 @@ public class ODEService {
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
         boolean success = true;
-        MyRoleMessageExchange odeMex = null;
+        MyRoleMessageExchange odeMex;
         Future responseFuture = null;
         try {
             _txManager.begin();
@@ -114,17 +115,10 @@ public class ODEService {
                     __log.debug("Invoking ODE using MEX " + odeMex);
                     __log.debug("Message content:  " + DOMUtils.domToString(odeRequest.getMessage()));
                 }
-                // Invoking ODE
+
+                // Invoke ODE
                 responseFuture = odeMex.invoke(odeRequest);
-            } else {
-                success = false;
-            }
-        } catch (Exception e) {
-            __log.error("Exception occured while invoking ODE", e);
-            success = false;
-            throw new OdeFault("An exception occured when invoking ODE.", e);
-        } finally {
-            if (success) {
+
                 __log.debug("Commiting ODE MEX " + odeMex);
                 try {
                     if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
@@ -133,9 +127,15 @@ public class ODEService {
                     __log.error("Commit failed", e);
                     success = false;
                 }
+            } else {
+                success = false;
             }
+        } catch (Exception e) {
+            __log.error("Exception occured while invoking ODE", e);
+            success = false;
+            throw new OdeFault("An exception occured while invoking ODE.", e);
+        } finally {
             if (!success) {
-                __log.error("Rolling back ODE MEX " + odeMex);
                 try {
                     _txManager.rollback();
                 } catch (Exception e) {
@@ -145,7 +145,6 @@ public class ODEService {
         }
 
         if (odeMex.getOperation().getOutput() != null) {
-            if (odeMex.getOperation() != null) {
                 // Waits for the response to arrive
                 try {
                     responseFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
@@ -153,7 +152,6 @@ public class ODEService {
                     String errorMsg = "Timeout or execution error when waiting for response to MEX "
                             + odeMex + " " + e.toString();
                     __log.error(errorMsg);
-                    __log.error(e);
                     throw new OdeFault(errorMsg);
                 }
 
@@ -184,26 +182,26 @@ public class ODEService {
                         __log.error("Error processing response for MEX " + odeMex, e);
                         throw new OdeFault("An exception occured when invoking ODE.", e);
                     } finally {
-                        if (commit)
+                    if (commit) {
                             try {
                                 if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
                                 _txManager.commit();
                             } catch (Exception e) {
                                 throw new OdeFault("Commit failed!", e);
                             }
-                        else
+                    } else {
                             try {
                                 _txManager.rollback();
                             } catch (Exception ex) {
                                 throw new OdeFault("Rollback failed!", ex);
                             }
-
                     }
                 }
             }
-            if (!success)
+            if (!success) {
                 throw new OdeFault("Message was either unroutable or timed out!");
         }
+    }
     }
 
     public boolean respondsTo(QName serviceName, QName portTypeName) {
