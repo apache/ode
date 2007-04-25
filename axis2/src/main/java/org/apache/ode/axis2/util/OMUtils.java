@@ -131,12 +131,12 @@ public class OMUtils {
     }
 
     public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) throws AxisFault {
-        OMNamespace elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
+        OMNamespace elns = null;
+        if (src.getNamespaceURI() != null) {
+            elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
+        }
         OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(),elns) :
         omf.createOMElement(src.getLocalName(),elns,parent);
-        
-        
-        
         
         if (parent == null) {
             NSContext nscontext = DOMUtils.getMyNSContext(src);
