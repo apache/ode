@@ -19,6 +19,19 @@
 
 package org.apache.ode.axis2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -46,18 +59,6 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -310,7 +311,6 @@ public class ODEServer {
         // operations so the first one should fit them all
         AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
         ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
-        ((ODEMessageReceiver) firstOp.getMessageReceiver()).setExecutorService(_executorService);
 
         // We're public!
         _axisConfig.addService(axisService);
@@ -377,7 +377,8 @@ public class ODEServer {
             Object txFact = txFactClass.newInstance();
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
         } catch (Exception e) {
-            throw new ServletException("Couldn't initialize a transaction manager!", e);
+            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
+            throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
         }
     }
 
