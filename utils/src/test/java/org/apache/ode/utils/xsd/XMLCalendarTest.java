@@ -43,6 +43,19 @@ public class XMLCalendarTest extends TestCase {
 		assertEquals(500, c.get(Calendar.MILLISECOND));
 		assertEquals(0, c.get(Calendar.ZONE_OFFSET));
 	}
+    
+    public void testNoSeconds() {
+        String TEST = "2000-10-05T23:12Z";
+        
+        Calendar c = new XMLCalendar(TEST);
+        assertEquals(2000, c.get(Calendar.YEAR));
+        assertEquals(10, c.get(Calendar.MONTH));
+        assertEquals(5, c.get(Calendar.DAY_OF_MONTH));
+        assertEquals(23, c.get(Calendar.HOUR_OF_DAY));
+        assertEquals(12, c.get(Calendar.MINUTE));
+        assertEquals(0, c.get(Calendar.ZONE_OFFSET));
+        
+    }
 	
 	public void testTimeZoneMinus(){
 		String TEST = "0001-01-01T01:01:01.1-08:00";

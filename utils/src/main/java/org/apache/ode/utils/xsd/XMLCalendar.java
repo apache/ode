@@ -56,7 +56,7 @@ public class XMLCalendar extends GregorianCalendar {
 	static final int TZ_MIN_MG = 10;
 
 	static final Pattern PATTERN =
-    Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2}\\.?\\d*)(Z|(\\+|-)(\\d{2}):(\\d{2}))");
+    Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2})(:\\d{2}\\.?\\d*)?(Z|(\\+|-)(\\d{2}):(\\d{2}))");
 
 	public XMLCalendar(long time) {
 		this.setTimeInMillis(time);
@@ -69,11 +69,14 @@ public class XMLCalendar extends GregorianCalendar {
       this.set(Integer.valueOf(m.group(YEAR_MG)), Integer.valueOf(m.group(MONTH_MG)),
           Integer.valueOf(m.group(DAY_MG)), Integer.valueOf(m.group(HOUR_MG)),
           Integer.valueOf(m.group(MIN_MG)));
-      BigDecimal sec = new BigDecimal(m.group(SEC_MG));
-      this.set(SECOND, sec.intValue());
-      BigDecimal fraction = sec.subtract(sec.setScale(0, BigDecimal.ROUND_DOWN));
-      int millisec = fraction.movePointRight(3).intValue();
-      this.set(Calendar.MILLISECOND, millisec);
+      if (m.group(SEC_MG) != null) {
+          BigDecimal sec = new BigDecimal(m.group(SEC_MG).substring(1));
+          this.set(SECOND, sec.intValue());
+          BigDecimal fraction = sec.subtract(sec.setScale(0, BigDecimal.ROUND_DOWN));
+          int millisec = fraction.movePointRight(3).intValue();
+          this.set(Calendar.MILLISECOND, millisec);
+      }
+      
 
       String tz = m.group(TZ_MG);
       if ("Z".equals(tz)) {
