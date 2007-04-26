@@ -9,6 +9,7 @@ ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.4")
 AXIS2               = "org.apache.axis2:axis2:jar:1.1.1"
+AXIS2_WAR           = "org.apache.axis2:axis2:war:1.1.1"
 AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-kernel", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.1.1")
@@ -120,6 +121,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       web_inf.merge project("ode:dao-hibernate-db").package(:zip)
       web_inf.include project("ode:axis2").path_to("src/main/wsdl/*")
       web_inf.include project("ode:bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
+    end
+    package(:war).tap do |root|
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
