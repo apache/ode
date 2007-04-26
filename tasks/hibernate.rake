@@ -1,12 +1,13 @@
 module Hibernate
 
-  REQUIRES = OpenObject.new
-  REQUIRES.collections  = "commons-collections:commons-collections:jar:3.1"
-  REQUIRES.logging      = "commons-logging:commons-logging:jar:1.0.3"
-  REQUIRES.dom4j        = "dom4j:dom4j:jar:1.6.1"
-  REQUIRES.hibernate    = "org.hibernate:hibernate:jar:3.1.2"
-  REQUIRES.xdoclet      = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+  REQUIRES = Buildr.struct(
+    :collections  => "commons-collections:commons-collections:jar:3.1",
+    :logging      => "commons-logging:commons-logging:jar:1.0.3",
+    :dom4j        => "dom4j:dom4j:jar:1.6.1",
+    :hibernate    => "org.hibernate:hibernate:jar:3.1.2",
+    :xdoclet      => Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
                                 :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
+  )
 
   class << self
     include Buildr::Ant
@@ -61,7 +62,7 @@ module Hibernate
 
     # This will download all the required artifacts before returning a classpath, and we want to do this only once.
     def requires()
-      @requires ||= Buildr.artifacts(REQUIRES.to_hash.values).each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
+      @requires ||= Buildr.artifacts(REQUIRES.to_a).each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
     end
 
   end

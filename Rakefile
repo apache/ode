@@ -1,9 +1,14 @@
-#require "buildr"
-require "buildr/lib/buildr"
+#require "buildr/lib/buildr"
+require "buildr"
+require "buildr/xmlbeans"
+require "buildr/openjpa"
+require "buildr/javacc"
+require "buildr/jetty"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.0-SNAPSHOT"
 NEXT_VERSION = "1.0"
+
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -14,7 +19,7 @@ AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools"
                         "axis2-java2wsdl", "axis2-jibx", "axis2-kernel", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.1.1")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
-COMMONS             = OpenStruct.new(
+COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.1",
   :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.1",
@@ -28,7 +33,7 @@ COMMONS             = OpenStruct.new(
 DERBY               = "org.apache.derby:derby:jar:10.1.2.1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.1.2.1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
-GERONIMO            = OpenStruct.new(
+GERONIMO            = struct(
   :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:1.2-beta",
   :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
   :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
@@ -37,7 +42,7 @@ HIBERNATE           = [ "org.hibernate:hibernate:jar:3.1.2", "asm:asm:jar:1.5.3"
                         "antlr:antlr:jar:2.7.6rc1", "cglib:cglib:jar:2.1_3", "ehcache:ehcache:jar:1.1" ]
 HOWL_LOGGER         = "howl:howl-logger:jar:0.1.11"
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
-JAVAX               = OpenStruct.new(
+JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
   #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",
   :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
@@ -54,25 +59,27 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:0.9.7-incubating-SNAPSHOT",
+OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:#{Buildr::OpenJPA::VERSION}",
                        "net.sourceforge.serp:serp:jar:1.12.0"]
 QUARTZ              = "quartz:quartz:jar:1.5.2"
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
-SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services", :under=>"org.apache.servicemix", :version=>"3.1-incubating")
-SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx", :under=>"org.springframework", :version=>"2.0.1")
+SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
+                        :under=>"org.apache.servicemix", :version=>"3.1-incubating")
+SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx",
+                        :under=>"org.springframework", :version=>"2.0.1")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
-"regexp:regexp:jar:1.3"
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
 XERCES              = "xerces:xercesImpl:jar:2.8.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
-WS_COMMONS          = OpenStruct.new(
+WS_COMMONS          = struct(
   :axiom            =>AXIOM,
   :neethi           =>"org.apache.ws.commons.neethi:neethi:jar:2.0",
   :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.2"
 )
-XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring", :under=>"org.apache.xbean", :version=>"2.8")
+XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
+                        :under=>"org.apache.xbean", :version=>"2.8")
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
 
 
@@ -205,7 +212,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     test.compile.with projects("ode:bpel-scheduler-quartz", "ode:dao-jpa", "ode:dao-hibernate", "ode:bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
-        LOG4J, XERCES, OpenJPA::REQUIRES, QUARTZ, XALAN
+        LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, QUARTZ, XALAN
     test.junit.with HIBERNATE, DOM4J
 
     package :jar
@@ -315,11 +322,12 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     quartz_sql = _("src/main/scripts/quartz-derby.sql")
     partial_sql = file("target/partial.sql"=>derby_xml) do |task|
       mkpath _("target"), :verbose=>false
-      OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
+      Buildr::OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
         :classpath=>projects("ode:bpel-store", "ode:dao-jpa", "ode:bpel-api", "ode:bpel-dao", "ode:utils" )
     end
     derby_sql = concat(_("target/derby.sql")=>[partial_sql, quartz_sql])
     derby_db = Derby.create(_("target/derby/jpadb")=>derby_sql)
+
 
     test.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,

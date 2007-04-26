@@ -4,7 +4,7 @@ module Clover
   DATABASE = "clover.db"
 
   task "clover" do
-    projects.each do |project|
+    Buildr.projects.each do |project|
       unless project.compile.sources.empty?
         instrumented = project.file("target/clover")
         instrumented.enhance project.compile.sources do |task|
@@ -13,7 +13,7 @@ module Clover
             map { |src| FileList[File.join(src.to_s, "**/*.java")] }.flatten
           args << "-verbose" if Rake.application.options.trace
           args << { :classpath=>REQUIRES }
-          Java.java "com.cenqua.clover.CloverInstr", *args
+          Buildr::Java.java "com.cenqua.clover.CloverInstr", *args
         end
         file DATABASE=>instrumented
         project.compile.sources = [instrumented]
@@ -26,7 +26,7 @@ module Clover
   namespace "clover" do
 
     task "html"=>file("clover.db") do
-      Java.java "com.cenqua.clover.reporters.html.HtmlReporter", "-i", DATABASE, "-o", "clover", :classpath=>REQUIRES
+      Buildr::Java.java "com.cenqua.clover.reporters.html.HtmlReporter", "-i", DATABASE, "-o", "clover", :classpath=>REQUIRES
     end
 
   end
