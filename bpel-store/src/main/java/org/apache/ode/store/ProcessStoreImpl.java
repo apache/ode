@@ -23,7 +23,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
@@ -38,7 +43,13 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -475,11 +486,7 @@ public class ProcessStoreImpl implements ProcessStore {
     protected void fireEvent(ProcessStoreEvent pse) {
         __log.debug("firing event: " + pse);
         for (ProcessStoreListener psl : _listeners)
-            try {
-                psl.onProcessStoreEvent(pse);
-            } catch (Throwable t) {
-                __log.error("Exception in listener.", t);
-            }
+            psl.onProcessStoreEvent(pse);
     }
 
     private void fireStateChange(QName processId, ProcessState state, String duname) {
