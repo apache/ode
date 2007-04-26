@@ -19,19 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -59,6 +46,18 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -164,6 +163,9 @@ public class ODEServer {
                 throw new ServletException(errmsg, ex);
             }
 
+            File deploymentDir = new File(_workRoot, "processes");
+            _poller = new DeploymentPoller(deploymentDir, this);
+
             new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
             new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
                     .getAbsolutePath());
@@ -172,9 +174,6 @@ public class ODEServer {
 
             __log.debug("Initializing JCA adapter.");
             initConnector();
-
-            File deploymentDir = new File(_workRoot, "processes");
-            _poller = new DeploymentPoller(deploymentDir, this);
 
             _poller.start();
             __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
