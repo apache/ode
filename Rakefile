@@ -21,7 +21,7 @@ COMMONS             = OpenStruct.new(
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.0",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
   :lang             =>"commons-lang:commons-lang:jar:2.1",
-  :logging          =>"commons-logging:commons-logging:jar:1.0.3",
+  :logging          =>"commons-logging:commons-logging:jar:1.1",
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
@@ -111,7 +111,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       "ode:bpel-schemas", "ode:bpel-store", "ode:dao-hibernate", "ode:jacob", "ode:jca-ra", "ode:jca-server",
       "ode:utils", "ode:dao-jpa"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
-      COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
+      COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ, SAXON, TRANQL,
       WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS
