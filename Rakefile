@@ -361,7 +361,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Axis2 Based Distribution"
   define "distro-axis2" do
-    package(:zip, :id => "apache-ode-war").path("#{id}-#{version}").tap do |zip|
+    package(:zip, :id => "apache-ode-war").path("apache-ode-war-#{version}").tap do |zip|
       distro_common.call(self, zip)
       zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
     end
@@ -379,7 +379,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE JBI Based Distribution"
   define "distro-jbi" do
-    package(:zip, :id => "apache-ode-jbi").path("#{id}-#{version}").tap do |zip|
+    package(:zip, :id => "apache-ode-jbi").path("apache-ode-war-#{version}").tap do |zip|
       distro_common.call(self, zip)
       zip.include project("ode:jbi").package(:zip)
     end
