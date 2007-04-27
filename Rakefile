@@ -6,9 +6,8 @@ require "buildr/javacc"
 require "buildr/jetty"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.0-SNAPSHOT"
-NEXT_VERSION = "1.0"
-
+VERSION_NUMBER = "1.0-RC2-incubating-SNAPSHOT"
+NEXT_VERSION = "1.0-RC2-incubating"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -89,6 +88,15 @@ repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
 
+# Changing releases tag names
+class Release
+  class << self
+    def tag_with_apache_ode(version)
+      tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
+    end
+    alias_method_chain :tag, :apache_ode
+  end
+end
 
 desc "Apache ODE"
 define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -353,7 +361,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE Axis2 Based Distribution"
   define "distro-axis2" do
-    package(:zip).path("#{id}-#{version}").tap do |zip|
+    package(:zip, :id => "apache-ode-war").path("#{id}-#{version}").tap do |zip|
       distro_common.call(self, zip)
       zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
     end
@@ -371,7 +379,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE JBI Based Distribution"
   define "distro-jbi" do
-    package(:zip).path("#{id}-#{version}").tap do |zip|
+    package(:zip, :id => "apache-ode-jbi").path("#{id}-#{version}").tap do |zip|
       distro_common.call(self, zip)
       zip.include project("ode:jbi").package(:zip)
     end
