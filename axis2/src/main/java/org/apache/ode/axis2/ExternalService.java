@@ -19,12 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
@@ -44,13 +38,18 @@ import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used services.
@@ -132,22 +131,27 @@ public class ExternalService implements PartnerRoleChannel {
                         if (!success)
                             return;
 
-                        try {
-                            operationClient.execute(true);
-                            MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-                            MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
-                            if (flt != null) {
-                                reply(odeMex, flt, true);
-                            } else {
-                                reply(odeMex, response, false);
+                        // The invocation must happen in a separate thread, holding on the afterCompletion
+                        // blocks other operations that could have been listed there as well.
+                        _executorService.submit(new Callable<Object>() {
+                            public Object call() throws Exception {
+                                try {
+                                    operationClient.execute(true);
+                                    MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+                                    MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
+                                    if (flt != null) {
+                                        reply(odeMex, flt, true);
+                                    } else {
+                                        reply(odeMex, response, false);
+                                    }
+                                } catch (Throwable t) {
+                                    String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
+                                    __log.error(errmsg, t);
+                                    replyWithFailure(odeMex, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                                }
+                                return null;
                             }
-                        } catch (Throwable t) {
-                            String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-                            __log.error(errmsg, t);
-                            replyWithFailure(odeMex, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
-                            return;
-                        }
-
+                        });
                     }
 
                     public void beforeCompletion() {
@@ -158,7 +162,12 @@ public class ExternalService implements PartnerRoleChannel {
 
             } else /** one-way case * */
             {
-                operationClient.execute(false);
+                _executorService.submit(new Callable<Object>() {
+                    public Object call() throws Exception {
+                        operationClient.execute(false);
+                        return null;
+                    }
+                });
                 odeMex.replyOneWayOk();
             }
         } catch (AxisFault axisFault) {
