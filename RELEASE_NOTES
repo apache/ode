@@ -9,7 +9,10 @@ incubator, an exhaustive list is therefore almost impossible to
 build. So these first release notes are going to be closer to a
 features list.
 
-Apache ODE 1.0 requires Java 1.5.x.
+Apache ODE 1.0 requires Java 1.5.x. The WAR distribution can run in
+most J2EE servlet container. The JBI distribution should be able to
+run in any JBI container but has only been tested with ServiceMix
+3.1 so far.
 
 Apache ODE is a WS-BPEL compliant web services orchestration engine.
 It organizes web services calls following a process description
