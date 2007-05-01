@@ -379,7 +379,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
   desc "ODE JBI Based Distribution"
   define "distro-jbi" do
-    package(:zip, :id => "apache-ode-jbi").path("apache-ode-war-#{version}").tap do |zip|
+    package(:zip, :id => "apache-ode-jbi").path("apache-ode-jbi-#{version}").tap do |zip|
       distro_common.call(self, zip)
       zip.include project("ode:jbi").package(:zip)
     end
@@ -479,7 +479,10 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
       each { |f| zip.include f, :as=>f }
   end
 
-  javadoc projects("ode:bpel-api", "ode:bpel-epr")
+  javadoc projects("ode:axis2", "ode:bpel-api", "ode:bpel-epr", "ode:tools", "ode:utils",
+    "ode:jca-server", "ode:jca-ra", "ode:jbi", "ode:jacob", "ode:dao-jpa", "ode:dao-hibernate", 
+    "ode:bpel-test", "ode:bpel-store", "ode:bpel-scheduler-quartz", "ode:bpel-runtime", 
+    "ode:bpel-ql", "ode:bpel-epr", "ode:bpel-dao", "ode:bpel-connector", "ode:bpel-connector")
   package :zip, :classifier=>"docs", :include=>javadoc.target
 
 end
