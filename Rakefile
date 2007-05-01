@@ -1,5 +1,5 @@
-#require "buildr/lib/buildr"
-require "buildr"
+require "buildr/lib/buildr"
+#require "buildr"
 require "buildr/xmlbeans"
 require "buildr/openjpa"
 require "buildr/javacc"
@@ -248,9 +248,9 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     compile.with projects("ode:bpel-api", "ode:bpel-compiler", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-schemas",
       "ode:dao-hibernate", "ode:utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
-
-    compile { hibernate_doclet :excludedtags=>"@version,@author,@todo" }
     compile { open_jpa_enhance }
+    resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
+
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
       XERCES, XALAN, JAXEN, SAXON, OPENJPA
     package :jar
@@ -274,7 +274,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
   define "dao-hibernate" do
     compile.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-ql", "ode:utils"),
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
-    compile { hibernate_doclet :excludedtags=>"@version,@author,@todo" }
+    resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
     test.with project("ode:bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
@@ -344,45 +344,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 
     build derby_db
     package :zip, :include=>derby_db
-  end
-
-  distro_common = lambda do |project, zip|
-    zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| project.parent.path_to(f) }
-    zip.path("examples").include project.path_to("src/examples"), :as=>"."
-    zip.merge project("ode:tools-bin").package(:zip)
-    zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-      COMMONS.pool, COMMONS.collections, JAXEN,
-      SAXON, LOG4J, WSDL4J, XALAN, XERCES)
-    projects("ode:utils", "ode:tools", "ode:bpel-compiler", "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
-      map(&:packages).flatten.each do |pkg|
-      zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
-    end
-  end
-
-  desc "ODE Axis2 Based Distribution"
-  define "distro-axis2" do
-    package(:zip, :id => "apache-ode-war").path("apache-ode-war-#{version}").tap do |zip|
-      distro_common.call(self, zip)
-      zip.include project("ode:axis2-war").package(:war), :as=>"ode.war"
-    end
-
-    project("ode:axis2-war").task("start").enhance do |task|
-      target = "#{task.path}/webapp/WEB-INF/processes"
-      puts "Deploying processes to #{target}" if verbose
-      verbose(false) do
-        mkpath target
-        cp_r FileList[_("src/examples/*")].to_a, target
-        rm Dir.glob("#{target}/*.deployed")
-      end
-    end
-  end
-
-  desc "ODE JBI Based Distribution"
-  define "distro-jbi" do
-    package(:zip, :id => "apache-ode-jbi").path("apache-ode-jbi-#{version}").tap do |zip|
-      distro_common.call(self, zip)
-      zip.include project("ode:jbi").package(:zip)
-    end
   end
 
   desc "ODE JAva Concurrent OBjects"
@@ -473,10 +434,56 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     package :jar
   end
 
-  package(:zip, :classifier=>"sources").tap do |zip|
-    `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
-      map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-      each { |f| zip.include f, :as=>f }
+end
+
+
+define "apache-ode" do
+  [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
+
+  def distro(project, id)
+    project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
+      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
+      zip.path("examples").include project.path_to("src/examples"), :as=>"."
+      zip.merge project("ode:tools-bin").package(:zip)
+      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+        COMMONS.pool, COMMONS.collections, JAXEN,
+        SAXON, LOG4J, WSDL4J, XALAN, XERCES)
+      projects("ode:utils", "ode:tools", "ode:bpel-compiler", "ode:bpel-api", "ode:bpel-obj", "ode:bpel-schemas").
+        map(&:packages).flatten.each do |pkg|
+        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+      end
+      yield zip
+    end
+  end
+
+  desc "ODE Axis2 Based Distribution"
+  define "distro-axis2" do
+    parent.distro(self, "#{parent.id}-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
+
+    project("ode:axis2-war").task("start").enhance do |task|
+      target = "#{task.path}/webapp/WEB-INF/processes"
+      puts "Deploying processes to #{target}" if verbose
+      verbose(false) do
+        mkpath target
+        cp_r FileList[_("src/examples/*")].to_a, target
+        rm Dir.glob("#{target}/*.deployed")
+      end
+    end
+  end
+
+  desc "ODE JBI Based Distribution"
+  define "distro-jbi" do
+    parent.distro(self, "#{parent.id}-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
+  end
+
+  package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
+    if File.exist?(".svn")
+      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
+        map { |l| l.split.last }.reject { |f| File.directory?(f) }.
+        each { |f| zip.include f, :as=>f }
+    else
+      zip.include Dir.pwd, :as=>"."
+    end
   end
 
   javadoc projects("ode:axis2", "ode:bpel-api", "ode:bpel-epr", "ode:tools", "ode:utils",

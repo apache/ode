@@ -72,7 +72,15 @@ end
 class Project
 
   def hibernate_doclet(options = {})
-    Hibernate.xdoclet({ :sources=>compile.sources, :target=>compile.target }.merge(options))
+    if options[:package]
+      depends = compile.sources.map { |src| FileList[File.join(src.to_s, options[:package].gsub(".", "/"), "*.java")] }.flatten
+    else
+      depends = compile.sources.map { |src| FileList[File.join(src.to_s, "**/*.java")] }.flatten
+    end
+    file("target/hbm.timestamp"=>depends) do |task|
+      Hibernate.xdoclet({ :sources=>compile.sources, :target=>compile.target }.merge(options))
+      write task.name
+    end
   end
 
 end
