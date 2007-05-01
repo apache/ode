@@ -49,15 +49,15 @@ rake test
 
 It just works! For more information about buildr see http://buildr.rubyforge.org/.
 
-Running in Tomcat
------------------
+Running in Tomcat (WAR deployment)
+----------------------------------
 
-You should find the full distribution in the distro-axis/target directory. Unzip it somewhere on your disk, everything needed is inside.
+You should find the full distribution in the distro-axis2/target directory. Unzip it somewhere on your disk, everything needed is inside.
 
-Get the WAR file in the distribution root directory, rename it to *ode.war* and copy this file to Tomcat's webapp directory. You should get a blank page under http://localhost:8080/ode. The Ode WAR includes its own embedded database (Derby - http://db.apache.org/derby) so you don't have to worry about configuring any external database for now.
+Get the WAR file in the distribution root directory (should be named apache-ode-war-x.x.zip), rename it to *ode.war* and copy this file to Tomcat's webapp directory. You should get a blank page under http://localhost:8080/ode. The Ode WAR includes its own embedded database (Derby - http://db.apache.org/derby) so you don't have to worry about configuring any external database for now.
 
-Testing
--------
+Testing a Tomcat Deployment
+---------------------------
 
 Copy the content of examples directory in the distribution (the 3 sub-directories) to _tomcat/webapps/ode/WEB-INF/processes_, this will automatically deploy the 3 example processes. Use the sendsoap command located in the distribution _bin_ directory to send test messages. The messages to run each of the 3 examples are provided in their respective directory (testRequest.soap). For each example type:
 
@@ -70,3 +70,23 @@ bin/sendsoap.sh http://localhost:8080/ode/processes/helloWorld examples/HelloWor
 The URLs should be updated according to the address defined in the WSDL file for the process service.
 
 If you want to use an IDE to explore the PXE sources or debug PXE executables, Eclipse .project and .classpath files are present in all the modules; simply choose File|Import from the Eclipse menu, and select the root ODE directory. You may also use Maven to generate project files for other IDEs. See the Maven documentation for details.
+
+Running in ServiceMix (JBI deployment)
+--------------------------------------
+
+You should find the full distribution in the distro-jbi/target directory. Unzip it somewhere on your disk, everything needed is inside.
+
+Get the zip containing ODE's service engine in the distribution root directory (should be named apache-ode-jbi-x.x.zip) and copy it in the install directory of ServiceMix 3.1. Most process deployments will also require HTTP binding so you should also copy the servicemix-shared and servicemix-http zip files from its components directory to its install directory. Start ServiceMix by going into its root directory and type:
+
+bin/servicemix
+
+The server should start properly.
+
+Testing a ServiceMix Deployment
+-------------------------------
+
+JBI examples come with ant scripts to build the service assemblies and test them. It's just a 3 step process:
+
+1. Go to the example directory and run ant (no need to specify a task, the default one will work).
+2. Copy the zip service assembly created in the build subdirectory to the deploy directory of ServiceMix.
+3. Run 'ant test' from the example directory.
