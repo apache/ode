@@ -159,8 +159,11 @@ public class SoapMessageConverter {
         if (bi == null)
             throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
-        SOAPEnvelope soapEnv = _soapFactory.createSOAPEnvelope();
+        SOAPEnvelope soapEnv = msgCtx.getEnvelope();
+        if (soapEnv == null) {
+            _soapFactory.getDefaultEnvelope();
         msgCtx.setEnvelope(soapEnv);
+        }
         
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bi);
         for (SOAPHeader sh : soapHeaders)
@@ -193,7 +196,11 @@ public class SoapMessageConverter {
         if (bo == null)
             throw new OdeFault(__msgs.msgBindingOutputNotFound(_serviceName, _portName, op.getName()));
 
-        SOAPEnvelope soapEnv = _soapFactory.createSOAPEnvelope();
+        SOAPEnvelope soapEnv = msgCtx.getEnvelope();
+        if (soapEnv == null) {
+            _soapFactory.getDefaultEnvelope();
+            msgCtx.setEnvelope(soapEnv);
+        }
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bo);
         for (SOAPHeader sh : soapHeaders)
             createSoapHeader(soapEnv, sh, op.getOutput().getMessage(), message);
