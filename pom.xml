@@ -107,9 +107,9 @@
         <xstreamVersion>1.2</xstreamVersion>
         <xalanVersion>2.7.0</xalanVersion>
         <hsqlDbVersion>1.8.0.7</hsqlDbVersion>
-        <openjpaVersion>0.9.7-incubating-SNAPSHOT</openjpaVersion>
+        <openjpaVersion>0.9.7-incubating</openjpaVersion>
         <persistenceAPIVersion>1.0</persistenceAPIVersion>
-	    <dom4jVersion>1.6.1</dom4jVersion>
+        <dom4jVersion>1.6.1</dom4jVersion>
 
         <!--
         | Build number used by the intalio:release plugin
