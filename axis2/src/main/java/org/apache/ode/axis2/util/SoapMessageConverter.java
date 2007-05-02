@@ -42,6 +42,7 @@ import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -49,6 +50,8 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPFault;
 import org.apache.axiom.soap.SOAPFaultDetail;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.namespace.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.Messages;
@@ -94,10 +97,8 @@ public class SoapMessageConverter {
 
     private SOAPBinding _soapBinding;
 
-    public SoapMessageConverter(SOAPFactory soapFactory, Definition def, QName serviceName, String portName,
+    public SoapMessageConverter(Definition def, QName serviceName, String portName,
             boolean replicateEmptyNS) throws AxisFault {
-        if (soapFactory == null)
-            throw new NullPointerException("Null soapFactory");
         if (def == null)
             throw new NullPointerException("Null wsdl def.");
         if (serviceName == null)
@@ -105,7 +106,6 @@ public class SoapMessageConverter {
         if (portName == null)
             throw new NullPointerException("Null portName");
 
-        _soapFactory = soapFactory;
         _def = def;
         _serviceName = serviceName;
         _portName = portName;
@@ -131,16 +131,24 @@ public class SoapMessageConverter {
         _soapBinding = (SOAPBinding) soapBindings.iterator().next();
         String style = _soapBinding.getStyle();
         _isRPC = style != null && style.equals("rpc");
+        
+        if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL11_SOAP)) {
+        	_soapFactory = OMAbstractFactory.getSOAP11Factory();
+        } else if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL12_SOAP)) {
+        	_soapFactory = OMAbstractFactory.getSOAP12Factory();
+        } else {
+        	throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType()); 
+        }
     }
 
     @SuppressWarnings("unchecked")
-    public void createSoapRequest(SOAPEnvelope soapEnv, Element message, Operation op) throws AxisFault {
+    public void createSoapRequest(MessageContext msgCtx, Element message, Operation op) throws AxisFault {
         if (op == null)
             throw new NullPointerException("Null operation");
         if (message == null)
             throw new NullPointerException("Null message.");
-        if (soapEnv == null)
-            throw new NullPointerException("Null soapEnv");
+        if (msgCtx == null)
+            throw new NullPointerException("Null msgCtx");
 
         BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);
 
@@ -151,6 +159,9 @@ public class SoapMessageConverter {
         if (bi == null)
             throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
+        SOAPEnvelope soapEnv = _soapFactory.createSOAPEnvelope();
+        msgCtx.setEnvelope(soapEnv);
+        
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bi);
         for (SOAPHeader sh : soapHeaders)
             createSoapHeader(soapEnv, sh, op.getInput().getMessage(), message);
@@ -165,13 +176,13 @@ public class SoapMessageConverter {
 
     }
 
-    public void createSoapResponse(SOAPEnvelope soapEnv, Element message, Operation op) throws AxisFault {
+    public void createSoapResponse(MessageContext msgCtx, Element message, Operation op) throws AxisFault {
         if (op == null)
             throw new NullPointerException("Null operation");
         if (message == null)
             throw new NullPointerException("Null message.");
-        if (soapEnv == null)
-            throw new NullPointerException("Null soapEnv");
+        if (msgCtx == null)
+            throw new NullPointerException("Null msgCtx");
 
         BindingOperation bop = _binding.getBindingOperation(op.getName(),null,null);
 
@@ -182,6 +193,7 @@ public class SoapMessageConverter {
         if (bo == null)
             throw new OdeFault(__msgs.msgBindingOutputNotFound(_serviceName, _portName, op.getName()));
 
+        SOAPEnvelope soapEnv = _soapFactory.createSOAPEnvelope();
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bo);
         for (SOAPHeader sh : soapHeaders)
             createSoapHeader(soapEnv, sh, op.getOutput().getMessage(), message);

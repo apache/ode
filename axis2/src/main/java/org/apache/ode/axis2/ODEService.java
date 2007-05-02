@@ -30,7 +30,17 @@ import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.om.OMAbstractFactory;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -82,8 +92,7 @@ public class ODEService {
         _serviceName = serviceName;
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
-        _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), def, serviceName, portName,
-                _isReplicateEmptyNS);
+        _converter = new SoapMessageConverter(def, serviceName, portName, _isReplicateEmptyNS);
 
     }
 
@@ -223,8 +232,7 @@ public class ODEService {
                         _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation()));
             case ASYNC:
             case RESPONSE:
-                _converter.createSoapResponse(msgContext.getEnvelope(), mex.getResponse().getMessage(),
-                        mex.getOperation());
+                _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
                 if (__log.isDebugEnabled())
                     __log.debug("Generated response message " +
                         msgContext.getEnvelope());
