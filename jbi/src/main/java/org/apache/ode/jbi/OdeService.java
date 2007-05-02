@@ -139,6 +139,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                     if (jbiMex.getStatus() == ExchangeStatus.ACTIVE)
                         jbiMex.setStatus(ExchangeStatus.DONE);
                 }
+                _ode.getChannel().send(jbiMex);
             }
         } else if (jbiMex.getPattern().equals(org.apache.ode.jbi.MessageExchangePattern.IN_OUT)) {
             boolean success = false;
