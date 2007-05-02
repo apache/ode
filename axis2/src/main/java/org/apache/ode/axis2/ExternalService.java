@@ -19,7 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -52,8 +51,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used services.
- * 
+ * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used
+ * services.
+ *
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ExternalService implements PartnerRoleChannel {
@@ -84,8 +84,7 @@ public class ExternalService implements PartnerRoleChannel {
         _executorService = executorService;
         _axisConfig = axisConfig;
         _sched = sched;
-        _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), definition, serviceName, portName,
-                _isReplicateEmptyNS);
+        _converter = new SoapMessageConverter(definition, serviceName, portName, _isReplicateEmptyNS);
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -94,16 +93,15 @@ public class ExternalService implements PartnerRoleChannel {
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out handler.
             MessageContext mctx = new MessageContext();
-            writeHeader(mctx.getOptions(), odeMex);
+            Options options = mctx.getOptions();
+            writeHeader(options, odeMex);
 
-            SOAPEnvelope soapEnv = OMAbstractFactory.getSOAP11Factory().getDefaultEnvelope();
+            _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
 
-            _converter.createSoapRequest(soapEnv, odeMex.getRequest().getMessage(), odeMex.getOperation());
+            SOAPEnvelope soapEnv = mctx.getEnvelope();
 
-            mctx.setEnvelope(soapEnv);
-
-            Options options = new Options();
-            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
+            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference())
+                    .getUrl());
             if (__log.isDebugEnabled()) {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                 __log.debug("Message: " + soapEnv);
@@ -201,7 +199,8 @@ public class ExternalService implements PartnerRoleChannel {
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
-                    __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);
+                    __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: "
+                            + myRoleSessionId);
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
@@ -227,8 +226,7 @@ public class ExternalService implements PartnerRoleChannel {
     public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
         _isReplicateEmptyNS = isReplicateEmptyNS;
         try {
-            _converter = new SoapMessageConverter(OMAbstractFactory.getSOAP11Factory(), _definition, _serviceName, _portName,
-                    _isReplicateEmptyNS);
+            _converter = new SoapMessageConverter(_definition, _serviceName, _portName, _isReplicateEmptyNS);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -242,8 +240,8 @@ public class ExternalService implements PartnerRoleChannel {
         return _serviceName;
     }
 
-    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg,
-            final Element details) {
+    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error,
+            final String errmsg, final Element details) {
         // ODE MEX needs to be invoked in a TX.
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
@@ -283,9 +281,9 @@ public class ExternalService implements PartnerRoleChannel {
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
-                    Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(faultType.getLocalPart())
-                            .getMessage().getQName()) : odeMex.createMessage(odeMex.getOperation().getOutput().getMessage()
-                            .getQName());
+                    Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(
+                            faultType.getLocalPart()).getMessage().getQName()) : odeMex.createMessage(odeMex
+                            .getOperation().getOutput().getMessage().getQName());
                     try {
                         if (__log.isDebugEnabled()) {
                             __log.debug("Received response for MEX " + odeMex);
@@ -299,10 +297,12 @@ public class ExternalService implements PartnerRoleChannel {
                                 odeMex.replyWithFault(faultType, response);
                             } else {
                                 if (__log.isDebugEnabled()) {
-                                    __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
+                                    __log
+                                            .debug("FAULT RESPONSE(unknown fault type): "
+                                                    + DOMUtils.domToString(odeMsgEl));
                                 }
-                                odeMex.replyWithFailure(FailureType.FORMAT_ERROR, reply.getEnvelope().getBody().getFault()
-                                        .getText(), null);
+                                odeMex.replyWithFailure(FailureType.FORMAT_ERROR, reply.getEnvelope().getBody()
+                                        .getFault().getText(), null);
                             }
                         } else {
                             if (__log.isDebugEnabled()) {

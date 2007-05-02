@@ -59,8 +59,7 @@ public class SoapMessageConverterTestFromRaja1 extends TestCase {
         wsdl1tns = wsdl1.getTargetNamespace();
         portType = wsdl1.getPortType(new QName(wsdl1tns,"SimpleServicesPortType"));
         op1 = portType.getOperation("addNumbers", null, null);
-        portmapper = new SoapMessageConverter(new SOAP11Factory(),
-                wsdl1, new QName(wsdl1tns,"SimpleServices"), 
+        portmapper = new SoapMessageConverter(wsdl1, new QName(wsdl1tns,"SimpleServices"), 
                 "SimpleServicesHttpPort", true);
     }
     
