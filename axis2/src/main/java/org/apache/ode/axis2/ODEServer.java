@@ -323,7 +323,7 @@ public class ODEServer {
             return extService;
 
         try {
-            extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler);
+            extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
             throw new ContextException("Error creating external service.", ex);
