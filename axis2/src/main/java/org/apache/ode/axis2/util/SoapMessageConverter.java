@@ -109,7 +109,7 @@ public class SoapMessageConverter {
         _def = def;
         _serviceName = serviceName;
         _portName = portName;
-        
+
         _serviceDef = _def.getService(serviceName);
         if (_serviceDef == null)
             throw new OdeFault(__msgs.msgServiceDefinitionNotFound(serviceName));
@@ -131,13 +131,13 @@ public class SoapMessageConverter {
         _soapBinding = (SOAPBinding) soapBindings.iterator().next();
         String style = _soapBinding.getStyle();
         _isRPC = style != null && style.equals("rpc");
-        
+
         if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL11_SOAP)) {
         	_soapFactory = OMAbstractFactory.getSOAP11Factory();
         } else if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL12_SOAP)) {
         	_soapFactory = OMAbstractFactory.getSOAP12Factory();
         } else {
-        	throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType()); 
+        	throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType());
         }
     }
 
@@ -161,10 +161,10 @@ public class SoapMessageConverter {
 
         SOAPEnvelope soapEnv = msgCtx.getEnvelope();
         if (soapEnv == null) {
-            _soapFactory.getDefaultEnvelope();
-        msgCtx.setEnvelope(soapEnv);
+            soapEnv = _soapFactory.getDefaultEnvelope();
+            msgCtx.setEnvelope(soapEnv);
         }
-        
+
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bi);
         for (SOAPHeader sh : soapHeaders)
             createSoapHeader(soapEnv, sh, op.getInput().getMessage(), message);
@@ -198,7 +198,7 @@ public class SoapMessageConverter {
 
         SOAPEnvelope soapEnv = msgCtx.getEnvelope();
         if (soapEnv == null) {
-            _soapFactory.getDefaultEnvelope();
+            soapEnv = _soapFactory.getDefaultEnvelope();
             msgCtx.setEnvelope(soapEnv);
         }
         List<SOAPHeader> soapHeaders = getSOAPHeaders(bo);
@@ -233,7 +233,7 @@ public class SoapMessageConverter {
                 srcPartEl = DOMUtils.findChildByName(fho, headerdef.getElementType());
             }
         }
-            
+
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.
@@ -410,14 +410,14 @@ public class SoapMessageConverter {
         if (headerEl == null)
             return;
 
-        
+
         Element destPart = getForeignIn(odeMessage);
         destPart.appendChild(odeMessage.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
 
     }
 
     /**
-     * Get the "FOREIGN_IN" message extension if it exists, otherwise create it. 
+     * Get the "FOREIGN_IN" message extension if it exists, otherwise create it.
      * @param odeMessage
      * @return the FOREING_IN extension element.
      */
@@ -429,7 +429,7 @@ public class SoapMessageConverter {
         }
         return fi;
     }
-    
+
 
     public static SOAPBody getSOAPBody(ElementExtensible ee) {
         return getFirstExtensibilityElement(ee, SOAPBody.class);
