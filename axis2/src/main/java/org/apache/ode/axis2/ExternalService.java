@@ -93,19 +93,19 @@ public class ExternalService implements PartnerRoleChannel {
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out handler.
             MessageContext mctx = new MessageContext();
-            Options options = mctx.getOptions();
-            writeHeader(options, odeMex);
+            writeHeader(mctx.getOptions(), odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
 
             SOAPEnvelope soapEnv = mctx.getEnvelope();
-
             EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference())
                     .getUrl());
             if (__log.isDebugEnabled()) {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                 __log.debug("Message: " + soapEnv);
             }
+
+            Options options = new Options();
             options.setTo(axisEPR);
             String soapAction = _converter.getSoapAction(odeMex.getOperationName());
             options.setAction(soapAction);
