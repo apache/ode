@@ -179,8 +179,7 @@ public class ODEService {
                     }
                     try {
                         // Refreshing the message exchange
-                        odeMex = (MyRoleMessageExchange) _server.getEngine()
-                                .getMessageExchange(odeMex.getMessageExchangeId());
+                        odeMex = (MyRoleMessageExchange) _server.getEngine().getMessageExchange(odeMex.getMessageExchangeId());
                         onResponse(odeMex, outMsgContext);
                         commit = true;
                     } catch (AxisFault af) {
