@@ -1,5 +1,4 @@
-require "buildr/lib/buildr"
-#require "buildr"
+require "buildr"
 require "buildr/xmlbeans"
 require "buildr/openjpa"
 require "buildr/javacc"
