@@ -19,10 +19,10 @@
 
 package org.apache.ode.bpel.compiler;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;
+
+import javax.xml.namespace.QName;
 
 /**
  * General compilation messages.
@@ -200,6 +200,13 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage(
             "Attempt to reference undeclared WSDL message \"{0}\"" + " in namespace {1}.",
             msgName, namespaceURI);
+    }
+
+    /** Missing message type reference in property alias {0} in namespace {1}. */
+    public CompilationMessage errAliasUndeclaredMessage(QName property, String path) {
+        return this.formatCompilationMessage(
+            "Missing message type reference in property alias for property {0} using path {1}.",
+            property.toString(), path);
     }
 
     /** The property "{1}" does not have an alias for message type "{0}". */
