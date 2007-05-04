@@ -13,24 +13,6 @@ svn checkout http://svn.apache.org/repos/asf/incubator/ode/trunk ode
 
 For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://incubator.apache.org/ode/source-code.html).
 
-Building With Maven2
---------------------
-
-You'll need to install Maven2 (http://maven.apache.org/) to build Ode. Just follow the installation instructions (http://maven.apache.org/download.html#Installation). Then open a command in the source root and type:
-
-mvn install
-
-This will compile and install all necessary artifacts in your local repository.
-
-You may find that the optimistic claim made above is---well, let's just say, not reflected by reality. In fact you are likely to experience the following problems:
-    * tools.jar library cannot be found: make sure JAVA_HOME points to a Java JDK, /not/ a JRE.
-    * OpenJPA enhancer cannot find necessary libraries: re-run the mvn install and all should be well.
-    * Build fails because you're missing dao-jpa-ojpa-derby or dao-hibernate-db-derby. Go into the directory of the missing module, run mvn install, go back to the root directory and run Maven again.
-
-After everything has been compiled, it's rather easy to produce a standalone distribution of ODE. Just go into the _distro-axis2_ directory (or distro-jbi if you're interested in the JBI integration) and type: 
-
-mvn install
-
 Building With Buildr
 --------------------
 
