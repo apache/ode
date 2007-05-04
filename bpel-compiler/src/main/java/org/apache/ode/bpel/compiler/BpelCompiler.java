@@ -897,6 +897,11 @@ abstract class BpelCompiler implements CompilerContext {
         OProcess.OPropertyAlias alias = new OProcess.OPropertyAlias(_oprocess);
         alias.debugInfo = createDebugInfo(_processDef, "PropertyAlias " + src.getPropertyName() + " for "
                 + src.getMessageType());
+        if (src.getMessageType() == null){
+            throw new CompilationException(__cmsgs.errAliasUndeclaredMessage(src.getPropertyName(),
+                    src.getQuery().getPath()));
+        }
+
         OMessageVarType messageType = resolveMessageType(src.getMessageType());
         alias.varType = messageType;
         // bpel 2.0 excludes declaration of part;
