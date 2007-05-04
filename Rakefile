@@ -1,14 +1,10 @@
+gem "buildr", "1.0.0"
 require "buildr"
 require "buildr/xmlbeans"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 
-module Buildr
-  module OpenJPA
-    VERSION = "0.9.7-incubating"
-  end
-end
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.0-RC2-incubating-SNAPSHOT"
