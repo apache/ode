@@ -332,7 +332,7 @@
     -->
     <repositories>
         <repository>
-            <id>central</id>
+            <id>pxe.intalio.org</id>
             <name>ODE Maven2 repository</name>
             <url>http://pxe.intalio.org/public/maven2</url>
             <snapshots>
