@@ -142,7 +142,7 @@ public class ExternalService implements PartnerRoleChannel {
                                         reply(mexId, operation, response, false);
                                     }
                                 } catch (Throwable t) {
-                                    String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
+                                    String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
                                     __log.error(errmsg, t);
                                     replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
                                 }
@@ -242,11 +242,10 @@ public class ExternalService implements PartnerRoleChannel {
     private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg,
             final Element details) {
         // ODE MEX needs to be invoked in a TX.
-        final PartnerRoleMessageExchange odeMex =
-                (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
+                    PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
                     odeMex.replyWithFailure(error, errmsg, details);
                     return null;
                 }
@@ -299,11 +298,9 @@ public class ExternalService implements PartnerRoleChannel {
                                 odeMex.replyWithFault(faultType, response);
                             } else {
                                 if (__log.isDebugEnabled()) {
-                                    __log
-                                            .debug("FAULT RESPONSE(unknown fault type): "
-                                                    + DOMUtils.domToString(odeMsgEl));
+                                    __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
                                 }
-                                odeMex.replyWithFailure(FailureType.FORMAT_ERROR, reply.getEnvelope().getBody()
+                                odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
                                         .getFault().getText(), null);
                             }
                         } else {
@@ -316,7 +313,7 @@ public class ExternalService implements PartnerRoleChannel {
                     } catch (Exception ex) {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         __log.error(errmsg, ex);
-                        odeMex.replyWithFailure(FailureType.FORMAT_ERROR, errmsg, null);
+                        odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
                     }
                     return null;
                 }
