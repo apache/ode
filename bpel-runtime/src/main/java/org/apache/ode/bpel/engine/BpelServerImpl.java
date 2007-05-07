@@ -43,7 +43,9 @@ import org.apache.ode.utils.msg.MessageBundle;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -72,8 +74,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
 
-    private final List<BpelProcess> _runningProcesses =
-            Collections.synchronizedList(new ArrayList<BpelProcess>());
+    private final Set<BpelProcess> _runningProcesses = new HashSet<BpelProcess>();
 
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
@@ -250,7 +251,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
             BpelProcess process = new BpelProcess(conf, null, this);
 
             _engine.registerProcess(process);
-            _runningProcesses.add(process);
+            
+            synchronized(_runningProcesses) {
+                _runningProcesses.add(process);
+            }
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
@@ -273,7 +277,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
             BpelProcess p = null;
             if (_engine != null) {
                 _engine.unregisterProcess(pid);
-                _runningProcesses.remove(p);
+                synchronized(_runningProcesses) {
+                    _runningProcesses.remove(p);
+                }
             }
 
             __log.info(__msgs.msgProcessUnregistered(pid));
@@ -406,7 +412,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
             }
         }
 
-        _runningProcesses.add(process);
+        synchronized (_runningProcesses) {
+            _runningProcesses.add(process);
+        }
     }
 
     private class ProcessDefReaper implements Runnable {
@@ -431,7 +439,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor, Proce
                         for (BpelProcess process : ripped) {
                             __log.debug("Dehydrating process " + process.getPID());
                             process.dehydrate();
-                            _runningProcesses.remove(process);
+                            synchronized (_runningProcesses) {
+                                _runningProcesses.remove(process);
+                            }
                         }
                     } finally {
                         _mngmtLock.writeLock().unlock();
