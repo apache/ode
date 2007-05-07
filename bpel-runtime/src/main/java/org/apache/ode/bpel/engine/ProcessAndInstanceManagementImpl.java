@@ -166,12 +166,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         final TProcessInfoList procInfoList = ret.addNewProcessInfoList();
         final ProcessFilter processFilter = new ProcessFilter(filter, orderKeys);
 
-        try {
-            for (ProcessConf pconf : processQuery(processFilter))
+        for (ProcessConf pconf : processQuery(processFilter)) {
+            try {
                 fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
-        } catch (Exception e) {
-            __log.error("Exception while listing processes", e);
-            throw new ProcessingException("Exception while listing processes: " + e.toString());
+            } catch (Exception e) {
+                __log.error("Exception when querying process " + pconf.getProcessId(), e);
+            }
         }
 
         return ret;
