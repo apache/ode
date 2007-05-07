@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.WorkEvent.Type;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -33,6 +35,7 @@ import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
+    private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
     private PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;
@@ -49,14 +52,23 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public void replyOneWayOk() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("replyOneWayOk mex=" + getMessageExchangeId());
+        }
         setStatus(Status.ASYNC);
     }
 
     public void replyAsync() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("replyAsync mex=" + getMessageExchangeId());
+        }
         setStatus(Status.ASYNC);
     }
 
     public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("replyWithFault mex=" + getMessageExchangeId());
+        }
         boolean isAsync = isAsync();
         setFault(faultType, outputFaultMessage);
         if (isAsync)
@@ -64,6 +76,9 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public void reply(Message response) throws BpelEngineException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("reply mex=" + getMessageExchangeId());
+        }
         boolean isAsync = isAsync();
         setResponse(response);
         if (isAsync)
@@ -72,6 +87,9 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("replyWithFailure mex=" + getMessageExchangeId());
+        }
         boolean isAsync = isAsync();
         setFailure(type, description, details);
         if (isAsync)
@@ -84,9 +102,16 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
      */
     private void continueAsync() {
         // If there is no channel waiting for us, there is nothing to do.
-        if (getDAO().getChannel() == null)
+        if (getDAO().getChannel() == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("no channel on mex=" + getMessageExchangeId());
+            }
             return;
+        }
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("create work event for mex=" + getMessageExchangeId());
+        }
         WorkEvent we = new WorkEvent();
         we.setIID(getDAO().getInstance().getInstanceId());
         we.setType(Type.INVOKE_RESPONSE);
