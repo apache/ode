@@ -93,16 +93,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return getDAO().getPropagateTransactionFlag();
     }
 
-    public boolean isFault() {
-        // TODO
-        return false;
-    }
-
-    public boolean isDone() {
-        // TODO
-        return false;
-    }
-
     public Message getResponse() {
         return new MessageImpl(getDAO().getResponse());
     }
@@ -184,6 +174,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
+        // TODO not using FailureType, nor details
         setStatus(Status.FAILURE);
         getDAO().setFaultExplanation(reason);
     }
