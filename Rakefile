@@ -8,7 +8,7 @@ require "buildr/lib/buildr/jetty"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.0-RC3-incubating-SNAPSHOT"
-NEXT_VERSION = "1.0-RC3"
+NEXT_VERSION = "1.0-RC3-incubating"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
