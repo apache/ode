@@ -2,7 +2,7 @@ This file contains the PGP keys of various developers.
 
 Users: pgp < KEYS
        gpg --import KEYS
-Developers: 
+Developers:
         pgp -kxa <your name> and append it to this file.
         (pgpk -ll <your name> && pgpk -xa <your name>) >> this file.
         (gpg --list-sigs <your name>
@@ -49,4 +49,38 @@ XhyiQTbLuvFvEQ5C5wiy3TS4xoRgEjFOX2+M8nIi9i9QAYBUu7sZ0R4r9EZgXDHW
 AzJfYg+GQtF/uEzjiEkEGBECAAkFAkYAHbYCGwwACgkQWy/NmDyPPDNfwACggHvK
 FhjFYYJSxhkOdre/2cZR9+QAoNeNMyr6KiYcJqxjy9t+joycJHzo
 =Ztlf
+-----END PGP PUBLIC KEY BLOCK-----
+
+
+pub   1024D/2EED13CE 2007-05-09
+uid                  Alex Boisvert (CODE SIGNING KEY) <alex.boisvert@gmail.com>
+sig 3        2EED13CE 2007-05-09  Alex Boisvert (CODE SIGNING KEY) <alex.boisvert@gmail.com>
+sub   1024g/54BC5E9F 2007-05-09
+sig          2EED13CE 2007-05-09  Alex Boisvert (CODE SIGNING KEY) <alex.boisvert@gmail.com>
+
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+mQGiBEZCQ80RBACdngN/JZod5XLn8Was2AbSutxP/H5WssX/StS+0BLNRn+FMhtn
+xXKkJwqKtqbKoHzEKKziQHybD5AfXSBj21l2iZXPfcwfsJJVpDmwBr7p6SPXdNEY
+eDoSW8ZVsA81m/Oc/kxbglVSiH39O3olrQ7bwaKyBMR2QkjxynJYGImtFwCg8FKy
+tPJRTUaXHGYtoGw7Jh5fNSsEAI9qQYA8IK2AwyjJE5D/rcv0nahzFRZqT+HZwmfP
+FVqsgIBUt7KKuDpWw2dzf6utmKHq9JZZb7BvDlfYv7PbPIioX+35SNu7cQUNy7al
+5aCgf7+evukiQBiEHZio8AzaLquCq/A29igf4fINZ4AJKTL0iRhJAKk3gey/CrOj
+p61WA/oDpGIXU4adXg4x/dbUT2pbgh+KZu8oNjaMH6ZwAQtHYJ3wabH1masz+yb3
+spAUZ3IHJmFrpZeJYCUlLXZqu+/0R7hnoNH9zaE2g1JGwtiKjLEmubCp3nme0/Ca
+lt8aG9XpgcWe09rA7Sbd7p9Pkdgor/p0yaF6eJl5wETdCTTjpLQ6QWxleCBCb2lz
+dmVydCAoQ09ERSBTSUdOSU5HIEtFWSkgPGFsZXguYm9pc3ZlcnRAZ21haWwuY29t
+PohgBBMRAgAgBQJGQkPNAhsjBgsJCAcDAgQVAggDBBYCAwECHgECF4AACgkQ9sJV
+Ei7tE873UgCeKKtOd1wW8B1b7vlT8J8y5a35kNMAoJ9WjLxFmKbKOkxYrt54esl6
+mGXouQENBEZCQ84QBADI6QppW8BMMaQ4us7axSinOOgTGGkOjuv48d8JnNkgUj34
+N84PME18JlTD9jlkVf+PHjYMaA3fkiKfjlojq0D9V4l7zVDd7e8O5LRL1eOKzivl
+A84a3d2574V1I3ioljCyXLA+41OxYE4DtNXH+mvcumhYGBu2Bg0I5ZuXDvhv5wAE
+CwQAnSLLv0M9LptAiOXl012jgP/4yuZDnBKczvAzMzR847Sy4Shuk03H2rN12+AM
+rX+unJpcGOGxlzJ8Mb40aauBc270wVSCrza9z7/i/4DLPsTUuc+ZgBLWuv+lNitD
+UeieigodJqbr8EFNj6MlhJyUeGxbFmkngR80nZX06sAIILyISQQYEQIACQUCRkJD
+zgIbDAAKCRD2wlUSLu0TzhPzAJ93zO3DP6/fcA1yfbFSSbgLGI7+/wCdFMH1Ptl8
+sGH4v6GYUVHyfKnWKbg=
+=X6Yk
 -----END PGP PUBLIC KEY BLOCK-----
