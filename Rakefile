@@ -1,9 +1,9 @@
-gem "buildr", "1.0.0"
-require "buildr"
-require "buildr/xmlbeans"
-require "buildr/openjpa"
-require "buildr/javacc"
-require "buildr/jetty"
+# gem "buildr", "1.0.0"
+require "buildr/lib/buildr"
+require "buildr/lib/buildr/xmlbeans"
+require "buildr/lib/buildr/openjpa"
+require "buildr/lib/buildr/javacc"
+require "buildr/lib/buildr/jetty"
 
 
 # Keep this structure to allow the build system to update version numbers.
@@ -308,7 +308,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
     build derby_db
 
-    %w{ firebird hsql postgres sqlserver }.each do |db|
+    %w{ firebird hsql postgres sqlserver oracle }.each do |db|
       partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
       build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
@@ -336,7 +336,6 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
     end
     derby_sql = concat(_("target/derby.sql")=>[partial_sql, quartz_sql])
     derby_db = Derby.create(_("target/derby/jpadb")=>derby_sql)
-
 
     test.with projects("ode:bpel-api", "ode:bpel-dao", "ode:bpel-obj", "ode:bpel-epr", "ode:dao-jpa", "ode:utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
@@ -375,7 +374,7 @@ define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
         "ode:bpel-scheduler-quartz", "ode:bpel-schemas", "ode:bpel-store", "ode:dao-hibernate", "ode:dao-jpa",
         "ode:jacob", "ode:jacob-ap", "ode:utils"),
         ANT, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, DOM4J, HIBERNATE, HSQLDB, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
+        COMMONS.primitives, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
         JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, QUARTZ, SAXON, TRANQL,
         XALAN, XMLBEANS, XSTREAM, WSDL4J)
 
