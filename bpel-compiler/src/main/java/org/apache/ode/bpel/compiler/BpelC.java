@@ -259,7 +259,6 @@ public class BpelC {
         if (!_dryRun) {
             if (outputPath != null) {
                 this.setOutputStream(new BufferedOutputStream(new FileOutputStream(outputPath)));
-                System.out.println("Writing compilation results to " + outputPath);
                 if (__log.isDebugEnabled()) {
                     __log.debug("Writing compilation results to " + outputPath);
                 }
