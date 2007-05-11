@@ -19,10 +19,6 @@
 
 package org.apache.ode.bpel.compiler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
@@ -34,6 +30,10 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Generates code for <code>&lt;invoke&gt;</code> activities.
@@ -63,10 +63,13 @@ class InvokeGenerator extends DefaultActivityGenerator {
         // throw new CompilationException(CMSGSG.errPortTypeMismatch(portType,
         // onMessage.partnerLink.myRolePortType.getQName()));
         if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null) {
-            if (src.getInputVar() == null)
-                throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
-            oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput()
-                    .getMessage().getQName());
+            // Input var can be omitted if input message has no part 
+            if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
+                if (src.getInputVar() == null)
+                    throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
+                oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput()
+                        .getMessage().getQName());
+            }
         }
         if (oinvoke.operation.getOutput() != null && oinvoke.operation.getOutput().getMessage() != null) {
             if (src.getOutputVar() == null)
