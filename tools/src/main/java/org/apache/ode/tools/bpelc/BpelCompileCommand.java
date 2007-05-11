@@ -108,7 +108,6 @@ public class BpelCompileCommand implements Command {
       if (u != null) {
         compiler.setProcessWSDL(u);
       }
-      compiler.setOutputDirectory(_outputDir);
       compiler.setCompileListener(myListener);
 
       File bpelFile = new File(bpelURI);

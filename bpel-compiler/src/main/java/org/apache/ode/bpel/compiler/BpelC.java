@@ -58,12 +58,12 @@ public class BpelC {
 
     private CompileListener _compileListener;
     public OutputStream _outputStream = null;
-    private File _outputDir = null;
 
     private File _bpelFile;
     private ResourceFinder _wsdlFinder;
     private URI _bpel11wsdl;
     private Map<String,Object> _compileProperties;
+    private boolean _dryRun = false;
 
     public static BpelC newBpelCompiler() {
         return new BpelC();
@@ -82,7 +82,6 @@ public class BpelC {
         this.setResourceFinder(null);
         this.setCompileListener(null);
         this.setOutputStream(null);
-        this.setOutputDirectory(null);
     }
 
     /**
@@ -93,6 +92,15 @@ public class BpelC {
      */
     public void setCompileListener(CompileListener cl) {
         _compileListener = cl;
+    }
+
+    /**
+     * Configures the compiler to run a dry compilation, doesn't generate the produced
+     * compiled process.
+     * @param dryRun
+     */
+    public void setDryRun(boolean dryRun) {
+        _dryRun = dryRun;
     }
 
     /**
@@ -151,30 +159,6 @@ public class BpelC {
 
     /**
      * <p>
-     * Set the target directory for output.  This overrides {@link #setOutputStream(OutputStream)}.
-     * </p>
-     * @param outputDir the filesystem directory to write the compiled process to.
-     * @see #setOutputStream(OutputStream)
-     */
-    public void setOutputDirectory(File outputDir) {
-        // override any outputStream setting
-        this.setOutputStream(null);
-
-        // check if this is suitable for output
-        if (outputDir != null) {
-            if (outputDir.exists() && outputDir.isDirectory() && outputDir.canWrite()) {
-                _outputDir = outputDir;
-                if (__log.isDebugEnabled()) {
-                    __log.debug("Set output directory to " + outputDir.toURI());
-                }
-            } else {
-                throw new IllegalArgumentException("outputDirectory not writeable: " + outputDir.toURI());
-            }
-        }
-    }
-
-    /**
-     * <p>
      * Compile a BPEL process from a BOM {@link Process} object.
      * </p>
      *
@@ -187,7 +171,7 @@ public class BpelC {
      * @throws CompilationException
      *           if one occurs while compiling.
      */
-    public void compile(final Process process) throws CompilationException, IOException {
+    public void compile(final Process process, String outputPath) throws CompilationException, IOException {
         if (process == null)
             throw new NullPointerException("Attempt to compile NULL process.");
 
@@ -272,35 +256,37 @@ public class BpelC {
             throw cex;
         }
 
-        if (_outputStream != null) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("Writing compilation results to " + _outputStream.getClass().getName());
+        if (!_dryRun) {
+            if (outputPath != null) {
+                this.setOutputStream(new BufferedOutputStream(new FileOutputStream(outputPath)));
+                System.out.println("Writing compilation results to " + outputPath);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Writing compilation results to " + outputPath);
+                }
+            } else if (_outputStream != null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Writing compilation results to " + _outputStream.getClass().getName());
+                }
+            } else {
+                throw new IllegalStateException("must setOutputStream() or setOutputDirectory()!");
             }
-        } else if (_outputDir != null) {
-            File outFile = new File(_outputDir, oprocess.getName() + ".cbp");
-            this.setOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
-            if (__log.isDebugEnabled()) {
-                __log.debug("Writing compilation results to " + outFile.toURI().toString());
-            }
-        } else {
-            throw new IllegalStateException("must setOutputStream() or setOutputDirectory()!");
-        }
 
-        try {
-            Serializer fileHeader = new Serializer(System.currentTimeMillis());
-            fileHeader.writeOProcess(oprocess, _outputStream);
-        } finally {
-            // close & mark myself invalid
-            this.invalidate();
+            try {
+                Serializer fileHeader = new Serializer(System.currentTimeMillis());
+                fileHeader.writeOProcess(oprocess, _outputStream);
+            } finally {
+                // close & mark myself invalid
+                this.invalidate();
+            }
         }
     }
 
     /**
      * <p>
-     * Compile a BPEL process from a URL.  This method uses a {@link BpelProcessBuilder}
-     * to parse the XML and then calls {@link #compile(Process)}.
+     * Compile a BPEL process from a file.  This method uses a {@link BpelObjectFactory}
+     * to parse the XML and then calls {@link #compile(Process,String)}.
      * </p>
-     * @param bpelFile the URL of the BPEL process to be compiled.
+     * @param bpelFile the file of the BPEL process to be compiled.
      * @throws IOException if one occurs while reading the BPEL process or writing the
      * output.
      * @throws CompilationException if one occurs while compiling the process.
@@ -322,8 +308,6 @@ public class BpelC {
             isrc.setSystemId(bpelFile.getAbsolutePath());
 
             process = BpelObjectFactory.getInstance().parse(isrc,_bpelFile.toURI());
-
-
         } catch (Exception e) {
             CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocationImpl(bpelFile.toURI()));
             this.invalidate();
@@ -332,7 +316,11 @@ public class BpelC {
 
         assert process != null;
 
-        compile(process);
+        // Output file = bpel file with a cbp extension
+        String bpelPath = bpelFile.getAbsolutePath();
+        String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + ".cbp";
+
+        compile(process, cbpPath);
         this.invalidate();
     }
 
