@@ -128,9 +128,7 @@ class DeploymentUnitDir  {
         HashMap<QName, CBPInfo> processes = new HashMap<QName, CBPInfo>();
         ArrayList<File> cbps = listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
         for (File file : cbps) {
-            System.out.println("Found CBP file " + file.getAbsolutePath());
             CBPInfo cbpinfo = loadCBPInfo(file);
-            System.out.println("Process name " + cbpinfo.processName);
             processes.put(cbpinfo.processName, cbpinfo);
         }
         _processes = processes;
@@ -148,7 +146,6 @@ class DeploymentUnitDir  {
     }
 
     private void compile(File bpelFile) {
-        System.out.println("Compiling " + bpelFile.getAbsolutePath());
         BpelC bpelc = BpelC.newBpelCompiler();
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         try {
