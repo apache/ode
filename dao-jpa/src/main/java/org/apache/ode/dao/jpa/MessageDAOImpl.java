@@ -85,7 +85,8 @@ public class MessageDAOImpl implements MessageDAO {
 	}
 
 	public void setData(Element value) {
-		_data = DOMUtils.domToString(value);
+        if (value == null) return;
+        _data = DOMUtils.domToString(value);
 		_element = value;
 	}
 

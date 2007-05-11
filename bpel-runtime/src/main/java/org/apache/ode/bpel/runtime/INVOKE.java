@@ -180,12 +180,13 @@ public class INVOKE extends ACTIVITY {
             }
         }
 
-        Node outboundMsg = getBpelRuntimeContext().fetchVariableData(
-            _scopeFrame.resolve(oinvoke.inputVar), false);
-
-        // TODO outbound message should be updated with non-initiate correlation sets
-        assert outboundMsg instanceof Element;
-        return (Element) outboundMsg;
+        if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
+            Node outboundMsg = getBpelRuntimeContext().fetchVariableData(
+                _scopeFrame.resolve(oinvoke.inputVar), false);
+            // TODO outbound message should be updated with non-initiate correlation sets
+            assert outboundMsg instanceof Element;
+            return (Element) outboundMsg;
+        } else return null;
     }
 
     private void retryOrFailure(String reason, Element data) {
