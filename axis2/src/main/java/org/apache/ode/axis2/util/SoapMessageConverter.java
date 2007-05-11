@@ -19,10 +19,23 @@
 
 package org.apache.ode.axis2.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultDetail;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.namespace.Constants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.Messages;
+import org.apache.ode.axis2.OdeFault;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.w3c.dom.Element;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -41,24 +54,10 @@ import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultDetail;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.namespace.Constants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.Messages;
-import org.apache.ode.axis2.OdeFault;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.stl.CollectionsX;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * SOAP/ODE Message converter. Uses WSDL binding information to convert the protocol-neutral ODE representation into a SOAP
@@ -145,7 +144,8 @@ public class SoapMessageConverter {
     public void createSoapRequest(MessageContext msgCtx, Element message, Operation op) throws AxisFault {
         if (op == null)
             throw new NullPointerException("Null operation");
-        if (message == null)
+        // The message can be null if the input message has no part
+        if (op.getInput().getMessage().getParts().size() > 0 && message == null)
             throw new NullPointerException("Null message.");
         if (msgCtx == null)
             throw new NullPointerException("Null msgCtx");
@@ -225,15 +225,17 @@ public class SoapMessageConverter {
             throw new OdeFault(__msgs.msgSoapHeaderReferencesUnkownPart(headerdef.getPart()));
 
         Element srcPartEl = null;
-        if (payloadMessageHeader)
-            srcPartEl = DOMUtils.findChildByName(message, new QName(null, headerdef.getPart()));
-        else {
-            Element fho = DOMUtils.findChildByName(message, FOREIGN_HEADER_OUT);
-            if (fho != null) {
-                srcPartEl = DOMUtils.findChildByName(fho, headerdef.getElementType());
+        // Message can be null if the operation message has no part
+        if (message != null) {
+            if (payloadMessageHeader)
+                srcPartEl = DOMUtils.findChildByName(message, new QName(null, headerdef.getPart()));
+            else {
+                Element fho = DOMUtils.findChildByName(message, FOREIGN_HEADER_OUT);
+                if (fho != null) {
+                    srcPartEl = DOMUtils.findChildByName(fho, headerdef.getElementType());
+                }
             }
         }
-
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.
