@@ -1,9 +1,9 @@
-# gem "buildr", "1.0.0"
-require "buildr/lib/buildr"
-require "buildr/lib/buildr/xmlbeans"
-require "buildr/lib/buildr/openjpa"
-require "buildr/lib/buildr/javacc"
-require "buildr/lib/buildr/jetty"
+gem "buildr", "1.0.0"
+require "buildr"
+require "buildr/xmlbeans"
+require "buildr/openjpa"
+require "buildr/javacc"
+require "buildr/jetty"
 
 
 # Keep this structure to allow the build system to update version numbers.
