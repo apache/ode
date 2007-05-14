@@ -324,7 +324,7 @@ abstract class BpelCompiler implements CompilerContext {
         if (scopeToComp == null)
             throw new CompilationException(__cmsgs.errCompensateOfInvalidScope(scopeToCompensate));
 
-        return scopeToComp;
+        return scopeToComp; 
     }
 
     public String getSourceLocation() {
