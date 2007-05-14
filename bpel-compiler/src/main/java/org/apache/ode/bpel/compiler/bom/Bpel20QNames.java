@@ -21,7 +21,6 @@ package org.apache.ode.bpel.compiler.bom;
 import javax.xml.namespace.QName;
 
 public abstract class Bpel20QNames {
-
     /**
      * The XML namespace for schema of WS-BPEL 2.0, i.e., the first
      * OASIS-sanctioned version of the specification.
