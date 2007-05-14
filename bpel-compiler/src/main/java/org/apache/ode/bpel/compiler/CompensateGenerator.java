@@ -18,19 +18,24 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OCompensate;
+import org.apache.ode.utils.msg.MessageBundle;
 
 
 /**
- * Generates code for the <code>&lt;switch&gt;</code> activities.
+ * Generates code for the <code>&lt;compensate&gt;</code> activities.
  */
 class CompensateGenerator extends DefaultActivityGenerator {
-
+    private static final CompensateGeneratorMessages __cmsgs = MessageBundle.getMessages(CompensateGeneratorMessages.class);
+    
     public void compile(OActivity output, Activity src) {
         CompensateActivity compSrc = (CompensateActivity) src;
+        if (compSrc.getScopeToCompensate() == null)
+            throw new CompilationException(__cmsgs.errScopeToCompensateUnspecfied());
         ((OCompensate)output).compensatedScope = _context.resolveCompensatableScope(compSrc.getScopeToCompensate());
     }
 
