@@ -23,7 +23,7 @@
  xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
  xmlns:wns="http://ode/bpel/unit-test/testCompensationHandlers.wsdl"
  xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
- name="TestCompensationProcess"
+ name="TestCompensationHandlersProcess"
  targetNamespace="http://ode/bpel/unit-test/testCompensationHandlers"
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
@@ -84,7 +84,7 @@
 
 
 		<catchAll>
-			<compensate scope="tns:ScopeTwo"/>
+			<compensate scope="ScopeTwo"/>
 		</catchAll>
 
 		

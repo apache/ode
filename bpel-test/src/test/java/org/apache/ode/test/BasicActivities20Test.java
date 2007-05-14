@@ -18,26 +18,46 @@
  */
 package org.apache.ode.test;
 
-public class BasicActivities20Test extends BPELTestAbstract {
-	  public void testHelloWorld2() throws Throwable {
-		    go("/bpel/2.0/HelloWorld2");
-	  }
+import javax.xml.namespace.QName;
 
-	  public void testNegativeTargetNS1() throws Throwable {
-		    /**
-         * Test for an invalid targetNamespace has been entered into the WSDL.
-         * See JIRA ODE-67
-         * Test for a specific exception message.
-        */
-		    go("/bpel/2.0/NegativeTargetNSTest1");
-	  }
-	
-	  public void testTimer() throws Throwable {
-	      go("/bpel/2.0/TestTimer");
-	  }
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.MessageExchange;
+
+public class BasicActivities20Test extends BPELTestAbstract {
+    public void testHelloWorld2() throws Throwable {
+        go("/bpel/2.0/HelloWorld2");
+    }
+
+    public void testNegativeTargetNS1() throws Throwable {
+        /**
+         * Test for an invalid targetNamespace has been entered into the WSDL. See JIRA ODE-67 Test for a specific exception
+         * message.
+         */
+        Deployment deployment = addDeployment("/bpel/2.0/NegativeTargetNSTest1");
+        deployment.expectedException = ContextException.class;
+        
+        go();
+    }
+
+    public void testTimer() throws Throwable {
+        go("/bpel/2.0/TestTimer");
+    }
 
     public void testIf() throws Throwable {
         go("/bpel/2.0/TestIf");
+    }
+    
+    public void testWait1() throws Throwable {
+        deploy("/bpel/2.0/TestWait1");
+        Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
+            "<message><TestPart/><Time/></message>",
+            null);
+        inv.minimumWaitMs=5*1000L;
+        inv.maximumWaitMs=7*1000L;
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        
+        go();
     }
 
 }
