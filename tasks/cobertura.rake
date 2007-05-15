@@ -27,20 +27,21 @@ module Cobertura
 
     task "instrument" do
       Buildr.projects.each do |project|
-        # Instrumented bytecode goes in a different directory.
-        instrumented = project.path_to(:target, "instrumented")
         unless project.compile.sources.empty?
-          project.compile do
-            ant_project.send "cobertura-instrument", :todir=>instrumented, :datafile=>data_file do
+          # Instrumented bytecode goes in a different directory. This task creates before running the test
+          # cases and monitors for changes in the generate bytecode.
+          instrumented = project.file(project.project.path_to(:target, "instrumented")=>project.compile.target) do |task|
+            ant_project.send "cobertura-instrument", :todir=>task.to_s, :datafile=>data_file do
               fileset(:dir=>project.compile.target.to_s) { include :name=>"**/*.class" }
             end
+            touch task.to_s, :verbose=>false
           end
           # We now have two target directories with bytecode. It would make sense to remove compile.target
           # and add instrumented instead, but apparently Cobertura only creates some of the classes, so
           # we need both directories and instrumented must come first.
           project.test.junit.classpath.unshift file(instrumented)
           project.test.junit.with requires
-          project.clean { rm_rf instrument, :verbose=>false }
+          project.clean { rm_rf instrumented.to_s, :verbose=>false }
         end
       end
     end
@@ -72,6 +73,8 @@ module Cobertura
     end
   end
 
-  task "clean"=>"cobertura:clean"
+  task "clean" do
+    task("cobertura:clean").invoke if Dir.pwd == Rake.application.original_dir
+  end
 
 end
