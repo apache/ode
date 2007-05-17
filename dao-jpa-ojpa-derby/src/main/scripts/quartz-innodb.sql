@@ -1,3 +1,5 @@
+# IMPORTED FROM OPENSYMPHONY QUARTZ, SEE NOTICE FILE FOR DETAILS
+
 #
 # In your Quartz properties file, you'll need to set 
 # org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate

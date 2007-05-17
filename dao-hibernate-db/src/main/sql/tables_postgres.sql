@@ -1,3 +1,5 @@
+# IMPORTED FROM OPENSYMPHONY QUARTZ, SEE NOTICE FILE FOR DETAILS
+
 # Thanks to Patrick Lightbody for submitting this...
 #
 # In your Quartz properties file, you'll need to set 
