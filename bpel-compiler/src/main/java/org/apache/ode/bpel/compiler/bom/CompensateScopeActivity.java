@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.compiler;
+package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.ode.bpel.compiler.bom.Activity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OCompensate;
-
+import org.w3c.dom.Element;
 
 /**
- * Generates code for the <code>&lt;compensate&gt;</code> activities.
+ * Representation of the BPEL <code>&lt;compensateScope&gt;</code> activity.
  */
-class CompensateGenerator extends DefaultActivityGenerator {
-    
-    public void compile(OActivity output, Activity src) {
+public class CompensateScopeActivity extends Activity {
+
+    public CompensateScopeActivity(Element el) {
+        super(el);
     }
 
-    public OActivity newInstance(Activity src) {
-        return new OCompensate(_context.getOProcess(), _context.getCurrent());
+    /**
+     * Get the name of the compensate scope: the scope which is compensated by
+     * this activity.
+     * 
+     * @return scope compensated by this activity
+     */
+    public String getScopeToCompensate() {
+        return getAttribute("target", /** historical **/ getAttribute("scope", null));
     }
+
 }
