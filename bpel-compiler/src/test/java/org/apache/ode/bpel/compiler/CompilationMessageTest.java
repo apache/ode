@@ -37,9 +37,12 @@ public class CompilationMessageTest extends TestCase {
 
   private CompilationTestMessages _bundle;
   private SourceLocationImpl sloc;
+  private Locale oldLocale;
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    oldLocale = Locale.getDefault();
+    Locale.setDefault(Locale.ENGLISH);
     _bundle = MessageBundle.getMessages(CompilationTestMessages.class);
     sloc = new SourceLocationImpl(new URI("urn:foo"));
   }
@@ -47,6 +50,7 @@ public class CompilationMessageTest extends TestCase {
   @Override
   protected void tearDown() throws Exception {
     _bundle = null;
+    Locale.setDefault(oldLocale);
     super.tearDown();
   }
 
