@@ -48,6 +48,12 @@ http://www.itl.nist.gov/div897/ctg/sql_form.htm
     Sun Microsystems and licensed under the CDDL 1.0. The source code is
     available at: https://glassfish.dev.java.net/source/browse/glassfish/
 
+=========================================================================
+==  OpenSymphony Notice                                                ==
+=========================================================================
+
+Thr program includes all or portions of OpenSymphony Quartz, licensed
+under the Apache Software License 2.0. Copyright 2004-2005 OpenSymphony.
 
 =========================================================================
 ==  Saxon Notice                                                      ==
