@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
 import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
+import org.apache.ode.bpel.compiler.bom.CompensateScopeActivity;
 import org.apache.ode.bpel.compiler.bom.EmptyActivity;
 import org.apache.ode.bpel.compiler.bom.FlowActivity;
 import org.apache.ode.bpel.compiler.bom.ForEachActivity;
@@ -52,6 +53,7 @@ public class BpelCompiler20 extends BpelCompiler {
         super((WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance());
 
         registerActivityCompiler(EmptyActivity.class, new EmptyGenerator());
+        registerActivityCompiler(CompensateScopeActivity.class, new CompensateScopeGenerator());
         registerActivityCompiler(CompensateActivity.class, new CompensateGenerator());
         registerActivityCompiler(FlowActivity.class, new FlowGenerator());
         registerActivityCompiler(SequenceActivity.class, new SequenceGenerator());
