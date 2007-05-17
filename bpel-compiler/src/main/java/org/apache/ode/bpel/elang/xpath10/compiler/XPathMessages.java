@@ -32,74 +32,80 @@ public class XPathMessages extends CompilationMessageBundle {
         return super.formatCompilationMessage("Couldn't configure XPath factory");
     }
 
+    /** Invalid number of argument to function "{0}". */
+    public CompilationMessage errInvalidNumberOfArguments(String functionName) {
+        return super.formatCompilationMessage("Invalid number of argument to function \"{0}\".",
+                functionName);
+    }
 
-  /** Invalid number of argument to function "{0}". */
-  public CompilationMessage errInvalidNumberOfArguments(String functionName) {
-    return super.formatCompilationMessage("Invalid number of argument to function \"{0}\".",
-        functionName);
-  }
+    /** Error compiling XSL Sheet "{0}" : {1}. */
+    public CompilationMessage errXslCompilation(String xslName, String error) {
+        return super.formatCompilationMessage("Error compiling XSL Sheet \"{0}\" : {1}",
+                xslName, error);
+    }
 
-  /** Error compiling XSL Sheet "{0}" : {1}. */
-  public CompilationMessage errXslCompilation(String xslName, String error) {
-    return super.formatCompilationMessage("Error compiling XSL Sheet \"{0}\" : {1}",
-        xslName, error);
-  }
+    /** Attempt to use an unrecognized BPEL function "{0}". */
+    public CompilationMessage errUnknownBpelFunction(String functionName) {
+        return super.formatCompilationMessage(
+                "Attempt to use an unrecognized BPEL function \"{0}\".", functionName);
+    }
 
-  /** Attempt to use an unrecognized BPEL function "{0}". */
-  public CompilationMessage errUnknownBpelFunction(String functionName) {
-    return super.formatCompilationMessage(
-        "Attempt to use an unrecognized BPEL function \"{0}\".", functionName);
-  }
+    /** The expression "{0}" must be a literal string. */
+    public CompilationMessage errLiteralExpected(String text) {
+        return super.formatCompilationMessage("The expression \"{0}\" must be a literal string.",
+                text);
+    }
 
-  /** The expression "{0}" must be a literal string. */
-  public CompilationMessage errLiteralExpected(String text) {
-    return super.formatCompilationMessage("The expression \"{0}\" must be a literal string.",
-        text);
-  }
+    /** The prefix "{0}" on the XPath function "{1}" is not bound to a URI. */
+    public CompilationMessage errUndeclaredFunctionPrefix(String prefix, String functionName) {
+        return super.formatCompilationMessage("The prefix \"{0}\" on the XPath function \"{1}\""
+                + " is not bound to a URI.", prefix, functionName);
+    }
 
-  /** The prefix "{0}" on the XPath function "{1}" is not bound to a URI. */
-  public CompilationMessage errUndeclaredFunctionPrefix(String prefix, String functionName) {
-    return super.formatCompilationMessage("The prefix \"{0}\" on the XPath function \"{1}\""
-        + " is not bound to a URI.", prefix, functionName);
-  }
+    /**
+     * The prefixed name "{0}" could not be dereferenced in this namespace
+     * context.
+     */
+    public CompilationMessage errInvalidQName(String qnameStr) {
+        return super.formatCompilationMessage(
+                "The prefixed name \"{0}\" could not be dereferenced in this namespace context.",
+                qnameStr);
+    }
 
-  /**
-   * The prefixed name "{0}" could not be dereferenced in this namespace
-   * context.
-   */
-  public CompilationMessage errInvalidQName(String qnameStr) {
-    return super.formatCompilationMessage(
-        "The prefixed name \"{0}\" could not be dereferenced in this namespace context.",
-        qnameStr);
-  }
+    /** The string "{0}" is not a valid XPath 1.0 expression. */
+    public CompilationMessage errXPathSyntax(String xPathString) {
+        return super.formatCompilationMessage(
+                "The string \"{0}\" is not a valid XPath 1.0 expression.", xPathString);
+    }
 
-  /** The string "{0}" is not a valid XPath 1.0 expression. */
-  public CompilationMessage errXPathSyntax(String xPathString) {
-    return super.formatCompilationMessage(
-        "The string \"{0}\" is not a valid XPath 1.0 expression.", xPathString);
-  }
+    /** The string "{0}" is not a valid XPath 1.0 expression. */
+    public CompilationMessage warnXPath20Syntax(String xPathString, String message) {
+        return super.formatCompilationMessage(
+                "The string \"{0}\" is not a valid XPath 2.0 expression: {1}", xPathString, message);
+    }
 
-  /** The string "{0}" is not a valid XPath 1.0 expression. */
-  public CompilationMessage warnXPath20Syntax(String xPathString, String message) {
-    return super.formatCompilationMessage(
-        "The string \"{0}\" is not a valid XPath 2.0 expression: {1}", xPathString, message);
-  }
+    /** The XPath node with value "{0}" was not a text node. */
+    public CompilationMessage errUnexpectedNodeTypeForXPath(String string) {
+        return super.formatCompilationMessage(
+                "The XPath node with value \"{0}\" was not a text node.", string);
+    }
 
-  /** The XPath node with value "{0}" was not a text node. */
-  public CompilationMessage errUnexpectedNodeTypeForXPath(String string) {
-    return super.formatCompilationMessage(
-        "The XPath node with value \"{0}\" was not a text node.", string);
-  }
+    /** Unexpected compilator error: {0} */
+    public CompilationMessage errUnexpectedCompilationError(String string) {
+        return super.formatCompilationMessage(
+                "Unexpected compilation error: {0}", string);
+    }
 
-  /** Unexpected compilator error: {0} */
-  public CompilationMessage errUnexpectedCompilationError(String string) {
-    return super.formatCompilationMessage(
-        "Unexpected compilation error: {0}", string);
-  }
+    /** bpws:xsltStylesheetNotFound the declared stylesheet could not be found: {0} */
+    public CompilationMessage errXsltStylesheetNotFound(String string) {
+        return super.formatCompilationMessage(
+                "bpws:xsltStylesheetNotFound the declared stylesheet could not be found: {0}", string);
+    }
 
-  /** bpws:xsltStylesheetNotFound the declared stylesheet could not be found: {0} */
-  public CompilationMessage errXsltStylesheetNotFound(String string) {
-    return super.formatCompilationMessage(
-        "bpws:xsltStylesheetNotFound the declared stylesheet could not be found: {0}", string);
-  }
+    /** Invalid number of argument to function "{0}". */
+    public CompilationMessage errExpressionMessageNoPart(String message) {
+        return super.formatCompilationMessage("Attempt to use the messageType variable {0} in an expression " +
+                " even though the associated message is undefined or has no part.", message);
+    }
+
 }
