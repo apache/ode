@@ -945,14 +945,16 @@ public class DOMUtils {
     private static Transformer getTransformer() {
         Transformer txer = __txers.get();
         if (txer == null) {
+            synchronized(_transformerFactory) {
             try {
                 txer = _transformerFactory.newTransformer();
-                __txers.set(txer);
             } catch (TransformerConfigurationException e) {
                 String errmsg = "Transformer configuration error!";
                 __log.fatal(errmsg, e);
                 throw new Error(errmsg, e);
             }
+        }
+            __txers.set(txer);
         }
         return txer;
     }
