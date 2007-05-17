@@ -1,3 +1,5 @@
+-- IMPORTED FROM OPENSYMPHONY QUARTZ, SEE NOTICE FILE FOR DETAILS
+
 -- 
 -- Apache Derby scripts by Steve Stewart.
 -- Based on Srinivas Venkatarangaiah's file for Cloudscape
