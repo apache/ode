@@ -61,16 +61,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of HSQL database.
  * </p>
- * 
+ *
  * <p>
  * The philsophy here is to keep things simple. Process store operations are relatively infrequent. Performance of the public
  * methods is not a concern. However, note that the {@link org.apache.ode.bpel.iapi.ProcessConf} objects returned by the class are
  * going to be used from within the engine runtime, and hence their performance needs to be very good. Similarly, these objects
  * should be immutable so as not to confuse the engine.
- * 
+ *
  * Note the way that the database is used in this class, it is more akin to a recovery log, this is intentional: we want to start
  * up, load stuff from the database and then pretty much forget about it when it comes to reads.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author mriou <mriou at apache dot org>
  */
@@ -112,7 +112,7 @@ public class ProcessStoreImpl implements ProcessStore {
     public ProcessStoreImpl() {
         this(null, "", true);
     }
-    
+
     public ProcessStoreImpl(DataSource ds, String persistenceType, boolean auto) {
         if (ds != null) {
             // ugly hack
@@ -443,7 +443,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Load all the deployment units out of the store. Called on start-up.
-     * 
+     *
      */
     public void loadAll() {
         final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
@@ -460,8 +460,13 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         });
 
-        for (ProcessConfImpl p : loaded)
-            fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
+        for (ProcessConfImpl p : loaded) {
+            try {
+                fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
+            } catch (Exception except) {
+                __log.error("Error while activating process: pid=" + p.getProcessId() + " package="+p.getDeploymentUnit().getName(), except);
+            }
+        }
 
     }
 
@@ -516,7 +521,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Execute database transactions in an isolated context.
-     * 
+     *
      * @param <T>
      *            return type
      * @param callable
@@ -540,7 +545,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Create a property mapping based on the initial values in the deployment descriptor.
-     * 
+     *
      * @param dd
      * @return
      */
@@ -564,7 +569,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Figure out the initial process state from the state in the deployment descriptor.
-     * 
+     *
      * @param dd
      *            deployment descriptor
      * @return
@@ -582,7 +587,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Load a deployment unit record stored in the db into memory.
-     * 
+     *
      * @param dudao
      */
     protected List<ProcessConfImpl> load(DeploymentUnitDAO dudao) {
@@ -643,7 +648,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Make sure that the deployment unit is loaded.
-     * 
+     *
      * @param duName
      *            deployment unit name
      */
@@ -675,9 +680,9 @@ public class ProcessStoreImpl implements ProcessStore {
 
     /**
      * Wrapper for database transactions.
-     * 
+     *
      * @author Maciej Szefler
-     * 
+     *
      * @param <V>
      *            return type
      */
