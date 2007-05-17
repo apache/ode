@@ -21,6 +21,7 @@ package org.apache.ode.bpel.elang.xpath20.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OLink;
@@ -28,8 +29,9 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
 
 import javax.xml.namespace.QName;
@@ -43,6 +45,8 @@ import javax.xml.xpath.XPathVariableResolver;
  * @author mriou <mriou at apache dot org>
  */
 public class JaxpVariableResolver implements XPathVariableResolver {
+
+    private static final XPathMessages __msgs = MessageBundle.getMessages(XPathMessages.class);
 
     private CompilerContext _cctx;
     private OXPath10ExpressionBPEL20 _oxpath;
@@ -72,21 +76,23 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                     name = name.substring(0,dot);
                 OScope.Variable var = _cctx.resolveVariable(name);
                 _oxpath.vars.put(name, var);
-                return extractValue(var.type);
+                return extractValue(var, var.type);
             }
         } catch (CompilationException e) {
             throw new WrappedResolverException(e);
         }
     }
 
-    private Object extractValue(OVarType varType) {
+    private Object extractValue(OScope.Variable var, OVarType varType) {
         if (varType instanceof OXsdTypeVarType) {
             return generateFromType(((OXsdTypeVarType)varType).xsdType);
         } else if (varType instanceof OElementVarType) {
             return generateFromType(((OElementVarType)varType).elementType);
         } else if (varType instanceof OMessageVarType) {
             // MR That's an ugly hack but otherwise, xpath compilation doesn't work
-            return extractValue( ((OMessageVarType.Part) ((OMessageVarType)varType).parts.values().iterator().next()).type);
+            if (((OMessageVarType)varType).parts.size() == 0)
+                throw new WrappedResolverException(__msgs.errExpressionMessageNoPart(var.name));
+            return extractValue(var, ((OMessageVarType)varType).parts.values().iterator().next().type);
         }
         return "";
     }
