@@ -30,16 +30,20 @@ public class MessageBundleTest extends TestCase {
   private static String WRONG_PARAMETER = "Wrong parameter :-)";
 
   private MessageBundleTestMessages _bundle;
+  private Locale oldLocale;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    oldLocale = Locale.getDefault();
+    Locale.setDefault(Locale.ENGLISH);
     _bundle = MessageBundle.getMessages(MessageBundleTestMessages.class);
   }
 
   @Override
   protected void tearDown() throws Exception {
     _bundle = null;
+    Locale.setDefault(oldLocale);
     super.tearDown();
   }
 
