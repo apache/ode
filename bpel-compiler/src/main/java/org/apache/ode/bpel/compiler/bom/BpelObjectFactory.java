@@ -62,7 +62,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_WAIT, WaitActivity.class);
         _mappings.put(Bpel20QNames.FINAL_THROW, ThrowActivity.class);
         _mappings.put(Bpel20QNames.FINAL_COMPENSATE, CompensateActivity.class);
-        _mappings.put(Bpel20QNames.FINAL_COMPENSATE_SCOPE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATE_SCOPE, CompensateScopeActivity.class);
         _mappings.put(Bpel20QNames.FINAL_RETHROW, RethrowActivity.class);
         _mappings.put(Bpel20QNames.FINAL_EXIT, TerminateActivity.class);
         _mappings.put(Bpel20QNames.FINAL_FLOW, FlowActivity.class);
@@ -84,6 +84,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_CORRELATION, Correlation.class);
         _mappings.put(Bpel20QNames.FINAL_CORRELATIONSET, CorrelationSet.class);
         _mappings.put(Bpel20QNames.FINAL_COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPENSATE_SCOPE, CompensateScopeActivity.class);
         _mappings.put(Bpel20QNames.FINAL_COMPENSATIONHANDLER, CompensationHandler.class);
         _mappings.put(Bpel20QNames.FINAL_FAULTHANDLERS, FaultHandler.class);
         _mappings.put(Bpel20QNames.FINAL_TERMINATIONHANDLER, TerminationHandler.class);
@@ -135,7 +136,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.REPLY, ReplyActivity.class);
         _mappings.put(Bpel20QNames.WAIT, WaitActivity.class);
         _mappings.put(Bpel20QNames.THROW, ThrowActivity.class);
-        _mappings.put(Bpel20QNames.COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.COMPENSATE, CompensateScopeActivity.class);
         _mappings.put(Bpel20QNames.RETHROW, RethrowActivity.class);
         _mappings.put(Bpel20QNames.EXIT, TerminateActivity.class);
         _mappings.put(Bpel20QNames.FLOW, FlowActivity.class);
@@ -156,7 +157,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_COUNTER_VALUE, Expression.class);
         _mappings.put(Bpel20QNames.CORRELATION, Correlation.class);
         _mappings.put(Bpel20QNames.CORRELATIONSET, CorrelationSet.class);
-        _mappings.put(Bpel20QNames.COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel20QNames.COMPENSATE, CompensateScopeActivity.class);
         _mappings.put(Bpel20QNames.COMPENSATIONHANDLER, CompensationHandler.class);
         _mappings.put(Bpel20QNames.FAULTHANDLERS, FaultHandler.class);
         _mappings.put(Bpel20QNames.TERMINATIONHANDLER, TerminationHandler.class);
@@ -208,7 +209,6 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.REPLY, ReplyActivity.class);
         _mappings.put(Bpel11QNames.WAIT, WaitActivity.class);
         _mappings.put(Bpel11QNames.THROW, ThrowActivity.class);
-        _mappings.put(Bpel11QNames.COMPENSATE, CompensateActivity.class);
         _mappings.put(Bpel11QNames.TERMINATE, TerminateActivity.class);
         _mappings.put(Bpel11QNames.FLOW, FlowActivity.class);
         _mappings.put(Bpel11QNames.SWITCH, SwitchActivity.class);
@@ -223,7 +223,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.FROM, From.class);
         _mappings.put(Bpel11QNames.CORRELATION, Correlation.class);
         _mappings.put(Bpel11QNames.CORRELATIONSET, CorrelationSet.class);
-        _mappings.put(Bpel11QNames.COMPENSATE, CompensateActivity.class);
+        _mappings.put(Bpel11QNames.COMPENSATE, CompensateScopeActivity.class);
         _mappings.put(Bpel11QNames.COMPENSATIONHANDLER, CompensationHandler.class);
         _mappings.put(Bpel11QNames.FAULTHANDLERS, FaultHandler.class);
         _mappings.put(Bpel11QNames.CASE, SwitchActivity.Case.class);
