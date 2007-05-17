@@ -1,3 +1,5 @@
+--# IMPORTED FROM OPENSYMPHONY QUARTZ, SEE NOTICE FILE FOR DETAILS
+
 --# thanks to George Papastamatopoulos for submitting this ... and Marko Lahma for
 --# updating it.
 --#
