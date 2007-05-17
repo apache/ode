@@ -58,7 +58,7 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
 	static String PROP_PORT = "fivesight.uid.port";
 
 	// 32 bits
-	private static final byte[] ipadd;
+	private static final byte[] ipadd = {127,0,0,1};
 
 	// 64 bits
 	private static byte[] baseId = getSystemUniqId();
@@ -69,12 +69,6 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
 	private static GUID _VM_GUID;
 
 	static {
-		try {
-			ipadd = InetAddress.getLocalHost().getAddress();
-		} catch (Exception e) {
-			throw new RuntimeException("GUID.<sinit>:" + e.toString());
-		}
-
 		_VM_GUID = new GUID();
 	}
 
