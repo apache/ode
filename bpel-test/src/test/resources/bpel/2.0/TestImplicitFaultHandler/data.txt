@@ -1,7 +1,0 @@
-target.name.space=urn:sybase:bpel:faultCompHandlerInInvokeProcessing
-port.type=faultCompHandlerInInvokePT
-operation=request
-
-part1=xml.requestMessageData
-
-xml.requestMessageData=<testMessage><wait>PT7S</wait><onAlarm>PT3S</onAlarm></testMessage>

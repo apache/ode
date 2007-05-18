@@ -18,6 +18,12 @@
  */
 package org.apache.ode.test;
 
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.MessageExchange;
+
 public class CompensationHandling20Test extends BPELTestAbstract {
 
 	  public void testCompensationHandlers() throws Throwable {
@@ -25,7 +31,18 @@ public class CompensationHandling20Test extends BPELTestAbstract {
 	  }
 
 	  public void testImplicitFaultHandler() throws Throwable {
-		  go("/bpel/2.0/TestImplicitFaultHandler");
+              
+              
+         deploy("/bpel/2.0/TestImplicitFaultHandler");
+         Invocation inv = addInvoke("Invoke#1", 
+                 new QName("http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl","testImplicitFaultHandlerService"),
+                 "request",
+                 "<message><requestID>Start TestImplicitFaultHandler</requestID><requestText>Event TestImplicitFaultHandler</requestText><faultIndicator1>yes</faultIndicator1><faultIndicator2>no</faultIndicator2></message>",
+                 null);
+         inv.expectedFinalStatus = MessageExchange.Status.FAULT;
+         inv.expectedResponsePattern=Pattern.compile(".*Event TestFaultWithVariable1 -&gt; caught FaultMessage1 -&gt; Event TestFaultWithVariable1 -&gt; process complete.*");
+         
+         go();
 	  }
 	
 }
