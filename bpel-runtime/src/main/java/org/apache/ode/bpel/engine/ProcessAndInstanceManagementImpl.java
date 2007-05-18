@@ -146,12 +146,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
     protected ProcessStore _store;
 
-    protected Calendar _calendar = Calendar.getInstance(); // Calendar can be
+    // Calendar can be expensive to initialize so we cache and clone it
+    protected Calendar _calendar = Calendar.getInstance(); 
 
-    // expensive to
-    // initialize so we
-    // cache and clone
-    // it
     protected BpelServerImpl _server;
 
     public ProcessAndInstanceManagementImpl(BpelServer server, ProcessStore store) {
@@ -717,6 +714,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         TDeploymentInfo depinfo = info.addNewDeploymentInfo();
         depinfo.setPackage(pconf.getPackage());
+        depinfo.setDocument(pconf.getBpelDocument());
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
         depinfo.setDeployer(pconf.getDeployer());
         if (custom.includeInstanceSummary()) {
