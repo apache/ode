@@ -228,6 +228,11 @@
                     <documentation>Deployment package the process was deployed into.</documentation>
                 </annotation>
             </element>
+            <element name="document" type="xs:string">
+              <annotation>
+                <documentation>File name of BPEL document.</documentation>
+              </annotation>
+            </element>
             <element name="deploy-date" type="xs:dateTime">
                 <annotation>
                     <documentation>Date the process was deployed.</documentation>

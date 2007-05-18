@@ -68,6 +68,12 @@ public interface ProcessConf {
     InputStream getCBPInputStream();
    
     /**
+     * Get the path of the BPEL document, relative to its deployment unit 
+     * @return Relative path of BPEL document
+     */
+    String getBpelDocument();
+   
+    /**
      * Get the date of deployment.
      * @return
      */
