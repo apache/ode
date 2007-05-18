@@ -18,9 +18,32 @@
  */
 package org.apache.ode.store;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dd.*;
+import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.dd.TInvoke;
+import org.apache.ode.bpel.dd.TMexInterceptor;
+import org.apache.ode.bpel.dd.TProcessEvents;
+import org.apache.ode.bpel.dd.TProvide;
+import org.apache.ode.bpel.dd.TScopeEvents;
+import org.apache.ode.bpel.dd.TService;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -29,14 +52,6 @@ import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.*;
 
 /**
  * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface.
@@ -160,6 +175,22 @@ class ProcessConfImpl implements ProcessConf {
         }
     }
 
+    public String getBpelDocument() {
+        CBPInfo cbpInfo = _du.getCBPInfo(getType());
+        if (cbpInfo == null)
+            throw new ContextException("CBP record not found for type " + getType());
+        try {
+            String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp);
+            if (!relative.endsWith(".cbp")) throw new ContextException("CBP file must end with .cbp suffix: " + cbpInfo.cbp);
+            relative = relative.replace(".cbp", ".bpel");
+            File bpelFile = new File(_du.getDeployDir(), relative);
+            if (!bpelFile.exists()) __log.warn("BPEL file does not exist: " + bpelFile);
+            return relative;
+        } catch (IOException e) {
+            throw new ContextException("IOException in getBpelRelativePath: " + cbpInfo.cbp, e);
+        }
+    }
+    
     public ProcessState getState() {
         return _state;
     }
@@ -291,4 +322,12 @@ class ProcessConfImpl implements ProcessConf {
         }
     }
 
+    private String getRelativePath(File base, File path) throws IOException {
+        String basePath = base.getCanonicalPath();
+        String cbpPath = path.getCanonicalPath();
+        if (!cbpPath.startsWith(basePath)) throw new IOException("Invalid relative path: base="+base+" path="+path);
+        String relative = cbpPath.substring(basePath.length());
+        if (relative.startsWith(File.separator)) relative = relative.substring(1);
+        return relative;
+    }
 }
