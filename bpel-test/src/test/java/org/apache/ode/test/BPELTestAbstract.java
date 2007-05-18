@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
@@ -568,7 +569,12 @@ public abstract class BPELTestAbstract extends TestCase {
                             .getCorrelationStatus());
                 }
                 if (_invocation.expectedResponsePattern != null) {
-
+                    if (mex.getResponse() == null)
+                        failure(_invocation, "Expected response, but got none.", null);
+                    String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
+                    Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
+                    if (!matcher.matches())
+                        failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
                 }
             } finally {
                 scheduler.commit();

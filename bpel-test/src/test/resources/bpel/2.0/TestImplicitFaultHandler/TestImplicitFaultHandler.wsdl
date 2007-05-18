@@ -46,7 +46,7 @@
     </wsdl:operation>
   </wsdl:portType>
 
-  <plnk:partnerLinkType name="testImplicitFaultHandlerRequest">
+  <plnk:partnerLinkType name="testImplicitFaultHandlwequest">
     <plnk:role name="testImplicitFaultHandlerService" portType="tns:testImplicitFaultHandlerPT"/>
   </plnk:partnerLinkType>
   

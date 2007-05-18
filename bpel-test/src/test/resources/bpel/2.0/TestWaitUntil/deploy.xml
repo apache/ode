@@ -22,11 +22,10 @@
 	xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
 
-	<process name="pns:Wait1">
+	<process name="pns:WaitUntil">
 		<active>true</active>
 		<provide partnerLink="testPartnerLink">
 			<service name="wns:testService" port="wns:TestPort"/>
 		</provide>
 	</process>
-
 </deploy>
