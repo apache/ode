@@ -377,6 +377,7 @@ define "ode" do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
+    compile.with Java.tools_jar
     package :jar
   end
 
