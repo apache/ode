@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 
-<process name="WaitWithUntil-2.0"
+<process name="WaitUntil"
     targetNamespace="http://ode/bpel/unit-test" 
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"

@@ -18,10 +18,17 @@
  */
 package org.apache.ode.test;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import javax.xml.namespace.QName;
 
+import org.apache.log4j.helpers.ISO8601DateFormat;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.utils.ISO8601DateParser;
 
 public class BasicActivities20Test extends BPELTestAbstract {
     public void testHelloWorld2() throws Throwable {
@@ -47,10 +54,32 @@ public class BasicActivities20Test extends BPELTestAbstract {
         go("/bpel/2.0/TestIf");
     }
     
-    public void testWait1() throws Throwable {
+    /**
+     * Tests the wait "for" syntax.
+     * @throws Throwable
+     */
+    public void testWaitFor() throws Throwable {
         deploy("/bpel/2.0/TestWait1");
         Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
             "<message><TestPart/><Time/></message>",
+            null);
+        inv.minimumWaitMs=5*1000L;
+        inv.maximumWaitMs=7*1000L;
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        
+        go();
+    }
+    
+    /**
+     * Test the wait "until" syntax.
+     */
+    public void testWaitUntil() throws Throwable {
+        deploy("/bpel/2.0/TestWaitUntil");
+        DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        String isountil = idf.format(new Date(System.currentTimeMillis()+5000));
+        Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
+            "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
