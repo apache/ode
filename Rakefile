@@ -94,7 +94,7 @@ XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
   :neethi           =>"org.apache.ws.commons.neethi:neethi:jar:2.0",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.2"
+  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.1"
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
@@ -133,9 +133,10 @@ define "ode" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "bpel-scheduler-quartz", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, AXIS2, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
-      JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, XMLBEANS
+      JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
+      XMLBEANS
 
-    test.with project("tools"), XERCES, WOODSTOX, AXIOM, WS_COMMONS.xml_schema, JAVAX.javamail
+    test.with project("tools"), XERCES, WOODSTOX, AXIOM, JAVAX.javamail
     test.exclude '*'
 
     package :jar
