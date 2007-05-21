@@ -258,24 +258,33 @@ public class SoapMessageConverter {
 
     public OMElement createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
         if (faultName.getNamespaceURI() == null || !faultName.getNamespaceURI().equals(_def.getTargetNamespace()))
-            throw new OdeFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
+            return toFaultDetail(faultName, message);
         Fault f = op.getFault(faultName.getLocalPart());
         if (f == null)
-            throw new OdeFault(__msgs.msgUndefinedFault(_serviceName, _portName, op.getName(), faultName));
+            return toFaultDetail(faultName, message);
 
         // For faults, there will be exactly one part.
         Part p = (Part)f.getMessage().getParts().values().iterator().next();
-        Element partEl= DOMUtils.getFirstChildElement(DOMUtils.findChildByName(message,new QName(null,p.getName())));
-        if (partEl == null)
-            throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(p.getName()));
         if (p == null)
-            throw new OdeFault(new IllegalStateException("fault part is non-element" + p.getName()));
+            return toFaultDetail(faultName, message);
+        Element partEl= DOMUtils.findChildByName(message,new QName(null,p.getName()));
+        if (partEl == null)
+            return toFaultDetail(faultName, message);
         Element detail = DOMUtils.findChildByName(partEl, p.getElementName());
         if (detail == null)
-            throw new OdeFault(__msgs.msgOdeMessagePartMissingRequiredElement(_serviceName, _portName, op.getName(), p.getElementName()));
+            return toFaultDetail(faultName, message);
 
         return OMUtils.toOM(detail, _soapFactory);
    }
+
+    private OMElement toFaultDetail(QName fault, Element message) {
+        if (message == null) return null;
+        Element firstPart = DOMUtils.getFirstChildElement(message);
+        if (firstPart == null) return null;
+        Element detail = DOMUtils.getFirstChildElement(firstPart);
+        if (detail == null) return OMUtils.toOM(firstPart, _soapFactory);
+        return OMUtils.toOM(detail, _soapFactory);
+    }
 
     public void parseSoapRequest(Element odeMessage, SOAPEnvelope envelope, Operation op) throws AxisFault {
         BindingOperation bop = _binding.getBindingOperation(op.getName(), null, null);

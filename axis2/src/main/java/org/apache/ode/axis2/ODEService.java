@@ -41,6 +41,7 @@ import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -48,6 +49,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
@@ -224,16 +226,15 @@ public class ODEService {
         switch (mex.getStatus()) {
             case FAULT:
                 if (__log.isDebugEnabled())
-                    __log.debug("Generated FAULT response message: " +
-                        mex.getFault());
-                throw new AxisFault(mex.getFault(),
-                        mex.getFaultExplanation(), null, null,
-                        _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation()));
+                    __log.debug("Fault response message: " + mex.getFault());
+                OMElement detail = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
+                String reason = mex.getFault()+" "+mex.getFaultExplanation();
+                throw new AxisFault(mex.getFault(), reason, null, null, detail);
             case ASYNC:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
                 if (__log.isDebugEnabled())
-                    __log.debug("Generated response message " +
+                    __log.debug("Response message " +
                         msgContext.getEnvelope());
                 writeHeader(msgContext, mex);
                 break;
