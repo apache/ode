@@ -18,16 +18,18 @@
  */
 package org.apache.ode.bpel.iapi;
 
-import org.apache.ode.bpel.evt.BpelEvent.TYPE;
-import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.w3c.dom.Node;
 
 /**
  * Deployed process configuration. IMPORTANT: Implementations of this class <em>MUST BE IMMUTABLE</em>,
@@ -73,6 +75,11 @@ public interface ProcessConf {
      */
     String getBpelDocument();
    
+    /**
+     * Get the base URL for resolving resources.  
+     */
+    URL getBaseURL();
+    
     /**
      * Get the date of deployment.
      * @return
@@ -139,6 +146,6 @@ public interface ProcessConf {
      */
     Map<String, Endpoint> getInvokeEndpoints();
 
-    boolean isEventEnabled(List<String> scopeNames, TYPE type);
+    boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
     
 }

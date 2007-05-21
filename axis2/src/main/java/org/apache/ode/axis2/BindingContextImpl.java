@@ -30,6 +30,7 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 
 /**
@@ -50,11 +51,12 @@ public class BindingContextImpl implements BindingContext {
 
     public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         try {
-        	Definition wsdl = _store.getProcessConfiguration(processId).getDefinitionForService(myRoleEndpoint.serviceName);
+            ProcessConf pconf = _store.getProcessConfiguration(processId); 
+        	Definition wsdl = pconf.getDefinitionForService(myRoleEndpoint.serviceName);
         	if (wsdl == null)
         		throw new ContextException("Unable to access WSDL definition to activate MyRole endpoint for service " + myRoleEndpoint.serviceName
         				+ " and port " + myRoleEndpoint.portName);
-            ODEService svc = _server.createService(wsdl, myRoleEndpoint.serviceName, myRoleEndpoint.portName);
+            ODEService svc = _server.createService(pconf, myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {
             throw new ContextException("Could not activate endpoint for service " + myRoleEndpoint.serviceName

@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -191,6 +193,14 @@ class ProcessConfImpl implements ProcessConf {
         }
     }
     
+    public URL getBaseURL() {
+        try {
+           return _du.getDeployDir().toURL();
+        } catch (MalformedURLException except) {
+            throw new RuntimeException(except);
+        }
+    }
+
     public ProcessState getState() {
         return _state;
     }
@@ -330,4 +340,5 @@ class ProcessConfImpl implements ProcessConf {
         if (relative.startsWith(File.separator)) relative = relative.substring(1);
         return relative;
     }
+
 }
