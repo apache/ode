@@ -32,7 +32,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
-import org.apache.axis2.AxisFault;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Attr;
@@ -49,16 +48,16 @@ import org.w3c.dom.Text;
  */
 public class OMUtils {
 
-    public static Element toDOM(OMElement element) throws AxisFault {
+    public static Element toDOM(OMElement element) {
         return toDOM(element, DOMUtils.newDocument());
     }
 
-    public static Element toDOM(OMElement element, Document doc) throws AxisFault { 
+    public static Element toDOM(OMElement element, Document doc) { 
         return toDOM(element,doc,true);
     }
     
     @SuppressWarnings("unchecked")
-    public static Element toDOM(OMElement element, Document doc, boolean deepNS) throws AxisFault {
+    public static Element toDOM(OMElement element, Document doc, boolean deepNS) {
         final Element domElement = doc.createElementNS(element.getQName().getNamespaceURI(), element.getQName().getLocalPart());
 
         if (deepNS) {
@@ -126,11 +125,11 @@ public class OMUtils {
             nscontext.register("", element.getDefaultNamespace().getNamespaceURI());
     }
 
-    public static OMElement toOM(Element src, OMFactory omf) throws AxisFault {
+    public static OMElement toOM(Element src, OMFactory omf) {
         return toOM(src,omf,null);
     }
 
-    public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) throws AxisFault {
+    public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) {
         OMNamespace elns = null;
         if (src.getNamespaceURI() != null) {
             elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
