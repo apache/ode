@@ -184,6 +184,8 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
             _ode.getChannel().send(jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.ERROR) {
             outFailure((InOut) jbiMex);
+        } else if (jbiMex.getStatus() == ExchangeStatus.DONE) {
+            _outstandingExchanges.remove(jbiMex.getExchangeId());
         } else {
             __log.error("Unexpected status " + jbiMex.getStatus() + " for JBI message exchange: " + jbiMex.getExchangeId());
         }
