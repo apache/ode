@@ -51,15 +51,17 @@ public class ODEAxisServlet extends AxisServlet {
         super.stop();
         _odeServer.shutDown();
     }
-    
+
     protected ODEServer createODEServer() {
         return new ODEServer();
     }
 
     /**
      * Returns the ODEServer instance which has been created by the servlet.
-     * Must be called after init() has been called, or null will be returned.
-     * @return the ODEServer instance being used by the servlet
+     * Must be called after init() has been called by the servlet engine
+     * or null will be returned.
+     * @return the ODEServer instance being used by the servlet or null if
+     * init() has not yet been called by the servlet engine
      */
     public ODEServer getODEServer(){
        return _odeServer;
