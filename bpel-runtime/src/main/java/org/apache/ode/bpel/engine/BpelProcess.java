@@ -28,6 +28,7 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -277,6 +278,7 @@ public class BpelProcess {
                 __log.debug("InvokeInternal event for mexid " + we.getMexId());
             }
             MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) getEngine().getMessageExchange(we.getMexId());
+            if (mex == null) throw new ContextException("Unable to find MEX " + we.getMexId());
             invokeProcess(mex);
         } else {
             // Instance level events
