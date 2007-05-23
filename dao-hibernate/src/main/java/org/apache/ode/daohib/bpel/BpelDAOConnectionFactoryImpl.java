@@ -95,7 +95,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
         properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
-        // properties.put(Environment.SESSION_FACTORY_NAME, "jta");
+        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
 
         // Guess Hibernate dialect if not specified in hibernate.properties
         if (properties.get(Environment.DIALECT) == null) {
