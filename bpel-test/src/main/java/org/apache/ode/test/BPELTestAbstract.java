@@ -18,6 +18,29 @@
  */
 package org.apache.ode.test;
 
+import junit.framework.TestCase;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.MockScheduler;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.w3c.dom.Element;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -31,31 +54,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.namespace.QName;
-
-import junit.framework.TestCase;
-
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.il.MockScheduler;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
-import org.w3c.dom.Element;
 
 public abstract class BPELTestAbstract extends TestCase {
 
