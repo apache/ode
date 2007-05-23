@@ -282,13 +282,13 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "bpel-epr"),
-      DERBY, WSDL4J
+      "bpel-store", "utils", "bpel-epr", "dao-jpa"),
+      DERBY, Java::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J
 
-    test.with projects("bpel-obj", "dao-jpa", "jacob", "bpel-schemas",
+    test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "bpel-scheduler-quartz"),
-      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, JAVAX.persistence,
-      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, OPENJPA, SAXON, XERCES, XMLBEANS, XALAN
+      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
+      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN
 
     package :jar
   end
