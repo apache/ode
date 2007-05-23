@@ -47,8 +47,8 @@ public class DataSourceConnectionProvider implements ConnectionProvider {
     return c;
   }
 
-  public void closeConnection(Connection arg0) throws SQLException {
-    arg0.close();
+  public void closeConnection(Connection con) throws SQLException {
+    con.close();
   }
 
   public void close() throws HibernateException {

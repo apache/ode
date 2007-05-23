@@ -106,7 +106,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         }
 
         final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx);
-        _conn.differ(new Runnable() {
+        _conn.defer(new Runnable() {
             public void run() {
                 _routes.add(mr);
             }
