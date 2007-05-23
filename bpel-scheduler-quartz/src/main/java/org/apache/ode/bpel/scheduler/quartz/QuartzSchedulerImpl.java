@@ -227,8 +227,11 @@ public class QuartzSchedulerImpl implements Scheduler {
         registerSynchronizer(new Synchronizer() {
             public void afterCompletion(boolean success) {
                 try {
+                    _executorSvc.submit(new Runnable() {
+                        public void run() {
+                            try {
                     if (transacted) {
-                        execIsolatedTransaction(new Callable() {
+                                    execTransaction(new Callable() {
                             public Object call() throws Exception {
                                 JobInfo ji = new JobInfo("volatileJob", detail, 0);
                                 doExecute(ji);
@@ -239,8 +242,13 @@ public class QuartzSchedulerImpl implements Scheduler {
                         JobInfo ji = new JobInfo("volatileJob", detail, 0);
                         doExecute(ji);
                     }
-                } catch (Exception e) {
-                    throw new ContextException("Failure when starting a new volatile job.", e);
+                            } catch (Throwable t) {
+                                __log.error("Error while executing volatile job: "+detail, t);
+                            }
+                        }
+                    });
+                } catch (Throwable t) {
+                    __log.error("Failure when starting a new volatile job: "+detail, t);
                 }
             }
             public void beforeCompletion() { }
