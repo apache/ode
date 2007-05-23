@@ -56,4 +56,13 @@ public class ODEAxisServlet extends AxisServlet {
         return new ODEServer();
     }
 
+    /**
+     * Returns the ODEServer instance which has been created by the servlet.
+     * Must be called after init() has been called, or null will be returned.
+     * @return the ODEServer instance being used by the servlet
+     */
+    public ODEServer getODEServer(){
+       return _odeServer;
+    }
+
 }
