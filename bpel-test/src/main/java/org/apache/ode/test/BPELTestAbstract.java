@@ -537,9 +537,8 @@ public abstract class BPELTestAbstract extends TestCase {
             if (isFailed())
                 return;
 
-            Status finalstat;
             try {
-                finalstat = running.get(_invocation.maximumWaitMs, TimeUnit.MILLISECONDS);
+                running.get(_invocation.maximumWaitMs, TimeUnit.MILLISECONDS);
             } catch (Exception ex) {
                 failure(_invocation, "Exception on future object.", ex);
                 return;
@@ -553,14 +552,15 @@ public abstract class BPELTestAbstract extends TestCase {
             if (_invocation.maximumWaitMs <= itime)
                 failure(_invocation, "Response took too long.", _invocation.maximumWaitMs, itime);
 
-            if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
-                failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
-
             if (isFailed())
                 return;
 
             scheduler.begin();
             try {
+                Status finalstat = mex.getStatus();
+                if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
+                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+
                 if (_invocation.expectedFinalCorrelationStatus != null
                         && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
                     failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
