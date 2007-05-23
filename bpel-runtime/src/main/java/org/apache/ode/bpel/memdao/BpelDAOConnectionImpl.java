@@ -300,7 +300,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             __log.warn("Couldn't find mex " + mexId + " for cleanup.");
     }
 
-    public void differ(final Runnable runnable) {
+    public void defer(final Runnable runnable) {
         _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
             public void afterCompletion(boolean success) {
             }

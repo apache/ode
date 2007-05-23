@@ -100,7 +100,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     public ProcessInstanceDAO createInstance(CorrelatorDAO correlator) {
         final ProcessInstanceDaoImpl newInstance = new ProcessInstanceDaoImpl(_conn, this, correlator);
-        _conn.differ(new Runnable() {
+        _conn.defer(new Runnable() {
             public void run() {
                 _instances.put(newInstance.getInstanceId(), newInstance);
             }
