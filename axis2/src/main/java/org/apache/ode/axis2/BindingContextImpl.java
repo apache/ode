@@ -20,10 +20,6 @@
 
 package org.apache.ode.axis2;
 
-import javax.wsdl.Definition;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -32,6 +28,10 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
+
+import javax.wsdl.Definition;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 
 /**
  * AXIS2 implementation of the {@link org.apache.ode.bpel.iapi.BindingContext}
@@ -65,7 +65,7 @@ public class BindingContextImpl implements BindingContext {
     }
 
     public void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint) {
-        _server.destroyService(myRoleEndpoint.serviceName);
+        _server.destroyService(myRoleEndpoint.serviceName, myRoleEndpoint.portName);
     }
 
     public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
