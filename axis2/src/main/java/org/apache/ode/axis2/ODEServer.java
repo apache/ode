@@ -19,19 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -59,6 +46,18 @@ import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -293,7 +292,7 @@ public class ODEServer {
     }
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        destroyService(serviceName);
+        destroyService(serviceName, portName);
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server, _txMgr);
         if (_odeConfig.isReplicateEmptyNS()) {
@@ -336,15 +335,17 @@ public class ODEServer {
         return extService;
     }
 
-    public void destroyService(QName serviceName) {
-        __log.debug("Destroying service " + serviceName);
-        ODEService service = (ODEService) _services.remove(serviceName);
+    public void destroyService(QName serviceName, String portName) {
+        __log.debug("Destroying service " + serviceName + " port " + portName);
+        ODEService service = (ODEService) _services.remove(serviceName, portName);
         if (service != null) {
-        try {
+            try {
                 _axisConfig.removeService(service.getAxisService().getName());
-        } catch (AxisFault axisFault) {
-            __log.error("Couldn't destroy service " + serviceName);
-        }
+            } catch (AxisFault axisFault) {
+                __log.error("Couldn't destroy service " + serviceName);
+            }
+        } else {
+            __log.debug("Couldn't find service " + serviceName + " port " + portName + " to destroy.");
         }
     }
 
