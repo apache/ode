@@ -273,19 +273,19 @@ class ProcessConfImpl implements ProcessConf {
     }
 
     public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {
-        if (scopeNames == null) return false;
+        if (scopeNames != null) {
         for (String scopeName : scopeNames) {
             Set<BpelEvent.TYPE> evtSet = _events.get(scopeName);
             if (evtSet != null) {
                 if (evtSet.contains(type)) return true;
             }
         }
+        }
         Set<BpelEvent.TYPE> evtSet = _events.get(null);
         if (evtSet != null) {
             // Default filtering at the process level for some event types
             if (evtSet.contains(type)) return true;
         }
-
         return false;
     }
 
