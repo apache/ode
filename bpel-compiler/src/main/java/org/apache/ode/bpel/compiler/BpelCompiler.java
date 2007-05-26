@@ -818,7 +818,7 @@ abstract class BpelCompiler implements CompilerContext {
     public OScope compileSLC(final ScopeLikeActivity source, final OScope.Variable[] variables) {
         final OScope implicitScope = new OScope(_oprocess, getCurrent());
         implicitScope.implicitScope = true;
-        implicitScope.name = createName(source);
+        implicitScope.name = createName(source, "implicit-scope");
         implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
         compileScope(implicitScope, source.getScope(), new Runnable() {
             public void run() {
@@ -840,7 +840,7 @@ abstract class BpelCompiler implements CompilerContext {
     private OActivity compileActivity(final boolean doLinks, final Activity source) {
         final ActivityGenerator actgen = findActivityGen(source);
         final OActivity oact = actgen.newInstance(source);
-        oact.name = createName(source);
+        oact.name = createName(source, "activity");
         oact.debugInfo = createDebugInfo(source, "Activity body for " + source);
         _compiledActivities.add(oact);
         compile(oact, source, new Runnable() {
@@ -867,11 +867,11 @@ abstract class BpelCompiler implements CompilerContext {
                 .isEmpty()) ? null : compileJoinCondition(source.getJoinCondition());
     }
 
-    private String createName(Activity source) {
+    private String createName(Activity source, String type) {
         if (source.getName() != null)
             return source.getName();
 
-        return "__unnamed:" + source.getType() + "@" + source.getLineNo();
+        return source.getType().getLocalPart() + "-" + type + "-line-" + source.getLineNo();
     }
 
     private OProcess.OProperty compile(Property property) {
