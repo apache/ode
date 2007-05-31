@@ -35,7 +35,7 @@ import java.util.Set;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
-	private String messageExchangeId;
+    private String messageExchangeId;
 	private MessageDAO response;
 	private Date createTime;
 	private MessageDAO request;
@@ -63,7 +63,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
 		this.messageExchangeId = messageEchangeId;
-	}
+    }
 	
 	public String getMessageExchangeId() {
 		return messageExchangeId;
@@ -279,7 +279,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         response = null;
         BpelDAOConnectionImpl.removeMessageExchange(getMessageExchangeId());
     }
-
 
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";

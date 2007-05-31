@@ -27,7 +27,6 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
-	
 	private QName type;
 	private Element data;
 	private MessageExchangeDAO messageExchange;

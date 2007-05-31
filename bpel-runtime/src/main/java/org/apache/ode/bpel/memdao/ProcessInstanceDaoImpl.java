@@ -52,40 +52,24 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
     private static final Collection<ScopeDAO> EMPTY_SCOPE_DAOS = Collections.emptyList();
 
     private short _previousState;
-
     private short _state;
-
     private Long _instanceId;
-
     private ProcessDaoImpl _processDao;
-
     private byte[] _jacobState;
-
     private Map<Long, ScopeDAO> _scopes = new HashMap<Long, ScopeDAO>();
-
     private Map<String, List<ScopeDAO>> _scopesByName = new HashMap<String, List<ScopeDAO>>();
-
     private Map<String, byte[]> _messageExchanges = new HashMap<String, byte[]>();
-
     private ScopeDAO _rootScope;
-
     private FaultDAO _fault;
-
     private CorrelatorDAO _instantiatingCorrelator;
-
     private BpelDAOConnection _conn;
-
     private int _failureCount;
-
     private Date _failureDateTime;
-
     private Map<String, ActivityRecoveryDAO> _activityRecoveries = new HashMap<String, ActivityRecoveryDAO>();
 
     // TODO: Remove this, we should be using the main event store...
     private List<ProcessInstanceEvent> _events = new ArrayList<ProcessInstanceEvent>();
-
     private Date _lastActive;
-
     private int _seq;
 
     ProcessInstanceDaoImpl(BpelDAOConnection conn, ProcessDaoImpl processDao, CorrelatorDAO correlator) {

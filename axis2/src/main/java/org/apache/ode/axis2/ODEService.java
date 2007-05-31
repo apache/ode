@@ -19,28 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.xml.namespace.QName;
-
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
@@ -49,7 +27,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
@@ -64,6 +41,16 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.xml.namespace.QName;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and our
@@ -101,7 +88,7 @@ public class ODEService {
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
         boolean success = true;
-        MyRoleMessageExchange odeMex;
+        MyRoleMessageExchange odeMex = null;
         Future responseFuture = null;
         try {
             _txManager.begin();
@@ -147,6 +134,7 @@ public class ODEService {
             throw new OdeFault("An exception occured while invoking ODE.", e);
         } finally {
             if (!success) {
+                if (odeMex != null) odeMex.release();
                 try {
                     _txManager.rollback();
                 } catch (Exception e) {
@@ -192,20 +180,21 @@ public class ODEService {
                         __log.error("Error processing response for MEX " + odeMex, e);
                         throw new OdeFault("An exception occured when invoking ODE.", e);
                     } finally {
-                    if (commit) {
+                        odeMex.release();
+                        if (commit) {
                             try {
                                 if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
                                 _txManager.commit();
                             } catch (Exception e) {
                                 throw new OdeFault("Commit failed!", e);
                             }
-                    } else {
+                        } else {
                             try {
                                 _txManager.rollback();
                             } catch (Exception ex) {
                                 throw new OdeFault("Rollback failed!", ex);
                             }
-                    }
+                        }
                 }
             }
             if (!success) {
