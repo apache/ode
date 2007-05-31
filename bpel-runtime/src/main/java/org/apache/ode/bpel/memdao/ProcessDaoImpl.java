@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A very simple, in-memory implementation of the {@link ProcessDAO} interface.
@@ -50,6 +51,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
     private int _executionCount = 0;
+    private Collection<Long> _instancesToRemove = new ConcurrentLinkedQueue<Long>();
 
     private String _guid;
 
@@ -128,8 +130,16 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         // Cleaning up
         __log.debug("Removing completed process instance " + instance.getInstanceId() + " from in-memory store.");
         ProcessInstanceDAO removed = _instances.remove(instance.getInstanceId());
-        if (removed == null)
-            __log.warn("Couldn't find process instance " + instance.getInstanceId() + " for cleanup.");
+        if (removed == null) {
+            // Checking for leftover instances that should be removed
+            for (Long iid : _instancesToRemove) {
+                _instances.remove(iid);
+            }
+
+            // The instance can't be found probably because the transaction isn't committed yet and
+            // it doesn't exist. Saving its id for later cleanup.
+            _instancesToRemove.add(instance.getInstanceId());
+        }
     }
 
     public void delete() {
