@@ -131,8 +131,10 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             we.setProcessId(target.getPID());
             we.setMexId(getDAO().getMessageExchangeId());
 
-            ResponseCallback callback = new ResponseCallback();
-            _waitingCallbacks.put(getClientId(), callback);
+            if (getOperation().getOutput() != null) {
+                ResponseCallback callback = new ResponseCallback();
+                _waitingCallbacks.put(getClientId(), callback);
+            }
 
             setStatus(Status.ASYNC);
             if (target.isInMemory())

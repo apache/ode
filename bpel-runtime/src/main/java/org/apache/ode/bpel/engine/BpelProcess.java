@@ -153,6 +153,11 @@ public class BpelProcess {
         markused();
         target.invokeMyRole(mex);
         markused();
+
+        // For a one way, once the engine is done, the mex can be safely released.
+        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+            mex.release();
+        }
     }
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {

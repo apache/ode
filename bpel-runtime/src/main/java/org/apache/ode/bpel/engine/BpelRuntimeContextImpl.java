@@ -204,7 +204,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public void completedOk() {
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("ProcessImpl completed OK.");
+            BpelProcess.__log.debug("ProcessImpl " + _bpelProcess.getPID() + " completed OK.");
         }
 
         // send event
@@ -786,13 +786,13 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setMexId(mexDao.getMessageExchangeId());
         sendEvent(evt);
 
-        // MEX pattern is request only, at this point the status can only be a
-        // one way
+        // MEX pattern is request only, at this point the status can only be a one way
         if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
             mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
+            // This mex can now be released
+            mexDao.release();
         }
-        // Check if there is a synchronous response, if so, we need to inject
-        // the
+        // Check if there is a synchronous response, if so, we need to inject the
         // message on the response channel.
         switch (mex.getStatus()) {
         case NEW:
@@ -1052,6 +1052,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             default:
                 mex.setFailure(FailureType.OTHER, "No response.", null);
                 _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+                mex.release();
             }
         }
     }
