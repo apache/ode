@@ -144,63 +144,63 @@ public class ODEService {
         }
 
         if (odeMex.getOperation().getOutput() != null) {
-                // Waits for the response to arrive
+            // Waits for the response to arrive
+            try {
+                responseFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                String errorMsg = "Timeout or execution error when waiting for response to MEX "
+                        + odeMex + " " + e.toString();
+                __log.error(errorMsg);
+                throw new OdeFault(errorMsg);
+            }
+
+            if (outMsgContext != null) {
+                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+                outMsgContext.setEnvelope(envelope);
+
+                // Hopefully we have a response
+                __log.debug("Handling response for MEX " + odeMex);
+                boolean commit = false;
                 try {
-                    responseFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    String errorMsg = "Timeout or execution error when waiting for response to MEX "
-                            + odeMex + " " + e.toString();
-                    __log.error(errorMsg);
-                    throw new OdeFault(errorMsg);
+                    if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+                    _txManager.begin();
+                } catch (Exception ex) {
+                    throw new OdeFault("Error starting transaction!", ex);
                 }
-
-                if (outMsgContext != null) {
-                    SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-                    outMsgContext.setEnvelope(envelope);
-
-                    // Hopefully we have a response
-                    __log.debug("Handling response for MEX " + odeMex);
-                    boolean commit = false;
-                    try {
-                        if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
-                        _txManager.begin();
-                    } catch (Exception ex) {
-                        throw new OdeFault("Error starting transaction!", ex);
-                    }
-                    try {
-                        // Refreshing the message exchange
-                        odeMex = (MyRoleMessageExchange) _server.getEngine().getMessageExchange(odeMex.getMessageExchangeId());
-                        onResponse(odeMex, outMsgContext);
-                        commit = true;
-                    } catch (AxisFault af) {
-                        __log.error("Error processing response for MEX " + odeMex, af);
-                        commit = true;
-                        throw af;
-                    } catch (Exception e) {
-                        __log.error("Error processing response for MEX " + odeMex, e);
-                        throw new OdeFault("An exception occured when invoking ODE.", e);
-                    } finally {
-                        odeMex.release();
-                        if (commit) {
-                            try {
-                                if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
-                                _txManager.commit();
-                            } catch (Exception e) {
-                                throw new OdeFault("Commit failed!", e);
-                            }
-                        } else {
-                            try {
-                                _txManager.rollback();
-                            } catch (Exception ex) {
-                                throw new OdeFault("Rollback failed!", ex);
-                            }
+                try {
+                    // Refreshing the message exchange
+                    odeMex = (MyRoleMessageExchange) _server.getEngine().getMessageExchange(odeMex.getMessageExchangeId());
+                    onResponse(odeMex, outMsgContext);
+                    commit = true;
+                } catch (AxisFault af) {
+                    __log.error("Error processing response for MEX " + odeMex, af);
+                    commit = true;
+                    throw af;
+                } catch (Exception e) {
+                    __log.error("Error processing response for MEX " + odeMex, e);
+                    throw new OdeFault("An exception occured when invoking ODE.", e);
+                } finally {
+                    odeMex.release();
+                    if (commit) {
+                        try {
+                            if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
+                            _txManager.commit();
+                        } catch (Exception e) {
+                            throw new OdeFault("Commit failed!", e);
                         }
+                    } else {
+                        try {
+                            _txManager.rollback();
+                        } catch (Exception ex) {
+                            throw new OdeFault("Rollback failed!", ex);
+                        }
+                    }
                 }
             }
             if (!success) {
                 throw new OdeFault("Message was either unroutable or timed out!");
+            }
         }
-    }
     }
 
     public boolean respondsTo(QName serviceName, QName portTypeName) {
@@ -223,8 +223,7 @@ public class ODEService {
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
                 if (__log.isDebugEnabled())
-                    __log.debug("Response message " +
-                        msgContext.getEnvelope());
+                    __log.debug("Response message " + msgContext.getEnvelope());
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:
