@@ -132,9 +132,11 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         ProcessInstanceDAO removed = _instances.remove(instance.getInstanceId());
         if (removed == null) {
             // Checking for leftover instances that should be removed
-            for (Long iid : _instancesToRemove) {
+            ArrayList<Long> removals = new ArrayList<Long>(_instancesToRemove);
+            for (Long iid : removals) {
                 _instances.remove(iid);
             }
+            _instancesToRemove.removeAll(removals);
 
             // The instance can't be found probably because the transaction isn't committed yet and
             // it doesn't exist. Saving its id for later cleanup.
