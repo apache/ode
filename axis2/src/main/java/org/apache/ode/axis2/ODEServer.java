@@ -445,7 +445,6 @@ public class ODEServer {
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize());
 
-        _executorService = Executors.newCachedThreadPool();
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_server);
