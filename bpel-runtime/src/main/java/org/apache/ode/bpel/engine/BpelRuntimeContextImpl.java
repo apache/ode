@@ -1038,21 +1038,23 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
-            switch (mex.getStatus()) {
-            case ASYNC:
-            case RESPONSE:
-                mex.setStatus(MessageExchange.Status.COMPLETED_OK);
-                break;
-            case REQUEST:
-                if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+            if (mexDao != null) {
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                switch (mex.getStatus()) {
+                case ASYNC:
+                case RESPONSE:
                     mex.setStatus(MessageExchange.Status.COMPLETED_OK);
                     break;
+                case REQUEST:
+                    if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+                        mex.setStatus(MessageExchange.Status.COMPLETED_OK);
+                        break;
+                    }
+                default:
+                    mex.setFailure(FailureType.OTHER, "No response.", null);
+                    _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+                    mex.release();
                 }
-            default:
-                mex.setFailure(FailureType.OTHER, "No response.", null);
-                _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
-                mex.release();
             }
         }
     }
@@ -1061,17 +1063,19 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
-            _bpelProcess.initMyRoleMex(mex);
+            if (mexDao != null) {
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                _bpelProcess.initMyRoleMex(mex);
 
-            Message message = mex.createMessage(faultData.getFaultName());
-            if (faultData.getFaultMessage() != null)
-                message.setMessage(faultData.getFaultMessage());
-            mex.setResponse(message);
+                Message message = mex.createMessage(faultData.getFaultName());
+                if (faultData.getFaultMessage() != null)
+                    message.setMessage(faultData.getFaultMessage());
+                mex.setResponse(message);
 
-            mex.setFault(faultData.getFaultName(), message);
-            mex.setFaultExplanation(faultData.getExplanation());
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+                mex.setFault(faultData.getFaultName(), message);
+                mex.setFaultExplanation(faultData.getExplanation());
+                _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+            }
         }
     }
 
