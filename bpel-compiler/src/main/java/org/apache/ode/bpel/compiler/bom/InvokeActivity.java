@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -74,4 +75,60 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
         return _commHelper.getCorrelations();
     }
 
+    
+    /**
+     * Bastardized scope for invokes. Only supports catches/compensation handlers.
+     * @author mszefler
+     *
+     */
+    class BastardScope extends Scope {
+
+        public BastardScope(Element el) {
+            super(el);
+        }
+
+        @Override
+        public FaultHandler getFaultHandler() {
+            // Note, in <invoke> unlike <scope> the catches are NOT in an <faultHandler> element. 
+            return new FaultHandler(getElement());
+        }
+
+        @Override
+        public CorrelationSet getCorrelationSetDecl(String setName) {
+            return null;
+        }
+
+        @Override
+        public List<CorrelationSet> getCorrelationSetDecls() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<OnEvent> getEvents() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public PartnerLink getPartnerLink(String partnerLinkName) {
+            return null;
+        }
+
+        @Override
+        public List<PartnerLink> getPartnerLinks() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Variable getVariableDecl(String varName) {
+            return null; 
+        }
+
+        @Override
+        public List<Variable> getVariables() {
+            return Collections.emptyList();
+
+        }
+
+        
+    }
 }
