@@ -33,6 +33,11 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
     /** Mix-In for handling the {@link Communication} interface methods. */
     private CommunicationHelper _commHelper;
     
+    @Override
+    public Scope getScope() {
+        return new BastardScope(getElement());
+    }
+
     public InvokeActivity(Element el) {
         super(el);
         
