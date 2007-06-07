@@ -86,11 +86,11 @@ public class OProcess extends OBase {
     }
 
     public OBase getChild(final int id) {
-        return CollectionsX.find_if(_children, new MemberOfFunction<OBase>() {
-            public boolean isMember(OBase o) {
-                return o.getId() == id;
+        for (int i=_children.size()-1; i>=0; i--) {
+            OBase child = _children.get(i);
+            if (child.getId() == id) return child;
             }
-        });
+        return null;
     }
 
     public List<OBase> getChildren() {
