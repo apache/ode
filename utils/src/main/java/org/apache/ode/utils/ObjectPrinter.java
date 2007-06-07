@@ -29,35 +29,6 @@ package org.apache.ode.utils;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class ObjectPrinter {
-  /**
-   * Get a the short (without package) class name.
-   *
-   * @param o some non-null object
-   *
-   * @return short class name of given object
-   */
-  public static String getShortClassName(Object o) {
-    return getShortClassName(o.getClass());
-  }
-
-  /**
-   * Get a the short (without package) class name.
-   *
-   * @param clazz some {@link Class} object
-   *
-   * @return short class name of given class
-   */
-  public static String getShortClassName(Class clazz) {
-    String clsName = clazz.getName();
-    String pkgName = clazz.getPackage()
-                          .getName();
-
-    if ((pkgName != null) && (pkgName.length() > 0)) {
-      clsName = clsName.substring(pkgName.length() + 1);
-    }
-
-    return clsName;
-  }
 
   /**
    * Generate a default trace message for method entry.
@@ -124,7 +95,7 @@ public class ObjectPrinter {
    */
   public static String toString(Object thiz, Object[] objects) {
     StringBuffer buf = new StringBuffer("{");
-    buf.append(getShortClassName(thiz));
+    buf.append(thiz.getClass().getSimpleName());
     buf.append(' ');
     buf.append(stringifyNvList(objects));
     buf.append('}');

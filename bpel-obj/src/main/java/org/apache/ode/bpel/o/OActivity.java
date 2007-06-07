@@ -39,7 +39,7 @@ public abstract class OActivity extends OAgent {
     private OActivity parent;
 
     public String getType() {
-        return ObjectPrinter.getShortClassName(getClass());
+        return getClass().getSimpleName();
     }
 
     public OActivity(OProcess owner, OActivity parent) {
