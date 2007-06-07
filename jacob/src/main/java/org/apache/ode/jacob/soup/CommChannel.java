@@ -39,7 +39,7 @@ public class CommChannel extends ExecutionQueueObject {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer(ObjectPrinter.getShortClassName(_type));
+        StringBuffer buf = new StringBuffer(_type.getSimpleName());
         if (getDescription() != null) {
             buf.append(':').append(getDescription());
         }

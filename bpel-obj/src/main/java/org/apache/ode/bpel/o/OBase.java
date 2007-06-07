@@ -68,7 +68,7 @@ public class OBase implements Serializable {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer(ObjectPrinter.getShortClassName(this));
+        StringBuffer buf = new StringBuffer(getClass().getSimpleName());
         buf.append('#');
         buf.append(_id);
         return buf.toString();
