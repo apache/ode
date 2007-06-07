@@ -48,14 +48,14 @@ import java.util.Set;
  * A very simple, in-memory implementation of the {@link ProcessInstanceDAO}
  * interface.
  */
-class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
+public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
     private static final Collection<ScopeDAO> EMPTY_SCOPE_DAOS = Collections.emptyList();
 
     private short _previousState;
     private short _state;
     private Long _instanceId;
     private ProcessDaoImpl _processDao;
-    private byte[] _jacobState;
+    private Object _soup;
     private Map<Long, ScopeDAO> _scopes = new HashMap<Long, ScopeDAO>();
     private Map<String, List<ScopeDAO>> _scopesByName = new HashMap<String, List<ScopeDAO>>();
     private Map<String, byte[]> _messageExchanges = new HashMap<String, byte[]>();
@@ -76,7 +76,7 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
         _state = 0;
         _processDao = processDao;
         _instantiatingCorrelator = correlator;
-        _jacobState = null;
+        _soup = null;
         _instanceId = IdGen.newProcessId();
         _conn = conn;
     }
@@ -125,11 +125,19 @@ class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
      * @see ProcessInstanceDAO#getExecutionState()
      */
     public byte[] getExecutionState() {
-        return _jacobState;
+        throw new IllegalStateException("In-memory instances are never serialized");
     }
 
     public void setExecutionState(byte[] bytes) {
-        _jacobState = bytes;
+        throw new IllegalStateException("In-memory instances are never serialized");
+    }
+
+    public Object getSoup() {
+        return _soup;
+    }
+
+    public void setSoup(Object soup) {
+        _soup = soup;
     }
 
     public byte[] getMessageExchange(String identifier) {
