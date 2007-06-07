@@ -49,6 +49,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -90,9 +91,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
 
-    // private static final Messages __msgs =
-    // MessageBundle.getMessages(Messages.class);
-
     /** Data-access object for process instance. */
     private ProcessInstanceDAO _dao;
 
@@ -100,14 +98,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private final Long _iid;
 
     /** JACOB VPU */
-    protected JacobVPU vpu;
+    protected JacobVPU _vpu;
 
     /** JACOB ExecutionQueue (state) */
-    protected ExecutionQueueImpl soup;
+    protected ExecutionQueueImpl _soup;
 
     private MyRoleMessageExchangeImpl _instantiatingMessageExchange;
 
-    private OutstandingRequestManager _outstandingRequests = new OutstandingRequestManager();
+    private OutstandingRequestManager _outstandingRequests;
 
     private BpelProcess _bpelProcess;
 
@@ -120,25 +118,41 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao = dao;
         _iid = dao.getInstanceId();
         _instantiatingMessageExchange = instantiatingMessageExchange;
-        initVPU();
+        _vpu = new JacobVPU();
+        _vpu.registerExtension(BpelRuntimeContext.class, this);
 
+        if (bpelProcess.isInMemory()) {
+            ProcessInstanceDaoImpl inmem = (ProcessInstanceDaoImpl) _dao;
+            if (inmem.getSoup() != null) {
+                _soup = (ExecutionQueueImpl) inmem.getSoup();
+            }
+        } else {
         byte[] daoState = dao.getExecutionState();
         if (daoState != null) {
             ByteArrayInputStream iis = new ByteArrayInputStream(daoState);
             try {
-                soup.read(iis);
-                _outstandingRequests = (OutstandingRequestManager) soup.getGlobalData();
+                    _soup.read(iis);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
+        }
+
+        if (_soup == null) {
+            _soup = new ExecutionQueueImpl(null);
+            _soup.setReplacementMap(_bpelProcess.getReplacementMap());
+            _outstandingRequests = new OutstandingRequestManager();
+        } else {
+            _outstandingRequests = (OutstandingRequestManager) _soup.getGlobalData();
+        }
+        _vpu.setContext(_soup);
 
         if (PROCESS != null) {
-            vpu.inject(PROCESS);
+            _vpu.inject(PROCESS);
         }
 
         if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + soup.getIndex());
+            __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + _soup.getIndex());
         }
     }
 
@@ -818,20 +832,26 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
         boolean canReduce = true;
         while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
-            canReduce = vpu.execute();
+            canReduce = _vpu.execute();
         }
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
+            if (__log.isDebugEnabled()) __log.debug("Setting execution state on instance " + _iid);
+            _soup.setGlobalData(_outstandingRequests);
+            
+            if (_bpelProcess.isInMemory()) {
+                // don't serialize in-memory processes
+                ((ProcessInstanceDaoImpl) _dao).setSoup(_soup);
+            } else {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(10000);
             try {
-                soup.setGlobalData(_outstandingRequests);
-                soup.write(bos);
+                    _soup.write(bos);
                 bos.close();
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
             _dao.setExecutionState(bos.toByteArray());
-            __log.debug("Setting execution state on instance " + _iid);
+            }
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
                 // Max time exceeded (possibly an infinite loop).
@@ -874,7 +894,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _outstandingRequests.associate(responsechannel, mex.getMessageExchangeId());
 
         final String mexId = mex.getMessageExchangeId();
-        vpu.inject(new JacobRunnable() {
+        _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
@@ -895,7 +915,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             return;
         }
 
-        vpu.inject(new JacobRunnable() {
+        _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = -7767141033611036745L;
 
             public void run() {
@@ -913,7 +933,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.getProcess().removeRoutes(id, _dao);
         _outstandingRequests.cancel(id);
 
-        vpu.inject(new JacobRunnable() {
+        _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 6157913683737696396L;
 
             public void run() {
@@ -936,7 +956,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("Invoking message response for mexid " + mexid + " and channel " + responseChannelId);
         }
-        vpu.inject(new BpelJacobRunnable() {
+        _vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
 
             public void run() {
@@ -997,14 +1017,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // saving
         _bpelProcess.saveEvent(event, _dao);
-    }
-
-    private void initVPU() {
-        vpu = new JacobVPU();
-        vpu.registerExtension(BpelRuntimeContext.class, this);
-        soup = new ExecutionQueueImpl(null);
-        soup.setReplacementMap(_bpelProcess.getReplacementMap());
-        vpu.setContext(soup);
     }
 
     /**
@@ -1242,7 +1254,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void recoverActivity(final String channel, final long activityId, final String action, final FaultData fault) {
-        vpu.inject(new JacobRunnable() {
+        _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
