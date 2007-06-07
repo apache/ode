@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -66,6 +67,9 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     private static final Log __log = LogFactory.getLog(ExecutionQueueImpl.class);
 
     private ClassLoader _classLoader;
+
+    private static ConcurrentHashMap<String, ObjectStreamClass> _classDescriptors
+        = new ConcurrentHashMap<String, ObjectStreamClass>();
 
     /**
      * Cached set of enqueued {@link Continuation} objects (i.e. those read using
@@ -522,7 +526,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         public String toString() {
             StringBuffer buf = new StringBuffer(32);
             buf.append("{CFRAME ");
-            buf.append(ObjectPrinter.getShortClassName(type));
+            buf.append(type.getSimpleName());
             buf.append(':');
             buf.append(description);
             buf.append('#');
@@ -720,7 +724,12 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             boolean ser = readBoolean();
             if (ser) {
                 String clsName = readUTF();
-                return ObjectStreamClass.lookup(Class.forName(clsName, true, _classLoader));
+                ObjectStreamClass cached = _classDescriptors.get(clsName);
+                if (cached == null) {
+                    cached = ObjectStreamClass.lookup(Class.forName(clsName, true, _classLoader));
+                    _classDescriptors.put(clsName, cached);
+                }
+                return cached;
             }
             return super.readClassDescriptor();
         }
