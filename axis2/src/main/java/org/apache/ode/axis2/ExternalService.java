@@ -62,6 +62,10 @@ public class ExternalService implements PartnerRoleChannel {
 
     private static final Log __log = LogFactory.getLog(ExternalService.class);
 
+    private static final int EXPIRE_SERVICE_CLIENT = 30000;
+
+    private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
+
     private ExecutorService _executorService;
     private Definition _definition;
     private QName _serviceName;
@@ -108,9 +112,16 @@ public class ExternalService implements PartnerRoleChannel {
             options.setAction(soapAction);
             options.setTimeOutInMilliSeconds(60000);
 
-            ConfigurationContext ctx = new ConfigurationContext(_axisConfig);
-            ServiceClient sclient = new ServiceClient(ctx, null);
-            final OperationClient operationClient = sclient.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
+            CachedServiceClient cached = _cachedClients.get();
+            long now = System.currentTimeMillis();
+            if (cached == null || cached._expire < now) {
+                cached = new CachedServiceClient();
+                ConfigurationContext ctx = new ConfigurationContext(_axisConfig);
+                cached._client = new ServiceClient(ctx, null);
+                cached._expire = now+EXPIRE_SERVICE_CLIENT;
+                _cachedClients.set(cached);
+            }
+            final OperationClient operationClient = cached._client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.setOptions(options);
 
@@ -323,6 +334,12 @@ public class ExternalService implements PartnerRoleChannel {
             String errmsg = "Error executing reply transaction; reply will be lost.";
             __log.error(errmsg, e);
         }
+    }
+
+    // INNER CLASS
+    static class CachedServiceClient {
+        ServiceClient _client;
+        long _expire;
     }
 
 }
