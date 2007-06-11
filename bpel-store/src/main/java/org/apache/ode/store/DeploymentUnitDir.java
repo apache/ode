@@ -147,6 +147,12 @@ class DeploymentUnitDir  {
 
     private void compile(File bpelFile) {
         BpelC bpelc = BpelC.newBpelCompiler();
+        
+        // BPEL 1.1 does not suport the <import> element, so "global" WSDL needs to be configured explicitly.
+        File bpel11wsdl = findBpel11Wsdl(bpelFile);
+        if (bpel11wsdl != null)
+            bpelc.setProcessWSDL(bpel11wsdl.toURI());
+        
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         try {
             bpelc.compile(bpelFile);
@@ -313,6 +319,9 @@ class DeploymentUnitDir  {
     private Map<String, Object> prepareCompileProperties(File bpelFile) {
         List<Process> plist = getDeploymentDescriptor().getDeploy().getProcessList();
         for (Process process : plist) {
+            if (process.getFileName() == null || "".equals(process.getFileName()))
+                continue;
+            
             if (bpelFile.getName().equals(process.getFileName())) {
                 Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(process);
                 Map<String, Object> result = new HashMap<String, Object>();
@@ -323,6 +332,27 @@ class DeploymentUnitDir  {
         return null;
     }
 
+    
+    /**
+     * Figure out the name of the WSDL file for a BPEL 1.1 process. 
+     * @param bpelFile BPEL process file name
+     * @return file name of the WSDL, or null if none specified.
+     */
+    private File findBpel11Wsdl(File bpelFile) {
+        List<Process> plist = getDeploymentDescriptor().getDeploy().getProcessList();
+        for (Process process : plist) {
+            if (process.getFileName() == null || "".equals(process.getFileName()))
+                continue;
+            if (!bpelFile.getName().equals(process.getFileName()))
+                continue;
+            if (process.getBpel11WsdlFileName() == null || "".equals(process.getBpel11WsdlFileName()))
+                return null;
+            
+            return new File(bpelFile.getParentFile(), process.getBpel11WsdlFileName());
+        }
+        return null;
+    }
+    
     public long getVersion() {
         return _version;
     }
