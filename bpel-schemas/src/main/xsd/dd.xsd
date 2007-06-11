@@ -97,7 +97,13 @@
 
                     <xs:attribute name="name" type="xs:QName" use="required"/>
                     <xs:attribute name="fileName" type="xs:string" use="optional"/>
-
+                    <xs:attribute name="bpel11wsdlFileName" type="xs:string" use="optional">
+                            <xs:annotation>
+                                <xs:documentation>
+                                Allows you to specify a WSDL for BPEL 1.1 processes which do not support an "import" element.
+                                </xs:documentation>
+                            </xs:annotation>
+                    </xs:attribute>
                 </xs:complexType>
             </xs:element>
 
