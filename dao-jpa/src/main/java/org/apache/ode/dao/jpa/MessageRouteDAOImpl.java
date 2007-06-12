@@ -43,7 +43,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 	private Long _id;
 	@Basic @Column(name="GROUP_ID")
     private String _groupId;
-	@Basic @Column(name="INDEX")
+	@Basic @Column(name="ROUTE_INDEX")
     private int _index;
 	@Basic @Column(name="CORRELATION_KEY")
     private String _correlationKey;
