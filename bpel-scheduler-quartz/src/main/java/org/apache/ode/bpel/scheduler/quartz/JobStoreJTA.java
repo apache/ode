@@ -19,10 +19,25 @@
 
 package org.apache.ode.bpel.scheduler.quartz;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
+
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.LoggingConnectionWrapper;
-import org.quartz.*;
+import org.quartz.Calendar;
+import org.quartz.JobDetail;
+import org.quartz.JobPersistenceException;
+import org.quartz.ObjectAlreadyExistsException;
+import org.quartz.SchedulerConfigException;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.quartz.core.SchedulingContext;
 import org.quartz.impl.jdbcjobstore.Constants;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
@@ -31,14 +46,6 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
-
-import javax.transaction.Status;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A server-level devloper friendly implementation of {@link JobStore}. This is
@@ -1332,13 +1339,7 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
                             + "': " + e.toString(), e,
                     JobPersistenceException.ERR_PERSISTENCE_CRITICAL_FAILURE);
         } finally {
-            if (rollback)
-                try {
-                    _txm.rollback();
-                } catch (Exception ex) {
-                    __log.error("Failed to rollback transaction.", ex);
-                    ; // eat it, we have bigger problems
-                }
+            if (rollback) rollbackConnection(null);
             if (resume)
                 resume();
         }
@@ -1357,14 +1358,14 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
     }
 
     @Override
-    protected void rollbackConnection(Connection conn)
-            throws JobPersistenceException {
+    protected void rollbackConnection(Connection conn) {
         __log.debug("ROLLBACK: "+ conn);
         try {
+            if (_txm.getStatus() != Status.STATUS_NO_TRANSACTION) {
             _txm.rollback();
+            }
         } catch (Exception e) {
-            throw new JobPersistenceException("Couldn't rollback jdbc connection. "
-                    + e.getMessage(), e);
+            __log.error("Exception while trying to rollback transaction", e);
         }
     }
 
@@ -1384,14 +1385,17 @@ public class JobStoreJTA extends JobStoreSupport implements JobStore {
             throws JobPersistenceException {
         try {
             conn.close();
+        } catch (Exception ex) {
+            __log.error("Error closing connection",ex);
+        }
 
+        try {
             if (_suspenededTx.get() != null && _txm.getStatus() == Status.STATUS_ACTIVE) {
                 __log.error("Unexpected: transaction still active", new Exception());
-                _txm.rollback();
-
+                rollbackConnection(conn);
             }
         } catch (Exception ex) {
-            __log.error("Error rolling back transaction.",ex);
+            __log.error("Error getting transaction status",ex);
         }
         resume();
     }
