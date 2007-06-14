@@ -349,15 +349,18 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    derby_xml = _("src/main/descriptors/persistence.derby.xml")
-    quartz_sql = _("src/main/scripts/quartz-derby.sql")
-    partial_sql = file("target/partial.sql"=>derby_xml) do |task|
-      mkpath _("target"), :verbose=>false
-      Buildr::OpenJPA.mapping_tool :properties=>derby_xml, :action=>"build", :sql=>task.name,
-        :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
+    %w{ derby mysql }.each do |db|
+      db_xml = _("src/main/descriptors/persistence.#{db}.xml")
+      quartz_sql = _("src/main/scripts/quartz-#{db}.sql")
+      partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
+        mkpath _("target"), :verbose=>false
+        Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
+          :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
+      end
+      sql = concat(_("target/#{db}.sql")=>[partial_sql, quartz_sql])
+      build sql
     end
-    derby_sql = concat(_("target/derby.sql")=>[partial_sql, quartz_sql])
-    derby_db = Derby.create(_("target/derby/jpadb")=>derby_sql)
+    derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
 
     test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
