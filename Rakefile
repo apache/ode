@@ -16,8 +16,8 @@
 #
 
 gem "buildr", "~>1.1"
-#require "buildr"
-require "buildr/lib/buildr"
+require "buildr"
+# require "buildr/lib/buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
