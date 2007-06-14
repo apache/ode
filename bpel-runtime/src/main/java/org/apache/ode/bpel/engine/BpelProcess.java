@@ -494,7 +494,7 @@ public class BpelProcess {
         _expLangRuntimeRegistry = null;
     }
 
-    private void hydrate() {
+    void hydrate() {
         markused();
         __log.debug("Rehydrating process " + _pconf.getProcessId());
         try {
