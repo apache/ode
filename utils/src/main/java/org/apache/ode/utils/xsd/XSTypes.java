@@ -19,6 +19,8 @@
 
 package org.apache.ode.utils.xsd;
 
+import org.apache.ode.utils.ISO8601DateParser;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -44,7 +46,7 @@ public class XSTypes {
         return Double.valueOf(value);
       } else if (isDate(type)) {
         foundType = "date";
-        return new XMLCalendar(value);
+        return ISO8601DateParser.parseCal(value);
       } else if (isString(type)) {
         foundType = "string";
         return value;
