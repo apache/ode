@@ -32,6 +32,7 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
+import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
@@ -132,8 +133,12 @@ public abstract class BPELTestAbstract extends TestCase {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process
                 _server.unregister(event.pid);
-                if (event.type != ProcessStoreEvent.Type.UNDEPLOYED)
-                    _server.register(store.getProcessConfiguration(event.pid));
+                if (event.type != ProcessStoreEvent.Type.UNDEPLOYED) {
+                    ProcessConfImpl conf = (ProcessConfImpl) store.getProcessConfiguration(event.pid);
+                    // Test processes always run with in-mem DAOs
+                    conf.setTransient(true);
+                    _server.register(conf);
+                }
             }
         });
         _server.init();
@@ -301,8 +306,12 @@ public abstract class BPELTestAbstract extends TestCase {
         }
 
         try {
-            for (QName procName : procs)
-                _server.register(store.getProcessConfiguration(procName));
+            for (QName procName : procs) {
+                ProcessConfImpl conf = (ProcessConfImpl) store.getProcessConfiguration(procName);
+                // Test processes always run with in-mem DAOs
+                conf.setTransient(true);
+                _server.register(conf);
+            }
         } catch (Exception ex) {
             if (d.expectedException == null)
                 failure(d, "REGISTER: Unexpected exception: " + ex, ex);
