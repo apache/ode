@@ -18,17 +18,13 @@
  */
 package org.apache.ode.test;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.xml.namespace.QName;
-
-import org.apache.log4j.helpers.ISO8601DateFormat;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.utils.ISO8601DateParser;
+
+import javax.xml.namespace.QName;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class BasicActivities20Test extends BPELTestAbstract {
     public void testHelloWorld2() throws Throwable {
@@ -78,7 +74,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String isountil = idf.format(new Date(System.currentTimeMillis()+5000));
-        Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
+        Invocation inv = addInvoke("WaitUntil", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
             "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
         inv.minimumWaitMs=5*1000L;
