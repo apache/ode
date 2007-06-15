@@ -18,25 +18,6 @@
  */
 package org.apache.ode.store;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dd.TDeployment;
@@ -55,6 +36,24 @@ import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
 
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface.
  * Provides configuration information for a process. Note that this class should
@@ -62,7 +61,7 @@ import org.w3c.dom.Node;
  *
  * @author mriou <mriou at apache dot org>
  */
-class ProcessConfImpl implements ProcessConf {
+public class ProcessConfImpl implements ProcessConf {
     private static final Log __log = LogFactory.getLog(ProcessConfImpl.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -270,6 +269,9 @@ class ProcessConfImpl implements ProcessConf {
 
     public boolean isTransient() {
         return _pinfo.isSetInMemory() && _pinfo.getInMemory();
+    }
+    public void setTransient(boolean t) {
+        _pinfo.setInMemory(t);
     }
 
     public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {
