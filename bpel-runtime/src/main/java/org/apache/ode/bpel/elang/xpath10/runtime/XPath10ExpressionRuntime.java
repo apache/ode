@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath10.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.explang.ConfigurationException;
@@ -26,10 +28,8 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
-import org.apache.ode.utils.xsd.XMLCalendar;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jaxen.Context;
 import org.jaxen.ContextSupport;
 import org.jaxen.JaxenException;
@@ -40,7 +40,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * XPath 1.0 Expression Language run-time subsytem.
@@ -126,9 +130,8 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
             EvaluationException {
 
         String literal = evaluateAsString(cexp, context);
-
         try {
-            return new XMLCalendar(literal);
+            return ISO8601DateParser.parseCal(literal);
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);

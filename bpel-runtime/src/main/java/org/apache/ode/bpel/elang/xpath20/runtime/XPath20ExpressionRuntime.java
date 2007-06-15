@@ -32,8 +32,8 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
-import org.apache.ode.utils.xsd.XMLCalendar;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -137,11 +137,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
-
         String literal = evaluateAsString(cexp, context);
-
         try {
-            return new XMLCalendar(literal);
+            return ISO8601DateParser.parseCal(literal);
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);
