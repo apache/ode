@@ -49,10 +49,13 @@ public class MockScheduler implements Scheduler {
     private ThreadLocal<Boolean> _transacted = new ThreadLocal<Boolean>();
     private TransactionManager _txm;
 
-    public MockScheduler() { }
+    public MockScheduler() {
+        _transacted.set(false);
+    }
 
     public MockScheduler(TransactionManager txm) {
         _txm = txm;
+        _transacted.set(false);
     }
 
     ThreadLocal<List<Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
@@ -65,7 +68,7 @@ public class MockScheduler implements Scheduler {
     public String schedulePersistedJob(Map<String, Object> detail, Date date) throws ContextException {
         if (date != null) {
             try {
-                while(new Date().before(date)) Thread.sleep(100);
+                while(new Date().before(date)) { Thread.sleep(100); }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -174,8 +177,8 @@ public class MockScheduler implements Scheduler {
             }
         } else {
             _synchros.get().clear();
-            _transacted.set(Boolean.TRUE);
         }
+        _transacted.set(Boolean.TRUE);
     }
 
     public void commit() {
@@ -199,8 +202,8 @@ public class MockScheduler implements Scheduler {
                 }
 
             _synchros.get().clear();
-            _transacted.set(Boolean.FALSE);
         }
+        _transacted.set(Boolean.FALSE);
     }
 
     public void rollback() {
@@ -223,8 +226,8 @@ public class MockScheduler implements Scheduler {
                 } catch (Throwable t) {
                 }
             _synchros.get().clear();
-            _transacted.set(Boolean.FALSE);
         }
+        _transacted.set(Boolean.FALSE);
     }
 
     private void doExecute(JobInfo ji) {
