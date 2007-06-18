@@ -18,12 +18,6 @@
  */
 package org.apache.ode.bpel.elang.xpath10.o;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.util.HashMap;
-
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -31,9 +25,14 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.NSContext;
+
+import javax.xml.namespace.QName;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.HashMap;
 
 
 /**
@@ -167,8 +166,6 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 	 * @see org.apache.ode.bpel.o.OLValueExpression#getVariable()
 	 */
 	public Variable getVariable() {
-		if(vars.size() > 1)
-			throw new IllegalStateException("LValue must not have more than one variable reference");
 		if(vars.size() == 0)
 			throw new IllegalStateException("LValue must have one variable reference.");
 		return vars.values().iterator().next();
