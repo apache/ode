@@ -168,7 +168,13 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 	public Variable getVariable() {
 		if(vars.size() == 0)
 			throw new IllegalStateException("LValue must have one variable reference.");
-		return vars.values().iterator().next();
+        // We're interested in the first variable referenced by the LValue
+        for (String varName : vars.keySet()) {
+            if (xpath.substring(1, xpath.length()).startsWith(varName))
+                return vars.get(varName);
+        }
+        throw new IllegalStateException("Either the expression doesn't start with a variable reference or " +
+                "the reference is unknow.");
 	}
 
 }
