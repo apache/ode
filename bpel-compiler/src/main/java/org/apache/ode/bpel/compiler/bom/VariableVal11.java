@@ -27,8 +27,8 @@ public class VariableVal11 extends VariableVal {
     }
 
     public Expression getLocation() {
-        return (getAttribute("location") != null) 
-                ? new Expression11(getElement(), getElement().getAttributeNode("location"))
+        return (getAttribute("query") != null)
+                ? new Expression11(getElement(), getElement().getAttributeNode("query"))
                 : null;
     }
 
