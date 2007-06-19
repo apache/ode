@@ -27,9 +27,10 @@ public class ToFrom extends BpelObject {
     }
     
     public VariableVal getAsVariableVal() {
-        if (getAttribute("variable", null) != null)
-            return new VariableVal(getElement());
-        // TODO fix for 11
+        if (getAttribute("variable", null) != null) {
+            if (is11()) return new VariableVal11(getElement());
+            else return new VariableVal(getElement());
+        }
         return null;
     }
     

@@ -31,12 +31,11 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
-import org.apache.ode.bpel.compiler.bom.VariableVal11;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OAssign.RValue;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
@@ -167,10 +166,8 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (vv.getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    // The following only applies to BPEL 1.1 processes:
-                    if (vv instanceof VariableVal11)
-                        if (((VariableVal11)vv).getLocation() != null)
-                            vref.location = _context.compileExpr(((VariableVal11)vv).getLocation());
+                    if (vv.getLocation() != null)
+                        vref.location = _context.compileExpr(vv.getLocation());
                 }
                 // TODO: check for irrelevant properties.
                 return vref;
@@ -230,10 +227,8 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (to.getAsVariableVal().getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    // Following applies only to BPEL 1.1
-                    if (vv instanceof VariableVal11)
-                        if (((VariableVal11)vv).getLocation() != null)
-                        vref.location = _context.compileExpr(((VariableVal11)vv).getLocation());
+                    if (vv.getLocation() != null)
+                        vref.location = _context.compileExpr(vv.getLocation());
                 }
                 // TODO: check for irrelevant properties.
                 return vref;

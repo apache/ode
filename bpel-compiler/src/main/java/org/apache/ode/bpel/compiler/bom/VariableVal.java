@@ -46,4 +46,8 @@ public class VariableVal extends ToFrom {
         return getAttribute("part", null);
     }
 
+    public Expression getLocation() {
+        return getFirstChild(Query.class);
+    }
+
 }
