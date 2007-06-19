@@ -33,9 +33,10 @@ ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.4")
 AXIS2               = "org.apache.axis2:axis2:jar:1.1.1"
 AXIS2_WAR           = "org.apache.axis2:axis2:war:1.1.1"
-AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools", "axis2-kernel",
-                        "axis2-java2wsdl", "axis2-jibx", "axis2-kernel", "axis2-saaj", "axis2-xmlbeans",
+AXIS2_ALL           = group("axis2", "axis2-adb", "axis2-codegen", "axis2-tools",
+                        "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.1.1")
+AXIS2_PATCHED       = "org.apache.axis2:axis2-kernel-intalio:jar:1.1.1b"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -148,7 +149,7 @@ define "ode" do
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "bpel-scheduler-quartz",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
-      AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
+      AXIS2_ALL, AXIS2_PATCHED, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, QUARTZ, SAXON, TRANQL,
@@ -461,56 +462,3 @@ define "ode" do
 
 end
 
-
-define "apache-ode" do
-  [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
-
-  def distro(project, id)
-    project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
-      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
-      zip.path("examples").include project.path_to("src/examples"), :as=>"."
-      zip.merge project("ode:tools-bin").package(:zip)
-      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-        COMMONS.pool, COMMONS.collections, JAXEN,
-        SAXON, LOG4J, WSDL4J, XALAN, XERCES)
-      project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-obj", "bpel-schemas").
-        map(&:packages).flatten.each do |pkg|
-        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
-      end
-      yield zip
-    end
-  end
-
-  desc "ODE Axis2 Based Distribution"
-  define "distro-axis2" do
-    parent.distro(self, "#{parent.id}-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
-
-    project("ode:axis2-war").task("start").enhance do |task|
-      target = "#{task.path}/webapp/WEB-INF/processes"
-      puts "Deploying processes to #{target}" if verbose
-      verbose(false) do
-        mkpath target
-        cp_r FileList[_("src/examples/*")].to_a, target
-        rm Dir.glob("#{target}/*.deployed")
-      end
-    end
-  end
-
-  desc "ODE JBI Based Distribution"
-  define "distro-jbi" do
-    parent.distro(self, "#{parent.id}-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
-  end
-
-  package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
-    if File.exist?(".svn")
-      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
-        map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-        each { |f| zip.include f, :as=>f }
-    else
-      zip.include Dir.pwd, :as=>"."
-    end
-  end
-
-  package :zip, :id=>"#{id}-docs", :include=>javadoc(project("ode").projects).target
-
-end
