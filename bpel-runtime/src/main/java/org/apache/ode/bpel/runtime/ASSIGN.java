@@ -220,8 +220,7 @@ class ASSIGN extends ACTIVITY {
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
-            Element literalRoot = ((OAssign.Literal) from).xmlLiteral
-                    .getDocumentElement();
+            Element literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
             assert literalRoot.getLocalName().equals("literal");
             // We'd like a single text node...
 

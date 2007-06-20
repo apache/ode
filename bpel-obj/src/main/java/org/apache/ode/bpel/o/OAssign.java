@@ -21,12 +21,13 @@ package org.apache.ode.bpel.o;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.namespace.QName;
 
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
@@ -103,6 +104,13 @@ public class OAssign extends OActivity {
             }
         }
 
+        public Document getXmlLiteral() {
+            Element literalRoot = xmlLiteral.getDocumentElement();
+            Document copyDoc = DOMUtils.newDocument();
+            Node copyElmt = copyDoc.importNode(literalRoot, true);
+            copyDoc.appendChild(copyElmt);
+            return copyDoc;
+        }
     }
 
     public static class LValueExpression extends OBase implements LValue {
