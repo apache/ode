@@ -543,6 +543,17 @@ public class BpelProcess {
 
     }
 
+    void hydrate() {
+        _hydrationLatch.latch(1);
+
+        try {
+            // We don't actually need to do anything, the latch will run the doHydrate method
+            // when necessary..
+        } finally {
+            _hydrationLatch.release(1);
+        }
+    }
+    
     OProcess getOProcess() {
         _hydrationLatch.latch(1);
         try {
