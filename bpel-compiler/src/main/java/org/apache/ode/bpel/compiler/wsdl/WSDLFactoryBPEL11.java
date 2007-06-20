@@ -18,14 +18,14 @@
  */
 package org.apache.ode.bpel.compiler.wsdl;
 
-import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
-import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
-
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
+import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 
 /**
  * Factory for {@link WSDLFactory} objects that are pre-configured to handle
@@ -57,6 +57,7 @@ public class WSDLFactoryBPEL11 extends WSDLFactoryImpl implements WSDLFactory4BP
         extRegistry.registerDeserializer(Types.class, XMLSchemaType.QNAME, new XMLSchemaTypeSerializer());
         extRegistry.registerDeserializer(Definition.class, new QName(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05,
                 "partnerLinkType"), _bs);
+        
         return extRegistry;
 
     }
