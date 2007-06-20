@@ -19,11 +19,14 @@
 package org.apache.ode.bpel.compiler.wsdl;
 
 import javax.wsdl.Definition;
+import javax.wsdl.Operation;
 import javax.wsdl.WSDLException;
+import javax.wsdl.extensions.AttributeExtensible;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
+import javax.xml.namespace.QName;
 
 /**
  * Implementation of the BPEL-aware {@link javax.wsdl.factory.WSDLFactory}.
@@ -86,6 +89,11 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
   }
 
   public ExtensionRegistry newPopulatedExtensionRegistry() {
-    return _wsdlFactory.newPopulatedExtensionRegistry();
+    ExtensionRegistry extRegistry = _wsdlFactory.newPopulatedExtensionRegistry();
+    extRegistry.registerExtensionAttributeType(Operation.class, 
+            new QName("http://www.w3.org/ns/wsdl-extensions","safe"), AttributeExtensible.STRING_TYPE);
+    
+    return extRegistry;
+
   }
 }
