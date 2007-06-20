@@ -31,7 +31,7 @@ import java.util.Set;
  * <pre>
  *     1) The time on any machine is never set back.
  *     2) Each machine has a unique IP address.
- *     3) Each process has the 'fivesight.uid.port' property set to the
+ *     3) Each process has the 'org.apache.ode.uid.port' property set to the
  *        same non-zero value.
  * 
  *    byte:    0   1   2   3   4  5  6  7  8  9  10  11   12  13
@@ -53,10 +53,10 @@ import java.util.Set;
 public final class GUID implements Cloneable, Comparable, java.io.Serializable {
 	static final long serialVersionUID = -7977671257884186039L;
 
-	static int port = 33666;
+	static String PROP_PORT = "org.apache.ode.uid.port";
 
-	static String PROP_PORT = "fivesight.uid.port";
-
+	static int port = Integer.getInteger(PROP_PORT, 33666);
+	
 	// 32 bits
 	private static final byte[] ipadd = {127,0,0,1};
 
