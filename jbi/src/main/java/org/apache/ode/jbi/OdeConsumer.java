@@ -39,18 +39,18 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Bridge between ODE (consumers) and JBI (providers). An single object of this type handles all communications initiated by ODE
- * that is destined for other JBI providers.
+ * that is destined for other JBI providers. 
  */
-class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
+abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     private static final Log __log = LogFactory.getLog(OdeConsumer.class);
+    private static final long DEFAULT_RESPONSE_TIMEOUT = 2 * 60 * 1000L;
 
-    private static final long DEFAULT_SENDSYNC_TIMEOUT = 2 * 60 * 1000L;
+    protected OdeContext _ode;
 
-    private OdeContext _ode;
+    protected long _responseTimeout = DEFAULT_RESPONSE_TIMEOUT;
 
-    private long _sendSyncTimeout = DEFAULT_SENDSYNC_TIMEOUT;
 
-    private Map<String, PartnerRoleMessageExchange> _outstandingExchanges = new ConcurrentHashMap<String, PartnerRoleMessageExchange>();
+    protected Map<String, PartnerRoleMessageExchange> _outstandingExchanges = new ConcurrentHashMap<String, PartnerRoleMessageExchange>();
 
     OdeConsumer(OdeContext ode) {
         _ode = ode;
@@ -103,23 +103,9 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         if (success) {
-                            _ode._executorService.submit(new Runnable() {
-                                public void run() {
-                                    try {
-                                        boolean sendOk = _ode.getChannel().sendSync(inonly, _sendSyncTimeout);
-                                        if (!sendOk) {
-                                            __log.warn("Timeout while sending message for JBI message exchange: " + jbiMex.getExchangeId());
-                                        }
-                                        onJbiMessageExchange(inonly);
-                                    } catch (MessagingException e) {
-                                        String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
-                                        __log.error(errmsg, e);
-                                    }
-                                }
-                            });
+                            doSendOneWay(odeMex, inonly);
                         }
                     }
-
                     public void beforeCompletion() {
                     }
 
@@ -133,21 +119,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         if (success) {
-                            _ode._executorService.submit(new Runnable() {
-                                public void run() {
-                                    try {
-                                        _outstandingExchanges.put(inout.getExchangeId(), odeMex);
-                                        boolean sendOk = _ode.getChannel().sendSync(inout, _sendSyncTimeout);
-                                        if (!sendOk) {
-                                            __log.warn("Timeout while sending message for JBI message exchange: " + jbiMex.getExchangeId());
-                                        }
-                                        onJbiMessageExchange(inout);
-                                    } catch (MessagingException e) {
-                                        String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
-                                        __log.error(errmsg, e);
-                                    }
-                                }
-                            });
+                            doSendTwoWay(odeMex, inout);
                         }
                     }
 
@@ -169,6 +141,11 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
         }
 
     }
+
+    protected abstract void doSendOneWay(PartnerRoleMessageExchange odeMex, InOnly inonly);
+
+    protected abstract void doSendTwoWay(PartnerRoleMessageExchange odeMex, InOut inout);
+
 
     public void onJbiMessageExchange(MessageExchange jbiMex) throws MessagingException {
         if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY) &&
@@ -273,11 +250,11 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
         }
     }
 
-    public void setSendSyncTimeout(long timeout) {
-    	_sendSyncTimeout = timeout;
+    public void setResponseTimeout(long timeout) {
+    	_responseTimeout = timeout;
     }
 
-    public long getSendSyncTimeout() {
-    	return _sendSyncTimeout;
+    public long getResponseTimeout() {
+    	return _responseTimeout;
     }
 }
