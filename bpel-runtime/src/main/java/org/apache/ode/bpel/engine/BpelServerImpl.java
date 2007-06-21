@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -85,6 +86,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
     private DehydrationPolicy _dehydrationPolicy;
+    private Properties _configProperties;
+    
     BpelEngineImpl _engine;
     BpelDatabase _db;
 
@@ -145,7 +148,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void registerBpelEventListener(BpelEventListener listener) {
         // Do not synchronize, eventListeners is copy-on-write array.
-        _contexts.eventListeners.add(listener);
+    	listener.startup(_configProperties);
+    	_contexts.eventListeners.add(listener);
     }
 
     /**
@@ -155,7 +159,19 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void unregisterBpelEventListener(BpelEventListener listener) {
         // Do not synchronize, eventListeners is copy-on-write array.
-        _contexts.eventListeners.remove(listener);
+    	try {
+    		listener.shutdown();
+    	} catch (Exception e) {
+    		__log.warn("Stopping BPEL event listener " + listener.getClass().getName() + " failed, nevertheless it has been unregistered.", e);
+    	} finally {
+    		_contexts.eventListeners.remove(listener);
+    	}
+    }
+    
+    private void unregisterBpelEventListeners() {
+    	for (BpelEventListener l : _contexts.eventListeners) {
+    		unregisterBpelEventListener(l);
+    	}
     }
 
     public void stop() {
@@ -199,6 +215,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _mngmtLock.writeLock().lock();
         try {
             stop();
+            unregisterBpelEventListeners();
 
             _db = null;
             _engine = null;
@@ -388,6 +405,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _dehydrationPolicy = dehydrationPolicy;
     }
 
+    public void setConfigProperties(Properties configProperties) {
+    	_configProperties = configProperties;
+    }
+    
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
         _contexts.mexContext = mexContext;
     }

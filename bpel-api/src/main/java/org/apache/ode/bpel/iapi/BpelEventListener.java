@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.iapi;
 
+import java.util.Properties;
+
 import org.apache.ode.bpel.evt.BpelEvent;
 
 /**
@@ -34,4 +36,26 @@ public interface BpelEventListener {
      * @param bpelEvent BPEL event
      */
     void onEvent(BpelEvent bpelEvent);
+	
+    /**
+     * Allows the initialisation of listeners. Called directly
+     * after removing the listener from the listeners list. 
+     * 
+     * <code>configProperties</code> provide access to 
+     * configuration option defined in Ode's configuration file 
+     * (depends on the used IL implementation). This parameter might 
+     * be null if no configuration options are available (i.e. in test 
+     * cases).
+     * 
+     * @param configProperties configuration properties
+     * 
+     */
+    void startup(Properties configProperties);
+    
+    /**
+     * Allows the clean up in listener implementations. Called 
+     * directly before adding the listener to the listeners list.
+     */
+    void shutdown();
+
 }
