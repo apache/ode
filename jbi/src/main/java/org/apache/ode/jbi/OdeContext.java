@@ -70,7 +70,7 @@ final class OdeContext {
     /** Mapper by class name. */
     private Map<String, Mapper> _mappersByClassName = new HashMap<String, Mapper>();
 
-    OdeConsumer _consumer = new OdeConsumer(this);
+    OdeConsumer _consumer;
 
     JbiMessageExchangeProcessor _jbiMessageExchangeProcessor = new JbiMessageExchangeEventRouter(this);
 
