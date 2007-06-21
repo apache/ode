@@ -25,7 +25,7 @@ require "buildr/jetty"
 
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.0-RC4-incubating-SNAPSHOT"
+VERSION_NUMBER = "1.1-SNAPSHOT"
 NEXT_VERSION = "1.1"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
