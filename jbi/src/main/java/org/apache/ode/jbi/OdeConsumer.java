@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  */
 abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     private static final Log __log = LogFactory.getLog(OdeConsumer.class);
-    private static final long DEFAULT_RESPONSE_TIMEOUT = 2 * 60 * 1000L;
+    private static final long DEFAULT_RESPONSE_TIMEOUT = Long.getLong("org.apache.ode.jbi.timeout", 2 * 60 * 1000L);
 
     protected OdeContext _ode;
 
