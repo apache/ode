@@ -32,6 +32,7 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
@@ -141,6 +142,7 @@ public abstract class BPELTestAbstract extends TestCase {
                 }
             }
         });
+        _server.setConfigProperties(getConfigProperties());
         _server.init();
         _server.start();
     }
@@ -383,6 +385,18 @@ public abstract class BPELTestAbstract extends TestCase {
         return new File(deployxmlurl.getPath()).getParentFile();
     }
 
+    /**
+     * Override this to provide configuration properties for Ode extensions 
+     * like BpelEventListeners.
+     * 
+     * @return
+     */
+    protected Properties getConfigProperties() {
+    	// could also return null, returning an empty properties 
+    	// object is more fail-safe.
+    	return new Properties();
+    }
+    
     protected static class Failure {
         Object where;
 

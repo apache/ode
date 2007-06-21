@@ -214,6 +214,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
+	_ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
 

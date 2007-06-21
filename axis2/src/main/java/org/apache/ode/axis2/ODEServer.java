@@ -460,6 +460,7 @@ public class ODEServer {
             // dehy.setProcessMaxAge(10000);
             _server.setDehydrationPolicy(dehy);
         }
+        _server.setConfigProperties(_odeConfig.getProperties());
         _server.init();
     }
 
