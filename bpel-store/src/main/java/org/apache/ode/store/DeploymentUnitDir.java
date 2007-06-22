@@ -119,6 +119,8 @@ class DeploymentUnitDir  {
      */
     void compile() {
         ArrayList<File> bpels = listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
+        if (bpels.size() == 0)
+            throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
             compile(bpel);
         }
