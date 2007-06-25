@@ -94,6 +94,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+
+/**
+ * 
+ * 
+ * @author Maciej Szefler
+ */
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
@@ -791,6 +797,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     }
 
+    /**
+     * Invoke a partner via the Integration Layer ("IL"). 
+     * @param partnerLink
+     * @param operation
+     * @param outgoingMessage
+     * @param partnerRoleChannel
+     * @param partnerEpr
+     * @param mexDao
+     */
     private void invokeIL(
             PartnerLinkInstance partnerLink, 
             Operation operation, 
@@ -808,12 +823,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 // If RELIABLE is supported, this is easy, we just do it in-line.
                 throw new UnsupportedOperationException(); // TODO
                 ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl();
-                _bpelProcess._engine._contexts.mexContext.invokePartner(reliableMex);
+                _bpelProcess._engine._contexts.mexContext.invokePartnerReliable(reliableMex);
             } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)){
                 // If TRANSACTED is supported, this is again easy, do it in-line.
                 throw new UnsupportedOperationException(); // TODO
                 TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl();
-                _bpelProcess._engine._contexts.mexContext.invokePartner(transactedMex);
+                _bpelProcess._engine._contexts.mexContext.invokePartnerTransacted(transactedMex);
             } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
                 // For BLOCKING invocation, we defer the call until after commit (unless idempotent). 
                 BlockingPartnerRoleMessageExchangeImpl blockingMex = new BlockingPartnerRoleMessageExchangeImpl();
@@ -824,7 +839,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 _todoAsyncCalls.add(asyncMex);
             } else {
                 // This really should not happen, indicates IL is screwy.
-                __log.error("Integration layer did not agree to any known invocation style for EPR " + DOMUtils.domToString(partnerEPR));
+                __log.error("Integration Layer did not agree to any known invocation style for EPR " + DOMUtils.domToString(partnerEPR));
                 mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
                 mexDao.setStatus(Status.FAILURE.toString());
                 mexDao.setFaultExplanation("NoMatchingStyle");
@@ -839,6 +854,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
+    /**
+     * Invoke a partner process directly (via the engine), bypassing the Integration Layer. Obviously this can only
+     * be used when an process is partners with another process hosted on the same engine.
+     * 
+     * @param operation
+     * @param outgoingMessage
+     * @param mexDao
+     */
     private void invokeP2P(Operation operation, Element outgoingMessage, MessageExchangeDAO mexDao) {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("Invoking in a p2p interaction, partnerrole " + mexDao.getMessageExchangeId() + " - myrole " + myRoleMex);

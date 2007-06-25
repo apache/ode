@@ -81,7 +81,13 @@ public interface MessageExchangeContext {
      * @throws ContextException
      *             if the port does not support the operation
      */
-    void invokePartner(PartnerRoleMessageExchange mex) throws ContextException;
+    void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException;
+    
+    void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException;
+    
+    void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException;
+    
+    void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException;
 
     /**
      * Method used to asynchronously deliver to the integration layer the BPEL engine's response to an invocation that could not

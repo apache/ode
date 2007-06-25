@@ -44,7 +44,7 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
      * 
      * @return communication channel, an object created by the IL
      */
-    PartnerRoleChannel getChannel();
+    PartnerRoleChannel getPartnerRoleChannel();
 
     /**
      * Indicate that the partner faulted in processing the message exchange.

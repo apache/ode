@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
@@ -39,11 +40,11 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     public MessageExchangeContextImpl(ODEServer server) {
     }
 
-    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange, InvocationStyle style) throws ContextException {
+    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
-        ExternalService service = (ExternalService)partnerRoleMessageExchange.getChannel();
+        ExternalService service = (ExternalService)partnerRoleMessageExchange.getPartnerRoleChannel();
         if (__log.isDebugEnabled())
             __log.debug("The service to invoke is the external service " + service);
         service.invoke(partnerRoleMessageExchange);
@@ -57,8 +58,4 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         // mex reply when invoking the engine.
     }
 
-    public boolean isStyleSupported(PartnerRoleMessageExchange mex, InvocationStyle style) {
-        // Currently, we only support BLOCKING invokes. 
-        return style == InvocationStyle.BLOCKING;
-    }
 }

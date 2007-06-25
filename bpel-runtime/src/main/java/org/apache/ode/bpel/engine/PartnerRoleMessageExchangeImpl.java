@@ -34,13 +34,20 @@ import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
+/**
+ * Base-class implementation of the interface used to expose a partner invocation to the integration
+ * layer.
+ * 
+ * @author Maciej Szefler
+ */
 class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
     private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
-    private final PartnerRoleChannel _channel;
-    private EndpointReference _myRoleEPR;
-    private boolean _inMem;
-
+    protected final PartnerRoleChannel _partnerRoleChannel;
+    protected EndpointReference _myRoleEPR;
+    protected boolean _inMem;
+    protected String _responseChannel;
+    
     private QName _caller;
     
     PartnerRoleMessageExchangeImpl(
@@ -54,7 +61,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
             PartnerRoleChannel channel) {
         super(engine, mexId);
         _myRoleEPR = myRoleEPR;
-        _channel = channel;
+        _partnerRoleChannel = channel;
         _inMem = inMem;
         setPortOp(portType, operation);    
     }
@@ -113,47 +120,16 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         if (isAsync)
             continueAsync();
     }
-
-    /**
-     * Continue from the ASYNC state.
-     * 
-     */
-    private void continueAsync() {
-        // If there is no channel waiting for us, there is nothing to do.
-        if (getDAO().getChannel() == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("no channel on mex=" + getMessageExchangeId());
-            }
-            return;
-        }
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("create work event for mex=" + getMessageExchangeId());
-        }
-        WorkEvent we = new WorkEvent();
-        we.setIID(_iid);
-        we.setType(Type.INVOKE_RESPONSE);
-        if (_inMem)
-            we.setInMem(true);
-        we.setChannel(getDAO().getChannel());
-        we.setMexId(_mexId);
-        if (_inMem)
-            _contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-        else
-            _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-    }
-
-    /**
-     * Check if we are in the ASYNC state.
-     * 
-     * @return
-     */
-    private boolean isAsync() {
-        return getStatus() == Status.ASYNC;
-    }
-
     public QName getCaller() {
         return _caller;
+    }
+
+    public PartnerRoleChannel getPartnerRoleChannel() {
+        return _partnerRoleChannel;
+    }
+
+    public EndpointReference getMyRoleEndpointReference() {
+        return _myRoleEPR;
     }
 
     public String toString() {
@@ -165,14 +141,6 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
             return "{PartnerRoleMex#????}";
         }
 
-    }
-
-    public PartnerRoleChannel getChannel() {
-        return _channel;
-    }
-
-    public EndpointReference getMyRoleEndpointReference() {
-        return _myRoleEPR;
     }
 
 }
