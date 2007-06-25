@@ -31,39 +31,13 @@ import java.util.Set;
 public interface PartnerRoleChannel {
 
     /**
-     * Style of invocation supported on the given channel. 
+     * Get the supported invocation styles (see {@link InvocationStyle}) for invoking the EPR provided 
+     * via this channel.
      * 
-     * @author Maciej Szefler
+     * @param partnerEpr partner's EPR
+     * @return supported invocation styles
      */
-    public enum InvocationStyle {
-        /** 
-         * The very ordinary blocking IO style --- the IL will block until the operation is complete, or until
-         * a timeout is reached. 
-         */
-        BLOCKING, 
-        
-        /**
-         * Asynchrnous style -- the IL will "queue" the invocation, and call-back asynchrnously when the response
-         * is available. 
-         */
-        ASYNC, 
-        
-        /**
-         * Reliable style -- the IL will queue the invocation using the current transaction. The response will be
-         * delivered when available using a separate transaction. 
-         */
-        RELIABLE,
-        
-        
-        /**
-         * Transacted style -- the IL will enroll the operation with the current transaction. The IL will block until the
-         * operation completes. 
-         */
-        TRANSACTED
-    }
-
-    
-    Set<InvocationStyle> getSupportedInvocationStyle();
+    Set<InvocationStyle> getSupportedInvocationStyle(EndpointReference partnerEpr);
     
     /**
      * Return the endpoint reference to the endpoint with which the

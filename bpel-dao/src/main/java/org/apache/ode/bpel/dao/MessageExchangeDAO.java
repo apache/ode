@@ -18,11 +18,12 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 import java.util.Date;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
+
+import org.w3c.dom.Element;
 
 /**
  * Data access object for a message exchange.
@@ -40,6 +41,19 @@ public interface MessageExchangeDAO {
      */
     String getMessageExchangeId();
 
+    /**
+     * Get the invocation style. 
+     * @return
+     */
+    String getInvocationStyle();
+    
+    /**
+     * Set the invocation style. 
+     * @param invocationStyle
+     */
+    void setInvocationStyle(String invocationStyle);
+    
+    
     /**
      * Get output message (could be fault message)
      *
@@ -234,13 +248,16 @@ public interface MessageExchangeDAO {
     PartnerLinkDAO getPartnerLink();
 
     /**
-     * Gets the mex id for the message exchange that has been piped with
-     * this one in a process to process interaction. 
-     * @return
+     * Gets the message exchange that has been piped with this one in a process to process interaction.
+     *  
+     * @return other side of the message pipe 
      */
-    String getPipedMessageExchangeId();
-    void setPipedMessageExchangeId(String mexId);
+    MessageExchangeDAO getPipedMessageExchange();
+    
+    void setPipedMessageExchange(MessageExchangeDAO mexId);
 
     void release();
+
+    void setFailureType(String failureType);
 
 }

@@ -45,13 +45,14 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     
     PartnerRoleMessageExchangeImpl(
             BpelEngineImpl engine, 
+            String mexId,
             PortType portType,
             Operation operation, 
             boolean inMem,
             EndpointReference epr,
             EndpointReference myRoleEPR,
             PartnerRoleChannel channel) {
-        super(engine);
+        super(engine, mexId);
         _myRoleEPR = myRoleEPR;
         _channel = channel;
         _inMem = inMem;

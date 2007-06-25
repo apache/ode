@@ -337,7 +337,7 @@ public class BpelProcess {
                     if (__log.isDebugEnabled()) {
                         __log.debug("InvokeResponse event for iid " + we.getIID());
                     }
-                    processInstance.invocationResponse(we.getMexId(), we.getChannel());
+                    processInstance.injectPartnerResponse(we.getMexId(), we.getChannel());
                     processInstance.execute();
                     break;
                 case MATCHER:

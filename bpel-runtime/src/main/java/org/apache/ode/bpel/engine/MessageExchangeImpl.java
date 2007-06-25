@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -41,7 +43,7 @@ import org.w3c.dom.Element;
 /**
  * Base implementation of the {@link MessageExchange} interface. This interfaces is exposed to the Integration Layer (IL)
  * to allow it to implement incoming (via {@link MyRoleMessageExchangeImpl}) and outgoing (via {@link PartnerRoleMessageExchangeImpl})
- * communications.
+ * communications. 
  * 
  * It should be noted that this class and its derived classes are in NO WAY THREADSAFE. It is imperative that the integration layer
  * not attempt to use {@link MessageExchange} objects from multiple threads. 
@@ -95,6 +97,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
     BpelEngineImpl _engine;
 
     boolean _associated;
+    
+    InvocationStyle _istyle;
+    
+    /** The point at which this message-exchange will time out. */
+    Date _timeout;
    
     enum Change { 
         EPR,
@@ -123,11 +130,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _mexId = mexId;
     }
 
-    public MessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao) {
-        load(dao);
-    }
 
     void load(MessageExchangeDAO dao) {
+        if (dao.getMessageExchangeId().equals(_mexId))
+            throw new IllegalArgumentException("MessageExchangeId mismatch!");
+        
         if (_pattern == null)
             _pattern = MessageExchangePattern.valueOf(dao.getPattern());
         if (_opname == null)
@@ -144,11 +151,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
             _status = Status.valueOf(dao.getStatus());
         if (_callee == null)
             _callee = dao.getCallee();
-        
+        if (_istyle == null)
+            _istyle = InvocationStyle.valueOf(dao.getInvocationStyle());
     }
     
     public void save(MessageExchangeDAO dao) {
         dao.setStatus(_status.toString());
+        dao.setInvocationStyle(_istyle.toString());
         dao.setFault(_fault);
         dao.setFaultExplanation(_explanation);
         //todo: set failureType
@@ -169,6 +178,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
             dao.setProperty(modprop, _properties.get(modprop));
         }
 
+    }
+    
+    public InvocationStyle getInvocationStyle() {
+        return _istyle;
     }
 
     public boolean isSafe() {
@@ -209,10 +222,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     public String getFaultExplanation() {
         return _explanation;
-    }
-
-    public MessageExchangePattern getPattern() {
-        return _pattern;
     }
 
     public Status getStatus() {

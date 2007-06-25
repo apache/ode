@@ -31,11 +31,6 @@ import org.w3c.dom.Element;
  */
 public interface PartnerRoleMessageExchange extends MessageExchange {
 
-    /**
-     * Get the invocation style for this message exchange. 
-     * @return
-     */
-    PartnerRoleChannel.InvocationStyle getInvocationStyle();
 
     /**
      * Get the identifier of the process that created this message exchange.

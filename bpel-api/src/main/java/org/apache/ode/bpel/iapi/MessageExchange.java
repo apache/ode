@@ -113,6 +113,13 @@ public interface MessageExchange {
     String getMessageExchangeId()
             throws BpelEngineException;
 
+
+    /**
+     * Get the invocation style for this message exchange. 
+     * @return
+     */
+    InvocationStyle getInvocationStyle();
+    
     /**
      * Get the name of the operation (WSDL 1.1) / message exchange (WSDL 1.2?).
      *

@@ -43,13 +43,14 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
@@ -109,8 +110,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /** JACOB ExecutionQueue (state) */
     protected ExecutionQueueImpl _soup;
 
-    private MyRoleMessageExchangeImpl _instantiatingMessageExchange;
+    private MessageExchangeDAO _instantiatingMessageExchange;
 
+    /** Object for keeping track of all the outstanding <invoke>s. */
     private OutstandingRequestManager _outstandingRequests;
 
     /** List of BLOCKING invocations that need to be deferred until the end of the current TX */
@@ -127,7 +129,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
 
     public BpelRuntimeContextImpl(BpelProcess bpelProcess, ProcessInstanceDAO dao, PROCESS PROCESS,
-                                  MyRoleMessageExchangeImpl instantiatingMessageExchange) {
+                                  MessageExchangeDAO instantiatingMessageExchange) {
         _bpelProcess = bpelProcess;
         _dao = dao;
         _iid = dao.getInstanceId();
@@ -544,59 +546,61 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setOperation(opName);
         evt.setPortType(plinkInstnace.partnerLink.myRolePortType.getQName());
 
-        MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexRef);
+        // Get the "my-role" mex from the DB. 
+        MessageExchangeDAO myrolemex = _dao.getConnection().getMessageExchange(mexRef);
 
-        MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
+        // TODO: add some checks here/could get npe
+        MessageDAO message = myrolemex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
                 .getMessage().getQName());
         message.setData(msg);
 
-        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
-        _bpelProcess.initMyRoleMex(m);
-        m.setResponse(new MessageImpl(message));
+        myrolemex.setResponse(message);
 
+        Status status;
+        
         if (fault != null) {
-            mex.setStatus(MessageExchange.Status.FAULT.toString());
-            mex.setFault(fault);
+            status = Status.FAULT;
+            myrolemex.setFault(fault);
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_FAULT);
         } else {
-            mex.setStatus(MessageExchange.Status.RESPONSE.toString());
+            status = Status.RESPONSE;
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
+        
+        myrolemex.setStatus(status.toString());
 
-        if (mex.getPipedMessageExchangeId() != null) {
-            PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _bpelProcess
-                    .getEngine().getMessageExchange(mex.getPipedMessageExchangeId());
+        
+        if (myrolemex.getPipedMessageExchange() != null) /* p2p case */ {
+            MessageExchangeDAO pmex = myrolemex.getPipedMessageExchange();
+
             if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
+                __log.debug("Replying to a p2p mex, myrole " + myrolemex + " - partnerole " + pmex);
             }
-            try {
-                switch (m.getStatus()) {
-                    case FAILURE:
-                        // We can't seem to get the failure out of the myrole mex?
-                        pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
-                        break;
-                    case FAULT:
-                        Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
-                                .getMessage().getQName());
-                        faultRes.setMessage(m.getResponse().getMessage());
-                        pmex.replyWithFault(m.getFault(), faultRes);
-                        break;
-                    case RESPONSE:
-                        Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
-                        response.setMessage(m.getResponse().getMessage());
-                        pmex.reply(response);
-                        break;
-                    default:
-                        __log.warn("Unexpected state: " + m.getStatus());
-                        break;
-                }
-            } finally {
-                mex.release();
-            }
-        } else _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
 
-        // send event
+            // In the p2p case we copy the status/response from one mex object into the other.
+            pmex.setResponse(myrolemex.getResponse());
+            pmex.setStatus(myrolemex.getStatus());
+            continuePartnerReplied(pmex);
+            myrolemex.release();
+
+        } else /* IL-mediated communication */  {
+            // TODO: distinguish between different kinds of my-role mexss
+            MyRoleMessageExchangeImpl myRoleMex = new MyRoleMessageExchangeImpl();
+            _bpelProcess._engine._contexts.mexContext.onAsyncReply(myRoleMex);
+        }
+
+
         sendEvent(evt);
+    }
+
+
+    /**
+     * Continue a process due to a reply being received from a partner. 
+     * 
+     * @param pmex partner-role message exchange where the response was received
+     */
+    private void continuePartnerReplied(MessageExchangeDAO pmex) {
+        
     }
 
     /**
@@ -699,16 +703,18 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
                          InvokeResponseChannel channel) throws FaultException {
-
+        
+        // Get the Integration Layer's communication channel for the partnerlink.
+        PartnerRoleChannel partnerRoleChannel = _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
+        
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
-        // The target (partner endpoint) -- if it has not been explicitly
-        // initialized
-        // then use the value from bthe deployment descriptor ..
+        
         Element partnerEPR = plinkDAO.getPartnerEPR();
+        
         EndpointReference partnerEpr;
 
         if (partnerEPR == null) {
-            partnerEpr = _bpelProcess.getInitialPartnerRoleEPR(partnerLink.partnerLink);
+            partnerEpr = partnerRoleChannel.getInitialEndpointReference();
             // In this case, the partner link has not been initialized.
             if (partnerEpr == null)
                 throw new FaultException(partnerLink.partnerLink.getOwner().constants.qnUninitializedPartnerRole);
@@ -740,14 +746,108 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 : MessageExchangePattern.REQUEST_ONLY).toString());
         mexDao.setChannel(channel == null ? null : channel.export());
 
-        PartnerRoleChannel partnerRoleChannel = _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
         
-//      PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
-//      partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, );
+        MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
+        mexDao.setRequest(message);
+        message.setData(outgoingMessage);
+        message.setType(operation.getInput().getMessage().getQName());
+
+        
+        BpelProcess p2pProcess = null;
+        Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
+        if (partnerEndpoint != null)
+            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, new MemBackedMessageImpl(message.getData(),message.getType(), true));
+
+        evt.setMexId(mexDao.getMessageExchangeId());
+        sendEvent(evt);
+
+        if (p2pProcess != null) {
+            /* P2P (process-to-process) invocation, special logic */
+            invokeP2P(operation, outgoingMessage, mexDao);
+        } else {
+            /* NOT p2p, need to call out to IL */ 
+            invokeIL(partnerRoleChannel, partnerEpr, mexDao);
+        }
+
+        // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations, 
+        // we need to inject a message on the response channel, so that the process continues. 
+        switch (Status.valueOf(mexDao.getStatus())){
+            case ASYNC:
+                break;
+            case RESPONSE:
+            case FAULT:
+            case FAILURE:
+                injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+                break;
+            default:
+                __log.error("Partner did not acknowledge message exchange: " + mexDao.getMessageExchangeId());
+                mexDao.setStatus(Status.FAILURE.toString());
+                mexDao.setFailureType(FailureType.NO_RESPONSE.toString());
+                injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+        }
+
+        
+        return mexDao.getMessageExchangeId();
+
+    }
+
+    private void invokeIL(
+            PartnerLinkInstance partnerLink, 
+            Operation operation, 
+            Element outgoingMessage,
+            PartnerRoleChannel partnerRoleChannel, 
+            EndpointReference partnerEpr, 
+            MessageExchangeDAO mexDao) {
+        if (partnerEpr != null) {
+            // If we couldn't find the endpoint, then there is no sense
+            // in asking the IL to invoke.
+            mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
+            mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
+            Set<InvocationStyle> supportedStyles = partnerRoleChannel.getSupportedInvocationStyle(partnerEpr);
+            if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
+                // If RELIABLE is supported, this is easy, we just do it in-line.
+                throw new UnsupportedOperationException(); // TODO
+                ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl();
+                _bpelProcess._engine._contexts.mexContext.invokePartner(reliableMex);
+            } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)){
+                // If TRANSACTED is supported, this is again easy, do it in-line.
+                throw new UnsupportedOperationException(); // TODO
+                TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl();
+                _bpelProcess._engine._contexts.mexContext.invokePartner(transactedMex);
+            } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
+                // For BLOCKING invocation, we defer the call until after commit (unless idempotent). 
+                BlockingPartnerRoleMessageExchangeImpl blockingMex = new BlockingPartnerRoleMessageExchangeImpl();
+                _todoBlockingCalls.add(blockingMex);
+            } else if (supportedStyles.contains(InvocationStyle.ASYNC)) {
+                // For ASYNC style, we defer the call until after commit (unless idempotent).
+                AsyncPartnerRoleMessageExchangeImpl asyncMex = new AsyncPartnerRoleMessageExchangeImpl();
+                _todoAsyncCalls.add(asyncMex);
+            } else {
+                // This really should not happen, indicates IL is screwy.
+                __log.error("Integration layer did not agree to any known invocation style for EPR " + DOMUtils.domToString(partnerEPR));
+                mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
+                mexDao.setStatus(Status.FAILURE.toString());
+                mexDao.setFaultExplanation("NoMatchingStyle");
+            }
+
+        } else {
+            __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
+            mexDao.setFailureType(FailureType.UNKNOWN_ENDPOINT.toString());
+            mexDao.setFaultExplanation("UnknownEndpoint");
+            mexDao.setStatus(Status.FAILURE.toString());
+            //, partnerEPR);
+        }
+    }
+
+    private void invokeP2P(Operation operation, Element outgoingMessage, MessageExchangeDAO mexDao) {
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("Invoking in a p2p interaction, partnerrole " + mexDao.getMessageExchangeId() + " - myrole " + myRoleMex);
+        }
 
         // Properties used by stateful-exchange protocol.
-        String mySessionId = plinkDAO.getMySessionId();
-        String partnerSessionId = plinkDAO.getPartnerSessionId();
+        String mySessionId = mexDao.getPartnerLink().getMySessionId();
+        String partnerSessionId = mexDao.getPartnerLink().getPartnerSessionId();
+
 
         if ( mySessionId != null )
             mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
@@ -757,108 +857,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
-        MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
-        mexDao.setRequest(message);
-        message.setData(outgoingMessage);
-        message.setType(operation.getInput().getMessage().getQName());
 
-        // Get he my-role EPR (if myrole exists) for optional use by partner
-        // (for callback mechanism).
-        EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
-                .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
 
-        BpelProcess p2pProcess = null;
-        Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
-        if (partnerEndpoint != null)
-            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, new MemBackedMessageImpl(message.getData(),message.getType(), true));
+        Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
+        odeRequest.setMessage(outgoingMessage);
 
-        if (p2pProcess != null) {
-            // Creating a my mex using the same message id as partner mex to "pipe" them
-            MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
-                    mexDao.getMessageExchangeId(), partnerEndpoint.serviceName,
-                    operation.getName(), mexDao.getMessageExchangeId());
-
-            if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Invoking in a p2p interaction, partnerrole " + mexDao.getMessageExchangeId() + " - myrole " + myRoleMex);
-            }
-
-            Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
-            odeRequest.setMessage(outgoingMessage);
-
-            if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
-                        + partnerSessionId + " - partnerSess " + mySessionId);
-            }
-            if ( partnerSessionId != null )
-                myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
-            if ( mySessionId != null )
-                myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
-
-            mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
-            myRoleMex.invoke(odeRequest);
-        } else /* NOT p2p, need to call out to IL */ {
-            if (partnerEpr != null) {
-                // If we couldn't find the endpoint, then there is no sense
-                // in asking the IL to invoke.
-                mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
-                mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
-                Set<InvocationStyle> supportedStyles = partnerRoleChannel.getSupportedInvocationStyle();
-                if (!_bpelProcess.isInMemory()) {
-                    if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
-                        // If RELIABLE is supported, this is easy, we just do it in-line.
-                        _bpelProcess._engine._contexts.mexContext.invokePartner();
-                    } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)){
-                        // If TRANSACTED is supported, this is again easy, do it in-line.
-                        _bpelProcess._engine._contexts.mexContext.invokePartner(mex, MessageExchangeContext.InvocationStyle.TRANSACTED);
-                    } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
-                        // For BLOCKING invocation, we defer the call until after commit (unless idempotent). 
-                        _todoBlockingCalls.add(mex);
-                    } else if (supportedStyles.contains(InvocationStyle.ASYNC)) {
-                        // For ASYNC style, we defer the call until after commit (unless idempotent). 
-                        _todoAsyncCalls.add(mex);
-                    } else {
-                        // This really should not happen, indicates IL is screwy.
-                        __log.error("Integration layer did not agree to any known invocation style for EPR " + DOMUtils.domToString(partnerEPR));
-                        mex.setFailure(FailureType.COMMUNICATION_ERROR, "NoMatchingStyle",partnerEPR);
-                    }
-                } else  /* in-memory */ {
-                    
-                }
-            } else {
-                __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
-                mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint", partnerEPR);
-            }
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
+                    + partnerSessionId + " - partnerSess " + mySessionId);
         }
+        if ( partnerSessionId != null )
+            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
+        if ( mySessionId != null )
+            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
 
-        evt.setMexId(mexDao.getMessageExchangeId());
-        sendEvent(evt);
-
-        // MEX pattern is request only, at this point the status can only be a one way
-        if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
-            mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
-            // This mex can now be released
-            mexDao.release();
-        }
-        // Check if there is a synchronous response, if so, we need to inject the
-        // message on the response channel.
-        switch (mex.getStatus()) {
-            case NEW:
-                throw new AssertionError("Impossible!");
-            case ASYNC:
-                break;
-            case RESPONSE:
-            case FAULT:
-            case FAILURE:
-                invocationResponse(mex);
-                break;
-            default:
-                __log.error("Partner did not acknowledge message exchange: " + mex);
-                mex.setFailure(FailureType.NO_RESPONSE, "Partner did not acknowledge.", null);
-                invocationResponse(mex);
-        }
-
-        return mexDao.getMessageExchangeId();
-
+        mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
+        myRoleMex.invoke(odeRequest);
     }
 
     void execute() {
@@ -911,7 +925,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-    void inputMsgMatch(final String responsechannel, final int idx, MyRoleMessageExchangeImpl mex) {
+    void inputMsgMatch(final String responsechannel, final int idx, MessageExchangeDAO mexdao) {
         // if we have a message match, this instance should be marked
         // active if it isn't already
         if (_dao.getState() == ProcessState.STATE_READY) {
@@ -928,9 +942,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             sendEvent(evt);
         }
 
-        _outstandingRequests.associate(responsechannel, mex.getMessageExchangeId());
+        _outstandingRequests.associate(responsechannel, mexdao.getMessageExchangeId());
 
-        final String mexId = mex.getMessageExchangeId();
+        final String mexId = mexdao.getMessageExchangeId();
         _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 3168964409165899533L;
 
@@ -980,11 +994,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         });
     }
 
-    void invocationResponse(PartnerRoleMessageExchangeImpl mex) {
-        invocationResponse(mex.getDAO().getMessageExchangeId(), mex.getDAO().getChannel());
-    }
-
-    void invocationResponse(final String mexid, final String responseChannelId) {
+    void injectPartnerResponse(final String mexid, final String responseChannelId) {
         if (responseChannelId == null)
             throw new NullPointerException("Null responseChannelId");
         if (mexid == null)
@@ -1365,9 +1375,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                         + " on CKEY " + ckey);
             }
 
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexdao);
-
-            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
+            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mexdao);
             execute();
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
