@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -158,7 +159,7 @@ public class BpelProcess {
                 return;
             }
 
-            mex.getDAO().setProcess(getProcessDAO());
+            getDAO(mex).setProcess(getProcessDAO());
 
             if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
                 __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
@@ -176,6 +177,10 @@ public class BpelProcess {
         if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
             mex.release();
         }
+    }
+
+    private MessageExchangeDAO getDAO(MyRoleMessageExchangeImpl mex) {
+
     }
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {

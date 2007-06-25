@@ -36,13 +36,10 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     private static final Log __log = LogFactory.getLog(MessageExchangeContextImpl.class);
 
-    private ODEServer _server;
-
     public MessageExchangeContextImpl(ODEServer server) {
-        _server = server;
     }
 
-    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
+    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange, InvocationStyle style) throws ContextException {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
@@ -58,5 +55,10 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
         // Nothing to do, no callback is necessary, the client just synchornizes itself with the
         // mex reply when invoking the engine.
+    }
+
+    public boolean isStyleSupported(PartnerRoleMessageExchange mex, InvocationStyle style) {
+        // Currently, we only support BLOCKING invokes. 
+        return style == InvocationStyle.BLOCKING;
     }
 }

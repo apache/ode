@@ -141,8 +141,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         try {
             return ISO8601DateParser.parseCal(literal);
         } catch (Exception ex) {
-            String errmsg = "Invalid date: " + literal;
-            __log.error(errmsg, ex);
+            String errmsg = "Invalid date format: " + literal;
+            __log.error(errmsg);
             throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,errmsg);
         }
     }

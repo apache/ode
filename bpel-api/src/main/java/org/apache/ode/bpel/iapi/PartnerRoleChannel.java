@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.iapi;
 
+import java.util.Set;
+
 /**
  * Representation of a communication link to a partner or partners. Objects of this
  * type generally represent a physical resource in the integration layer that is used
@@ -28,6 +30,41 @@ package org.apache.ode.bpel.iapi;
  */
 public interface PartnerRoleChannel {
 
+    /**
+     * Style of invocation supported on the given channel. 
+     * 
+     * @author Maciej Szefler
+     */
+    public enum InvocationStyle {
+        /** 
+         * The very ordinary blocking IO style --- the IL will block until the operation is complete, or until
+         * a timeout is reached. 
+         */
+        BLOCKING, 
+        
+        /**
+         * Asynchrnous style -- the IL will "queue" the invocation, and call-back asynchrnously when the response
+         * is available. 
+         */
+        ASYNC, 
+        
+        /**
+         * Reliable style -- the IL will queue the invocation using the current transaction. The response will be
+         * delivered when available using a separate transaction. 
+         */
+        RELIABLE,
+        
+        
+        /**
+         * Transacted style -- the IL will enroll the operation with the current transaction. The IL will block until the
+         * operation completes. 
+         */
+        TRANSACTED
+    }
+
+    
+    Set<InvocationStyle> getSupportedInvocationStyle();
+    
     /**
      * Return the endpoint reference to the endpoint with which the
      * channel was initialized or <code>null</code> if the channel

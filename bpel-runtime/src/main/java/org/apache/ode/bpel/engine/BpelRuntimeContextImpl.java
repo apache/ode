@@ -45,8 +45,11 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel.InvocationStyle;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
@@ -75,6 +78,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.omg.CORBA._PolicyStub;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -85,7 +89,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -107,10 +113,18 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private OutstandingRequestManager _outstandingRequests;
 
+    /** List of BLOCKING invocations that need to be deferred until the end of the current TX */
+    private List<PartnerRoleMessageExchange> _todoBlockingCalls = new LinkedList<PartnerRoleMessageExchange>();
+    
+    /** List of ASYNC invocations that need to be deferred until the end of the current TX. */
+    private List<PartnerRoleMessageExchange> _todoAsyncCalls = new LinkedList<PartnerRoleMessageExchange>();
+    
     private BpelProcess _bpelProcess;
 
     /** Five second maximum for continous execution. */
     private long _maxReductionTimeMs = 2000000;
+
+
 
     public BpelRuntimeContextImpl(BpelProcess bpelProcess, ProcessInstanceDAO dao, PROCESS PROCESS,
                                   MyRoleMessageExchangeImpl instantiatingMessageExchange) {
@@ -726,6 +740,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 : MessageExchangePattern.REQUEST_ONLY).toString());
         mexDao.setChannel(channel == null ? null : channel.export());
 
+        PartnerRoleChannel partnerRoleChannel = _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
+        
+//      PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
+//      partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, );
+
         // Properties used by stateful-exchange protocol.
         String mySessionId = plinkDAO.getMySessionId();
         String partnerSessionId = plinkDAO.getPartnerSessionId();
@@ -747,23 +766,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // (for callback mechanism).
         EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
                 .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
-        PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
-                partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, _bpelProcess
-                .getPartnerRoleChannel(partnerLink.partnerLink));
 
         BpelProcess p2pProcess = null;
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
         if (partnerEndpoint != null)
-            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
+            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, new MemBackedMessageImpl(message.getData(),message.getType(), true));
 
         if (p2pProcess != null) {
             // Creating a my mex using the same message id as partner mex to "pipe" them
             MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
-                    mex.getMessageExchangeId(), partnerEndpoint.serviceName,
-                    operation.getName(), mex.getMessageExchangeId());
+                    mexDao.getMessageExchangeId(), partnerEndpoint.serviceName,
+                    operation.getName(), mexDao.getMessageExchangeId());
 
             if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Invoking in a p2p interaction, partnerrole " + mex + " - myrole " + myRoleMex);
+                __log.debug("Invoking in a p2p interaction, partnerrole " + mexDao.getMessageExchangeId() + " - myrole " + myRoleMex);
             }
 
             Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
@@ -778,18 +794,36 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if ( mySessionId != null )
                 myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
 
-            mex.setStatus(MessageExchange.Status.REQUEST);
+            mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
             myRoleMex.invoke(odeRequest);
-
-            // Can't expect any sync response
-            mex.replyAsync();
-        } else {
-            // If we couldn't find the endpoint, then there is no sense
-            // in asking the IL to invoke.
+        } else /* NOT p2p, need to call out to IL */ {
             if (partnerEpr != null) {
+                // If we couldn't find the endpoint, then there is no sense
+                // in asking the IL to invoke.
                 mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
-                mex.setStatus(MessageExchange.Status.REQUEST);
-                _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
+                mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
+                Set<InvocationStyle> supportedStyles = partnerRoleChannel.getSupportedInvocationStyle();
+                if (!_bpelProcess.isInMemory()) {
+                    if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
+                        // If RELIABLE is supported, this is easy, we just do it in-line.
+                        _bpelProcess._engine._contexts.mexContext.invokePartner();
+                    } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)){
+                        // If TRANSACTED is supported, this is again easy, do it in-line.
+                        _bpelProcess._engine._contexts.mexContext.invokePartner(mex, MessageExchangeContext.InvocationStyle.TRANSACTED);
+                    } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
+                        // For BLOCKING invocation, we defer the call until after commit (unless idempotent). 
+                        _todoBlockingCalls.add(mex);
+                    } else if (supportedStyles.contains(InvocationStyle.ASYNC)) {
+                        // For ASYNC style, we defer the call until after commit (unless idempotent). 
+                        _todoAsyncCalls.add(mex);
+                    } else {
+                        // This really should not happen, indicates IL is screwy.
+                        __log.error("Integration layer did not agree to any known invocation style for EPR " + DOMUtils.domToString(partnerEPR));
+                        mex.setFailure(FailureType.COMMUNICATION_ERROR, "NoMatchingStyle",partnerEPR);
+                    }
+                } else  /* in-memory */ {
+                    
+                }
             } else {
                 __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
                 mex.setFailure(FailureType.UNKNOWN_ENDPOINT, "UnknownEndpoint", partnerEPR);
@@ -829,10 +863,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     void execute() {
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
+        
+        // Execute the process state reductions
         boolean canReduce = true;
         while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
             canReduce = _vpu.execute();
         }
+        
+        
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
             if (__log.isDebugEnabled()) __log.debug("Setting execution state on instance " + _iid);

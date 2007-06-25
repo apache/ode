@@ -37,18 +37,35 @@ import javax.xml.namespace.QName;
 class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
     private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
-    private PartnerRoleChannel _channel;
+    private final PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;
+    private boolean _inMem;
+
+    private QName _caller;
     
-    PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
+    PartnerRoleMessageExchangeImpl(
+            BpelEngineImpl engine, 
+            PortType portType,
             Operation operation, 
+            boolean inMem,
             EndpointReference epr,
             EndpointReference myRoleEPR,
             PartnerRoleChannel channel) {
-        super(engine, dao);
+        super(engine);
         _myRoleEPR = myRoleEPR;
-        setPortOp(portType, operation);
         _channel = channel;
+        _inMem = inMem;
+        setPortOp(portType, operation);    
+    }
+
+    @Override
+    void load(MessageExchangeDAO dao) {
+        super.load(dao);
+    }
+
+    @Override
+    public void save(MessageExchangeDAO dao) {
+        super.save(dao);
     }
 
     public void replyOneWayOk() {
@@ -113,16 +130,16 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
             LOG.debug("create work event for mex=" + getMessageExchangeId());
         }
         WorkEvent we = new WorkEvent();
-        we.setIID(getDAO().getInstance().getInstanceId());
+        we.setIID(_iid);
         we.setType(Type.INVOKE_RESPONSE);
-        if (_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory())
+        if (_inMem)
             we.setInMem(true);
         we.setChannel(getDAO().getChannel());
-        we.setMexId(getDAO().getMessageExchangeId());
-        if (we.isInMem())
-            _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+        we.setMexId(_mexId);
+        if (_inMem)
+            _contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
         else
-            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
     }
 
     /**
@@ -135,13 +152,13 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
     }
 
     public QName getCaller() {
-        return _dao.getProcess().getProcessId();
+        return _caller;
     }
 
     public String toString() {
         try {
-            return "{PartnerRoleMex#" + getMessageExchangeId() + " [PID " + getCaller() + "] calling " + _epr + "."
-                    + getOperationName() + "(...)}";
+            return "{PartnerRoleMex#" + _mexId  + " [PID " + getCaller() + "] calling " + _epr + "."
+                    + _opname + "(...)}";
 
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";

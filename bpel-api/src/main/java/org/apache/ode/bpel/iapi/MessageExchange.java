@@ -147,8 +147,12 @@ public interface MessageExchange {
      */
     Message createMessage(QName msgType);
 
-    boolean isTransactionPropagated()
-            throws BpelEngineException;
+    /**
+     * Indicates whether a transactions in associated with the message exchange. If this is the case, then the object must be used
+     * from a context (i.e. thread) that is associated with the same transaction. 
+     * @return <code>true<code> if there is a transaction associated with the object, <code>false</code> otherwise.
+     */
+    boolean isTransactional();
 
     /**
      * Get the message exchange status.
@@ -223,6 +227,13 @@ public interface MessageExchange {
      */
     public Set<String> getPropertyNames();
 
+    /**
+     * Report whether the operation is "safe" in the sense of the WSDL1.2 meaning of the term. That is,
+     * is the operation side-effect free?
+     * @return <code>true</code> if the operation is safe, <code>false</code> otherwise. 
+     */
+    public boolean isSafe();
+    
     /**
      * Should be called by the external partner when it's done with the
      * message exchange. Ncessary for a better resource management and

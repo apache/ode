@@ -68,7 +68,7 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
      * the response become available.
      */
-    Future invoke(Message request);
+    Future<MessageExchange.Status> invoke(Message request);
 
     /**
      * Complete the message, exchange: indicates that the client has receive the

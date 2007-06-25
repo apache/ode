@@ -19,6 +19,17 @@
 
 package org.apache.ode.axis2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -47,18 +58,6 @@ import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.fs.TempFileManager;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
  * 
@@ -86,8 +85,6 @@ public class ODEServer {
     protected TransactionManager _txMgr;
 
     protected BpelDAOConnectionFactory _daoCF;
-
-    protected ExecutorService _executorService;
 
     protected Scheduler _scheduler;
 
@@ -320,7 +317,7 @@ public class ODEServer {
             return extService;
 
         try {
-            extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
+            extService = new ExternalService(def, serviceName, portName, _axisConfig, _scheduler, _server);
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
             throw new ContextException("Error creating external service.", ex);
@@ -429,7 +426,6 @@ public class ODEServer {
 
     protected Scheduler createScheduler() {
         QuartzSchedulerImpl scheduler = new QuartzSchedulerImpl();
-        scheduler.setExecutorService(_executorService, 20);
         scheduler.setTransactionManager(_txMgr);
         scheduler.setDataSource(_db.getDataSource());
         scheduler.init();
@@ -440,10 +436,6 @@ public class ODEServer {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
-        if (_odeConfig.getThreadPoolMaxSize() == 0)
-            _executorService = Executors.newCachedThreadPool();
-        else
-            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize());
 
         _server = new BpelServerImpl();
         _scheduler = createScheduler();

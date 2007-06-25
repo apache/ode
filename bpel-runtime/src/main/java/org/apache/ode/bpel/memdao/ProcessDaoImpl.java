@@ -50,7 +50,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
-    private int _executionCount = 0;
     private Collection<Long> _instancesToRemove = new ConcurrentLinkedQueue<Long>();
 
     private String _guid;
@@ -107,7 +106,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
                 _instances.put(newInstance.getInstanceId(), newInstance);
             }
         });
-        _executionCount++;
         return newInstance;
     }
 
@@ -174,8 +172,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public int getNumInstances() {
-        // Instances are removed after execution, using a counter instead
-        return _executionCount;
+        return _instances.size();
     }
 
     public ProcessInstanceDAO getInstanceWithLock(Long iid) {

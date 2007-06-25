@@ -22,6 +22,7 @@ package org.apache.ode.bpel.engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -45,11 +46,11 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
     public static final int TIMEOUT = 2 * 60 * 1000;
 
-    private static Map<String, ResponseCallback> _waitingCallbacks =
-            new ConcurrentHashMap<String, ResponseCallback>();
+    private static Map<String, ResponseFuture> _waitingFutures =
+            new ConcurrentHashMap<String, ResponseFuture>();
 
 
-    public MyRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO mexdao) {
+    public MyRoleMessageExchangeImpl() {
         super(engine, mexdao);
     }
 
@@ -98,7 +99,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
-    public Future invoke(Message request) {
+    public Future<MessageExchange.Status> invoke(Message request) {
         if (request == null) {
             String errmsg = "Must pass non-null message to invoke()!";
             __log.fatal(errmsg);
@@ -106,23 +107,27 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         }
 
         _dao.setRequest(((MessageImpl) request)._dao);
-        _dao.setStatus(MessageExchange.Status.REQUEST.toString());
+        setStatus(MessageExchange.Status.REQUEST);
 
-        if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked))
-            return null;
+        if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked)) {
+            throw new BpelEngineException("Intercepted.");
+        }
 
         BpelProcess target = _engine.route(getDAO().getCallee(), request);
 
         if (__log.isDebugEnabled())
             __log.debug("invoke() EPR= " + _epr + " ==> " + target);
 
+        
+        ResponseFuture future = new ResponseFuture();
+        
         if (target == null) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));
 
             setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT);
             setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
-            return null;
+            future.done(_lastStatus);
         } else {
             // Schedule a new job for invocation
             WorkEvent we = new WorkEvent();
@@ -131,18 +136,23 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             we.setProcessId(target.getPID());
             we.setMexId(getDAO().getMessageExchangeId());
 
+            setStatus(Status.ASYNC);
+
             if (getOperation().getOutput() != null) {
-                ResponseCallback callback = new ResponseCallback();
-                _waitingCallbacks.put(getClientId(), callback);
+                _waitingFutures.put(getMessageExchangeId(), future);
+            } else {
+                future.done(_lastStatus);
             }
 
-            setStatus(Status.ASYNC);
+
             if (target.isInMemory())
                 _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
             else
                 _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-            return new ResponseFuture(getClientId());
+
         }
+
+        return future;
     }
 
     public void complete() {
@@ -173,80 +183,68 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
-    static class ResponseFuture implements Future {
-        private String _clientId;
-        private boolean _done = false;
-
-        public ResponseFuture(String clientId) {
-            _clientId = clientId;
-        }
-
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            throw new UnsupportedOperationException();
-        }
-        public Object get() throws InterruptedException, ExecutionException {
-            try {
-                return get(0, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                // If it's thrown it's definitely a bug
-                throw new ExecutionException(e);
-            }
-        }
-        public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            ResponseCallback callback = _waitingCallbacks.get(_clientId);
-            if (callback != null) {
-                callback.waitResponse(timeout);
-                _done = true;
-                if (callback._timedout)
-                    throw new TimeoutException("Message exchange " + this + " timed out when waiting for a response!");
-            }
-            return null;
-        }
-        public boolean isCancelled() {
-            return false;
-        }
-        public boolean isDone() {
-            return _done;
-        }
-    }
 
     protected void responseReceived() {
-        final String cid = getClientId();
+        final String mexid = getMessageExchangeId();
         _engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
             public void afterCompletion(boolean success) {
                 __log.debug("Received myrole mex response callback");
-                ResponseCallback callback = _waitingCallbacks.remove(cid);
-                if (callback != null) callback.responseReceived();
+                ResponseFuture callback = _waitingFutures.remove(mexid);
+                callback.done(_lastStatus);
             }
             public void beforeCompletion() {
             }
         });
     }
+    
+    private static class ResponseFuture implements Future<Status> {
+        private Status _status;
 
-    static class ResponseCallback {
-        private boolean _timedout;
-        private boolean _waiting = true;
-
-        synchronized boolean responseReceived() {
-            if (_timedout) {
-                return false;
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+        
+        public Status get() throws InterruptedException, ExecutionException {
+            try {
+                return get(0, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                // If it's thrown it's definitely a bug
+                throw new RuntimeException(e);
             }
-            _waiting = false;
-            this.notify();
-            return true;
+        }
+        
+        public Status get(long timeout, TimeUnit unit) 
+            throws InterruptedException, ExecutionException, TimeoutException {
+            
+            
+            synchronized(this) {
+                if (_status != null)
+                    return _status;
+                
+                while (_status == null) {
+                    this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
+                }
+    
+                if (_status == null)
+                    throw new TimeoutException();
+                
+                return _status;
+            }
         }
 
-        synchronized void waitResponse(long timeout) {
-            long etime = timeout == 0 ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
-            long ctime;
-            try {
-                while (_waiting && (ctime = System.currentTimeMillis()) < etime) {
-                    this.wait(etime - ctime);
-                }
-            } catch (InterruptedException ie) {
-                // ignore
+        public boolean isCancelled() {
+            return false;
+        }
+        
+        public boolean isDone() {
+            return _status != null;
+        }
+        
+        void done(Status status) {
+            synchronized(this) {
+                _status = status;
+                this.notifyAll();
             }
-            _timedout = _waiting;
         }
     }
 

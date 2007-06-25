@@ -176,6 +176,8 @@ public class MockScheduler implements Scheduler {
                 throw new RuntimeException(e);
             }
         } else {
+            if (_transacted.get() == Boolean.TRUE)
+                throw new RuntimeException("Transaction active.");
             _synchros.get().clear();
         }
         _transacted.set(Boolean.TRUE);
