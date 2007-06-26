@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
@@ -41,15 +42,15 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
 /**
- * Base implementation of the {@link MessageExchange} interface. This interfaces is exposed to the Integration Layer (IL)
- * to allow it to implement incoming (via {@link ReliableMyRoleMessageExchangeImpl}) and outgoing (via {@link PartnerRoleMessageExchangeImpl})
- * communications. 
+ * Base implementation of the {@link MessageExchange} interface. This interfaces is exposed to the Integration Layer (IL) to allow
+ * it to implement incoming (via {@link ReliableMyRoleMessageExchangeImpl}) and outgoing (via
+ * {@link PartnerRoleMessageExchangeImpl}) communications.
  * 
  * It should be noted that this class and its derived classes are in NO WAY THREADSAFE. It is imperative that the integration layer
- * not attempt to use {@link MessageExchange} objects from multiple threads. 
+ * not attempt to use {@link MessageExchange} objects from multiple threads.
  * 
  * @author Maciej Szefler
- *
+ * 
  */
 abstract class MessageExchangeImpl implements MessageExchange {
 
@@ -92,49 +93,44 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     Contexts _contexts;
 
-    QName _callee;
-    
     BpelEngineImpl _engine;
 
     boolean _associated;
-    
+
     InvocationStyle _istyle;
-    
+
     /** The point at which this message-exchange will time out. */
     Date _timeout;
-   
-    enum Change { 
-        EPR,
-        RESPONSE, 
-        RELEASE
+
+    enum Change {
+        EPR, RESPONSE, RELEASE, REQUEST
     }
 
     final HashSet<Change> _changes = new HashSet<Change>();
-    
+
     /** Properties that have been retrieved from the database. */
-    final HashMap<String, String> _properties = new HashMap<String,String>();
-    
+    final HashMap<String, String> _properties = new HashMap<String, String>();
+
     /** Names of properties that have been retrieved from the database. */
     final HashSet<String> _loadedProperties = new HashSet<String>();
 
     /** Names of proprties that have been modified. */
     final HashSet<String> _modifiedProperties = new HashSet<String>();
-    
+
     private FailureType _failureType;
 
     private Set<String> _propNames;
-    
+
     public MessageExchangeImpl(BpelEngineImpl engine, String mexId) {
         _contexts = engine._contexts;
         _engine = engine;
         _mexId = mexId;
     }
 
-
     void load(MessageExchangeDAO dao) {
         if (dao.getMessageExchangeId().equals(_mexId))
             throw new IllegalArgumentException("MessageExchangeId mismatch!");
-        
+
         if (_pattern == null)
             _pattern = MessageExchangePattern.valueOf(dao.getPattern());
         if (_opname == null)
@@ -149,37 +145,44 @@ abstract class MessageExchangeImpl implements MessageExchange {
             _explanation = dao.getFaultExplanation();
         if (_status == null)
             _status = Status.valueOf(dao.getStatus());
-        if (_callee == null)
-            _callee = dao.getCallee();
         if (_istyle == null)
             _istyle = InvocationStyle.valueOf(dao.getInvocationStyle());
     }
-    
+
     public void save(MessageExchangeDAO dao) {
         dao.setStatus(_status.toString());
         dao.setInvocationStyle(_istyle.toString());
         dao.setFault(_fault);
         dao.setFaultExplanation(_explanation);
-        //todo: set failureType
-        
+        // todo: set failureType
+
         if (_changes.contains(Change.RESPONSE)) {
             MessageDAO responseDao = dao.createMessage(_response.getType());
             responseDao.setData(_response.getMessage());
         }
-        
+
         if (_changes.contains(Change.EPR)) {
             if (_epr != null)
                 dao.setEPR(_epr.toXML().getDocumentElement());
             else
                 dao.setEPR(null);
         }
-        
+
         for (String modprop : _modifiedProperties) {
             dao.setProperty(modprop, _properties.get(modprop));
         }
 
     }
-    
+
+    void save() {
+        doInTX(new InDbAction<Void>() {
+            public Void call(MessageExchangeDAO mexdao) {
+                save(mexdao);
+                return null;
+            }
+        });
+    }
+
     public InvocationStyle getInvocationStyle() {
         return _istyle;
     }
@@ -240,12 +243,12 @@ abstract class MessageExchangeImpl implements MessageExchange {
         if (_request != null)
             return _request;
 
-        return _request = doInDb(new InDbAction<MessageImpl>() {
+        return _request = doInTX(new InDbAction<MessageImpl>() {
             public MessageImpl call(MessageExchangeDAO dao) {
                 MessageDAO req = dao.getRequest();
                 if (req == null)
                     return null;
-                return new MemBackedMessageImpl(req.getData(),req.getType(),true);
+                return new MemBackedMessageImpl(req.getData(), req.getType(), true);
             }
         });
 
@@ -255,13 +258,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
         if (_response != null)
             return _response;
 
-        return _response = doInDb(new InDbAction<MessageImpl>() {
+        return _response = doInTX(new InDbAction<MessageImpl>() {
             public MessageImpl call(MessageExchangeDAO dao) {
                 MessageDAO req = dao.getResponse();
                 if (req == null)
                     return null;
-                return new MemBackedMessageImpl(req.getData(),req.getType(),true);
-                
+                return new MemBackedMessageImpl(req.getData(), req.getType(), true);
+
             }
         });
     }
@@ -277,7 +280,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         setStatus(Status.FAULT);
         _fault = faultType;
         _response = (MessageImpl) outputFaultMessage;
-        
+
         _changes.add(Change.RESPONSE);
     }
 
@@ -295,7 +298,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _response = (MessageImpl) outputMessage;
         _response.makeReadOnly();
         _changes.add(Change.RESPONSE);
-        
+
     }
 
     void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
@@ -303,7 +306,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         setStatus(Status.FAILURE);
         _failureType = type;
         _explanation = reason;
-        
+
         _changes.add(Change.RESPONSE);
     }
 
@@ -312,7 +315,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public Message createMessage(javax.xml.namespace.QName msgType) {
-        return new MemBackedMessageImpl(null,msgType,false);
+        return new MemBackedMessageImpl(null, msgType, false);
     }
 
     public void setEndpointReference(EndpointReference ref) {
@@ -324,7 +327,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         if (_epr != null)
             return _epr;
 
-        return _epr = doInDb(new InDbAction<EndpointReference>() {
+        return _epr = doInTX(new InDbAction<EndpointReference>() {
 
             public EndpointReference call(MessageExchangeDAO mexdao) {
                 Element eprdao = mexdao.getEPR();
@@ -335,14 +338,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     }
 
-
     public String getProperty(final String key) {
         if (!_loadedProperties.contains(key)) {
-            _properties.put(key, doInDb(new InDbAction<String> () {
+            _properties.put(key, doInTX(new InDbAction<String>() {
                 public String call(MessageExchangeDAO mexdao) {
                     return mexdao.getProperty(key);
                 }
-                
+
             }));
             _loadedProperties.add(key);
         }
@@ -351,7 +353,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public void setProperty(String key, String value) {
-        _properties.put(key,value);
+        _properties.put(key, value);
         _loadedProperties.add(key);
         _modifiedProperties.add(key);
     }
@@ -359,13 +361,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public Set<String> getPropertyNames() {
         if (_propNames != null)
             return _propNames;
-        
-        return _propNames = doInDb(new InDbAction<Set<String>>() {
+
+        return _propNames = doInTX(new InDbAction<Set<String>>() {
             public Set<String> call(MessageExchangeDAO mexdao) {
                 return mexdao.getPropertyNames();
             }
         });
-        
+
     }
 
     public void release() {
@@ -376,22 +378,47 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public String toString() {
         return "MEX[" + _mexId + "]";
     }
-    
+
     protected void assertTransaction() {
         if (!_contexts.scheduler.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
     }
 
-    protected <T> T doInDb(InDbAction<T> action) {
+    protected <T> T doInTX(final InDbAction<T> action) {
         if (_txflag) {
-            MessageExchangeDAO mexDao;
-            action.call(mexDao);
+            assertTransaction();
+            return action.call(getDAO());
         } else {
+            try {
+                return _contexts.scheduler.execIsolatedTransaction(new Callable<T>() {
+                    public T call() throws Exception {
+                        assertTransaction();
+                        return action.call(getDAO());
+                    }
+
+                }).get();
+            } catch (Exception ie) {
+                __log.error("Internal error executing transaction.", ie);
+                throw new BpelEngineException("Internal Error",ie);
+            }
         }
+    }
+
+    /**
+     * Get the DAO object. Note, we can do this only when we are running in a transaction.
+     * 
+     * @return 
+     */
+    protected MessageExchangeDAO getDAO() {
+        assertTransaction();
+        MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(_mexId);
+        if (mexdao == null)
+            mexdao = _contexts.dao.getConnection().getMessageExchange(_mexId);
+        return mexdao;
     }
 
     interface InDbAction<T> {
         public T call(MessageExchangeDAO mexdao);
     }
-    
+
 }

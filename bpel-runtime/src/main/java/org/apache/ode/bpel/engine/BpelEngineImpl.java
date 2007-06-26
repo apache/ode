@@ -54,12 +54,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
  * transaction.
- *
+ * 
  * @author mszefler
  * @author Matthieu Riou <mriou at apache dot org>
  */
@@ -107,40 +108,89 @@ public class BpelEngineImpl implements BpelEngine {
         _contexts = contexts;
     }
 
-    MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, QName targetService, String operation, String clientKey)
-            throws BpelEngineException {
+    MyRoleMessageExchange createMessageExchange(final InvocationStyle istyle, final QName targetService, final String operation,
+            final String clientKey) throws BpelEngineException {
 
-        // TODO: for now, invocation of the engine is only supported in RELIABLE mode.
-        if (istyle != InvocationStyle.RELIABLE)
-            throw new BpelEngineException("Unsupported InvocationStyle: " + istyle);
-        
-        BpelProcess target = route(targetService, null);
+        final BpelProcess target = route(targetService, null);
 
-        MessageExchangeDAO dao;
-        if (target == null || target.isInMemory()) {
-            dao = _contexts.inMemDao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-        } else {
-            dao = _contexts.dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        if (target == null)
+            throw new BpelEngineException("NoSuchService: " + targetService);
+
+        Callable<String> createDao = new Callable<String>() {
+
+            public String call() throws Exception {
+                MessageExchangeDAO dao;
+                if (target.isInMemory()) {
+                    dao = _contexts.inMemDao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+                } else {
+                    dao = _contexts.dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+                }
+                dao.setInvocationStyle(istyle.toString());
+                dao.setCorrelationId(clientKey);
+                dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
+                dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
+                dao.setCallee(targetService);
+                dao.setStatus(Status.NEW.toString());
+                dao.setOperation(operation);
+                return dao.getMessageExchangeId();
+            }
+
+        };
+
+        MyRoleMessageExchangeImpl mex;
+        String mexId;
+        switch (istyle) {
+        case ASYNC:
+            try {
+                mexId = _contexts.scheduler.execIsolatedTransaction(createDao).get();
+            } catch (Exception e) {
+                __log.error("Internal Error: could not execute isolated transaction.", e);
+                throw new BpelEngineException("Internal Error", e);
+            }
+            mex = new AsyncMyRoleMessageExchangeImpl(this, mexId);
+            break;
+        case BLOCKING:
+            try {
+                mexId = _contexts.scheduler.execIsolatedTransaction(createDao).get();
+            } catch (Exception e) {
+                __log.error("Internal Error: could not execute isolated transaction.", e);
+                throw new BpelEngineException("Internal Error", e);
+            }
+            mex = new BlockingMyRoleMessageExchangeImpl(this, mexId);
+            break;
+            
+        case RELIABLE:
+            assertTransaction();
+            try {
+                mexId = createDao.call();
+            } catch (Exception e) {
+                __log.error("Internal Error: could not execute DB calls.", e);
+                throw new BpelEngineException("Internal Error", e);
+            }
+            mex = new ReliableMyRoleMessageExchangeImpl(this, mexId);
+            break;
+        case TRANSACTED:
+            assertTransaction();
+            try {
+                mexId = createDao.call();
+            } catch (Exception e) {
+                __log.error("Internal Error: could not execute DB calls.", e);
+                throw new BpelEngineException("Internal Error", e);
+            }
+            mex = new TransactedMyRoleMessageExchangeImpl(this, mexId);
+        default:
+            throw new Error("Internal Error: unknown InvocationStyle: " + istyle);
         }
-        dao.setCorrelationId(clientKey);
-        dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
-        dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
-        dao.setCallee(targetService);
-        dao.setStatus(Status.NEW.toString());
-        dao.setOperation(operation);
-        dao.setPipedMessageExchangeId(pipedMexId);
-        ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(this, dao);
 
-        if (target != null) {
-            target.initMyRoleMex(mex);
-        }
+        target.initMyRoleMex(mex);
 
         return mex;
     }
 
     MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
         MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
-        if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
+        if (mexdao == null)
+            mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
         if (mexdao == null)
             return null;
 
@@ -203,7 +253,9 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Register a process with the engine.
-     * @param process the process to register
+     * 
+     * @param process
+     *            the process to register
      */
     void registerProcess(BpelProcess process) {
         _activeProcesses.put(process.getPID(), process);
@@ -217,7 +269,7 @@ public class BpelEngineImpl implements BpelEngine {
     /**
      * Route to a process using the service id. Note, that we do not need the endpoint name here, we are assuming that two processes
      * would not be registered under the same service qname but different endpoint.
-     *
+     * 
      * @param service
      *            target service id
      * @param request
@@ -260,7 +312,9 @@ public class BpelEngineImpl implements BpelEngine {
                 public void afterCompletion(boolean success) {
                     _instanceLockManager.unlock(we.getIID());
                 }
-                public void beforeCompletion() { }
+
+                public void beforeCompletion() {
+                }
             });
         } catch (InterruptedException e) {
             // Retry later.
@@ -284,8 +338,10 @@ public class BpelEngineImpl implements BpelEngine {
                 process = _activeProcesses.get(we.getProcessId());
             } else {
                 ProcessInstanceDAO instance;
-                if (we.isInMem()) instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
-                else instance = _contexts.dao.getConnection().getInstance(we.getIID());
+                if (we.isInMem())
+                    instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
+                else
+                    instance = _contexts.dao.getConnection().getInstance(we.getIID());
 
                 if (instance == null) {
                     __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
@@ -344,13 +400,13 @@ public class BpelEngineImpl implements BpelEngine {
                     _contexts.scheduler.execIsolatedTransaction(new Callable<Void>() {
                         public Void call() throws Exception {
                             jobInfo.jobDetail.put("final", true);
-                            _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail,
-                                    new Date(System.currentTimeMillis() + 60 * 1000));
+                            _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, new Date(
+                                    System.currentTimeMillis() + 60 * 1000));
                             return null;
                         }
                     });
             } catch (Exception ex) {
-                __log.error("Error rescheduling problematic job: " + jobInfo,ex);
+                __log.error("Error rescheduling problematic job: " + jobInfo, ex);
                 saveToDisk = true;
             }
         } else {
@@ -363,11 +419,10 @@ public class BpelEngineImpl implements BpelEngine {
                 ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream(f));
                 fos.writeObject(jobInfo);
                 fos.close();
-                __log.error("Saved problematic job to disk (last resort): " + jobInfo +" in file " + f);
+                __log.error("Saved problematic job to disk (last resort): " + jobInfo + " in file " + f);
             } catch (Exception ex) {
                 __log.error("Could not save bad job; it will be lost: " + jobInfo, ex);
             }
-
 
         // No more retries.
         return false;
@@ -408,11 +463,16 @@ public class BpelEngineImpl implements BpelEngine {
 
     /**
      * Get the list of globally-registered message-exchange interceptors.
-     *
+     * 
      * @return list
      */
     List<MessageExchangeInterceptor> getGlobalInterceptors() {
         return _contexts.globalIntereceptors;
+    }
+
+    protected void assertTransaction() {
+        if (!_contexts.scheduler.isTransacted())
+            throw new BpelEngineException("Operation must be performed in a transaction!");
     }
 
 }

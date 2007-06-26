@@ -95,20 +95,8 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
             __log.debug("invoke() EPR= " + _epr + " ==> " + target);
         setStatus(Status.REQUEST);
         save(getDAO());
-        
         scheduleInvoke(target);
-                            
     }
 
-    /**
-     * Get the DAO object. Note, we can do this for RELIABLE, since we are guaranteed to be running in 
-     * a transaction.
-     * 
-     * @return
-     */
-    MessageExchangeDAO getDAO() {
-        MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(_mexId);
-        if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(_mexId);
-        return mexdao;        
-    }
+
 }

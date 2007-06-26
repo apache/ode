@@ -60,7 +60,7 @@ public class WorkEvent {
     }
 
     public enum Type {
-        TIMER, RESUME, INVOKE_RESPONSE, MATCHER, INVOKE_INTERNAL
+        TIMER, RESUME, INVOKE_RESPONSE, MATCHER, INVOKE_INTERNAL, INVOKE_TIMEOUT
     }
 
     public String getChannel() {

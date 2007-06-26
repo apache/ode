@@ -191,7 +191,7 @@ public class BpelProcess {
         return null;
     }
 
-    void initMyRoleMex(ReliableMyRoleMessageExchangeImpl mex) {
+    void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
         markused();
         PartnerLinkMyRoleImpl target = null;
         for (Endpoint endpoint : getEndpointToMyRoleMap().keySet()) {
