@@ -56,6 +56,8 @@ public interface MyRoleMessageExchange extends MessageExchange {
      */
     CorrelationStatus getCorrelationStatus();
 
+    void setRequest(Message request);
+    
     /**
      * "Invoke" a process hosted by the BPEL engine. The state of the invocation
      * may be obtained by a call to the {@link MessageExchange#getStatus()}
@@ -68,20 +70,19 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
      * the response become available.
      */
-    Future<MessageExchange.Status> invoke(Message request);
+    void invokeBlocking();
 
+    void invokeReliable();
+    
+    void invokeAsync();
+    
+    void invokeTransacted();
+    
     /**
      * Complete the message, exchange: indicates that the client has receive the
      * response (if any).
      */
     void complete();
-
-    /**
-     * Associate a client key with this message exchange.
-     * 
-     * @param clientKey
-     */
-    void setClientId(String clientKey);
 
     /**
      * Get the previously associated client key for this exchange.

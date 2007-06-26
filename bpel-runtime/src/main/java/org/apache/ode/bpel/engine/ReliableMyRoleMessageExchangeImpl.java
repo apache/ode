@@ -21,12 +21,15 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -41,25 +44,49 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
+/**
+ * Provides an implementation of the {@link MyRoleMessageExchange} inteface for interactions performed in the
+ * {@link InvocationStyle#RELIABLE} style.
+ * 
+ * @author Maciej Szefler
+ */
+class ReliableMyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
-    private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
+    private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
+
     public static final int TIMEOUT = 2 * 60 * 1000;
 
-    private static Map<String, ResponseFuture> _waitingFutures =
-            new ConcurrentHashMap<String, ResponseFuture>();
+    private static Map<String, ResponseFuture> _waitingFutures = new ConcurrentHashMap<String, ResponseFuture>();
 
+    private CorrelationStatus _cstatus;
 
-    public MyRoleMessageExchangeImpl() {
-        super(engine, mexdao);
+    private String _clientId;
+
+    public ReliableMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+        super(engine, mexId);
+
+        // RELIABLE means we are bound to a transaction
+        _txflag = true;
     }
 
     public CorrelationStatus getCorrelationStatus() {
-        return CorrelationStatus.valueOf(getDAO().getCorrelationStatus());
+        return _cstatus;
     }
 
-    void setCorrelationStatus(CorrelationStatus status) {
-        getDAO().setCorrelationStatus(status.toString());
+    @Override
+    void load(MessageExchangeDAO dao) {
+        super.load(dao);
+        if (_cstatus == null)
+            _cstatus = CorrelationStatus.valueOf(dao.getCorrelationStatus());
+        if (_clientId == null)
+            _clientId = dao.getCorrelationId();
+    }
+
+    @Override
+    public void save(MessageExchangeDAO dao) {
+        super.save(dao);
+        dao.setCorrelationStatus(_cstatus.toString());
+        dao.setCorrelationId(_clientId);
     }
 
     /**
@@ -67,21 +94,19 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      * 
      * @param mex
      *            message exchange
-     * @return <code>true</code> if execution should continue,
-     *         <code>false</code> otherwise
+     * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
-    private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), 
-                mex._dao.getProcess(), null);
+    private boolean processInterceptors(InterceptorInvoker invoker, MessageExchangeDAO mexDao) {
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), mexDao.getProcess(), null);
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
-            if (!processInterceptor(i, mex, ictx, invoker))
+            if (!processInterceptor(i, this, ictx, invoker))
                 return false;
 
         return true;
     }
 
-    boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx,
+    boolean processInterceptor(MessageExchangeInterceptor i, ReliableMyRoleMessageExchangeImpl mex, InterceptorContext ictx,
             InterceptorInvoker invoker) {
         __log.debug(invoker + "--> interceptor " + i);
         try {
@@ -99,40 +124,54 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
-    public Future<MessageExchange.Status> invoke(Message request) {
+    public Future<MessageExchange.Status> invoke(final Message request) {
         if (request == null) {
             String errmsg = "Must pass non-null message to invoke()!";
-            __log.fatal(errmsg);
             throw new NullPointerException(errmsg);
         }
 
-        _dao.setRequest(((MessageImpl) request)._dao);
-        setStatus(MessageExchange.Status.REQUEST);
+        // For reliable, we MUST HAVE A TRANSACTION!
+        assertTransaction();
 
-        if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked)) {
-            throw new BpelEngineException("Intercepted.");
-        }
-
-        BpelProcess target = _engine.route(getDAO().getCallee(), request);
-
-        if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + target);
-
-        
-        ResponseFuture future = new ResponseFuture();
-        
+        BpelProcess target = _engine.route(_callee, request);
         if (target == null) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));
 
-            setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT);
+            ResponseFuture future = new ResponseFuture();
+
+            _cstatus = MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT;
             setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
-            future.done(_lastStatus);
-        } else {
+            future.done(_status);
+
+            return future;
+        }
+
+        doInDb(new InDbAction<Void>() {
+
+            public Void call(MessageExchangeDAO mexdao) {
+                // TODO: perhaps we should check if already backed by DB?
+                MessageDAO msgDao = mexdao.createMessage(request.getType());
+                msgDao.setData(request.getMessage());
+                setStatus(MessageExchange.Status.REQUEST);
+
+                if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked)) {
+                    throw new BpelEngineException("Intercepted.");
+                }
+
+                if (__log.isDebugEnabled())
+                    __log.debug("invoke() EPR= " + _epr + " ==> " + target);
+
+            }
+
+        });
+
+        {
             // Schedule a new job for invocation
             WorkEvent we = new WorkEvent();
             we.setType(WorkEvent.Type.INVOKE_INTERNAL);
-            if (target.isInMemory()) we.setInMem(true);
+            if (target.isInMemory())
+                we.setInMem(true);
             we.setProcessId(target.getPID());
             we.setMexId(getDAO().getMessageExchangeId());
 
@@ -143,7 +182,6 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             } else {
                 future.done(_lastStatus);
             }
-
 
             if (target.isInMemory())
                 _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
@@ -158,16 +196,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
     public void complete() {
     }
 
-    public QName getServiceName() {
-        return getDAO().getCallee();
-    }
-
-    public void setClientId(String clientKey) {
-        getDAO().setCorrelationId(clientKey);
-    }
-
     public String getClientId() {
-        return getDAO().getCorrelationId();
+        return _clientId;
     }
 
     public String toString() {
@@ -179,11 +209,6 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         }
     }
 
-    public boolean isAsynchronous() {
-        return true;
-    }
-
-
     protected void responseReceived() {
         final String mexid = getMessageExchangeId();
         _engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
@@ -192,18 +217,19 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
                 ResponseFuture callback = _waitingFutures.remove(mexid);
                 callback.done(_lastStatus);
             }
+
             public void beforeCompletion() {
             }
         });
     }
-    
+
     private static class ResponseFuture implements Future<Status> {
         private Status _status;
 
         public boolean cancel(boolean mayInterruptIfRunning) {
             return false;
         }
-        
+
         public Status get() throws InterruptedException, ExecutionException {
             try {
                 return get(0, TimeUnit.MILLISECONDS);
@@ -212,22 +238,20 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
                 throw new RuntimeException(e);
             }
         }
-        
-        public Status get(long timeout, TimeUnit unit) 
-            throws InterruptedException, ExecutionException, TimeoutException {
-            
-            
-            synchronized(this) {
+
+        public Status get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+
+            synchronized (this) {
                 if (_status != null)
                     return _status;
-                
+
                 while (_status == null) {
                     this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
                 }
-    
+
                 if (_status == null)
                     throw new TimeoutException();
-                
+
                 return _status;
             }
         }
@@ -235,13 +259,13 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         public boolean isCancelled() {
             return false;
         }
-        
+
         public boolean isDone() {
             return _status != null;
         }
-        
+
         void done(Status status) {
-            synchronized(this) {
+            synchronized (this) {
                 _status = status;
                 this.notifyAll();
             }

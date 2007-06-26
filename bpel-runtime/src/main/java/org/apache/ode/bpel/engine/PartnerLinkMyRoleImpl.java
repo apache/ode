@@ -83,7 +83,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
      * @param mex
      *            exchange to which the message is related
      */
-    public void invokeMyRole(MyRoleMessageExchangeImpl mex) {
+    public void invokeMyRole(ReliableMyRoleMessageExchangeImpl mex) {
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
                     "messageExchange", mex }));
@@ -266,7 +266,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return op;
     }
 
-    private CorrelationKey[] computeCorrelationKeys(MyRoleMessageExchangeImpl mex) {
+    private CorrelationKey[] computeCorrelationKeys(ReliableMyRoleMessageExchangeImpl mex) {
         Operation operation = mex.getOperation();
         Element msg = mex.getRequest().getMessage();
         javax.wsdl.Message msgDescription = operation.getInput().getMessage();

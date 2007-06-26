@@ -591,7 +591,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         } else /* IL-mediated communication */  {
             // TODO: distinguish between different kinds of my-role mexss
-            MyRoleMessageExchangeImpl myRoleMex = new MyRoleMessageExchangeImpl();
+            ReliableMyRoleMessageExchangeImpl myRoleMex = new ReliableMyRoleMessageExchangeImpl();
             _bpelProcess._engine._contexts.mexContext.onAsyncReply(myRoleMex);
         }
 
@@ -1121,7 +1121,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
                 switch (mex.getStatus()) {
                     case ASYNC:
                     case RESPONSE:
@@ -1146,7 +1146,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
                 _bpelProcess.initMyRoleMex(mex);
 
                 Message message = mex.createMessage(faultData.getFaultName());
@@ -1165,7 +1165,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+            ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
             _bpelProcess.initMyRoleMex(mex);
             mex.setFailure(FailureType.OTHER, "No response.", null);
             _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);

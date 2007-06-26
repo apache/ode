@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 
 /**
  * Base implementation of the {@link MessageExchange} interface. This interfaces is exposed to the Integration Layer (IL)
- * to allow it to implement incoming (via {@link MyRoleMessageExchangeImpl}) and outgoing (via {@link PartnerRoleMessageExchangeImpl})
+ * to allow it to implement incoming (via {@link ReliableMyRoleMessageExchangeImpl}) and outgoing (via {@link PartnerRoleMessageExchangeImpl})
  * communications. 
  * 
  * It should be noted that this class and its derived classes are in NO WAY THREADSAFE. It is imperative that the integration layer
@@ -236,9 +236,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _portType;
     }
 
-    QName getServiceName() {
-        return _callee;
-    }
     public Message getRequest() {
         if (_request != null)
             return _request;
@@ -379,9 +376,18 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public String toString() {
         return "MEX[" + _mexId + "]";
     }
+    
+    protected void assertTransaction() {
+        if (!_contexts.scheduler.isTransacted())
+            throw new BpelEngineException("Operation must be performed in a transaction!");
+    }
 
-    protected <T> T doInDb(InDbAction<T> name) {
-        throw new UnsupportedOperationException();
+    protected <T> T doInDb(InDbAction<T> action) {
+        if (_txflag) {
+            MessageExchangeDAO mexDao;
+            action.call(mexDao);
+        } else {
+        }
     }
 
     interface InDbAction<T> {

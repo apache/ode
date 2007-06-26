@@ -29,6 +29,7 @@ import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -106,10 +107,13 @@ public class BpelEngineImpl implements BpelEngine {
         _contexts = contexts;
     }
 
-    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService,
-                                                       String operation, String pipedMexId)
+    MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, QName targetService, String operation, String clientKey)
             throws BpelEngineException {
 
+        // TODO: for now, invocation of the engine is only supported in RELIABLE mode.
+        if (istyle != InvocationStyle.RELIABLE)
+            throw new BpelEngineException("Unsupported InvocationStyle: " + istyle);
+        
         BpelProcess target = route(targetService, null);
 
         MessageExchangeDAO dao;
@@ -125,7 +129,7 @@ public class BpelEngineImpl implements BpelEngine {
         dao.setStatus(Status.NEW.toString());
         dao.setOperation(operation);
         dao.setPipedMessageExchangeId(pipedMexId);
-        MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(this, dao);
+        ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(this, dao);
 
         if (target != null) {
             target.initMyRoleMex(mex);
@@ -134,11 +138,7 @@ public class BpelEngineImpl implements BpelEngine {
         return mex;
     }
 
-    public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation) {
-        return createMessageExchange(clientKey, targetService, operation, null);        
-    }
-
-    public MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
+    MessageExchange getMessageExchange(String mexId) throws BpelEngineException {
         MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
         if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
         if (mexdao == null)
@@ -167,7 +167,7 @@ public class BpelEngineImpl implements BpelEngine {
             }
             break;
         case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-            mex = new MyRoleMessageExchangeImpl(this, mexdao);
+            mex = new ReliableMyRoleMessageExchangeImpl(this, mexdao);
             if (process != null) {
                 OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
                 PortType ptype = plink.myRolePortType;

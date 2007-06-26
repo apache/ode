@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.iapi;
 
-import javax.xml.namespace.QName;
 
 /**
  * Interface exposing the BPEL "engine". Basically, this interface facilitates
@@ -34,26 +33,5 @@ import javax.xml.namespace.QName;
  */
 public interface BpelEngine extends Scheduler.JobProcessor {
 
-    /**
-     * Create a "my role" message exchange for invoking a BPEL process.
-     * 
-     * @param serviceId
-     *            the service id of the process being called, if known
-     * @param operation
-     *            name of the operation
-     * 
-     * @return {@link MyRoleMessageExchange} the newly created message exchange
-     */
-    MyRoleMessageExchange createMessageExchange(String clientKey, QName serviceId, String operation)
-            throws BpelEngineException;
-
-    /**
-     * Retrieve a message identified by the given identifer.
-     * 
-     * @param mexId
-     *            message exhcange identifier
-     * @return associated message exchange
-     */
-    MessageExchange getMessageExchange(String mexId);
-
+   
 }

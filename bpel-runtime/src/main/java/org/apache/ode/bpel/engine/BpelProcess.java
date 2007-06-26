@@ -148,7 +148,7 @@ public class BpelProcess {
      * 
      * @param mex
      */
-    void invokeProcess(MyRoleMessageExchangeImpl mex) {
+    void invokeProcess(ReliableMyRoleMessageExchangeImpl mex) {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
@@ -179,7 +179,7 @@ public class BpelProcess {
         }
     }
 
-    private MessageExchangeDAO getDAO(MyRoleMessageExchangeImpl mex) {
+    private MessageExchangeDAO getDAO(ReliableMyRoleMessageExchangeImpl mex) {
 
     }
 
@@ -191,7 +191,7 @@ public class BpelProcess {
         return null;
     }
 
-    void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
+    void initMyRoleMex(ReliableMyRoleMessageExchangeImpl mex) {
         markused();
         PartnerLinkMyRoleImpl target = null;
         for (Endpoint endpoint : getEndpointToMyRoleMap().keySet()) {
@@ -274,7 +274,7 @@ public class BpelProcess {
      *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
-    boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
+    boolean processInterceptors(ReliableMyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
         InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO(), _pconf);
 
         for (MessageExchangeInterceptor i : _mexInterceptors)
@@ -307,7 +307,7 @@ public class BpelProcess {
                 if (__log.isDebugEnabled()) {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
-                MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
+                ReliableMyRoleMessageExchangeImpl mex = (ReliableMyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
                 invokeProcess(mex);
             } else {
                 // Instance level events
@@ -612,7 +612,7 @@ public class BpelProcess {
 
     /** Create a version-appropriate runtime context. */
     BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
-            MyRoleMessageExchangeImpl instantiatingMessageExchange) {
+            ReliableMyRoleMessageExchangeImpl instantiatingMessageExchange) {
         return new BpelRuntimeContextImpl(this, dao, template, instantiatingMessageExchange);
 
     }
