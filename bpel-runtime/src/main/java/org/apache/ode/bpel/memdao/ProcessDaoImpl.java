@@ -47,6 +47,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private long _version;
     final Map<String, CorrelatorDaoImpl> _correlators = new ConcurrentHashMap<String, CorrelatorDaoImpl>();
     protected final Map<Long, ProcessInstanceDAO> _instances = new ConcurrentHashMap<Long, ProcessInstanceDAO>();
+    protected final Map<Long, Long> _instancesAge = new ConcurrentHashMap<Long, Long>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
     private BpelDAOConnectionImpl _conn;
@@ -107,6 +108,28 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
                 _instances.put(newInstance.getInstanceId(), newInstance);
             }
         });
+        _instancesAge.put(newInstance.getInstanceId(), System.currentTimeMillis());
+
+        // Checking for old instances that could still be around because of a failure
+        // or completion problem
+        ArrayList<Long> removals = new ArrayList<Long>();
+        for (Map.Entry<Long, Long> entry : _instancesAge.entrySet()) {
+            if (System.currentTimeMillis() - entry.getValue() > BpelDAOConnectionImpl.TIME_TO_LIVE) {
+                ProcessInstanceDAO idao = _instances.remove(entry.getKey());
+                removals.add(entry.getKey());
+            }
+        }
+        for (Long removal : removals) _instancesAge.remove(removal);
+
+        // Removing right away on rollback
+        final Long iid = newInstance.getInstanceId();
+        _conn.onRollback(new Runnable() {
+            public void run() {
+                _instances.remove(iid);
+                _instancesAge.remove(iid);
+            }
+        });
+
         _executionCount++;
         return newInstance;
     }
@@ -114,7 +137,6 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public ProcessInstanceDAO getInstance(Long instanceId) {
         return _instances.get(instanceId);
     }
-
 
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
         ArrayList<ProcessInstanceDAO> result = new ArrayList<ProcessInstanceDAO>();
