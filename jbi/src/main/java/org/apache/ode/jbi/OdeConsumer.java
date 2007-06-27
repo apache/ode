@@ -18,39 +18,36 @@
  */
 package org.apache.ode.jbi;
 
+import java.util.Collection;
+
+import javax.jbi.messaging.ExchangeStatus;
+import javax.jbi.messaging.Fault;
+import javax.jbi.messaging.InOnly;
+import javax.jbi.messaging.InOut;
+import javax.jbi.messaging.MessageExchange;
+import javax.jbi.messaging.MessageExchangeFactory;
+import javax.jbi.messaging.MessagingException;
+import javax.jbi.messaging.NormalizedMessage;
+import javax.jbi.servicedesc.ServiceEndpoint;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.msgmap.MessageTranslationException;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.jbi.messaging.*;
-import javax.jbi.servicedesc.ServiceEndpoint;
-import javax.xml.namespace.QName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Bridge between ODE (consumers) and JBI (providers). An single object of this type handles all communications initiated by ODE
- * that is destined for other JBI providers. 
+ * that is destined for other JBI providers.
  */
-abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
+class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     private static final Log __log = LogFactory.getLog(OdeConsumer.class);
-    private static final long DEFAULT_RESPONSE_TIMEOUT = Long.getLong("org.apache.ode.jbi.timeout", 2 * 60 * 1000L);
 
     protected OdeContext _ode;
-
-    protected long _responseTimeout = DEFAULT_RESPONSE_TIMEOUT;
-
-
-    protected Map<String, PartnerRoleMessageExchange> _outstandingExchanges = new ConcurrentHashMap<String, PartnerRoleMessageExchange>();
 
     OdeConsumer(OdeContext ode) {
         _ode = ode;
@@ -100,35 +97,15 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                 NormalizedMessage nmsg = inonly.createMessage();
                 mapper.toNMS(nmsg, odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
                 inonly.setInMessage(nmsg);
-                _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-                    public void afterCompletion(boolean success) {
-                        if (success) {
-                            doSendOneWay(odeMex, inonly);
-                        }
-                    }
-                    public void beforeCompletion() {
-                    }
-
-                });
+                doSendJBI(odeMex, inonly);
                 odeMex.replyOneWayOk();
             } else {
                 final InOut inout = (InOut) jbiMex;
                 NormalizedMessage nmsg = inout.createMessage();
                 mapper.toNMS(nmsg, odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
                 inout.setInMessage(nmsg);
-                _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-                    public void afterCompletion(boolean success) {
-                        if (success) {
-                            doSendTwoWay(odeMex, inout);
-                        }
-                    }
-
-                    public void beforeCompletion() {
-                    }
-
-                });
-
-                odeMex.replyAsync();
+                doSendJBI(odeMex, inout);
+                odeMex.replyAsync(inout.getExchangeId());
             }
         } catch (MessagingException me) {
             String errmsg = "JBI messaging error for ODE MEX " + odeMex;
@@ -142,14 +119,9 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
 
     }
 
-    protected abstract void doSendOneWay(PartnerRoleMessageExchange odeMex, InOnly inonly);
-
-    protected abstract void doSendTwoWay(PartnerRoleMessageExchange odeMex, InOut inout);
-
-
     public void onJbiMessageExchange(MessageExchange jbiMex) throws MessagingException {
-        if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY) &&
-            !jbiMex.getPattern().equals(MessageExchangePattern.IN_OUT)) {
+        if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY)
+                && !jbiMex.getPattern().equals(MessageExchangePattern.IN_OUT)) {
             __log.error("JBI MessageExchange " + jbiMex.getExchangeId() + " is of an unsupported pattern " + jbiMex.getPattern());
             return;
         }
@@ -162,60 +134,42 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
         } else if (jbiMex.getStatus() == ExchangeStatus.ERROR) {
             outFailure((InOut) jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.DONE) {
-            _outstandingExchanges.remove(jbiMex.getExchangeId());
+            ; // anything todo here? 
         } else {
             __log.error("Unexpected status " + jbiMex.getStatus() + " for JBI message exchange: " + jbiMex.getExchangeId());
         }
     }
 
     private void outFailure(final InOut jbiMex) {
-        final PartnerRoleMessageExchange pmex = _outstandingExchanges.remove(jbiMex.getExchangeId());
+        PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getMessageExchangeByForeignKey(jbiMex.getExchangeId());
         if (pmex == null) {
-            __log.warn("Received a response for unknown JBI message exchange " + jbiMex.getExchangeId());
+            __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
             return;
         }
-
-        try {
-            _ode._scheduler.execTransaction(new Callable<Boolean>() {
-                public Boolean call() throws Exception {
-                    pmex.replyWithFailure(FailureType.OTHER, "Error: " + jbiMex.getError(), null);
-                    return null;
-                }
-            });
-        } catch (Exception ex) {
-            __log.error("error delivering failure: ", ex);
-        }
-
+        
+        pmex.replyWithFailure(FailureType.OTHER, "Error: " + jbiMex.getError(), null);
     }
 
     private void outResponse(final InOut jbiMex) {
-        final PartnerRoleMessageExchange outstanding = _outstandingExchanges.remove(jbiMex.getExchangeId());
-        if (outstanding == null) {
-            __log.warn("Received a response for unknown JBI message exchange " + jbiMex.getExchangeId());
+
+        PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getMessageExchangeByForeignKey(jbiMex.getExchangeId());
+        if (pmex == null) {
+            __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
             return;
         }
-
-        try {
-            _ode._scheduler.execTransaction(new Callable<Boolean>() {
-                @SuppressWarnings("unchecked")
-                public Boolean call() throws Exception {
-                    // need to reload mex since we're in a different transaction
-                    PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getEngine().getMessageExchange(outstanding.getMessageExchangeId());
-                    if (pmex == null) {
-                        __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
-                        return Boolean.FALSE;
-                    }
-                    String mapperName = pmex.getProperty(Mapper.class.getName());
-                    Mapper mapper = mapperName == null ? _ode.getDefaultMapper() : _ode.getMapper(mapperName);
-                    if (mapper == null) {
-                        String errmsg = "Mapper not found.";
-                        __log.error(errmsg);
-                        pmex.replyWithFailure(FailureType.FORMAT_ERROR, errmsg, null);
-                    } else {
-                        try {
-                            Fault jbiFlt = jbiMex.getFault();
-                            if (jbiFlt != null) {
-                                javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt, (Collection<javax.wsdl.Fault>) pmex.getOperation().getFaults().values());
+     
+        String mapperName = pmex.getProperty(Mapper.class.getName());
+        Mapper mapper = mapperName == null ? _ode.getDefaultMapper() : _ode.getMapper(mapperName);
+        if (mapper == null) {
+            String errmsg = "Mapper not found.";
+            __log.error(errmsg);
+            pmex.replyWithFailure(FailureType.FORMAT_ERROR, errmsg, null);
+        } else {
+            try {
+                Fault jbiFlt = jbiMex.getFault();
+                if (jbiFlt != null) {
+                    javax.wsdl.Fault wsdlFlt = mapper.toFaultType(jbiFlt, (Collection<javax.wsdl.Fault>) pmex
+                            .getOperation().getFaults().values());
                                 if (wsdlFlt == null) {
                                     pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Unrecognized fault message.", null);
                                 } else {
@@ -231,30 +185,34 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                                                 + wsdlFlt.getName(), null);
                                     }
                                 }
-                            } else {
-                                Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
-                                mapper.toODE(response, jbiMex.getOutMessage(), pmex.getOperation().getOutput().getMessage());
-                                pmex.reply(response);
-                            }
-                        } catch (MessageTranslationException mte) {
-                            __log.error("Error translating message.", mte);
-                            pmex.replyWithFailure(FailureType.FORMAT_ERROR, mte.getMessage(), null);
-                        }
-                    }
-                    return null;
+                } else {
+                    Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
+                    mapper.toODE(response, jbiMex.getOutMessage(), pmex.getOperation().getOutput().getMessage());
+                    pmex.reply(response);
                 }
-            });
-        } catch (Exception ex) {
-            __log.error("error delivering RESPONSE: ", ex);
-
+            } catch (MessageTranslationException mte) {
+                __log.error("Error translating message.", mte);
+                pmex.replyWithFailure(FailureType.FORMAT_ERROR, mte.getMessage(), null);
+            }
         }
     }
 
-    public void setResponseTimeout(long timeout) {
-    	_responseTimeout = timeout;
+    protected void doSendJBI(final PartnerRoleMessageExchange odeMex, final MessageExchange jbiMex) {
+        try {
+            switch (odeMex.getInvocationStyle()) {
+            case ASYNC:
+                _ode.getChannel().send(jbiMex);
+                break;
+            case BLOCKING:
+                _ode.getChannel().sendSync(jbiMex, odeMex.getTimeout());
+                break;
+            default:
+                throw new ContextException("Unsupported Invocation Style: " + odeMex.getInvocationStyle());
+            }
+        } catch (MessagingException e) {
+            String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
+            __log.error(errmsg, e);
+        }
     }
 
-    public long getResponseTimeout() {
-    	return _responseTimeout;
-    }
 }

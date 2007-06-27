@@ -84,12 +84,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode = OdeContext.getInstance();
             _ode.setContext(context);
             
-            // Use system property to determine if DeliveryChannel.sendSync or DeliveryChannel.send is used.
-            if (Boolean.getBoolean("org.apache.ode.jbi.sendSynch"))
-                _ode._consumer = new OdeConsumerSync(_ode);
-            else 
-                _ode._consumer = new OdeConsumerAsync(_ode);
-
+            _ode._consumer = new OdeConsumer(_ode);
+            
             if (_ode.getContext().getWorkspaceRoot() != null)
                 TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
 
