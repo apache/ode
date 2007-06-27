@@ -21,6 +21,7 @@ package org.apache.ode.bpel.iapi;
 
 import javax.xml.namespace.QName;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Extension of the {@link org.apache.ode.bpel.iapi.MessageExchange} interface
@@ -59,25 +60,35 @@ public interface MyRoleMessageExchange extends MessageExchange {
     void setRequest(Message request);
     
     /**
-     * "Invoke" a process hosted by the BPEL engine. The state of the invocation
-     * may be obtained by a call to the {@link MessageExchange#getStatus()}
-     * method. It is possible that the response for the operation is not
-     * immediately available (i.e the call to {@link #invoke(Message)} will
-     * return before a response is available). In such cases,
-     * {@link MessageExchange#getStatus()} == {@link Status#ASYNC} and the
-     * integration layer will receive an asynchronous notification from the BPEL
-     * engine via the
-     * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
-     * the response become available.
+     * Invoke a process hosted by the BPEL engine, blocking until the operation completes. 
+     * 
+     * @return the final status of the operation
+     * 
      */
-    void invokeBlocking();
+    MessageExchange.Status invokeBlocking() throws BpelEngineException, TimeoutException;
 
+    /**
+     * Invoke a transactional process: this method must be invoked in a transaction. The invoking thread
+     * will be blocked for the duration of the call. 
+     * 
+     * @return the final status of the operation (provided that commit succeedes)
+     */
+    MessageExchange.Status invokeTransacted() throws BpelEngineException;
+
+    /**
+     * Invoke a reliable process: this method must be invoked in a transaction. The invoking thread will 
+     * not be blocked. When the response is available, it will be provided via the {@link MessageExchangeContext#onReliableReply(MyRoleMessageExchange)}.
+     * 
+     */
     void invokeReliable();
     
-    void invokeAsync();
-    
-    void invokeTransacted();
-    
+    /**
+     * Invoke a processs asynchronously. This method will start an operation, but will not block; instead a future object is returned.
+     * 
+     * @return
+     */
+    Future<MessageExchange.Status> invokeAsync();
+        
     /**
      * Complete the message, exchange: indicates that the client has receive the
      * response (if any).

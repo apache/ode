@@ -31,15 +31,6 @@ import java.util.Set;
 public interface PartnerRoleChannel {
 
     /**
-     * Get the supported invocation styles (see {@link InvocationStyle}) for invoking the EPR provided 
-     * via this channel.
-     * 
-     * @param partnerEpr partner's EPR
-     * @return supported invocation styles
-     */
-    Set<InvocationStyle> getSupportedInvocationStyle(EndpointReference partnerEpr);
-    
-    /**
      * Return the endpoint reference to the endpoint with which the
      * channel was initialized or <code>null</code> if the channel
      * was initialized without an initial endpoint.

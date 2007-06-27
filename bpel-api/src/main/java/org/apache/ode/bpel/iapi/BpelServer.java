@@ -139,7 +139,7 @@ public interface BpelServer {
     MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, 
             QName serviceId, 
             String operation,
-            String clientKey)
+            String foreignKey)
             throws BpelEngineException;
 
     /**
@@ -152,4 +152,6 @@ public interface BpelServer {
     MessageExchange getMessageExchange(String mexId) 
         throws BpelEngineException;
 
+    MessageExchange getMessageExchangeByForeignKey(String foreignKey) 
+        throws BpelEngineException;
 }

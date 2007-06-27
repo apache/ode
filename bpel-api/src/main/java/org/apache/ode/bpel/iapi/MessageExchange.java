@@ -121,6 +121,12 @@ public interface MessageExchange {
     InvocationStyle getInvocationStyle();
     
     /**
+     * Get the time-out in ms. 
+     * @return
+     */
+    long getTimeout();
+    
+    /**
      * Get the name of the operation (WSDL 1.1) / message exchange (WSDL 1.2?).
      *
      * @return name of the operation (WSDL 1.1) /message exchange (WSDL 1.2?).

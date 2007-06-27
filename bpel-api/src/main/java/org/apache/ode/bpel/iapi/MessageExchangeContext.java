@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.iapi;
 
+import java.util.Set;
+
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.w3c.dom.Element;
 
@@ -90,11 +92,30 @@ public interface MessageExchangeContext {
     void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException;
 
     /**
+     * Cancel an async/reliable partner-role message exchange. 
+     * @param mex message exchange that should be cancelled. 
+     * @throws ContextException
+     */
+    void cancel(PartnerRoleMessageExchange mex) throws ContextException;
+    
+    /**
      * Method used to asynchronously deliver to the integration layer the BPEL engine's response to an invocation that could not
      * complete synchronously.
      * 
      * @see MyRoleMessageExchange#invoke(Message)
      */
     void onAsyncReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException;
+
+    void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException;
+    
+    /**
+     * Get the supported invocation styles (see {@link InvocationStyle}) for invoking the EPR provided 
+     * via a given channel.
+     * 
+     * @param partnerEpr partner's EPR
+     * @return supported invocation styles
+     */
+    Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr); 
+
 
 }

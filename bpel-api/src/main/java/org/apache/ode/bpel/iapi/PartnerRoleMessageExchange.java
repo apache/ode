@@ -88,8 +88,10 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
     /**
      * Indicate that the response to the request/response operation is not yet available and that the response will be delivered
      * asynchronously.
+     * 
+     * @param foreignKey "foreign" key that is used to identify this message exchange.
      */
-    void replyAsync();
+    void replyAsync(String foreignKey);
 
     /**
      * Get the {@link EndpointReference} associated with the my-role of the partner link to which this message exchange belongs.
