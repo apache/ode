@@ -63,7 +63,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         _myRoleEPR = myRoleEPR;
         _partnerRoleChannel = channel;
         _inMem = inMem;
-        setPortOp(portType, operation);    
+        init(portType, operation);    
     }
 
     @Override

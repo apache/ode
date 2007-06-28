@@ -24,6 +24,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.InvalidMessageException;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -34,6 +35,7 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -55,6 +57,7 @@ import java.util.*;
  */
 class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     private static final Log __log = LogFactory.getLog(BpelProcess.class);
+
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** The local endpoint for this "myrole". */
@@ -79,27 +82,23 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     /**
      * Called when an input message has been received.
-     *
+     * 
      * @param mex
      *            exchange to which the message is related
      */
-    public void invokeMyRole(ReliableMyRoleMessageExchangeImpl mex) {
+    public void invokeMyRole(MessageExchangeDAO mex) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
-                    "messageExchange", mex }));
+            __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] { "messageExchange", mex }));
         }
 
-        Operation operation = getMyRoleOperation(mex.getOperationName());
+        Operation operation = getMyRoleOperation(mex.getOperation());
         if (operation == null) {
-            __log.error(__msgs.msgUnknownOperation(mex.getOperationName(), _plinkDef.myRolePortType.getQName()));
-            mex.setFailure(MessageExchange.FailureType.UNKNOWN_OPERATION, mex.getOperationName(), null);
+            __log.error(__msgs.msgUnknownOperation(mex.getOperation(), _plinkDef.myRolePortType.getQName()));
+            mex.setStatus(Status.FAILURE.toString());
+            mex.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION.toString());
+            mex.setFaultExplanation(mex.getOperation());
             return;
         }
-
-        mex.getDAO().setPartnerLinkModelId(_plinkDef.getId());
-        mex.setPortOp(_plinkDef.myRolePortType, operation);
-        mex.setPattern(operation.getOutput() == null ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
-                : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE);
 
         // Is this a /possible/ createInstance Operation?
         boolean isCreateInstnace = _plinkDef.isCreateInstanceOperation(operation);
@@ -118,26 +117,28 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         MessageRouteDAO messageRoute = null;
 
         // We need to compute the correlation keys (based on the operation
-        // we can  infer which correlation keys to compute - this is merely a set
+        // we can infer which correlation keys to compute - this is merely a set
         // consisting of each correlationKey used in each correlation sets
         // that is ever referenced in an <receive>/<onMessage> on this
         // partnerlink/operation.
         try {
-            keys = computeCorrelationKeys(mex);
+            keys = computeCorrelationKeys(mex, operation);
         } catch (InvalidMessageException ime) {
             // We'd like to do a graceful exit here, no sense in rolling back due to a
             // a message format problem.
-            __log.debug("Unable to evaluate correlation keys, invalid message format. ",ime);
-            mex.setFailure(MessageExchange.FailureType.FORMAT_ERROR, ime.getMessage(), null);
+            __log.debug("Unable to evaluate correlation keys, invalid message format. ", ime);
+            mex.setFailureType(MessageExchange.FailureType.FORMAT_ERROR.toString());
+            mex.setStatus(Status.FAILURE.toString());
+            mex.setFaultExplanation(ime.getMessage());
+
             return;
         }
 
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
-            __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys="
-                    + ArrayUtils.makeCollection(HashSet.class, keys) + " mySessionId=" + mySessionId
-                    + " partnerSessionId=" + partnerSessionId);
+            __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + ArrayUtils.makeCollection(HashSet.class, keys)
+                    + " mySessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
         }
 
         CorrelationKey matchedKey = null;
@@ -169,26 +170,25 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
             }
 
-            if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
-                __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
-                return;
-            }
+            // if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
+            // __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+            // return;
+            // }
 
             ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
 
-            BpelRuntimeContextImpl instance = _process
-                    .createRuntimeContext(newInstance, new PROCESS(_process.getOProcess()), mex);
+            BpelRuntimeContextImpl instance = _process.createRuntimeContext(newInstance, new PROCESS(_process.getOProcess()), mex);
 
             // send process instance event
-            NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace,
-                    _process.getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
-            evt.setPortType(mex.getPortType().getQName());
+            NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace, _process
+                    .getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
+            evt.setPortType(mex.getPortType());
             evt.setOperation(operation.getName());
             evt.setMexId(mex.getMessageExchangeId());
             _process._debugger.onEvent(evt);
             _process.saveEvent(evt, newInstance);
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE);
-            mex.getDAO().setInstance(newInstance);
+            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
+            mex.setInstance(newInstance);
 
             instance.execute();
         } else if (messageRoute != null) {
@@ -208,10 +208,9 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             correlator.removeRoutes(messageRoute.getGroupId(), instanceDao);
 
             // send process instance event
-            CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace,
-                    _process.getOProcess().getName()), _process.getProcessDAO().getProcessId(),
-                    instanceDao.getInstanceId(), matchedKey);
-            evt.setPortType(mex.getPortType().getQName());
+            CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace, _process
+                    .getOProcess().getName()), _process.getProcessDAO().getProcessId(), instanceDao.getInstanceId(), matchedKey);
+            evt.setPortType(mex.getPortType());
             evt.setOperation(operation.getName());
             evt.setMexId(mex.getMessageExchangeId());
 
@@ -219,35 +218,32 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             // store event
             _process.saveEvent(evt, instanceDao);
 
-            // EXPERIMENTAL -- LOCK
-            // instanceDao.lock();
-
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED);
-            mex.getDAO().setInstance(messageRoute.getTargetInstance());
+            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED.toString());
+            mex.setInstance(messageRoute.getTargetInstance());
             instance.execute();
         } else {
             if (__log.isDebugEnabled()) {
                 __log.debug("INPUTMSG: " + correlatorId + ": SAVING to DB (no match) ");
             }
 
-            if (!mex.isAsynchronous()) {
-                mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
+            // TODO: Revist (BART)
+            // if (!mex.isAsynchronous()) {
+            // mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
+            //
+            // } else {
+            // send event
+            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(),
+                    mex.getMessageExchangeId(), keys);
 
-            } else {
-                // send event
-                CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-                        .getOperation().getName(), mex.getMessageExchangeId(), keys);
+            evt.setProcessId(_process.getProcessDAO().getProcessId());
+            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+            _process._debugger.onEvent(evt);
 
-                evt.setProcessId(_process.getProcessDAO().getProcessId());
-                evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
-                _process._debugger.onEvent(evt);
+            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED.toString());
 
-                mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
-
-                // No match, means we add message exchange to the queue.
-                correlator.enqueueMessage(mex.getDAO(), keys);
-
-            }
+            // No match, means we add message exchange to the queue.
+            correlator.enqueueMessage(mex, keys);
+            // }
         }
 
         // Now we have to update our message exchange status. If the <reply>
@@ -255,8 +251,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // invocation, then we will be in the "REQUEST" phase which means
         // that either this was a one-way
         // or a two-way that needs to delivery the reply asynchronously.
-        if (mex.getStatus() == MessageExchange.Status.REQUEST) {
-            mex.setStatus(MessageExchange.Status.ASYNC);
+        if (Status.valueOf(mex.getStatus()) == MessageExchange.Status.REQUEST) {
+            mex.setStatus(MessageExchange.Status.ASYNC.toString());
         }
     }
 
@@ -266,17 +262,16 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return op;
     }
 
-    private CorrelationKey[] computeCorrelationKeys(ReliableMyRoleMessageExchangeImpl mex) {
-        Operation operation = mex.getOperation();
-        Element msg = mex.getRequest().getMessage();
+    private CorrelationKey[] computeCorrelationKeys(MessageExchangeDAO mex, Operation operation) {
+        Element msg = mex.getRequest().getData();
         javax.wsdl.Message msgDescription = operation.getInput().getMessage();
         List<CorrelationKey> keys = new ArrayList<CorrelationKey>();
 
         Set<OScope.CorrelationSet> csets = _plinkDef.getCorrelationSetsForOperation(operation);
 
         for (OScope.CorrelationSet cset : csets) {
-            CorrelationKey key = computeCorrelationKey(cset,
-                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg);
+            CorrelationKey key = computeCorrelationKey(cset, _process.getOProcess().messageTypes.get(msgDescription.getQName()),
+                    msg);
             keys.add(key);
         }
 
@@ -288,8 +283,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return keys.toArray(new CorrelationKey[keys.size()]);
     }
 
-    private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype,
-            Element msg) {
+    private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype, Element msg) {
         String[] values = new String[cset.properties.size()];
 
         int jIdx = 0;
@@ -300,8 +294,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             if (alias == null) {
                 // TODO: Throw a real exception! And catch this at compile
                 // time.
-                throw new IllegalArgumentException("No alias matching property '" + property.name
-                        + "' with message type '" + messagetype + "'");
+                throw new IllegalArgumentException("No alias matching property '" + property.name + "' with message type '"
+                        + messagetype + "'");
             }
 
             String value;

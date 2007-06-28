@@ -127,6 +127,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /** List of ASYNC invocations that need to be deferred until the end of the current TX. */
     private List<PartnerRoleMessageExchange> _todoAsyncCalls = new LinkedList<PartnerRoleMessageExchange>();
     
+    
     private BpelProcess _bpelProcess;
 
     /** Five second maximum for continous execution. */

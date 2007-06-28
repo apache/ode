@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 
 /**
@@ -20,14 +21,17 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
 public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
-    private static Map<String, ResponseFuture> _waitingFutures = new ConcurrentHashMap<String, ResponseFuture>();
-
+    ResponseFuture _future;
+    
     public AsyncMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
         super(engine, mexId);
     }
 
     public Future<Status> invokeAsync() {
-        ResponseFuture future = new ResponseFuture();
+        if (_future != null)
+            return _future;
+        
+        _future = new ResponseFuture();
 
         BpelProcess target = _engine.route(_callee, _request);
         if (target == null) {
@@ -36,23 +40,30 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
             _cstatus = CorrelationStatus.UKNOWN_ENDPOINT;
             setFailure(FailureType.UNKNOWN_ENDPOINT, null, null);
-            future.done(_status);
+            _future.done(_status);
 
-            return future;
+            return _future;
         }
 
-        scheduleInvoke(target);
-      
-        if (getOperation().getOutput() != null) {
-            _waitingFutures.put(getMessageExchangeId(), future);
+        if (target.isInMemory()) {
+            target.invokeProcess(this);
         } else {
-            future.done(getStatus());
+            scheduleInvoke(target);
+        }
+      
+        if (getOperation().getOutput() == null) {
+            _future.done(getStatus());
         }
 
-        return future;
+        return _future;
 
     }
 
+    protected void onMessageExchangeComplete(MessageExchangeDAO mexdao) {
+        load(mexdao);
+        _future.done(getStatus());         
+    }
+    
     private static class ResponseFuture implements Future<Status> {
         private Status _status;
 

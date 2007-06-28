@@ -19,19 +19,20 @@
 
 package org.apache.ode.bpel.memdao;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
@@ -58,7 +59,9 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private QName callee;
 	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
-    private String pipedMessageExchangeId;
+    private String _istyle;
+    private MessageExchangeDAO _pipedExchange;
+    private String _failureType;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -263,13 +266,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         return retVal;
     }
 
-    public String getPipedMessageExchangeId() {
-        return pipedMessageExchangeId;
-    }
-
-    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
-        this.pipedMessageExchangeId = pipedMessageExchangeId;
-    }
 
     public void release() {
         instance = null;
@@ -282,5 +278,28 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
+    }
+
+    public String getInvocationStyle() {
+        return _istyle;
+    }
+
+    public MessageExchangeDAO getPipedMessageExchange() {
+        return _pipedExchange;
+    }
+
+    public void setFailureType(String failureType) {
+        _failureType = failureType;
+        
+    }
+
+    public void setInvocationStyle(String invocationStyle) {
+        _istyle = invocationStyle;
+        
+    }
+
+    public void setPipedMessageExchange(MessageExchangeDAO mex) {
+        _pipedExchange = mex;
+        
     }
 }

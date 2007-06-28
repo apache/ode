@@ -7,13 +7,11 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -115,21 +113,16 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         we1.setMexId(_mexId);
         
         setStatus(Status.ASYNC);
-        if (target.isInMemory()) {
-            _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-            _engine._contexts.scheduler.scheduleVolatileJob(true, we1.getDetail());
-        } else {
-            doInTX(new InDbAction<Void>() {
+        doInTX(new InDbAction<Void>() {
 
-                public Void call(MessageExchangeDAO mexdao) {
-                    _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-                    _engine._contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
-                    return null;
-                }
+            public Void call(MessageExchangeDAO mexdao) {
+                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                _engine._contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
+                return null;
+            }
 
-            });
+        });
 
-        }
     }
     
 
@@ -168,5 +161,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
-    
+
+    /**
+     * Callback.
+     * 
+     * @param mexdao
+     */
+    protected void onMessageExchangeComplete(MessageExchangeDAO mexdao) {
+    }
 }

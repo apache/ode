@@ -1,11 +1,17 @@
 package org.apache.ode.bpel.engine;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 
+/**
+ * Non-transaction blocking MyRole message-exchange implementation.
+ * 
+ * @author Maciej Szefler 
+ */
 public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchangeImpl {
     Future<Status> _future;
     boolean _done = false;
@@ -23,12 +29,17 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
     public Status invokeBlocking() throws BpelEngineException, TimeoutException {
         if (_done) 
             return _status;
-        if (_future != null)
-            _future.get();
-        Future<Status> future = super.invokeAsync();
-        
-        future.get(timeout, unit)
-    }
 
-    
+        Future<Status> future = _future != null ? _future : super.invokeAsync();
+        
+        try {
+            future.get(Math.max(System.currentTimeMillis()-_timeout.getTime(),1), TimeUnit.MILLISECONDS);
+            _done = true;
+            return _status;
+        } catch (InterruptedException e) {
+            throw new BpelEngineException(e);
+        } catch (ExecutionException e) {
+            throw new BpelEngineException(e.getCause());
+        } 
+    }    
 }

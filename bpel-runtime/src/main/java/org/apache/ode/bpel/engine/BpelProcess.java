@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -44,9 +47,12 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -70,7 +76,7 @@ import org.w3c.dom.Text;
 /**
  * Entry point into the runtime of a BPEL process.
  * 
- * @author mszefler
+ * @author Maciej Szefler 
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelProcess {
@@ -118,6 +124,11 @@ public class BpelProcess {
     /** Latch-like thing to control hydration/dehydration. */
     private HydrationLatch _hydrationLatch;
 
+    private Contexts _contexts;
+    
+    /** Manage instance-level locks. */
+    private final InstanceLockManager _instanceLockManager = new InstanceLockManager();
+
     public BpelProcess(ProcessConf conf, BpelEventListener debugger) {
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -148,9 +159,11 @@ public class BpelProcess {
      * 
      * @param mex
      */
-    void invokeProcess(ReliableMyRoleMessageExchangeImpl mex) {
+    void invokeProcess(MyRoleMessageExchangeImpl mex) {
         _hydrationLatch.latch(1);
         try {
+            MessageExchangeDAO mexdao = getDAO(mex);
+
             PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
             if (target == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
@@ -174,12 +187,12 @@ public class BpelProcess {
         }
 
         // For a one way, once the engine is done, the mex can be safely released.
-        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+        if (mex.getMessageExchangePattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
             mex.release();
         }
     }
 
-    private MessageExchangeDAO getDAO(ReliableMyRoleMessageExchangeImpl mex) {
+    private MessageExchangeDAO getDAO(MyRoleMessageExchangeImpl mex) {
 
     }
 
@@ -199,7 +212,10 @@ public class BpelProcess {
                 target = getEndpointToMyRoleMap().get(endpoint);
         }
         if (target != null) {
-            mex.setPortOp(target._plinkDef.myRolePortType, target._plinkDef.getMyRoleOperation(mex.getOperationName()));
+            Operation op = target._plinkDef.getMyRoleOperation(mex.getOperationName());
+            MessageExchange.MessageExchangePattern pattern = op.getOutput() == null ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
+                    : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+            mex.init(target._plinkDef.myRolePortType, op, pattern);
         } else {
             __log.warn("Couldn't find endpoint from service " + mex.getServiceName() + " when initializing a myRole mex.");
         }
@@ -274,7 +290,7 @@ public class BpelProcess {
      *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
-    boolean processInterceptors(ReliableMyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
+    boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
         InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), getProcessDAO(), _pconf);
 
         for (MessageExchangeInterceptor i : _mexInterceptors)
@@ -287,6 +303,48 @@ public class BpelProcess {
         return true;
     }
 
+    
+    /*
+
+        // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
+        // all types of failure here, the scheduler is not going to know how to handle our errors,
+        // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
+        // to a grinding halt.
+        try {
+
+            ProcessInstanceDAO instance;
+            if (process.isInMemory())
+                instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
+            else
+                instance = _contexts.dao.getConnection().getInstance(we.getIID());
+
+            if (instance == null) {
+                __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+                // nothing we can do, this instance is not in the database, it will
+                // always
+                // fail.
+                return;
+            }
+            ProcessDAO processDao = instance.getProcess();
+            process = _activeProcesses.get(processDao.getProcessId());
+
+            process.handleWorkEvent(we.getDetail());
+            debuggingDelay();
+        } catch (BpelEngineException bee) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), bee);
+            throw new Scheduler.JobProcessorException(bee, checkRetry(jobInfo, bee));
+        } catch (ContextException ce) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ce);
+            throw new Scheduler.JobProcessorException(ce, checkRetry(jobInfo, ce));
+        } catch (RuntimeException rte) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), rte);
+            throw new Scheduler.JobProcessorException(rte, checkRetry(jobInfo, rte));
+        } catch (Throwable t) {
+            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t);
+            throw new Scheduler.JobProcessorException(false);
+
+
+     */
     /**
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
@@ -299,18 +357,43 @@ public class BpelProcess {
                 __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobData", jobData }));
             }
 
-
-            WorkEvent we = new WorkEvent(jobData);
+            final WorkEvent we = new WorkEvent(jobData);
 
             // Process level events
             if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
-                ReliableMyRoleMessageExchangeImpl mex = (ReliableMyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
+                ReliableMyRoleMessageExchangeImpl mex = (ReliableMyRoleMessageExchangeImpl) _engine.getMessageExchange(we
+                        .getMexId());
                 invokeProcess(mex);
             } else {
                 // Instance level events
+                // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
+                // Note that we don't want to wait too long here to get our lock, since we are likely holding
+                // on to scheduler's locks of various sorts.
+                try {
+                    _instanceLockManager.lock(we.getIID(), 1, TimeUnit.MICROSECONDS);
+                    _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+                        public void afterCompletion(boolean success) {
+                            _instanceLockManager.unlock(we.getIID());
+                        }
+
+                        public void beforeCompletion() {
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    // Retry later.
+                    __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
+                    throw new Scheduler.JobProcessorException(true);
+                } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
+                    __log.debug("Instance " + we.getIID() + " is busy, rescheduling job.");
+                    // TODO: This should really be more of something like the exponential backoff algorithm in ethernet.
+                    _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, new Date(System.currentTimeMillis()
+                            + Math.min(randomExp(1000), 10000)));
+                    return;
+                }
+
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
                 if (procInstance == null) {
                     if (__log.isDebugEnabled()) {
@@ -437,14 +520,14 @@ public class BpelProcess {
         return endpoints;
     }
 
-    void activate(BpelEngineImpl engine) {
-        _engine = engine;
+    void activate(Contexts contexts) {
+        _contexts = contexts;
         _debugger = new DebuggerSupport(this);
 
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
-            EndpointReference initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+            EndpointReference initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
             __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
             _myEprs.put(entry.getValue(), initialEPR);
         }
@@ -558,7 +641,7 @@ public class BpelProcess {
             _hydrationLatch.release(1);
         }
     }
-    
+
     OProcess getOProcess() {
         _hydrationLatch.latch(1);
         try {
@@ -566,6 +649,61 @@ public class BpelProcess {
         } finally {
             _hydrationLatch.release(1);
         }
+    }
+
+    MyRoleMessageExchangeImpl createMyRoleMex(MessageExchangeDAO mexdao) {
+        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+        
+        _hydrationLatch.latch(1);
+        try {
+            MyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+            OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+            PortType ptype = plink.myRolePortType;
+            Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+            mex.init(ptype, op, MessageExchangePattern.valueOf(mexdao.getPattern()));
+            return mex;
+        } finally {
+            _hydrationLatch.release(1);
+        }
+    }
+
+    PartnerRoleMessageExchangeImpl createPartnerRoleMex(MessageExchangeDAO  mexdao) {
+        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+        PartnerRoleMessageExchangeImpl mex;
+        _hydrationLatch.latch(1);
+        try {
+            OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+            PortType ptype = plink.partnerRolePortType;
+            Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
+            switch (istyle) {
+            case BLOCKING:
+                mex = new BlockingPartnerRoleMessageExchangeImpl(_engine, mexdao.getMessageExchangeId(), ptype, op, isInMemory(), null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                break;
+            case ASYNC:
+                mex = new AsyncPartnerRoleMessageExchangeImpl(_engine, mexdao.getMessageExchangeId(), ptype, op, isInMemory(),
+                        null, /* EPR todo */
+                        plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                break;
+
+            case TRANSACTED:
+                mex = new TransactedPartnerRoleMessageExchangeImpl(_engine, mexdao.getMessageExchangeId(), ptype, op, isInMemory(), null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                break;
+            case RELIABLE:
+                mex = new ReliablePartnerRoleMessageExchangeImpl(_engine, mexdao.getMessageExchangeId(), ptype, op, isInMemory(), null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                break;
+                
+            default:
+                throw new BpelEngineException("Unexpected InvocationStyle: " + istyle);
+
+            }
+            return mex;
+        } finally {
+            _hydrationLatch.release(1);
+        }
+
     }
 
     private Map<Endpoint, PartnerLinkMyRoleImpl> getEndpointToMyRoleMap() {
@@ -612,7 +750,7 @@ public class BpelProcess {
 
     /** Create a version-appropriate runtime context. */
     BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
-            ReliableMyRoleMessageExchangeImpl instantiatingMessageExchange) {
+            MessageExchangeDAO instantiatingMessageExchange) {
         return new BpelRuntimeContextImpl(this, dao, template, instantiatingMessageExchange);
 
     }
@@ -741,14 +879,13 @@ public class BpelProcess {
                 }
             }
 
-
             if (isInMemory()) {
                 bounceProcessDAO(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else if (_engine._contexts.scheduler.isTransacted()) {
                 // If we have a transaction, we do this in the current transaction.
                 bounceProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else {
-                // If we do not have a transaction we need to create one. 
+                // If we do not have a transaction we need to create one.
                 try {
                     _engine._contexts.scheduler.execIsolatedTransaction(new Callable<Object>() {
                         public Object call() throws Exception {

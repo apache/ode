@@ -127,6 +127,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _mexId = mexId;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        return _mexId.equals(((MessageExchangeImpl)other)._mexId);
+    }
+    
     void load(MessageExchangeDAO dao) {
         if (dao.getMessageExchangeId().equals(_mexId))
             throw new IllegalArgumentException("MessageExchangeId mismatch!");
@@ -147,6 +152,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
             _status = Status.valueOf(dao.getStatus());
         if (_istyle == null)
             _istyle = InvocationStyle.valueOf(dao.getInvocationStyle());
+        if (_timeout == null)  // TODO: custom timeout
+            _timeout = new Date(dao.getCreateTime().getTime() + 60000); 
     }
 
     public void save(MessageExchangeDAO dao) {
@@ -269,11 +276,12 @@ abstract class MessageExchangeImpl implements MessageExchange {
         });
     }
 
-    void setPortOp(PortType portType, Operation operation) {
+    void init(PortType portType, Operation operation, MessageExchangePattern pattern) {
         if (__log.isTraceEnabled())
             __log.trace("Mex[" + getMessageExchangeId() + "].setPortOp(" + portType + "," + operation + ")");
         _portType = portType;
         _operation = operation;
+        _pattern = pattern;
     }
 
     void setFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
@@ -421,4 +429,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
         public T call(MessageExchangeDAO mexdao);
     }
 
+    
 }
+
