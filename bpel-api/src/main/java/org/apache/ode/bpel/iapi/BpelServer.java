@@ -99,12 +99,6 @@ public interface BpelServer {
 
 
     /**
-     * Get the {@link BpelEngine} interface for handling transaction operations.
-     * @return transactional {@link BpelEngine} interfacce
-     */
-    BpelEngine getEngine();
-
-    /**
      * Register a process with the server.
      * @param pid process to register
      * @throws BpelEngineException
