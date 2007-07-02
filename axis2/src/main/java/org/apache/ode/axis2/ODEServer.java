@@ -36,7 +36,6 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
@@ -44,9 +43,11 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
 
 import javax.servlet.ServletConfig;
@@ -431,11 +432,9 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        QuartzSchedulerImpl scheduler = new QuartzSchedulerImpl();
-        scheduler.setExecutorService(_executorService, 20);
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()));
+        scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
-        scheduler.setDataSource(_db.getDataSource());
-        scheduler.init();
         return scheduler;
     }
 
