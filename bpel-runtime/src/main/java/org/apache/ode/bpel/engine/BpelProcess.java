@@ -40,7 +40,6 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
