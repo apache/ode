@@ -36,11 +36,13 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
@@ -61,7 +63,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
- * 
+ *
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEServer {
@@ -151,9 +153,10 @@ public class ODEServer {
             __log.debug("Initializing BPEL server.");
             initBpelServer();
 
-            // Register BPEL event listeners configured in axis2.properties
-            // file.
+            // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
+
+            registerMexInterceptors();
 
             try {
                 _server.start();
@@ -209,7 +212,7 @@ public class ODEServer {
     /**
      * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
      * must be called before the transformation engine can be started again with a call to start().
-     * 
+     *
      * @throws AxisFault
      *             if the engine is unable to shut down.
      */
@@ -265,7 +268,7 @@ public class ODEServer {
             if (_db != null)
                 try {
                     _db.shutdown();
-                    
+
                 } catch (Throwable ex) {
                     __log.debug("DB shutdown failed.", ex);
                 } finally {
@@ -402,7 +405,7 @@ public class ODEServer {
 
     /**
      * Initialize the DAO.
-     * 
+     *
      * @throws ServletException
      */
     protected void initDAO() throws ServletException {
@@ -413,7 +416,7 @@ public class ODEServer {
             String errmsg = __msgs.msgDAOInstantiationFailed(_odeConfig.getDAOConnectionFactory());
             __log.error(errmsg, ex);
             throw new ServletException(errmsg, ex);
-            
+
         }
     }
 
@@ -482,10 +485,26 @@ public class ODEServer {
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
-                            + "loaded properly.");
+                            + "loaded properly: " + e);
                 }
             }
 
+        }
+    }
+
+    private void registerMexInterceptors() {
+        String listenersStr = _odeConfig.getMessageExchangeInterceptors();
+        if (listenersStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String interceptorCN = tokenizer.nextToken();
+                try {
+                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+                    __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+                            + "loaded properly: " + e);
+                }
+            }
         }
     }
 

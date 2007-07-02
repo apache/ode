@@ -135,6 +135,10 @@ public class Messages extends MessageBundle {
         return format("Registered custom BPEL event listener: {0}", listenerCN);
     }
 
+    public String msgMessageExchangeInterceptorRegistered(String interceptorCN) {
+        return format("Registered message exchange interceptor: {0}", interceptorCN);
+    }
+
     public String msgOdeShutdownCompleted() {
         return "Shutdown completed. ";
     }
