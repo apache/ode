@@ -48,10 +48,7 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -190,9 +187,17 @@ public class BpelEngineImpl implements BpelEngine {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
 
-            p.deactivate();
-            while (_serviceMap.values().remove(p))
-                ;
+            Endpoint processEndpoint = null;
+            for (Map.Entry<Endpoint,BpelProcess> processEntry : _serviceMap.entrySet()) {
+                if (processEntry.getValue()._pid.equals(process)) {
+                    _serviceMap.remove(processEntry.getKey());
+                    processEndpoint = processEntry.getKey();
+                }
+            }
+
+            // Only deactivating if no other process (version) need that endpoint anymore
+            if (_serviceMap.get(processEndpoint) == null)
+                p.deactivate();
         }
         return p;
     }
