@@ -77,6 +77,8 @@ public class OdeConfigProperties {
 
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
+    public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
+
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
     public static final String PROP_DAOCF = "dao.factory";
@@ -231,6 +233,10 @@ public class OdeConfigProperties {
 
     public String getEventListeners() {
         return getProperty(PROP_EVENT_LISTENERS);
+    }
+
+    public String getMessageExchangeInterceptors() {
+        return getProperty(PROP_MEX_INTERCEPTORS);
     }
 
     public boolean isDehydrationEnabled() {
