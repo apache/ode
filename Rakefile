@@ -249,7 +249,7 @@ define "ode" do
     package :jar
   end
 
-  desc "ODE Quartz Interface"
+  desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
     package :jar
@@ -351,13 +351,13 @@ define "ode" do
   define "dao-jpa-ojpa-derby" do
     %w{ derby mysql }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
-      quartz_sql = _("src/main/scripts/simplesched-#{db}.sql")
+      scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
         mkpath _("target"), :verbose=>false
         Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
           :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
       end
-      sql = concat(_("target/#{db}.sql")=>[partial_sql, quartz_sql])
+      sql = concat(_("target/#{db}.sql")=>[partial_sql, scheduler_sql])
       build sql
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
