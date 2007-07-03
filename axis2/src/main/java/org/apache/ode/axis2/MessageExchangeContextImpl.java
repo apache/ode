@@ -40,7 +40,12 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     public MessageExchangeContextImpl(ODEServer server) {
     }
 
-    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
+
+    public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
+        throw new UnsupportedOperationException();
+    }
+
+    public void invokePartnerBlocking(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
@@ -48,7 +53,18 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         if (__log.isDebugEnabled())
             __log.debug("The service to invoke is the external service " + service);
         service.invoke(partnerRoleMessageExchange);
+        
     }
+
+    public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
+        throw new UnsupportedOperationException();
+    }
+
+    public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
+        throw new UnsupportedOperationException();        
+    }
+
+    
 
     public void onAsyncReply(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
         if (__log.isDebugEnabled())
@@ -56,6 +72,10 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
         // Nothing to do, no callback is necessary, the client just synchornizes itself with the
         // mex reply when invoking the engine.
+    }
+
+    public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
+        // We don't support this yet, so not much to do here. 
     }
 
 }

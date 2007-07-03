@@ -9,7 +9,7 @@ package org.apache.ode.bpel.engine;
  */
 public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
-    public TransactedMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public TransactedMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
         super(engine, mexId);
     }
 

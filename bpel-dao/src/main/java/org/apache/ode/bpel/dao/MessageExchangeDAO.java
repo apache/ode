@@ -260,4 +260,4 @@ public interface MessageExchangeDAO {
 
     void setFailureType(String failureType);
 
-}
+ }

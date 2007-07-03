@@ -23,7 +23,7 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
     ResponseFuture _future;
     
-    public AsyncMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public AsyncMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
         super(engine, mexId);
     }
 
@@ -33,7 +33,7 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         
         _future = new ResponseFuture();
 
-        BpelProcess target = _engine.route(_callee, _request);
+        BpelProcess target = _server.route(_callee, _request);
         if (target == null) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));

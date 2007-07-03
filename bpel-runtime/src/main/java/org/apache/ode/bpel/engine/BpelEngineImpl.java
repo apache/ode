@@ -8,7 +8,7 @@
  * with the License.  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -65,10 +65,6 @@ import java.util.concurrent.TimeUnit;
 class BpelEngineImpl {
     private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
 
-    /** RNG, for delays */
-    private Random _random = new Random(System.currentTimeMillis());
-
-    private static double _delayMean = 0;
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -81,18 +77,7 @@ class BpelEngineImpl {
         _contexts = contexts;
     }
 
-     OProcess getOProcess(QName processId) {
-        BpelProcess process = _activeProcesses.get(processId);
 
-        if (process == null)
-            return null;
-
-        return process.getOProcess();
-    }
-
-    public void processJob(WorkEvent we) throws BpelEngineException {
-        }
-    }
 
     private boolean checkRetry(final JobInfo jobInfo, Throwable t) {
         // TODO, better handling of failed jobs (put them in the DB perhaps?)
@@ -138,39 +123,6 @@ class BpelEngineImpl {
 
         // No more retries.
         return false;
-    }
-
-    /**
-     * Block the thread for random amount of time. Used for testing for races and the like. The delay generated is exponentially
-     * distributed with the mean obtained from the <code>ODE_DEBUG_TX_DELAY</code> environment variable.
-     */
-    private void debuggingDelay() {
-        // Do a delay for debugging purposes.
-        if (_delayMean != 0)
-            try {
-                long delay = randomExp(_delayMean);
-                // distribution
-                // with mean
-                // _delayMean
-                __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms.");
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                ; // ignore
-            }
-    }
-
-    private long randomExp(double mean) {
-        double u = _random.nextDouble(); // Uniform
-        long delay = (long) (-Math.log(u) * mean); // Exponential
-        return delay;
-    }
-
-    void fireEvent(BpelEvent event) {
-        // Note that the eventListeners list is a copy-on-write array, so need
-        // to mess with synchronization.
-        for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
-            l.onEvent(event);
-        }
     }
 
     /**

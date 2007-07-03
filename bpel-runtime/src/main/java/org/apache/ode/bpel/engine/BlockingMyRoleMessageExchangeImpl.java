@@ -16,7 +16,7 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
     Future<Status> _future;
     boolean _done = false;
     
-    public BlockingMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public BlockingMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
         super(engine, mexId);
     }
 

@@ -93,7 +93,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     Contexts _contexts;
 
-    BpelEngineImpl _engine;
+    BpelServerImpl _server;
 
     boolean _associated;
 
@@ -121,9 +121,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     private Set<String> _propNames;
 
-    public MessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public MessageExchangeImpl(BpelServerImpl engine, String mexId) {
         _contexts = engine._contexts;
-        _engine = engine;
+        _server = engine;
         _mexId = mexId;
     }
 

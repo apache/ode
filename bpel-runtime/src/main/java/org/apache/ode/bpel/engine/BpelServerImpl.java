@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
@@ -93,23 +94,27 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
 
+    /** RNG, for delays */
+    private Random _random = new Random(System.currentTimeMillis());
+
+    private static double _delayMean = 0;
+
     /**
      * Set of processes that are registered with the server. Includes hydrated and dehydrated processes. Guarded by
      * _mngmtLock.writeLock().
      */
     private final HashMap<QName, BpelProcess> _registeredProcesses = new HashMap<QName, BpelProcess>();
 
-    /** Mapping from myrole endpoint name to active process. */
-    private final HashMap<Endpoint, BpelProcess> _serviceMap = new HashMap<Endpoint, BpelProcess>();
+    /** Mapping from myrole service name to active process. */
+    private final HashMap<QName, BpelProcess> _serviceMap = new HashMap<QName, BpelProcess>();
 
     private State _state = State.SHUTDOWN;
 
-    private Contexts _contexts = new Contexts();
+    Contexts _contexts = new Contexts();
 
     private DehydrationPolicy _dehydrationPolicy;
 
     private Properties _configProperties;
-
 
     BpelDatabase _db;
 
@@ -273,9 +278,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
-                _serviceMap.put(e, process);
+                _serviceMap.put(e.serviceName, process);
             }
-            
+
             process.activate(_contexts);
 
             _registeredProcesses.put(process.getPID(), process);
@@ -350,15 +355,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         // TODO: use the message to route to the correct service if more than
         // one service is listening on the same endpoint.
 
-        BpelProcess routed = null;
-        for (Endpoint endpoint : _serviceMap.keySet()) {
-            if (endpoint.serviceName.equals(service))
-                routed = _serviceMap.get(endpoint);
+        _mngmtLock.readLock().lock();
+        try {
+            return _serviceMap.get(service);
+        } finally {
+            _mngmtLock.readLock().unlock();
         }
-        if (__log.isDebugEnabled())
-            __log.debug("Routed: svcQname " + service + " --> " + routed);
-        return routed;
-
     }
 
     /**
@@ -446,10 +448,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _contexts.dao = daoCF;
     }
 
-    public void setInMemDaoConnectionFactory(BpelDAOConnectionFactory daoCF) {
-        _contexts.inMemDao = daoCF;
-    }
-
     public void setBindingContext(BindingContext bc) {
         _contexts.bindingContext = bc;
     }
@@ -467,13 +465,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             Callable<String> createDao = new Callable<String>() {
 
                 public String call() throws Exception {
-                    MessageExchangeDAO dao;
-                    if (target.isInMemory()) {
-                        dao = _contexts.inMemDao.getConnection().createMessageExchange(
-                                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-                    } else {
-                        dao = _contexts.dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-                    }
+                    MessageExchangeDAO dao = target.createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
                     dao.setInvocationStyle(istyle.toString());
                     dao.setCorrelationId(clientKey);
                     dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
@@ -554,7 +546,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         return null;
 
                     ProcessDAO pdao = mexdao.getProcess();
-                    BpelProcess process = pdao == null ? null : _engine._activeProcesses.get(pdao.getProcessId());
+                    BpelProcess process = pdao == null ? null : _registeredProcesses.get(pdao.getProcessId());
 
                     if (process == null) {
                         String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
@@ -607,21 +599,71 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
         _mngmtLock.readLock().lock();
         try {
+            BpelProcess process = _serviceMap.get(serviceId);
+            if (process == null)
+                throw new BpelEngineException("No such service: " + serviceId);
+            return process.getSupportedInvocationStyle(serviceId);
+        } finally {
+            _mngmtLock.readLock().unlock();
+        }
+    }
+
+    void registerMessageExchangeStateListener(MessageExchangeStateListener mexStateListener) {
+        WeakReference<MessageExchangeStateListener> ref = new WeakReference<MessageExchangeStateListener>(mexStateListener);
+
+    }
+
+    OProcess getOProcess(QName processId) {
+        _mngmtLock.readLock().lock();
+        try {
+            BpelProcess process = _registeredProcesses.get(processId);
+
+            if (process == null)
+                return null;
+
+            return process.getOProcess();
 
         } finally {
             _mngmtLock.readLock().unlock();
         }
     }
 
-    
-    void registerMessageExchangeStateListener(MessageExchangeStateListener mexStateListener) {
-        WeakReference<MessageExchangeStateListener> ref = new WeakReference<MessageExchangeStateListener>(mexStateListener);
-
-    }
-
     protected void assertTransaction() {
         if (!_contexts.scheduler.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
+    }
+
+    void fireEvent(BpelEvent event) {
+        // Note that the eventListeners list is a copy-on-write array, so need
+        // to mess with synchronization.
+        for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
+            l.onEvent(event);
+        }
+    }
+
+    /**
+     * Block the thread for random amount of time. Used for testing for races and the like. The delay generated is exponentially
+     * distributed with the mean obtained from the <code>ODE_DEBUG_TX_DELAY</code> environment variable.
+     */
+    private void debuggingDelay() {
+        // Do a delay for debugging purposes.
+        if (_delayMean != 0)
+            try {
+                long delay = randomExp(_delayMean);
+                // distribution
+                // with mean
+                // _delayMean
+                __log.warn("Debugging delay has been activated; delaying transaction for " + delay + "ms.");
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                ; // ignore
+            }
+    }
+
+    private long randomExp(double mean) {
+        double u = _random.nextDouble(); // Uniform
+        long delay = (long) (-Math.log(u) * mean); // Exponential
+        return delay;
     }
 
     private class ProcessDefReaper implements Runnable {
@@ -661,6 +703,4 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    
-    
 }

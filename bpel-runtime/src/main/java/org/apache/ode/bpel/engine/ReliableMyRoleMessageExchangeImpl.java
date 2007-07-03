@@ -57,7 +57,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
     public static final int TIMEOUT = 2 * 60 * 1000;
 
     
-    public ReliableMyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public ReliableMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
         super(engine, mexId);
 
         // RELIABLE means we are bound to a transaction
@@ -76,7 +76,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
         if (_status != Status.NEW)
             throw new BpelEngineException("Invalid state: " + _status);
         
-        final BpelProcess target = _engine.route(_callee, _request);
+        final BpelProcess target = _server.route(_callee, _request);
         if (target == null) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));

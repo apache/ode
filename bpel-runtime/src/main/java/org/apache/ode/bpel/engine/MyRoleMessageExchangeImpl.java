@@ -28,7 +28,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 
     protected QName _callee;
 
-    public MyRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId) {
+    public MyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
         super(engine, mexId);
     }
 
@@ -116,8 +116,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         doInTX(new InDbAction<Void>() {
 
             public Void call(MessageExchangeDAO mexdao) {
-                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-                _engine._contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
+                _server._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                _server._contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
                 return null;
             }
 
@@ -134,9 +134,9 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
     protected boolean processInterceptors(InterceptorInvoker invoker, MessageExchangeDAO mexDao) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), mexDao.getProcess(), null);
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_server._contexts.dao.getConnection(), mexDao.getProcess(), null);
 
-        for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
+        for (MessageExchangeInterceptor i : _server.getGlobalInterceptors())
             if (!processInterceptor(i, this, ictx, invoker))
                 return false;
 
