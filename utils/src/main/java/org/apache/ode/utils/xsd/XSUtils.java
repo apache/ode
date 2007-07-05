@@ -129,22 +129,18 @@ public class XSUtils {
        */
       List<XMLParseException> errors = eh.getErrors();
       if (errors.size() != 0) {
-        if (__log.isDebugEnabled()) 
-          __log.debug("captureSchema: XMLParseException(s) in " + input);
+        __log.error("captureSchema: XMLParseException(s) in " + input);
         
         XsdException ex = null;
         for (XMLParseException xpe : errors) {
           ex = new XsdException(ex, xpe.getMessage(), xpe.getLineNumber(), xpe.getColumnNumber(),
               xpe.getLiteralSystemId());
         }
-        assert ex != null;
         throw ex;
       }
       
       if (__log.isDebugEnabled())
         __log.debug("captureSchema: NULL model (unknown error) for " + input.getSystemId());
-      
-      throw new XsdException(null, __msgs.msgXsdUnknownError(input.getSystemId()), 0, 0, input.getSystemId());
     }
 
     return captured;
