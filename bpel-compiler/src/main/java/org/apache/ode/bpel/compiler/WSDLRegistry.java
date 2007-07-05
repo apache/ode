@@ -201,7 +201,7 @@ class WSDLRegistry {
                     String schema = ((XMLSchemaType)ee).getXMLSchema();
                     Map<URI, byte[]> capture = null;
 
-                    WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas);
+                    WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
                     try {
                         capture = XSUtils.captureSchema(defuri, schema, resolver);
                         _schemas.putAll(capture);
