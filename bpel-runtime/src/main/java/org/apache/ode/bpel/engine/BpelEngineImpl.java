@@ -188,9 +188,11 @@ public class BpelEngineImpl implements BpelEngine {
                 __log.debug("Deactivating process " + p.getPID());
 
             Endpoint processEndpoint = null;
-            for (Map.Entry<Endpoint,BpelProcess> processEntry : _serviceMap.entrySet()) {
+            Iterator<Map.Entry<Endpoint,BpelProcess>> serviceIter = _serviceMap.entrySet().iterator();
+            while (serviceIter.hasNext()) {
+                Map.Entry<Endpoint,BpelProcess> processEntry = serviceIter.next();
                 if (processEntry.getValue()._pid.equals(process)) {
-                    _serviceMap.remove(processEntry.getKey());
+                    serviceIter.remove();
                     processEndpoint = processEntry.getKey();
                 }
             }
