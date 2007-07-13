@@ -80,8 +80,8 @@ class DebuggerSupport {
      */
     DebuggerSupport(BpelProcess process) {
         _process = process;
-        _db = new BpelProcessDatabase(_process._engine._contexts.dao,
-                _process._engine._contexts.scheduler,
+        _db = new BpelProcessDatabase(_process._contexts.dao,
+                _process._contexts.scheduler,
                 _process._pid);
 
     }
@@ -174,7 +174,7 @@ class DebuggerSupport {
                         WorkEvent we = new WorkEvent();
                         we.setIID(iid);
                         we.setType(WorkEvent.Type.RESUME);
-                        _process._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
 
                         return true;
                     }
@@ -298,7 +298,7 @@ class DebuggerSupport {
                         WorkEvent we = new WorkEvent();
                         we.setType(WorkEvent.Type.RESUME);
                         we.setIID(iid);
-                        _process._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
 
 
                         return true;
