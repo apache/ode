@@ -22,14 +22,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -61,7 +58,6 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
-import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -274,7 +270,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            BpelProcess process = new BpelProcess(conf, null);
+            BpelProcess process = new BpelProcess(this, conf, null);
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -410,7 +406,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 return;
             }
 
-            process.handleWorkEvent(jobInfo.jobDetail);
+            process.handleWorkEvent(jobInfo);
         } catch (Exception ex) {
             throw new JobProcessorException(ex, true);
         } finally {
@@ -488,7 +484,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     __log.error("Internal Error: could not execute isolated transaction.", e);
                     throw new BpelEngineException("Internal Error", e);
                 }
-                mex = new AsyncMyRoleMessageExchangeImpl(this, mexId);
+                mex = new AsyncMyRoleMessageExchangeImpl(target, mexId);
                 break;
             case BLOCKING:
                 try {
@@ -497,7 +493,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     __log.error("Internal Error: could not execute isolated transaction.", e);
                     throw new BpelEngineException("Internal Error", e);
                 }
-                mex = new BlockingMyRoleMessageExchangeImpl(this, mexId);
+                mex = new BlockingMyRoleMessageExchangeImpl(target, mexId);
                 break;
 
             case RELIABLE:
@@ -508,7 +504,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     __log.error("Internal Error: could not execute DB calls.", e);
                     throw new BpelEngineException("Internal Error", e);
                 }
-                mex = new ReliableMyRoleMessageExchangeImpl(this, mexId);
+                mex = new ReliableMyRoleMessageExchangeImpl(target, mexId);
                 break;
             case TRANSACTED:
                 assertTransaction();
@@ -518,7 +514,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     __log.error("Internal Error: could not execute DB calls.", e);
                     throw new BpelEngineException("Internal Error", e);
                 }
-                mex = new TransactedMyRoleMessageExchangeImpl(this, mexId);
+                mex = new TransactedMyRoleMessageExchangeImpl(target, mexId);
             default:
                 throw new Error("Internal Error: unknown InvocationStyle: " + istyle);
             }
@@ -530,12 +526,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.readLock().unlock();
         }
     }
-
+    
     public MessageExchange getMessageExchange(final String mexId) throws BpelEngineException {
 
         _mngmtLock.readLock().lock();
         try {
-            final MessageExchangeDAO inmemdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
+            final MessageExchangeDAO inmemdao = getInMemMexDAO(mexId);
 
             Callable<MessageExchange> loadMex = new Callable<MessageExchange>() {
 
@@ -577,6 +573,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 if (inmemdao != null)
                     return loadMex.call();
 
+                // TODO: should we not do this in the current thread if the mex is a transacted/reliable?
                 return _contexts.scheduler.execIsolatedTransaction(loadMex).get();
             } catch (ContextException e) {
                 throw new BpelEngineException(e);
@@ -608,6 +605,20 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+    MessageExchangeDAO getInMemMexDAO(String mexId) {
+        _mngmtLock.readLock().lock();
+        try {
+          for (BpelProcess p : _registeredProcesses.values()) {
+              MessageExchangeDAO mexDao = p.getInMemMexDAO(mexId);
+              if (mexDao != null)
+                  return mexDao;
+          }
+        } finally {
+            _mngmtLock.readLock().unlock();
+        }
+        
+        return null;
+    }
     void registerMessageExchangeStateListener(MessageExchangeStateListener mexStateListener) {
         WeakReference<MessageExchangeStateListener> ref = new WeakReference<MessageExchangeStateListener>(mexStateListener);
 
@@ -676,7 +687,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     _mngmtLock.writeLock().lockInterruptibly();
                     try {
                         __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
-                        // Copying the runnning process list to avoid synchronization
+                        // Copying the runnning process list to avoid synchronizatMessageExchangeInterion
                         // problems and a potential mess if a policy modifies the list
                         List<BpelProcess> candidates = new ArrayList<BpelProcess>(_registeredProcesses.values());
                         CollectionsX.remove_if(candidates, new MemberOfFunction<BpelProcess>() {
@@ -702,5 +713,4 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             }
         }
     }
-
 }

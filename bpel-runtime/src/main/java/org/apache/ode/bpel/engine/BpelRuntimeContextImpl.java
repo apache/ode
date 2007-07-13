@@ -133,11 +133,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     /** Five second maximum for continous execution. */
     private long _maxReductionTimeMs = 2000000;
 
+    private Contexts _contexts;
+
 
 
     public BpelRuntimeContextImpl(BpelProcess bpelProcess, ProcessInstanceDAO dao, PROCESS PROCESS,
                                   MessageExchangeDAO instantiatingMessageExchange) {
         _bpelProcess = bpelProcess;
+        _contexts = bpelProcess._contexts;
         _dao = dao;
         _iid = dao.getInstanceId();
         _instantiatingMessageExchange = instantiatingMessageExchange;
@@ -528,7 +531,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             // We have an element
             nodeQName = new QName(targetNode.getNamespaceURI(), targetNode.getLocalName());
         }
-        return _bpelProcess._engine._contexts.eprContext.convertEndpoint(nodeQName, sourceNode).toXML();
+        return _contexts.eprContext.convertEndpoint(nodeQName, sourceNode).toXML();
     }
 
     public void commitChanges(VariableInstance variable, Node changes) {
@@ -593,7 +596,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         } else /* IL-mediated communication */  {
             // TODO: distinguish between different kinds of my-role mexss
             ReliableMyRoleMessageExchangeImpl myRoleMex = new ReliableMyRoleMessageExchangeImpl();
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(myRoleMex);
+            _contexts.mexContext.onAsyncReply(myRoleMex);
         }
 
 
@@ -695,7 +698,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
         we.setInMem(_bpelProcess.isInMemory());
-        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
@@ -705,7 +708,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
         we.setInMem(_bpelProcess.isInMemory());
-        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+        _contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
     }
 
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
@@ -726,7 +729,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if (partnerEpr == null)
                 throw new FaultException(partnerLink.partnerLink.getOwner().constants.qnUninitializedPartnerRole);
         } else {
-            partnerEpr = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
+            partnerEpr = _contexts.eprContext.resolveEndpointReference(partnerEPR);
         }
 
         if (BpelProcess.__log.isDebugEnabled()) {
@@ -763,17 +766,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         BpelProcess p2pProcess = null;
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
         if (partnerEndpoint != null)
-            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, new MemBackedMessageImpl(message.getData(),message.getType(), true));
+            p2pProcess = _bpelProcess._server.route(partnerEndpoint.serviceName, new MemBackedMessageImpl(message.getData(),message.getType(), true));
 
         evt.setMexId(mexDao.getMessageExchangeId());
         sendEvent(evt);
 
         if (p2pProcess != null) {
             /* P2P (process-to-process) invocation, special logic */
-            invokeP2P(operation, outgoingMessage, mexDao);
+            invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, outgoingMessage, mexDao);
         } else {
             /* NOT p2p, need to call out to IL */ 
-            invokeIL(partnerRoleChannel, partnerEpr, mexDao);
+            invokeIL(partnerLink, operation, outgoingMessage, partnerRoleChannel, partnerEpr, mexDao);
         }
 
         // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations, 
@@ -819,17 +822,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             // in asking the IL to invoke.
             mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
             mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
-            Set<InvocationStyle> supportedStyles = partnerRoleChannel.getSupportedInvocationStyle(partnerEpr);
+            Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(partnerRoleChannel, partnerEpr);
             if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
                 // If RELIABLE is supported, this is easy, we just do it in-line.
                 throw new UnsupportedOperationException(); // TODO
                 ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl();
-                _bpelProcess._engine._contexts.mexContext.invokePartnerReliable(reliableMex);
+                _contexts.mexContext.invokePartnerReliable(reliableMex);
             } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)){
                 // If TRANSACTED is supported, this is again easy, do it in-line.
                 throw new UnsupportedOperationException(); // TODO
                 TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl();
-                _bpelProcess._engine._contexts.mexContext.invokePartnerTransacted(transactedMex);
+                _contexts.mexContext.invokePartnerTransacted(transactedMex);
             } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
                 // For BLOCKING invocation, we defer the call until after commit (unless idempotent). 
                 BlockingPartnerRoleMessageExchangeImpl blockingMex = new BlockingPartnerRoleMessageExchangeImpl();
@@ -861,42 +864,48 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * 
      * @param operation
      * @param outgoingMessage
-     * @param mexDao
+     * @param partnerRoleMex
      */
-    private void invokeP2P(Operation operation, Element outgoingMessage, MessageExchangeDAO mexDao) {
+    private void invokeP2P(BpelProcess target, QName serviceName, Operation operation, Element outgoingMessage, MessageExchangeDAO partnerRoleMex) {
         if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("Invoking in a p2p interaction, partnerrole " + mexDao.getMessageExchangeId() + " - myrole " + myRoleMex);
+            __log.debug("Invoking in a p2p interaction, partnerrole " + partnerRoleMex.getMessageExchangeId());
         }
 
         // Properties used by stateful-exchange protocol.
-        String mySessionId = mexDao.getPartnerLink().getMySessionId();
-        String partnerSessionId = mexDao.getPartnerLink().getPartnerSessionId();
+        String mySessionId = partnerRoleMex.getPartnerLink().getMySessionId();
+        String partnerSessionId = partnerRoleMex.getPartnerLink().getPartnerSessionId();
 
 
         if ( mySessionId != null )
-            mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
+            partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
         if ( partnerSessionId != null )
-            mexDao.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
+            partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
 
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
-
-
-        Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
-        odeRequest.setMessage(outgoingMessage);
-
+        MessageExchangeDAO myRoleMex = _bpelProcess.createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        myRoleMex.setCallee(serviceName);
+        myRoleMex.setPipedMessageExchange(partnerRoleMex);
+        myRoleMex.setOperation(partnerRoleMex.getOperation());
+        myRoleMex.setPattern(partnerRoleMex.getPattern());
+        myRoleMex.setTimeout(partnerRoleMex.getTimeout());
+        myRoleMex.setRequest(partnerRoleMex.getRequest());
+     
+          
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
                     + partnerSessionId + " - partnerSess " + mySessionId);
         }
+        
         if ( partnerSessionId != null )
             myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
         if ( mySessionId != null )
             myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
 
-        mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
-        myRoleMex.invoke(odeRequest);
+        partnerRoleMex.setStatus(MessageExchange.Status.ASYNC.toString());
+        target.invokeProcess(myRoleMex);
+        // TODO: perhaps we should check if the other process finished ,or will it always
     }
 
     void execute() {
@@ -938,9 +947,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     we.setType(WorkEvent.Type.RESUME);
                     we.setInMem(_bpelProcess.isInMemory());
                     if (_bpelProcess.isInMemory())
-                        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+                        _contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
                     else
-                        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
+                        _contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);
@@ -1157,7 +1166,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
                 mex.setFault(faultData.getFaultName(), message);
                 mex.setFaultExplanation(faultData.getExplanation());
-                _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+                _contexts.mexContext.onAsyncReply(mex);
             }
         }
     }
@@ -1169,7 +1178,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             ReliableMyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
             _bpelProcess.initMyRoleMex(mex);
             mex.setFailure(FailureType.OTHER, "No response.", null);
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+            _contexts.mexContext.onAsyncReply(mex);
         }
     }
 

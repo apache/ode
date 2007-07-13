@@ -2,99 +2,85 @@ package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.w3c.dom.Element;
 
 /**
- * Implementation of the {@link PartnerRoleMessageExchange} interface that is used when the ASYNC invocation 
- * style is being used (see {@link InvocationStyle#ASYNC}). The basic idea here is that with this style, the
- * IL does not get the "message" (i.e. this object) until the ODE transaction has committed, and it does not
- * block during the performance of the operation. Hence, when a reply becomes available, we'll need to 
- * schedule a transaction to process it. 
+ * Implementation of the {@link PartnerRoleMessageExchange} interface that is used when the ASYNC invocation style is being used
+ * (see {@link InvocationStyle#ASYNC}). The basic idea here is that with this style, the IL does not get the "message" (i.e. this
+ * object) until the ODE transaction has committed, and it does not block during the performance of the operation. Hence, when a
+ * reply becomes available, we'll need to schedule a transaction to process it.
  * 
  * @author Maciej Szefler
- *
+ * 
  */
 public class AsyncPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
     private static final Log __log = LogFactory.getLog(AsyncPartnerRoleMessageExchangeImpl.class);
     
-    AsyncPartnerRoleMessageExchangeImpl(BpelEngineImpl engine, String mexId, PortType portType, Operation operation, boolean inMem, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(engine, mexId, portType, operation, inMem, epr, myRoleEPR, channel);
-    }
-    
-    public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
-        if(!isAsync())
-            throw new BpelEngineException("Invalid action, message-exchange is not in ASYNC state!");
-        
-        super.replyWithFault(faultType,outputFaultMessage);
-        scheduleContinuation();
+    AsyncPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType portType, Operation operation,
+            EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+        super(process, mexId, portType, operation, epr, myRoleEPR, channel);
     }
 
-    public void reply(Message response) throws BpelEngineException {
-        if(!isAsync())
-            throw new BpelEngineException("Invalid action, message-exchange is not in ASYNC state!");
+    @Override
+    protected void resumeInstance() {
+        assert !_contexts.scheduler.isTransacted() : "checkReplyContext() should have prevented us from getting here.";
+        assert !_process.isInMemory() : "resumeInstance() for in-mem processes makes no sense.";
 
-        super.reply(response);
-        scheduleContinuation();
-
-    }
-
-    public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-        if(!isAsync())
-            throw new BpelEngineException("Invalid action, message-exchange is not in ASYNC state!");
-        super.replyWithFailure(type, description, details);
-        scheduleContinuation();
-    }
-        
-
-    /**
-     * Check if we are in the ASYNC state. 
-     * 
-     * @return
-     */
-    private boolean isAsync() {
-        return getStatus() == Status.ASYNC;
-    }
-
-
-    /**
-     * Continue from the ASYNC state by scheduling a continuation to process a response/fault/failure. 
-     */
-    private void scheduleContinuation() {
-        // If there is no channel waiting for us, there is nothing to do.
-        if (getPartnerRoleChannel() == null) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("no channel on mex=" + getMessageExchangeId());
-            }
-            return;
-        }
-        
-
-        WorkEvent we = new WorkEvent();
-        we.setIID(_iid);
-        we.setType(WorkEvent.Type.INVOKE_RESPONSE);
-        we.setInMem(_inMem);
-        we.setChannel(_responseChannel);
-        we.setMexId(_mexId);
-
+        final WorkEvent we = generateInvokeResponseWorkEvent();
         if (__log.isDebugEnabled()) {
-            __log.debug("scheduleContinuation: scheduling WorkEvent " + we);
+            __log.debug("resumeInstance: scheduling WorkEvent " + we);
         }
+
+
+        doInTX(new InDbAction<Void>() {
+
+            public Void call(MessageExchangeDAO mexdao) {
+                save(mexdao);
+                _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    protected void checkReplyContextOk() {
+        super.checkReplyContextOk();
+
+        // Prevent user from attempting the replyXXXX calls while a transaction is active. 
+        if (!_ownerThread.get() && _contexts.scheduler.isTransacted())
+            throw new BpelEngineException("Cannot reply to ASYNC style invocation from a transactional context!");
         
-        if (_inMem)
-            _contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-        else
-            _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+
+    }
+
+    @Override
+    public void replyAsync(String foreignKey) {
+        if (__log.isDebugEnabled()) 
+            __log.debug("replyAsync mex=" + _mexId);
+
+        sync();
+        
+        if (!_blocked)
+            throw new BpelEngineException("Invalid context for replyAsync(); can only be called during MessageExchangeContext call. ");
+        checkReplyContextOk();
+        setStatus(Status.ASYNC);
+        _foreignKey = foreignKey;
+        sync();
+
+    }
+
+    @Override
+    public InvocationStyle getInvocationStyle() {
+        return InvocationStyle.ASYNC;
     }
 
 }

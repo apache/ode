@@ -101,16 +101,6 @@ public class WorkEvent {
         _jobDetail.put("ckey", ckey == null ? null : ckey.toCanonicalString());
     }
 
-    public void setInMem(boolean inmem) {
-        _jobDetail.put("inmem", inmem);
-    }
-
-    public boolean isInMem() {
-        Boolean bool = (Boolean) _jobDetail.get("inmem");
-        if (bool == null) return false;
-        else return bool;
-    }
-
     public void setProcessId(QName pid) {
         _jobDetail.put("pid", pid.toString());
     }

@@ -8,10 +8,13 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 
 public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    public ReliablePartnerRoleMessageExchangeImpl(BpelEngineImpl impl, String messageExchangeId, PortType ptype, Operation op, boolean b, Object object, EndpointReference reference, PartnerRoleChannel partnerRoleChannel) {
-        // TODO Auto-generated constructor stub
+    public ReliablePartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType ptype, Operation op, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel partnerRoleChannel) {
+        super(process, mexId, ptype, op, epr, myRoleEPR, partnerRoleChannel);
     }
 
-
-
+    @Override
+    protected void resumeInstance() {
+        // TODO Auto-generated method stub
+        
+    }
 }

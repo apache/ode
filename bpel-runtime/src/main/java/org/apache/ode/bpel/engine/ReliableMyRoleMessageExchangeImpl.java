@@ -57,7 +57,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
     public static final int TIMEOUT = 2 * 60 * 1000;
 
     
-    public ReliableMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
+    public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
         super(engine, mexId);
 
         // RELIABLE means we are bound to a transaction

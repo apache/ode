@@ -56,6 +56,8 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
@@ -72,7 +74,6 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.omg.CosNaming.IstringHelper;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -127,7 +128,7 @@ public class BpelProcess {
     /** Latch-like thing to control hydration/dehydration. */
     private HydrationLatch _hydrationLatch;
 
-    private Contexts _contexts;
+    protected Contexts _contexts;
 
     /** Manage instance-level locks. */
     private final InstanceLockManager _instanceLockManager = new InstanceLockManager();
@@ -138,9 +139,10 @@ public class BpelProcess {
 
     private Random _random = new Random();
 
-    private BpelServerImpl _server;
+    final BpelServerImpl _server;
 
-    public BpelProcess(ProcessConf conf, BpelEventListener debugger) {
+    public BpelProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
+        _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();
@@ -345,18 +347,19 @@ public class BpelProcess {
      * 
      */
     /**
+     * @throws JobProcessorException 
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
-    public void handleWorkEvent(Map<String, Object> jobData) {
+    public void handleWorkEvent(JobInfo jobInfo) throws JobProcessorException {
         _hydrationLatch.latch(1);
         try {
             markused();
 
             if (__log.isDebugEnabled()) {
-                __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobData", jobData }));
+                __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobInfo", jobInfo }));
             }
 
-            final WorkEvent we = new WorkEvent(jobData);
+            final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
 
             // Process level events
             if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
@@ -433,7 +436,7 @@ public class BpelProcess {
         }
     }
 
-    private MessageExchangeDAO loadMexDao(String mexId) {
+    MessageExchangeDAO loadMexDao(String mexId) {
         return isInMemory() ? _inMemDao.getConnection().getMessageExchange(mexId) : _contexts.dao.getConnection()
                 .getMessageExchange(mexId);
     }
@@ -658,7 +661,7 @@ public class BpelProcess {
 
         _hydrationLatch.latch(1);
         try {
-            MyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(_server, mexdao.getMessageExchangeId());
+            MyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             PortType ptype = plink.myRolePortType;
             Operation op = plink.getMyRoleOperation(mexdao.getOperation());
@@ -679,23 +682,23 @@ public class BpelProcess {
             Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
             switch (istyle) {
             case BLOCKING:
-                mex = new BlockingPartnerRoleMessageExchangeImpl(_server, mexdao.getMessageExchangeId(), ptype, op, isInMemory(),
+                mex = new BlockingPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op,
                         null, /* EPR todo */
                         plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
             case ASYNC:
-                mex = new AsyncPartnerRoleMessageExchangeImpl(_server, mexdao.getMessageExchangeId(), ptype, op, isInMemory(),
+                mex = new AsyncPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, 
                         null, /* EPR todo */
                         plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
 
             case TRANSACTED:
-                mex = new TransactedPartnerRoleMessageExchangeImpl(_server, mexdao.getMessageExchangeId(), ptype, op, isInMemory(),
+                mex = new TransactedPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op,
                         null, /* EPR todo */
                         plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
             case RELIABLE:
-                mex = new ReliablePartnerRoleMessageExchangeImpl(_server, mexdao.getMessageExchangeId(), ptype, op, isInMemory(),
+                mex = new ReliablePartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, 
                         null, /* EPR todo */
                         plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
@@ -914,6 +917,10 @@ public class BpelProcess {
         } else {
             return _contexts.dao.getConnection().createMessageExchange(dir);
         }
+    }
+
+    MessageExchangeDAO getInMemMexDAO(String mexId) {
+        return _inMemDao.getConnection().getMessageExchange(mexId);
     }
 
 }

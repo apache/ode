@@ -1,7 +1,5 @@
 package org.apache.ode.bpel.engine;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 
 /**
  * For invoking the engine using ASYNC style.
@@ -23,8 +21,8 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
     ResponseFuture _future;
     
-    public AsyncMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
-        super(engine, mexId);
+    public AsyncMyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
+        super(process, mexId);
     }
 
     public Future<Status> invokeAsync() {
@@ -33,22 +31,10 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         
         _future = new ResponseFuture();
 
-        BpelProcess target = _server.route(_callee, _request);
-        if (target == null) {
-            if (__log.isWarnEnabled())
-                __log.warn(__msgs.msgUnknownEPR("" + _epr));
-
-            _cstatus = CorrelationStatus.UKNOWN_ENDPOINT;
-            setFailure(FailureType.UNKNOWN_ENDPOINT, null, null);
-            _future.done(_status);
-
-            return _future;
-        }
-
-        if (target.isInMemory()) {
-            target.invokeProcess(this);
+        if (_process.isInMemory()) {
+            _process.invokeProcess(_process.getInMemMexDAO(_mexId));
         } else {
-            scheduleInvoke(target);
+            scheduleInvoke(_process);
         }
       
         if (getOperation().getOutput() == null) {
@@ -111,6 +97,11 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
                 this.notifyAll();
             }
         }
+    }
+
+    @Override
+    public InvocationStyle getInvocationStyle() {
+        return InvocationStyle.ASYNC;
     }
 
 }

@@ -103,12 +103,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // Is this a /possible/ createInstance Operation?
         boolean isCreateInstnace = _plinkDef.isCreateInstanceOperation(operation);
 
-        // now, the tricks begin: when a message arrives we have to see if
-        // there
-        // is anyone waiting for it.
-        // Get the correlator, a persisted communnication-reduction data
-        // structure
-        // supporting correlation correlationKey matching!
+        // now, the tricks begin: when a message arrives we have to see if there is anyone waiting for it. Get the correlator, a
+        // persisted communnication-reduction data structure supporting correlation correlationKey matching!
         String correlatorId = BpelProcess.genCorrelatorId(_plinkDef, operation.getName());
 
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
@@ -232,8 +228,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             //
             // } else {
             // send event
-            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(),
-                    mex.getMessageExchangeId(), keys);
+            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(), mex
+                    .getMessageExchangeId(), keys);
 
             evt.setProcessId(_process.getProcessDAO().getProcessId());
             evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));

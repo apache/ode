@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +46,9 @@ import org.w3c.dom.Element;
  * {@link PartnerRoleMessageExchangeImpl}) communications.
  * 
  * It should be noted that this class and its derived classes are in NO WAY THREADSAFE. It is imperative that the integration layer
- * not attempt to use {@link MessageExchange} objects from multiple threads.
+ * not attempt to use {@link MessageExchange} objects from multiple threads (although it is permitted to use the object from 
+ * a different/new thread than the one from which the object originated, so long as only one thread is manipulating the object
+ * at a time). 
  * 
  * @author Maciej Szefler
  * 
@@ -64,6 +65,16 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
+    //
+    // The following are immutable. 
+    //
+    
+    final Contexts _contexts;
+
+    final BpelProcess _process;
+
+    final String _mexId;
+
     /** Instance identifier. */
     Long _iid;
 
@@ -73,34 +84,33 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     EndpointReference _epr;
 
-    Status _status;
-
     MessageExchangePattern _pattern;
 
     String _opname;
 
-    String _mexId;
-
-    Boolean _txflag;
-
-    QName _fault;
-
-    String _explanation;
-
-    MessageImpl _response;
-
     MessageImpl _request;
-
-    Contexts _contexts;
-
-    BpelServerImpl _server;
 
     boolean _associated;
 
-    InvocationStyle _istyle;
-
     /** The point at which this message-exchange will time out. */
-    Date _timeout;
+    long _timeout;
+
+    //
+    // The following fields need to be volatile, since a random  IL thread may set them.
+    //
+    volatile Status _status;
+
+    volatile QName _fault;
+
+    volatile String _explanation;
+
+    volatile MessageImpl _response;
+
+    /** 
+     * Used internally to sync memory between the thread that created this object (engine thread) and the thread that is
+     * manipulating it (possibly a foregin IL thread). This is an alternative to needlessly maniuplating one of the above 
+     */
+    private volatile int _syncdummy;
 
     enum Change {
         EPR, RESPONSE, RELEASE, REQUEST
@@ -121,9 +131,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     private Set<String> _propNames;
 
-    public MessageExchangeImpl(BpelServerImpl engine, String mexId) {
-        _contexts = engine._contexts;
-        _server = engine;
+
+    public MessageExchangeImpl(BpelProcess process, String mexId) {
+        _process = process;
+        _contexts = process._contexts; 
         _mexId = mexId;
     }
 
@@ -140,27 +151,21 @@ abstract class MessageExchangeImpl implements MessageExchange {
             _pattern = MessageExchangePattern.valueOf(dao.getPattern());
         if (_opname == null)
             _opname = dao.getOperation();
-        if (_mexId == null)
-            _mexId = dao.getMessageExchangeId();
-        if (_txflag == null)
-            _txflag = dao.getPropagateTransactionFlag();
         if (_fault == null)
             _fault = dao.getFault();
         if (_explanation == null)
             _explanation = dao.getFaultExplanation();
         if (_status == null)
             _status = Status.valueOf(dao.getStatus());
-        if (_istyle == null)
-            _istyle = InvocationStyle.valueOf(dao.getInvocationStyle());
-        if (_timeout == null)  // TODO: custom timeout
-            _timeout = new Date(dao.getCreateTime().getTime() + 60000); 
+        _timeout = dao.getTimeout();
     }
 
     public void save(MessageExchangeDAO dao) {
         dao.setStatus(_status.toString());
-        dao.setInvocationStyle(_istyle.toString());
+        dao.setInvocationStyle(getInvocationStyle().toString());
         dao.setFault(_fault);
         dao.setFaultExplanation(_explanation);
+        dao.setTimeout(_timeout);
         // todo: set failureType
 
         if (_changes.contains(Change.RESPONSE)) {
@@ -190,9 +195,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         });
     }
 
-    public InvocationStyle getInvocationStyle() {
-        return _istyle;
-    }
+    public abstract InvocationStyle getInvocationStyle();
 
     public boolean isSafe() {
         Object val = getOperation().getExtensionAttribute(SAFE_ATTRIBUTE);
@@ -219,7 +222,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public boolean isTransactional() throws BpelEngineException {
-        return _txflag;
+        switch (getInvocationStyle()) {
+            case TRANSACTED:
+            case RELIABLE:
+                return true;
+        }
+        
+        return false;
     }
 
     public QName getFault() {
@@ -378,6 +387,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     }
 
+    public long getTimeout() {
+        return _timeout;
+    }
+
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         _changes.add(Change.RELEASE);
@@ -393,7 +406,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     protected <T> T doInTX(final InDbAction<T> action) {
-        if (_txflag) {
+        if (isTransactional()) {
             assertTransaction();
             return action.call(getDAO());
         } else {
@@ -419,16 +432,21 @@ abstract class MessageExchangeImpl implements MessageExchange {
      */
     protected MessageExchangeDAO getDAO() {
         assertTransaction();
-        MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(_mexId);
-        if (mexdao == null)
-            mexdao = _contexts.dao.getConnection().getMessageExchange(_mexId);
-        return mexdao;
+        return _process.loadMexDao(_mexId);
     }
 
     interface InDbAction<T> {
         public T call(MessageExchangeDAO mexdao);
     }
 
-    
+    /** 
+     * Force memory sync between the thread that updated the object and the engine thread. Note that this does not make 
+     * the Mex objects "thread-safe", it just allows us to manipulate it from a different (single) thread than the original
+     * one. Otherwise, Java memory model could render changes non-visible to the engine. 
+     *
+     */
+    void sync() {
+        ++_syncdummy;
+    }
 }
 

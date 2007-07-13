@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 
 /**
  * Non-transaction blocking MyRole message-exchange implementation.
@@ -16,8 +17,8 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
     Future<Status> _future;
     boolean _done = false;
     
-    public BlockingMyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
-        super(engine, mexId);
+    public BlockingMyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
+        super(process, mexId);
     }
 
     @Override
@@ -33,7 +34,7 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
         Future<Status> future = _future != null ? _future : super.invokeAsync();
         
         try {
-            future.get(Math.max(System.currentTimeMillis()-_timeout.getTime(),1), TimeUnit.MILLISECONDS);
+            future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);
             _done = true;
             return _status;
         } catch (InterruptedException e) {
@@ -42,4 +43,9 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
             throw new BpelEngineException(e.getCause());
         } 
     }    
+    
+    @Override
+    public InvocationStyle getInvocationStyle() {
+        return InvocationStyle.BLOCKING;
+    }
 }

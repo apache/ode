@@ -18,7 +18,7 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
-class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
+abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
     
@@ -28,8 +28,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 
     protected QName _callee;
 
-    public MyRoleMessageExchangeImpl(BpelServerImpl engine, String mexId) {
-        super(engine, mexId);
+    public MyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
+        super(process, mexId);
     }
 
     public CorrelationStatus getCorrelationStatus() {
@@ -101,14 +101,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         // Schedule a new job for invocation
         final WorkEvent we = new WorkEvent();
         we.setType(WorkEvent.Type.INVOKE_INTERNAL);
-        we.setInMem(target.isInMemory());
         we.setProcessId(target.getPID());
         we.setMexId(_mexId);
 
         // Schedule a timeout 
         final WorkEvent we1 = new WorkEvent();
         we1.setType(WorkEvent.Type.INVOKE_TIMEOUT);
-        we1.setInMem(target.isInMemory());
         we1.setProcessId(target.getPID());
         we1.setMexId(_mexId);
         
@@ -116,8 +114,8 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         doInTX(new InDbAction<Void>() {
 
             public Void call(MessageExchangeDAO mexdao) {
-                _server._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-                _server._contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
+                _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                _contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
                 return null;
             }
 
@@ -134,9 +132,10 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
     protected boolean processInterceptors(InterceptorInvoker invoker, MessageExchangeDAO mexDao) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_server._contexts.dao.getConnection(), mexDao.getProcess(), null);
+        // TODO: should we give the in-mem dao connection for interceptors on in-mem processes? 
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), mexDao.getProcess(), null);
 
-        for (MessageExchangeInterceptor i : _server.getGlobalInterceptors())
+        for (MessageExchangeInterceptor i : _contexts.globalIntereceptors)
             if (!processInterceptor(i, this, ictx, invoker))
                 return false;
 

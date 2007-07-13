@@ -19,56 +19,65 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.engine.WorkEvent.Type;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.w3c.dom.Element;
-
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.w3c.dom.Element;
+
 /**
- * Base-class implementation of the interface used to expose a partner invocation to the integration
- * layer.
+ * Base-class implementation of the interface used to expose a partner invocation to the integration layer.
  * 
  * @author Maciej Szefler
  */
-class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
-    private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
+abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
+    private static final Log __log = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
     protected final PartnerRoleChannel _partnerRoleChannel;
+
     protected EndpointReference _myRoleEPR;
-    protected boolean _inMem;
+
     protected String _responseChannel;
-    
+
+    protected volatile String _foreignKey;
+
     private QName _caller;
-    
-    PartnerRoleMessageExchangeImpl(
-            BpelEngineImpl engine, 
-            String mexId,
-            PortType portType,
-            Operation operation, 
-            boolean inMem,
-            EndpointReference epr,
-            EndpointReference myRoleEPR,
-            PartnerRoleChannel channel) {
-        super(engine, mexId);
+
+    /** thread-local indicator telling us if a given thread is the thread that "owns" the object. */
+    final ThreadLocal<Boolean> _ownerThread = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+
+    };
+
+    volatile boolean _blocked = false;
+
+    PartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType portType, Operation operation,
+            EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+        super(process, mexId);
         _myRoleEPR = myRoleEPR;
         _partnerRoleChannel = channel;
-        _inMem = inMem;
-        init(portType, operation);    
+
+        init(portType, operation, (operation.getOutput() == null) ? MessageExchangePattern.REQUEST_ONLY
+                : MessageExchangePattern.REQUEST_RESPONSE);
     }
 
     @Override
     void load(MessageExchangeDAO dao) {
         super.load(dao);
+        _caller = dao.getProcess().getProcessId();
     }
 
     @Override
@@ -76,50 +85,57 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         super.save(dao);
     }
 
-    public void replyOneWayOk() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyOneWayOk mex=" + getMessageExchangeId());
-        }
-        setStatus(Status.ASYNC);
+    public void replyAsync(String foreignKey) {
+        throw new BpelEngineException("replyAsync() is not supported for invocation style " + _istyle);
     }
 
-    public void replyAsync() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyAsync mex=" + getMessageExchangeId());
+    public void replyOneWayOk() {
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyOneWayOk mex=" + getMessageExchangeId());
         }
+        sync();
+        checkReplyContextOk();
         setStatus(Status.ASYNC);
+        sync();
     }
 
     public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFault mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyWithFault mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
+        sync();
+        checkReplyContextOk();
         setFault(faultType, outputFaultMessage);
-        if (isAsync)
-            continueAsync();
+        sync();
+        if (!_blocked)
+            resumeInstance();
     }
 
     public void reply(Message response) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("reply mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("reply mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
+        sync();
+        checkReplyContextOk();
         setResponse(response);
-        if (isAsync)
-            continueAsync();
+        sync();
+        if (!_blocked)
+            resumeInstance();
 
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFailure mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyWithFailure mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
+        sync();
+        checkReplyContextOk();
         setFailure(type, description, details);
-        if (isAsync)
-            continueAsync();
+        sync();
+        if (!_blocked)
+            resumeInstance();
     }
+
     public QName getCaller() {
         return _caller;
     }
@@ -134,13 +150,46 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
 
     public String toString() {
         try {
-            return "{PartnerRoleMex#" + _mexId  + " [PID " + getCaller() + "] calling " + _epr + "."
-                    + _opname + "(...)}";
+            return "{PartnerRoleMex#" + _mexId + " [PID " + getCaller() + "] calling " + _epr + "." + _opname + "(...)}";
 
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";
         }
 
+    }
+
+    /**
+     * Resume an instance. This happens if the response for the partner invocation were not "immediately" available, that is if the
+     * IL was not able to supply a response in the scope of the
+     * {@link MessageExchangeContext#invokePartnerReliable(PartnerRoleMessageExchange)} or
+     * {@link MessageExchangeContext#invokePartnerAsynch(PartnerRoleMessageExchange)}. Note that this is actually the common case
+     * for ASYNC and RELIABLE invocations.
+     * 
+     */
+    protected void resumeInstance() {
+        assert false : "should not get resumeInstance() call";
+        throw new IllegalStateException("InternalError: unexpected state");
+    }
+
+    protected WorkEvent generateInvokeResponseWorkEvent() {
+        WorkEvent we = new WorkEvent();
+        we.setIID(_iid);
+        we.setType(WorkEvent.Type.INVOKE_RESPONSE);
+        we.setChannel(_responseChannel);
+        we.setMexId(_mexId);
+
+        return we;
+
+    }
+
+    protected void checkReplyContextOk() {
+        // Prevent duplicate replies.
+        if (_status != MessageExchange.Status.REQUEST && _status != MessageExchange.Status.ASYNC)
+            throw new BpelEngineException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + _status);
+
+        // In-memory processe are special, they don't allow scheduling so any replies must be delivered immediately.
+        if (!_blocked && _process.isInMemory())
+            throw new BpelEngineException("Cannot reply to in-memory process outside of BLOCKING call");
     }
 
 }
