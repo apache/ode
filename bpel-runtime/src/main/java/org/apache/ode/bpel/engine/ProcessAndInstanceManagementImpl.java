@@ -397,7 +397,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         return null;
                     for (ActivityRecoveryDAO recovery : instance.getActivityRecoveries()) {
                         if (recovery.getActivityId() == aid) {
-                            BpelProcess process = _server._engine._activeProcesses.get(instance.getProcess().getProcessId());
+                            BpelProcess process = _server.getBpelProcess(instance.getProcess().getProcessId());
                             if (process != null) {
                                 process.recoverActivity(instance, recovery.getChannel(), aid, action, null);
                                 break;
@@ -480,7 +480,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids) {
         ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
         TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
-        OProcess oprocess = _server._engine.getOProcess(pid);
+        OProcess oprocess = _server.getOProcess(pid);
 
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
@@ -516,7 +516,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      */
     protected final DebuggerSupport getDebugger(QName procid) throws ManagementException {
 
-        BpelProcess process = _server._engine._activeProcesses.get(procid);
+        BpelProcess process = _server.getBpelProcess(procid);
         if (process == null)
             throw new InvalidRequestException("The process \"" + procid + "\" is available.");
 
@@ -747,13 +747,13 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             }
         }
 
-        OProcess oprocess = _server._engine.getOProcess(pconf.getProcessId());
+        OProcess oprocess = _server.getOProcess(pconf.getProcessId());
         if (custom.includeEndpoints() && oprocess != null) {
             TEndpointReferences eprs = info.addNewEndpoints();
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
                     // TODO: this is very uncool.
-                    EndpointReference pepr = _server._engine._activeProcesses.get(pconf.getProcessId())
+                    EndpointReference pepr = _server.getBpelProcess(pconf.getProcessId())
                             .getInitialPartnerRoleEPR(oplink);
 
                     if (pepr != null) {
