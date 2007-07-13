@@ -47,9 +47,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private String correlationId;
 	private String pattern;
 	private Element ePR;
-	private Element callbackEPR;
 	private String channel;
-	private boolean propagateTransactionFlag;
 	private QName fault;
     private String faultExplanation;
     private String correlationStatus;
@@ -62,6 +60,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     private String _istyle;
     private MessageExchangeDAO _pipedExchange;
     private String _failureType;
+    private long _timeout;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -159,15 +158,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 		return ePR;
 	}
 
-	public void setCallbackEPR(Element epr) {
-		this.callbackEPR = epr;
-
-	}
-
-	public Element getCallbackEPR() {
-		return callbackEPR;
-	}
-
+	
 	public String getPattern() {
 		return pattern;
 	}
@@ -178,10 +169,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	public void setChannel(String string) {
 		this.channel = string;
-	}
-
-	public boolean getPropagateTransactionFlag() {
-		return propagateTransactionFlag;
 	}
 
 	public QName getFault() {
@@ -301,5 +288,13 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void setPipedMessageExchange(MessageExchangeDAO mex) {
         _pipedExchange = mex;
         
+    }
+
+    public long getTimeout() {
+        return _timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
     }
 }

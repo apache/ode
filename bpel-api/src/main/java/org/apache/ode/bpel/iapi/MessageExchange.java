@@ -162,7 +162,8 @@ public interface MessageExchange {
 
     /**
      * Indicates whether a transactions in associated with the message exchange. If this is the case, then the object must be used
-     * from a context (i.e. thread) that is associated with the same transaction. 
+     * from a context (i.e. thread) that is associated with the same transaction. The TRANSACTED and RELIABLE invocation styles will
+     * have this flag set to <code>true</code>. ASYNC and BLOCKING styles will always have this set to <code>false</code>.
      * @return <code>true<code> if there is a transaction associated with the object, <code>false</code> otherwise.
      */
     boolean isTransactional();

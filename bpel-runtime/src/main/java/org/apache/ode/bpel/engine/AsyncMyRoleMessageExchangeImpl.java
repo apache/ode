@@ -34,7 +34,12 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         if (_process.isInMemory()) {
             _process.invokeProcess(_process.getInMemMexDAO(_mexId));
         } else {
-            scheduleInvoke(_process);
+            doInTX(new InDbAction<Void>() {
+                public Void call(MessageExchangeDAO mexdao) {
+                    scheduleInvoke(_process);
+                    return null;
+                }
+            });
         }
       
         if (getOperation().getOutput() == null) {

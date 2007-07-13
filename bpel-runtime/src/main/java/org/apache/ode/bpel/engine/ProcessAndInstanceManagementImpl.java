@@ -714,7 +714,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         TDeploymentInfo depinfo = info.addNewDeploymentInfo();
         depinfo.setPackage(pconf.getPackage());
-        depinfo.setDocument(pconf.getBpelDocument());
+        //depinfo.setDocument(pconf.getBpelDocument());
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
         depinfo.setDeployer(pconf.getDeployer());
         if (custom.includeInstanceSummary()) {

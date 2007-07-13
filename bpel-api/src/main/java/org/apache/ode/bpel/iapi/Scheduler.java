@@ -47,14 +47,12 @@ public interface Scheduler {
 
     /**
      * Schedule a volatile (non-persisted) job. Volatile jobs should not be
-     * saved in the database and should not survive system crash. Volatile
-     * jobs scheduled from a transactional context should be scheduled
-     * regardless of whether the transaction commits.
+     * saved in the database and should not survive system crash. 
      *
-     * @param jobDetail information about the job
+     * @param transacted 
      * @return unique (as far as the scheduler is concerned) job identifier
      */
-    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException;
+    <T> Future<T> scheduleVolatileJob(boolean transacted, final Callable<T> call) throws ContextException;
 
     /**
      * Make a good effort to cancel the job. If its already running no big

@@ -86,7 +86,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     }
 
     public void replyAsync(String foreignKey) {
-        throw new BpelEngineException("replyAsync() is not supported for invocation style " + _istyle);
+        throw new BpelEngineException("replyAsync() is not supported for invocation style " + getInvocationStyle());
     }
 
     public void replyOneWayOk() {
@@ -174,7 +174,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     protected WorkEvent generateInvokeResponseWorkEvent() {
         WorkEvent we = new WorkEvent();
         we.setIID(_iid);
-        we.setType(WorkEvent.Type.INVOKE_RESPONSE);
+        we.setType(WorkEvent.Type.PARTNER_RESPONSE);
         we.setChannel(_responseChannel);
         we.setMexId(_mexId);
 

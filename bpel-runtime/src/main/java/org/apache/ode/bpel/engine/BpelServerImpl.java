@@ -64,6 +64,8 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
+import com.sun.corba.se.spi.activation._ActivatorImplBase;
+
 /**
  * <p>
  * The BPEL server implementation.
@@ -711,6 +713,15 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             } catch (InterruptedException e) {
                 __log.info(e);
             }
+        }
+    }
+
+    public BpelProcess getBpelProcess(QName processId) {
+        _mngmtLock.readLock().lock();
+        try {
+            return _registeredProcesses.get(processId);
+        } finally {
+            _mngmtLock.readLock().unlock();
         }
     }
 }

@@ -98,28 +98,25 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     }
 
     protected void scheduleInvoke(BpelProcess target) {
+        
+        assert !_process.isInMemory() : "Cannot schedule invokes for in-memory processes.";
+        assert _contexts.scheduler.isTransacted() : "Cannot schedule outside of transaction context.";
+        
         // Schedule a new job for invocation
         final WorkEvent we = new WorkEvent();
-        we.setType(WorkEvent.Type.INVOKE_INTERNAL);
+        we.setType(WorkEvent.Type.MYROLE_INVOKE);
         we.setProcessId(target.getPID());
         we.setMexId(_mexId);
 
         // Schedule a timeout 
         final WorkEvent we1 = new WorkEvent();
-        we1.setType(WorkEvent.Type.INVOKE_TIMEOUT);
+        we1.setType(WorkEvent.Type.MYROLE_INVOKE_TIMEOUT);
         we1.setProcessId(target.getPID());
         we1.setMexId(_mexId);
         
         setStatus(Status.ASYNC);
-        doInTX(new InDbAction<Void>() {
-
-            public Void call(MessageExchangeDAO mexdao) {
-                _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-                _contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
-                return null;
-            }
-
-        });
+        _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        _contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
 
     }
     

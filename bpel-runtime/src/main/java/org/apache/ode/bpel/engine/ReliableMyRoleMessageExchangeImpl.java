@@ -58,10 +58,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
 
     
     public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
-        super(engine, mexId);
-
-        // RELIABLE means we are bound to a transaction
-        _txflag = true;
+        super(process, mexId);
     }
 
 
@@ -76,26 +73,21 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
         if (_status != Status.NEW)
             throw new BpelEngineException("Invalid state: " + _status);
         
-        final BpelProcess target = _server.route(_callee, _request);
-        if (target == null) {
-            if (__log.isWarnEnabled())
-                __log.warn(__msgs.msgUnknownEPR("" + _epr));
-
-            _cstatus = MyRoleMessageExchange.CorrelationStatus.UKNOWN_ENDPOINT;
-            setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
-            save();
-            return;
-        }
-
         if (!processInterceptors(InterceptorInvoker.__onBpelServerInvoked, getDAO())) {
             throw new BpelEngineException("Intercepted.");
         }
         
         if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + target);
+            __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
         setStatus(Status.REQUEST);
         save(getDAO());
-        scheduleInvoke(target);
+        scheduleInvoke(_process);
+    }
+
+
+    @Override
+    public InvocationStyle getInvocationStyle() {
+        return InvocationStyle.RELIABLE;
     }
 
 

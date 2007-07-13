@@ -362,7 +362,7 @@ public class BpelProcess {
             final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
 
             // Process level events
-            if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
+            if (we.getType().equals(WorkEvent.Type.MYROLE_INVOKE)) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
@@ -417,7 +417,7 @@ public class BpelProcess {
                     }
                     processInstance.execute();
                     break;
-                case INVOKE_RESPONSE:
+                case PARTNER_RESPONSE:
                     if (__log.isDebugEnabled()) {
                         __log.debug("InvokeResponse event for iid " + we.getIID());
                     }

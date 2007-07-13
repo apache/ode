@@ -186,8 +186,6 @@ public interface MessageExchangeDAO {
      */
     void setChannel(String string);
 
-    boolean getPropagateTransactionFlag();
-
     QName getFault();
 
     void setFault(QName faultType);
@@ -224,14 +222,14 @@ public interface MessageExchangeDAO {
     char getDirection();
 
     /**
-     * Get the "callee"--the id of the process being invoked in a myRole
+     * Get the "callee"--the id of the service being invoked in a myRole
      * exchange.
      * @return
      */
     QName getCallee();
 
     /**
-     * Set the "callee"--the id of the process being invoked in a myRole
+     * Set the "callee"--the id of the service being invoked in a myRole
      * exchange.
      * @param callee
      */
@@ -259,5 +257,9 @@ public interface MessageExchangeDAO {
     void release();
 
     void setFailureType(String failureType);
+
+    long getTimeout();
+
+    void setTimeout(long timeout);
 
  }

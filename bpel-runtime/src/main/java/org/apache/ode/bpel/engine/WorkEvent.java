@@ -60,7 +60,20 @@ public class WorkEvent {
     }
 
     public enum Type {
-        TIMER, RESUME, INVOKE_RESPONSE, MATCHER, INVOKE_INTERNAL, INVOKE_TIMEOUT
+        TIMER, 
+        
+        RESUME, 
+        
+        /** Response from partner (i.e. the result of a partner-role invoke) has been received. */
+        PARTNER_RESPONSE, 
+        
+        MATCHER, 
+        
+        /** Invoke a "my role" operation (i.e. implemented by the process). */
+        MYROLE_INVOKE, 
+        
+        /** Timer event for "my role" invocations that are taking too long. */
+        MYROLE_INVOKE_TIMEOUT, MYROLE_INVOKE_ASYNC_RESPONSE
     }
 
     public String getChannel() {
