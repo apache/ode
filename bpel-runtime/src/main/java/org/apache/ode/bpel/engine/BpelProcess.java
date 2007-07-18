@@ -40,6 +40,7 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -116,7 +117,7 @@ public class BpelProcess {
     /** Latch-like thing to control hydration/dehydration. */
     private HydrationLatch _hydrationLatch;
 
-    public BpelProcess(ProcessConf conf, BpelEventListener debugger) {
+    public BpelProcess(ProcessConf conf) {
         _pid = conf.getProcessId();
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();

@@ -270,7 +270,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            BpelProcess process = new BpelProcess(conf, null);
+            BpelProcess process = new BpelProcess(conf);
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
