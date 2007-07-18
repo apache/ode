@@ -63,9 +63,19 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         // so no instance has been created after a process has been retired.
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+
+        // clean up deployment and invocations
+        _deployments.clear();
+        _invocations.clear();
+        
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
+        
+        // clean up deployment and invocations
+        _deployments.clear();
+        _invocations.clear();
+        
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
         assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
@@ -75,6 +85,10 @@ public class VersionedRedeployTest extends BPELTestAbstract {
     public void testVersionedUndeployDeploy() throws Throwable {
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         doUndeployments();
+
+        //clean up invocations before next run
+        _invocations.clear();
+
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         // We should have a brand new version 1 with no version 2
         assertNull(store.getProcessConfiguration(qName1));
