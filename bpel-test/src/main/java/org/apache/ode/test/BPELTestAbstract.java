@@ -233,7 +233,7 @@ public abstract class BPELTestAbstract extends TestCase {
 
                 addInvoke(testPropsFile + "#" + i, serviceId, operation, in, responsePattern);
             }
-
+            propsFileCnt++;
             testPropsFile = new File(deployDir, "test" + propsFileCnt + ".properties");
         }
     }
@@ -422,6 +422,9 @@ public abstract class BPELTestAbstract extends TestCase {
 
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
+            if (ex != null) {
+            	sbuf.append("; got exception msg: " + ex.getMessage());
+            }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
             return sbuf.toString();
