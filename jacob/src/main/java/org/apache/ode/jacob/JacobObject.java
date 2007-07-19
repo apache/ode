@@ -35,15 +35,7 @@ public abstract class JacobObject implements Serializable {
      * Get the unadorned (no package) name of this class.
      */
     protected String getClassName() {
-        return getClassName(getClass());
-    }
-
-    /**
-     * Get the unadorned (no package) name of a class.
-     */
-    protected static String getClassName(Class clazz) {
-        String className = clazz.getName();
-        return (className.indexOf('.') == -1) ? className : className.substring(clazz.getPackage().getName().length() + 1);
+        return getClass().getSimpleName();
     }
 
     protected static Object getExtension(Class extensionClass) {
@@ -79,7 +71,7 @@ public abstract class JacobObject implements Serializable {
     protected <T extends Channel> T newChannel(Class<T> channelType, String description)
         throws IllegalArgumentException
     {
-        return (T) JacobVPU.activeJacobThread().newChannel(channelType, toString(), description);
+        return (T) JacobVPU.activeJacobThread().newChannel(channelType, getClassName(), description);
     }
 
     /**
