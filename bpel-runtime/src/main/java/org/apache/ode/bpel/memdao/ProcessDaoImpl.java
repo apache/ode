@@ -18,6 +18,16 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -26,15 +36,6 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A very simple, in-memory implementation of the {@link ProcessDAO} interface.
@@ -53,6 +54,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private BpelDAOConnectionImpl _conn;
     private int _executionCount = 0;
     private Collection<Long> _instancesToRemove = new ConcurrentLinkedQueue<Long>();
+    private static volatile long _lastRemoval = 0;
 
     private String _guid;
 
@@ -108,18 +110,22 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
                 _instances.put(newInstance.getInstanceId(), newInstance);
             }
         });
-        _instancesAge.put(newInstance.getInstanceId(), System.currentTimeMillis());
+        long now = System.currentTimeMillis();
 
         // Checking for old instances that could still be around because of a failure
         // or completion problem
-        ArrayList<Long> removals = new ArrayList<Long>();
-        for (Map.Entry<Long, Long> entry : _instancesAge.entrySet()) {
-            if (System.currentTimeMillis() - entry.getValue() > BpelDAOConnectionImpl.TIME_TO_LIVE) {
-                ProcessInstanceDAO idao = _instances.remove(entry.getKey());
-                removals.add(entry.getKey());
+        if (now > _lastRemoval + (BpelDAOConnectionImpl.TIME_TO_LIVE/10)) {
+            _lastRemoval = now;
+            Object[] oldInstances = _instancesAge.keySet().toArray();
+            for (int i=oldInstances.length-1; i>0; i--) {
+                Long old = (Long) oldInstances[i];
+                Long age = _instancesAge.get(old);
+                if (age != null && now-age > BpelDAOConnectionImpl.TIME_TO_LIVE) {
+                    _instances.remove(old);
+                    _instancesAge.remove(old);
+                }
             }
         }
-        for (Long removal : removals) _instancesAge.remove(removal);
 
         // Removing right away on rollback
         final Long iid = newInstance.getInstanceId();
@@ -150,7 +156,9 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     public void instanceCompleted(ProcessInstanceDAO instance) {
         // Cleaning up
+        if (__log.isDebugEnabled())
         __log.debug("Removing completed process instance " + instance.getInstanceId() + " from in-memory store.");
+        _instancesAge.remove(instance.getInstanceId());
         ProcessInstanceDAO removed = _instances.remove(instance.getInstanceId());
         if (removed == null) {
             // Checking for leftover instances that should be removed
