@@ -58,4 +58,7 @@ class OdeConsumerSync extends OdeConsumer {
         });
     }
 
+    protected void inOutDone(InOut inout) {
+        // nothing
+    }
 }

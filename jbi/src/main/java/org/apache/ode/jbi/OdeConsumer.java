@@ -146,6 +146,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
 
     protected abstract void doSendTwoWay(PartnerRoleMessageExchange odeMex, InOut inout);
 
+    protected abstract void inOutDone(InOut inout);
 
     public void onJbiMessageExchange(MessageExchange jbiMex) throws MessagingException {
         if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY) &&
@@ -155,11 +156,13 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
         }
         if (jbiMex.getStatus() == ExchangeStatus.ACTIVE) {
             if (jbiMex.getPattern().equals(MessageExchangePattern.IN_OUT)) {
+                inOutDone((InOut) jbiMex);
                 outResponse((InOut) jbiMex);
             }
             jbiMex.setStatus(ExchangeStatus.DONE);
             _ode.getChannel().send(jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.ERROR) {
+            inOutDone((InOut) jbiMex);
             outFailure((InOut) jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.DONE) {
             _outstandingExchanges.remove(jbiMex.getExchangeId());
