@@ -1,8 +1,9 @@
 package org.apache.ode.jbi;
 
 
-import java.util.TimerTask;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -17,9 +18,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 
 /**
- * 
- * @author mszefler
- *
+ * Asynchronous JBI service consumer
  */
 class OdeConsumerAsync extends OdeConsumer {
     private static final Log __log = LogFactory.getLog(OdeConsumerAsync.class);
@@ -28,13 +27,17 @@ class OdeConsumerAsync extends OdeConsumer {
      * We create an executor to handle all the asynchronous invocations/timeouts. Note, we don't need a lot of threads
      * here, the operations are all async, using single-thread executor avoids any possible problems in concurrent
      * use of delivery channel.
+     * 
+     * WARNING:  Canceling tasks does not immediately release them, so we don't use the schedule-cancel pattern here.  
      */
     private ScheduledExecutorService _executor;
 
+    private Map<String, Long> _mexTimeouts = new ConcurrentHashMap<String, Long>();
+    
     OdeConsumerAsync(OdeContext ode) {
         super(ode);
        _executor = Executors.newSingleThreadScheduledExecutor();
-
+        _executor.scheduleWithFixedDelay(new MEXReaper(), _responseTimeout, _responseTimeout/10, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -59,14 +62,7 @@ class OdeConsumerAsync extends OdeConsumer {
             public void run() {
                 try {
                     _outstandingExchanges.put(inout.getExchangeId(), odeMex);
-                    _executor.schedule(new TimerTask() {
-
-                        @Override
-                        public void run() {
-                            doTimeoutCheck(inout);
-                        }
-
-                    }, _responseTimeout, TimeUnit.MILLISECONDS);
+                    _mexTimeouts.put(inout.getExchangeId(), System.currentTimeMillis()+_responseTimeout);
                     _ode.getChannel().send(inout);
                 } catch (MessagingException e) {
                     String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
@@ -77,24 +73,36 @@ class OdeConsumerAsync extends OdeConsumer {
 
     }
 
-    private void doTimeoutCheck(InOut inout) {
-        final PartnerRoleMessageExchange pmex = _outstandingExchanges.remove(inout.getExchangeId());
+    protected void inOutDone(InOut inout) {
+        _mexTimeouts.remove(inout.getExchangeId());
+    }
 
-        if (pmex == null) /* no worries, got a response. */
-            return;
+    private class MEXReaper implements Runnable {
+        public void run() {
+            long now = System.currentTimeMillis();
+            Object[] inouts = _mexTimeouts.keySet().toArray();
+            for (int i=0; i<inouts.length; i++) {
+                long timeout = _mexTimeouts.get(inouts[i]);
+                if (timeout >= now) {
+                    _mexTimeouts.remove(inouts[i]);
+                    final PartnerRoleMessageExchange pmex = _outstandingExchanges.remove(inouts[i]);
 
-        __log.warn("Timeout on JBI message exchange " + inout.getExchangeId());
+                    if (pmex == null) /* no worries, got a response. */
+                        continue;
 
+                    __log.warn("Timeout on JBI message exchange " + inouts[i]);
         try {
             _ode._scheduler.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     pmex.replyWithFailure(FailureType.NO_RESPONSE, "Response not received after " + _responseTimeout + "ms.", null);
                     return null;
                 }
-
             });
         } catch (Exception ex) {
             __log.error("Error executing transaction:  ", ex);
+        }
+    }
+            }
         }
     }
 }
