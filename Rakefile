@@ -15,7 +15,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.1"
+gem "buildr", "=1.1.3"
 require "buildr"
 # require "buildr/lib/buildr"
 require "buildr/xmlbeans.rb"
