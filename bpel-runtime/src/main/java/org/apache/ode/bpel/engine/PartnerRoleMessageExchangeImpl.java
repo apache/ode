@@ -88,7 +88,8 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFailure mex=" + getMessageExchangeId());
+            LOG.debug("replyWithFailure mex=" + getMessageExchangeId() + " failureType="+type+" description="+description
+                      +" details="+details);
         }
         boolean isAsync = isAsync();
         setFailure(type, description, details);
