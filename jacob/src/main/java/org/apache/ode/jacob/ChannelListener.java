@@ -38,9 +38,8 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
     private transient CT _channel;
 
     protected ChannelListener(CT channel) throws IllegalStateException {
-        if (this.getClass().getSuperclass().getSuperclass() != ChannelListener.class) {
-            throw new IllegalStateException("Inheritence in ChannelListener classes not allowed!");
-        }
+        assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
+               "Inheritance in ChannelListener classes not allowed!";
         if (channel == null) {
             throw new IllegalArgumentException("Null channel!");
         }
