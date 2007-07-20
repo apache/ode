@@ -19,6 +19,25 @@
 
 package org.apache.ode.axis2.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -45,21 +64,6 @@ import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.Node;
 
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 /**
  * Axis2 wrapper for process and instance management interfaces.
  */
@@ -80,7 +84,8 @@ public class ManagementService {
             WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
             wsdlReader.setFeature("javax.wsdl.verbose", false);
 
-            def = wsdlReader.readWSDL(rootpath + "/pmapi.wsdl");
+            File wsdlFile = new File(rootpath + "/pmapi.wsdl");            
+            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
             AxisService processService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
                     "ProcessManagementPort", "ProcessManagement", def, new ProcessMessageReceiver());

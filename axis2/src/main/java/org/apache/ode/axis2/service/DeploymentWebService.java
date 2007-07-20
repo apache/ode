@@ -56,6 +56,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -89,7 +91,8 @@ public class DeploymentWebService {
             WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
             wsdlReader.setFeature("javax.wsdl.verbose", false);
 
-            def = wsdlReader.readWSDL(rootpath + "/deploy.wsdl");
+            File wsdlFile = new File(rootpath + "/deploy.wsdl");            
+            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
             AxisService deployService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/deployapi", "DeploymentService"),
                     "DeploymentPort", "DeploymentService", def, new DeploymentMessageReceiver());
