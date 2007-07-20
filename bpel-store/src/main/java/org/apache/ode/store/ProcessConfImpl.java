@@ -78,6 +78,9 @@ public class ProcessConfImpl implements ProcessConf {
     private QName _pid;
     private QName _type;
 
+    // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
+    private volatile boolean _inMemory = false;
+
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate) {
         _pid = pid;
@@ -88,6 +91,7 @@ public class ProcessConfImpl implements ProcessConf {
         _props = Collections.unmodifiableMap(props);
         _state = pstate;
         _type = type;
+        _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
 
         initLinks();
         initMexInterceptors();
@@ -268,10 +272,11 @@ public class ProcessConfImpl implements ProcessConf {
     }
 
     public boolean isTransient() {
-        return _pinfo.isSetInMemory() && _pinfo.getInMemory();
+        return _inMemory;
     }
     public void setTransient(boolean t) {
         _pinfo.setInMemory(t);
+        _inMemory = t;
     }
 
     public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {
