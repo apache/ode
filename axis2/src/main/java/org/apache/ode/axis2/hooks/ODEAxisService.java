@@ -21,6 +21,8 @@ package org.apache.ode.axis2.hooks;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -68,7 +70,7 @@ public class ODEAxisService extends AxisService {
         }
         
         try {
-            URI baseUri = pconf.getBaseURL().toURI().resolve(wsdlDefinition.getDocumentBaseURI());
+        	URI baseUri = pconf.getBaseURI().resolve(wsdlDefinition.getDocumentBaseURI());
             InputStream is = baseUri.toURL().openStream();
             WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(is, wsdlServiceName, portName);
             serviceBuilder.setBaseUri(baseUri.toString());
