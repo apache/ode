@@ -19,6 +19,8 @@
 package org.apache.ode.test;
 
 import junit.framework.TestCase;
+
+import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
@@ -46,6 +48,7 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +61,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class BPELTestAbstract extends TestCase {
-
+	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
+	
     protected BpelServerImpl _server;
 
     protected ProcessStore store;
@@ -143,6 +147,7 @@ public abstract class BPELTestAbstract extends TestCase {
             }
         });
         _server.setConfigProperties(getConfigProperties());
+        _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
     }
@@ -382,7 +387,13 @@ public abstract class BPELTestAbstract extends TestCase {
         if (deployxmlurl == null) {
             fail("Resource not found: " + deployxml);
         }
-        return new File(deployxmlurl.getPath()).getParentFile();
+        try {
+			return new File(deployxmlurl.toURI().getPath()).getParentFile();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+			return null;
+		}
     }
 
     /**
@@ -394,7 +405,9 @@ public abstract class BPELTestAbstract extends TestCase {
     protected Properties getConfigProperties() {
     	// could also return null, returning an empty properties 
     	// object is more fail-safe.
-    	return new Properties();
+    	Properties p = new Properties();
+    	p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+    	return p;
     }
     
     protected static class Failure {
