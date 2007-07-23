@@ -71,7 +71,8 @@ JAVAX               = struct(
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0"
+  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0",
+  :resource			=>"javax.resource:connector:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
 JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
@@ -99,12 +100,19 @@ WS_COMMONS          = struct(
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
+JOTM				= struct(
+  :jotm				=>"jotm:jotm:jar:2.0.10",
+  :carol			=>"org.objectweb.carol:carol:jar:2.0.5",
+  :jrmp				=>"jotm:jotm_jrmp_stubs:jar:2.0.10",
+  :howl				=>"howl:howl-logger:jar:0.1.11"
+)
 
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
+repositories.remote << "http://download.java.net/maven/2"
 repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 # Changing releases tag names
@@ -213,7 +221,7 @@ define "ode" do
   desc "ODE Interface Layers Common"
   define "bpel-epr" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
-      COMMONS.logging, DERBY, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, JAVAX.connector
+      COMMONS.logging, DERBY, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, JAVAX.connector, COMMONS.lang
     package :jar
   end
 
@@ -252,6 +260,8 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
+	test.compile.with HSQLDB, JOTM.jotm
+	test.junit.with HSQLDB, JOTM.jotm, JOTM.carol, JOTM.jrmp, JAVAX.transaction, JOTM.howl, JAVAX.resource, JAVAX.connector, LOG4J
     package :jar
   end
 
