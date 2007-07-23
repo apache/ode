@@ -18,15 +18,16 @@
  */
 package org.apache.ode.bpel.o;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Message variable type.
@@ -35,7 +36,7 @@ public class OMessageVarType extends OVarType {
     private static final long serialVersionUID = 256680050844726425L;
     
     public QName messageType;
-    public final Map<String, Part> parts = new HashMap<String,Part>();
+    public final Map<String, Part> parts = new LinkedHashMap<String,Part>();
 
     /** For doc-lit-like message types , the element type of the only part. */
     public final OElementVarType docLitType;
