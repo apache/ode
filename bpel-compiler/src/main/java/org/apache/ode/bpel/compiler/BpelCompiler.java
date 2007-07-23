@@ -352,7 +352,7 @@ abstract class BpelCompiler implements CompilerContext {
             }
 
             List<OMessageVarType.Part> parts = new ArrayList<OMessageVarType.Part>();
-            CollectionsX.transform(parts, ((Map<String, Part>) msg.getParts()).values(),
+            CollectionsX.transform(parts, ((List<Part>) msg.getOrderedParts(null)),
                     new UnaryFunction<Part, OMessageVarType.Part>() {
                         public OMessageVarType.Part apply(Part part) {
                             OVarType partType;
