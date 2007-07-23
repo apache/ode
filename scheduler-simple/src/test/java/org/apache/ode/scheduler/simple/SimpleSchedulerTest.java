@@ -1,7 +1,14 @@
 package org.apache.ode.scheduler.simple;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
@@ -9,7 +16,7 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
-import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.objectweb.jotm.Jotm;
 
 public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
@@ -22,17 +29,13 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
     TransactionManager _txm;
 
-    public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
-    }
     
-    /*
     Jotm _jotm;
 
     public void setUp() throws Exception {
         _jotm = new Jotm(true, false);
         _txm = _jotm.getTransactionManager();
         _ds = new DelegateSupport();
-        _ds.truncate();
 
         _scheduler = newScheduler("n1");
         _jobs = new ArrayList<JobInfo>(100);
@@ -234,5 +237,5 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         scheduler.setTransactionManager(_txm);
         return scheduler;
     }
-    */
+    
 }
