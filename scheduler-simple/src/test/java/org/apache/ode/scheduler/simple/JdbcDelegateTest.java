@@ -22,7 +22,7 @@ public class JdbcDelegateTest extends TestCase {
 
     public void setUp() throws Exception {
         _ds = new DelegateSupport();
-//        _del = _ds.delegate();
+        _del = _ds.delegate();
     }
     
     
