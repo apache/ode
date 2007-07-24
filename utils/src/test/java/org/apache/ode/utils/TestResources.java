@@ -28,7 +28,7 @@ public class TestResources {
 
     public static URL getResource(String s) {
         URL url = TestResources.class.getResource(s);
-        if (url == null) url = ClassLoader.getSystemClassLoader().getResource(s);
+        if (url == null) url = TestResources.class.getResource("/" + s);
         return url;
     }
 
