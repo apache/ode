@@ -35,6 +35,10 @@ import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
 
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,22 +51,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-
 /**
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
-    private Scheduler _scheduler;
+    private TransactionManager _txm;
+
     private Map<QName, ProcessDaoImpl> _store;
+
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
-    private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
+
+    private static Map<String, MessageExchangeDAO> _mexStore = Collections
+            .synchronizedMap(new HashMap<String, MessageExchangeDAO>());
+
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
 
-    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, Scheduler scheduler) {
+    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, TransactionManager txm) {
         _store = store;
-        _scheduler = scheduler;
+        _txm = txm;
     }
 
     public ProcessDAO getProcess(QName processId) {
@@ -70,8 +78,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
-        ProcessDaoImpl process = new ProcessDaoImpl(this,_store,pid,type, guid,version);
-        _store.put(pid,process);
+        ProcessDaoImpl process = new ProcessDaoImpl(this, _store, pid, type, guid, version);
+        _store.put(pid, process);
         return process;
     }
 
@@ -85,13 +93,12 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter filter) {
-        if(filter.getLimit()==0) {
+        if (filter.getLimit() == 0) {
             return Collections.EMPTY_LIST;
         }
         List<ProcessInstanceDAO> matched = new ArrayList<ProcessInstanceDAO>();
         // Selecting
-        selectionCompleted:
-        for (ProcessDaoImpl proc : _store.values()) {
+        selectionCompleted: for (ProcessDaoImpl proc : _store.values()) {
             boolean pmatch = true;
             if (filter.getNameFilter() != null
                     && !equalsOrWildcardMatch(filter.getNameFilter(), proc.getProcessId().getLocalPart()))
@@ -107,9 +114,11 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
                     if (filter.getStatusFilter() != null) {
                         boolean statusMatch = false;
                         for (Short status : filter.convertFilterState()) {
-                            if (inst.getState() == status.byteValue()) statusMatch = true;
+                            if (inst.getState() == status.byteValue())
+                                statusMatch = true;
                         }
-                        if (!statusMatch) match = false;
+                        if (!statusMatch)
+                            match = false;
                     }
                     if (filter.getStartedDateFilter() != null
                             && !dateMatch(filter.getStartedDateFilter(), inst.getCreateTime(), filter))
@@ -118,25 +127,25 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
                             && !dateMatch(filter.getLastActiveDateFilter(), inst.getLastActiveTime(), filter))
                         match = false;
 
-//                    if (filter.getPropertyValuesFilter() != null) {
-//                        for (Map.Entry propEntry : filter.getPropertyValuesFilter().entrySet()) {
-//                            boolean entryMatched = false;
-//                            for (ProcessPropertyDAO prop : proc.getProperties()) {
-//                                if (prop.getName().equals(propEntry.getKey())
-//                                        && (propEntry.getValue().equals(prop.getMixedContent())
-//                                        || propEntry.getValue().equals(prop.getSimpleContent()))) {
-//                                    entryMatched = true;
-//                                }
-//                            }
-//                            if (!entryMatched) {
-//                                match = false;
-//                            }
-//                        }
-//                    }
+                    // if (filter.getPropertyValuesFilter() != null) {
+                    // for (Map.Entry propEntry : filter.getPropertyValuesFilter().entrySet()) {
+                    // boolean entryMatched = false;
+                    // for (ProcessPropertyDAO prop : proc.getProperties()) {
+                    // if (prop.getName().equals(propEntry.getKey())
+                    // && (propEntry.getValue().equals(prop.getMixedContent())
+                    // || propEntry.getValue().equals(prop.getSimpleContent()))) {
+                    // entryMatched = true;
+                    // }
+                    // }
+                    // if (!entryMatched) {
+                    // match = false;
+                    // }
+                    // }
+                    // }
 
                     if (match) {
                         matched.add(inst);
-                        if(matched.size()==filter.getLimit()) {
+                        if (matched.size() == filter.getLimit()) {
                             break selectionCompleted;
                         }
                     }
@@ -149,9 +158,10 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
             Collections.sort(matched, new Comparator<ProcessInstanceDAO>() {
                 public int compare(ProcessInstanceDAO o1, ProcessInstanceDAO o2) {
-                    for (String orderKey: orders) {
+                    for (String orderKey : orders) {
                         int result = compareInstanceUsingKey(orderKey, o1, o2);
-                        if (result != 0) return result;
+                        if (result != 0)
+                            return result;
                     }
                     return 0;
                 }
@@ -173,8 +183,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     public MessageExchangeDAO createMessageExchange(char dir) {
         String id = Long.toString(counter.getAndIncrement());
-        MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir,id);
-        _mexStore.put(id,mex);
+        MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir, id);
+        _mexStore.put(id, mex);
         return mex;
     }
 
@@ -189,7 +199,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         String orderKey = key;
         if (key.startsWith("+") || key.startsWith("-")) {
             orderKey = key.substring(1, key.length());
-            if (key.startsWith("-")) ascending = false;
+            if (key.startsWith("-"))
+                ascending = false;
         }
         ProcessDAO process1 = getProcess(instanceDAO1.getProcess().getProcessId());
         ProcessDAO process2 = getProcess(instanceDAO2.getProcess().getProcessId());
@@ -203,11 +214,11 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             s1 = process1.getProcessId().getNamespaceURI();
             s2 = process2.getProcessId().getNamespaceURI();
         } else if ("version".equals(orderKey)) {
-            s1 = ""+process1.getVersion();
-            s2 = ""+process2.getVersion();
+            s1 = "" + process1.getVersion();
+            s2 = "" + process2.getVersion();
         } else if ("status".equals(orderKey)) {
-            s1 = ""+instanceDAO1.getState();
-            s2 = ""+instanceDAO2.getState();
+            s1 = "" + instanceDAO1.getState();
+            s2 = "" + instanceDAO2.getState();
         } else if ("started".equals(orderKey)) {
             s1 = ISO8601DateParser.format(instanceDAO1.getCreateTime());
             s2 = ISO8601DateParser.format(instanceDAO2.getCreateTime());
@@ -215,69 +226,77 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             s1 = ISO8601DateParser.format(instanceDAO1.getLastActiveTime());
             s2 = ISO8601DateParser.format(instanceDAO2.getLastActiveTime());
         }
-        if (ascending) return s1.compareTo(s2);
-        else return s2.compareTo(s1);
+        if (ascending)
+            return s1.compareTo(s2);
+        else
+            return s2.compareTo(s1);
     }
 
     private boolean equalsOrWildcardMatch(String s1, String s2) {
-        if (s1 == null || s2 == null) return false;
-        if (s1.equals(s2)) return true;
+        if (s1 == null || s2 == null)
+            return false;
+        if (s1.equals(s2))
+            return true;
         if (s1.endsWith("*")) {
-            if (s2.startsWith(s1.substring(0, s1.length() - 1))) return true;
+            if (s2.startsWith(s1.substring(0, s1.length() - 1)))
+                return true;
         }
         if (s2.endsWith("*")) {
-            if (s1.startsWith(s2.substring(0, s2.length() - 1))) return true;
+            if (s1.startsWith(s2.substring(0, s2.length() - 1)))
+                return true;
         }
         return false;
     }
 
-    public boolean dateMatch(List<String> dateFilters, Date instanceDate,  InstanceFilter filter) {
+    public boolean dateMatch(List<String> dateFilters, Date instanceDate, InstanceFilter filter) {
         boolean match = true;
         for (String ddf : dateFilters) {
             String isoDate = ISO8601DateParser.format(instanceDate);
             String critDate = Filter.getDateWithoutOp(ddf);
             if (ddf.startsWith("=")) {
-                if (!isoDate.startsWith(critDate)) match = false;
+                if (!isoDate.startsWith(critDate))
+                    match = false;
             } else if (ddf.startsWith("<=")) {
-                if (!isoDate.startsWith(critDate) && isoDate.compareTo(critDate) > 0) match = false;
+                if (!isoDate.startsWith(critDate) && isoDate.compareTo(critDate) > 0)
+                    match = false;
             } else if (ddf.startsWith(">=")) {
-                if (!isoDate.startsWith(critDate) && isoDate.compareTo(critDate) < 0) match = false;
+                if (!isoDate.startsWith(critDate) && isoDate.compareTo(critDate) < 0)
+                    match = false;
             } else if (ddf.startsWith("<")) {
-                if (isoDate.compareTo(critDate) > 0) match = false;
+                if (isoDate.compareTo(critDate) > 0)
+                    match = false;
             } else if (ddf.startsWith(">")) {
-                if (isoDate.compareTo(critDate) < 0) match = false;
+                if (isoDate.compareTo(critDate) < 0)
+                    match = false;
             }
         }
         return match;
     }
 
-
     public ScopeDAO getScope(Long siidl) {
         for (ProcessDaoImpl process : _store.values()) {
             for (ProcessInstanceDAO instance : process._instances.values()) {
-                if (instance.getScope(siidl) != null) return instance.getScope(siidl);
+                if (instance.getScope(siidl) != null)
+                    return instance.getScope(siidl);
             }
         }
         return null;
     }
 
-
     public void insertBpelEvent(BpelEvent event, ProcessDAO processConfiguration, ProcessInstanceDAO instance) {
         _events.add(event);
     }
 
-
     public List<Date> bpelEventTimelineQuery(InstanceFilter ifilter, BpelEventFilter efilter) {
         // TODO : Provide more correct implementation:
         ArrayList<Date> dates = new ArrayList<Date>();
-        CollectionsX.transform(dates, _events, new UnaryFunction<BpelEvent,Date>() {
+        CollectionsX.transform(dates, _events, new UnaryFunction<BpelEvent, Date>() {
             public Date apply(BpelEvent x) {
                 return x.getTimestamp();
             }
         });
         return dates;
     }
-
 
     public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter, BpelEventFilter efilter) {
         // TODO : Provide a more correct (filtering) implementation:
@@ -288,7 +307,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
      * @see org.apache.ode.bpel.dao.BpelDAOConnection#instanceQuery(String)
      */
     public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
-        //TODO
+        // TODO
         throw new UnsupportedOperationException();
     }
 
@@ -301,12 +320,18 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public void defer(final Runnable runnable) {
-        _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-            public void afterCompletion(boolean success) {
-            }
-            public void beforeCompletion() {
-                runnable.run();
-            }
-        });
+        try {
+            _txm.getTransaction().registerSynchronization(new Synchronization() {
+                public void afterCompletion(int status) {
+                }
+
+                public void beforeCompletion() {
+                    runnable.run();
+                }
+            });
+       
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

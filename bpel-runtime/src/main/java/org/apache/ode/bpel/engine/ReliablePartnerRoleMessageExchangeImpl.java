@@ -22,7 +22,7 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
     protected void checkReplyContextOk() {
         super.checkReplyContextOk();
         
-        if (!_contexts.scheduler.isTransacted())
+        if (!_contexts.isTransacted())
             throw new BpelEngineException("Cannot replyXXX from non-transaction context!");
     }
 
@@ -40,7 +40,7 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
     @Override
     protected void resumeInstance() {
         // TODO Auto-generated method stub
-        assert _contexts.scheduler.isTransacted() : "checkReplyContext() should have prevented us from getting here.";
+        assert _contexts.isTransacted() : "checkReplyContext() should have prevented us from getting here.";
         assert !_process.isInMemory() : "resumeInstance() for reliable in-mem processes makes no sense.";
 
         final WorkEvent we = generateInvokeResponseWorkEvent();

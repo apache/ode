@@ -70,9 +70,15 @@ public class HMessageExchange extends HObject {
 
     private String _callee;
 
-    private String _pipedMessageExchangeId;
-
+    private HMessageExchange _p2pPeer;
+    
     private Map<String, String> _properties = new HashMap<String, String>();
+
+    private long _timeout;
+
+    private String _istyle;
+
+    private String _failureType;
 
     /**
      * 
@@ -324,14 +330,52 @@ public class HMessageExchange extends HObject {
         return _partnerLink;
     }
 
+    
     /**
-     * @hibernate.property column="PIPED_ID"
+     * @hibernate.property column="TIMEOUT"
+     * 
      */
-    public String getPipedMessageExchangeId() {
-        return _pipedMessageExchangeId;
+    public long getTimeout() {
+        return _timeout; 
+    }
+    
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
     }
 
-    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
-        _pipedMessageExchangeId = pipedMessageExchangeId;
+    /**
+     * @hibernate.property column="ISTYLE"
+     */
+    public String getInvocationStyle() {
+        return _istyle;
     }
+
+    /**
+     * @hibernate.many-to-one column="P2P_PEER"
+     * @return
+     */
+    public HMessageExchange getPipedMessageExchange() {
+        return _p2pPeer;
+    }
+    
+    public void setPipedMesageExchange(HMessageExchange p2ppeer) {
+        _p2pPeer = p2ppeer;
+    }
+
+    public void setFailureType(String failureType) {
+        _failureType = failureType;
+    }
+    
+    /**
+     * @hibernate.property column="FAILURE_TYPE"
+     * @return
+     */
+    public String getFailureType() {
+        return _failureType;
+    }
+
+    public void setInvocationStyle(String invocationStyle) {
+        _istyle = invocationStyle;
+    }
+    
 }

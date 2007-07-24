@@ -80,8 +80,7 @@ class DebuggerSupport {
      */
     DebuggerSupport(BpelProcess process) {
         _process = process;
-        _db = new BpelProcessDatabase(_process._contexts.dao,
-                _process._contexts.scheduler,
+        _db = new BpelProcessDatabase(_process._contexts,
                 _process._pid);
 
     }

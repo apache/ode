@@ -401,7 +401,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     protected void assertTransaction() {
-        if (!_contexts.scheduler.isTransacted())
+        if (!_contexts.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
     }
 
@@ -411,7 +411,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
             return action.call(getDAO());
         } else {
             try {
-                return _contexts.scheduler.execIsolatedTransaction(new Callable<T>() {
+                return _process._server.execIsolatedTransaction(new Callable<T>() {
                     public T call() throws Exception {
                         assertTransaction();
                         return action.call(getDAO());

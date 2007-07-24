@@ -21,20 +21,29 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
+
 /**
- * Aggregation of all the contexts provided to the BPEL engine by the
- * integration layer.
+ * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
  */
 class Contexts {
+
+    TransactionManager txManager;
 
     MessageExchangeContext mexContext;
 
@@ -46,11 +55,84 @@ class Contexts {
 
     BpelDAOConnectionFactory dao;
 
-    /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
-    final List<MessageExchangeInterceptor >globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
+    /** Global Message-Exchange interceptors. Must be copy-on-write!!! */
+    final List<MessageExchangeInterceptor> globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
 
     /** Global event listeners. Must be copy-on-write!!! */
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
 
+    public boolean isTransacted() {
+        try {
+            return txManager.getStatus() == Status.STATUS_ACTIVE;
+        } catch (SystemException e) {
+            throw new BpelEngineException(e);
+        }
+    }
+
+    public void execTransaction(final Runnable transaction) {
+        try {
+            execTransaction(new Callable<Void>() {
+
+                public Void call() throws Exception {
+                    transaction.run();
+                    return null;
+                }
+
+            });
+        } catch (Exception e) {
+            throw new BpelEngineException(e);
+        }
+
+    }
+
+    public <T> T execTransaction(Callable<T> transaction) throws Exception{
+        try {
+            txManager.begin();
+        } catch (Exception ex) {
+            String errmsg = "Internal Error, could not begin transaction.";
+            throw new BpelEngineException(errmsg, ex);
+        }
+        boolean success = false;
+        try {
+            T retval = transaction.call();
+            success = true;
+            return retval;
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (success)
+                try {
+                    txManager.commit();
+                } catch (Exception ex) {
+                    throw new BpelEngineException("Could not commit.", ex);
+                }
+            else
+                try {
+                    txManager.rollback();
+                } catch (Exception ex) {
+                    throw new BpelEngineException("Could not rollback.", ex);
+
+                }
+        }
+    }
+
+    public void registerCommitSynchronizer(final Runnable runnable) {
+        try {
+            txManager.getTransaction().registerSynchronization(new Synchronization() {
+
+                public void afterCompletion(int status) {
+                    if (status == Status.STATUS_COMMITTED)
+                        runnable.run();
+                }
+
+                public void beforeCompletion() {
+
+                }
+                
+            });
+        } catch (Exception ex) {
+            throw new BpelEngineException("Error registering synchronizer." ,ex);
+        }
+    }
 
 }

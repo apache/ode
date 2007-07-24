@@ -32,7 +32,7 @@ public class AsyncPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExcha
 
     @Override
     protected void resumeInstance() {
-        assert !_contexts.scheduler.isTransacted() : "checkReplyContext() should have prevented us from getting here.";
+        assert !_contexts.isTransacted() : "checkReplyContext() should have prevented us from getting here.";
         assert !_process.isInMemory() : "resumeInstance() for in-mem processes makes no sense.";
 
         final WorkEvent we = generateInvokeResponseWorkEvent();
@@ -56,7 +56,7 @@ public class AsyncPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExcha
         super.checkReplyContextOk();
 
         // Prevent user from attempting the replyXXXX calls while a transaction is active. 
-        if (!_ownerThread.get() && _contexts.scheduler.isTransacted())
+        if (!_ownerThread.get() && _contexts.isTransacted())
             throw new BpelEngineException("Cannot reply to ASYNC style invocation from a transactional context!");
         
 

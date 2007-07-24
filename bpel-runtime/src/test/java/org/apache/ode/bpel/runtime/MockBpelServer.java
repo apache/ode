@@ -18,21 +18,35 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.MockScheduler;
@@ -43,21 +57,6 @@ import org.apache.ode.utils.GUID;
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 class MockBpelServer {
@@ -72,8 +71,8 @@ class MockBpelServer {
     EndpointReferenceContext  _eprContext;
     MessageExchangeContext    _mexContext;
     BindingContext            _bindContext;
-    HashMap<String, QName>    _activated = new HashMap();
-    HashMap                   _endpoints = new HashMap();
+    HashMap<String, QName>    _activated = new HashMap<String,QName>();
+    HashMap<String, EndpointReference> _endpoints = new HashMap<String, EndpointReference>();
 
     public MockBpelServer() {
         try {
@@ -85,7 +84,6 @@ class MockBpelServer {
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
             _server.setDaoConnectionFactory(_daoCF);
-            _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
             _store = new ProcessStoreImpl(_dataSource,"jpa", true);
@@ -115,7 +113,7 @@ class MockBpelServer {
             MyRoleMessageExchange mex;
 
             _txManager.begin();
-            mex = _server.getEngine().createMessageExchange("" + messageId, serviceName, opName);
+            mex = _server.createMessageExchange(InvocationStyle.ASYNC,serviceName, opName, "" + messageId);
             if (mex.getOperation() == null)
                 throw new Exception("Did not find operation " + opName + " on service " + serviceName);
             Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
@@ -124,7 +122,8 @@ class MockBpelServer {
             Element message = body.getOwnerDocument().createElementNS("", "message");
             message.appendChild(wrapper);
             request.setMessage(message);
-            mex.invoke(request);
+            mex.setRequest(request);
+            mex.invokeAsync();
             mex.complete();
             _txManager.commit();
         } catch (Exception except) {
@@ -216,6 +215,34 @@ class MockBpelServer {
        _mexContext =  new MessageExchangeContext() {
             public void invokePartner(PartnerRoleMessageExchange mex) { }
             public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
+            public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
+                // TODO Auto-generated method stub
+                
+            }
+            public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
+                // TODO Auto-generated method stub
+                
+            }
+            public void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException {
+                // TODO Auto-generated method stub
+                
+            }
+            public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
+                // TODO Auto-generated method stub
+                
+            }
+            public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
+                // TODO Auto-generated method stub
+                
+            }
+            public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
+                // TODO Auto-generated method stub
+                
+            }
         };
         return _mexContext;
     }
@@ -267,9 +294,7 @@ class MockBpelServer {
         long                _nextSchedule;
 
         SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
-            ExecutorService executorService = Executors.newCachedThreadPool();
             _scheduler = new MockScheduler(_txManager);
-            _scheduler.setExecutorSvc(executorService);
             _scheduler.setJobProcessor(server);
         }
 
@@ -279,39 +304,24 @@ class MockBpelServer {
             return jobId;
         }
 
-        public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException {
-            String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail);
-            _nextSchedule = System.currentTimeMillis();
-            return jobId;
-        }
-
         public void cancelJob(String jobId) throws ContextException {
             _scheduler.cancelJob(jobId);
         }
 
-        public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-            return _scheduler.execTransaction(transaction);
-        }
-
-        public <T> Future<T> execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
-            return _scheduler.execIsolatedTransaction(transaction);
-        }
-
-        public boolean isTransacted() {
-            return _scheduler.isTransacted();
-        }
 
         public void start() { _scheduler.start(); }
         public void stop() { _scheduler.stop(); }
         public void shutdown() { _scheduler.shutdown(); }
 
-        public void registerSynchronizer(Synchronizer synch) throws ContextException {
-            _scheduler.registerSynchronizer(synch);
-        }
 
         public void setJobProcessor(JobProcessor processor) throws ContextException {
             _scheduler.setJobProcessor(processor);
 
+        }
+
+        public void jobCompleted(String jobId) {
+            _scheduler.jobCompleted(jobId);
+            
         }
     }
 

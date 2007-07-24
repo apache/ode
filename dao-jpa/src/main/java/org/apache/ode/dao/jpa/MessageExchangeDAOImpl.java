@@ -100,13 +100,26 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private PartnerLinkDAOImpl _partnerLink;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="REQUEST_MESSAGE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="REQUEST_MESSAGE_ID")
 	private MessageDAOImpl _request;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="RESPONSE_MESSAGE_ID")
+    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="RESPONSE_MESSAGE_ID")
 	private MessageDAOImpl _response;
 
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     private CorrelatorDAOImpl _correlator;
+    
+    
+    @Basic @Column(name="ISTYLE")
+    private String _istyle;
+
+    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="P2P_PIPE_PEER")
+    private MessageExchangeDAO _pipedMex;
+    
+    @Basic @Column(name="TIMEOUT")
+    private long _timeout;
+    
+    @Basic @Column(name="FAILURE_TYPE")
+    private String _failureType;
 
     public MessageExchangeDAOImpl() {}
     
@@ -338,5 +351,34 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void setCorrelator(CorrelatorDAOImpl correlator) {
         _correlator = correlator;
+    }
+
+    public String getInvocationStyle() {
+        return _istyle;
+    }
+
+    public MessageExchangeDAO getPipedMessageExchange() {
+        return _pipedMex;
+    }
+
+    public long getTimeout() {
+        return _timeout;
+    }
+
+    public void setFailureType(String failureType) {
+        _failureType = failureType;
+    }
+
+    public void setInvocationStyle(String invocationStyle) {
+        _istyle = invocationStyle;
+    }
+
+    public void setPipedMessageExchange(MessageExchangeDAO mex) {
+        _pipedMex = mex;
+    }
+
+    public void setTimeout(long timeout) {
+        // TODO Auto-generated method stub
+        
     }
 }

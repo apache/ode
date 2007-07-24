@@ -18,20 +18,11 @@
  */
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.jbi.util.WSDLFlattener;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.w3c.dom.Document;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 import javax.jbi.component.ComponentContext;
 import javax.jbi.messaging.DeliveryChannel;
@@ -42,11 +33,21 @@ import javax.wsdl.Definition;
 import javax.wsdl.Operation;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.jbi.util.WSDLFlattener;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.w3c.dom.Document;
 
 /**
  * Encapsulation of all the junk needed to get the BPEL engine running.
@@ -80,7 +81,6 @@ final class OdeContext {
 
     MessageExchangeContextImpl _mexContext;
 
-    QuartzSchedulerImpl _scheduler;
 
     ExecutorService _executorService;
 
@@ -94,6 +94,8 @@ final class OdeContext {
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
+
+    public SimpleScheduler _scheduler;
 
     /**
      * Gets the delivery channel.

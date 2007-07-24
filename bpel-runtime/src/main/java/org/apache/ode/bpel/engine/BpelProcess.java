@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.InputStream;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
@@ -53,9 +52,9 @@ import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -126,12 +125,11 @@ public class BpelProcess {
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
 
     /** Latch-like thing to control hydration/dehydration. */
-    private HydrationLatch _hydrationLatch;
+    HydrationLatch _hydrationLatch;
 
     protected Contexts _contexts;
 
-    /** Manage instance-level locks. */
-    private final InstanceLockManager _instanceLockManager = new InstanceLockManager();
+    final BpelInstanceWorkerCache _instanceWorkerCache = new BpelInstanceWorkerCache(this);
 
     private final Set<InvocationStyle> _invocationStyles;
 
@@ -141,12 +139,20 @@ public class BpelProcess {
 
     final BpelServerImpl _server;
 
+    /** Indicates whether we are operating in a server-managed transaction. */
+    private ThreadLocal<Boolean> _serverTx = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return Boolean.FALSE;
+        }
+    };
+
     public BpelProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
         _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();
-        _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.scheduler);
+        _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
         HashSet<InvocationStyle> istyles = new HashSet<InvocationStyle>();
@@ -167,8 +173,9 @@ public class BpelProcess {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
         markused();
-        BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
-        processInstance.recoverActivity(channel, activityId, action, fault);
+        throw new AssertionError("TODO: fixme");// TODO
+        // BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
+        // processInstance.recoverActivity(channel, activityId, action, fault);
     }
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
@@ -183,7 +190,9 @@ public class BpelProcess {
      * 
      * @param mex
      */
-    void invokeProcess(MessageExchangeDAO mexdao) {
+    void invokeProcess(final MessageExchangeDAO mexdao) {
+        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+
         _hydrationLatch.latch(1);
         try {
             PartnerLinkMyRoleImpl target = getMyRoleForService(mexdao.getCallee());
@@ -205,7 +214,29 @@ public class BpelProcess {
             // }
 
             markused();
-            target.invokeMyRole(mexdao);
+            CorrelationStatus cstatus = target.invokeMyRole(mexdao);
+            if (cstatus == null) {
+                ; // do nothing
+            } else if (cstatus == CorrelationStatus.CREATE_INSTANCE) {
+                doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
+                    public Void call() {
+                        executeCreateInstance(mexdao);
+                        return null;
+                    }
+                });
+
+            } else if (cstatus == CorrelationStatus.MATCHED) {
+                doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
+                    public Void call() {
+                        executeContinueInstance(mexdao);
+                        return null;
+                    }
+                });
+
+            } else if (cstatus == CorrelationStatus.QUEUED) {
+                ; // do nothing
+            }
+            // TODO: handle correlation status (i.e. execute instance).
         } finally {
             _hydrationLatch.release(1);
         }
@@ -214,6 +245,66 @@ public class BpelProcess {
         // if (mex.getMessageExchangePattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
         // mex.release();
         // }
+    }
+
+    void executeCreateInstance(MessageExchangeDAO mexdao) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
+        assert worker.isWorkerThread();
+        BpelRuntimeContextImpl instanceCtx = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), new PROCESS(_oprocess),
+                mexdao);
+        instanceCtx.execute();
+    }
+
+    void executeContinueInstance(MessageExchangeDAO mexdao) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
+        assert worker.isWorkerThread();
+        BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), null, null);
+        int amp = mexdao.getChannel().indexOf('&');
+        String groupId = mexdao.getChannel().substring(0, amp);
+        int idx = Integer.valueOf(mexdao.getChannel().substring(amp + 1));
+        instance.inputMsgMatch(groupId, idx, mexdao);
+        instance.execute();
+    }
+
+    
+
+    private void enqueueInstanceWork(Long instanceId, Runnable runnable) {
+        BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
+        iworker.enqueue(new ProcessRunnable(runnable));
+    }
+
+    private void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
+        enqueueInstanceWork(instanceId, new ProcessRunnable(new TransactedRunnable(runnable)));
+    }
+    
+    /**
+     * Schedule work for a given instance; work will occur if transaction commits.
+     * 
+     * @param instanceId
+     * @param name
+     */
+    private void scheduleInstanceWork(final Long instanceId, final Runnable runnable) {
+        _contexts.registerCommitSynchronizer(new Runnable() {
+            public void run() {
+                BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
+                iworker.enqueue(new ProcessRunnable(runnable));
+            }
+        });
+
+    }
+    
+    private void scheduleInstanceTX(Long instanceId, final Runnable transaction) {
+        scheduleInstanceWork(instanceId, new TransactedRunnable(transaction));
+    }
+
+    private <T> T doInstanceWork(Long instanceId, final Callable<T> callable) {
+        try {
+            BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
+            return iworker.execInCurrentThread(new ProcessCallable<T>(callable));
+
+        } catch (Exception ex) {
+            throw new BpelEngineException(ex);
+        }
     }
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
@@ -323,116 +414,111 @@ public class BpelProcess {
         return true;
     }
 
-    /*
-     * // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle // all types of failure here, the
-     * scheduler is not going to know how to handle our errors, // ALSO we have to release the lock obtained above (IMPORTANT), lest
-     * the whole system come // to a grinding halt. try {
-     * 
-     * ProcessInstanceDAO instance; if (process.isInMemory()) instance =
-     * _contexts.inMemDao.getConnection().getInstance(we.getIID()); else instance =
-     * _contexts.dao.getConnection().getInstance(we.getIID());
-     * 
-     * if (instance == null) { __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID())); // nothing we can do, this
-     * instance is not in the database, it will // always // fail. return; } ProcessDAO processDao = instance.getProcess(); process =
-     * _activeProcesses.get(processDao.getProcessId());
-     * 
-     * process.handleWorkEvent(we.getDetail()); debuggingDelay(); } catch (BpelEngineException bee) {
-     * __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), bee); throw new Scheduler.JobProcessorException(bee,
-     * checkRetry(jobInfo, bee)); } catch (ContextException ce) { __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ce);
-     * throw new Scheduler.JobProcessorException(ce, checkRetry(jobInfo, ce)); } catch (RuntimeException rte) {
-     * __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), rte); throw new Scheduler.JobProcessorException(rte,
-     * checkRetry(jobInfo, rte)); } catch (Throwable t) { __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t); throw new
-     * Scheduler.JobProcessorException(false);
-     * 
-     * 
-     */
     /**
-     * @throws JobProcessorException 
+     * Handle a work event; this method is called from the scheduler thread and should be very quick, i.e. any serious work needs to
+     * be handed off to a separate thread.
+     * 
+     * @throws JobProcessorException
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
-    public void handleWorkEvent(JobInfo jobInfo) throws JobProcessorException {
-        _hydrationLatch.latch(1);
-        try {
-            markused();
+    public void handleWorkEvent(final JobInfo jobInfo) throws JobProcessorException {
+        assert !_contexts.isTransacted() : "work events must be received outside of a transaction";
 
+        markused();
+
+        final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+        if (__log.isDebugEnabled()) {
+            __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobInfo", jobInfo }));
+        }
+
+        // Process-level events
+        if (we.getType().equals(WorkEvent.Type.MYROLE_INVOKE)) {
+            // second stage of my-role invoke for BLOCKING/ASYNC/RELIABLE invocation style.
             if (__log.isDebugEnabled()) {
-                __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobInfo", jobInfo }));
+                __log.debug("InvokeInternal event for mexid " + we.getMexId());
             }
 
-            final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
-
-            // Process level events
-            if (we.getType().equals(WorkEvent.Type.MYROLE_INVOKE)) {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("InvokeInternal event for mexid " + we.getMexId());
+            enqueueTransaction(new Callable<Void>() {
+                public Void call() {
+                    _contexts.scheduler.jobCompleted(jobInfo.jobName);
+                    MessageExchangeDAO mexdao = loadMexDao(we.getMexId());
+                    invokeProcess(mexdao);
+                    return null;
                 }
-                MessageExchangeDAO mexdao = loadMexDao(we.getMexId());
-                invokeProcess(mexdao);
-            } else {
-                // Instance level events
-                // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
-                // Note that we don't want to wait too long here to get our lock, since we are likely holding
-                // on to scheduler's locks of various sorts.
+            });
+
+        } else /* instance-level events */{
+            enqueueInstanceTransaction(we.getIID(), new Runnable() {
+                public void run() {
+                    _contexts.scheduler.jobCompleted(jobInfo.jobName);
+                    execInstanceEvent(we);
+                }
+
+            });
+        }
+
+    }
+
+    /**
+     * Enqueue a transaction for execution by the engine.
+     * 
+     * @param tx
+     *            the transaction
+     */
+    private <T> Future<T> enqueueTransaction(final Callable<T> tx) {
+        // We have to wrap our transaction to make sure that we are hydrated when the transaction runs.
+        return _server.execIsolatedTransaction(new Callable<T>() {
+            public T call() throws Exception {
+                _hydrationLatch.latch(1);
                 try {
-                    _instanceLockManager.lock(we.getIID(), 1, TimeUnit.MICROSECONDS);
-                    _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-                        public void afterCompletion(boolean success) {
-                            _instanceLockManager.unlock(we.getIID());
-                        }
-
-                        public void beforeCompletion() {
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    // Retry later.
-                    __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
-                    throw new Scheduler.JobProcessorException(true);
-                } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
-                    __log.debug("Instance " + we.getIID() + " is busy, rescheduling job.");
-                    // TODO: This should really be more of something like the exponential backoff algorithm in ethernet.
-                    _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, new Date(System.currentTimeMillis()
-                            + _random.nextInt(1000)));
-                    return;
-                }
-
-                ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
-                if (procInstance == null) {
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
-                    }
-                    return;
-                }
-
-                BpelRuntimeContextImpl processInstance = createRuntimeContext(procInstance, null, null);
-                switch (we.getType()) {
-                case TIMER:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
-                    }
-                    processInstance.timerEvent(we.getChannel());
-                    break;
-                case RESUME:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
-                    }
-                    processInstance.execute();
-                    break;
-                case PARTNER_RESPONSE:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("InvokeResponse event for iid " + we.getIID());
-                    }
-                    processInstance.injectPartnerResponse(we.getMexId(), we.getChannel());
-                    processInstance.execute();
-                    break;
-                case MATCHER:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("Matcher event for iid " + we.getIID());
-                    }
-                    processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
+                    return tx.call();
+                } finally {
+                    _hydrationLatch.release(1);
                 }
             }
-        } finally {
-            _hydrationLatch.release(1);
+
+        });
+
+    }
+
+    private void execInstanceEvent(WorkEvent we) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(we.getIID());
+        assert worker.isWorkerThread();
+
+        ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
+        if (procInstance == null) {
+            if (__log.isDebugEnabled()) {
+                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
+            }
+            return;
+        }
+
+        BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(worker, procInstance, null, null);
+        switch (we.getType()) {
+        case TIMER:
+            if (__log.isDebugEnabled()) {
+                __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
+            }
+            processInstance.timerEvent(we.getChannel());
+            break;
+        case RESUME:
+            if (__log.isDebugEnabled()) {
+                __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
+            }
+            processInstance.execute();
+            break;
+        case PARTNER_RESPONSE:
+            if (__log.isDebugEnabled()) {
+                __log.debug("InvokeResponse event for iid " + we.getIID());
+            }
+            processInstance.injectPartnerResponse(we.getMexId(), we.getChannel());
+            processInstance.execute();
+            break;
+        case MATCHER:
+            if (__log.isDebugEnabled()) {
+                __log.debug("Matcher event for iid " + we.getIID());
+            }
+            processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
         }
     }
 
@@ -661,7 +747,24 @@ public class BpelProcess {
 
         _hydrationLatch.latch(1);
         try {
-            MyRoleMessageExchangeImpl mex = new ReliableMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+            MyRoleMessageExchangeImpl mex;
+            switch (istyle) {
+            case RELIABLE:
+                mex = new ReliableMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+                break;
+            case ASYNC:
+                mex = new AsyncMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+                break;
+            case TRANSACTED:
+                mex = new TransactedMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+                break;
+            case BLOCKING:
+                mex = new BlockingMyRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId());
+                break;
+            default:
+                throw new AssertionError("Unexpected invocation style: " + istyle);
+
+            }
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             PortType ptype = plink.myRolePortType;
             Operation op = plink.getMyRoleOperation(mexdao.getOperation());
@@ -682,25 +785,24 @@ public class BpelProcess {
             Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
             switch (istyle) {
             case BLOCKING:
-                mex = new BlockingPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op,
-                        null, /* EPR todo */
-                        plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                mex = new BlockingPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
             case ASYNC:
-                mex = new AsyncPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, 
-                        null, /* EPR todo */
-                        plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                mex = new AsyncPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
 
             case TRANSACTED:
-                mex = new TransactedPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op,
-                        null, /* EPR todo */
-                        plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                mex = new TransactedPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, null, /*
+                                                                                                                             * EPR
+                                                                                                                             * todo
+                                                                                                                             */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
             case RELIABLE:
-                mex = new ReliablePartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, 
-                        null, /* EPR todo */
-                        plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
+                mex = new ReliablePartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), ptype, op, null, /* EPR todo */
+                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
 
             default:
@@ -756,13 +858,6 @@ public class BpelProcess {
         _lastUsed = System.currentTimeMillis();
     }
 
-    /** Create a version-appropriate runtime context. */
-    BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
-            MessageExchangeDAO instantiatingMessageExchange) {
-        return new BpelRuntimeContextImpl(this, dao, template, instantiatingMessageExchange);
-
-    }
-
     /**
      * If necessary, create an object in the data store to represent the process. We'll re-use an existing object if it already
      * exists and matches the GUID.
@@ -804,7 +899,7 @@ public class BpelProcess {
         }
     }
 
-    private class HydrationLatch extends NStateLatch {
+    class HydrationLatch extends NStateLatch {
 
         HydrationLatch() {
             super(new Runnable[2]);
@@ -889,13 +984,13 @@ public class BpelProcess {
 
             if (isInMemory()) {
                 bounceProcessDAO(_inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
-            } else if (_contexts.scheduler.isTransacted()) {
+            } else if (_contexts.isTransacted()) {
                 // If we have a transaction, we do this in the current transaction.
                 bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else {
                 // If we do not have a transaction we need to create one.
                 try {
-                    _contexts.scheduler.execIsolatedTransaction(new Callable<Object>() {
+                    _contexts.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
                             bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
                             return null;
@@ -921,6 +1016,83 @@ public class BpelProcess {
 
     MessageExchangeDAO getInMemMexDAO(String mexId) {
         return _inMemDao.getConnection().getMessageExchange(mexId);
+    }
+
+    /**
+     * Schedule process-level work. This method defers to the server to do the scheduling and wraps the {@link Runnable} in a
+     * try-finally block that ensures that the process is hydrated.
+     * 
+     * @param runnable
+     */
+    public void scheduleRunnable(final Runnable runnable) {
+        if (__log.isDebugEnabled())
+            __log.debug("schedulingRunnable for process " + _pid + ": " + runnable);
+
+        _server.scheduleRunnable(new ProcessRunnable(runnable));
+    }
+
+   
+    class TransactedRunnable implements Runnable {
+        Runnable _work;
+        
+        TransactedRunnable(Runnable work) {
+            _work = work;
+        }
+        
+        public void run() {
+            _contexts.execTransaction(_work);
+        } 
+    }
+    
+    class TransactedCallable<T> implements Callable<T> {
+        Callable<T> _work;
+        
+        TransactedCallable(Callable<T> work) {
+            _work = work;
+        }
+        
+        public T call() throws Exception {
+            return _contexts.execTransaction(_work);
+        } 
+    }
+    
+
+    class ProcessRunnable implements Runnable {
+        Runnable _work;
+        
+        ProcessRunnable(Runnable work) {
+            _work = work;
+        }
+        
+        public void run() {
+            _hydrationLatch.latch(1);
+            try {
+                _work.run();
+            } finally {
+                _hydrationLatch.release(1);
+            }
+            
+        }
+        
+    }
+    
+    class ProcessCallable<T> implements Callable<T> {
+        Callable<T> _work;
+        
+        ProcessCallable(Callable<T> work) {
+            _work = work;
+        }
+        
+        public T call ()  throws Exception  {
+            _hydrationLatch.latch(1);
+            try {
+                return _work.call();
+            } finally {
+                _hydrationLatch.release(1);
+            }
+            
+        }
+        
     }
 
 }

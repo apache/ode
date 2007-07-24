@@ -27,6 +27,9 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -63,8 +66,6 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-
-import com.sun.corba.se.spi.activation._ActivatorImplBase;
 
 /**
  * <p>
@@ -114,6 +115,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     private Properties _configProperties;
 
+    private ExecutorService _exec;
+
     BpelDatabase _db;
 
     /**
@@ -155,6 +158,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             }
 
             __log.debug("BPEL SERVER starting.");
+
+
+            if (_exec == null)
+                _exec = Executors.newCachedThreadPool();
 
             _contexts.scheduler.start();
             _state = State.RUNNING;
@@ -226,7 +233,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("BPEL SERVER initializing ");
 
-            _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
+            _db = new BpelDatabase(_contexts);
             _state = State.INIT;
 
         } finally {
@@ -393,18 +400,26 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
+    public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
         _mngmtLock.readLock().lock();
         try {
-            WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+            final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
             BpelProcess process = _registeredProcesses.get(we.getProcessId());
             if (process == null) {
                 // If the process is not active, it means that we should not be
                 // doing any work on its behalf, therefore we will reschedule the
                 // events for some time in the future (1 minute).
-                Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
-                _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);
+                _contexts.execTransaction(new Callable<Void>() {
+
+                    public Void call() throws Exception {
+                        _contexts.scheduler.jobCompleted(jobInfo.jobName);
+                        Date future = new Date(System.currentTimeMillis() + (60 * 1000));
+                        __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
+                        _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);            
+                        return null;
+                    }
+                    
+                });
                 return;
             }
 
@@ -481,7 +496,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             switch (istyle) {
             case ASYNC:
                 try {
-                    mexId = _contexts.scheduler.execIsolatedTransaction(createDao).get();
+                    mexId = _contexts.execTransaction(createDao);
                 } catch (Exception e) {
                     __log.error("Internal Error: could not execute isolated transaction.", e);
                     throw new BpelEngineException("Internal Error", e);
@@ -490,7 +505,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 break;
             case BLOCKING:
                 try {
-                    mexId = _contexts.scheduler.execIsolatedTransaction(createDao).get();
+                    mexId = _contexts.execTransaction(createDao);
                 } catch (Exception e) {
                     __log.error("Internal Error: could not execute isolated transaction.", e);
                     throw new BpelEngineException("Internal Error", e);
@@ -576,7 +591,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     return loadMex.call();
 
                 // TODO: should we not do this in the current thread if the mex is a transacted/reliable?
-                return _contexts.scheduler.execIsolatedTransaction(loadMex).get();
+                return execIsolatedTransaction(loadMex).get();
             } catch (ContextException e) {
                 throw new BpelEngineException(e);
             } catch (Exception e) {
@@ -621,6 +636,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         
         return null;
     }
+    
     void registerMessageExchangeStateListener(MessageExchangeStateListener mexStateListener) {
         WeakReference<MessageExchangeStateListener> ref = new WeakReference<MessageExchangeStateListener>(mexStateListener);
 
@@ -641,8 +657,27 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+
+    <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws ContextException {
+        return _exec.submit(new Callable<T>() {
+            public T call() throws Exception {
+                
+                return _contexts.execTransaction(transaction);
+            }
+        });
+    }
+
+    /**
+     * Schedule a {@link Runnable} object for execution after the completion of the current transaction. 
+     * @param runnable
+     */
+    void scheduleRunnable(Runnable runnable) {
+        assertTransaction();
+        _contexts.registerCommitSynchronizer(runnable);
+    }
+    
     protected void assertTransaction() {
-        if (!_contexts.scheduler.isTransacted())
+        if (!_contexts.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
     }
 
@@ -724,4 +759,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.readLock().unlock();
         }
     }
+
+    
 }

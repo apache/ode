@@ -19,18 +19,10 @@
 
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
-import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.il.dbutil.DatabaseConfigException;
-import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.fs.TempFileManager;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
 import javax.jbi.component.ComponentContext;
@@ -39,10 +31,21 @@ import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.dbutil.DatabaseConfigException;
+import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.fs.TempFileManager;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this engine class automatically when JBI framework starts
@@ -194,12 +197,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        _ode._scheduler = new QuartzSchedulerImpl();
+        _ode._scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource));
         _ode._scheduler.setJobProcessor(_ode._server);
-        _ode._scheduler.setExecutorService(_ode._executorService, 20);
         _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
-        _ode._scheduler.setDataSource(_ode._dataSource);
-        _ode._scheduler.init();
 
         _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
         _ode._store.loadAll();

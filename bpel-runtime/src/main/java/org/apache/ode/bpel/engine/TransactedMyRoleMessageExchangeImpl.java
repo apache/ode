@@ -23,15 +23,11 @@ public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
     public Status invokeTransacted() throws BpelEngineException {
         assertTransaction();
        
-        boolean success = false;
-        try {
-            _process.invokeProcess(getDAO());
-            if (MessageExchange.Status.valueOf(getDAO().getStatus()) != Status.RESPONSE)
-                throw new BpelEngineException("Transactional invoke on process did not yield a response.");
-            success = true;
-        } finally {
-            
-        }
+        _process.invokeProcess(getDAO());
+        if (MessageExchange.Status.valueOf(getDAO().getStatus()) != Status.RESPONSE)
+            throw new BpelEngineException("Transactional invoke on process did not yield a response.");
+        return Status.valueOf(getDAO().getStatus());
+        
     }
 
     @Override

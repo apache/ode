@@ -19,6 +19,12 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -33,14 +39,10 @@ import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
-import javax.xml.namespace.QName;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
-
 public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
 
     private HMessageExchange _hself;
+    
 
     // Used when provided process and instance aren't hibernate implementations. The relation
     // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
@@ -298,15 +300,35 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
-    public String getPipedMessageExchangeId() {
-        return _hself.getPipedMessageExchangeId();
-    }
-
-    public void setPipedMessageExchangeId(String mexId) {
-        _hself.setPipedMessageExchangeId(mexId);
-    }
-
     public void release() {
         // no-op for now, could be used to do some cleanup
+    }
+
+    public String getInvocationStyle() {
+        return _hself.getInvocationStyle();
+    }
+
+    public MessageExchangeDAO getPipedMessageExchange() {
+        return new MessageExchangeDaoImpl(_sm,_hself.getPipedMessageExchange());
+    }
+
+    public long getTimeout() {
+        return _hself.getTimeout();
+    }
+
+    public void setFailureType(String failureType) {
+        _hself.setFailureType(failureType);
+    }
+
+    public void setInvocationStyle(String invocationStyle) {
+        _hself.setInvocationStyle(invocationStyle);
+    }
+
+    public void setPipedMessageExchange(MessageExchangeDAO mexId) {
+        _hself.setPipedMesageExchange(((MessageExchangeDaoImpl)mexId)._hself);
+    }
+
+    public void setTimeout(long timeout) {
+        _hself.setTimeout(timeout);
     }
 }

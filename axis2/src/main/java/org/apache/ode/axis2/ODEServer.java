@@ -52,10 +52,11 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.bpel.scheduler.quartz.QuartzSchedulerImpl;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
 
 /**
@@ -291,7 +292,7 @@ public class ODEServer {
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         destroyService(serviceName, portName);
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server, _txMgr);
+        ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server);
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting service with empty namespace replication");
             odeService.setReplicateEmptyNS(true);
@@ -425,10 +426,9 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        QuartzSchedulerImpl scheduler = new QuartzSchedulerImpl();
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_db.getDataSource()));
         scheduler.setTransactionManager(_txMgr);
-        scheduler.setDataSource(_db.getDataSource());
-        scheduler.init();
+
         return scheduler;
     }
 
@@ -442,7 +442,6 @@ public class ODEServer {
         _scheduler.setJobProcessor(_server);
 
         _server.setDaoConnectionFactory(_daoCF);
-        _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));

@@ -19,123 +19,72 @@
 
 package org.apache.ode.il;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Scheduler;
-
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
+ * 
  * @author Matthieu Riou <mriou at apache dot org>
+ * 
+ * - BART refactor: Removed transaction management logic. 
+ * @author Maciej Szefler <mszefler at gmail dot com> 
  */
 public class MockScheduler implements Scheduler {
 
     private static final Log __log = LogFactory.getLog(MockScheduler.class);
 
     private JobProcessor _processor;
-    private ExecutorService _executorSvc = Executors.newCachedThreadPool();
-    private ThreadLocal<Boolean> _transacted = new ThreadLocal<Boolean>();
-    private TransactionManager _txm;
 
-    public MockScheduler() {
-        _transacted.set(false);
-    }
+    private ScheduledExecutorService _exec;
+
+    private TransactionManager _txm;
 
     public MockScheduler(TransactionManager txm) {
         _txm = txm;
-        _transacted.set(false);
     }
 
-    ThreadLocal<List<Synchronizer>> _synchros = new ThreadLocal<List<Scheduler.Synchronizer>>() {
+    ThreadLocal<List<Synchronization>> _synchros = new ThreadLocal<List<Synchronization>>() {
         @Override
-        protected List<Synchronizer> initialValue() {
-            return new ArrayList<Synchronizer>();
+        protected List<Synchronization> initialValue() {
+            return new ArrayList<Synchronization>();
         }
     };
 
-    public String schedulePersistedJob(Map<String, Object> detail, Date date) throws ContextException {
-        if (date != null) {
-            try {
-                while(new Date().before(date)) { Thread.sleep(100); }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return scheduleVolatileJob(true, detail);
-    }
-
-    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
-        registerSynchronizer(new Synchronizer() {
-            public void afterCompletion(boolean success) {
-                try {
-                    if (transacted) {
-                        execIsolatedTransaction(new Callable() {
-                            public Object call() throws Exception {
-                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
-                                doExecute(ji);
-                                return null;
-                            }
-                        });
-                    } else {
-                        JobInfo ji = new JobInfo("volatileJob", detail, 0);
+    public String schedulePersistedJob(final Map<String, Object> detail, final Date date) throws ContextException {
+        registerSynchronizer(new Synchronization() {
+            public void afterCompletion(int status) {
+                long delay = Math.max(0, date.getTime() - System.currentTimeMillis());
+                _exec.schedule(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        JobInfo ji = new JobInfo("job" + System.currentTimeMillis(), detail, 0);
                         doExecute(ji);
+                        return null;
                     }
-                } catch (Exception e) {
-                    throw new ContextException("Failure when starting a new volatile job.", e);
-                }
+                }, delay, TimeUnit.MILLISECONDS);
             }
-            public void beforeCompletion() { }
+
+            public void beforeCompletion() {
+            }
         });
         return null;
+
     }
 
     public void cancelJob(String arg0) throws ContextException {
 
-    }
-
-    public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-        begin();
-        try {
-            T retval = transaction.call();
-            commit();
-            return retval;
-        } catch (Throwable t) {
-            __log.error("Caught an exception during transaction", t);
-            rollback();
-            throw new ContextException("Error in tx", t);
-        }
-    }
-
-    public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
-        return _executorSvc.submit(new Callable<T>() {
-            public T call() throws Exception {
-                return execTransaction(transaction);
-            }
-        });
-    }
-
-    public boolean isTransacted() {
-        if (_txm != null) {
-            try {
-                return _txm.getTransaction() != null;
-            } catch (SystemException e) {
-                __log.error("Exception in mock scheduler isTransacted.", e);
-                throw new RuntimeException(e);
-            }
-        }
-        else return _transacted.get();
     }
 
     public void start() {
@@ -147,90 +96,15 @@ public class MockScheduler implements Scheduler {
     public void shutdown() {
     }
 
-    public void registerSynchronizer(final Synchronizer synch) throws ContextException {
-        if (_txm != null) {
-            try {
-                _txm.getTransaction().registerSynchronization(new Synchronization() {
-                    public void beforeCompletion() {
-                        synch.beforeCompletion();
-                    }
-                    public void afterCompletion(int status) {
-                        synch.afterCompletion(status == Status.STATUS_COMMITTED);
-                    }
-                });
-            } catch (Exception e) {
-                __log.error("Exception in mock scheduler sync registration.", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            _synchros.get().add(synch);
+    private void registerSynchronizer(final Synchronization synch) throws ContextException {
+        try {
+            _txm.getTransaction().registerSynchronization(synch);
+        } catch (Exception e) {
+            __log.error("Exception in mock scheduler sync registration.", e);
+            throw new RuntimeException(e);
         }
     }
 
-    public void begin() {
-        if (_txm != null) {
-            try {
-                _txm.begin();
-            } catch (Exception e) {
-                __log.error("Exception in mock scheduler begin.", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            if (_transacted.get() == Boolean.TRUE)
-                throw new RuntimeException("Transaction active.");
-            _synchros.get().clear();
-        }
-        _transacted.set(Boolean.TRUE);
-    }
-
-    public void commit() {
-        if (_txm != null) {
-            try {
-                _txm.commit();
-            } catch (Exception e) {
-                __log.error("Exception in mock scheduler commit.", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            for (Synchronizer s : _synchros.get())
-                try {
-                    s.beforeCompletion();
-                } catch (Throwable t) {
-                }
-            for (Synchronizer s : _synchros.get())
-                try {
-                    s.afterCompletion(true);
-                } catch (Throwable t) {
-                }
-
-            _synchros.get().clear();
-        }
-        _transacted.set(Boolean.FALSE);
-    }
-
-    public void rollback() {
-        if (_txm != null) {
-            try {
-                _txm.rollback();
-            } catch (Exception e) {
-                __log.error("Exception in mock scheduler rollback.", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            for (Synchronizer s : _synchros.get())
-                try {
-                    s.beforeCompletion();
-                } catch (Throwable t) {
-                }
-            for (Synchronizer s : _synchros.get())
-                try {
-                    s.afterCompletion(false);
-                } catch (Throwable t) {
-                }
-            _synchros.get().clear();
-        }
-        _transacted.set(Boolean.FALSE);
-    }
 
     private void doExecute(JobInfo ji) {
         JobProcessor processor = _processor;
@@ -247,7 +121,7 @@ public class MockScheduler implements Scheduler {
         _processor = processor;
     }
 
-    public void setExecutorSvc(ExecutorService executorSvc) {
-        _executorSvc = executorSvc;
+    public void jobCompleted(String jobId) {
+
     }
 }

@@ -32,10 +32,12 @@ import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -86,7 +88,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
      * @param mex
      *            exchange to which the message is related
      */
-    public void invokeMyRole(MessageExchangeDAO mex) {
+    public CorrelationStatus invokeMyRole(MessageExchangeDAO mex) {
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] { "messageExchange", mex }));
         }
@@ -97,151 +99,134 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             mex.setStatus(Status.FAILURE.toString());
             mex.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION.toString());
             mex.setFaultExplanation(mex.getOperation());
-            return;
+            return null;
         }
 
         // Is this a /possible/ createInstance Operation?
         boolean isCreateInstnace = _plinkDef.isCreateInstanceOperation(operation);
-
-        // now, the tricks begin: when a message arrives we have to see if there is anyone waiting for it. Get the correlator, a
-        // persisted communnication-reduction data structure supporting correlation correlationKey matching!
         String correlatorId = BpelProcess.genCorrelatorId(_plinkDef, operation.getName());
-
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
 
-        CorrelationKey[] keys;
-        MessageRouteDAO messageRoute = null;
-
-        // We need to compute the correlation keys (based on the operation
-        // we can infer which correlation keys to compute - this is merely a set
-        // consisting of each correlationKey used in each correlation sets
-        // that is ever referenced in an <receive>/<onMessage> on this
-        // partnerlink/operation.
-        try {
-            keys = computeCorrelationKeys(mex, operation);
-        } catch (InvalidMessageException ime) {
-            // We'd like to do a graceful exit here, no sense in rolling back due to a
-            // a message format problem.
-            __log.debug("Unable to evaluate correlation keys, invalid message format. ", ime);
-            mex.setFailureType(MessageExchange.FailureType.FORMAT_ERROR.toString());
-            mex.setStatus(Status.FAILURE.toString());
-            mex.setFaultExplanation(ime.getMessage());
-
-            return;
-        }
-
-        String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
-        String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
-        if (__log.isDebugEnabled()) {
-            __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + ArrayUtils.makeCollection(HashSet.class, keys)
-                    + " mySessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
-        }
-
-        CorrelationKey matchedKey = null;
-
-        // Try to find a route for one of our keys.
-        for (CorrelationKey key : keys) {
-            messageRoute = correlator.findRoute(key);
-            if (messageRoute != null) {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
-                }
-                matchedKey = key;
-                break;
-            }
-        }
-
-        // TODO - ODE-58
-
-        // If no luck, and this operation qualifies for create-instance
-        // treatment, then create a new process
-        // instance.
-        if (messageRoute == null && isCreateInstnace) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("INPUTMSG: " + correlatorId + ": routing failed, CREATING NEW INSTANCE");
-            }
-            ProcessDAO processDAO = _process.getProcessDAO();
-
-            if (_process._pconf.getState() == ProcessState.RETIRED) {
-                throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
+        // Special logic for in-mem processes, only createInstance is allowed, so we can skip the
+        // correlation BS to save time.
+        if (_process.isInMemory()) {
+            if (isCreateInstnace)
+                invokeMyRoleCreateInstance(mex, operation, correlatorId, correlator);
+            else {
+                mex.setStatus(Status.FAILURE.toString());
+                mex.setFailureType(MessageExchange.FailureType.OTHER.toString());
+                mex.setFaultExplanation("Invalid in-memory process: non createInstance operations are not supported!");
+                return null;
             }
 
-            // if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
-            // __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
-            // return;
-            // }
-
-            ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
-
-            BpelRuntimeContextImpl instance = _process.createRuntimeContext(newInstance, new PROCESS(_process.getOProcess()), mex);
-
-            // send process instance event
-            NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace, _process
-                    .getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
-            evt.setPortType(mex.getPortType());
-            evt.setOperation(operation.getName());
-            evt.setMexId(mex.getMessageExchangeId());
-            _process._debugger.onEvent(evt);
-            _process.saveEvent(evt, newInstance);
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
-            mex.setInstance(newInstance);
-
-            instance.execute();
-        } else if (messageRoute != null) {
-            if (__log.isDebugEnabled()) {
-                __log.debug("INPUTMSG: " + correlatorId + ": ROUTING to instance "
-                        + messageRoute.getTargetInstance().getInstanceId());
-            }
-
-            ProcessInstanceDAO instanceDao = messageRoute.getTargetInstance();
-
-            // Reload process instance for DAO.
-            BpelRuntimeContextImpl instance = _process.createRuntimeContext(instanceDao, null, null);
-            instance.inputMsgMatch(messageRoute.getGroupId(), messageRoute.getIndex(), mex);
-
-            // Kill the route so some new message does not get routed to
-            // same process instance.
-            correlator.removeRoutes(messageRoute.getGroupId(), instanceDao);
-
-            // send process instance event
-            CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace, _process
-                    .getOProcess().getName()), _process.getProcessDAO().getProcessId(), instanceDao.getInstanceId(), matchedKey);
-            evt.setPortType(mex.getPortType());
-            evt.setOperation(operation.getName());
-            evt.setMexId(mex.getMessageExchangeId());
-
-            _process._debugger.onEvent(evt);
-            // store event
-            _process.saveEvent(evt, instanceDao);
-
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED.toString());
-            mex.setInstance(messageRoute.getTargetInstance());
-            instance.execute();
         } else {
-            if (__log.isDebugEnabled()) {
-                __log.debug("INPUTMSG: " + correlatorId + ": SAVING to DB (no match) ");
+
+            MessageRouteDAO messageRoute = null;
+
+            // now, the tricks begin: when a message arrives we have to see if there is anyone waiting for it. Get the correlator, a
+            // persisted communnication-reduction data structure supporting correlation correlationKey matching!
+
+            CorrelationKey[] keys;
+
+            // We need to compute the correlation keys (based on the operation
+            // we can infer which correlation keys to compute - this is merely a set
+            // consisting of each correlationKey used in each correlation sets
+            // that is ever referenced in an <receive>/<onMessage> on this
+            // partnerlink/operation.
+            try {
+                keys = computeCorrelationKeys(mex, operation);
+            } catch (InvalidMessageException ime) {
+                // We'd like to do a graceful exit here, no sense in rolling back due to a
+                // a message format problem.
+                __log.debug("Unable to evaluate correlation keys, invalid message format. ", ime);
+                mex.setFailureType(MessageExchange.FailureType.FORMAT_ERROR.toString());
+                mex.setStatus(Status.FAILURE.toString());
+                mex.setFaultExplanation(ime.getMessage());
+
+                return null;
             }
 
-            // TODO: Revist (BART)
-            // if (!mex.isAsynchronous()) {
-            // mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
-            //
-            // } else {
-            // send event
-            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(), mex
-                    .getMessageExchangeId(), keys);
+            String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+            String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
+            if (__log.isDebugEnabled()) {
+                __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + ArrayUtils.makeCollection(HashSet.class, keys)
+                        + " mySessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
+            }
 
-            evt.setProcessId(_process.getProcessDAO().getProcessId());
-            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
-            _process._debugger.onEvent(evt);
+            CorrelationKey matchedKey = null;
 
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED.toString());
+            // Try to find a route for one of our keys.
+            for (CorrelationKey key : keys) {
+                messageRoute = correlator.findRoute(key);
+                if (messageRoute != null) {
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
+                    }
+                    matchedKey = key;
+                    break;
+                }
+            }
 
-            // No match, means we add message exchange to the queue.
-            correlator.enqueueMessage(mex, keys);
-            // }
+            // TODO - ODE-58
+
+            // If no luck, and this operation qualifies for create-instance
+            // treatment, then create a new process
+            // instance.
+            if (messageRoute == null && isCreateInstnace) {
+                invokeMyRoleCreateInstance(mex, operation, correlatorId, correlator);
+            } else if (messageRoute != null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("INPUTMSG: " + correlatorId + ": ROUTING to instance "
+                            + messageRoute.getTargetInstance().getInstanceId());
+                }
+
+                ProcessInstanceDAO instanceDao = messageRoute.getTargetInstance();
+
+                // Reload process instance for DAO.
+
+                // Kill the route so some new message does not get routed to
+                // same process instance.
+                correlator.removeRoutes(messageRoute.getGroupId(), instanceDao);
+
+                // send process instance event
+                CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace, _process
+                        .getOProcess().getName()), _process.getProcessDAO().getProcessId(), instanceDao.getInstanceId(), matchedKey);
+                evt.setPortType(mex.getPortType());
+                evt.setOperation(operation.getName());
+                evt.setMexId(mex.getMessageExchangeId());
+
+                _process._debugger.onEvent(evt);
+                // store event
+                _process.saveEvent(evt, instanceDao);
+
+                mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED.toString());
+                mex.setInstance(messageRoute.getTargetInstance());
+                
+                // We're overloading the channel here to be the PICK response channel +  index
+                mex.setChannel(messageRoute.getGroupId() + "&" + messageRoute.getIndex());
+            } else {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("INPUTMSG: " + correlatorId + ": SAVING to DB (no match) ");
+                }
+
+                // TODO: Revist (BART)
+                // if (!mex.isAsynchronous()) {
+                // mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
+                //
+                // } else {
+                // send event
+                CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(), mex
+                        .getMessageExchangeId(), keys);
+
+                evt.setProcessId(_process.getProcessDAO().getProcessId());
+                evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+                _process._debugger.onEvent(evt);
+
+                mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED.toString());
+                correlator.enqueueMessage(mex, keys);
+            }
+
         }
-
         // Now we have to update our message exchange status. If the <reply>
         // was not hit during the
         // invocation, then we will be in the "REQUEST" phase which means
@@ -250,6 +235,39 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         if (Status.valueOf(mex.getStatus()) == MessageExchange.Status.REQUEST) {
             mex.setStatus(MessageExchange.Status.ASYNC.toString());
         }
+        
+        return CorrelationStatus.valueOf(mex.getCorrelationStatus());
+    }
+
+    private void invokeMyRoleCreateInstance(MessageExchangeDAO mex, Operation operation, String correlatorId,
+            CorrelatorDAO correlator) {
+        if (__log.isDebugEnabled()) {
+            __log.debug("INPUTMSG: " + correlatorId + ": routing failed, CREATING NEW INSTANCE");
+        }
+        ProcessDAO processDAO = _process.getProcessDAO();
+
+        if (_process._pconf.getState() == ProcessState.RETIRED) {
+            throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
+        }
+
+        // if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
+        // __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+        // return;
+        // }
+
+        ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
+
+        // send process instance event
+        NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace, _process
+                .getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
+        evt.setPortType(mex.getPortType());
+        evt.setOperation(operation.getName());
+        evt.setMexId(mex.getMessageExchangeId());
+        _process._debugger.onEvent(evt);
+        _process.saveEvent(evt, newInstance);
+        mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
+        mex.setInstance(newInstance);
+
     }
 
     @SuppressWarnings("unchecked")

@@ -39,15 +39,4 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         _initialPartner = initialPartner;
     }
 
-    public void processPartnerResponse(PartnerRoleMessageExchangeImpl messageExchange) {
-        if (__log.isDebugEnabled()) {
-            __log.debug("Processing partner's response for partnerLink: " + messageExchange);
-        }
-
-        BpelRuntimeContextImpl processInstance =
-                _process.createRuntimeContext(messageExchange.getDAO().getInstance(), null, null);
-        processInstance.invocationResponse(messageExchange);
-        processInstance.execute();
-    }
-
 }

@@ -100,7 +100,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     protected void scheduleInvoke(BpelProcess target) {
         
         assert !_process.isInMemory() : "Cannot schedule invokes for in-memory processes.";
-        assert _contexts.scheduler.isTransacted() : "Cannot schedule outside of transaction context.";
+        assert _contexts.isTransacted() : "Cannot schedule outside of transaction context.";
         
         // Schedule a new job for invocation
         final WorkEvent we = new WorkEvent();
