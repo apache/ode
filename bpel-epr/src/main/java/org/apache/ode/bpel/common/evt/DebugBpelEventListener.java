@@ -45,7 +45,6 @@ public class DebugBpelEventListener implements BpelEventListener {
 	private static final String SYSOUT_KEY = "debugeventlistener.dumpToStdOut";
 	private boolean _dumpToStdOut = false;
 	
-	@Override
 	public void onEvent(BpelEvent bpelEvent) {
 		if (__log.isDebugEnabled()) {
 			__log.debug(bpelEvent.toString());
@@ -56,13 +55,11 @@ public class DebugBpelEventListener implements BpelEventListener {
 		}
 	}
 
-	@Override
 	public void startup(Properties configProperties) {
 		if (configProperties != null) {
 			_dumpToStdOut = BooleanUtils.toBoolean(configProperties.getProperty(SYSOUT_KEY, "false"));
 		}
 	}
 
-	@Override
 	public void shutdown() {}
 }
