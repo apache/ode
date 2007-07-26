@@ -39,12 +39,9 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     @Override
     void load(MessageExchangeDAO dao) {
         super.load(dao);
-        if (_cstatus == null)
-            _cstatus = CorrelationStatus.valueOf(dao.getCorrelationStatus());
-        if (_clientId == null)
-            _clientId = dao.getCorrelationId();
-        if (_callee == null)
-            _callee = dao.getCallee();
+        _cstatus = CorrelationStatus.valueOf(dao.getCorrelationStatus());
+        _clientId = dao.getCorrelationId();
+        _callee = dao.getCallee();
     }
 
     @Override

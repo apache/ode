@@ -34,7 +34,7 @@ public class BlockingMyRoleMessageExchangeImpl extends AsyncMyRoleMessageExchang
         Future<Status> future = _future != null ? _future : super.invokeAsync();
         
         try {
-            future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);
+            _status = future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);
             _done = true;
             return _status;
         } catch (InterruptedException e) {

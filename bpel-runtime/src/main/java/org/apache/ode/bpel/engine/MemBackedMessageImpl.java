@@ -2,8 +2,6 @@ package org.apache.ode.bpel.engine;
 
 import javax.xml.namespace.QName;
 
-import org.apache.derby.impl.store.raw.data.SetReservedSpaceOperation;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.w3c.dom.Element;
 
 /**

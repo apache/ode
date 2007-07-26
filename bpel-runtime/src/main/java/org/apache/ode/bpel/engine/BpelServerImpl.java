@@ -33,6 +33,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -162,7 +163,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             if (_exec == null)
                 _exec = Executors.newCachedThreadPool();
-
+            
             _contexts.scheduler.start();
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
@@ -431,6 +432,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+    public void setTransactionManager(TransactionManager txm) {
+        _contexts.txManager = txm;
+    }
+    
     public void setDehydrationPolicy(DehydrationPolicy dehydrationPolicy) {
         _dehydrationPolicy = dehydrationPolicy;
     }
@@ -475,70 +480,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             if (target == null)
                 throw new BpelEngineException("NoSuchService: " + targetService);
 
-            Callable<String> createDao = new Callable<String>() {
-
-                public String call() throws Exception {
-                    MessageExchangeDAO dao = target.createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-                    dao.setInvocationStyle(istyle.toString());
-                    dao.setCorrelationId(clientKey);
-                    dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
-                    dao.setPattern(MessageExchangePattern.UNKNOWN.toString());
-                    dao.setCallee(targetService);
-                    dao.setStatus(Status.NEW.toString());
-                    dao.setOperation(operation);
-                    return dao.getMessageExchangeId();
-                }
-
-            };
-
-            MyRoleMessageExchangeImpl mex;
-            String mexId;
-            switch (istyle) {
-            case ASYNC:
-                try {
-                    mexId = _contexts.execTransaction(createDao);
-                } catch (Exception e) {
-                    __log.error("Internal Error: could not execute isolated transaction.", e);
-                    throw new BpelEngineException("Internal Error", e);
-                }
-                mex = new AsyncMyRoleMessageExchangeImpl(target, mexId);
-                break;
-            case BLOCKING:
-                try {
-                    mexId = _contexts.execTransaction(createDao);
-                } catch (Exception e) {
-                    __log.error("Internal Error: could not execute isolated transaction.", e);
-                    throw new BpelEngineException("Internal Error", e);
-                }
-                mex = new BlockingMyRoleMessageExchangeImpl(target, mexId);
-                break;
-
-            case RELIABLE:
+            if (istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
                 assertTransaction();
-                try {
-                    mexId = createDao.call();
-                } catch (Exception e) {
-                    __log.error("Internal Error: could not execute DB calls.", e);
-                    throw new BpelEngineException("Internal Error", e);
-                }
-                mex = new ReliableMyRoleMessageExchangeImpl(target, mexId);
-                break;
-            case TRANSACTED:
-                assertTransaction();
-                try {
-                    mexId = createDao.call();
-                } catch (Exception e) {
-                    __log.error("Internal Error: could not execute DB calls.", e);
-                    throw new BpelEngineException("Internal Error", e);
-                }
-                mex = new TransactedMyRoleMessageExchangeImpl(target, mexId);
-            default:
-                throw new Error("Internal Error: unknown InvocationStyle: " + istyle);
-            }
-
-            target.initMyRoleMex(mex);
-
-            return mex;
+            else
+                assertNoTransaction();
+            
+            
+            return target.createNewMyRoleMex(istyle, targetService, operation, clientKey);
         } finally {
             _mngmtLock.readLock().unlock();
         }
@@ -587,11 +535,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             };
 
             try {
-                if (inmemdao != null)
+                if (inmemdao != null || _contexts.isTransacted()) // TODO: hmmmmm, catch-22, need to be able to infer if TRANSACTED/RELIABLE just from mex id ? here || istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
                     return loadMex.call();
-
-                // TODO: should we not do this in the current thread if the mex is a transacted/reliable?
-                return execIsolatedTransaction(loadMex).get();
+                else 
+                    return enqueueTransaction(loadMex).get();
             } catch (ContextException e) {
                 throw new BpelEngineException(e);
             } catch (Exception e) {
@@ -658,13 +605,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
 
-    <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws ContextException {
-        return _exec.submit(new Callable<T>() {
-            public T call() throws Exception {
-                
-                return _contexts.execTransaction(transaction);
-            }
-        });
+    <T> Future<T> enqueueTransaction(final Callable<T> transaction) throws ContextException {
+        return _exec.submit(new ServerCallable<T>(new TransactedCallable<T>(transaction)));
     }
 
     /**
@@ -673,12 +615,17 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     void scheduleRunnable(Runnable runnable) {
         assertTransaction();
-        _contexts.registerCommitSynchronizer(runnable);
+        _contexts.registerCommitSynchronizer(new ServerRunnable(runnable));
     }
     
     protected void assertTransaction() {
         if (!_contexts.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
+    }
+
+    protected void assertNoTransaction() {
+        if (_contexts.isTransacted())
+            throw new BpelEngineException("Operation must be performed outside of a transaction!");
     }
 
     void fireEvent(BpelEvent event) {
@@ -761,4 +708,68 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     
+   
+    
+    class ServerRunnable implements Runnable {
+        final Runnable _work;
+        ServerRunnable(Runnable work) {
+            _work = work;
+        }
+        
+        public void run() {
+            _mngmtLock.readLock().lock();
+            try {
+                _work.run();
+            } catch (Throwable ex) {
+                __log.fatal("Internal Error", ex);
+            } finally {
+                _mngmtLock.readLock().unlock();
+            }
+        }
+        
+    }
+    
+   
+    
+    class ServerCallable<T> implements Callable<T>{
+        final Callable<T> _work;
+        ServerCallable(Callable<T> work) {
+            _work = work;
+        }
+        
+        public T call () throws Exception {
+            _mngmtLock.readLock().lock();
+            try {
+                return _work.call();
+            } finally {
+                _mngmtLock.readLock().unlock();
+            }
+        }
+        
+    }
+
+    class TransactedCallable<T> implements Callable<T> {
+        Callable<T> _work;
+
+        TransactedCallable(Callable<T> work) {
+            _work = work;
+        }
+
+        public T call() throws Exception {
+            return _contexts.execTransaction(_work);
+        }
+    }
+
+
+    class TransactedRunnable implements Runnable {
+        Runnable _work;
+
+        TransactedRunnable(Runnable work) {
+            _work = work;
+        }
+
+        public void run() {
+            _contexts.execTransaction(_work);
+        }
+    }
 }

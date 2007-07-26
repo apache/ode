@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -54,6 +55,7 @@ public class MockScheduler implements Scheduler {
 
     public MockScheduler(TransactionManager txm) {
         _txm = txm;
+        _exec = Executors.newSingleThreadScheduledExecutor();
     }
 
     ThreadLocal<List<Synchronization>> _synchros = new ThreadLocal<List<Synchronization>>() {
@@ -63,7 +65,8 @@ public class MockScheduler implements Scheduler {
         }
     };
 
-    public String schedulePersistedJob(final Map<String, Object> detail, final Date date) throws ContextException {
+    public String schedulePersistedJob(final Map<String, Object> detail, Date dt) throws ContextException {
+        final Date date = dt == null ? new Date() : dt;
         registerSynchronizer(new Synchronization() {
             public void afterCompletion(int status) {
                 long delay = Math.max(0, date.getTime() - System.currentTimeMillis());

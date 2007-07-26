@@ -58,20 +58,30 @@ import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 class MockBpelServer {
 
-    BpelServerImpl            _server;
-    ProcessStoreImpl          _store;
-    TransactionManager        _txManager;
-    Database                  _database;
-    DataSource                _dataSource;
-    SchedulerWrapper          _scheduler;
-    BpelDAOConnectionFactory  _daoCF;
-    EndpointReferenceContext  _eprContext;
-    MessageExchangeContext    _mexContext;
-    BindingContext            _bindContext;
-    HashMap<String, QName>    _activated = new HashMap<String,QName>();
+    BpelServerImpl _server;
+
+    ProcessStoreImpl _store;
+
+    TransactionManager _txManager;
+
+    Database _database;
+
+    DataSource _dataSource;
+
+    SchedulerWrapper _scheduler;
+
+    BpelDAOConnectionFactory _daoCF;
+
+    EndpointReferenceContext _eprContext;
+
+    MessageExchangeContext _mexContext;
+
+    BindingContext _bindContext;
+
+    HashMap<String, QName> _activated = new HashMap<String, QName>();
+
     HashMap<String, EndpointReference> _endpoints = new HashMap<String, EndpointReference>();
 
     public MockBpelServer() {
@@ -86,7 +96,8 @@ class MockBpelServer {
             _server.setDaoConnectionFactory(_daoCF);
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
-            _store = new ProcessStoreImpl(_dataSource,"jpa", true);
+            _store = new ProcessStoreImpl(_dataSource, "jpa", true);
+            _server.setTransactionManager(_txManager);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
@@ -102,51 +113,32 @@ class MockBpelServer {
 
     public Collection<QName> deploy(File deploymentUnitDirectory) {
         Collection<QName> pids = _store.deploy(deploymentUnitDirectory);
-        for (QName pid: pids)
+        for (QName pid : pids)
             _server.register(_store.getProcessConfiguration(pid));
         return pids;
     }
 
     public void invoke(QName serviceName, String opName, Element body) throws Exception {
-        try {
-            String messageId = new GUID().toString();
-            MyRoleMessageExchange mex;
+        String messageId = new GUID().toString();
+        MyRoleMessageExchange mex;
 
-            _txManager.begin();
-            mex = _server.createMessageExchange(InvocationStyle.ASYNC,serviceName, opName, "" + messageId);
-            if (mex.getOperation() == null)
-                throw new Exception("Did not find operation " + opName + " on service " + serviceName);
-            Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
-            Element wrapper = body.getOwnerDocument().createElementNS("", "main");
-            wrapper.appendChild(body);
-            Element message = body.getOwnerDocument().createElementNS("", "message");
-            message.appendChild(wrapper);
-            request.setMessage(message);
-            mex.setRequest(request);
-            mex.invokeAsync();
-            mex.complete();
-            _txManager.commit();
-        } catch (Exception except) {
-              _txManager.rollback();
-              throw except;
-        }
+        mex = _server.createMessageExchange(InvocationStyle.BLOCKING, serviceName, opName, "" + messageId);
+        if (mex.getOperation() == null)
+            throw new Exception("Did not find operation " + opName + " on service " + serviceName);
+        Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
+        Element wrapper = body.getOwnerDocument().createElementNS("", "main");
+        wrapper.appendChild(body);
+        Element message = body.getOwnerDocument().createElementNS("", "message");
+        message.appendChild(wrapper);
+        request.setMessage(message);
+        mex.setRequest(request);
+        mex.invokeBlocking();
+        mex.complete();
+
     }
 
     public TransactionManager getTransactionManager() {
         return _txManager;
-    }
-
-    public void waitForBlocking() {
-        try {
-            long delay = 1000;
-            while (true) {
-                // Be warned: ugly hack and not safe for slow CPUs.
-                long cutoff = System.currentTimeMillis() - delay;
-                if (_scheduler._nextSchedule < cutoff)
-                    break;
-                Thread.sleep(delay);
-            }
-        } catch (InterruptedException except) { }
     }
 
     public void shutdown() throws Exception {
@@ -204,44 +196,57 @@ class MockBpelServer {
         _eprContext = new EndpointReferenceContext() {
             public EndpointReference resolveEndpointReference(Element element) {
                 String service = DOMUtils.getChildCharacterData(element);
-                return (EndpointReference)_endpoints.get(service);
+                return (EndpointReference) _endpoints.get(service);
             }
-            public EndpointReference convertEndpoint(QName qName, Element element) { return null; }
+
+            public EndpointReference convertEndpoint(QName qName, Element element) {
+                return null;
+            }
         };
         return _eprContext;
     }
 
     protected MessageExchangeContext createMessageExchangeContext() {
-       _mexContext =  new MessageExchangeContext() {
-            public void invokePartner(PartnerRoleMessageExchange mex) { }
-            public void onAsyncReply(MyRoleMessageExchange myRoleMex) { }
+        _mexContext = new MessageExchangeContext() {
+            public void invokePartner(PartnerRoleMessageExchange mex) {
+            }
+
+            public void onAsyncReply(MyRoleMessageExchange myRoleMex) {
+            }
+
             public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
-                
+
             }
+
             public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
-                
+
             }
+
             public void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
-                
+
             }
+
             public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
-                
+
             }
+
             public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
-                
+
             }
+
             public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
                 // TODO Auto-generated method stub
-                
+
             }
         };
         return _mexContext;
@@ -252,12 +257,14 @@ class MockBpelServer {
             public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
                 final Document doc = DOMUtils.newDocument();
                 Element serviceRef = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
-                    EndpointReference.SERVICE_REF_QNAME.getLocalPart());
+                        EndpointReference.SERVICE_REF_QNAME.getLocalPart());
                 serviceRef.appendChild(doc.createTextNode(myRoleEndpoint.serviceName.toString()));
                 doc.appendChild(serviceRef);
                 _activated.put(myRoleEndpoint.toString(), processId);
                 return new EndpointReference() {
-                    public Document toXML() { return doc; }
+                    public Document toXML() {
+                        return doc;
+                    }
                 };
             }
 
@@ -266,12 +273,12 @@ class MockBpelServer {
             }
 
             public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
-                                                               final Endpoint initialPartnerEndpoint) {
+                    final Endpoint initialPartnerEndpoint) {
                 final EndpointReference epr = new EndpointReference() {
                     public Document toXML() {
                         Document doc = DOMUtils.newDocument();
                         Element serviceRef = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
-                            EndpointReference.SERVICE_REF_QNAME.getLocalPart());
+                                EndpointReference.SERVICE_REF_QNAME.getLocalPart());
                         serviceRef.appendChild(doc.createTextNode(initialPartnerEndpoint.serviceName.toString()));
                         doc.appendChild(serviceRef);
                         return doc;
@@ -279,28 +286,32 @@ class MockBpelServer {
                 };
                 _endpoints.put(initialPartnerEndpoint.serviceName.toString(), epr);
                 return new PartnerRoleChannel() {
-                    public EndpointReference getInitialEndpointReference() { return epr; }
-                    public void close() { };
+                    public EndpointReference getInitialEndpointReference() {
+                        return epr;
+                    }
+
+                    public void close() {
+                    };
                 };
             }
         };
         return _bindContext;
     }
 
-
     private class SchedulerWrapper implements Scheduler {
 
         MockScheduler _scheduler;
-        long                _nextSchedule;
+
+        long _nextSchedule;
 
         SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
             _scheduler = new MockScheduler(_txManager);
             _scheduler.setJobProcessor(server);
         }
 
-        public String schedulePersistedJob(Map<String,Object>jobDetail,Date when) throws ContextException {
+        public String schedulePersistedJob(Map<String, Object> jobDetail, Date when) throws ContextException {
             String jobId = _scheduler.schedulePersistedJob(jobDetail, when);
-            _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
+            _nextSchedule = when == null ? System.currentTimeMillis() : when.getTime();
             return jobId;
         }
 
@@ -308,11 +319,17 @@ class MockBpelServer {
             _scheduler.cancelJob(jobId);
         }
 
+        public void start() {
+            _scheduler.start();
+        }
 
-        public void start() { _scheduler.start(); }
-        public void stop() { _scheduler.stop(); }
-        public void shutdown() { _scheduler.shutdown(); }
+        public void stop() {
+            _scheduler.stop();
+        }
 
+        public void shutdown() {
+            _scheduler.shutdown();
+        }
 
         public void setJobProcessor(JobProcessor processor) throws ContextException {
             _scheduler.setJobProcessor(processor);
@@ -321,7 +338,7 @@ class MockBpelServer {
 
         public void jobCompleted(String jobId) {
             _scheduler.jobCompleted(jobId);
-            
+
         }
     }
 

@@ -50,6 +50,7 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -152,6 +153,7 @@ public class BpelProcess {
         _pid = conf.getProcessId();
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();
+        _contexts = server._contexts;
         _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
@@ -266,17 +268,16 @@ public class BpelProcess {
         instance.execute();
     }
 
-    
-
     private void enqueueInstanceWork(Long instanceId, Runnable runnable) {
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
-        iworker.enqueue(new ProcessRunnable(runnable));
+        iworker.enqueue(runnable);
     }
 
     private void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
-        enqueueInstanceWork(instanceId, new ProcessRunnable(new TransactedRunnable(runnable)));
+        BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
+        iworker.enqueue(_server.new TransactedRunnable(runnable));
     }
-    
+
     /**
      * Schedule work for a given instance; work will occur if transaction commits.
      * 
@@ -291,10 +292,6 @@ public class BpelProcess {
             }
         });
 
-    }
-    
-    private void scheduleInstanceTX(Long instanceId, final Runnable transaction) {
-        scheduleInstanceWork(instanceId, new TransactedRunnable(transaction));
     }
 
     private <T> T doInstanceWork(Long instanceId, final Callable<T> callable) {
@@ -313,23 +310,6 @@ public class BpelProcess {
                 return e.getValue();
         }
         return null;
-    }
-
-    void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
-        markused();
-        PartnerLinkMyRoleImpl target = null;
-        for (Endpoint endpoint : getEndpointToMyRoleMap().keySet()) {
-            if (endpoint.serviceName.equals(mex.getServiceName()))
-                target = getEndpointToMyRoleMap().get(endpoint);
-        }
-        if (target != null) {
-            Operation op = target._plinkDef.getMyRoleOperation(mex.getOperationName());
-            MessageExchange.MessageExchangePattern pattern = op.getOutput() == null ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
-                    : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
-            mex.init(target._plinkDef.myRolePortType, op, pattern);
-        } else {
-            __log.warn("Couldn't find endpoint from service " + mex.getServiceName() + " when initializing a myRole mex.");
-        }
     }
 
     /**
@@ -467,18 +447,7 @@ public class BpelProcess {
      */
     private <T> Future<T> enqueueTransaction(final Callable<T> tx) {
         // We have to wrap our transaction to make sure that we are hydrated when the transaction runs.
-        return _server.execIsolatedTransaction(new Callable<T>() {
-            public T call() throws Exception {
-                _hydrationLatch.latch(1);
-                try {
-                    return tx.call();
-                } finally {
-                    _hydrationLatch.release(1);
-                }
-            }
-
-        });
-
+        return _server.enqueueTransaction(new ProcessCallable<T>(tx));
     }
 
     private void execInstanceEvent(WorkEvent we) {
@@ -768,6 +737,7 @@ public class BpelProcess {
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             PortType ptype = plink.myRolePortType;
             Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+            mex.load(mexdao);
             mex.init(ptype, op, MessageExchangePattern.valueOf(mexdao.getPattern()));
             return mex;
         } finally {
@@ -809,6 +779,8 @@ public class BpelProcess {
                 throw new BpelEngineException("Unexpected InvocationStyle: " + istyle);
 
             }
+            
+            mex.load(mexdao);
             return mex;
         } finally {
             _hydrationLatch.release(1);
@@ -1031,39 +1003,15 @@ public class BpelProcess {
         _server.scheduleRunnable(new ProcessRunnable(runnable));
     }
 
-   
-    class TransactedRunnable implements Runnable {
-        Runnable _work;
-        
-        TransactedRunnable(Runnable work) {
-            _work = work;
-        }
-        
-        public void run() {
-            _contexts.execTransaction(_work);
-        } 
-    }
-    
-    class TransactedCallable<T> implements Callable<T> {
-        Callable<T> _work;
-        
-        TransactedCallable(Callable<T> work) {
-            _work = work;
-        }
-        
-        public T call() throws Exception {
-            return _contexts.execTransaction(_work);
-        } 
-    }
-    
 
+    
     class ProcessRunnable implements Runnable {
         Runnable _work;
-        
+
         ProcessRunnable(Runnable work) {
             _work = work;
         }
-        
+
         public void run() {
             _hydrationLatch.latch(1);
             try {
@@ -1071,28 +1019,93 @@ public class BpelProcess {
             } finally {
                 _hydrationLatch.release(1);
             }
-            
+
         }
-        
+
     }
-    
+
     class ProcessCallable<T> implements Callable<T> {
         Callable<T> _work;
-        
+
         ProcessCallable(Callable<T> work) {
             _work = work;
         }
-        
-        public T call ()  throws Exception  {
+
+        public T call() throws Exception {
             _hydrationLatch.latch(1);
             try {
                 return _work.call();
             } finally {
                 _hydrationLatch.release(1);
             }
-            
+
         }
-        
+
     }
 
+    public MyRoleMessageExchange createNewMyRoleMex(final InvocationStyle istyle, final QName targetService, final String operation, final String clientKey) {
+        _hydrationLatch.latch(1);
+        try {
+            
+        final PartnerLinkMyRoleImpl target = getPartnerLinkForService(targetService);
+        if (target == null)
+            throw new BpelEngineException("NoSuchService: " + targetService);
+        final Operation op = target._plinkDef.getMyRoleOperation(operation);
+        if (op == null)
+            throw new BpelEngineException("NoSuchOperation: " + operation);
+        
+        final MessageExchangePattern pattern = op.getOutput() == null ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
+                    : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+
+        Callable<MyRoleMessageExchange> createDao = new Callable<MyRoleMessageExchange>() {
+
+            public MyRoleMessageExchange call() throws Exception {
+                MessageExchangeDAO dao = createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+                dao.setInvocationStyle(istyle.toString());
+                dao.setCorrelationId(clientKey);
+                dao.setCorrelationStatus(CorrelationStatus.UKNOWN_ENDPOINT.toString());
+                dao.setPattern(pattern.toString());
+                dao.setCallee(targetService);
+                dao.setStatus(Status.NEW.toString());
+                dao.setOperation(operation);
+                dao.setPartnerLinkModelId(target._plinkDef.getId());
+                dao.setTimeout(30 * 1000); // default timeout is 30 seconds, can be chaged by client.
+                return createMyRoleMex(dao);
+            }
+
+        };
+
+        try {
+            if (isInMemory() || istyle == InvocationStyle.TRANSACTED || istyle == InvocationStyle.RELIABLE) 
+                return createDao.call();
+            else
+                return _contexts.execTransaction(createDao);
+            
+        } catch (BpelEngineException be) {
+            throw be;
+        } catch (Exception e) {
+            __log.error("Internal Error: could not create message exchange.", e);
+            throw new BpelEngineException("Internal Error", e);
+        }
+        
+    } finally {
+        _hydrationLatch.release(1);
+    }
+    }
+
+    /**
+     * Find the partner-link-my-role that corresponds to the given service name.
+     * @param serviceName name of service
+     * @return corresponding {@link PartnerLinkMyRoleImpl}
+     */
+    private PartnerLinkMyRoleImpl getPartnerLinkForService(QName serviceName) {
+        PartnerLinkMyRoleImpl target = null;
+        for (Endpoint endpoint : getEndpointToMyRoleMap().keySet()) {
+            if (endpoint.serviceName.equals(serviceName))
+                target = getEndpointToMyRoleMap().get(endpoint);
+        }
+        
+        return target;
+
+    }
 }

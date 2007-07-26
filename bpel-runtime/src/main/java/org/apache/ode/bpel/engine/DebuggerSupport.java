@@ -49,24 +49,26 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Class providing functions used to support debugging funtionality
- * in the BPEL engine. This class serves as the underlying
- * implementation of the {@link BpelManagementFacade} interface, and
- * the various MBean interfaces.
- *
+ * Class providing functions used to support debugging funtionality in the BPEL engine. This class serves as the underlying
+ * implementation of the {@link BpelManagementFacade} interface, and the various MBean interfaces.
+ * 
  * @todo Need to revisit the whole stepping/suspend/resume mechanism.
  */
 class DebuggerSupport {
 
     private static final Log __log = LogFactory.getLog(DebuggerSupport.class);
+
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     static final Breakpoint[] EMPTY_BP = new Breakpoint[0];
 
     private boolean _enabled = true;
+
     private Breakpoint[] _globalBreakPoints = EMPTY_BP;
+
     private final Set<Long> _step = new HashSet<Long>();
-    private final Map<Long, Breakpoint[]>_instanceBreakPoints = new HashMap<Long, Breakpoint[]>();
+
+    private final Map<Long, Breakpoint[]> _instanceBreakPoints = new HashMap<Long, Breakpoint[]>();
 
     /** BPEL process database */
     private BpelProcessDatabase _db;
@@ -76,42 +78,40 @@ class DebuggerSupport {
 
     /**
      * Constructor.
-     * @param db BPEL process database
+     * 
+     * @param db
+     *            BPEL process database
      */
     DebuggerSupport(BpelProcess process) {
         _process = process;
-        _db = new BpelProcessDatabase(_process._contexts,
-                _process._pid);
+        _db = new BpelProcessDatabase(_process._contexts, _process._pid);
 
     }
 
-    void enable(boolean enabled){
+    void enable(boolean enabled) {
         _enabled = enabled;
     }
 
-    Breakpoint[] getGlobalBreakpoints(){
+    Breakpoint[] getGlobalBreakpoints() {
         return _globalBreakPoints;
     }
 
-    Breakpoint[] getBreakpoints(Long pid){
+    Breakpoint[] getBreakpoints(Long pid) {
         Breakpoint[] arr = _instanceBreakPoints.get(pid);
-        return (arr == null)
-                ? EMPTY_BP
-                : arr;
+        return (arr == null) ? EMPTY_BP : arr;
     }
 
-    void addGlobalBreakpoint(Breakpoint breakpoint){
+    void addGlobalBreakpoint(Breakpoint breakpoint) {
         Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.add(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
 
-    void addBreakpoint(Long pid, Breakpoint breakpoint){
+    void addBreakpoint(Long pid, Breakpoint breakpoint) {
         Breakpoint[] bpArr = _instanceBreakPoints.get(pid);
-        if(bpArr == null) {
-            bpArr = new Breakpoint[]{breakpoint};
-        }
-        else{
+        if (bpArr == null) {
+            bpArr = new Breakpoint[] { breakpoint };
+        } else {
             Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, bpArr);
             c.add(breakpoint);
             bpArr = c.toArray(new Breakpoint[c.size()]);
@@ -119,22 +119,21 @@ class DebuggerSupport {
         _instanceBreakPoints.put(pid, bpArr);
     }
 
-    void removeGlobalBreakpoint(Breakpoint breakpoint){
+    void removeGlobalBreakpoint(Breakpoint breakpoint) {
         Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.remove(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
 
-    void removeBreakpoint(Long pid, Breakpoint breakpoint){
+    void removeBreakpoint(Long pid, Breakpoint breakpoint) {
         Breakpoint[] bpArr = _instanceBreakPoints.get(pid);
-        if(bpArr != null){
+        if (bpArr != null) {
             Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, bpArr);
             c.remove(breakpoint);
             bpArr = c.toArray(new Breakpoint[c.size()]);
-            if(bpArr.length == 0) {
+            if (bpArr.length == 0) {
                 _instanceBreakPoints.remove(pid);
-            }
-            else {
+            } else {
                 _instanceBreakPoints.put(pid, bpArr);
             }
         }
@@ -150,7 +149,7 @@ class DebuggerSupport {
                     if (instance == null)
                         throw new InstanceNotFoundException("" + iid);
 
-                    if(ProcessState.STATE_SUSPENDED == instance.getState()){
+                    if (ProcessState.STATE_SUSPENDED == instance.getState()) {
                         // send event
                         ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
                         evt.setOldState(ProcessState.STATE_SUSPENDED);
@@ -193,22 +192,23 @@ class DebuggerSupport {
 
     /**
      * Process BPEL events WRT debugging.
-     * @param event BPEL event
+     * 
+     * @param event
+     *            BPEL event
      */
     public void onEvent(BpelEvent event) {
 
-        if(_enabled && (event instanceof ProcessInstanceEvent) &&
-                // I have this excluded since we are recursing here when onEvent()
+        if (_enabled && (event instanceof ProcessInstanceEvent) &&
+        // I have this excluded since we are recursing here when onEvent()
                 // is called from DebugSupport codepath's which change state
                 !(event instanceof ProcessInstanceStateChangeEvent)) {
 
-            final ProcessInstanceEvent evt = (ProcessInstanceEvent)event;
+            final ProcessInstanceEvent evt = (ProcessInstanceEvent) event;
 
             //
             // prevent leaking of memory
             //
-            if(evt instanceof ProcessCompletionEvent ||
-                    evt instanceof ProcessTerminationEvent) {
+            if (evt instanceof ProcessCompletionEvent || evt instanceof ProcessTerminationEvent) {
                 _step.remove(evt.getProcessInstanceId());
                 _instanceBreakPoints.remove(evt.getProcessInstanceId());
                 return;
@@ -218,19 +218,19 @@ class DebuggerSupport {
             if (!suspend) {
                 suspend = checkBreakPoints(evt, _globalBreakPoints);
             }
-            if (!suspend){
+            if (!suspend) {
                 Breakpoint[] bp = _instanceBreakPoints.get(evt.getProcessInstanceId());
-                if(bp != null) {
+                if (bp != null) {
                     suspend = checkBreakPoints(evt, bp);
                 }
             }
 
-            if(suspend){
+            if (suspend) {
                 _step.remove(evt.getProcessInstanceId());
                 try {
                     ProcessDAO process = _db.getProcessDAO();
                     ProcessInstanceDAO instance = process.getInstance(evt.getProcessInstanceId());
-                    if(ProcessState.canExecute(instance.getState())){
+                    if (ProcessState.canExecute(instance.getState())) {
                         // send event
                         ProcessInstanceStateChangeEvent changeEvent = new ProcessInstanceStateChangeEvent();
                         changeEvent.setOldState(instance.getState());
@@ -251,17 +251,15 @@ class DebuggerSupport {
         }
     }
 
-    private boolean checkStep(ProcessInstanceEvent event){
+    private boolean checkStep(ProcessInstanceEvent event) {
         Long pid = event.getProcessInstanceId();
-        return (_step.contains(pid)
-                && (event instanceof ActivityExecStartEvent
-                || event instanceof ScopeCompletionEvent));
+        return (_step.contains(pid) && (event instanceof ActivityExecStartEvent || event instanceof ScopeCompletionEvent));
     }
 
-    private boolean checkBreakPoints(ProcessInstanceEvent event, Breakpoint[] breakpoints){
+    private boolean checkBreakPoints(ProcessInstanceEvent event, Breakpoint[] breakpoints) {
         boolean suspended = false;
-        for(int i = 0; i < breakpoints.length; ++i){
-            if (((BreakpointImpl)breakpoints[i]).checkBreak(event)){
+        for (int i = 0; i < breakpoints.length; ++i) {
+            if (((BreakpointImpl) breakpoints[i]).checkBreak(event)) {
                 suspended = true;
                 break;
             }
@@ -279,7 +277,7 @@ class DebuggerSupport {
                     if (instance == null)
                         throw new InstanceNotFoundException("" + iid);
 
-                    if(ProcessState.STATE_SUSPENDED == instance.getState()){
+                    if (ProcessState.STATE_SUSPENDED == instance.getState()) {
                         // send event
                         ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
                         evt.setOldState(ProcessState.STATE_SUSPENDED);
@@ -299,7 +297,6 @@ class DebuggerSupport {
                         we.setIID(iid);
                         _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
 
-
                         return true;
                     }
                     return false;
@@ -310,7 +307,7 @@ class DebuggerSupport {
             throw infe;
         } catch (Exception ex) {
             __log.error("ProcessingEx", ex);
-            throw new ProcessingException(ex.getMessage(),ex);
+            throw new ProcessingException(ex.getMessage(), ex);
         }
 
         return doit;
@@ -372,8 +369,7 @@ class DebuggerSupport {
                     //
                     // TerminationEvent (peer of ProcessCompletionEvent)
                     //
-                    ProcessTerminationEvent terminationEvent =
-                            new ProcessTerminationEvent();
+                    ProcessTerminationEvent terminationEvent = new ProcessTerminationEvent();
                     terminationEvent.setProcessInstanceId(iid);
                     terminationEvent.setProcessName(processName);
                     terminationEvent.setProcessId(processId);
@@ -391,7 +387,6 @@ class DebuggerSupport {
             __log.error("DbError", e);
             throw new RuntimeException(e);
         }
-
 
     }
 }

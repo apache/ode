@@ -144,20 +144,18 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
     
     void load(MessageExchangeDAO dao) {
-        if (dao.getMessageExchangeId().equals(_mexId))
+        if (!dao.getMessageExchangeId().equals(_mexId))
             throw new IllegalArgumentException("MessageExchangeId mismatch!");
-
-        if (_pattern == null)
-            _pattern = MessageExchangePattern.valueOf(dao.getPattern());
-        if (_opname == null)
-            _opname = dao.getOperation();
+        _pattern = MessageExchangePattern.valueOf(dao.getPattern());
+        _opname = dao.getOperation();
+        _timeout = dao.getTimeout();
+        
         if (_fault == null)
             _fault = dao.getFault();
         if (_explanation == null)
             _explanation = dao.getFaultExplanation();
         if (_status == null)
             _status = Status.valueOf(dao.getStatus());
-        _timeout = dao.getTimeout();
     }
 
     public void save(MessageExchangeDAO dao) {
@@ -411,7 +409,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
             return action.call(getDAO());
         } else {
             try {
-                return _process._server.execIsolatedTransaction(new Callable<T>() {
+                return _process._server.enqueueTransaction(new Callable<T>() {
                     public T call() throws Exception {
                         assertTransaction();
                         return action.call(getDAO());
