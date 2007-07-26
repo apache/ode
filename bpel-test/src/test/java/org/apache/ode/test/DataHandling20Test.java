@@ -47,5 +47,8 @@ public class DataHandling20Test extends BPELTestAbstract {
     public void testXslTransform() throws Throwable {
         go("/bpel/2.0/TestXslTransform");
     }
-	
+    public void testSplit() throws Throwable {
+        go("/bpel/2.0/TestSplit");
+    }
+
 }

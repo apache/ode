@@ -35,6 +35,7 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 
@@ -70,6 +71,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 return new DoXslTransform();
             } else {
                 throw new WrappedResolverException(__msgs.errUnknownBpelFunction(localName));
+            }
+        } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
+            String localName = functionName.getLocalPart();
+            if (Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS.equals(localName)) {
+                return new SplitToElements();
             }
         }
 
@@ -121,6 +127,19 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
 
             _out.xslSheets.put(xslSheet.uri, xslSheet);
+            return "";
+        }
+    }
+
+    /**
+     * Compile time checking for the non standard ode:splitToElements function.
+     */
+    public class SplitToElements implements XPathFunction {
+        public Object evaluate(List params) throws XPathFunctionException {
+            if (params.size() < 3 || params.size() > 4) {
+                throw new CompilationException(
+                        __msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS));
+            }
             return "";
         }
     }

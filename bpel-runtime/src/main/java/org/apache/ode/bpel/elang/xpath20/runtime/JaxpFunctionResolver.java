@@ -39,6 +39,7 @@ import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
@@ -86,6 +87,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 return new DoXslTransform();
             } else {
                 throw new WrappedResolverException("Unknown BPEL function: " + functionName);
+            }
+        } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
+            String localName = functionName.getLocalPart();
+            if (Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS.equals(localName)) {
+                return new SplitToElements();
             }
         }
 
@@ -282,4 +288,69 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         }
     }
 
+    /**
+     * Compile time checking for the non standard ode:splitToElements function.
+     */
+    public class SplitToElements implements XPathFunction {
+        public Object evaluate(List args) throws XPathFunctionException {
+            assert args.size() > 2;
+            assert args.size() < 5;
+            if (__log.isDebugEnabled()) {
+                __log.debug("splitToElements call(context=" + _ectx + " args=" + args + ")");
+            }
+
+            // Checking the first parameters, should be a proper element or a text node. Java verbosity at its best.
+            String strToSplit = null;
+            try {
+                Node firstParam = null;
+                if (args.get(0) instanceof List) {
+                    List elmts = (List)args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "splitInvalidSource"),
+                                    "First parameter of the ode:splitToElements function MUST point to a single " +
+                                            "element or text node."));
+                    firstParam = (Node) elmts.get(0);
+                } else  if (args.get(0) instanceof NodeWrapper) {
+                    firstParam = (Node) ((NodeWrapper)args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Node) {
+                    firstParam = (Node) args.get(0);
+                } else {
+                    strToSplit = (String) args.get(0);
+                }
+
+                if (strToSplit == null) {
+                    if (Node.ELEMENT_NODE == firstParam.getNodeType()) {
+                        strToSplit = firstParam.getTextContent().trim();
+                    } else if (Node.TEXT_NODE == firstParam.getNodeType()) {
+                        strToSplit = ((Text)firstParam).getWholeText().trim();
+                    }
+                }
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "splitInvalidSource"),
+                                "First parameter of the ode:splitToElements function MUST point to a single " +
+                                        "element node."));
+            }
+
+            // Other parameters
+            String separator = (String) args.get(1);
+            String localName = (String) args.get(2);
+            String namespace = args.size() == 4 ? (String) args.get(3) : null;
+
+            // Preparing the result document
+            Document doc = DOMUtils.newDocument();
+            Element wrapper = doc.createElement("wrapper");
+            doc.appendChild(wrapper);
+
+            // Creating nodes for each string element of the split string and appending to result
+            String[] strElmts = strToSplit.split(separator);
+            for (String strElmt : strElmts) {
+                Element elmt = doc.createElementNS(namespace, localName);
+                elmt.setTextContent(strElmt.trim());
+                wrapper.appendChild(elmt);
+            }
+
+            return wrapper;
+        }
+    }
 }
