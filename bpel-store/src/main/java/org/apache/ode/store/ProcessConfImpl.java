@@ -184,7 +184,7 @@ public class ProcessConfImpl implements ProcessConf {
         if (cbpInfo == null)
             throw new ContextException("CBP record not found for type " + getType());
         try {
-            String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp);
+            String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp).replaceAll("\\\\", "/");
             if (!relative.endsWith(".cbp")) throw new ContextException("CBP file must end with .cbp suffix: " + cbpInfo.cbp);
             relative = relative.replace(".cbp", ".bpel");
             File bpelFile = new File(_du.getDeployDir(), relative);
