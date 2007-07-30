@@ -17,7 +17,6 @@
 
 gem "buildr", "~>1.2.2"
 require "buildr"
-# require "buildr/lib/buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
@@ -323,19 +322,19 @@ define "ode" do
     dao_hibernate = project("dao-hibernate").compile.target
     bpel_store = project("bpel-store").compile.target
 
-	Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
-							:under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
+    Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+      :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-		hibernate_schemaexport "" do |task, ant|
-			ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-				:drop=>"no", :create=>"yes", :output=>target) do
-				task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
-					ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
-				end
-			end
-		end
+        hibernate_schemaexport "" do |task, ant|
+          ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
+            :drop=>"no", :create=>"yes", :output=>target) do
+            task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
+              ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
+            end
+          end
+        end
       end
     end
 
