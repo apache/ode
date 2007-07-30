@@ -15,13 +15,14 @@
 #    limitations under the License.
 #
 
-gem "buildr", "=1.1.3"
+gem "buildr", "~>1.2.2"
 require "buildr"
 # require "buildr/lib/buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
+require "buildr/hibernate"
 
 
 # Keep this structure to allow the build system to update version numbers.
@@ -113,7 +114,7 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
-repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
+repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 # Changing releases tag names
 class Release
@@ -248,11 +249,10 @@ define "ode" do
       "bpel-store", "jacob", "jacob-ap", "utils"),
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
-    test.compile.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
+    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, XALAN
-    test.junit.with HIBERNATE, DOM4J
 
     package :jar
   end
@@ -261,7 +261,7 @@ define "ode" do
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
 	test.compile.with HSQLDB, JOTM.jotm
-	test.junit.with HSQLDB, JOTM.jotm, JOTM.carol, JOTM.jrmp, JAVAX.transaction, JOTM.howl, JAVAX.resource, JAVAX.connector, LOG4J
+	test.with HSQLDB, JOTM.jotm, JOTM.carol, JOTM.jrmp, JAVAX.transaction, JOTM.howl, JAVAX.resource, JAVAX.connector, LOG4J
     package :jar
   end
 
@@ -293,7 +293,7 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-jpa"),
-      DERBY, Java::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J
+      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
@@ -323,14 +323,19 @@ define "ode" do
     dao_hibernate = project("dao-hibernate").compile.target
     bpel_store = project("bpel-store").compile.target
 
-    schemaexport = Hibernate.schemaexport
+	Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+							:under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-        schemaexport.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-          :drop=>"no", :create=>"yes", :output=>target) do
-          fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml"
-        end
+		hibernate_schemaexport "" do |task, ant|
+			ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
+				:drop=>"no", :create=>"yes", :output=>target) do
+				task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
+					ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
+				end
+			end
+		end
       end
     end
 
@@ -345,7 +350,7 @@ define "ode" do
       build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
 
-    package :zip, :include=>derby_db
+    package(:zip).include(derby_db)
   end
 
   desc "ODE OpenJPA DAO Implementation"
@@ -378,7 +383,7 @@ define "ode" do
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
-    package :zip, :include=>derby_db
+    package(:zip).include(derby_db)
   end
 
   desc "ODE JAva Concurrent OBjects"
@@ -427,7 +432,7 @@ define "ode" do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.junit.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
+    test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
     test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-ojpa-derby").package(:zip))
 
   end
@@ -466,6 +471,7 @@ define "ode" do
   desc "ODE Utils"
   define "utils" do
     compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
+	test.exclude "*TestResources"
     package :jar
   end
 
@@ -520,5 +526,5 @@ define "apache-ode" do
     end
   end
 
-  package :zip, :id=>"#{id}-docs", :include=>javadoc(project("ode").projects).target
+  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end

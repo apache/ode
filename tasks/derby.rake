@@ -36,7 +36,7 @@ module Derby
           sqls = task.prerequisites.map(&:to_s)
           ant.sql :driver=>"org.apache.derby.jdbc.EmbeddedDriver", :url=>"jdbc:derby:#{task.to_s};create=true",
             :userid=>"sa", :password=>"", :autocommit=>"on" do
-            sqls.each { |sql| transaction :src=>sql }
+            sqls.each { |sql| ant.transaction :src=>sql }
           end
         end
         # Copy the SQL files into the database directory.

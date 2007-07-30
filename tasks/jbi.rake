@@ -156,7 +156,6 @@ class Project
       JBITask.define_task(file_name).tap do |jbi|
         jbi.include options[:include] if options[:include]
         [:component, :bootstrap].each { |key| jbi[key] = options[key] if options[key] }
-        yield jbi
       end
     end
     file(file_name)
