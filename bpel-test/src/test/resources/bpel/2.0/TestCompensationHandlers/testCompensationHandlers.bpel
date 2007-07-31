@@ -18,11 +18,11 @@
 -->
 
 <process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2004/03/business-process/ ../../../../../../../bpel-schemas/src/main/resources/wsbpel_main-draft-Apr-29-2006.xsd"
+ xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
  xmlns:tns="http://ode/bpel/unit-test/testCompensationHandlers"
  xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
  xmlns:wns="http://ode/bpel/unit-test/testCompensationHandlers.wsdl"
- xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+ xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
  name="TestCompensationHandlersProcess"
  targetNamespace="http://ode/bpel/unit-test/testCompensationHandlers"
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
@@ -84,7 +84,7 @@
 
 
 		<catchAll>
-			<compensate scope="ScopeTwo"/>
+			<compensateScope target="ScopeTwo"/>
 		</catchAll>
 
 		
@@ -99,7 +99,7 @@
 	  			   	  <assign>
 	      				<copy>
 	      					<from>
-	      						<literal><![CDATA[fire compenstation handler]]></literal>
+	      						<literal><![CDATA[fire compensation handler]]></literal>
 	      					</from>
 	        				<to variable="probeInput" part="probeName"/>
 	      				</copy>
@@ -158,26 +158,24 @@
 	    </invoke>
 
 	  <if>
-	  	<condition>$request.faultIndictor1 = 'yes'</condition>
-	  	<then>
-	  		<sequence>
-	  			<assign>
-	      				<copy>
-	      					<from>
-	      						<literal><![CDATA[throw testFault]]></literal>
-	      					</from>
-	        				<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	  			</assign> 
-	    		<invoke name="probe1" partnerLink="probe" 
-	            			portType="prb:probeMessagePT" 
-	            			operation="probe"
-	            			inputVariable="probeInput"  
-	            			outputVariable="probeInput">
-	    		</invoke>
-	  			<throw faultName="tns:testFault"/>
-	  		</sequence>
-	  	</then>
+	  	<condition>$request.faultIndicator1 = 'yes'</condition>
+  		<sequence>
+  			<assign>
+      				<copy>
+      					<from>
+      						<literal><![CDATA[throw testFault]]></literal>
+      					</from>
+        				<to variable="probeInput" part="probeName"/>
+      				</copy>
+  			</assign> 
+    		<invoke name="probe1" partnerLink="probe" 
+            			portType="prb:probeMessagePT" 
+            			operation="probe"
+            			inputVariable="probeInput"  
+            			outputVariable="probeInput">
+    		</invoke>
+  			<throw faultName="tns:testFault"/>
+  		</sequence>
 	  	<elseif>
 	  		<condition>$request.faultIndicator2 = 'yes'</condition>
 	  		<sequence>

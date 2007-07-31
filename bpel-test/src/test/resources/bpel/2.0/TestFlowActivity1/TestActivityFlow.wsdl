@@ -95,7 +95,7 @@
   <bpws:property name="testProbeData" type="xsd:string"/>
   <bpws:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestText
+      requestText
     </bpws:query>
   </bpws:propertyAlias>
   
@@ -103,7 +103,7 @@
   <bpws:propertyAlias propertyName="tns:testFlow1" messageType="tns:requestMessage" part="requestMessageData">
  
     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/flowIndicators/indicatorOne
+      flowIndicators/indicatorOne
     </bpws:query> 
   
   </bpws:propertyAlias>
@@ -113,7 +113,7 @@
   <bpws:propertyAlias propertyName="tns:loopInd" messageType="tns:requestMessage" part="requestMessageData">
 
     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/loopIndicator
+      loopIndicator
     </bpws:query>  
    
   </bpws:propertyAlias>

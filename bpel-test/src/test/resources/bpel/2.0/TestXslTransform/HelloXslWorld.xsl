@@ -27,7 +27,7 @@
          in the engine) -->
     <xsl:element name="root">
       <xsl:element name="hello">
-        <xsl:value-of select="concat(*/text(), $middle/text(), ' World')"/>
+        <xsl:value-of select="concat(*/content/text(), $middle, ' World')"/>
       </xsl:element>
     </xsl:element>
   </xsl:template>
