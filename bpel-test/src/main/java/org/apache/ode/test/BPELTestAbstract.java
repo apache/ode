@@ -39,6 +39,9 @@ import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.w3c.dom.Element;
 
 import javax.persistence.EntityManager;
@@ -60,7 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class BPELTestAbstract extends TestCase {
+public abstract class BPELTestAbstract {
 	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
 	
     protected BpelServerImpl _server;
@@ -89,8 +92,8 @@ public abstract class BPELTestAbstract extends TestCase {
     /** What's actually been deployed. */
     private List<Deployment> _deployed;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         _failures = new CopyOnWriteArrayList<Failure>();
         _server = new BpelServerImpl();
         mexContext = new MessageExchangeContextImpl();
@@ -152,8 +155,8 @@ public abstract class BPELTestAbstract extends TestCase {
         _server.start();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         for (Deployment d : _deployed) {
             try {
                 store.undeploy(d.deployDir);
@@ -183,7 +186,7 @@ public abstract class BPELTestAbstract extends TestCase {
         } catch (junit.framework.AssertionFailedError ex) {
             return;
         }
-        fail("Expecting test to fail");
+        Assert.fail("Expecting test to fail");
     }
 
     protected void go(String deployDir) throws Exception {
@@ -217,8 +220,9 @@ public abstract class BPELTestAbstract extends TestCase {
             }
         }
 
-        if (!testPropsFile.exists())
-            fail("Test property file not found in " + deployDir);
+        if (!testPropsFile.exists()) {
+            Assert.fail("Test property file not found in " + deployDir);
+        }
 
         while (testPropsFile.exists()) {
             Properties testProps = new Properties();
@@ -269,10 +273,15 @@ public abstract class BPELTestAbstract extends TestCase {
     }
 
     protected void checkFailure() {
-        for (Failure failure : _failures)
-            System.err.println(failure);
-
-        assertTrue(_failures.size() == 0);
+        StringBuffer sb = new StringBuffer("Failure report:\n");
+    	for (Failure failure : _failures) {
+            sb.append(failure);
+            sb.append('\n');
+        }
+    	if (_failures.size() != 0) {
+        	System.err.println(sb.toString());
+            Assert.fail(sb.toString());
+    	}
     }
 
     
@@ -368,13 +377,13 @@ public abstract class BPELTestAbstract extends TestCase {
     private void failure(Object where, String message, Exception ex) {
         Failure f = new Failure(where, message, ex);
         _failures.add(f);
-        fail(f.toString());
+        Assert.fail(f.toString());
     }
 
     private void failure(Object where, String message, Object expected, Object actual) {
         Failure f = new Failure(where, message, expected, actual, null);
         _failures.add(f);
-        fail(f.toString());
+        Assert.fail(f.toString());
     }
 
     protected boolean isFailed() {
@@ -385,13 +394,13 @@ public abstract class BPELTestAbstract extends TestCase {
         String deployxml = deployDir + "/deploy.xml";
         URL deployxmlurl = getClass().getResource(deployxml);
         if (deployxmlurl == null) {
-            fail("Resource not found: " + deployxml);
+            Assert.fail("Resource not found: " + deployxml);
         }
         try {
 			return new File(deployxmlurl.toURI().getPath()).getParentFile();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			fail(e.getMessage());
+			Assert.fail(e.getMessage());
 			return null;
 		}
     }
@@ -598,7 +607,12 @@ public abstract class BPELTestAbstract extends TestCase {
             try {
                 Status finalstat = mex.getStatus();
                 if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
-                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+                    if (finalstat.equals(Status.FAULT)) {
+                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: " 
+                    			+ mex.getFault() + " | " + mex.getFaultExplanation());
+                    } else {
+                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+                    }
 
                 if (_invocation.expectedFinalCorrelationStatus != null
                         && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {

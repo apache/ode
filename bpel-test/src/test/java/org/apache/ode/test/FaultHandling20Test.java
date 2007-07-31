@@ -18,14 +18,16 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Test;
+
 public class FaultHandling20Test extends BPELTestAbstract {
-    public void testFaultHandlers() throws Throwable {
+	@Test public void testFaultHandlers() throws Throwable {
         go("/bpel/2.0/TestFaultHandlers");
     }
-    public void testFaultWithVariable() throws Throwable {
+	@Test public void testFaultWithVariable() throws Throwable {
         go("/bpel/2.0/TestFaultWithVariable");
     }
-    public void testCatchFaultInFaultHandler() throws Throwable {
+	@Test public void testCatchFaultInFaultHandler() throws Throwable {
         go("/bpel/2.0/TestCatchFaultInFaultHandler");
     }
 }
