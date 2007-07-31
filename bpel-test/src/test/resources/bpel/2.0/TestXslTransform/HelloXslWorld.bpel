@@ -39,7 +39,7 @@
         
     <variables>
         <variable name="myVar" messageType="test:HelloXslMessage"/>
-        <variable name="otherVar" messageType="test:HelloXslMessage"/>
+        <variable name="otherVar" type="xsd:string"/>
     </variables>
             
     <sequence>   
@@ -53,15 +53,15 @@
         <assign name="assign1">
             <copy>
                 <from variable="myVar" part="TestPart"/>
-                <to variable="otherVar" part="TestPart"/>
+                <to variable="otherVar"/>
             </copy>
             <copy>
                 <from>'Xsl'</from>
-                <to>$otherVar.TestPart</to>
+                <to>$otherVar</to>
             </copy>
             <copy>
                 <from>
-                    bpws:doXslTransform("HelloXslWorld.xsl", $myVar.TestPart, 'middle', $otherVar.TestPart)
+                    bpws:doXslTransform("HelloXslWorld.xsl", $myVar.TestPart, 'middle', $otherVar)
                 </from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
