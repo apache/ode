@@ -52,6 +52,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -1203,18 +1204,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Node getPartData(Element message, Part part) {
-        Element partEl = DOMUtils.findChildByName((Element) message, new QName(null, part.name), false);
+    	// borrowed from ASSIGN.evalQuery()
+        QName partName = new QName(null, part.name);
+        Node ret = DOMUtils.findChildByName((Element) message, partName);
+        if (part.type instanceof OElementVarType) {
+            QName elName = ((OElementVarType) part.type).elementType;
+            ret = DOMUtils.findChildByName((Element) ret, elName);
+        }
 
-        // This could occur if the message does not contain the required part.
-        if (partEl == null)
-            return null;
-
-        Node container = DOMUtils.getFirstChildElement(partEl);
-        if (container == null)
-            container = partEl.getFirstChild(); // either a text node / element
-        // /
-        // xsd-type-wrapper
-        return container;
+        return ret;
     }
 
     public Element getSourceEPR(String mexId) {
