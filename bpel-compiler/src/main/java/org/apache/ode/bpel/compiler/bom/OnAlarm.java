@@ -47,7 +47,7 @@ public class OnAlarm extends BpelObject {
    * @return duration of the alarm
    */
   public Expression getFor() {
-      return (Expression) getFirstChild(new QName[] {Bpel20QNames.FOR, Bpel20QNames.FINAL_FOR});
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FOR));
   }
 
 
@@ -57,7 +57,7 @@ public class OnAlarm extends BpelObject {
    * @return deadline when alarm goes out of effect
    */
   public Expression getUntil() {
-      return (Expression) getFirstChild(new QName[] {Bpel20QNames.UNTIL, Bpel20QNames.FINAL_UNTIL});
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.UNTIL));
       
   }
   

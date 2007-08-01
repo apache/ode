@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import javax.xml.namespace.QName;
-
 import org.w3c.dom.Element;
 
 /**
@@ -37,7 +35,7 @@ public class WaitActivity extends Activity {
    * @return Returns the for.
    */
   public Expression getFor() {
-      return  (Expression) getFirstChild(new QName[] {Bpel20QNames.FOR, Bpel20QNames.FINAL_FOR});
+	  return  (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FOR));
   }
 
   /**
@@ -46,7 +44,6 @@ public class WaitActivity extends Activity {
    * @return the "until" expression
    */
   public Expression getUntil() {
-      return  (Expression) getFirstChild(new QName[] {Bpel20QNames.UNTIL, Bpel20QNames.FINAL_UNTIL});
-      
+	  return  (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.UNTIL));
   }
 }
