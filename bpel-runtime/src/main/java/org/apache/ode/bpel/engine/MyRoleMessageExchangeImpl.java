@@ -1,8 +1,10 @@
 package org.apache.ode.bpel.engine;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
+import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -17,21 +19,27 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
     
+    protected final QName _callee;
+
     protected CorrelationStatus _cstatus;
 
     protected String _clientId;
 
-    protected QName _callee;
-
-    public MyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
-        super(process, mexId);
+    public MyRoleMessageExchangeImpl(BpelProcess process,
+            String mexId, 
+            OPartnerLink oplink, 
+            Operation operation,
+            QName callee) {
+        super(process, mexId, oplink, oplink.myRolePortType, operation);
+        _callee = callee;
     }
-
+        
     public CorrelationStatus getCorrelationStatus() {
         return _cstatus;
     }
@@ -41,7 +49,6 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         super.load(dao);
         _cstatus = CorrelationStatus.valueOf(dao.getCorrelationStatus());
         _clientId = dao.getCorrelationId();
-        _callee = dao.getCallee();
     }
 
     @Override
@@ -83,7 +90,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     public String toString() {
         try {
-            return "{MyRoleMex#" + _mexId + " [Client " + _clientId + "] calling " + _callee + "." + _opname + "(...)}";
+            return "{MyRoleMex#" + _mexId + " [Client " + _clientId + "] calling " + _callee + "." + getOperationName() + "(...)}";
         } catch (Throwable t) {
             return "{MyRoleMex#???}";
         }
@@ -94,7 +101,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     }
 
-    protected void scheduleInvoke(BpelProcess target) {
+    protected void scheduleInvoke() {
         
         assert !_process.isInMemory() : "Cannot schedule invokes for in-memory processes.";
         assert _contexts.isTransacted() : "Cannot schedule outside of transaction context.";
@@ -102,13 +109,13 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         // Schedule a new job for invocation
         final WorkEvent we = new WorkEvent();
         we.setType(WorkEvent.Type.MYROLE_INVOKE);
-        we.setProcessId(target.getPID());
+        we.setProcessId(_process.getPID());
         we.setMexId(_mexId);
 
         // Schedule a timeout 
         final WorkEvent we1 = new WorkEvent();
         we1.setType(WorkEvent.Type.MYROLE_INVOKE_TIMEOUT);
-        we1.setProcessId(target.getPID());
+        we1.setProcessId(_process.getPID());
         we1.setMexId(_mexId);
         
         setStatus(Status.ASYNC);
@@ -155,11 +162,13 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     }
 
 
-    /**
-     * Callback.
-     * 
-     * @param mexdao
-     */
-    protected void onMessageExchangeComplete(MessageExchangeDAO mexdao) {
+    protected void onStateChanged(MessageExchangeDAO mexdao) {
+        setStatus(Status.valueOf(mexdao.getStatus()));
     }
+    
+    
+    protected void finalize() {
+        _process.unregisterMyRoleMex(this);
+    }
+
 }

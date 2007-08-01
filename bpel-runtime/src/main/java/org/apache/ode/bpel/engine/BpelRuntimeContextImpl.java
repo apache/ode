@@ -135,7 +135,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private boolean _executed;
 
-    public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
+    public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, 
+            ProcessInstanceDAO dao, 
+            PROCESS PROCESS,
             MessageExchangeDAO instantiatingMessageExchange) {
         _instanceWorker = instanceWorker;
         _bpelProcess = instanceWorker._process;
@@ -558,7 +560,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 scheduleAsyncResponse(myrolemex);
                 break;
             default:
-                // DO NOTHING
                 break;
             }
 
@@ -693,7 +694,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
         evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
 
-        MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
+        MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
         mexDao.setStatus(MessageExchange.Status.NEW.toString());
         mexDao.setOperation(operation.getName());
         mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
@@ -779,22 +780,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
             // If RELIABLE is supported, this is easy, we just do it in-line.
             ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), portType, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
+                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
             _contexts.mexContext.invokePartnerReliable(reliableMex);
         } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
             // If TRANSACTED is supported, this is again easy, do it in-line.
             TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
-                    mexDao.getMessageExchangeId(), portType, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
+                    mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
             _contexts.mexContext.invokePartnerTransacted(transactedMex);
         } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
             // For BLOCKING invocation, we defer the call until after commit (unless idempotent).
             BlockingPartnerRoleMessageExchangeImpl blockingMex = new BlockingPartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), portType, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
+                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
             schedule(new BlockingInvoker(blockingMex));
         } else if (supportedStyles.contains(InvocationStyle.ASYNC)) {
             // For ASYNC style, we defer the call until after commit (unless idempotent).
             AsyncPartnerRoleMessageExchangeImpl asyncMex = new AsyncPartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), portType, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
+                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
             schedule(new AsyncInvoker(asyncMex));
             
         } else {
@@ -866,7 +867,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
-        MessageExchangeDAO myRoleMex = _bpelProcess.createMessageExchange(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        MessageExchangeDAO myRoleMex = _bpelProcess.createMessageExchange(new GUID().toString(),MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         myRoleMex.setCallee(serviceName);
         myRoleMex.setPipedMessageExchange(partnerRoleMex);
         myRoleMex.setOperation(partnerRoleMex.getOperation());
@@ -1393,7 +1394,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         assert !_bpelProcess.isInMemory() : "Internal error; attempt to schedule in-memory process";
         assert _contexts.isTransacted();
 
-        final MyRoleMessageExchangeImpl mex = _bpelProcess.createMyRoleMex(mexdao);
+        final MyRoleMessageExchangeImpl mex = _bpelProcess.recreateMyRoleMex(mexdao);
         _pendingMyRoleReplies.add(mex);
     }
 

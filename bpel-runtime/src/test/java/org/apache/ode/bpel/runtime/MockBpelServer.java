@@ -342,4 +342,9 @@ class MockBpelServer {
         }
     }
 
+    public void waitForBlocking() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

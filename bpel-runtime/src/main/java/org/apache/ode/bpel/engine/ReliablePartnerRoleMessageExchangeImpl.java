@@ -1,7 +1,6 @@
 package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.MessageExchangeImpl.InDbAction;
@@ -10,11 +9,12 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    public ReliablePartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType ptype, Operation op, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel partnerRoleChannel) {
-        super(process, mexId, ptype, op, epr, myRoleEPR, partnerRoleChannel);
+    public ReliablePartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation op, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel partnerRoleChannel) {
+        super(process, mexId, oplink, op, epr, myRoleEPR, partnerRoleChannel);
     }
 
     

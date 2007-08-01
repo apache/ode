@@ -22,6 +22,8 @@ import org.apache.ode.bpel.evt.BpelEvent;
 
 /**
  * Interface implemented by listeners of BPEL events.
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
  */
 public interface BpelEventListener {
 

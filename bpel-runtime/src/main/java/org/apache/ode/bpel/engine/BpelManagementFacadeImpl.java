@@ -40,6 +40,8 @@ import java.util.*;
  * Implementation of the instance/process management interaction. This class implements
  * the methods necessary to support process debugging. It also implements all the methods in the
  * newer Process/Instance Management interface (pmapi).
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
  */
 public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         implements BpelManagementFacade {

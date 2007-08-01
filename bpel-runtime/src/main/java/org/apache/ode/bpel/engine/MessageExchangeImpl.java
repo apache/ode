@@ -37,6 +37,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
@@ -73,32 +74,29 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     final BpelProcess _process;
 
+    final OPartnerLink _oplink;
+
+    /** Message-exchange id. */
     final String _mexId;
+
+    final PortType _portType;
+
+    final Operation _operation;
 
     /** Instance identifier. */
     Long _iid;
 
-    PortType _portType;
-
-    Operation _operation;
-
     EndpointReference _epr;
-
-    MessageExchangePattern _pattern;
-
-    String _opname;
 
     MessageImpl _request;
 
-    boolean _associated;
-
     /** The point at which this message-exchange will time out. */
-    long _timeout;
+    long _timeout = 30 * 1000;
 
     //
     // The following fields need to be volatile, since a random  IL thread may set them.
     //
-    volatile Status _status;
+    private volatile Status _status = Status.NEW;
 
     volatile QName _fault;
 
@@ -132,23 +130,30 @@ abstract class MessageExchangeImpl implements MessageExchange {
     private Set<String> _propNames;
 
 
-    public MessageExchangeImpl(BpelProcess process, String mexId) {
+
+    public MessageExchangeImpl(
+            BpelProcess process, 
+            String mexId,
+            OPartnerLink oplink, 
+            PortType ptype, 
+            Operation operation) {
         _process = process;
-        _contexts = process._contexts; 
+        _contexts = process._contexts;
         _mexId = mexId;
+        _oplink = oplink;
+        _portType  = ptype;
+        _operation = operation;
     }
 
     @Override
     public boolean equals(Object other) {
         return _mexId.equals(((MessageExchangeImpl)other)._mexId);
     }
+
     
     void load(MessageExchangeDAO dao) {
-        if (!dao.getMessageExchangeId().equals(_mexId))
-            throw new IllegalArgumentException("MessageExchangeId mismatch!");
-        _pattern = MessageExchangePattern.valueOf(dao.getPattern());
-        _opname = dao.getOperation();
         _timeout = dao.getTimeout();
+        _iid = dao.getInstance() != null ? dao.getInstance().getInstanceId() : null;
         
         if (_fault == null)
             _fault = dao.getFault();
@@ -159,13 +164,21 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public void save(MessageExchangeDAO dao) {
+        dao.setPartnerLinkModelId(_oplink.getId());
+        dao.setOperation(_operation.getName());
         dao.setStatus(_status.toString());
         dao.setInvocationStyle(getInvocationStyle().toString());
         dao.setFault(_fault);
         dao.setFaultExplanation(_explanation);
         dao.setTimeout(_timeout);
-        // todo: set failureType
+        dao.setFailureType(_failureType == null ? null : _failureType.toString());
+        
 
+        if (_changes.contains(Change.REQUEST)) {
+            MessageDAO requestDao = dao.createMessage(_request.getType());
+            requestDao.setData(_request.getMessage());            
+        }
+        
         if (_changes.contains(Change.RESPONSE)) {
             MessageDAO responseDao = dao.createMessage(_response.getType());
             responseDao.setData(_response.getMessage());
@@ -212,11 +225,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public String getOperationName() throws BpelEngineException {
-        return _opname;
+        return getOperation().getName();
     }
 
     public MessageExchangePattern getMessageExchangePattern() {
-        return _pattern;
+        return _operation.getOutput()==null ? MessageExchangePattern.REQUEST_ONLY : MessageExchangePattern.REQUEST_RESPONSE; 
     }
 
     public boolean isTransactional() throws BpelEngineException {
@@ -283,14 +296,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         });
     }
 
-    void init(PortType portType, Operation operation, MessageExchangePattern pattern) {
-        if (__log.isTraceEnabled())
-            __log.trace("Mex[" + getMessageExchangeId() + "].setPortOp(" + portType + "," + operation + ")");
-        _portType = portType;
-        _operation = operation;
-        _pattern = pattern;
-    }
-
+    
     void setFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
         setStatus(Status.FAULT);
         _fault = faultType;
@@ -409,7 +415,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
             return action.call(getDAO());
         } else {
             try {
-                return _process._server.enqueueTransaction(new Callable<T>() {
+                return _process.enqueueTransaction(new Callable<T>() {
                     public T call() throws Exception {
                         assertTransaction();
                         return action.call(getDAO());

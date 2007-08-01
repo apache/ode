@@ -181,10 +181,9 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         throw new UnsupportedOperationException("Can't query process configuration using a transient DAO.");
     }
 
-    public MessageExchangeDAO createMessageExchange(char dir) {
-        String id = Long.toString(counter.getAndIncrement());
-        MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir, id);
-        _mexStore.put(id, mex);
+    public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
+        MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir, mexId);
+        _mexStore.put(mexId, mex);
         return mex;
     }
 

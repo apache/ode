@@ -1,7 +1,6 @@
 package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -9,6 +8,7 @@ import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
  * Implementation of the {@link PartnerRoleMessageExchange} interface that is passed to the IL when the 
@@ -18,13 +18,13 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  *
  * This InvocationStyle makes this class rather trivial. 
  *  
- * @author Maciej Szefler
+ * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
 public class BlockingPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    BlockingPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType portType, Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, mexId, portType, operation, epr, myRoleEPR, channel);
+    BlockingPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+        super(process, mexId, oplink, operation, epr, myRoleEPR, channel);
     }
 
     /**

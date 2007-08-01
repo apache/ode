@@ -20,7 +20,6 @@
 package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +32,7 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.OPartnerLink;
 import org.w3c.dom.Element;
 
 /**
@@ -64,14 +64,11 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     volatile boolean _blocked = false;
 
-    PartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType portType, Operation operation,
+    PartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, mexId);
+        super(process, mexId, oplink, oplink.partnerRolePortType, operation);
         _myRoleEPR = myRoleEPR;
         _partnerRoleChannel = channel;
-
-        init(portType, operation, (operation.getOutput() == null) ? MessageExchangePattern.REQUEST_ONLY
-                : MessageExchangePattern.REQUEST_RESPONSE);
     }
 
     @Override
@@ -150,7 +147,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     public String toString() {
         try {
-            return "{PartnerRoleMex#" + _mexId + " [PID " + getCaller() + "] calling " + _epr + "." + _opname + "(...)}";
+            return "{PartnerRoleMex#" + _mexId + " [PID " + getCaller() + "] calling " + _epr + "." + getOperationName() + "(...)}";
 
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";
@@ -184,8 +181,8 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     protected void checkReplyContextOk() {
         // Prevent duplicate replies.
-        if (_status != MessageExchange.Status.REQUEST && _status != MessageExchange.Status.ASYNC)
-            throw new BpelEngineException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + _status);
+        if (getStatus() != MessageExchange.Status.REQUEST && getStatus() != MessageExchange.Status.ASYNC)
+            throw new BpelEngineException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + getStatus());
 
         // In-memory processe are special, they don't allow scheduling so any replies must be delivered immediately.
         if (!_blocked && _process.isInMemory())

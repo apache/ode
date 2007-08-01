@@ -1,7 +1,6 @@
 package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,6 +10,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
  * Implementation of the {@link PartnerRoleMessageExchange} interface that is used when the ASYNC invocation style is being used
@@ -18,16 +18,16 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  * object) until the ODE transaction has committed, and it does not block during the performance of the operation. Hence, when a
  * reply becomes available, we'll need to schedule a transaction to process it.
  * 
- * @author Maciej Szefler
+ * @author Maciej Szefler <mszefler at gmail dot com>
  * 
  */
 public class AsyncPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
     private static final Log __log = LogFactory.getLog(AsyncPartnerRoleMessageExchangeImpl.class);
     
-    AsyncPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, PortType portType, Operation operation,
+    AsyncPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, mexId, portType, operation, epr, myRoleEPR, channel);
+        super(process, mexId, oplink, operation, epr, myRoleEPR, channel);
     }
 
     @Override

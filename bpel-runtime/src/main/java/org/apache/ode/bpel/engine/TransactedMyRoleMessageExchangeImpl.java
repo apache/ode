@@ -1,9 +1,13 @@
 package org.apache.ode.bpel.engine;
 
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
  * Transacted my-role message exchange.
@@ -15,8 +19,8 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
  */
 public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
-    public TransactedMyRoleMessageExchangeImpl(BpelProcess target, String mexId) {
-        super(target, mexId);
+    public TransactedMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+        super(process, mexId, oplink, operation, callee);
     }
 
     @Override

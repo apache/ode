@@ -35,7 +35,9 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+import org.apache.ode.bpel.o.OPartnerLink;
 
+import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,21 +59,20 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
     public static final int TIMEOUT = 2 * 60 * 1000;
 
     
-    public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId) {
-        super(process, mexId);
+    public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+        super(process, mexId, oplink, operation, callee);
     }
-
 
     public void invokeReliable() {
         // For reliable, we MUST HAVE A TRANSACTION!
         assertTransaction();
 
         // Cover the case where invoke was already called. 
-        if (_status == Status.REQUEST)
+        if (getStatus() == Status.REQUEST)
             return;
         
-        if (_status != Status.NEW)
-            throw new BpelEngineException("Invalid state: " + _status);
+        if (getStatus() != Status.NEW)
+            throw new BpelEngineException("Invalid state: " + getStatus());
         
         if (!processInterceptors(InterceptorInvoker.__onBpelServerInvoked, getDAO())) {
             throw new BpelEngineException("Intercepted.");
@@ -81,7 +82,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
             __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
         setStatus(Status.REQUEST);
         save(getDAO());
-        scheduleInvoke(_process);
+        scheduleInvoke();
     }
 
 

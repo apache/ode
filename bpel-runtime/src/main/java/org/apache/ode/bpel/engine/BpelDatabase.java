@@ -28,7 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Encapsulates transactional access to the BPEL database.
+ * Mostly of historical interest. Provides transactional access to the BPEL database, defines a Callable-style
+ * interface for transactions. 
+ * 
+ * <p>Should probably be eliminated. --mszefler 2007-07-26 </p>
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class BpelDatabase {
     static Log __log = LogFactory.getLog(BpelDatabase.class);

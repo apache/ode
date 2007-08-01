@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,9 +56,6 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -88,8 +84,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
-
-    private final List<WeakReference<MessageExchangeStateListener>> _mexStateListeners = new ArrayList<WeakReference<MessageExchangeStateListener>>();
 
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
@@ -525,7 +519,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
                         return process.createPartnerRoleMex(mexdao);
                     case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-                        return process.createMyRoleMex(mexdao);
+                        return process.recreateMyRoleMex(mexdao);
                     default:
                         String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
                         __log.fatal(errmsg);
@@ -584,11 +578,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return null;
     }
     
-    void registerMessageExchangeStateListener(MessageExchangeStateListener mexStateListener) {
-        WeakReference<MessageExchangeStateListener> ref = new WeakReference<MessageExchangeStateListener>(mexStateListener);
-
-    }
-
     OProcess getOProcess(QName processId) {
         _mngmtLock.readLock().lock();
         try {
