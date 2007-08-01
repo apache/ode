@@ -23,9 +23,9 @@
     xmlns:tns2="http://www.product.org"
     xmlns:tns3="http://www.company.org"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/">
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
     
     <wsdl:types>
         <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.person.org" xmlns="http://www.person.org" 

@@ -18,8 +18,8 @@
   -->
 <process name="HelloXslWorld" 
     targetNamespace="http://pxe/bpel/unit-test" 
-    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-    xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://pxe/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:types="http://pxe/bpel/types"
