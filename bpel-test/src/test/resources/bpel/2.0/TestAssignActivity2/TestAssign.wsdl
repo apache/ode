@@ -26,8 +26,8 @@
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-    xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
     <wsdl:message name="TestAssignMessage">
         <wsdl:part name="TestPart" type="xsd:string"/>
