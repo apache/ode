@@ -479,10 +479,11 @@ end
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
 
-  def distro(project, id)
+  def distro(project, postfix)
+    id = project.parent.id + postfix
     project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
       zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
-      zip.path("examples").include project.path_to("src/examples"), :as=>"."
+      zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
       zip.merge project("ode:tools-bin").package(:zip)
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
         COMMONS.pool, COMMONS.collections, JAXEN,
@@ -496,8 +497,9 @@ define "apache-ode" do
   end
 
   desc "ODE Axis2 Based Distribution"
-  define "distro-axis2" do
-    parent.distro(self, "#{parent.id}-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
+  define "distro" do
+    parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
+    parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
 
     project("ode:axis2-war").task("start").enhance do |task|
       target = "#{task.path}/webapp/WEB-INF/processes"
@@ -510,20 +512,15 @@ define "apache-ode" do
     end
   end
 
-  desc "ODE JBI Based Distribution"
-  define "distro-jbi" do
-    parent.distro(self, "#{parent.id}-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
-  end
+  #package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
+  #  if File.exist?(".svn")
+  #    `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
+  #      map { |l| l.split.last }.reject { |f| File.directory?(f) }.
+  #      each { |f| zip.include f, :as=>f }
+  #  else
+  #    zip.include Dir.pwd, :as=>"."
+  #  end
+  #end
 
-  package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
-    if File.exist?(".svn")
-      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
-        map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-        each { |f| zip.include f, :as=>f }
-    else
-      zip.include Dir.pwd, :as=>"."
-    end
-  end
-
-  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
+  # package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end
