@@ -66,7 +66,7 @@ public class OnAlarm extends BpelObject {
    * @return the duration expression that specifies the frequency
    */
   public Expression getRepeatEvery() {
-      return (Expression) getFirstChild(new QName[] {Bpel20QNames.REPEAT_EVERY, Bpel20QNames.FINAL_REPEAT_EVERY});
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.REPEAT_EVERY));
   }
   
   
