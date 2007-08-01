@@ -193,19 +193,10 @@ public class BpelObject implements SourceLocation {
         });
     }
 
-    protected BpelObject getFirstChild(final QName[] oneOfTheseTypes) {
-        return CollectionsX.find_if(getChildren(), new MemberOfFunction<BpelObject>() {
-            @Override
-            public boolean isMember(BpelObject o) {
-            	boolean isMember = false;
-            	for (QName type : oneOfTheseTypes) {
-            		isMember |= o.getType().equals(type);
-            	}
-            	return isMember;
-            }
-        });
+    protected QName rewriteTargetNS(QName target) {
+    	return new QName(getType().getNamespaceURI(), target.getLocalPart());
     }
-
+    
     protected List<BpelObject> getChildren() {
         if (_children == null) {
             _children = new ArrayList<BpelObject>();

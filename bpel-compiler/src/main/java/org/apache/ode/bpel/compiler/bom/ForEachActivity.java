@@ -58,7 +58,7 @@ public class ForEachActivity extends CompositeActivity {
      * @return start iteration counter
      */
     public Expression getStartCounter() {
-        return (Expression) getFirstChild(new QName[] {Bpel20QNames.START_COUNTER_VALUE, Bpel20QNames.FINAL_START_COUNTER_VALUE});
+        return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.START_COUNTER_VALUE));
     }
 
     /**
@@ -68,7 +68,7 @@ public class ForEachActivity extends CompositeActivity {
      * @return final counter expression
      */
     public Expression getFinalCounter() {
-        return (Expression) getFirstChild(new QName[] {Bpel20QNames.FINAL_COUNTER_VALUE, Bpel20QNames.FINAL_FINAL_COUNTER_VALUE});
+        return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FINAL_COUNTER_VALUE));
     }
 
     /**

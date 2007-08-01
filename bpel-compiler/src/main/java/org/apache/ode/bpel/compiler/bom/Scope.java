@@ -131,7 +131,7 @@ public class Scope extends JoinFailureSuppressor {
      * @return the <code>OnAlarmEventHandler</code>s
      */
     public List<OnAlarm> getAlarms() {
-        BpelObject eventHandlers = getFirstChild(new QName[] {Bpel20QNames.EVENTHANDLERS, Bpel20QNames.FINAL_EVENTHANDLERS});
+        BpelObject eventHandlers = getFirstChild(rewriteTargetNS(Bpel20QNames.EVENTHANDLERS));
         if (eventHandlers == null)
             return Collections.emptyList();
         return eventHandlers.getChildren(OnAlarm.class);
@@ -140,7 +140,7 @@ public class Scope extends JoinFailureSuppressor {
     /**
      */
     public List<OnEvent> getEvents() {
-    	BpelObject eventHandlers = getFirstChild(new QName[] {Bpel20QNames.EVENTHANDLERS, Bpel20QNames.FINAL_EVENTHANDLERS});
+        BpelObject eventHandlers = getFirstChild(rewriteTargetNS(Bpel20QNames.EVENTHANDLERS));
         if (eventHandlers == null)
             return Collections.emptyList();
 
