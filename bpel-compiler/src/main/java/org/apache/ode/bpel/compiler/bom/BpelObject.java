@@ -130,6 +130,19 @@ public class BpelObject implements SourceLocation {
         return e.getElement();
     }
 
+    public Element getFirstExtensibilityElementElement() {
+    	Element child = null;
+    	NodeList nl = getElement().getChildNodes();
+        for (int i = 0; i < nl.getLength(); ++i) {
+            Node node = nl.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE && 
+            		!getType().getNamespaceURI().equals(node.getNamespaceURI())) {
+                child = (Element)node;
+                break;
+            }
+        }
+        return child;
+    }
     
     /**
      * Is this a BPEL 1.1 object?
@@ -176,6 +189,19 @@ public class BpelObject implements SourceLocation {
             @Override
             public boolean isMember(BpelObject o) {
                 return o.getType().equals(type);
+            }
+        });
+    }
+
+    protected BpelObject getFirstChild(final QName[] oneOfTheseTypes) {
+        return CollectionsX.find_if(getChildren(), new MemberOfFunction<BpelObject>() {
+            @Override
+            public boolean isMember(BpelObject o) {
+            	boolean isMember = false;
+            	for (QName type : oneOfTheseTypes) {
+            		isMember |= o.getType().equals(type);
+            	}
+            	return isMember;
             }
         });
     }
