@@ -40,10 +40,10 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             .formatCompilationMessage("Error parsing BPEL process: the BPEL is either malformed or is invalid.");
     }
 
-    /** Compilation completed with {0} error(s). */
-    public CompilationMessage errCompilationErrors(int errorCount) {
-        return this.formatCompilationMessage("Compilation completed with {0} error(s).",
-            errorCount);
+    /** Compilation completed with {0} error(s): {1} */
+    public CompilationMessage errCompilationErrors(int errorCount, String prettyErrors) {
+        return this.formatCompilationMessage("Compilation completed with {0} error(s):\n{1}",
+            errorCount, prettyErrors);
     }
 
     /** Attempt to reference undeclared link "{0}". */

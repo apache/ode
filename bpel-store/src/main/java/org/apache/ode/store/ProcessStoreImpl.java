@@ -164,7 +164,7 @@ public class ProcessStoreImpl implements ProcessStore {
         try {
             du.compile();
         } catch (CompilationException ce) {
-            String errmsg = __msgs.msgDeployFailCompileErrors();
+            String errmsg = __msgs.msgDeployFailCompileErrors(ce);
             __log.error(errmsg, ce);
             throw new ContextException(errmsg, ce);
         }

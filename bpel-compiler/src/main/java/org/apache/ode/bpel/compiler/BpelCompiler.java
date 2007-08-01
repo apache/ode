@@ -685,14 +685,19 @@ abstract class BpelCompiler implements CompilerContext {
         assert _structureStack.size() == 0;
 
         boolean hasErrors = false;
+        StringBuffer sb = new StringBuffer();
         for (CompilationMessage msg : _errors) {
-            if (msg.severity >= CompilationMessage.ERROR)
+            if (msg.severity >= CompilationMessage.ERROR) {
                 hasErrors = true;
+                sb.append('\t');
+                sb.append(msg.toErrorString());
+                sb.append('\n');
+            }
         }
 
-        if (hasErrors)
-            throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size()));
-
+        if (hasErrors) {
+            throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));
+        }
         return _oprocess;
     }
 
