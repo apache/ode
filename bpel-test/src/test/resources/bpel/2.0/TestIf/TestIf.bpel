@@ -16,10 +16,10 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<process name="HelloWorld2"
+<process name="TestIf"
          targetNamespace="http://ode/bpel/unit-test"
-         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns:tns="http://ode/bpel/unit-test"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:test="http://ode/bpel/unit-test.wsdl">
@@ -56,16 +56,14 @@
         </assign>
         <if>
             <condition>number($tmpVar)=number(2)</condition>
-            <then>
-                <assign name="assignError">
-                    <copy>
-                        <from>
-                            <literal>Worked</literal>
-                        </from>
-                        <to variable="myVar" part="TestPart"/>
-                    </copy>
-                </assign>
-            </then>
+            <assign name="assignError">
+                <copy>
+                    <from>
+                        <literal>Worked</literal>
+                    </from>
+                    <to variable="myVar" part="TestPart"/>
+                </copy>
+            </assign>
             <else>
                 <assign name="assignZut">
                     <copy>

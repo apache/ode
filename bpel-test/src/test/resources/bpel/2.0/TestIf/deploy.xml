@@ -21,7 +21,7 @@
 	xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
 
-	<process name="pns:HelloWorld2">
+	<process name="pns:TestIf">
 		<active>true</active>
 		<provide partnerLink="helloPartnerLink">
 			<service name="wns:HelloService" port="HelloPort"/>
