@@ -72,7 +72,7 @@ JAVAX               = struct(
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0",
-  :resource			=>"javax.resource:connector:jar:1.0"
+  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
 JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
