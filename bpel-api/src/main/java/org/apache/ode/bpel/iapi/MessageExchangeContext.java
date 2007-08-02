@@ -99,15 +99,13 @@ public interface MessageExchangeContext {
     void cancel(PartnerRoleMessageExchange mex) throws ContextException;
     
     /**
-     * Method used to asynchronously deliver to the integration layer the BPEL engine's response to an invocation that could not
-     * complete synchronously.
+     * Method used to inform the integration layer that the state of a my-role message exchange has changed. This method
+     * is handy for implementations that need to survive system shutdowns.    
      * 
      * @see MyRoleMessageExchange#invoke(Message)
      */
-    void onAsyncReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException;
+    void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex) throws BpelEngineException;
 
-    void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException;
-    
     /**
      * Get the supported invocation styles (see {@link InvocationStyle}) for invoking the EPR provided 
      * via a given channel.
