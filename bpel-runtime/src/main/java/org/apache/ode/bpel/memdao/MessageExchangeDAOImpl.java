@@ -277,9 +277,12 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public void setFailureType(String failureType) {
         _failureType = failureType;
-        
     }
 
+    public String getFailureType() {
+        return _failureType;
+    }
+    
     public void setInvocationStyle(String invocationStyle) {
         _istyle = invocationStyle;
         

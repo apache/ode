@@ -6,10 +6,7 @@ import java.util.concurrent.Semaphore;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.runtime.PROCESS;
 
 /**
  * Objects used for synchronizing the execution of instance-level work. All work on behalf of an instance is funneled to one of
@@ -34,6 +31,8 @@ class BpelInstanceWorker implements Runnable {
     private ArrayList<Runnable> _todoQueue = new ArrayList<Runnable>();
 
     private final ThreadLocal<Long> _activeInstance = new ThreadLocal<Long>();
+    
+    private Thread _workerThread;
 
     BpelInstanceWorker(BpelProcess process, Long iid) {
         _process = process;
@@ -51,11 +50,12 @@ class BpelInstanceWorker implements Runnable {
      * @param runnable
      */
     synchronized void enqueue(Runnable runnable) {
+        __log.debug("Enqueue work for instance IID " + _iid + ": " + runnable);
         _todoQueue.add(runnable);
         // We mayh need to reschedule this thread if we've dropped out of the end of the run() method.
         if (!_running) {
             _running = true;
-            _process.scheduleRunnable(this);
+            _process.enqueueRunnable(this);
         }
     }
  
@@ -74,7 +74,8 @@ class BpelInstanceWorker implements Runnable {
      * @throws Exception
      *             forwarded from {@link Callable#call()}
      */
-    synchronized <T> T execInCurrentThread(Callable<T> callable) throws Exception {
+    <T> T execInCurrentThread(Callable<T> callable) throws Exception {
+        __log.debug("Importing thread " + Thread.currentThread() + " for IID " + _iid);
         final Semaphore ready = new Semaphore(0);
         final Semaphore finished = new Semaphore(0);
         enqueue(new Runnable() {
@@ -88,6 +89,8 @@ class BpelInstanceWorker implements Runnable {
                 }
             }
         });
+        
+        __log.debug("Blocking main worker thread for IID " + _iid);
         try {
             ready.acquire();
         } catch (InterruptedException ex) {
@@ -95,12 +98,14 @@ class BpelInstanceWorker implements Runnable {
             throw new BpelEngineException("Thread interrupted.", ex);
         }
 
+        __log.debug("Executing worker for IID " + _iid + " in imported thread " + Thread.currentThread());
         _activeInstance.set(_iid);
         try {
             return callable.call();
         } catch (Exception ex) {
             throw ex;
         } finally {
+            __log.debug("Releasing worker thread for IID " + _iid + " imported thread " + Thread.currentThread());
             finished.release();
             _activeInstance.set(null);
         }
@@ -113,7 +118,9 @@ class BpelInstanceWorker implements Runnable {
      * Implementation of the {@link Runnable} interface.
      */
     public void run() {
+        __log.debug("Running worker thread " + Thread.currentThread() + " for instance IID " + _iid);
         _activeInstance.set(_iid);
+        _workerThread = Thread.currentThread();
         try {
 
             do {
@@ -123,10 +130,12 @@ class BpelInstanceWorker implements Runnable {
                         // This is the only way to drop out of this method short of some disasterous error. This is
                         // important since we need to synchronize _running with _todoQueue state.
                         _running = false;
+                        __log.debug("Worker thread " + Thread.currentThread() + " for instance IID " + _iid + " ran out of work. ");
                         return;
                     }
 
                     next = _todoQueue.remove(0);
+                    __log.debug("Worker thread "  + Thread.currentThread() + " for instance IID " + _iid + " found work: " + next);
                 }
 
                 try {
@@ -137,11 +146,12 @@ class BpelInstanceWorker implements Runnable {
             } while (true);
         } finally {
             _activeInstance.set(null);
+            _workerThread = null;
         }
     }
 
     public String toString() {
-        return "{BpelInstanceWorker: PID=" + _process.getPID() + " IID=" + _iid + "}";
+        return "{BpelInstanceWorker: PID=" + _process.getPID() + " IID=" + _iid + " workerThread="+ _workerThread + "}";
     }
 
     public boolean isWorkerThread() {

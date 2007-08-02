@@ -157,6 +157,18 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             if (_exec == null)
                 _exec = Executors.newCachedThreadPool();
+
+            if (_contexts.txManager == null) {
+                String errmsg = "Transaction manager not specified; call setTransactionManager(...)!";
+                __log.fatal(errmsg);
+                throw new IllegalStateException(errmsg);
+            }
+            
+            if (_contexts.scheduler == null) { 
+                String errmsg = "Scheduler not specified; call setScheduler(...)!";
+                __log.fatal(errmsg);
+                throw new IllegalStateException(errmsg);
+            }
             
             _contexts.scheduler.start();
             _state = State.RUNNING;
@@ -305,6 +317,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
         try {
             BpelProcess p = _registeredProcesses.remove(pid);
+            if (p == null)
+                return;
+            
             p.deactivate();
             while (_serviceMap.values().remove(p))
                 ;
@@ -598,14 +613,26 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return _exec.submit(new ServerCallable<T>(new TransactedCallable<T>(transaction)));
     }
 
+    void enqueueRunnable(final Runnable runnable) {
+        _exec.submit(new ServerRunnable(runnable));
+    }
+    
     /**
      * Schedule a {@link Runnable} object for execution after the completion of the current transaction. 
      * @param runnable
      */
-    void scheduleRunnable(Runnable runnable) {
+    void scheduleRunnable(final Runnable runnable) {
         assertTransaction();
-        _contexts.registerCommitSynchronizer(new ServerRunnable(runnable));
+        _contexts.registerCommitSynchronizer(new Runnable() {
+
+            public void run() {
+                _exec.submit(new ServerRunnable(runnable));
+            }
+            
+        });
+        
     }
+
     
     protected void assertTransaction() {
         if (!_contexts.isTransacted())
@@ -730,6 +757,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.readLock().lock();
             try {
                 return _work.call();
+            } catch (Exception ex) {
+                __log.fatal("Internal Error", ex);
+                throw ex;
             } finally {
                 _mngmtLock.readLock().unlock();
             }

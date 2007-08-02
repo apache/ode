@@ -193,8 +193,9 @@ class BpelProcess {
                 __log.error(errmsg);
                 mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_ENDPOINT.toString());
                 mexdao.setFaultExplanation(errmsg);
+                Status oldstatus = Status.valueOf(mexdao.getStatus());
                 mexdao.setStatus(Status.FAILURE.toString());
-                fireMexStateEvent(mexdao);
+                fireMexStateEvent(mexdao, oldstatus, Status.FAILURE);
                 return;
             }
 
@@ -242,7 +243,7 @@ class BpelProcess {
 
     private void executeCreateInstance(MessageExchangeDAO mexdao) {
         assert _hydrationLatch.isLatched(1);
-        
+
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
         BpelRuntimeContextImpl instanceCtx = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), new PROCESS(_oprocess),
@@ -301,7 +302,7 @@ class BpelProcess {
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
         assert _hydrationLatch.isLatched(1);
-        
+
         for (Map.Entry<Endpoint, PartnerLinkMyRoleImpl> e : _endpointToMyRoleMap.entrySet()) {
             if (e.getKey().serviceName.equals(serviceName))
                 return e.getValue();
@@ -359,7 +360,6 @@ class BpelProcess {
             return null;
     }
 
-    
     /**
      * Process the message-exchange interceptors.
      * 
@@ -697,35 +697,31 @@ class BpelProcess {
         }
     }
 
-    private MyRoleMessageExchangeImpl newMyRoleMex(
-            InvocationStyle istyle, 
-            String mexId, 
-            QName target, 
-            OPartnerLink oplink, 
+    private MyRoleMessageExchangeImpl newMyRoleMex(InvocationStyle istyle, String mexId, QName target, OPartnerLink oplink,
             Operation operation) {
         MyRoleMessageExchangeImpl mex;
         switch (istyle) {
         case RELIABLE:
-            mex = new ReliableMyRoleMessageExchangeImpl(this, mexId, oplink,operation, target);
+            mex = new ReliableMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
         case ASYNC:
-            mex = new AsyncMyRoleMessageExchangeImpl(this, mexId,oplink,operation,target);
+            mex = new AsyncMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
         case TRANSACTED:
-            mex = new TransactedMyRoleMessageExchangeImpl(this, mexId, oplink,operation,target);
+            mex = new TransactedMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
         case BLOCKING:
-            mex = new BlockingMyRoleMessageExchangeImpl(this, mexId, oplink,operation,target);
+            mex = new BlockingMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
         default:
             throw new AssertionError("Unexpected invocation style: " + istyle);
 
         }
-        
+
         registerMyRoleMex(mex);
         return mex;
     }
-    
+
     MyRoleMessageExchangeImpl recreateMyRoleMex(MessageExchangeDAO mexdao) {
         InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
 
@@ -733,26 +729,30 @@ class BpelProcess {
         try {
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             if (plink == null) {
-                String errmsg = __msgs.msgDbConsistencyError("MexDao #"+ mexdao.getMessageExchangeId() + " referenced unknown pLinkModelId " + mexdao.getPartnerLinkModelId());
+                String errmsg = __msgs.msgDbConsistencyError("MexDao #" + mexdao.getMessageExchangeId()
+                        + " referenced unknown pLinkModelId " + mexdao.getPartnerLinkModelId());
                 __log.error(errmsg);
                 throw new BpelEngineException(errmsg);
             }
-            
-            Operation op  = plink.getMyRoleOperation(mexdao.getOperation());
+
+            Operation op = plink.getMyRoleOperation(mexdao.getOperation());
             if (op == null) {
-                String errmsg = __msgs.msgDbConsistencyError("MexDao #"+ mexdao.getMessageExchangeId() + " referenced unknown operation " + mexdao.getOperation());
+                String errmsg = __msgs.msgDbConsistencyError("MexDao #" + mexdao.getMessageExchangeId()
+                        + " referenced unknown operation " + mexdao.getOperation());
                 __log.error(errmsg);
-                throw new BpelEngineException(errmsg);                
+                throw new BpelEngineException(errmsg);
             }
-            
+
             PartnerLinkMyRoleImpl myRole = _myRoles.get(plink);
             if (myRole == null) {
-                String errmsg = __msgs.msgDbConsistencyError("MexDao #"+ mexdao.getMessageExchangeId() + " referenced non-existant myrole");
+                String errmsg = __msgs.msgDbConsistencyError("MexDao #" + mexdao.getMessageExchangeId()
+                        + " referenced non-existant myrole");
                 __log.error(errmsg);
-                throw new BpelEngineException(errmsg);                                
+                throw new BpelEngineException(errmsg);
             }
-            
-            MyRoleMessageExchangeImpl mex = newMyRoleMex(istyle, mexdao.getMessageExchangeId(), myRole._endpoint.serviceName, plink, op);
+
+            MyRoleMessageExchangeImpl mex = newMyRoleMex(istyle, mexdao.getMessageExchangeId(), myRole._endpoint.serviceName,
+                    plink, op);
             mex.load(mexdao);
             return mex;
         } finally {
@@ -815,7 +815,7 @@ class BpelProcess {
      */
     private PartnerLinkMyRoleImpl getPartnerLinkForService(QName serviceName) {
         assert _hydrationLatch.isLatched(1);
-        
+
         PartnerLinkMyRoleImpl target = null;
         for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
             if (endpoint.serviceName.equals(serviceName))
@@ -825,9 +825,10 @@ class BpelProcess {
         return target;
 
     }
-    
+
     /**
-     * Used by {@link BpelRuntimeContextImpl} constructor. Should only be called from latched context. 
+     * Used by {@link BpelRuntimeContextImpl} constructor. Should only be called from latched context.
+     * 
      * @return
      */
     ReplacementMap getReplacementMap() {
@@ -1028,6 +1029,13 @@ class BpelProcess {
         _server.scheduleRunnable(new ProcessRunnable(runnable));
     }
 
+    public void enqueueRunnable(BpelInstanceWorker worker) {
+        if (__log.isDebugEnabled())
+            __log.debug("enqueuRunnable for process " + _pid + ": " + worker);
+
+        _server.enqueueRunnable(new ProcessRunnable(worker));
+    }
+
     class ProcessRunnable implements Runnable {
         Runnable _work;
 
@@ -1066,11 +1074,9 @@ class BpelProcess {
 
     }
 
-    public MyRoleMessageExchange createNewMyRoleMex(final InvocationStyle istyle, 
-            final QName targetService,
-            final String operation, 
-            final String clientKey) {
-        
+    public MyRoleMessageExchange createNewMyRoleMex(final InvocationStyle istyle, final QName targetService,
+            final String operation, final String clientKey) {
+
         final String mexId = new GUID().toString();
         _hydrationLatch.latch(1);
         try {
@@ -1082,8 +1088,8 @@ class BpelProcess {
             if (op == null)
                 throw new BpelEngineException("NoSuchOperation: " + operation);
 
-            return newMyRoleMex(istyle, mexId, target._endpoint.serviceName, target._plinkDef, op);  
-            
+            return newMyRoleMex(istyle, mexId, target._endpoint.serviceName, target._plinkDef, op);
+
         } finally {
             _hydrationLatch.release(1);
         }
@@ -1092,24 +1098,25 @@ class BpelProcess {
     void registerMyRoleMex(MyRoleMessageExchangeImpl mymex) {
         _mexStateListeners.add(new WeakReference<MyRoleMessageExchangeImpl>(mymex));
     }
-    
+
     void unregisterMyRoleMex(MyRoleMessageExchangeImpl mymex) {
         ArrayList<WeakReference<MyRoleMessageExchangeImpl>> needsRemoval = new ArrayList<WeakReference<MyRoleMessageExchangeImpl>>();
-        for (WeakReference<MyRoleMessageExchangeImpl> wref : _mexStateListeners) { 
+        for (WeakReference<MyRoleMessageExchangeImpl> wref : _mexStateListeners) {
             MyRoleMessageExchangeImpl mex = wref.get();
             if (mex == null || mex == mymex)
                 needsRemoval.add(wref);
         }
         _mexStateListeners.removeAll(needsRemoval);
-            
+
     }
-    
-    void fireMexStateEvent(MessageExchangeDAO mexdao) {
-        for (WeakReference<MyRoleMessageExchangeImpl> wr:  _mexStateListeners) {
-            MyRoleMessageExchangeImpl mymex = wr.get();
-            if (mymex != null && mymex.getMessageExchangeId() != null)
-                mymex.onStateChanged(mexdao);
-        }
+
+    void fireMexStateEvent(MessageExchangeDAO mexdao, Status old, Status news) {
+        if (old != news)
+            for (WeakReference<MyRoleMessageExchangeImpl> wr : _mexStateListeners) {
+                MyRoleMessageExchangeImpl mymex = wr.get();
+                if (mymex != null && mymex.getMessageExchangeId() != null)
+                    mymex.onStateChanged(mexdao, old, news);
+            }
 
     }
 

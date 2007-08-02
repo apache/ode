@@ -125,7 +125,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     /** Names of proprties that have been modified. */
     final HashSet<String> _modifiedProperties = new HashSet<String>();
 
-    private FailureType _failureType;
+    protected FailureType _failureType;
 
     private Set<String> _propNames;
 
@@ -176,12 +176,14 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
         if (_changes.contains(Change.REQUEST)) {
             MessageDAO requestDao = dao.createMessage(_request.getType());
-            requestDao.setData(_request.getMessage());            
+            requestDao.setData(_request.getMessage());   
+            dao.setRequest(requestDao);
         }
         
         if (_changes.contains(Change.RESPONSE)) {
             MessageDAO responseDao = dao.createMessage(_response.getType());
             responseDao.setData(_response.getMessage());
+            dao.setResponse(responseDao);
         }
 
         if (_changes.contains(Change.EPR)) {
@@ -297,40 +299,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     
-    void setFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
-        setStatus(Status.FAULT);
-        _fault = faultType;
-        _response = (MessageImpl) outputFaultMessage;
-
-        _changes.add(Change.RESPONSE);
-    }
-
-    void setFaultExplanation(String explanation) {
-        _explanation = explanation;
-    }
-
-    void setResponse(Message outputMessage) throws BpelEngineException {
-        if (getStatus() != Status.REQUEST && getStatus() != Status.ASYNC)
-            throw new IllegalStateException("Not in REQUEST state!");
-
-        setStatus(Status.RESPONSE);
-        _fault = null;
-        _explanation = null;
-        _response = (MessageImpl) outputMessage;
-        _response.makeReadOnly();
-        _changes.add(Change.RESPONSE);
-
-    }
-
-    void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
-        // TODO not using FailureType, nor details
-        setStatus(Status.FAILURE);
-        _failureType = type;
-        _explanation = reason;
-
-        _changes.add(Change.RESPONSE);
-    }
-
+   
     void setStatus(Status status) {
         _status = status;
     }

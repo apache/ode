@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -42,7 +44,8 @@ import javax.transaction.TransactionManager;
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
  */
 class Contexts {
-
+    private static final Log __log = LogFactory.getLog(Contexts.class);
+    
     TransactionManager txManager;
 
     MessageExchangeContext mexContext;
@@ -104,14 +107,14 @@ class Contexts {
                 try {
                     txManager.commit();
                 } catch (Exception ex) {
-                    throw new BpelEngineException("Could not commit.", ex);
+                    __log.error("Commit failed.", ex);                    
+                    throw new BpelEngineException("Commit failed.", ex);
                 }
             else
                 try {
                     txManager.rollback();
                 } catch (Exception ex) {
-                    throw new BpelEngineException("Could not rollback.", ex);
-
+                    __log.error("Transaction rollback failed.", ex);
                 }
         }
     }

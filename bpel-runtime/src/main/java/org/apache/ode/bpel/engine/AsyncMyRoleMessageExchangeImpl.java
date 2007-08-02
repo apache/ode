@@ -11,6 +11,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -51,10 +52,14 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         if (_future != null)
             return _future;
         
+        if (_request == null)
+            throw new IllegalStateException("Must call setRequest(...)!");
+        
         _future = new ResponseFuture();
         _process.enqueueTransaction(new Callable<Void>() {
 
             public Void call() throws Exception {
+                AsyncMyRoleMessageExchangeImpl.super.setStatus(Status.REQUEST);
                 MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
                 save(dao);
                 if (_process.isInMemory()) 
@@ -93,9 +98,7 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
                 if (_status != null)
                     return _status;
 
-                while (_status == null) {
-                    this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
-                }
+                this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
 
                 if (_status == null)
                     throw new TimeoutException();

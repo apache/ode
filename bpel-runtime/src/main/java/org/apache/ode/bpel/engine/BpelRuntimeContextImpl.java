@@ -153,7 +153,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _outstandingRequests = new OutstandingRequestManager();
         _vpu.setContext(_soup);
 
-        byte[] daoState = dao.getExecutionState();
+        byte[] daoState = _bpelProcess.isInMemory() ? null : dao.getExecutionState();
         if (daoState != null) {
             assert !_bpelProcess.isInMemory() : "did not expect to rehydrate in-mem process!";
             ByteArrayInputStream iis = new ByteArrayInputStream(daoState);
@@ -535,8 +535,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
 
+        Status previousStatus = Status.valueOf(myrolemex.getStatus());
         myrolemex.setStatus(status.toString());
-
+        _bpelProcess.fireMexStateEvent(myrolemex, previousStatus, status);
+        
         if (myrolemex.getPipedMessageExchange() != null) /* p2p case */{
             MessageExchangeDAO pmex = myrolemex.getPipedMessageExchange();
 

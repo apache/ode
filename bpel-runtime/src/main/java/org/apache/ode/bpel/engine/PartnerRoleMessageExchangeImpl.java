@@ -102,7 +102,9 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         }
         sync();
         checkReplyContextOk();
-        setFault(faultType, outputFaultMessage);
+        _fault = faultType;
+        _response = (MessageImpl) outputFaultMessage;
+        setStatus(Status.FAULT);
         sync();
         if (!_blocked)
             resumeInstance();
@@ -114,7 +116,8 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         }
         sync();
         checkReplyContextOk();
-        setResponse(response);
+        _response = (MessageImpl) response;
+        setStatus(Status.RESPONSE);
         sync();
         if (!_blocked)
             resumeInstance();
@@ -127,7 +130,9 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         }
         sync();
         checkReplyContextOk();
-        setFailure(type, description, details);
+        _failureType = type;
+        _explanation = description;
+        setStatus(Status.FAILURE);
         sync();
         if (!_blocked)
             resumeInstance();
