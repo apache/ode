@@ -110,7 +110,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
             _txm.commit();
         }
 
-        Thread.sleep(7500);
+        Thread.sleep(8500);
         assertEquals(1, _jobs.size());
     }
 
@@ -127,7 +127,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
             _txm.commit();
         }
 
-        Thread.sleep(7500);
+        Thread.sleep(8500);
         assertEquals(1, _jobs.size());
     }
 
@@ -181,7 +181,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         }
 
         _scheduler.stop();
-        
+        Thread.sleep(1000);
+
         assertEquals(0, _jobs.size());
     }
 
