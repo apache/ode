@@ -258,8 +258,11 @@ public interface MessageExchangeDAO {
 
     void setFailureType(String failureType);
 
+    String getFailureType();
+
     long getTimeout();
 
     void setTimeout(long timeout);
+
 
  }

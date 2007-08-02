@@ -27,82 +27,96 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-
 /**
  * Represents the physical resource for connecting to the bpel state store.
  */
-public interface BpelDAOConnection  {
-  /**
-   * Return the DAO for a bpel process.
-   *
-   * @param processId name (identifier) of the process
-   *
-   * @return DAO
-   */
-  ProcessDAO getProcess(QName processId);
+public interface BpelDAOConnection {
+    /**
+     * Return the DAO for a bpel process.
+     * 
+     * @param processId
+     *            name (identifier) of the process
+     * 
+     * @return DAO
+     */
+    ProcessDAO getProcess(QName processId);
 
+    /**
+     * Retrieve a process instance from the database.
+     * 
+     * @param iid
+     *            instance identifier
+     * @return process instance
+     */
+    ProcessInstanceDAO getInstance(Long iid);
 
-  /**
-   * Retrieve a process instance from the database.
-   * @param iid instance identifier
-   * @return process instance
-   */
-  ProcessInstanceDAO getInstance(Long iid);
+    /**
+     * Retrieve a scope instance from the database.
+     * 
+     * @param siidl
+     *            scope instance identifier
+     * @return scope instance
+     */
+    ScopeDAO getScope(Long siidl);
 
-  /**
-   * Retrieve a scope instance from the database.
-   * @param siidl scope instance identifier
-   * @return scope instance
-   */
-  ScopeDAO getScope(Long siidl);
+    /**
+     * Query instances in the database meeting the requested criteria.
+     * 
+     * @param criteria
+     * @return Collection<ProcessInstanceDAO>
+     */
+    Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria);
 
-  /**
-   * Query instances in the database meeting the requested
-   * criteria.
-   * @param criteria
-   * @return Collection<ProcessInstanceDAO>
-   */
-  Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria);
+    /**
+     * Insert a BPEL event into the database.
+     * 
+     * @param event
+     *            a BPEL event
+     * @param process
+     *            associated process (optional)
+     * @param instance
+     *            associated instance (optional)
+     */
+    void insertBpelEvent(BpelEvent event, ProcessDAO process, ProcessInstanceDAO instance);
 
-  /**
-   * Insert a BPEL event into the database.
-   * @param event a BPEL event
-   * @param process associated process (optional)
-   * @param instance associated instance (optional) 
-   */
-  void insertBpelEvent(BpelEvent event, ProcessDAO process, 
-      ProcessInstanceDAO instance);
+    /**
+     * Execute a query for the timeline for BPEL events matching the criteria.
+     * 
+     * @param ifilter
+     *            instance filter (optional)
+     * @param efilter
+     *            event filter (optional)
+     * @return List of event timestamps of events matching the criteria
+     */
+    List<Date> bpelEventTimelineQuery(InstanceFilter ifilter, BpelEventFilter efilter);
 
-  /**
-   * Execute a query for the timeline for BPEL events matching the criteria.
-   * @param ifilter instance filter (optional)
-   * @param efilter event filter (optional)
-   * @return List of event timestamps of events matching the criteria
-   */
-  List<Date> bpelEventTimelineQuery(InstanceFilter ifilter, BpelEventFilter efilter);
-  
-  /**
-   * Execute a query to retrieve the BPEL events matching the criteria.
-   * @param ifilter instance filter
-   * @param efilter event filter
-   * @return
-   */
-  List<BpelEvent> bpelEventQuery(InstanceFilter ifilter, BpelEventFilter efilter);
+    /**
+     * Execute a query to retrieve the BPEL events matching the criteria.
+     * 
+     * @param ifilter
+     *            instance filter
+     * @param efilter
+     *            event filter
+     * @return
+     */
+    List<BpelEvent> bpelEventQuery(InstanceFilter ifilter, BpelEventFilter efilter);
 
-  void close();
-  
-  Collection<ProcessInstanceDAO> instanceQuery(String expression);
+    void close();
 
-  ProcessDAO createProcess(QName pid, QName type, String guid, long version);
+    Collection<ProcessInstanceDAO> instanceQuery(String expression);
 
+    ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 
-  /**
-   * Create a message exchange.
-   * @param dir type of message exchange
-   * @return
-   */
-  MessageExchangeDAO createMessageExchange(char dir);
+    /**
+     * Create a message exchange.
+     * 
+     * @param mexId message exchange id (application-assigned)
+     * @param dir 
+     *            type of message exchange
+     * @return
+     */
+    MessageExchangeDAO createMessageExchange(String mexId, char dir);
 
-  MessageExchangeDAO getMessageExchange(String mexid);
+    MessageExchangeDAO getMessageExchange(String mexid);
 
 }
