@@ -16,25 +16,18 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
-import org.objectweb.jotm.Jotm;
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
     DelegateSupport _ds;
-
     SimpleScheduler _scheduler;
-
     ArrayList<JobInfo> _jobs;
     ArrayList<JobInfo> _commit;
-
     TransactionManager _txm;
 
-    
-    Jotm _jotm;
-
     public void setUp() throws Exception {
-        _jotm = new Jotm(true, false);
-        _txm = _jotm.getTransactionManager();
+        _txm = new GeronimoTransactionManager();
         _ds = new DelegateSupport();
 
         _scheduler = newScheduler("n1");
@@ -44,7 +37,6 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
     public void tearDown() throws Exception {
         _scheduler.shutdown();
-
     }
 
     public void testConcurrentExec() throws Exception  {
