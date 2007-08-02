@@ -1118,7 +1118,6 @@ class BpelProcess {
                     mymex.onStateChanged(mexdao, old, news);
             }
 
+        // TODO: need to call MessageExchangeContext#onMyRoleMessageExchangeStateChanged
     }
-
-
 }

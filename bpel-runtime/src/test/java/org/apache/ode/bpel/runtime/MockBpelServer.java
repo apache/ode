@@ -211,7 +211,7 @@ class MockBpelServer {
             public void invokePartner(PartnerRoleMessageExchange mex) {
             }
 
-            public void onAsyncReply(MyRoleMessageExchange myRoleMex) {
+            public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex) {
             }
 
             public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
