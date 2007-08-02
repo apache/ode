@@ -278,7 +278,6 @@ public class ODEServer {
 
             if (_txMgr != null) {
                 __log.debug("shutting down transaction manager.");
-                // TODO: we need to shutdown jotm if it is running.
                 _txMgr = null;
             }
 

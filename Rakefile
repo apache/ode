@@ -23,7 +23,6 @@ require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
 
-
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.1-SNAPSHOT"
 NEXT_VERSION = "1.1"
@@ -59,7 +58,6 @@ GERONIMO            = struct(
 )
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.4.sp1", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
-HOWL_LOGGER         = "howl:howl-logger:jar:0.1.11"
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -100,13 +98,6 @@ WS_COMMONS          = struct(
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
-JOTM				= struct(
-  :jotm				=>"jotm:jotm:jar:2.0.10",
-  :carol			=>"org.objectweb.carol:carol:jar:2.0.5",
-  :jrmp				=>"jotm:jotm_jrmp_stubs:jar:2.0.10",
-  :howl				=>"howl:howl-logger:jar:0.1.11"
-)
-
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
@@ -259,8 +250,9 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
-	test.compile.with HSQLDB, JOTM.jotm
-	test.with HSQLDB, JOTM.jotm, JOTM.carol, JOTM.jrmp, JAVAX.transaction, JOTM.howl, JAVAX.resource, JAVAX.connector, LOG4J
+	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
+	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J, 
+          GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end
 
