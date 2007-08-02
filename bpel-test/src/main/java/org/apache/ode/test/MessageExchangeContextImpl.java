@@ -90,7 +90,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	}
 
-	public void onAsyncReply(MyRoleMessageExchange myRoleMex)
+	public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
 		
 

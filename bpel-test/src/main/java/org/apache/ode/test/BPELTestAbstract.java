@@ -132,6 +132,7 @@ public abstract class BPELTestAbstract extends TestCase {
         _server.setScheduler(scheduler);
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
+        _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
         store = new ProcessStoreImpl(null, "jpa", true);
         store.registerListener(new ProcessStoreListener() {
@@ -366,6 +367,7 @@ public abstract class BPELTestAbstract extends TestCase {
     private void failure(Object where, String message, Exception ex) {
         Failure f = new Failure(where, message, ex);
         _failures.add(f);
+        ex.printStackTrace();
         fail(f.toString());
     }
 
