@@ -1,3 +1,5 @@
+  Sun BDS style license
+
 The software comprising backport-util-concurrent is based in large
 part on the code from JSR166, and the package dl.util.concurrent.
 The software has been released to the public domain, as explained at:
