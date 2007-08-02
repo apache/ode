@@ -484,6 +484,7 @@ define "apache-ode" do
     project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
       zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
       zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
+      # Libraries
       zip.merge project("ode:tools-bin").package(:zip)
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
         COMMONS.pool, COMMONS.collections, JAXEN,
@@ -492,6 +493,14 @@ define "apache-ode" do
         map(&:packages).flatten.each do |pkg|
         zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
       end
+      # Including third party licenses
+      Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
+      Dir.mkdir(project.path_to("target")) unless File.exist?(project.path_to("target"))
+      cp path_to("LICENSE"), project.path_to("target/LICENSE")
+      File.open(project.path_to("target/LICENSE"), "a+") do |l| 
+        l <<  Dir["#{project.path_to("license")}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
+      end
+      zip.include(project.path_to("target/LICENSE"))
       yield zip
     end
   end
