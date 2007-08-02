@@ -521,15 +521,15 @@ define "apache-ode" do
     end
   end
 
-  #package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
-  #  if File.exist?(".svn")
-  #    `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
-  #      map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-  #      each { |f| zip.include f, :as=>f }
-  #  else
-  #    zip.include Dir.pwd, :as=>"."
-  #  end
-  #end
+  package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
+    if File.exist?(".svn")
+      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
+        map { |l| l.split.last }.reject { |f| File.directory?(f) }.
+        each { |f| zip.include f, :as=>f }
+    else
+      zip.include Dir.pwd, :as=>"."
+    end
+  end
 
-  # package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
+  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end
