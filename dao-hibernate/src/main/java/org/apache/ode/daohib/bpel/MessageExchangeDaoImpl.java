@@ -319,6 +319,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     public void setFailureType(String failureType) {
         _hself.setFailureType(failureType);
     }
+    
+    public String getFailureType() {
+        return _hself.getFailureType();
+    }
 
     public void setInvocationStyle(String invocationStyle) {
         _hself.setInvocationStyle(invocationStyle);

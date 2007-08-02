@@ -18,7 +18,6 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class HMessageExchange extends HObject {
     private HMessage _request;
 
     private HMessage _response;
-    
+
     private HPartnerLink _partnerLink;
 
     private String _clientKey;
@@ -71,7 +70,7 @@ public class HMessageExchange extends HObject {
     private String _callee;
 
     private HMessageExchange _p2pPeer;
-    
+
     private Map<String, String> _properties = new HashMap<String, String>();
 
     private long _timeout;
@@ -80,11 +79,27 @@ public class HMessageExchange extends HObject {
 
     private String _failureType;
 
+    private String _mexId;
+
     /**
      * 
      */
     public HMessageExchange() {
         super();
+    }
+
+    /**
+     * 
+     * @hibernate.property
+     * @hibernate.column name="MEXID" not-null="true" unique="true"
+     */
+
+    public String getMexId() {
+        return _mexId;
+    }
+
+    public void setMexId(String mexId) {
+        _mexId = mexId;
     }
 
     /**
@@ -305,8 +320,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false"
-     *                cascade="delete"
+     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false" cascade="delete"
      * @hibernate.collection-key column="MEX"
      * @hibernate.collection-index column="NAME" type="string"
      * @hibernate.collection-element column="VALUE" type="string" length="8000"
@@ -324,21 +338,20 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PARTNERLINK" 
+     * @hibernate.many-to-one column="PARTNERLINK"
      */
     public HPartnerLink getPartnerLink() {
         return _partnerLink;
     }
 
-    
     /**
      * @hibernate.property column="TIMEOUT"
      * 
      */
     public long getTimeout() {
-        return _timeout; 
+        return _timeout;
     }
-    
+
     public void setTimeout(long timeout) {
         _timeout = timeout;
     }
@@ -357,7 +370,7 @@ public class HMessageExchange extends HObject {
     public HMessageExchange getPipedMessageExchange() {
         return _p2pPeer;
     }
-    
+
     public void setPipedMesageExchange(HMessageExchange p2ppeer) {
         _p2pPeer = p2ppeer;
     }
@@ -365,7 +378,7 @@ public class HMessageExchange extends HObject {
     public void setFailureType(String failureType) {
         _failureType = failureType;
     }
-    
+
     /**
      * @hibernate.property column="FAILURE_TYPE"
      * @return
@@ -377,5 +390,5 @@ public class HMessageExchange extends HObject {
     public void setInvocationStyle(String invocationStyle) {
         _istyle = invocationStyle;
     }
-    
+
 }
