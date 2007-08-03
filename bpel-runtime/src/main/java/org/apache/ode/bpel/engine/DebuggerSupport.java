@@ -171,6 +171,7 @@ class DebuggerSupport {
 
                         WorkEvent we = new WorkEvent();
                         we.setIID(iid);
+                        we.setProcessId(_process.getPID());
                         we.setType(WorkEvent.Type.RESUME);
                         _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
 
@@ -294,6 +295,7 @@ class DebuggerSupport {
 
                         WorkEvent we = new WorkEvent();
                         we.setType(WorkEvent.Type.RESUME);
+                        we.setProcessId(_process.getPID());
                         we.setIID(iid);
                         _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
 

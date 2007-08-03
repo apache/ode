@@ -175,6 +175,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     protected WorkEvent generateInvokeResponseWorkEvent() {
         WorkEvent we = new WorkEvent();
+        we.setProcessId(_process.getPID());
         we.setIID(_iid);
         we.setType(WorkEvent.Type.PARTNER_RESPONSE);
         we.setChannel(_responseChannel);
@@ -189,9 +190,6 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         if (getStatus() != MessageExchange.Status.REQUEST && getStatus() != MessageExchange.Status.ASYNC)
             throw new BpelEngineException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + getStatus());
 
-        // In-memory processe are special, they don't allow scheduling so any replies must be delivered immediately.
-        if (!_blocked && _process.isInMemory())
-            throw new BpelEngineException("Cannot reply to in-memory process outside of BLOCKING call");
     }
 
 }

@@ -218,7 +218,6 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     }
 
     void serverFailed(FailureType type, String reason, Element details) {
-        // TODO not using FailureType, nor details
         _failureType = type;
         _explanation = reason;
         setStatus(Status.FAILURE);

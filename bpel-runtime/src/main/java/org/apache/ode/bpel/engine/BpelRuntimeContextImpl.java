@@ -27,6 +27,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
@@ -89,6 +92,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.omg.CORBA._PolicyStub;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -125,7 +129,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private List<MyRoleMessageExchangeImpl> _pendingMyRoleReplies = new LinkedList<MyRoleMessageExchangeImpl>();
 
     private BpelInstanceWorker _instanceWorker;
-    
+
     private BpelProcess _bpelProcess;
 
     /** Five second maximum for continous execution. */
@@ -135,9 +139,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private boolean _executed;
 
-    public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, 
-            ProcessInstanceDAO dao, 
-            PROCESS PROCESS,
+    public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
             MessageExchangeDAO instantiatingMessageExchange) {
         _instanceWorker = instanceWorker;
         _bpelProcess = instanceWorker._process;
@@ -172,6 +174,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + _soup.getIndex());
         }
+    }
+
+    public String toString() {
+        return "{BpelRuntimeCtx PID=" + _bpelProcess.getPID() + ", IID=" + _iid + "}";
     }
 
     public Long getPid() {
@@ -537,37 +543,37 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         Status previousStatus = Status.valueOf(myrolemex.getStatus());
         myrolemex.setStatus(status.toString());
-        _bpelProcess.fireMexStateEvent(myrolemex, previousStatus, status);
         
-        if (myrolemex.getPipedMessageExchange() != null) /* p2p case */{
-            MessageExchangeDAO pmex = myrolemex.getPipedMessageExchange();
-
-            if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Replying to a p2p mex, myrole " + myrolemex + " - partnerole " + pmex);
-            }
-
-            // In the p2p case we copy the status/response from one mex object into the other.
-            pmex.setResponse(myrolemex.getResponse());
-            pmex.setStatus(myrolemex.getStatus());
-            continuePartnerReplied(pmex);
-            myrolemex.release();
-
-        } else /* IL-mediated communication */{
-            InvocationStyle istyle = InvocationStyle.valueOf(myrolemex.getInvocationStyle());
-            switch (istyle) {
-            case RELIABLE:
-                scheduleReliableResponse(myrolemex);
-                break;
-            case ASYNC:
-                scheduleAsyncResponse(myrolemex);
-                break;
-            default:
-                break;
-            }
-
-        }
+        doMyRoleResponse(myrolemex, previousStatus, status);
 
         sendEvent(evt);
+    }
+
+    private void doMyRoleResponse(MessageExchangeDAO myrolemex, Status previousStatus, Status newStatus) {
+        myrolemex.setStatus(newStatus.toString());
+        if (myrolemex.getPipedMessageExchange() != null) /* p2p case */{
+            p2pResponse(myrolemex);
+        } else /* IL-mediated communication */{
+            _bpelProcess.fireMexStateEvent(myrolemex, previousStatus, newStatus);
+        }
+    }
+
+    /**
+     * Handle P2P responses. 
+     * @param myrolemex
+     */
+    private void p2pResponse(MessageExchangeDAO myrolemex) {
+        MessageExchangeDAO pmex = myrolemex.getPipedMessageExchange();
+
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("Replying to a p2p mex, myrole " + myrolemex + " - partnerole " + pmex);
+        }
+
+        // In the p2p case we copy the status/response from one mex object into the other.
+        pmex.setResponse(myrolemex.getResponse());
+        pmex.setStatus(myrolemex.getStatus());
+        continuePartnerReplied(pmex);
+        myrolemex.release();
     }
 
     /**
@@ -648,16 +654,26 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
+
+        if (_bpelProcess.isInMemory())
+            throw new InvalidProcessException("Process not compatible with in-memory execution.");
+
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
+        we.setProcessId(_bpelProcess.getPID());
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
         _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
+
+        if (_bpelProcess.isInMemory())
+            throw new InvalidProcessException("Process not compatible with in-memory execution.");
+
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
+        we.setProcessId(_bpelProcess.getPID());
         we.setType(WorkEvent.Type.MATCHER);
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
@@ -696,7 +712,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
         evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
 
-        MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
+        MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
+                MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
         mexDao.setStatus(MessageExchange.Status.NEW.toString());
         mexDao.setOperation(operation.getName());
         mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
@@ -773,39 +790,83 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             return;
         }
 
-        PortType portType = partnerLink.partnerLink.partnerRolePortType;
         EndpointReference myRoleEpr = null; // TODO: how did we get this?
 
         mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
         mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
         Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(partnerRoleChannel, partnerEpr);
-        if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
-            // If RELIABLE is supported, this is easy, we just do it in-line.
-            ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
-            _contexts.mexContext.invokePartnerReliable(reliableMex);
-        } else if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
-            // If TRANSACTED is supported, this is again easy, do it in-line.
-            TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
-                    mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
-            _contexts.mexContext.invokePartnerTransacted(transactedMex);
-        } else if (supportedStyles.contains(InvocationStyle.BLOCKING)) {
-            // For BLOCKING invocation, we defer the call until after commit (unless idempotent).
-            BlockingPartnerRoleMessageExchangeImpl blockingMex = new BlockingPartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
-            schedule(new BlockingInvoker(blockingMex));
-        } else if (supportedStyles.contains(InvocationStyle.ASYNC)) {
-            // For ASYNC style, we defer the call until after commit (unless idempotent).
-            AsyncPartnerRoleMessageExchangeImpl asyncMex = new AsyncPartnerRoleMessageExchangeImpl(_bpelProcess, mexDao
-                    .getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr, partnerRoleChannel);
-            schedule(new AsyncInvoker(asyncMex));
-            
+
+        boolean oneway = MessageExchangePattern.valueOf(mexDao.getPattern()) == MessageExchangePattern.REQUEST_ONLY;
+
+        if (_bpelProcess.isInMemory()) {
+            // In-memory processes are a bit different, we're never going to do any scheduling for them, so we'd
+            // prefer to have TRANSACTED invocation style.
+            if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
+                // If TRANSACTED is supported, this is again easy, do it in-line.
+                TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
+                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                        partnerRoleChannel);
+                _contexts.mexContext.invokePartnerTransacted(transactedMex);
+            } else if (supportedStyles.contains(InvocationStyle.RELIABLE) && oneway) {
+                // We can do RELIABLE for in-mem, but only if they are one way.
+                ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess,
+                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                        partnerRoleChannel);
+                _contexts.mexContext.invokePartnerReliable(reliableMex);
+
+            } else if (supportedStyles.contains(InvocationStyle.UNRELIABLE)) {
+                // Need to cheat a little bit for in-memory processes; do the invoke in-line, but first suspend
+                // the transaction so that the IL does not get confused.
+                Transaction tx;
+                try {
+                    tx = _contexts.txManager.suspend();
+                } catch (Exception ex) {
+                    throw new BpelEngineException("TxManager Error: cannot suspend!", ex);
+                }
+                try {
+                    UnreliablePartnerRoleMessageExchangeImpl unreliableMex = new UnreliablePartnerRoleMessageExchangeImpl(_bpelProcess,
+                            mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                            partnerRoleChannel);
+                    _contexts.mexContext.invokePartnerBlocking(unreliableMex);
+                    unreliableMex.waitForResponse();
+                } finally {
+                    try {
+                        _contexts.txManager.resume(tx);
+                    } catch (Exception e) {
+                        throw new BpelEngineException("TxManager Error: cannot resume!", e);
+                    }
+                }
+            }
         } else {
-            // This really should not happen, indicates IL is screwy.
-            __log.error("Integration Layer did not agree to any known invocation style for EPR " + partnerEpr);
-            mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
-            mexDao.setStatus(Status.FAILURE.toString());
-            mexDao.setFaultExplanation("NoMatchingStyle");
+            if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
+
+                // If TRANSACTED is supported, this is again easy, do it in-line. Also, this what we always do for
+                // in-mem processes (even if the IL claims to not support it.)
+                TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
+                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                        partnerRoleChannel);
+                _contexts.mexContext.invokePartnerTransacted(transactedMex);
+            } else if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
+                // If RELIABLE is supported, this is easy, we just do it in-line.
+                ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess,
+                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                        partnerRoleChannel);
+                _contexts.mexContext.invokePartnerReliable(reliableMex);
+            } else if (supportedStyles.contains(InvocationStyle.UNRELIABLE)) {
+                // For BLOCKING invocation, we defer the call until after commit (unless idempotent).
+                UnreliablePartnerRoleMessageExchangeImpl blockingMex = new UnreliablePartnerRoleMessageExchangeImpl(_bpelProcess,
+                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
+                        partnerRoleChannel);
+                // We schedule in-memory (no db) to guarantee "at most once" semantics.
+                schedule(new UnreliableInvoker(blockingMex));
+                // TODO: how do we recover the invocation if system dies in BlockingInvoker?
+            } else {
+                // This really should not happen, indicates IL is screwy.
+                __log.error("Integration Layer did not agree to any known invocation style for EPR " + partnerEpr);
+                mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
+                mexDao.setStatus(Status.FAILURE.toString());
+                mexDao.setFaultExplanation("NoMatchingStyle");
+            }
         }
 
     }
@@ -844,7 +905,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             else if (target.getSupportedInvocationStyle(serviceName).contains(InvocationStyle.TRANSACTED))
                 style = InvocationStyle.TRANSACTED;
             else
-                style = InvocationStyle.BLOCKING;
+                style = InvocationStyle.UNRELIABLE;
         } else /* persisted */{
 
             if (operation.getOutput() != null
@@ -869,7 +930,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
-        MessageExchangeDAO myRoleMex = _bpelProcess.createMessageExchange(new GUID().toString(),MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        MessageExchangeDAO myRoleMex = _bpelProcess.createMessageExchange(new GUID().toString(),
+                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         myRoleMex.setCallee(serviceName);
         myRoleMex.setPipedMessageExchange(partnerRoleMex);
         myRoleMex.setOperation(partnerRoleMex.getOperation());
@@ -898,9 +960,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new BpelEngineException("MUST RUN IN TRANSACTION!");
         if (_executed)
             throw new IllegalStateException("cannot call execute() twice!");
-        
+
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
-        
 
         // Execute the process state reductions
         boolean canReduce = true;
@@ -941,6 +1002,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 try {
                     WorkEvent we = new WorkEvent();
                     we.setIID(_iid);
+                    we.setProcessId(_bpelProcess.getPID());
                     we.setType(WorkEvent.Type.RESUME);
                     _contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
                 } catch (ContextException e) {
@@ -1139,15 +1201,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     mexDao.setFaultExplanation(optionalFaultData.toString());
                 }
                 mexDao.setFaultExplanation("Process completed without responding.");
-
-                switch (istyle) {
-                case RELIABLE:
-                    scheduleReliableResponse(mexDao);
-                    break;
-                case ASYNC:
-                    scheduleAsyncResponse(mexDao);
-                }
-
+                doMyRoleResponse(mexDao, status, Status.FAILURE);
             }
         }
     }
@@ -1351,7 +1405,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * Attempt to match message exchanges on a correlator.
      * 
      */
-    public void matcherEvent(String correlatorId, CorrelationKey ckey) {
+    void matcherEvent(String correlatorId, CorrelationKey ckey) {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
         }
@@ -1387,19 +1441,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-    /**
-     * Add a scheduled ASYNC response.
-     * 
-     * @param messageExchangeId
-     */
-    private void scheduleAsyncResponse(MessageExchangeDAO mexdao) {
-        assert !_bpelProcess.isInMemory() : "Internal error; attempt to schedule in-memory process";
-        assert _contexts.isTransacted();
-
-        final MyRoleMessageExchangeImpl mex = _bpelProcess.recreateMyRoleMex(mexdao);
-        _pendingMyRoleReplies.add(mex);
-    }
-
 
     private void scheduleReliableResponse(MessageExchangeDAO messageExchange) {
         assert !_bpelProcess.isInMemory() : "Internal error; attempt to schedule in-memory process";
@@ -1422,31 +1463,52 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     private void continuePartnerReplied(MessageExchangeDAO pmex) {
 
     }
-    
-    class BlockingInvoker implements Runnable {
 
-        public BlockingInvoker(BlockingPartnerRoleMessageExchangeImpl blockingMex) {
-            // TODO Auto-generated constructor stub
+    /**
+     * Runnable that actually performs UNRELIABLE invokes on the partner.
+     * 
+     * @author Maciej Szefler <mszefler at gmail dot com>
+     * 
+     */
+    class UnreliableInvoker implements Runnable {
+
+        UnreliablePartnerRoleMessageExchangeImpl _blockingMex;
+
+        public UnreliableInvoker(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
+            _blockingMex = blockingMex;
         }
 
         public void run() {
-            // TODO Auto-generated method stub
-            
+            assert !_contexts.isTransacted();
+
+            // TODO: what happens if system fails right here? we'll need to add a "retry" possibility
+
+            Runnable prc;
+            try {
+                _contexts.mexContext.invokePartnerBlocking(_blockingMex);
+                prc = new PartnerResponseContinuation(_blockingMex);
+            } catch (Exception ce) {
+                prc = new PartnerResponseContinuation(_blockingMex);
+            }
+
+            // Keep using the same thread to do the work, but note we need to run this in a transaction.
+            _instanceWorker.enqueue(_bpelProcess._server.new TransactedRunnable(prc));
         }
-        
+
     }
 
-    
-    class AsyncInvoker implements Runnable {
 
-        public AsyncInvoker(AsyncPartnerRoleMessageExchangeImpl asyncMex) {
-            // TODO Auto-generated constructor stub
+    class PartnerResponseContinuation implements Runnable {
+
+        private UnreliablePartnerRoleMessageExchangeImpl _mex;
+
+        public PartnerResponseContinuation(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
+            _mex = blockingMex;
         }
 
         public void run() {
-            // TODO Auto-generated method stub
-            
+
         }
-        
+
     }
 }

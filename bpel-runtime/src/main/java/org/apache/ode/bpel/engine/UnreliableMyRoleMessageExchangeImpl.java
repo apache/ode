@@ -11,8 +11,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.o.OPartnerLink;
 
@@ -22,12 +22,13 @@ import org.apache.ode.bpel.o.OPartnerLink;
  * @author Maciej Szefler <mszefler at gmail dot com>
  * 
  */
-public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
+public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
+    boolean _done = false;
     ResponseFuture _future;
     
-    public AsyncMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+    public UnreliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
         super(process, mexId, oplink, operation, callee);
     }
 
@@ -59,7 +60,7 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         _process.enqueueTransaction(new Callable<Void>() {
 
             public Void call() throws Exception {
-                AsyncMyRoleMessageExchangeImpl.super.setStatus(Status.REQUEST);
+                UnreliableMyRoleMessageExchangeImpl.super.setStatus(Status.REQUEST);
                 MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
                 save(dao);
                 if (_process.isInMemory()) 
@@ -75,6 +76,32 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         return _future;
 
     }
+
+  
+    @Override
+    public InvocationStyle getInvocationStyle() {
+        return InvocationStyle.UNRELIABLE;
+    }
+    
+
+    @Override
+    public Status invokeBlocking() throws BpelEngineException, TimeoutException {
+        if (_done) 
+            return getStatus();
+
+        Future<Status> future = _future != null ? _future : super.invokeAsync();
+        
+        try {
+            future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);
+            _done = true;
+            return getStatus();
+        } catch (InterruptedException e) {
+            throw new BpelEngineException(e);
+        } catch (ExecutionException e) {
+            throw new BpelEngineException(e.getCause());
+        } 
+    }    
+    
 
     private static class ResponseFuture implements Future<Status> {
         private Status _status;
@@ -121,11 +148,6 @@ public class AsyncMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
                 this.notifyAll();
             }
         }
-    }
-
-    @Override
-    public InvocationStyle getInvocationStyle() {
-        return InvocationStyle.ASYNC;
     }
 
 }

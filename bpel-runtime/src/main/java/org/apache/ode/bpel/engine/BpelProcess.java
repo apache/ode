@@ -33,7 +33,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -55,7 +54,6 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
@@ -63,9 +61,7 @@ import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
@@ -155,10 +151,12 @@ class BpelProcess {
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
         HashSet<InvocationStyle> istyles = new HashSet<InvocationStyle>();
-        istyles.add(InvocationStyle.BLOCKING);
+        istyles.add(InvocationStyle.UNRELIABLE);
+        
         if (!conf.isTransient()) {
-            istyles.add(InvocationStyle.ASYNC);
             istyles.add(InvocationStyle.RELIABLE);
+        } else {
+            istyles.add(InvocationStyle.TRANSACTED);
         }
 
         _invocationStyles = Collections.unmodifiableSet(istyles);
@@ -704,14 +702,11 @@ class BpelProcess {
         case RELIABLE:
             mex = new ReliableMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
-        case ASYNC:
-            mex = new AsyncMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
-            break;
         case TRANSACTED:
             mex = new TransactedMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
-        case BLOCKING:
-            mex = new BlockingMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
+        case UNRELIABLE:
+            mex = new UnreliableMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
             break;
         default:
             throw new AssertionError("Unexpected invocation style: " + istyle);
@@ -768,15 +763,10 @@ class BpelProcess {
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
             switch (istyle) {
-            case BLOCKING:
-                mex = new BlockingPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), plink, op, null, /* EPR todo */
+            case UNRELIABLE:
+                mex = new UnreliablePartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), plink, op, null, /* EPR todo */
                 plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
                 break;
-            case ASYNC:
-                mex = new AsyncPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), plink, op, null, /* EPR todo */
-                plink.hasMyRole() ? getInitialMyRoleEPR(plink) : null, getPartnerRoleChannel(plink));
-                break;
-
             case TRANSACTED:
                 mex = new TransactedPartnerRoleMessageExchangeImpl(this, mexdao.getMessageExchangeId(), plink, op, null, /*
                                                                                                                              * EPR
@@ -1111,6 +1101,8 @@ class BpelProcess {
     }
 
     void fireMexStateEvent(MessageExchangeDAO mexdao, Status old, Status news) {
+        // TODO: force a myrole mex to be created if it is not in cache.
+        
         if (old != news)
             for (WeakReference<MyRoleMessageExchangeImpl> wr : _mexStateListeners) {
                 MyRoleMessageExchangeImpl mymex = wr.get();
@@ -1118,6 +1110,5 @@ class BpelProcess {
                     mymex.onStateChanged(mexdao, old, news);
             }
 
-        // TODO: need to call MessageExchangeContext#onMyRoleMessageExchangeStateChanged
     }
 }
