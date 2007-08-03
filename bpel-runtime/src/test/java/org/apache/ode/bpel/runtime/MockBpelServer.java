@@ -122,7 +122,7 @@ class MockBpelServer {
         String messageId = new GUID().toString();
         MyRoleMessageExchange mex;
 
-        mex = _server.createMessageExchange(InvocationStyle.BLOCKING, serviceName, opName, "" + messageId);
+        mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, serviceName, opName, "" + messageId);
         if (mex.getOperation() == null)
             throw new Exception("Did not find operation " + opName + " on service " + serviceName);
         Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
