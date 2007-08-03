@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+                xmlns:tns="http://ode.apache.org/example"
+                xmlns:Client="http://example.com/HandleTimer/Client"
+                xmlns:root="http://example.com/HandleTimer"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                name="tns:Timer" fileName="HandleTimer-Timer.bpel">
+
+        <dd:provide partnerLink="timerAndClientPlkVar">
+            <dd:service name="tns:CanonicServiceForClient" port="canonicPort" />
+        </dd:provide>
+    </dd:process>
+</dd:deploy>

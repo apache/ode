@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.compiler;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 
 import javax.wsdl.xml.WSDLReader;

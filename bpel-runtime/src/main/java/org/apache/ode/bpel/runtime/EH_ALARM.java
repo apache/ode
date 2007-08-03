@@ -39,6 +39,8 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Date;
+
 import org.w3c.dom.Element;
 
 /**

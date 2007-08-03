@@ -28,10 +28,7 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,6 +45,7 @@ public class MockScheduler implements Scheduler {
     private ExecutorService _executorSvc = Executors.newCachedThreadPool();
     private ThreadLocal<Boolean> _transacted = new ThreadLocal<Boolean>();
     private TransactionManager _txm;
+    private Timer _timer = new Timer(false);
 
     public MockScheduler() {
         _transacted.set(false);
@@ -65,15 +63,27 @@ public class MockScheduler implements Scheduler {
         }
     };
 
-    public String schedulePersistedJob(Map<String, Object> detail, Date date) throws ContextException {
+    public String schedulePersistedJob(final Map<String, Object> detail, Date date) throws ContextException {
         if (date != null) {
-            try {
-                while(new Date().before(date)) { Thread.sleep(100); }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            _timer.schedule(new TimerTask() {
+                public void run() {
+                    try {
+                        execIsolatedTransaction(new Callable() {
+                            public Object call() throws Exception {
+                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                                doExecute(ji);
+                                return null;
+                            }
+                        });
+                    } catch (Exception e) {
+                        throw new ContextException("Failure when scheduling a new volatile job.", e);
+                    }
+                }
+            }, date);
+            return null;
+        } else {
+            return scheduleVolatileJob(true, detail);
         }
-        return scheduleVolatileJob(true, detail);
     }
 
     public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {

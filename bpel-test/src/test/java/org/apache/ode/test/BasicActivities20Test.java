@@ -80,11 +80,27 @@ public class BasicActivities20Test extends BPELTestAbstract {
         Invocation inv = addInvoke("WaitUntil", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
             "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
-        inv.minimumWaitMs=5*1000L;
+        inv.minimumWaitMs=4*1000L;
         inv.maximumWaitMs=7*1000L;
         inv.expectedStatus = MessageExchange.Status.ASYNC;
         inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
         
+        go();
+    }
+
+    /**
+     * Tests the wait "for" syntax.
+     * @throws Throwable
+     */
+	@Test public void testOnAlarm() throws Throwable {
+        deploy("/bpel/2.0/TestAlarm");
+        Invocation inv = addInvoke("Wait1#1", new QName("http://ode.apache.org/example", "CanonicServiceForClient"), "receive",
+            "<message><body><start xmlns=\"http://ode.apache.org/example\">start</start></body></message>",
+            null);
+        inv.maximumWaitMs=20*1000L;
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+
         go();
     }
 
