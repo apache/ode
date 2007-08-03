@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:tns="http://www.intalio.com/" xmlns:Client="http://example.com/HandleTimer/Client" xmlns:root="http://example.com/HandleTimer" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/HandleTimer/Timer" name="this:Timer" fileName="HandleTimer-Timer.bpel">
+  <dd:property name="PATH">HandleTimer</dd:property>
+  <dd:property name="SVG">HandleTimer.svg</dd:property>
+  <dd:provide partnerLink="timerAndClientPlkVar">
+    <dd:service name="this:CanonicServiceForClient" port="canonicPort"/>
+  </dd:provide>
+</dd:process>

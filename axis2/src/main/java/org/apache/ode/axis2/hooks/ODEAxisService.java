@@ -21,8 +21,6 @@ package org.apache.ode.axis2.hooks;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;

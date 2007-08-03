@@ -86,23 +86,11 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	public void onAsyncReply(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
-		
-
 		Status mStat = myRoleMex.getStatus();
-		
-	
-		if ( mStat == Status.RESPONSE ) {
-			
+        if ( mStat == Status.RESPONSE ) {
 			currentResponse = myRoleMex.getResponse();
-			
-			
-			//String resp = DOMUtils.domToString(getCurrentResponse().getMessage());
-			//System.out.println(resp);
-
 		}
-		
 		myRoleMex.complete();
-		
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {
