@@ -487,11 +487,6 @@ define "apache-ode" do
       end
       # Including third party licenses
       Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
-      Dir.mkdir(project.path_to("target")) unless File.exist?(project.path_to("target"))
-      cp path_to("LICENSE"), project.path_to("target/LICENSE")
-      File.open(project.path_to("target/LICENSE"), "a+") do |l| 
-        l <<  Dir["#{project.path_to("license")}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
-      end
       zip.include(project.path_to("target/LICENSE"))
       yield zip
     end
@@ -501,6 +496,15 @@ define "apache-ode" do
   define "distro" do
     parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
     parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
+
+    # Preparing third party licenses
+    build do
+      Dir.mkdir(project.path_to("target")) unless File.exist?(project.path_to("target"))
+      cp parent.path_to("LICENSE"), project.path_to("target/LICENSE")
+      File.open(project.path_to("target/LICENSE"), "a+") do |l| 
+        l <<  Dir["#{project.path_to("license")}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
+      end
+    end
 
     project("ode:axis2-war").task("start").enhance do |task|
       target = "#{task.path}/webapp/WEB-INF/processes"
