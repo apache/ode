@@ -6,18 +6,6 @@ package org.apache.ode.bpel.iapi;
  * @author Maciej Szefler
  */
 public enum InvocationStyle {
-    /** 
-     * The very ordinary blocking IO style --- the IL/engine will block until the operation is complete, or until
-     * a timeout is reached. 
-     */
-    BLOCKING, 
-    
-    /**
-     * Asynchrnous style -- the IL/engine will "queue" the invocation, and call-back asynchrnously when the response
-     * is available. 
-     */
-    ASYNC, 
-    
     /**
      * Reliable style -- the IL/engine will queue the invocation using the current transaction. The response will be
      * delivered when available using a separate transaction. 
@@ -29,5 +17,10 @@ public enum InvocationStyle {
      * Transacted style -- the IL/engine will enroll the operation with the current transaction. The IL/engine will
      * block until the operation completes. 
      */
-    TRANSACTED
+    TRANSACTED, 
+    
+    /**
+     * Unreliable style -- the "default"
+     */
+    UNRELIABLE
 }
