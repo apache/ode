@@ -251,7 +251,7 @@ define "ode" do
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
 	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
-	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J, 
+	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end
@@ -488,7 +488,14 @@ define "apache-ode" do
       # Including third party licenses
       Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
       zip.include(project.path_to("target/LICENSE"))
+      # Include supported database schemas
+      Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
+        zip.include(f, :path=>"sql") unless f =~ /partial/
+      end
       yield zip
+      project.check zip, "should contain mysql.sql" do
+        it.should contain("sql/mysql.sql")
+      end
     end
   end
 
@@ -501,7 +508,7 @@ define "apache-ode" do
     build do
       Dir.mkdir(project.path_to("target")) unless File.exist?(project.path_to("target"))
       cp parent.path_to("LICENSE"), project.path_to("target/LICENSE")
-      File.open(project.path_to("target/LICENSE"), "a+") do |l| 
+      File.open(project.path_to("target/LICENSE"), "a+") do |l|
         l <<  Dir["#{project.path_to("license")}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
       end
     end
