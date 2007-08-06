@@ -20,7 +20,7 @@ package org.apache.ode.bpel.iapi;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +78,7 @@ public interface ProcessConf {
     /**
      * Get the base URL for resolving resources.  
      */
-    URL getBaseURL();
+    URI getBaseURI();
     
     /**
      * Get the date of deployment.
