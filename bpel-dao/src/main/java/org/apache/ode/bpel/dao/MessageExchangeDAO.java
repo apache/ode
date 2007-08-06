@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.w3c.dom.Element;
 
 /**
@@ -264,5 +265,8 @@ public interface MessageExchangeDAO {
 
     void setTimeout(long timeout);
 
+    void setAckType(AckType ackType);
+    
+    AckType getAckType();
 
  }
