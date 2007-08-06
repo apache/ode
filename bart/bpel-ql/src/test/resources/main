@@ -1,4 +1,0 @@
-
-limit 100
-order by field1 asc
-order by last-active desc limit 1000

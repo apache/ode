@@ -65,26 +65,6 @@ class JBITask < Buildr::ZipTask
     end
   end
 
-  def initialize(*args)
-    super
-    prepare { path("lib").include((component.libs + bootstrap.libs).flatten.uniq) }
-      
-    enhance do
-      case jbi_xml
-      when String
-        path("META-INF").include jbi_xml.path, :as=>"jbi.xml" 
-      when nil, true
-        # Tempfiles gets deleted on garbage collection, so we're going to hold on to it
-        # through instance variable not closure variable.
-        Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write descriptor }
-        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
-      when Proc, Method
-        Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write jbi_xml.call.to_s }
-        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
-      end
-    end
-  end
-
   def []=(key, value)
     case key.to_sym
     when :name, :description, :type
@@ -115,6 +95,28 @@ class JBITask < Buildr::ZipTask
     (@bootstrap ||= Bootstrap.new).tap do |bootstrap|
       args.each { |k, v| bootstrap.send "#{k}=", v } if args
     end
+  end
+
+  def prerequisites()
+    super + (component.libs + bootstrap.libs).flatten.uniq
+  end
+
+protected
+
+  def create(zip)
+    zip.mkdir "META-INF"
+    # Create the jbi.xml file from provided file/code or by creating a descriptor.
+    jbi_xml_content = case jbi_xml
+    when String
+      File.read(jbi_xml)
+    when nil, true
+      descriptor
+    when Proc, Method
+      jbi_xml.call.to_s
+    end
+    zip.file.open("META-INF/jbi.xml", "w") { |file| file.write jbi_xml_content }
+    path("lib").include((component.libs + bootstrap.libs).flatten.uniq)
+    super zip
   end
 
   # Create a JBI descriptor (jbi.xml) from the component/bootstrap specification.
@@ -148,10 +150,15 @@ class Project
   def package_as_jbi(file_name, options)
     # The file name extension is zip, not jbi. And we also need to reset
     # the type on the artifact specification.
-    # The file type is ZIP, not JBI, so update the file name/spec accordingly.
+    file_name = file_name.ext("zip")
     options[:type] = :zip
-    file_name = path_to(:target, Artifact.hash_to_file_name(options))
-    JBITask.define_task(file_name) unless Rake::Task.task_defined?(file_name)
+    unless Rake::Task.task_defined?(file_name)
+      JBITask.define_task(file_name).tap do |jbi|
+        jbi.include options[:include] if options[:include]
+        [:component, :bootstrap].each { |key| jbi[key] = options[key] if options[key] }
+        yield jbi
+      end
+    end
     file(file_name)
   end
 
