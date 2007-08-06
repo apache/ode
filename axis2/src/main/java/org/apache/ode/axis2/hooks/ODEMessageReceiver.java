@@ -25,6 +25,7 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEService;
@@ -38,7 +39,7 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
 
   private ODEService _service;
 
-  public final void receive(final MessageContext msgContext) throws AxisFault {
+  public final void invokeBusinessLogic(final MessageContext msgContext) throws AxisFault {
     if (hasResponse(msgContext.getAxisOperation())) {
             if (__log.isDebugEnabled())
                 __log.debug("Received request message for " + msgContext.getAxisService().getName() + "."
@@ -73,14 +74,14 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
   }
 
   private boolean hasResponse(AxisOperation op) {
-        switch (op.getAxisSpecifMEPConstant()) {
-        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_IN_OUT:
+        switch (op.getAxisSpecificMEPConstant()) {
+        case WSDLConstants.MEP_CONSTANT_IN_OUT:
             return true;
-        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_ONLY:
+        case WSDLConstants.MEP_CONSTANT_OUT_ONLY:
             return true;
-        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_OUT_OPTIONAL_IN:
+        case WSDLConstants.MEP_CONSTANT_OUT_OPTIONAL_IN:
             return true;
-        case AxisOperation.WSDL20_2004Constants.MEP_CONSTANT_ROBUST_OUT_ONLY:
+        case WSDLConstants.MEP_CONSTANT_ROBUST_OUT_ONLY:
             return true;
         default:
             return false;
