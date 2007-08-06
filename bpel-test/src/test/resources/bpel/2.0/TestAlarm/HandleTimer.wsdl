@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:tns="http://ode.apache.org/example"
+                  xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling"
+                  xmlns:Client="http://example.com/HandleTimer/Client"
+                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:root="http://example.com/HandleTimer"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  targetNamespace="http://ode.apache.org/example">
+    <wsdl:import namespace="http://example.com/HandleTimer/Timer" location="HandleTimer-Timer.wsdl"/>
+    <pnlk:partnerLinkType name="TimerAndClient">
+        <pnlk:role name="Timer_for_Client" portType="tns:ForClient"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

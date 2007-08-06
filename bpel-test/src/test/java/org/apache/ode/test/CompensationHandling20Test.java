@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -56,7 +57,7 @@ public class CompensationHandling20Test extends BPELTestAbstract {
 						"testImplicitFaultHandlerService"), "request", 
 						"<message><requestID>Start TestImplicitFaultHandler</requestID><requestText>Event TestImplicitFaultHandler</requestText><faultIndicator1>yes</faultIndicator1><faultIndicator2>no</faultIndicator2></message>",
 						null);
-		inv.expectedFinalStatus = MessageExchange.Status.FAULT;
+		inv.expectedFinalStatus = AckType.FAULT;
 		inv.expectedResponsePattern = Pattern.compile(".*Event TestFaultWithVariable1 -&gt; caught FaultMessage1 -&gt; Event TestFaultWithVariable1 -&gt; process complete.*");
 
 		go();

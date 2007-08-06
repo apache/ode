@@ -91,7 +91,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
-	
+
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {

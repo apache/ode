@@ -18,6 +18,7 @@
  */
 package org.apache.ode.test;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -42,16 +43,14 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.AckType;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
@@ -106,7 +105,7 @@ public abstract class BPELTestAbstract {
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
             emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
             em = emf.createEntityManager();
-            _cf = new BPELDAOConnectionFactoryImpl();
+            _cf = new BpelDAOConnectionFactoryImpl(_txm);
             _server.setDaoConnectionFactory(_cf);
             _txm = new MockTransactionManager() {
 
