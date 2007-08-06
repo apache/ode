@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import javax.xml.namespace.QName;
+
 import org.w3c.dom.Element;
 
 /**
@@ -45,7 +47,7 @@ public class OnAlarm extends BpelObject {
    * @return duration of the alarm
    */
   public Expression getFor() {
-      return (Expression) getFirstChild(Bpel20QNames.FOR);
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FOR));
   }
 
 
@@ -55,7 +57,7 @@ public class OnAlarm extends BpelObject {
    * @return deadline when alarm goes out of effect
    */
   public Expression getUntil() {
-      return (Expression) getFirstChild(Bpel20QNames.UNTIL);
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.UNTIL));
       
   }
   
@@ -64,7 +66,7 @@ public class OnAlarm extends BpelObject {
    * @return the duration expression that specifies the frequency
    */
   public Expression getRepeatEvery() {
-      return (Expression) getFirstChild(Bpel20QNames.REPEAT_EVERY);
+      return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.REPEAT_EVERY));
   }
   
   

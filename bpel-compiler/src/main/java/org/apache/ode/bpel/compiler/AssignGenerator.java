@@ -166,7 +166,7 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (vv.getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    if (vv.getLocation() != null)
+                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }
                 // TODO: check for irrelevant properties.
@@ -227,7 +227,7 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (to.getAsVariableVal().getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    if (vv.getLocation() != null)
+                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }
                 // TODO: check for irrelevant properties.

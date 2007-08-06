@@ -21,6 +21,8 @@ package org.apache.ode.bpel.compiler.bom;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.w3c.dom.Element;
@@ -129,7 +131,7 @@ public class Scope extends JoinFailureSuppressor {
      * @return the <code>OnAlarmEventHandler</code>s
      */
     public List<OnAlarm> getAlarms() {
-        BpelObject eventHandlers = getFirstChild(Bpel20QNames.EVENTHANDLERS);
+        BpelObject eventHandlers = getFirstChild(rewriteTargetNS(Bpel20QNames.EVENTHANDLERS));
         if (eventHandlers == null)
             return Collections.emptyList();
         return eventHandlers.getChildren(OnAlarm.class);
@@ -138,7 +140,7 @@ public class Scope extends JoinFailureSuppressor {
     /**
      */
     public List<OnEvent> getEvents() {
-        BpelObject eventHandlers = getFirstChild(Bpel20QNames.EVENTHANDLERS);
+        BpelObject eventHandlers = getFirstChild(rewriteTargetNS(Bpel20QNames.EVENTHANDLERS));
         if (eventHandlers == null)
             return Collections.emptyList();
 

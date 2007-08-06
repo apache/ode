@@ -35,7 +35,7 @@ public class WaitActivity extends Activity {
    * @return Returns the for.
    */
   public Expression getFor() {
-      return  (Expression) getFirstChild(Bpel20QNames.FOR);
+	  return  (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FOR));
   }
 
   /**
@@ -44,7 +44,6 @@ public class WaitActivity extends Activity {
    * @return the "until" expression
    */
   public Expression getUntil() {
-      return  (Expression) getFirstChild(Bpel20QNames.UNTIL);
-      
+	  return  (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.UNTIL));
   }
 }

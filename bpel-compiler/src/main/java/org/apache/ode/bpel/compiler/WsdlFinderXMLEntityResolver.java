@@ -18,20 +18,19 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Xerces {@link XMLEntityResolver} implementation that defers to  our own
@@ -65,10 +64,12 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
      *                typically this is the system URI of the WSDL containing an 
      *                embedded schema
      */
-    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, String> internalSchemas) {
+    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, String> internalSchemas,
+            boolean failIfNotFound) {
         _wsdlFinder = finder;
         _baseURI = baseURI;
         _internalSchemas = internalSchemas;
+        _failIfNotFound = failIfNotFound;
     }
 
     public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier)
@@ -80,23 +81,15 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         XMLInputSource src = new XMLInputSource(resourceIdentifier);
         URI location;
 
-        try {
-            // Note: if the systemId is not specified then what we have is 
-            // an import without a schemaLocation. In this case we use the
-            // namespace to stand in for the location. If we have an 
-            // expandedsystemId, then we must use that, since schemas that
-            // are imported by other schemas will have their relative 
-            // locations encoded here. If we only have a literal system id,
-            // then it is going to be realative to our baseURI. 
-            if (resourceIdentifier.getLiteralSystemId() == null)
-                location = new URI(resourceIdentifier.getNamespace());
-            else if (resourceIdentifier.getExpandedSystemId() != null) 
-                location = _baseURI.resolve(resourceIdentifier.getExpandedSystemId());
-            else
-                location = _baseURI.resolve(resourceIdentifier.getLiteralSystemId());
-        } catch (URISyntaxException e) {
-            __log.debug("resolveEntity: URI syntax error", e);
-            throw new IOException(e.getMessage());
+        if (resourceIdentifier.getLiteralSystemId() == null) {
+            // import without schemaLocation
+            if (__log.isDebugEnabled()) __log.debug("resolveEntity: no schema location for "+resourceIdentifier.getNamespace());
+            return null;
+        } else if (resourceIdentifier.getExpandedSystemId() != null) { 
+            // schema imported by other schema
+            location = _baseURI.resolve(resourceIdentifier.getExpandedSystemId());
+        } else {
+            location = _baseURI.resolve(resourceIdentifier.getLiteralSystemId());
         }
 
         if (__log.isDebugEnabled())
@@ -120,17 +113,15 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             __log.debug("resolveEntity: IOException opening " + location,ioex);
 
             if (_failIfNotFound) {
-                __log.debug("resolveEntity: failIfNotFound set, rethrowing...");
+                __log.debug("resolveEntity: failIfNotFound is true, rethrowing...");
                 throw ioex;
             }
-
-            __log.debug("resolveEntity: failIfNotFound NOT set, returning NULL");
+            __log.debug("resolveEntity: failIfNotFound is false, returning null");
             return null;
         } catch (Exception ex) {
             __log.debug("resolveEntity: unexpected error: " + location);
             throw new IOException("Unexpected error loading resource: " + location);
         }
-
         return src;
     }
 

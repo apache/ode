@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.compiler.bom;
 
+import javax.xml.namespace.QName;
+
 import org.w3c.dom.Element;
 
 /**
@@ -56,7 +58,7 @@ public class ForEachActivity extends CompositeActivity {
      * @return start iteration counter
      */
     public Expression getStartCounter() {
-        return (Expression) getFirstChild(Bpel20QNames.START_COUNTER_VALUE);
+        return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.START_COUNTER_VALUE));
     }
 
     /**
@@ -66,7 +68,7 @@ public class ForEachActivity extends CompositeActivity {
      * @return final counter expression
      */
     public Expression getFinalCounter() {
-        return (Expression) getFirstChild(Bpel20QNames.FINAL_COUNTER_VALUE);
+        return (Expression) getFirstChild(rewriteTargetNS(Bpel20QNames.FINAL_COUNTER_VALUE));
     }
 
     /**

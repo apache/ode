@@ -130,6 +130,19 @@ public class BpelObject implements SourceLocation {
         return e.getElement();
     }
 
+    public Element getFirstExtensibilityElementElement() {
+    	Element child = null;
+    	NodeList nl = getElement().getChildNodes();
+        for (int i = 0; i < nl.getLength(); ++i) {
+            Node node = nl.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE && 
+            		!getType().getNamespaceURI().equals(node.getNamespaceURI())) {
+                child = (Element)node;
+                break;
+            }
+        }
+        return child;
+    }
     
     /**
      * Is this a BPEL 1.1 object?
@@ -180,6 +193,10 @@ public class BpelObject implements SourceLocation {
         });
     }
 
+    protected QName rewriteTargetNS(QName target) {
+    	return new QName(getType().getNamespaceURI(), target.getLocalPart());
+    }
+    
     protected List<BpelObject> getChildren() {
         if (_children == null) {
             _children = new ArrayList<BpelObject>();

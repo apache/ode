@@ -42,11 +42,12 @@ class GoodCompileTCase extends TestCase implements CompileListener {
     protected final Log __log = LogFactory.getLog(getClass());
     private BpelC _compiler;
     private ArrayList<CompilationMessage> _errors = new ArrayList<CompilationMessage>();
-    private File  _bpel;
+    private String _bpel;
+
 
     GoodCompileTCase(String bpel) {
         super(bpel);
-        _bpel = new File(getClass().getResource(bpel).getPath());
+        _bpel = bpel;
     }
 
     protected void setUp() throws Exception {
@@ -59,7 +60,8 @@ class GoodCompileTCase extends TestCase implements CompileListener {
 
     public void runTest() throws Exception {
         try {
-            _compiler.compile(_bpel);
+        	File bpelFile = new File(getClass().getResource(_bpel).toURI().getPath());
+        	_compiler.compile(bpelFile);
         } catch (Exception ex) {
             ex.printStackTrace();
             fail("Compilation did not succeed.");
