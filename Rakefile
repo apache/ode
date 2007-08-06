@@ -124,7 +124,7 @@ define "ode" do
   compile.options.source = "1.5"
   compile.options.target = "1.5"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
-  meta_inf << file("DISCLAIMER") << file("NOTICE")
+  meta_inf << file("NOTICE")
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
@@ -362,7 +362,7 @@ define "ode" do
         Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
           :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
       end
-      sql = concat(_("target/#{db}.sql")=>[partial_sql, scheduler_sql])
+      sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), partial_sql, scheduler_sql])
       build sql
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
@@ -535,3 +535,4 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end
+
