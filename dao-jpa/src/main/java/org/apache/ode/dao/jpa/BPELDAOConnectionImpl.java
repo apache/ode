@@ -69,8 +69,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         _em = null;
     }
 
-    public MessageExchangeDAO createMessageExchange(char dir) {
-        MessageExchangeDAOImpl ret = new MessageExchangeDAOImpl(dir);
+    public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
+        MessageExchangeDAOImpl ret = new MessageExchangeDAOImpl(mexId, dir);
         _em.persist(ret);
         return ret;
     }
@@ -152,7 +152,11 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	}
 	
     public MessageExchangeDAO getMessageExchange(String mexid) {
-        return _em.find(MessageExchangeDAOImpl.class, mexid);
+        List l = _em.createQuery("select x from MesssageExchangeDAOImpl x where x._mexId = ?1")
+        .setParameter(1, mexid).getResultList();
+        if (l.size() == 0) return null;
+        MessageExchangeDAOImpl m = (MessageExchangeDAOImpl) l.get(0);
+        return m;
     }
 
     public EntityManager getEntityManager() {

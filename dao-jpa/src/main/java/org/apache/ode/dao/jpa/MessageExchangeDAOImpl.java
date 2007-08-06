@@ -25,6 +25,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Element;
@@ -91,6 +92,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private String _correlationKeys;
     @Basic @Column(name="PIPED_ID")
     private String _pipedMessageExchangeId;
+    
+    @Basic @Column(name="ACK_TYPE")
+    private String _ackType;
 
     @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MexProperty> _props = new ArrayList<MexProperty>();
@@ -123,9 +127,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public MessageExchangeDAOImpl() {}
     
-	public MessageExchangeDAOImpl(char direction){
+	public MessageExchangeDAOImpl(String mexId, char direction){
 		_direction = direction;
-		_id = new UUID().toString();
+		_id = mexId;
 	}
 	
 	public MessageDAO createMessage(QName type) {
@@ -368,6 +372,10 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     public void setFailureType(String failureType) {
         _failureType = failureType;
     }
+    
+    public String getFailureType() {
+        return _failureType;
+    }
 
     public void setInvocationStyle(String invocationStyle) {
         _istyle = invocationStyle;
@@ -378,7 +386,14 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     }
 
     public void setTimeout(long timeout) {
-        // TODO Auto-generated method stub
-        
+        _timeout = timeout;
+    }
+
+    public AckType getAckType() {
+        return _ackType == null ? null : AckType.valueOf(_ackType);
+    }
+
+    public void setAckType(AckType ackType) {
+        _ackType = ackType == null ? null :ackType.toString();
     }
 }
