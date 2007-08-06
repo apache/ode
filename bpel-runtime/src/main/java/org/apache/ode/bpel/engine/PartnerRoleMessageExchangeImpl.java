@@ -19,6 +19,11 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
@@ -34,6 +39,8 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.w3c.dom.Element;
+
+import com.sun.corba.se.spi.activation._ActivatorImplBase;
 
 /**
  * Base-class implementation of the interface used to expose a partner invocation to the integration layer.
@@ -51,22 +58,33 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     protected volatile String _foreignKey;
 
+    protected Lock _accessLock = new ReentrantLock();
+
+    protected Condition _stateChanged = _accessLock.newCondition();
+    protected Condition _acked = _accessLock.newCondition();
+
     private QName _caller;
 
-    /** thread-local indicator telling us if a given thread is the thread that "owns" the object. */
-    final ThreadLocal<Boolean> _ownerThread = new ThreadLocal<Boolean>() {
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
+    /** the states for a partner mex. */
+    enum State {
+        /** state when we're in one of the MexContext.invokeXXX methods. */
+        INVOKE_XXX,
 
+        /** hold all actions (blocks the IL) */
+        HOLD,
+
+        /** the MEX is ASYNC ("in the wild"), i.e. a response can come at any momemnt from any thread. */
+        ASYNC,
+
+        /** the MEX is dead, it should no longer be accessed by the IL */
+        DEAD
     };
 
-    volatile boolean _blocked = false;
+    protected State _state = State.INVOKE_XXX;
 
-    PartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
+    PartnerRoleMessageExchangeImpl(BpelProcess process, Long iid, String mexId, OPartnerLink oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, mexId, oplink, oplink.partnerRolePortType, operation);
+        super(process, iid, mexId, oplink, oplink.partnerRolePortType, operation);
         _myRoleEPR = myRoleEPR;
         _partnerRoleChannel = channel;
     }
@@ -78,49 +96,75 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     }
 
     @Override
-    public void save(MessageExchangeDAO dao) {
+    void save(MessageExchangeDAO dao) {
         super.save(dao);
     }
 
+    @Override
+    void ack(AckType acktype) {
+        _accessLock.lock();
+        try {
+            super.ack(acktype);
+            _acked.signalAll();
+        } finally {
+            _accessLock.unlock();
+        }
+    }
+    
     public void replyAsync(String foreignKey) {
-        throw new BpelEngineException("replyAsync() is not supported for invocation style " + getInvocationStyle());
+        throw new IllegalStateException("replyAsync() is not supported for invocation style " + getInvocationStyle());
     }
 
     public void replyOneWayOk() {
         if (__log.isDebugEnabled()) {
             __log.debug("replyOneWayOk mex=" + getMessageExchangeId());
         }
-        sync();
-        checkReplyContextOk();
-        setStatus(Status.ASYNC);
-        sync();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            ack(AckType.ONEWAY);
+        } finally {
+            _accessLock.unlock();
+        }
     }
 
     public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
         if (__log.isDebugEnabled()) {
             __log.debug("replyWithFault mex=" + getMessageExchangeId());
         }
-        sync();
-        checkReplyContextOk();
-        _fault = faultType;
-        _response = (MessageImpl) outputFaultMessage;
-        setStatus(Status.FAULT);
-        sync();
-        if (!_blocked)
-            resumeInstance();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _fault = faultType;
+            _failureType = null;
+            _response = (MessageImpl) outputFaultMessage;
+            ack(AckType.FAULT);            
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
+        }
     }
 
     public void reply(Message response) throws BpelEngineException {
         if (__log.isDebugEnabled()) {
             __log.debug("reply mex=" + getMessageExchangeId());
         }
-        sync();
-        checkReplyContextOk();
-        _response = (MessageImpl) response;
-        setStatus(Status.RESPONSE);
-        sync();
-        if (!_blocked)
-            resumeInstance();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _response = (MessageImpl) response;
+            _fault = null;
+            _failureType = null;
+            ack(AckType.RESPONSE);
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
+        }
 
     }
 
@@ -128,14 +172,20 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         if (__log.isDebugEnabled()) {
             __log.debug("replyWithFailure mex=" + getMessageExchangeId());
         }
-        sync();
-        checkReplyContextOk();
-        _failureType = type;
-        _explanation = description;
-        setStatus(Status.FAILURE);
-        sync();
-        if (!_blocked)
-            resumeInstance();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _failureType = type;
+            _explanation = description;
+            _fault = null;
+            _response = null;
+            ack(AckType.FAILURE);
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
+        }
     }
 
     public QName getCaller() {
@@ -168,28 +218,47 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
      * for ASYNC and RELIABLE invocations.
      * 
      */
-    protected void resumeInstance() {
-        assert false : "should not get resumeInstance() call";
-        throw new IllegalStateException("InternalError: unexpected state");
-    }
-
-    protected WorkEvent generateInvokeResponseWorkEvent() {
-        WorkEvent we = new WorkEvent();
-        we.setProcessId(_process.getPID());
-        we.setIID(_iid);
-        we.setType(WorkEvent.Type.PARTNER_RESPONSE);
-        we.setChannel(_responseChannel);
-        we.setMexId(_mexId);
-
-        return we;
-
-    }
-
+    protected abstract void asyncACK();
+    
+    
     protected void checkReplyContextOk() {
         // Prevent duplicate replies.
-        if (getStatus() != MessageExchange.Status.REQUEST && getStatus() != MessageExchange.Status.ASYNC)
-            throw new BpelEngineException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + getStatus());
+        while (_state == State.HOLD)
+            try {
+                _stateChanged.await();
+            } catch (InterruptedException e) {
+                throw new BpelEngineException("Thread Interrupted.", e);
+            }
+
+        if (_state == State.DEAD)
+            throw new IllegalStateException("Object used in inappropriate context. ");
+
+        if (getStatus() != MessageExchange.Status.REQ)
+            throw new IllegalStateException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + getStatus());
 
     }
 
+    void setState(State newstate) {
+        _accessLock.lock();
+        try {
+            _state = newstate;
+            _stateChanged.signalAll();
+        } finally {
+            _accessLock.unlock();
+        }
+    }
+    
+    public boolean waitForAck(long timeout) throws InterruptedException  {
+        _accessLock.lock();
+        try {
+            if (getStatus() != Status.ACK) 
+                return _acked.await(timeout,TimeUnit.MILLISECONDS);
+            else
+                return true;
+        } finally {
+            _accessLock.unlock();
+        }
+    }
+
+    
 }

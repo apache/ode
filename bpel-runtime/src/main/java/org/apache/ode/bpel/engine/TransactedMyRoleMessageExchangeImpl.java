@@ -28,7 +28,7 @@ public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         assertTransaction();
        
         _process.invokeProcess(getDAO());
-        if (MessageExchange.Status.valueOf(getDAO().getStatus()) != Status.RESPONSE)
+        if (MessageExchange.Status.valueOf(getDAO().getStatus()) != Status.ACK)
             throw new BpelEngineException("Transactional invoke on process did not yield a response.");
         return Status.valueOf(getDAO().getStatus());
         

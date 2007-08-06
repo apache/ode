@@ -32,6 +32,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.w3c.dom.Element;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
@@ -61,6 +62,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     private MessageExchangeDAO _pipedExchange;
     private String _failureType;
     private long _timeout;
+    private AckType _ackType;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -299,5 +301,13 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public void setTimeout(long timeout) {
         _timeout = timeout;
+    }
+
+    public AckType getAckType() {
+        return _ackType;
+    }
+
+    public void setAckType(AckType ackType) {
+        _ackType = ackType;
     }
 }

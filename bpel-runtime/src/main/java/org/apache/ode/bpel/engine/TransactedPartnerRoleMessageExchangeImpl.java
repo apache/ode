@@ -18,8 +18,8 @@ import org.apache.ode.bpel.o.OPartnerLink;
  */
 public class TransactedPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    TransactedPartnerRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, mexId, oplink, operation,  epr, myRoleEPR, channel);
+    TransactedPartnerRoleMessageExchangeImpl(BpelProcess process, long iid, String mexId, OPartnerLink oplink,Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+        super(process, iid, mexId, oplink,  operation, epr, myRoleEPR, channel);
     }
     
     
@@ -31,10 +31,8 @@ public class TransactedPartnerRoleMessageExchangeImpl extends PartnerRoleMessage
      */
     @Override
     protected void checkReplyContextOk() {
-        if (!_blocked)
-            throw new BpelEngineException("replyXXX operation attempted outside of BLOCKING region!");
-        if (!_ownerThread.get())
-            throw new BpelEngineException("replyXXX operation attempted from foreign thread!");
+        if (_state != State.INVOKE_XXX)
+            throw new BpelEngineException("replyXXX operation attempted outside of transacted region!");
         
         assert _contexts.isTransacted() : "Internal Error: owner thread must be transactional!?!?!!?"; 
     }
@@ -43,6 +41,13 @@ public class TransactedPartnerRoleMessageExchangeImpl extends PartnerRoleMessage
     @Override
     public InvocationStyle getInvocationStyle() {
         return InvocationStyle.TRANSACTED;
+    }
+
+
+    @Override
+    protected void asyncACK() {
+        throw new IllegalStateException("Async responses not supported for transaction invocations.");
+        
     }
 
 

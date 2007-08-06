@@ -19,32 +19,16 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
-import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
-import org.apache.ode.bpel.o.OPartnerLink;
-
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.intercept.InterceptorInvoker;
+import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
  * Provides an implementation of the {@link MyRoleMessageExchange} inteface for interactions performed in the
@@ -68,7 +52,7 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
         assertTransaction();
 
         // Cover the case where invoke was already called. 
-        if (getStatus() == Status.REQUEST)
+        if (getStatus() == Status.REQ)
             return;
         
         if (getStatus() != Status.NEW)
@@ -80,7 +64,9 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
         
         if (__log.isDebugEnabled())
             __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
-        setStatus(Status.REQUEST);
+        
+        request();
+        
         save(getDAO());
         scheduleInvoke();
     }

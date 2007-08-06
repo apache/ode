@@ -37,6 +37,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -129,14 +130,16 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     private Set<String> _propNames;
 
+    private AckType _ackType;
+
 
 
     public MessageExchangeImpl(
             BpelProcess process, 
-            String mexId,
+            Long iid,
+            String mexId, 
             OPartnerLink oplink, 
-            PortType ptype, 
-            Operation operation) {
+            PortType ptype, Operation operation) {
         _process = process;
         _contexts = process._contexts;
         _mexId = mexId;
@@ -150,11 +153,14 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _mexId.equals(((MessageExchangeImpl)other)._mexId);
     }
 
+    Long getIID() {
+        return _iid;
+    }
     
     void load(MessageExchangeDAO dao) {
         _timeout = dao.getTimeout();
         _iid = dao.getInstance() != null ? dao.getInstance().getInstanceId() : null;
-        
+        _ackType = dao.getAckType();
         if (_fault == null)
             _fault = dao.getFault();
         if (_explanation == null)
@@ -163,7 +169,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
             _status = Status.valueOf(dao.getStatus());
     }
 
-    public void save(MessageExchangeDAO dao) {
+    void save(MessageExchangeDAO dao) {
         dao.setPartnerLinkModelId(_oplink.getId());
         dao.setOperation(_operation.getName());
         dao.setStatus(_status.toString());
@@ -172,7 +178,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         dao.setFaultExplanation(_explanation);
         dao.setTimeout(_timeout);
         dao.setFailureType(_failureType == null ? null : _failureType.toString());
-        
+        dao.setAckType(_ackType);
 
         if (_changes.contains(Change.REQUEST)) {
             MessageDAO requestDao = dao.createMessage(_request.getType());
@@ -260,6 +266,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _status;
     }
 
+    public AckType getAckType() {
+        return _ackType;
+    }
+    
     public Operation getOperation() {
         return _operation;
     }
@@ -299,9 +309,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     
-   
-    void setStatus(Status status) {
-        _status = status;
+    void request() {
+        _status = Status.REQ;
+    }
+    
+    void ack(AckType ackType) {
+        _status = Status.ACK;
+        _ackType = ackType;
     }
 
     public Message createMessage(javax.xml.namespace.QName msgType) {

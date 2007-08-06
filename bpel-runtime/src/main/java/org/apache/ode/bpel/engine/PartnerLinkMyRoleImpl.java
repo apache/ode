@@ -18,6 +18,15 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -32,27 +41,20 @@ import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
-import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.utils.ArrayUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.util.*;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -96,9 +98,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         Operation operation = getMyRoleOperation(mex.getOperation());
         if (operation == null) {
             __log.error(__msgs.msgUnknownOperation(mex.getOperation(), _plinkDef.myRolePortType.getQName()));
-            mex.setStatus(Status.FAILURE.toString());
-            mex.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION.toString());
-            mex.setFaultExplanation(mex.getOperation());
+            MexDaoUtil.setFailed(mex, FailureType.UNKNOWN_OPERATION, mex.getOperation());
             return null;
         }
 
@@ -113,9 +113,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             if (isCreateInstnace)
                 invokeMyRoleCreateInstance(mex, operation, correlatorId, correlator);
             else {
-                mex.setStatus(Status.FAILURE.toString());
-                mex.setFailureType(MessageExchange.FailureType.OTHER.toString());
-                mex.setFaultExplanation("Invalid in-memory process: non createInstance operations are not supported!");
+                MexDaoUtil.setFailed(mex, FailureType.OTHER,
+                        "Invalid in-memory process: non createInstance operations are not supported!");
                 return null;
             }
 
@@ -139,10 +138,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 // We'd like to do a graceful exit here, no sense in rolling back due to a
                 // a message format problem.
                 __log.debug("Unable to evaluate correlation keys, invalid message format. ", ime);
-                mex.setFailureType(MessageExchange.FailureType.FORMAT_ERROR.toString());
-                mex.setStatus(Status.FAILURE.toString());
-                mex.setFaultExplanation(ime.getMessage());
-
+                MexDaoUtil.setFailed(mex, FailureType.FORMAT_ERROR,  ime.getMessage());
                 return null;
             }
 
@@ -201,8 +197,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
                 mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED.toString());
                 mex.setInstance(messageRoute.getTargetInstance());
-                
-                // We're overloading the channel here to be the PICK response channel +  index
+
+                // We're overloading the channel here to be the PICK response channel + index
                 mex.setChannel(messageRoute.getGroupId() + "&" + messageRoute.getIndex());
             } else {
                 if (__log.isDebugEnabled()) {
@@ -227,15 +223,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             }
 
         }
-        // Now we have to update our message exchange status. If the <reply>
-        // was not hit during the
-        // invocation, then we will be in the "REQUEST" phase which means
-        // that either this was a one-way
-        // or a two-way that needs to delivery the reply asynchronously.
-        if (Status.valueOf(mex.getStatus()) == MessageExchange.Status.REQUEST) {
-            mex.setStatus(MessageExchange.Status.ASYNC.toString());
-        }
-        
+
         return CorrelationStatus.valueOf(mex.getCorrelationStatus());
     }
 

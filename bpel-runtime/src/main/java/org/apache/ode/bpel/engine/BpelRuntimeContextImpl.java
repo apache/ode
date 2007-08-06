@@ -25,13 +25,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import javax.transaction.InvalidTransactionException;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
 import javax.wsdl.Operation;
-import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -62,6 +57,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
@@ -92,7 +88,6 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
-import org.omg.CORBA._PolicyStub;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -119,9 +114,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private MessageExchangeDAO _instantiatingMessageExchange;
 
-    /** Object for keeping track of all the outstanding <pick>/<receive> activities */
-    private OutstandingRequestManager _outstandingRequests;
-
     /** List of pending invocations that need to be deferred until the end of the current TX */
     private List<PartnerRoleMessageExchangeImpl> _pendingPartnerRoleInvokes = new LinkedList<PartnerRoleMessageExchangeImpl>();
 
@@ -139,22 +131,26 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private boolean _executed;
 
-    public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
+    /**
+     * Construct a BRC using the soup from the previous BRC. This is handy as it allows us to eliminate the DB read of the soup,
+     * when we know the soup has not changed since the last TX.
+     * 
+     * @param instanceWorker
+     * @param instanceDao
+     * @param lastBRC
+     */
+    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO instanceDao, BpelRuntimeContextImpl lastBRC) {
+        this(instanceWorker, instanceDao, lastBRC._soup);
+    }
+
+    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
             MessageExchangeDAO instantiatingMessageExchange) {
-        _instanceWorker = instanceWorker;
-        _bpelProcess = instanceWorker._process;
-        _contexts = instanceWorker._contexts;
-        _dao = dao;
-        _iid = dao.getInstanceId();
+
+        this(instanceWorker, dao, new ExecutionQueueImpl(null));
         _instantiatingMessageExchange = instantiatingMessageExchange;
-        _vpu = new JacobVPU();
-        _vpu.registerExtension(BpelRuntimeContext.class, this);
 
-        _soup = new ExecutionQueueImpl(null);
         _soup.setReplacementMap(_bpelProcess.getReplacementMap());
-        _outstandingRequests = new OutstandingRequestManager();
-        _vpu.setContext(_soup);
-
+        _soup.setGlobalData(new OutstandingRequestManager());
         byte[] daoState = _bpelProcess.isInMemory() ? null : dao.getExecutionState();
         if (daoState != null) {
             assert !_bpelProcess.isInMemory() : "did not expect to rehydrate in-mem process!";
@@ -164,13 +160,23 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-            _outstandingRequests = (OutstandingRequestManager) _soup.getGlobalData();
         }
-
         if (PROCESS != null) {
             _vpu.inject(PROCESS);
         }
 
+    }
+
+    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, ExecutionQueueImpl soup) {
+        _instanceWorker = instanceWorker;
+        _bpelProcess = instanceWorker._process;
+        _contexts = instanceWorker._contexts;
+        _dao = dao;
+        _iid = dao.getInstanceId();
+        _vpu = new JacobVPU();
+        _vpu.registerExtension(BpelRuntimeContext.class, this);
+        _soup = soup;
+        _vpu.setContext(_soup);
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + _soup.getIndex());
         }
@@ -330,11 +336,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             correlators.add(processDao.getCorrelator(correlatorId));
         }
 
-        int conflict = _outstandingRequests.findConflict(selectors);
+        int conflict = getORM().findConflict(selectors);
         if (conflict != -1)
             throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingReceive, selectors[conflict].toString());
 
-        _outstandingRequests.register(pickResponseChannelStr, selectors);
+        getORM().register(pickResponseChannelStr, selectors);
 
         // TODO - ODE-58
 
@@ -508,7 +514,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg, QName fault)
             throws FaultException {
-        String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
+        String mexRef = getORM().release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
             throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest);
@@ -530,21 +536,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         myrolemex.setResponse(message);
 
-        Status status;
-
+        AckType ackType;
         if (fault != null) {
-            status = Status.FAULT;
+            ackType = AckType.FAULT;
             myrolemex.setFault(fault);
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_FAULT);
         } else {
-            status = Status.RESPONSE;
+            ackType = AckType.RESPONSE;
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
 
         Status previousStatus = Status.valueOf(myrolemex.getStatus());
-        myrolemex.setStatus(status.toString());
-        
-        doMyRoleResponse(myrolemex, previousStatus, status);
+        myrolemex.setStatus(Status.ACK.toString());
+        myrolemex.setAckType(ackType);
+        doMyRoleResponse(myrolemex, previousStatus, Status.ACK);
 
         sendEvent(evt);
     }
@@ -559,7 +564,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     /**
-     * Handle P2P responses. 
+     * Handle P2P responses.
+     * 
      * @param myrolemex
      */
     private void p2pResponse(MessageExchangeDAO myrolemex) {
@@ -683,6 +689,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
             InvokeResponseChannel channel) throws FaultException {
 
+        // TODO: move a lot of this into BpelProcess
+
         // Get the Integration Layer's communication channel for the partnerlink.
         PartnerRoleChannel partnerRoleChannel = _bpelProcess.getPartnerRoleChannel(partnerLink.partnerLink);
 
@@ -741,27 +749,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         if (p2pProcess != null) {
             /* P2P (process-to-process) invocation, special logic */
-            invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, outgoingMessage, mexDao);
+            invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, mexDao);
         } else {
             /* NOT p2p, need to call out to IL */
-            invokeIL(partnerLink, operation, outgoingMessage, partnerRoleChannel, partnerEpr, mexDao);
-        }
-
-        // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
-        // we need to inject a message on the response channel, so that the process continues.
-        switch (Status.valueOf(mexDao.getStatus())) {
-        case ASYNC:
-            break;
-        case RESPONSE:
-        case FAULT:
-        case FAILURE:
-            injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
-            break;
-        default:
-            __log.error("Partner did not acknowledge message exchange: " + mexDao.getMessageExchangeId());
-            mexDao.setStatus(Status.FAILURE.toString());
-            mexDao.setFailureType(FailureType.NO_RESPONSE.toString());
-            injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+            invokeIL(partnerLink, operation, partnerRoleChannel, partnerEpr, mexDao);
         }
 
         return mexDao.getMessageExchangeId();
@@ -778,105 +769,37 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @param partnerEpr
      * @param mexDao
      */
-    private void invokeIL(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
-            PartnerRoleChannel partnerRoleChannel, EndpointReference partnerEpr, MessageExchangeDAO mexDao) {
+    private void invokeIL(PartnerLinkInstance partnerLink, Operation operation, PartnerRoleChannel partnerRoleChannel,
+            EndpointReference partnerEpr, MessageExchangeDAO mexDao) {
+
         // If we couldn't find the endpoint, then there is no sense
         // in asking the IL to invoke.
         if (partnerEpr == null) {
             __log.error("Couldn't find endpoint for partner EPR ");
             mexDao.setFailureType(FailureType.UNKNOWN_ENDPOINT.toString());
             mexDao.setFaultExplanation("UnknownEndpoint");
-            mexDao.setStatus(Status.FAILURE.toString());
+            mexDao.setStatus(Status.ACK.toString());
+            mexDao.setAckType(AckType.FAILURE);
             return;
         }
 
-        EndpointReference myRoleEpr = null; // TODO: how did we get this?
-
         mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
-        mexDao.setStatus(MessageExchange.Status.REQUEST.toString());
-        Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(partnerRoleChannel, partnerEpr);
+        mexDao.setStatus(MessageExchange.Status.REQ.toString());
 
-        boolean oneway = MessageExchangePattern.valueOf(mexDao.getPattern()) == MessageExchangePattern.REQUEST_ONLY;
+        _bpelProcess.invokeIL(mexDao);
 
-        if (_bpelProcess.isInMemory()) {
-            // In-memory processes are a bit different, we're never going to do any scheduling for them, so we'd
-            // prefer to have TRANSACTED invocation style.
-            if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
-                // If TRANSACTED is supported, this is again easy, do it in-line.
-                TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
-                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                        partnerRoleChannel);
-                _contexts.mexContext.invokePartnerTransacted(transactedMex);
-            } else if (supportedStyles.contains(InvocationStyle.RELIABLE) && oneway) {
-                // We can do RELIABLE for in-mem, but only if they are one way.
-                ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess,
-                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                        partnerRoleChannel);
-                _contexts.mexContext.invokePartnerReliable(reliableMex);
-
-            } else if (supportedStyles.contains(InvocationStyle.UNRELIABLE)) {
-                // Need to cheat a little bit for in-memory processes; do the invoke in-line, but first suspend
-                // the transaction so that the IL does not get confused.
-                Transaction tx;
-                try {
-                    tx = _contexts.txManager.suspend();
-                } catch (Exception ex) {
-                    throw new BpelEngineException("TxManager Error: cannot suspend!", ex);
-                }
-                try {
-                    UnreliablePartnerRoleMessageExchangeImpl unreliableMex = new UnreliablePartnerRoleMessageExchangeImpl(_bpelProcess,
-                            mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                            partnerRoleChannel);
-                    _contexts.mexContext.invokePartnerBlocking(unreliableMex);
-                    unreliableMex.waitForResponse();
-                } finally {
-                    try {
-                        _contexts.txManager.resume(tx);
-                    } catch (Exception e) {
-                        throw new BpelEngineException("TxManager Error: cannot resume!", e);
-                    }
-                }
-            }
-        } else {
-            if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
-
-                // If TRANSACTED is supported, this is again easy, do it in-line. Also, this what we always do for
-                // in-mem processes (even if the IL claims to not support it.)
-                TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_bpelProcess,
-                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                        partnerRoleChannel);
-                _contexts.mexContext.invokePartnerTransacted(transactedMex);
-            } else if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
-                // If RELIABLE is supported, this is easy, we just do it in-line.
-                ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_bpelProcess,
-                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                        partnerRoleChannel);
-                _contexts.mexContext.invokePartnerReliable(reliableMex);
-            } else if (supportedStyles.contains(InvocationStyle.UNRELIABLE)) {
-                // For BLOCKING invocation, we defer the call until after commit (unless idempotent).
-                UnreliablePartnerRoleMessageExchangeImpl blockingMex = new UnreliablePartnerRoleMessageExchangeImpl(_bpelProcess,
-                        mexDao.getMessageExchangeId(), partnerLink.partnerLink, operation, partnerEpr, myRoleEpr,
-                        partnerRoleChannel);
-                // We schedule in-memory (no db) to guarantee "at most once" semantics.
-                schedule(new UnreliableInvoker(blockingMex));
-                // TODO: how do we recover the invocation if system dies in BlockingInvoker?
-            } else {
-                // This really should not happen, indicates IL is screwy.
-                __log.error("Integration Layer did not agree to any known invocation style for EPR " + partnerEpr);
-                mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
-                mexDao.setStatus(Status.FAILURE.toString());
-                mexDao.setFaultExplanation("NoMatchingStyle");
-            }
+        // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
+        // we need to inject a message on the response channel, so that the process continues.
+        switch (Status.valueOf(mexDao.getStatus())) {
+        case REQ:
+            break;
+        case ACK:
+            injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+            break;
+        default:
+            throw new AssertionError("Unexpected MEX status: " + mexDao.getStatus());
         }
 
-    }
-
-    private void schedule(final Runnable runnable) {
-        _contexts.registerCommitSynchronizer(new Runnable() {
-            public void run() {
-                _instanceWorker.enqueue(runnable);
-            }
-        });
     }
 
     /**
@@ -887,8 +810,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @param outgoingMessage
      * @param partnerRoleMex
      */
-    private void invokeP2P(BpelProcess target, QName serviceName, Operation operation, Element outgoingMessage,
-            MessageExchangeDAO partnerRoleMex) {
+    private void invokeP2P(BpelProcess target, QName serviceName, Operation operation, MessageExchangeDAO partnerRoleMex) {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("Invoking in a p2p interaction, partnerrole " + partnerRoleMex.getMessageExchangeId());
         }
@@ -950,9 +872,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mySessionId != null)
             myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
 
-        partnerRoleMex.setStatus(MessageExchange.Status.ASYNC.toString());
         target.invokeProcess(myRoleMex);
-        // TODO: perhaps we should check if the other process finished ,or will it always
+        // TODO: perhaps we should check if the other process finished ,or will it always?
     }
 
     void execute() {
@@ -973,7 +894,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (!ProcessState.isFinished(_dao.getState())) {
             if (__log.isDebugEnabled())
                 __log.debug("Setting execution state on instance " + _iid);
-            _soup.setGlobalData(_outstandingRequests);
+            _soup.setGlobalData(getORM());
 
             if (_bpelProcess.isInMemory()) {
                 // don't serialize in-memory processes
@@ -1029,8 +950,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             evt.setNewState(ProcessState.STATE_ACTIVE);
             sendEvent(evt);
         }
+        
 
-        _outstandingRequests.associate(responsechannel, mexdao.getMessageExchangeId());
+        getORM().associate(responsechannel, mexdao.getMessageExchangeId());
 
         final String mexId = mexdao.getMessageExchangeId();
         _vpu.inject(new JacobRunnable() {
@@ -1047,7 +969,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // In case this is a pick event, we remove routes,
         // and cancel the outstanding requests.
         _dao.getProcess().removeRoutes(timerResponseChannel, _dao);
-        _outstandingRequests.cancel(timerResponseChannel);
+        getORM().cancel(timerResponseChannel);
 
         // Ignore timer events after the process is finished.
         if (ProcessState.isFinished(_dao.getState())) {
@@ -1070,7 +992,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // receive/reply association.
         final String id = timerResponseChannel.export();
         _dao.getProcess().removeRoutes(id, _dao);
-        _outstandingRequests.cancel(id);
+        getORM().cancel(id);
 
         _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 6157913683737696396L;
@@ -1118,7 +1040,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchange.Status status = MessageExchange.Status.valueOf(mex.getStatus());
 
-        switch (status) {
+        switch (mex.getAckType()) {
         case FAULT:
             evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAULT);
             responseChannel.onFault();
@@ -1184,7 +1106,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * 
      */
     private void cleanupOutstandingMyRoleExchanges(FaultData optionalFaultData) {
-        String[] mexRefs = _outstandingRequests.releaseAll();
+        String[] mexRefs = getORM().releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
@@ -1192,18 +1114,24 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 MessageExchangePattern pattern = MessageExchange.MessageExchangePattern.valueOf(mexDao.getPattern());
                 InvocationStyle istyle = InvocationStyle.valueOf(mexDao.getInvocationStyle());
                 if (pattern == MessageExchangePattern.REQUEST_ONLY) {
-                    mexDao.setStatus(Status.COMPLETED_OK.toString());
+                    mexDao.setAckType(AckType.ONEWAY);
+                    mexDao.setStatus(Status.COMPLETED.toString());
                     continue;
                 }
 
+                mexDao.setAckType(AckType.FAILURE);
                 mexDao.setFailureType(FailureType.NO_RESPONSE.toString());
                 if (optionalFaultData != null) {
                     mexDao.setFaultExplanation(optionalFaultData.toString());
                 }
                 mexDao.setFaultExplanation("Process completed without responding.");
-                doMyRoleResponse(mexDao, status, Status.FAILURE);
+                doMyRoleResponse(mexDao, status, Status.ACK);
             }
         }
+    }
+
+    private OutstandingRequestManager getORM() {
+        return (OutstandingRequestManager) _soup.getGlobalData();
     }
 
     private void cleanupOutstandingMyRoleExchanges() {
@@ -1230,26 +1158,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new BpelEngineException(msg);
         }
 
-        MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
-        switch (status) {
-        case ASYNC:
-        case REQUEST:
-            MessageDAO request = dao.getRequest();
-            if (request == null) {
-                // this also should not happen
-                String msg = "Engine requested request for message exchange that did not have one: " + mexId;
-                __log.fatal(msg);
-                throw new BpelEngineException(msg);
-            }
-
-            return request.getData();
-
-        default:
-            // We should not be in any other state when requesting this.
-            String msg = "Engine requested response while the message exchange " + mexId + " was in the state " + status;
+        MessageDAO request = dao.getRequest();
+        if (request == null) {
+            // this also should not happen
+            String msg = "Engine requested request for message exchange that did not have one: " + mexId;
             __log.fatal(msg);
             throw new BpelEngineException(msg);
         }
+
+        return request.getData();
 
     }
 
@@ -1284,9 +1201,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageDAO response;
         MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
-        switch (status) {
-        case FAULT:
-        case RESPONSE:
+        if (status == Status.ACK) {
             response = dao.getResponse();
             if (response == null) {
                 // this also should not happen
@@ -1294,8 +1209,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 __log.fatal(msg);
                 throw new BpelEngineException(msg);
             }
-            break;
-        default:
+        } else {
             // We should not be in any other state when requesting this.
             String msg = "Engine requested response while the message exchange " + mexId + " was in the state " + status;
             __log.fatal(msg);
@@ -1441,7 +1355,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-
     private void scheduleReliableResponse(MessageExchangeDAO messageExchange) {
         assert !_bpelProcess.isInMemory() : "Internal error; attempt to schedule in-memory process";
         assert _contexts.isTransacted();
@@ -1464,51 +1377,4 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     }
 
-    /**
-     * Runnable that actually performs UNRELIABLE invokes on the partner.
-     * 
-     * @author Maciej Szefler <mszefler at gmail dot com>
-     * 
-     */
-    class UnreliableInvoker implements Runnable {
-
-        UnreliablePartnerRoleMessageExchangeImpl _blockingMex;
-
-        public UnreliableInvoker(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
-            _blockingMex = blockingMex;
-        }
-
-        public void run() {
-            assert !_contexts.isTransacted();
-
-            // TODO: what happens if system fails right here? we'll need to add a "retry" possibility
-
-            Runnable prc;
-            try {
-                _contexts.mexContext.invokePartnerBlocking(_blockingMex);
-                prc = new PartnerResponseContinuation(_blockingMex);
-            } catch (Exception ce) {
-                prc = new PartnerResponseContinuation(_blockingMex);
-            }
-
-            // Keep using the same thread to do the work, but note we need to run this in a transaction.
-            _instanceWorker.enqueue(_bpelProcess._server.new TransactedRunnable(prc));
-        }
-
-    }
-
-
-    class PartnerResponseContinuation implements Runnable {
-
-        private UnreliablePartnerRoleMessageExchangeImpl _mex;
-
-        public PartnerResponseContinuation(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
-            _mex = blockingMex;
-        }
-
-        public void run() {
-
-        }
-
-    }
 }

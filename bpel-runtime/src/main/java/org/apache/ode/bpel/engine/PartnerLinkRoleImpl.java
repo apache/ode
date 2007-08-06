@@ -28,10 +28,12 @@ abstract class PartnerLinkRoleImpl {
     protected OPartnerLink _plinkDef;
     protected EndpointReference _initialEPR;
     protected BpelProcess _process;
+    protected Contexts _contexts;
 
     PartnerLinkRoleImpl(BpelProcess process, OPartnerLink plink) {
         _plinkDef = plink;
         _process = process;
+        _contexts = _process._contexts;
     }
     String getPartnerLinkName() {
         return _plinkDef.name;

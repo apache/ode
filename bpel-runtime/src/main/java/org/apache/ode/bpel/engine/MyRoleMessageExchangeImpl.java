@@ -33,14 +33,14 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     protected String _clientId;
 
     public MyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
-        super(process, mexId, oplink, oplink.myRolePortType, operation);
+        super(process, null, mexId, oplink, oplink.myRolePortType, operation);
         _callee = callee;
     }
 
     public CorrelationStatus getCorrelationStatus() {
         return _cstatus;
     }
-
+  
     @Override
     void load(MessageExchangeDAO dao) {
         super.load(dao);
@@ -116,7 +116,6 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         we1.setProcessId(_process.getPID());
         we1.setMexId(_mexId);
 
-        setStatus(Status.ASYNC);
         _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
         _contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
 
@@ -160,40 +159,41 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     protected void onStateChanged(MessageExchangeDAO mexdao, Status oldstatus, final Status newstatus) {
         MessageDAO response = mexdao.getResponse();
-        switch (newstatus) {
-        case RESPONSE: {
-            final Element msg = response.getData();
-            final QName msgtype = response.getType();
-            _process.scheduleRunnable(new Runnable() {
-                public void run() {
-                    serverResponded(new MemBackedMessageImpl(msg, msgtype, true));
-                }
-            });
-        }
-            break;
-        case FAULT: {
-            final QName fault = mexdao.getFault();
-            final Element faultMsg = response.getData();
-            final QName msgtype = response.getType();
-            _process.scheduleRunnable(new Runnable() {
-                public void run() {
-                    serverFaulted(fault, new MemBackedMessageImpl(faultMsg, msgtype, true));
-                }
-
-            });
-        }
-            break;
-        case FAILURE:
-            final String failureExplanation = mexdao.getFaultExplanation();
-            final FailureType ftype = FailureType.valueOf(mexdao.getFailureType());
-            _process.scheduleRunnable(new Runnable() {
-                public void run() {
-                    serverFailed(ftype, failureExplanation, null); // TODO add failure detail
-                }
-
-            });
-            break;
-        }
+        if (newstatus == Status.ACK)
+            switch (mexdao.getAckType()) {
+            case RESPONSE: {
+                final Element msg = response.getData();
+                final QName msgtype = response.getType();
+                _process.scheduleRunnable(new Runnable() {
+                    public void run() {
+                        serverResponded(new MemBackedMessageImpl(msg, msgtype, true));
+                    }
+                });
+            }
+                break;
+            case FAULT: {
+                final QName fault = mexdao.getFault();
+                final Element faultMsg = response.getData();
+                final QName msgtype = response.getType();
+                _process.scheduleRunnable(new Runnable() {
+                    public void run() {
+                        serverFaulted(fault, new MemBackedMessageImpl(faultMsg, msgtype, true));
+                    }
+    
+                });
+            }
+                break;
+            case FAILURE:
+                final String failureExplanation = mexdao.getFaultExplanation();
+                final FailureType ftype = FailureType.valueOf(mexdao.getFailureType());
+                _process.scheduleRunnable(new Runnable() {
+                    public void run() {
+                        serverFailed(ftype, failureExplanation, null); // TODO add failure detail
+                    }
+    
+                });
+                break;
+            }
     }
 
     protected void finalize() {
@@ -204,7 +204,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     void serverFaulted(QName faultType, Message outputFaultMessage) throws BpelEngineException {
         _fault = faultType;
         _response = (MessageImpl) outputFaultMessage;
-        setStatus(Status.FAULT);
+        ack(AckType.FAULT);
     }
 
    
@@ -213,15 +213,14 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         _explanation = null;
         _response = (MessageImpl) outputMessage;
         _response.makeReadOnly();
-        setStatus(Status.RESPONSE);
+        ack(AckType.RESPONSE);
 
     }
 
     void serverFailed(FailureType type, String reason, Element details) {
         _failureType = type;
         _explanation = reason;
-        setStatus(Status.FAILURE);
-
+        ack(AckType.FAILURE);
     }
 
 }

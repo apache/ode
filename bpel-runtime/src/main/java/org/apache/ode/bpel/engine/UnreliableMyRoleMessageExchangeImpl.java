@@ -35,17 +35,11 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
     /**
      * Override the setStatus(...) to notify our future when there is a response/failure.
      */
-    protected void setStatus(Status status) {
+    protected void ack(AckType acktype) {
         Status old = getStatus();
-        super.setStatus(status);
+        super.ack(acktype);
         if (_future != null) {
-            if (getMessageExchangePattern() == MessageExchangePattern.REQUEST_ONLY) {
-                if (old == Status.REQUEST && old != status)
-                    _future.done(status);
-            } else /* two-way */ {
-                if ((old == Status.ASYNC || old == Status.REQUEST) && status != Status.ASYNC)
-                    _future.done(status);
-            }
+            _future.done(Status.ACK);
         }
     }
 
@@ -60,7 +54,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         _process.enqueueTransaction(new Callable<Void>() {
 
             public Void call() throws Exception {
-                UnreliableMyRoleMessageExchangeImpl.super.setStatus(Status.REQUEST);
+                request();
                 MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
                 save(dao);
                 if (_process.isInMemory()) 
