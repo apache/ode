@@ -86,7 +86,7 @@ public class ODEService {
         try {
             // Creating mesage exchange
             String messageId = new GUID().toString();
-            odeMex = _server.createMessageExchange(InvocationStyle.BLOCKING, _serviceName,
+            odeMex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _serviceName,
                     msgContext.getAxisOperation().getName().getLocalPart(), "" + messageId);
             
             __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
@@ -152,14 +152,14 @@ public class ODEService {
     }
 
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
-        switch (mex.getStatus()) {
+        switch (mex.getAckType()) {
             case FAULT:
                 if (__log.isDebugEnabled())
                     __log.debug("Fault response message: " + mex.getFault());
                 OMElement detail = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
                 String reason = mex.getFault()+" "+mex.getFaultExplanation();
                 throw new AxisFault(mex.getFault(), reason, null, null, detail);
-            case ASYNC:
+            case ONEWAY:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
                 if (__log.isDebugEnabled())

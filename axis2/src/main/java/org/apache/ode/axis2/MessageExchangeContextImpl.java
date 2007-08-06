@@ -48,8 +48,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     
     static {
         HashSet<InvocationStyle> styles = new HashSet<InvocationStyle>();
-        styles.add(InvocationStyle.ASYNC);
-        styles.add(InvocationStyle.BLOCKING);
+        styles.add(InvocationStyle.UNRELIABLE);
         __supportedInvocationStyles = Collections.unmodifiableSet(styles);
     }
     
@@ -73,27 +72,20 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     }
 
     public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
+        // TODO: tie in to WS-RELIABLE* stack. 
         throw new UnsupportedOperationException();
     }
 
     public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
-        throw new UnsupportedOperationException();        
+        // TODO: should we check if the partner actually supports transactions?
+        invokePartnerBlocking(mex);
     }
 
     
 
-    public void onAsyncReply(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
-        if (__log.isDebugEnabled())
-            __log.debug("Processing an async reply from service " + myRoleMessageExchange.getServiceName());
-
-        // Nothing to do, no callback is necessary, the client just synchornizes itself with the
-        // mex reply when invoking the engine.
-    }
-
-    public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
-        __log.error("RELIABLE reply from service " + myRoleMex.getServiceName() +"; RELIABLE IS NOT SUPPORTED!");
-
-        // We don't support this yet, so not much to do here. 
+    public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
+        // TODO: add code here to handle MEXs that we've "forgotten" about due to system failure etc.. mostly
+        // useful for RELIABLE, but nice to have with ASYNC/BLOCKING as well. 
     }
 
 
