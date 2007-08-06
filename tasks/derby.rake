@@ -32,11 +32,11 @@ module Derby
       db, prereqs = Rake.application.resolve_args(args)
       file(File.expand_path(db)=>prereqs) do |task|
         rm_rf task.name if File.exist?(task.name)
-        Ant.executable("derby") do |ant|
+        Buildr.ant("derby") do |ant|
           sqls = task.prerequisites.map(&:to_s)
           ant.sql :driver=>"org.apache.derby.jdbc.EmbeddedDriver", :url=>"jdbc:derby:#{task.to_s};create=true",
             :userid=>"sa", :password=>"", :autocommit=>"on" do
-            sqls.each { |sql| transaction :src=>sql }
+            sqls.each { |sql| ant.transaction :src=>sql }
           end
         end
         # Copy the SQL files into the database directory.
