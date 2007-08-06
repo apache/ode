@@ -42,6 +42,8 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
@@ -151,7 +153,7 @@ public abstract class BPELTestAbstract {
             }
         });
         _server.setConfigProperties(getConfigProperties());
-        _server.registerBpelEventListener(new DebugBpelEventListener());
+        //_server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
     }
@@ -254,11 +256,12 @@ public abstract class BPELTestAbstract {
         inv.target = target;
         inv.operation = operation;
         inv.request = DOMUtils.stringToDOM(request);
-        inv.expectedStatus = null;
         if (responsePattern != null) {
-            inv.expectedFinalStatus = MessageExchange.Status.ACK;
+            inv.expectedFinalStatus = AckType.RESPONSE;
+
             inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
-        }
+        } else
+            inv.expectedFinalStatus = AckType.ONEWAY; 
 
         _invocations.add(inv);
         return inv;
@@ -502,11 +505,10 @@ public abstract class BPELTestAbstract {
         /** If non-null, expect an exception of this class (or subclass) on invoke. */
         public Class expectedInvokeException = null;
 
-        /** If non-null, expecte this status right after invoke. */
-        public MessageExchange.Status expectedStatus = null;
 
         /** If non-null, expect this status after response received. */
-        public MessageExchange.Status expectedFinalStatus = MessageExchange.Status.COMPLETED;
+        public AckType expectedFinalStatus = AckType.RESPONSE;
+
 
         /** If non-null, expect this correlation status right after invoke. */
         public CorrelationStatus expectedCorrelationStatus = null;
@@ -556,18 +558,14 @@ public abstract class BPELTestAbstract {
             try {
                 mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _invocation.target, _invocation.operation, new GUID()
                         .toString());
-                mexContext.clearCurrentResponse();
 
                 Message request = mex.createMessage(_invocation.requestType);
                 request.setMessage(_invocation.request);
                 _invocation.invokeTime = System.currentTimeMillis();
                 mex.setRequest(request);
-                Status status = mex.invokeBlocking();
+                mex.invokeBlocking();
 
                 CorrelationStatus cstatus = mex.getCorrelationStatus();
-                if (_invocation.expectedStatus != null && !status.equals(_invocation.expectedStatus))
-                    failure(_invocation, "Unexpected message exchange status", _invocation.expectedStatus, status);
-
                 if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))
                     failure(_invocation, "Unexpected correlation status", _invocation.expectedCorrelationStatus, cstatus);
 
@@ -580,6 +578,9 @@ public abstract class BPELTestAbstract {
                 return;
             }
 
+            if (mex.getStatus() != Status.ACK)
+                failure(_invocation, "No ACK status", Status.ACK.toString(), mex.getStatus().toString());
+            
             if (isFailed())
                 return;
 
@@ -595,8 +596,8 @@ public abstract class BPELTestAbstract {
             if (isFailed())
                 return;
 
-            Status finalstat = mex.getStatus();
-            if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
+            AckType finalstat = mex.getAckType();
+            if (_invocation.expectedFinalStatus != null && _invocation.expectedFinalStatus != finalstat)
                 failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
 
 

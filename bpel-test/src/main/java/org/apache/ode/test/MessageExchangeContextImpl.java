@@ -73,8 +73,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 	// Probe Service is a simple concatination service
 	private static final QName probePT = new QName(PROBE_NS,"probeMessagePT");
 	private static final QName faultPT = new QName(FAULT_NS,"faultMessagePT");
-	
-	private Message currentResponse;
+
 	
 	public void invokePartner(PartnerRoleMessageExchange mex)
 			throws ContextException {
@@ -92,23 +91,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
-		
-
-		Status mStat = myRoleMex.getStatus();
-		
 	
-		if ( mStat == Status.ACK ) {
-			
-			currentResponse = myRoleMex.getResponse();
-			
-			
-			//String resp = DOMUtils.domToString(getCurrentResponse().getMessage());
-			//System.out.println(resp);
-
-		}
-		
-		myRoleMex.complete();
-		
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {
@@ -175,14 +158,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		}
 
 	}
-	
-	public Message getCurrentResponse() {
-		return currentResponse;
-	}
-	
-	public void clearCurrentResponse() {
-		currentResponse = null;
-	}
+
 
     public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
         // TODO Auto-generated method stub
