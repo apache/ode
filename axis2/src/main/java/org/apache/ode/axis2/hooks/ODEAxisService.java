@@ -66,7 +66,7 @@ public class ODEAxisService extends AxisService {
                       +" WSDL="+wsdlDefinition.getDocumentBaseURI()
                       +" BPEL="+pconf.getBpelDocument());
         }
-        
+
         try {
         	URI baseUri = pconf.getBaseURI().resolve(wsdlDefinition.getDocumentBaseURI());
             InputStream is = baseUri.toURL().openStream();
@@ -95,7 +95,7 @@ public class ODEAxisService extends AxisService {
     }
     return axisService;
         } catch (Exception e) {
-            throw new AxisFault(e);
+            throw AxisFault.makeFault(e);
         }
   }
 
@@ -182,5 +182,5 @@ public class ODEAxisService extends AxisService {
     }
   }
 
-    
+
 }

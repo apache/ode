@@ -15,7 +15,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.2.2"
+gem "buildr", "~>1.2.4"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
@@ -29,13 +29,12 @@ NEXT_VERSION = "1.1-RC2-SNAPSHOT"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
-AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.4")
-AXIS2               = "org.apache.axis2:axis2:jar:1.1.1"
-AXIS2_WAR           = "org.apache.axis2:axis2:war:1.1.1"
-AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-tools",
+AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
+                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3-RC3"
+AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.1.1")
-AXIS2_PATCHED       = "org.apache.axis2:axis2-kernel-intalio:jar:1.1.1b"
+                        :under=>"org.apache.axis2", :version=>"1.3-RC3")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -88,12 +87,12 @@ TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
-XERCES              = "xerces:xercesImpl:jar:2.8.0"
+XERCES              = "xerces:xercesImpl:jar:2.9.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.ws.commons.neethi:neethi:jar:2.0",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.1"
+  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
+  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
@@ -131,7 +130,7 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
-      AXIOM, AXIS2, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
+      AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
       XMLBEANS
 
@@ -147,7 +146,7 @@ define "ode" do
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
-      AXIS2_ALL, AXIS2_PATCHED, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
+      AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
