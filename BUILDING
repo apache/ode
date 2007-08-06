@@ -20,7 +20,7 @@ Buildr requires a Ruby interpreter. If you're running Linux or Mac OS you most p
 
  * Ruby 1.8.x with RubyGems 0.9 or later. For Windows users using the Ruby One-Click Installer is the easiest (http://rubyforge.org/projects/rubyinstaller/). For Linux or Mac OS users, a Ruby interpreter is usually preinstalled. Just make sure to have the ruby-dev package (mkmf is needed for RJB).
 
- * Buildr. Install it by running 'gem install buildr'. A proper JAVA_HOME environment variable must be set. Make sure to choose either win32 or ruby platforms (don't choose java for Antwrap, that's JRuby).
+ * Buildr. Install it by running 'gem install buildr -v 1.2.4'. A proper JAVA_HOME environment variable must be set. Make sure to choose either win32 or ruby platforms (don't choose java for Antwrap, that's JRuby).
 
 Building is then pretty simple. Open a command in the source root directory and run:
 
