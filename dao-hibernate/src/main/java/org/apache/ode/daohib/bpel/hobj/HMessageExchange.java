@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+
 /**
  * Hibernate-managed table for keeping track of message exchanges.
  * 
@@ -80,6 +82,8 @@ public class HMessageExchange extends HObject {
     private String _failureType;
 
     private String _mexId;
+
+    private String _ackType;
 
     /**
      * 
@@ -391,4 +395,15 @@ public class HMessageExchange extends HObject {
         _istyle = invocationStyle;
     }
 
+    /**
+     * @hibernate.property column="ACK_TYPE"
+     * @return
+     */
+    public String getAckType() {
+        return _ackType;
+    }
+
+    public void setAckType(String ackType) {
+        _ackType = ackType;
+    }
 }

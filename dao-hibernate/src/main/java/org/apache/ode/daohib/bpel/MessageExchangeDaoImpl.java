@@ -30,6 +30,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -334,5 +335,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setTimeout(long timeout) {
         _hself.setTimeout(timeout);
+    }
+
+    public AckType getAckType() {
+        return _hself.getAckType() == null ? null : AckType.valueOf(_hself.getAckType());
+    }
+
+    public void setAckType(AckType ackType) {
+        _hself.setAckType(ackType == null ? null : ackType.toString());
     }
 }
