@@ -18,11 +18,13 @@
   -->
 <process name="HelloWorld2"
     targetNamespace="http://ode/bpel/unit-test" 
-    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-    xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl">
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import location="HelloWorld2.wsdl"
      namespace="http://ode/bpel/unit-test.wsdl"
@@ -37,6 +39,7 @@
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
+     <variable name="tmpDate" type="xsd:dateTime"/>
    </variables>
         
    <sequence>   
@@ -54,7 +57,7 @@
             <to variable="tmpVar"/>
          </copy>
          <copy>
-             <from>concat($tmpVar,' World')"</from>
+             <from>concat($tmpVar,' World')</from>
              <to variable="myVar" part="TestPart"/>
          </copy>
       </assign>

@@ -35,7 +35,11 @@ public class MockTransactionManager implements TransactionManager {
         if (_transaction.get() == null)
             throw new IllegalStateException("Transaction not active. ");
 
-        _transaction.get().commit();
+        try {
+            _transaction.get().commit();
+        } finally {
+            _transaction.set(null);
+        }
     }
 
     public int getStatus() throws SystemException {
@@ -65,7 +69,11 @@ public class MockTransactionManager implements TransactionManager {
         if (_transaction.get() == null)
             throw new IllegalStateException("Transaction not active. ");
 
-        _transaction.get().rollback();
+        try {
+            _transaction.get().rollback();
+        } finally {
+            _transaction.set(null);
+        }
     }
 
     public void setRollbackOnly() throws IllegalStateException, SystemException {

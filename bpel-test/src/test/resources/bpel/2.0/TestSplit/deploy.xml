@@ -16,20 +16,15 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+	xmlns:pns="http://ode/bpel/unit-test" 
+	xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <xsl:output method="xml"/>
-  <xsl:param name="middle"/>
 
-  <xsl:template match="/">
-    <!-- Per the WS-BPEL spec, only the single child of the root of the 
-         result tree is considered (so the root element here is "suppressed"
-         in the engine) -->
-    <xsl:element name="root">
-      <xsl:element name="hello">
-        <xsl:value-of select="concat(*/content/text(), $middle, ' World')"/>
-      </xsl:element>
-    </xsl:element>
-  </xsl:template>
-
-</xsl:stylesheet>
+	<process name="pns:TestSplit">
+		<active>true</active>
+		<provide partnerLink="testSplitPartnerLink">
+			<service name="wns:TestSplitService" port="TestSplitPort"/>
+		</provide>
+	</process>
+</deploy>

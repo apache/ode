@@ -18,36 +18,10 @@
  */
 package org.apache.ode.test;
 
-import junit.framework.TestCase;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.il.MockScheduler;
-import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.store.ProcessConfImpl;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.test.MockTransactionManager.TX;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
-import org.w3c.dom.Element;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,12 +29,40 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class BPELTestAbstract extends TestCase {
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.namespace.QName;
 
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.il.MockScheduler;
+import org.apache.ode.store.ProcessConfImpl;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.w3c.dom.Element;
+
+public abstract class BPELTestAbstract {
+	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
+	
     protected BpelServerImpl _server;
 
     protected ProcessStore store;
@@ -89,8 +91,9 @@ public abstract class BPELTestAbstract extends TestCase {
 
     private MockTransactionManager _txm;
 
-    @Override
-    protected void setUp() throws Exception {
+
+    @Before
+    public void setUp() throws Exception {
         _failures = new CopyOnWriteArrayList<Failure>();
         _server = new BpelServerImpl();
         mexContext = new MessageExchangeContextImpl();
@@ -148,12 +151,13 @@ public abstract class BPELTestAbstract extends TestCase {
             }
         });
         _server.setConfigProperties(getConfigProperties());
+        _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         for (Deployment d : _deployed) {
             try {
                 store.undeploy(d.deployDir);
@@ -182,7 +186,7 @@ public abstract class BPELTestAbstract extends TestCase {
         } catch (junit.framework.AssertionFailedError ex) {
             return;
         }
-        fail("Expecting test to fail");
+        Assert.fail("Expecting test to fail");
     }
 
     protected void go(String deployDir) throws Exception {
@@ -216,8 +220,9 @@ public abstract class BPELTestAbstract extends TestCase {
             }
         }
 
-        if (!testPropsFile.exists())
-            fail("Test property file not found in " + deployDir);
+        if (!testPropsFile.exists()) {
+            Assert.fail("Test property file not found in " + deployDir);
+        }
 
         while (testPropsFile.exists()) {
             Properties testProps = new Properties();
@@ -237,7 +242,7 @@ public abstract class BPELTestAbstract extends TestCase {
 
                 addInvoke(testPropsFile + "#" + i, serviceId, operation, in, responsePattern);
             }
-
+            propsFileCnt++;
             testPropsFile = new File(deployDir, "test" + propsFileCnt + ".properties");
         }
     }
@@ -251,7 +256,7 @@ public abstract class BPELTestAbstract extends TestCase {
         inv.request = DOMUtils.stringToDOM(request);
         inv.expectedStatus = null;
         if (responsePattern != null) {
-            inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+            inv.expectedFinalStatus = MessageExchange.Status.ACK;
             inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
         }
 
@@ -269,10 +274,15 @@ public abstract class BPELTestAbstract extends TestCase {
     }
 
     protected void checkFailure() {
-        for (Failure failure : _failures)
-            System.err.println(failure);
-
-        assertTrue(_failures.size() == 0);
+        StringBuffer sb = new StringBuffer("Failure report:\n");
+    	for (Failure failure : _failures) {
+            sb.append(failure);
+            sb.append('\n');
+        }
+    	if (_failures.size() != 0) {
+        	System.err.println(sb.toString());
+            Assert.fail(sb.toString());
+    	}
     }
 
     protected Deployment deploy(String location) {
@@ -368,13 +378,13 @@ public abstract class BPELTestAbstract extends TestCase {
         Failure f = new Failure(where, message, ex);
         _failures.add(f);
         ex.printStackTrace();
-        fail(f.toString());
+        Assert.fail(f.toString());
     }
 
     private void failure(Object where, String message, Object expected, Object actual) {
         Failure f = new Failure(where, message, expected, actual, null);
         _failures.add(f);
-        fail(f.toString());
+        Assert.fail(f.toString());
     }
 
     protected boolean isFailed() {
@@ -385,9 +395,15 @@ public abstract class BPELTestAbstract extends TestCase {
         String deployxml = deployDir + "/deploy.xml";
         URL deployxmlurl = getClass().getResource(deployxml);
         if (deployxmlurl == null) {
-            fail("Resource not found: " + deployxml);
+            Assert.fail("Resource not found: " + deployxml);
         }
-        return new File(deployxmlurl.getPath()).getParentFile();
+        try {
+			return new File(deployxmlurl.toURI().getPath()).getParentFile();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			Assert.fail(e.getMessage());
+			return null;
+		}
     }
 
     /**
@@ -396,9 +412,11 @@ public abstract class BPELTestAbstract extends TestCase {
      * @return
      */
     protected Properties getConfigProperties() {
-        // could also return null, returning an empty properties
-        // object is more fail-safe.
-        return new Properties();
+    	// could also return null, returning an empty properties 
+    	// object is more fail-safe.
+    	Properties p = new Properties();
+    	p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+    	return p;
     }
 
     protected static class Failure {
@@ -426,6 +444,9 @@ public abstract class BPELTestAbstract extends TestCase {
 
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
+            if (ex != null) {
+            	sbuf.append("; got exception msg: " + ex.getMessage());
+            }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
             return sbuf.toString();
@@ -485,7 +506,7 @@ public abstract class BPELTestAbstract extends TestCase {
         public MessageExchange.Status expectedStatus = null;
 
         /** If non-null, expect this status after response received. */
-        public MessageExchange.Status expectedFinalStatus = MessageExchange.Status.COMPLETED_OK;
+        public MessageExchange.Status expectedFinalStatus = MessageExchange.Status.COMPLETED;
 
         /** If non-null, expect this correlation status right after invoke. */
         public CorrelationStatus expectedCorrelationStatus = null;
@@ -533,7 +554,7 @@ public abstract class BPELTestAbstract extends TestCase {
             }
 
             try {
-                mex = _server.createMessageExchange(InvocationStyle.BLOCKING, _invocation.target, _invocation.operation, new GUID()
+                mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _invocation.target, _invocation.operation, new GUID()
                         .toString());
                 mexContext.clearCurrentResponse();
 
@@ -577,6 +598,7 @@ public abstract class BPELTestAbstract extends TestCase {
             Status finalstat = mex.getStatus();
             if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
                 failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+
 
             if (_invocation.expectedFinalCorrelationStatus != null
                     && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {

@@ -18,12 +18,12 @@
 -->
 
 <bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2004/03/business-process/ ../../../../../../../bpel-schemas/src/main/resources/wsbpel_main-draft-Apr-29-2006.xsd"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
   xmlns:tns="http://ode/bpel/unit-test/TestXPathNamespace2"
   xmlns:wns="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
  xmlns:ns0="http://www.company.org"
  xmlns:ns1="http://www.person.org"
- xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+ xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
  xmlns:ns2="http://www.product.org"
   name="TestXPathNamespace2"
   queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"

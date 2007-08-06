@@ -18,8 +18,8 @@
 -->
 
 <wsdl:definitions targetNamespace="http://ode/bpel/unit-test/testCorrelation1.wsdl" xmlns:tns="http://ode/bpel/unit-test/testCorrelation1.wsdl" xmlns="http://ode/bpel/unit-test/testCorrelation1.wsdl"
-  xmlns:ns0="http://www.w3schools.com" xmlns:ns1="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  xmlns:ns0="http://www.w3schools.com" xmlns:ns1="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
 
   <wsdl:types>
     <xsd:schema targetNamespace="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:xsd="http://www.w3.org/2001/XMLSchema">

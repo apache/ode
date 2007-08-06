@@ -18,11 +18,11 @@
 -->
 
 <process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2004/03/business-process/ ../../../../../../../bpel-schemas/src/main/resources/wsbpel_main-draft-Apr-29-2006.xsd"
+          xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
          xmlns:tns="http://ode/bpel/unit-test/TestStaticOnMessage"
          xmlns:wns="http://ode/bpel/unit-test/TestStaticOnMessage.wsdl"
          xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
-         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          name="TestStaticOnMessageProcess"
          targetNamespace="http://ode/bpel/unit-test/TestStaticOnMessage"
          queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"

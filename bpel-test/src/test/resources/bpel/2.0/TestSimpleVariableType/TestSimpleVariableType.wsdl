@@ -23,9 +23,9 @@
    xmlns="http://ode/bpel/unit-test/TestSimpleVariableType.wsdl"
    xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-   xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
+   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-   xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/">
+   xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
 
    <wsdl:message name="requestMessage">
@@ -54,8 +54,8 @@
       </wsdl:port>
    </wsdl:service>
 
-   <bpws:property name="testProbeID" type="xsd:string"/>
-   <bpws:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
+   <vprop:property name="testProbeID" type="xsd:string"/>
+   <vprop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
 
    <plnk:partnerLinkType name="TestSimpleVariableTypeRequest">
       <plnk:role name="TestSimpleVariableTypeService" portType="TestSimpleVariableTypePT"/>

@@ -97,7 +97,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		Status mStat = myRoleMex.getStatus();
 		
 	
-		if ( mStat == Status.RESPONSE ) {
+		if ( mStat == Status.ACK ) {
 			
 			currentResponse = myRoleMex.getResponse();
 			

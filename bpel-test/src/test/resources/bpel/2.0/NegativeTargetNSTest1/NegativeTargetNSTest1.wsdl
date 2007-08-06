@@ -20,7 +20,7 @@
 <wsdl:definitions targetNamespace="http://ode/bpel/unit-test/NegativeTargetNSTest.wsdl"
 	xmlns:tns="http://ode/bpel/unit-test/NegativeTargetNSTest1.wsdl"
 	xmlns="http://ode/bpel/unit-test/NegativeTargetNSTest1.wsdl"
-	xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"      
+	xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
 	

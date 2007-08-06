@@ -20,6 +20,8 @@ package org.apache.ode.test;
 
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.xml.namespace.QName;
 import java.text.DateFormat;
@@ -27,11 +29,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BasicActivities20Test extends BPELTestAbstract {
-    public void testHelloWorld2() throws Throwable {
+	
+	@Test public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/HelloWorld2");
     }
 
-    public void testNegativeTargetNS1() throws Throwable {
+	@Test public void testNegativeTargetNS1() throws Throwable {
         /**
          * Test for an invalid targetNamespace has been entered into the WSDL. See JIRA ODE-67 Test for a specific exception
          * message.
@@ -42,11 +45,11 @@ public class BasicActivities20Test extends BPELTestAbstract {
         go();
     }
 
-    public void testTimer() throws Throwable {
+	@Test public void testTimer() throws Throwable {
         go("/bpel/2.0/TestTimer");
     }
 
-    public void testIf() throws Throwable {
+	@Test public void testIf() throws Throwable {
         go("/bpel/2.0/TestIf");
     }
     
@@ -54,7 +57,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
      * Tests the wait "for" syntax.
      * @throws Throwable
      */
-    public void testWaitFor() throws Throwable {
+	@Test public void testWaitFor() throws Throwable {
         deploy("/bpel/2.0/TestWait1");
         Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
             "<message><TestPart/><Time/></message>",
@@ -62,7 +65,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
         inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        inv.expectedFinalStatus = MessageExchange.Status.ACK;
         
         go();
     }
@@ -70,7 +73,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
     /**
      * Test the wait "until" syntax.
      */
-    public void testWaitUntil() throws Throwable {
+	@Test public void testWaitUntil() throws Throwable {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String isountil = idf.format(new Date(System.currentTimeMillis()+5000));
@@ -80,7 +83,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
         inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        inv.expectedFinalStatus = MessageExchange.Status.ACK;
         
         go();
     }
