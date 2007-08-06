@@ -113,8 +113,8 @@ public class HttpSoapSender extends BaseCommandlineTool {
                     new UsernamePasswordCredentials(username, password));
             httpPostMethod.setDoAuthentication(true);
         }
-        if (soapAction != null && soapAction.length() > 0)
-            httpPostMethod.setRequestHeader("SOAPAction", soapAction);
+        if (soapAction == null) soapAction = "";
+        httpPostMethod.setRequestHeader("SOAPAction", "\"" + soapAction + "\"");
         httpPostMethod.setRequestHeader("Content-Type", "text/xml");
         httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
         httpClient.executeMethod(httpPostMethod);
