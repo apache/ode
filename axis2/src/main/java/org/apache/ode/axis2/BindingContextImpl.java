@@ -36,9 +36,9 @@ import javax.xml.namespace.QName;
 /**
  * AXIS2 implementation of the {@link org.apache.ode.bpel.iapi.BindingContext}
  * interface. Deals with the activation of endpoints.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
- * 
+ *
  */
 public class BindingContextImpl implements BindingContext {
     private ODEServer _server;
@@ -51,7 +51,7 @@ public class BindingContextImpl implements BindingContext {
 
     public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         try {
-            ProcessConf pconf = _store.getProcessConfiguration(processId); 
+            ProcessConf pconf = _store.getProcessConfiguration(processId);
         	Definition wsdl = pconf.getDefinitionForService(myRoleEndpoint.serviceName);
         	if (wsdl == null)
         		throw new ContextException("Unable to access WSDL definition to activate MyRole endpoint for service " + myRoleEndpoint.serviceName
@@ -72,9 +72,13 @@ public class BindingContextImpl implements BindingContext {
                                                        Endpoint initialPartnerEndpoint) {
         // NOTE: This implementation assumes that the initial value of the
         // partner role determines the binding.
-        return _server.createExternalService(_store
-                .getProcessConfiguration(processId).getDefinitionForService(initialPartnerEndpoint.serviceName),
-                initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
+        ProcessConf pconf = _store.getProcessConfiguration(processId);
+        Definition wsdl = pconf.getDefinitionForService(initialPartnerEndpoint.serviceName);
+        if (wsdl == null) {
+            throw new ContextException("Cannot find definition for service " + initialPartnerEndpoint.serviceName
+                                       + " in the context of process "+processId);
+        }
+        return _server.createExternalService(wsdl, initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 
 }
