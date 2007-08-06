@@ -1,0 +1,89 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<assembly>
+    <id></id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>target/stage</directory>
+            <outputDirectory></outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/stage/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>*.bat</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.ode:ode-utils</include>
+                <include>org.apache.ode:ode-tools</include>
+                <include>org.apache.ode:ode-bpel-compiler</include>
+                <include>org.apache.ode:ode-bpel-bom</include>
+                <include>org.apache.ode:ode-bpel-api</include>
+                <include>org.apache.ode:ode-bpel-obj</include>
+                <include>org.apache.ode:ode-bpel-parser</include>
+                <include>org.apache.ode:ode-bpel-schemas</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory/>
+            <includes>
+                <include>org.apache.ode:ode-tools-bin</include>
+            </includes>
+            <unpack>true</unpack>
+        </dependencySet>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory>jbi-component</outputDirectory>
+            <includes>
+                <include>org.apache.ode:ode-jbi</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>commons-logging:commons-logging</include>
+                <include>commons-codec:commons-codec</include>
+                <include>commons-httpclient:commons-httpclient</include>
+                <include>commons-pool:commons-pool</include>
+                <include>commons-collections:commons-collections</include>
+                <include>jaxen:jaxen</include>
+                <include>net.sf.saxon:saxon</include>
+                <include>net.sf.saxon:saxon-xpath</include>
+                <include>net.sf.saxon:saxon-dom</include>
+                <include>log4j:log4j</include>
+                <include>wsdl4j:wsdl4j</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:tns="http://www.example.org/Assignment" xmlns:Client="http://example.com/ComplexVariables/Client" xmlns:diag="http://example.com/ComplexVariables" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/ComplexVariables/Variable" name="this:Variable" fileName="ComplexVariables-Variable.bpel">
+  <dd:property name="PATH">TestComplexVariable/ComplexVariables</dd:property>
+  <dd:provide partnerLink="clientAndVariablePlkVar">
+    <dd:service name="this:CanonicServiceForClient" port="canonicPort"/>
+  </dd:provide>
+</dd:process>

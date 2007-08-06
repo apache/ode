@@ -1,0 +1,10 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <!-- test soap message -->
+  <SOAP-ENV:Body>
+    <ns1:execute xmlns:ns1="http://ode/bpel/unit-test.wsdl">
+        <ns2:payload xmlns:ns2="http://ode/bpel/responder.wsdl">
+            <ns2:dummy>fire!</ns2:dummy>
+        </ns2:payload>
+    </ns1:execute>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
