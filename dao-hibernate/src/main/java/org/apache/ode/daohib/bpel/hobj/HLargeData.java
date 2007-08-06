@@ -44,12 +44,18 @@ public class HLargeData extends HObject {
   }
 
   /**
-   * @hibernate.property type="blob" length="2147483600" column="BIN_DATA"
+   * @hibernate.property
+   *    type="binary"
+   *     length="2G"
+   *
+   * @hibernate.column
+   *    name="BIN_DATA"
+   *    sql-type="blob(2G)"
    */
   public byte[] getBinary() {
     return binary;
   }
-
+                                  
   public void setBinary(byte[] binary) {
     this.binary = binary;
   }
