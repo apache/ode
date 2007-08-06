@@ -47,34 +47,24 @@ public interface MessageExchange {
         /** New message exchange, has not been "invoked" */
         NEW,
 
-        /** The request is being sent to the "server" */
-        REQUEST,
+        /** The request was sent. */
+        REQ,
 
-        /** Waiting for an asynchronous response from the "server" */
-        ASYNC,
+        /** The acknowledgement (either response/fault/failure) was sent. */
+        ACK,
 
-        /** The one way request has been sent to the server. */
-        // ONE_WAY, - supported as ASYNC + getMessageExchangePatter() - See JIRA ODE-54
+        /** The acknowledgement was processed. */
+        COMPLETED
 
-        /** Processing the response received from the "server". */
-        RESPONSE,
-
-        /** Processing the fault received from the "server". */
-        FAULT,
-
-        /** Processing a failure. */
-        FAILURE,
-
-        /** Message exchange completed succesfully. */
-        COMPLETED_OK,
-
-        /** Message exchange completed with a fault. */
-        COMPLETED_FAULT,
-
-        /** Message exchange completed with a failure. */
-        COMPLETED_FAILURE,
     }
 
+    public enum AckType {
+        RESPONSE,
+        ONEWAY,
+        FAULT,
+        FAILURE
+    }
+    
     /**
      * Enumeration of the types of failures.
      */
@@ -143,6 +133,7 @@ public interface MessageExchange {
             throws BpelEngineException;
 
 
+    AckType getAckType();
 
     /**
      * Return the type of message-exchange that resulted form this invocation
