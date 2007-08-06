@@ -61,7 +61,7 @@ import org.apache.ode.utils.fs.TempFileManager;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
- * 
+ *
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEServer {
@@ -149,9 +149,10 @@ public class ODEServer {
             __log.debug("Initializing BPEL server.");
             initBpelServer();
 
-            // Register BPEL event listeners configured in axis2.properties
-            // file.
+            // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
+
+            registerMexInterceptors();
 
             try {
                 _server.start();
@@ -207,7 +208,7 @@ public class ODEServer {
     /**
      * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
      * must be called before the transformation engine can be started again with a call to start().
-     * 
+     *
      * @throws AxisFault
      *             if the engine is unable to shut down.
      */
@@ -263,7 +264,7 @@ public class ODEServer {
             if (_db != null)
                 try {
                     _db.shutdown();
-                    
+
                 } catch (Throwable ex) {
                     __log.debug("DB shutdown failed.", ex);
                 } finally {
@@ -272,7 +273,6 @@ public class ODEServer {
 
             if (_txMgr != null) {
                 __log.debug("shutting down transaction manager.");
-                // TODO: we need to shutdown jotm if it is running.
                 _txMgr = null;
             }
 
@@ -393,14 +393,14 @@ public class ODEServer {
             try {
                 _connector.start();
             } catch (Exception e) {
-                __log.error("Failed to initialize JCA connector.");
+                __log.error("Failed to initialize JCA connector.", e);
             }
         }
     }
 
     /**
      * Initialize the DAO.
-     * 
+     *
      * @throws ServletException
      */
     protected void initDAO() throws ServletException {
@@ -411,7 +411,7 @@ public class ODEServer {
             String errmsg = __msgs.msgDAOInstantiationFailed(_odeConfig.getDAOConnectionFactory());
             __log.error(errmsg, ex);
             throw new ServletException(errmsg, ex);
-            
+
         }
     }
 
@@ -473,11 +473,28 @@ public class ODEServer {
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
-                            + "loaded properly.");
+                            + "loaded properly: " + e);
                 }
             }
 
         }
+    }
+
+    private void registerMexInterceptors() {
+        // TODO: put back.
+//        String listenersStr = _odeConfig.getMessageExchangeInterceptors();
+//        if (listenersStr != null) {
+//            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+//                String interceptorCN = tokenizer.nextToken();
+//                try {
+//                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+//                    __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
+//                } catch (Exception e) {
+//                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+//                            + "loaded properly: " + e);
+//                }
+//            }
+//        }
     }
 
     private class ProcessStoreListenerImpl implements ProcessStoreListener {

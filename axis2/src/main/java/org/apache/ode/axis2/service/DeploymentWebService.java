@@ -89,7 +89,8 @@ public class DeploymentWebService {
             WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
             wsdlReader.setFeature("javax.wsdl.verbose", false);
 
-            def = wsdlReader.readWSDL(rootpath + "/deploy.wsdl");
+            File wsdlFile = new File(rootpath + "/deploy.wsdl");
+            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
             AxisService deployService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/deployapi", "DeploymentService"),
                     "DeploymentPort", "DeploymentService", def, new DeploymentMessageReceiver());
@@ -104,7 +105,7 @@ public class DeploymentWebService {
 
     class DeploymentMessageReceiver extends AbstractMessageReceiver {
 
-        public void receive(MessageContext messageContext) throws AxisFault {
+        public void invokeBusinessLogic(MessageContext messageContext) throws AxisFault {
             String operation = messageContext.getAxisOperation().getName().getLocalPart();
             SOAPFactory factory = getSOAPFactory(messageContext);
             boolean unknown = false;
