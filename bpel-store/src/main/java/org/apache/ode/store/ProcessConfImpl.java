@@ -43,8 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -78,6 +77,9 @@ public class ProcessConfImpl implements ProcessConf {
     private QName _pid;
     private QName _type;
 
+    // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
+    private volatile boolean _inMemory = false;
+
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate) {
         _pid = pid;
@@ -88,6 +90,7 @@ public class ProcessConfImpl implements ProcessConf {
         _props = Collections.unmodifiableMap(props);
         _state = pstate;
         _type = type;
+        _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
 
         initLinks();
         initMexInterceptors();
@@ -181,7 +184,7 @@ public class ProcessConfImpl implements ProcessConf {
         if (cbpInfo == null)
             throw new ContextException("CBP record not found for type " + getType());
         try {
-            String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp);
+            String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp).replaceAll("\\\\", "/");
             if (!relative.endsWith(".cbp")) throw new ContextException("CBP file must end with .cbp suffix: " + cbpInfo.cbp);
             relative = relative.replace(".cbp", ".bpel");
             File bpelFile = new File(_du.getDeployDir(), relative);
@@ -192,12 +195,8 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
     
-    public URL getBaseURL() {
-        try {
-           return _du.getDeployDir().toURL();
-        } catch (MalformedURLException except) {
-            throw new RuntimeException(except);
-        }
+    public URI getBaseURI() {
+    	return _du.getDeployDir().toURI();
     }
 
     public ProcessState getState() {
@@ -268,10 +267,11 @@ public class ProcessConfImpl implements ProcessConf {
     }
 
     public boolean isTransient() {
-        return _pinfo.isSetInMemory() && _pinfo.getInMemory();
+        return _inMemory;
     }
     public void setTransient(boolean t) {
         _pinfo.setInMemory(t);
+        _inMemory = t;
     }
 
     public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {

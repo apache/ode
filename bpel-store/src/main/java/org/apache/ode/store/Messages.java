@@ -24,6 +24,7 @@ import java.util.Date;
 
 import javax.xml.namespace.QName;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.utils.msg.MessageBundle;
 
 /**
@@ -207,8 +208,12 @@ public class Messages extends MessageBundle {
         return format("Deploy failed; process \"{0}\" not found in deployment unit \"{1}\".",pid,du);
     }
 
-    public String msgDeployFailCompileErrors() {
-        return format("Deploy failed; BPEL compilation errors." );
+    public String msgDeployFailCompileErrors(CompilationException ce) {
+        if (ce != null) {
+        	return format("Deploy failed; {0}", ce.getMessage());
+        } else {
+        	return format("Deploy failed; BPEL compilation errors." );
+        }
     }
     
 }

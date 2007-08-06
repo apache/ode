@@ -36,7 +36,7 @@ public class DeploymentUnitTest  extends TestCase {
      * Test some complicated xsd/wsdl loading. 
      */
     public void setUp() throws Exception {
-        File dir = new File(getClass().getResource("/complexImport/deploy.xml").getPath()).getParentFile();
+        File dir = new File(getClass().getResource("/complexImport/deploy.xml").toURI().getPath()).getParentFile();
         du = new DeploymentUnitDir(dir);
     }
     

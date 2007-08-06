@@ -19,7 +19,7 @@
 package org.apache.ode.store;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class ProcessStoreTest extends TestCase {
         System.setProperty("openjpa.properties", "/openjpa.xml");
         _ps = new ProcessStoreImpl();
         _ps.loadAll();
-        URL tdd= getClass().getResource("/testdd/deploy.xml");
+        URI tdd= getClass().getResource("/testdd/deploy.xml").toURI();
         _testdd = new File(tdd.getPath()).getParentFile();
     } 
     
