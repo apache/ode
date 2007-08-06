@@ -79,7 +79,7 @@ EOF
 #    limitations under the License.
 #
 EOF
-    licenses[".bpel"] = licenses[".wsdl"] = licenses[".xsd"] = licenses['.usd'] = licenses['.xsl']  = licenses[".xml"]
+    licenses[".bpel"] = licenses[".wsdl"] = licenses[".xsd"] = licenses['.usd'] = licenses['.xsl'] = licenses[".deploy"] = licenses[".xml"]
     licenses[".rake"] = licenses[".tdef"] = licenses[".properties"]
     # This also tells us which files to look at.
     extensions = licenses.keys.join(",")
