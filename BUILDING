@@ -9,9 +9,9 @@ Getting the source code
 
 First you will have to make sure that you have [Subversion|http://svn.tigris.org]. If you don't know what Subversion is or don't  have it installed, check [here|http://svnbook.red-bean.com]. Once installed run:
 
-svn checkout http://svn.apache.org/repos/asf/incubator/ode/trunk ode
+svn checkout http://svn.apache.org/repos/asf/ode/trunk ode
 
-For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://incubator.apache.org/ode/source-code.html).
+For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://ode.apache.org/source-code.html).
 
 Building With Buildr
 --------------------
