@@ -166,29 +166,6 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     }
 
     /**
-     * Called from {@link MessageExchangeContextImpl#onAsyncReply(MyRoleMessageExchange)}
-     * 
-     * @param mex
-     *            message exchenge
-     */
-    public void onResponse(MyRoleMessageExchange mex, javax.jbi.messaging.MessageExchange jbiMex) {
-        switch (mex.getStatus()) {
-        case FAULT:
-            outResponseFault(mex, jbiMex);
-            break;
-        case RESPONSE:
-            outResponse(mex, jbiMex);
-            break;
-        case FAILURE:
-            outFailure(mex, jbiMex);
-            break;
-        default:
-            __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
-        }
-        mex.release();
-    }
-
-    /**
      * Forward a JBI input message to ODE.
      * 
      * @param jbiMex
@@ -201,7 +178,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                     + jbiMex.getOperation());
         }
 
-        odeMex = _ode._server.createMessageExchange(InvocationStyle.BLOCKING, _endpoint.serviceName, jbiMex.getOperation()
+        odeMex = _ode._server.createMessageExchange(InvocationStyle.UNRELIABLE, _endpoint.serviceName, jbiMex.getOperation()
                 .getLocalPart(), jbiMex.getExchangeId());
 
         if (odeMex.getOperation() == null) {
@@ -226,23 +203,34 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
         odeMex.setRequest(odeRequest);
         try {
             odeMex.invokeBlocking();
-            // Handle the response if it is immediately available.
-            if (odeMex.getStatus() != Status.ASYNC) {
-                __log.debug("ODE MEX " + odeMex + " completed SYNCHRONOUSLY.");
-                onResponse(odeMex, jbiMex);
-            } else {
-                __log.fatal("ODE MEX " + odeMex + " unexpectedly completed ASYNCHRONOUSLY.");
-            }
+
         } catch (Exception ex) {
             __log.error("ODE MEX " + odeMex + " resulted in an error.");
             sendError(jbiMex, ex);
+            return;
+        }
+
+        switch (odeMex.getAckType()) {
+        case FAULT:
+            outResponseFault(odeMex, jbiMex);
+            break;
+        case RESPONSE:
+            outResponse(odeMex, jbiMex);
+            break;
+        case FAILURE:
+            outFailure(odeMex, jbiMex);
+            break;
+        default:
+            __log.fatal("Unexpected AckType:" + odeMex.getAckType());
+            sendError(jbiMex, new RuntimeException("Unexpected AckType:" + odeMex.getAckType()));
+            
         }
 
     }
 
     private void outFailure(MyRoleMessageExchange odeMex, javax.jbi.messaging.MessageExchange jbiMex) {
         try {
-            jbiMex.setError(new Exception("MEXFailure"));
+            jbiMex.setError(new Exception("MEXFailure: " + odeMex.getFailureType()));
             jbiMex.setStatus(ExchangeStatus.ERROR);
             // TODO: get failure codes out of the message.
             _ode.getChannel().send(jbiMex);

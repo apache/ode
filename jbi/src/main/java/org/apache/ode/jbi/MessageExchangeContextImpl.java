@@ -49,8 +49,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     private static final Set<InvocationStyle> __supported;
     static {
         HashSet<InvocationStyle> supported = new HashSet<InvocationStyle>();
-        supported.add(InvocationStyle.BLOCKING);
-        supported.add(InvocationStyle.ASYNC);
+        supported.add(InvocationStyle.UNRELIABLE);
         __supported = Collections.unmodifiableSet(supported);
     }
 
@@ -58,16 +57,8 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         _ode = ode;
     }
 
-    public void onAsyncReply(MyRoleMessageExchange myrolemex) throws BpelEngineException {
-        __log.error("Unexpected onAsyncReply notification: " + myrolemex);
-        // Due to JBI limitiations (i.e. we cannot recover a JBI message-exchange object) , we don't support ASYNC invocations
-    }
 
-    public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
-        _ode._consumer.invokePartner(mex);
-    }
-
-    public void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException {
+    public void invokePartnerUnreliable(PartnerRoleMessageExchange mex) throws ContextException {
         _ode._consumer.invokePartner(mex);
     }
 
@@ -81,10 +72,6 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     }
 
-    public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
-        __log.error("Unexpected onRepliabeReply notification: " + myRoleMex);
-
-    }
 
     public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
         // What can we do in JBI to cancel? --- not much. 
@@ -93,6 +80,11 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
         return __supported ;
+    }
+
+
+    public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
+        // TODO: add support for message exchange recovery. 
     }
     
 

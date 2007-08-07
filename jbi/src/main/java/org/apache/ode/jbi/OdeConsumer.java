@@ -199,16 +199,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
 
     protected void doSendJBI(final PartnerRoleMessageExchange odeMex, final MessageExchange jbiMex) {
         try {
-            switch (odeMex.getInvocationStyle()) {
-            case ASYNC:
-                _ode.getChannel().send(jbiMex);
-                break;
-            case BLOCKING:
-                _ode.getChannel().sendSync(jbiMex, odeMex.getTimeout());
-                break;
-            default:
-                throw new ContextException("Unsupported Invocation Style: " + odeMex.getInvocationStyle());
-            }
+            _ode.getChannel().send(jbiMex);
         } catch (MessagingException e) {
             String errmsg = "Error sending request-only message to JBI for ODE mex " + odeMex;
             __log.error(errmsg, e);
