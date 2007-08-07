@@ -38,25 +38,24 @@
 
 package org.apache.ode.test;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.util.Set;
 
 /**
  * This is a simple MessageExchangeContext implementation
@@ -75,7 +74,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 	private static final QName faultPT = new QName(FAULT_NS,"faultMessagePT");
 
 	
-	public void invokePartner(PartnerRoleMessageExchange mex)
+	public void invokePartnerUnreliable(PartnerRoleMessageExchange mex)
 			throws ContextException {
 		QName calledPT = mex.getPortType().getQName();
 		
@@ -166,18 +165,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     }
 
     public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-        
+        return Collections.singleton(InvocationStyle.UNRELIABLE);
     }
 
     public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
@@ -190,9 +178,5 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         
     }
 
-    public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
-        // TODO Auto-generated method stub
-        
-    }
 
 }
