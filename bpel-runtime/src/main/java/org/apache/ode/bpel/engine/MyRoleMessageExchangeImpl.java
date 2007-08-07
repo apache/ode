@@ -65,6 +65,13 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         
     }
 
+    public FailureType getFailureType() {
+        if (getStatus() != Status.ACK || getAckType() != AckType.FAILURE)
+            throw new IllegalStateException("MessageExchange did not fail!");
+        
+        return _failureType;
+    }
+    
     public String getClientId() {
         return _clientId;
     }
