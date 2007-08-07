@@ -57,6 +57,12 @@ public interface MyRoleMessageExchange extends MessageExchange {
      */
     CorrelationStatus getCorrelationStatus();
 
+    /** 
+     * Get the type of failure. Only usable if AckType is FAILURE. 
+     * @return
+     */
+    FailureType getFailureType();
+
     void setRequest(Message request);
     
     /**
@@ -108,5 +114,6 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * @return service name
      */
     QName getServiceName();
+
 
 }
