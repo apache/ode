@@ -56,11 +56,8 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     }
 
 
-    public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
-        throw new UnsupportedOperationException();
-    }
 
-    public void invokePartnerBlocking(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
+    public void invokePartnerUnreliable(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
@@ -78,7 +75,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
         // TODO: should we check if the partner actually supports transactions?
-        invokePartnerBlocking(mex);
+        invokePartnerUnreliable(mex);
     }
 
     
