@@ -83,9 +83,7 @@ public interface MessageExchangeContext {
      * @throws ContextException
      *             if the port does not support the operation
      */
-    void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException;
-    
-    void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException;
+    void invokePartnerUnreliable(PartnerRoleMessageExchange mex) throws ContextException;
     
     void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException;
     
