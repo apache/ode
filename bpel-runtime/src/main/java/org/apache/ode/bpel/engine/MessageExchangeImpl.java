@@ -37,7 +37,6 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -112,7 +111,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     private volatile int _syncdummy;
 
     enum Change {
-        EPR, RESPONSE, RELEASE, REQUEST
+        EPR, ACK, RELEASE, REQUEST
     }
 
     final HashSet<Change> _changes = new HashSet<Change>();
@@ -180,19 +179,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
         dao.setFailureType(_failureType == null ? null : _failureType.toString());
         dao.setAckType(_ackType);
 
-        if (_changes.contains(Change.REQUEST)) {
-            MessageDAO requestDao = dao.createMessage(_request.getType());
-            requestDao.setData(_request.getMessage());   
-            dao.setRequest(requestDao);
-        }
-        
-        if (_changes.contains(Change.RESPONSE)) {
-            MessageDAO responseDao = dao.createMessage(_response.getType());
-            responseDao.setData(_response.getMessage());
-            dao.setResponse(responseDao);
-        }
-
+       
         if (_changes.contains(Change.EPR)) {
+            _changes.remove(_epr);
             if (_epr != null)
                 dao.setEPR(_epr.toXML().getDocumentElement());
             else

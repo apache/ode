@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.engine.MessageExchangeImpl.Change;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -54,6 +55,14 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         dao.setCorrelationStatus(_cstatus == null ? null : _cstatus.toString());
         dao.setCorrelationId(_clientId);
         dao.setCallee(_callee);
+        
+        if (_changes.contains(Change.REQUEST)) {
+            _changes.remove(Change.REQUEST);
+            MessageDAO requestDao = dao.createMessage(_request.getType());
+            requestDao.setData(_request.getMessage());   
+            dao.setRequest(requestDao);
+        }
+        
     }
 
     public String getClientId() {

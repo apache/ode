@@ -45,32 +45,51 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A very simple, in-memory implementation of the {@link ProcessInstanceDAO}
- * interface.
+ * A very simple, in-memory implementation of the {@link ProcessInstanceDAO} interface.
  */
 public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstanceDAO {
     private static final Collection<ScopeDAO> EMPTY_SCOPE_DAOS = Collections.emptyList();
 
     private short _previousState;
+
     private short _state;
+
     private Long _instanceId;
+
     private ProcessDaoImpl _processDao;
+
     private Object _soup;
+
     private Map<Long, ScopeDAO> _scopes = new HashMap<Long, ScopeDAO>();
+
     private Map<String, List<ScopeDAO>> _scopesByName = new HashMap<String, List<ScopeDAO>>();
+
     private Map<String, byte[]> _messageExchanges = new HashMap<String, byte[]>();
+
     private ScopeDAO _rootScope;
+
     private FaultDAO _fault;
+
     private CorrelatorDAO _instantiatingCorrelator;
+
     private BpelDAOConnection _conn;
+
     private int _failureCount;
+
     private Date _failureDateTime;
+
     private Map<String, ActivityRecoveryDAO> _activityRecoveries = new HashMap<String, ActivityRecoveryDAO>();
 
     // TODO: Remove this, we should be using the main event store...
     private List<ProcessInstanceEvent> _events = new ArrayList<ProcessInstanceEvent>();
+
     private Date _lastActive;
+
     private int _seq;
+
+    private byte[] _execState;
+
+    private int _execStateCount;
 
     ProcessInstanceDaoImpl(BpelDAOConnection conn, ProcessDaoImpl processDao, CorrelatorDAO correlator) {
         _state = 0;
@@ -125,11 +144,11 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
      * @see ProcessInstanceDAO#getExecutionState()
      */
     public byte[] getExecutionState() {
-        throw new IllegalStateException("In-memory instances are never serialized");
+        return _execState;
     }
 
     public void setExecutionState(byte[] bytes) {
-        throw new IllegalStateException("In-memory instances are never serialized");
+        _execState = bytes;
     }
 
     public Object getSoup() {
@@ -314,7 +333,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     public void createActivityRecovery(String channel, long activityId, String reason, Date dateTime, Element data,
-                                       String[] actions, int retries) {
+            String[] actions, int retries) {
         _activityRecoveries
                 .put(channel, new ActivityRecoveryDAOImpl(channel, activityId, reason, dateTime, data, actions, retries));
         _failureCount = _activityRecoveries.size();
@@ -347,7 +366,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
         private int _retries;
 
         ActivityRecoveryDAOImpl(String channel, long activityId, String reason, Date dateTime, Element details, String[] actions,
-                                int retries) {
+                int retries) {
             _activityId = activityId;
             _channel = channel;
             _reason = reason;
@@ -404,5 +423,13 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
 
     public String toString() {
         return "mem.instance(type=" + _processDao.getType() + " iid=" + _instanceId + ")";
+    }
+
+    public int getExecutionStateCounter() {
+        return _execStateCount;
+    }
+
+    public void setExecutionStateCounter(int stateCounter) {
+        _execStateCount = stateCounter;
     }
 }

@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -38,6 +39,7 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.xmlbeans.XmlCursor.ChangeStamp;
 import org.w3c.dom.Element;
 
 import com.sun.corba.se.spi.activation._ActivatorImplBase;
@@ -98,6 +100,15 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     @Override
     void save(MessageExchangeDAO dao) {
         super.save(dao);
+        
+        if (_changes.contains(Change.ACK)) {
+            _changes.remove(Change.ACK);
+            MessageDAO responseDao = dao.createMessage(_response.getType());
+            responseDao.setData(_response.getMessage());
+            dao.setResponse(responseDao);
+        }
+
+
     }
 
     @Override
@@ -105,6 +116,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         _accessLock.lock();
         try {
             super.ack(acktype);
+            _changes.add(Change.ACK);
             _acked.signalAll();
         } finally {
             _accessLock.unlock();
@@ -234,7 +246,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
             throw new IllegalStateException("Object used in inappropriate context. ");
 
         if (getStatus() != MessageExchange.Status.REQ)
-            throw new IllegalStateException("Invalid message exchange state, expect REQUEST or ASYNC, but got " + getStatus());
+            throw new IllegalStateException("Invalid message exchange state, expect REQ but got " + getStatus());
 
     }
 

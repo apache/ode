@@ -34,6 +34,8 @@ class BpelInstanceWorker implements Runnable {
     
     private Thread _workerThread;
 
+    private CachedState _cachedState;
+
     BpelInstanceWorker(BpelProcess process, Long iid) {
         _process = process;
         _iid = iid;
@@ -154,8 +156,29 @@ class BpelInstanceWorker implements Runnable {
         return "{BpelInstanceWorker: PID=" + _process.getPID() + " IID=" + _iid + " workerThread="+ _workerThread + "}";
     }
 
-    public boolean isWorkerThread() {
+    boolean isWorkerThread() {
         return _activeInstance.get() != null;
+    }
+
+    Object getCachedState(Object uuid) {
+        CachedState cs = _cachedState;
+        if (cs != null && cs.uuid.equals(uuid))
+            return cs.state;
+        return null;
+    }
+    
+    void setCachedState(Object uuid, Object state) {
+        _cachedState = new CachedState(uuid, state);
+    }
+    
+    private class CachedState {
+        final Object uuid;
+        final Object state;
+        
+        CachedState(Object uuid, Object state) {
+            this.uuid = uuid;
+            this.state = state;
+        }
     }
 
 }

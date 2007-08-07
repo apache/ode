@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,6 +68,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
+import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -274,7 +276,7 @@ class BpelProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), null, null);
+        BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance());
         int amp = mexdao.getChannel().indexOf('&');
         String groupId = mexdao.getChannel().substring(0, amp);
         int idx = Integer.valueOf(mexdao.getChannel().substring(amp + 1));
@@ -287,10 +289,7 @@ class BpelProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-//      TODO: we need a way to check if the lastBRC is indeed the lastBRC (serial number on the instanceDAO)
-//        BpelRuntimeContextImpl brc = lastBRC == null ? new BpelRuntimeContextImpl(worker, mexdao.getInstance(), null, null)
-//        : new BpelRuntimeContextImpl(worker, mexdao.getInstance(), lastBRC);
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), null, null);
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance());
 
         brc.injectPartnerResponse(mexdao.getMessageExchangeId(), mexdao.getChannel());
         brc.execute();
@@ -480,7 +479,7 @@ class BpelProcess {
             return;
         }
 
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDAO, null, null);
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDAO);
         switch (we.getType()) {
         case TIMER:
             if (__log.isDebugEnabled()) {
@@ -1137,6 +1136,13 @@ class BpelProcess {
         } finally {
             _hydrationLatch.release(1);
         }
+    }
+
+    public void scheduleWorkEvent(WorkEvent we, Date timeToFire) {
+//        if (isInMemory())
+//            throw new InvalidProcessException("In-mem process execution resulted in event scheduling.");
+        
+        _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
 }

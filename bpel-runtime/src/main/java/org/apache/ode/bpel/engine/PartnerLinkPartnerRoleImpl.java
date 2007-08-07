@@ -180,6 +180,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
                     .getInstance().getInstanceId(), mexDao.getMessageExchangeId(), _plinkDef, operation, partnerEpr, myRoleEpr,
                     _channel);
 
+
             // Need to cheat a little bit for in-memory processes; do the invoke in-line, but first suspend
             // the transaction so that the IL does not get confused.
             Transaction tx;
@@ -189,15 +190,22 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             } catch (Exception ex) {
                 throw new BpelEngineException("TxManager Error: cannot suspend!", ex);
             }
-
+            
+            unreliableMex.request();
+            unreliableMex.setState(State.INVOKE_XXX);
             try {
-                unreliableMex.setState(State.INVOKE_XXX);
-                _contexts.mexContext.invokePartnerUnreliable(unreliableMex);
+                try {
+                    _contexts.mexContext.invokePartnerUnreliable(unreliableMex);
+                } catch (Throwable t) {
+                    __log.error("Unexpected error invoking partner." ,t);
+                    MexDaoUtil.setFailed(mexDao, FailureType.OTHER, t.toString());
+                    return;
+                }
+                
                 try {
                     unreliableMex.waitForAck(mexDao.getTimeout());
                 } catch (InterruptedException ie) {
                     __log.warn("Interrupted waiting for MEX response.");
-
                 }
 
             } finally {
@@ -226,6 +234,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         ReliablePartnerRoleMessageExchangeImpl reliableMex = new ReliablePartnerRoleMessageExchangeImpl(_process, mexDao
                 .getInstance().getInstanceId(), mexDao.getMessageExchangeId(), _plinkDef, operation, partnerEpr, myRoleEpr,
                 _channel);
+        
+        reliableMex.request();
         reliableMex.setState(State.INVOKE_XXX);
         Throwable err = null;
         try {
@@ -255,6 +265,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         TransactedPartnerRoleMessageExchangeImpl transactedMex = new TransactedPartnerRoleMessageExchangeImpl(_process, mexDao
                 .getInstance().getInstanceId(), mexDao.getMessageExchangeId(), _plinkDef, operation, partnerEpr, myRoleEpr,
                 _channel);
+        
+        transactedMex.request();
         transactedMex.setState(State.INVOKE_XXX);
         try {
             _contexts.mexContext.invokePartnerTransacted(transactedMex);

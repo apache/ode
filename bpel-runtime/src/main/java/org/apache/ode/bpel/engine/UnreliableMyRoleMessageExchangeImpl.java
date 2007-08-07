@@ -17,7 +17,7 @@ import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
- * For invoking the engine using ASYNC style.
+ * For invoking the engine using UNRELIABLE style.
  * 
  * @author Maciej Szefler <mszefler at gmail dot com>
  * 
@@ -36,7 +36,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
      * Override the setStatus(...) to notify our future when there is a response/failure.
      */
     protected void ack(AckType acktype) {
-        Status old = getStatus();
         super.ack(acktype);
         if (_future != null) {
             _future.done(Status.ACK);

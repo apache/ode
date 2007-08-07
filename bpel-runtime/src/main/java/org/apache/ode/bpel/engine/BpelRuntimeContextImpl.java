@@ -131,29 +131,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private boolean _executed;
 
-    /**
-     * Construct a BRC using the soup from the previous BRC. This is handy as it allows us to eliminate the DB read of the soup,
-     * when we know the soup has not changed since the last TX.
-     * 
-     * @param instanceWorker
-     * @param instanceDao
-     * @param lastBRC
-     */
-    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO instanceDao, BpelRuntimeContextImpl lastBRC) {
-        this(instanceWorker, instanceDao, lastBRC._soup);
-    }
-
-    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
-            MessageExchangeDAO instantiatingMessageExchange) {
-
+    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao) {
         this(instanceWorker, dao, new ExecutionQueueImpl(null));
-        _instantiatingMessageExchange = instantiatingMessageExchange;
 
-        _soup.setReplacementMap(_bpelProcess.getReplacementMap());
-        _soup.setGlobalData(new OutstandingRequestManager());
-        byte[] daoState = _bpelProcess.isInMemory() ? null : dao.getExecutionState();
-        if (daoState != null) {
-            assert !_bpelProcess.isInMemory() : "did not expect to rehydrate in-mem process!";
+        // The following allows us to skip deserialization of the soup if our execution state in memory is the same
+        // as that in the database.
+        Object cachedState = instanceWorker.getCachedState(dao.getExecutionStateCounter());
+        if (cachedState != null) {
+            if (__log.isDebugEnabled())
+                __log.debug("CACHE HIT: Using cached state #" + dao.getExecutionStateCounter() + " to resume instance " + dao.getInstanceId());
+            _soup = (ExecutionQueueImpl) cachedState; 
+            _soup.setReplacementMap(_bpelProcess.getReplacementMap());
+            _vpu.setContext(_soup);
+        } else {
+            if (__log.isDebugEnabled())
+                __log.debug("CACHE MISS: Loading state to resume instance " + dao.getInstanceId() + " from database ");
+            byte[] daoState = dao.getExecutionState();
             ByteArrayInputStream iis = new ByteArrayInputStream(daoState);
             try {
                 _soup.read(iis);
@@ -161,9 +154,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 throw new RuntimeException(ex);
             }
         }
-        if (PROCESS != null) {
-            _vpu.inject(PROCESS);
-        }
+    }
+
+    BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao, PROCESS PROCESS,
+            MessageExchangeDAO instantiatingMessageExchange) {
+
+        this(instanceWorker, dao, new ExecutionQueueImpl(null));
+
+        if (PROCESS == null)
+            throw new NullPointerException();
+        if (instantiatingMessageExchange == null)
+            throw new NullPointerException();
+        _soup.setGlobalData(new OutstandingRequestManager());
+        _instantiatingMessageExchange = instantiatingMessageExchange;
+        _vpu.inject(PROCESS);
 
     }
 
@@ -176,6 +180,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _vpu = new JacobVPU();
         _vpu.registerExtension(BpelRuntimeContext.class, this);
         _soup = soup;
+        _soup.setReplacementMap(_bpelProcess.getReplacementMap());
         _vpu.setContext(_soup);
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + _soup.getIndex());
@@ -320,9 +325,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             _dao.setState(ProcessState.STATE_READY);
             evt.setNewState(ProcessState.STATE_READY);
             sendEvent(evt);
-        } else if (_bpelProcess.isInMemory()) {
-            // This condition should be detected with static analysis, but just in case.
-            throw new InvalidProcessException("In-memory process must not receive additional messages.");
         }
 
         final String pickResponseChannelStr = pickResponseChannel.export();
@@ -660,22 +662,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
-
-        if (_bpelProcess.isInMemory())
-            throw new InvalidProcessException("Process not compatible with in-memory execution.");
-
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
         we.setProcessId(_bpelProcess.getPID());
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        _bpelProcess.scheduleWorkEvent(we, timeToFire);
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
-
-        if (_bpelProcess.isInMemory())
-            throw new InvalidProcessException("Process not compatible with in-memory execution.");
 
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
@@ -683,7 +678,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setType(WorkEvent.Type.MATCHER);
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        _bpelProcess.scheduleWorkEvent(we, null);
     }
 
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
@@ -893,33 +888,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
-            if (__log.isDebugEnabled())
-                __log.debug("Setting execution state on instance " + _iid);
-            _soup.setGlobalData(getORM());
-
-            if (_bpelProcess.isInMemory()) {
-                // don't serialize in-memory processes
-                ((ProcessInstanceDaoImpl) _dao).setSoup(_soup);
-            } else {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream(10000);
-                try {
-                    _soup.write(bos);
-                    bos.close();
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-                _dao.setExecutionState(bos.toByteArray());
-            }
+            saveState();
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
                 // Max time exceeded (possibly an infinite loop).
                 if (__log.isDebugEnabled())
                     __log.debug("MaxTime exceeded for instance # " + _iid);
-
-                // NOTE: we never ever schedule anything for in-mem processes, they have to finish in a single
-                // go.
-                if (_bpelProcess.isInMemory())
-                    throw new BpelEngineException("In-memory process timeout.");
 
                 try {
                     WorkEvent we = new WorkEvent();
@@ -933,6 +907,21 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 }
             }
         }
+    }
+
+    private void saveState() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(10000);
+        try {
+            _soup.write(bos);
+            bos.close();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
+        int newcount = _dao.getExecutionStateCounter() + 1;
+        _dao.setExecutionStateCounter(newcount);
+        _dao.setExecutionState(bos.toByteArray());
+        _instanceWorker.setCachedState(newcount, _soup);
     }
 
     void inputMsgMatch(final String responsechannel, final int idx, MessageExchangeDAO mexdao) {
@@ -951,7 +940,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             evt.setNewState(ProcessState.STATE_ACTIVE);
             sendEvent(evt);
         }
-        
 
         getORM().associate(responsechannel, mexdao.getMessageExchangeId());
 
@@ -1357,7 +1345,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private void scheduleReliableResponse(MessageExchangeDAO messageExchange) {
-        assert !_bpelProcess.isInMemory() : "Internal error; attempt to schedule in-memory process";
         assert _contexts.isTransacted();
 
         WorkEvent we = new WorkEvent();
@@ -1365,7 +1352,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setMexId(messageExchange.getMessageExchangeId());
         we.setProcessId(_bpelProcess.getPID());
         we.setType(WorkEvent.Type.MYROLE_INVOKE_ASYNC_RESPONSE);
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        _bpelProcess.scheduleWorkEvent(we, null);
     }
 
     /**
