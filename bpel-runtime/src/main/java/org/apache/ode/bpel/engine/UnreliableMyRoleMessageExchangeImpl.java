@@ -83,7 +83,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         if (_done) 
             return getStatus();
 
-        Future<Status> future = _future != null ? _future : super.invokeAsync();
+        Future<Status> future = _future != null ? _future : invokeAsync();
         
         try {
             future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);

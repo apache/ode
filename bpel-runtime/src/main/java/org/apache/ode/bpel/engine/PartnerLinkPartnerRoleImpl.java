@@ -47,7 +47,7 @@ import org.w3c.dom.Element;
  * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
-    static final Log __log = LogFactory.getLog(BpelProcess.class);
+    static final Log __log = LogFactory.getLog(PartnerLinkPartnerRoleImpl.class);
 
     Endpoint _initialPartner;
 
@@ -100,8 +100,15 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
     void invokeIL(MessageExchangeDAO mexDao) {
 
         Element partnerEprXml = mexDao.getEPR();
-        EndpointReference partnerEpr = partnerEprXml == null ? _initialEPR : _contexts.eprContext
-                .resolveEndpointReference(partnerEprXml);
+        EndpointReference partnerEpr = _initialEPR;
+        if (partnerEprXml != null) {
+            if (_contexts.eprContext != null)
+                partnerEpr = _contexts.eprContext.resolveEndpointReference(partnerEprXml);
+            else
+                __log.warn("Partner EPR will not be resolved, no EPR context specified!" );
+        }
+
+        
         EndpointReference myRoleEpr = null; // TODO: fix?
         Operation operation = _plinkDef.getPartnerRoleOperation(mexDao.getOperation());
         Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(_channel, partnerEpr);
@@ -158,6 +165,10 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
      */
     private void invokeInMem(MessageExchangeDAO mexDao, EndpointReference partnerEpr, EndpointReference myRoleEpr,
             Operation operation, Set<InvocationStyle> supportedStyles, boolean oneway) {
+        if (__log.isDebugEnabled())
+            __log.debug("invokeInMem: mexid=" + mexDao.getMessageExchangeId() +" operation=" + mexDao.getOperation() +" oneway=" + oneway);
+
+        
         // In-memory processes are a bit different, we're never going to do any scheduling for them, so we'd
         // prefer to have TRANSACTED invocation style.
         if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
@@ -174,24 +185,26 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             Transaction tx;
             try {
                 tx = _contexts.txManager.suspend();
+                __log.debug("TX " + tx + " suspended for in-memory invoke. ");
             } catch (Exception ex) {
                 throw new BpelEngineException("TxManager Error: cannot suspend!", ex);
             }
 
             try {
                 unreliableMex.setState(State.INVOKE_XXX);
-                _contexts.mexContext.invokePartnerBlocking(unreliableMex);
+                _contexts.mexContext.invokePartnerUnreliable(unreliableMex);
                 try {
                     unreliableMex.waitForAck(mexDao.getTimeout());
                 } catch (InterruptedException ie) {
-                    ;
-                    ; // ignore
+                    __log.warn("Interrupted waiting for MEX response.");
+
                 }
 
             } finally {
                 unreliableMex.setState(State.DEAD);
                 try {
                     _contexts.txManager.resume(tx);
+                    __log.debug("TX " + tx + " resumed for in-memory invoke. ");
                 } catch (Exception e) {
                     throw new BpelEngineException("TxManager Error: cannot resume!", e);
                 }
@@ -302,7 +315,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             Status status;
             _unreliableMex.setState(State.INVOKE_XXX);
             try {
-                _contexts.mexContext.invokePartnerBlocking(_unreliableMex);
+                _contexts.mexContext.invokePartnerUnreliable(_unreliableMex);
                 _unreliableMex.setState(State.HOLD);
             } catch (Throwable t) {
                 _unreliableMex.setState(State.DEAD);

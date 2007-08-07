@@ -735,6 +735,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
+        mexDao.setTimeout(30000);
         message.setData(outgoingMessage);
         message.setType(operation.getInput().getMessage().getQName());
 
@@ -1011,7 +1012,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new NullPointerException("Null mexId");
 
         if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("Invoking message response for mexid " + mexid + " and channel " + responseChannelId);
+            __log.debug("<invoke> response for mexid " + mexid + " and channel " + responseChannelId);
         }
         _vpu.inject(new BpelJacobRunnable() {
             private static final long serialVersionUID = -1095444335740879981L;
