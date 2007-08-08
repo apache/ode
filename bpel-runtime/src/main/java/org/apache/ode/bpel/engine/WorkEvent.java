@@ -59,6 +59,10 @@ public class WorkEvent {
         return _jobDetail;
     }
 
+    public String toString() {
+        return "WorkEvent" + _jobDetail;
+    }
+    
     public enum Type {
         TIMER, 
         
@@ -72,8 +76,7 @@ public class WorkEvent {
         /** Invoke a "my role" operation (i.e. implemented by the process). */
         MYROLE_INVOKE, 
         
-        /** Timer event for "my role" invocations that are taking too long. */
-        MYROLE_INVOKE_TIMEOUT, MYROLE_INVOKE_ASYNC_RESPONSE
+        MYROLE_INVOKE_ASYNC_RESPONSE
     }
 
     public String getChannel() {

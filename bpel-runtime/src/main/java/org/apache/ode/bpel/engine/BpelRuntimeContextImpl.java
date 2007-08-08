@@ -354,7 +354,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             for (int i = 0; i < correlators.size(); ++i) {
                 CorrelatorDAO ci = correlators.get(i);
                 if (ci.equals(_dao.getInstantiatingCorrelator())) {
-                    inputMsgMatch(pickResponseChannelStr, i, _instantiatingMessageExchange);
+                    injectMyRoleMessageExchange(pickResponseChannelStr, i, _instantiatingMessageExchange);
                     if (BpelProcess.__log.isDebugEnabled()) {
                         BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": FOUND match for NEW instance mexRef="
                                 + _instantiatingMessageExchange);
@@ -924,7 +924,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _instanceWorker.setCachedState(newcount, _soup);
     }
 
-    void inputMsgMatch(final String responsechannel, final int idx, MessageExchangeDAO mexdao) {
+    void injectMyRoleMessageExchange(final String responsechannel, final int idx, MessageExchangeDAO mexdao) {
         // if we have a message match, this instance should be marked
         // active if it isn't already
         if (_dao.getState() == ProcessState.STATE_READY) {
@@ -954,7 +954,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         });
     }
 
-    void timerEvent(final String timerResponseChannel) {
+    boolean injectTimerEvent(final String timerResponseChannel) {
         // In case this is a pick event, we remove routes,
         // and cancel the outstanding requests.
         _dao.getProcess().removeRoutes(timerResponseChannel, _dao);
@@ -962,7 +962,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // Ignore timer events after the process is finished.
         if (ProcessState.isFinished(_dao.getState())) {
-            return;
+            return false;
         }
 
         _vpu.inject(new JacobRunnable() {
@@ -973,7 +973,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 responseChannel.onTimeout();
             }
         });
-        execute();
+        
+        return true;
     }
 
     public void cancel(final TimerResponseChannel timerResponseChannel) {
@@ -1308,7 +1309,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * Attempt to match message exchanges on a correlator.
      * 
      */
-    void matcherEvent(String correlatorId, CorrelationKey ckey) {
+    boolean matcherEvent(String correlatorId, CorrelationKey ckey) {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
         }
@@ -1320,7 +1321,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mroute == null) {
             // Ok, this means that a message arrived before we did, so nothing to do.
             __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
-            return;
+            return false;
         }
 
         // Now see if there is a message that matches this selector.
@@ -1336,12 +1337,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao + " on CKEY " + ckey);
             }
 
-            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mexdao);
-            execute();
+            injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
+            return true;
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 
         }
+        
+        return false;
     }
 
     private void scheduleReliableResponse(MessageExchangeDAO messageExchange) {

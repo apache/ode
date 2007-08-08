@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.engine;
 
+import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
@@ -126,14 +127,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         we.setProcessId(_process.getPID());
         we.setMexId(_mexId);
 
-        // Schedule a timeout
-        final WorkEvent we1 = new WorkEvent();
-        we1.setType(WorkEvent.Type.MYROLE_INVOKE_TIMEOUT);
-        we1.setProcessId(_process.getPID());
-        we1.setMexId(_mexId);
-
         _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-        _contexts.scheduler.schedulePersistedJob(we1.getDetail(), null);
 
     }
 

@@ -56,10 +56,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 request();
                 MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
                 save(dao);
-                if (_process.isInMemory()) 
-                    _process.invokeProcess(dao);
-                else
-                    scheduleInvoke();
+                _process.invokeProcess(dao);
                 return null;
             }
             
