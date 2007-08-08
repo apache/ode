@@ -19,10 +19,7 @@
 
 package org.apache.ode.il;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +45,7 @@ public class MockScheduler implements Scheduler {
     private static final Log __log = LogFactory.getLog(MockScheduler.class);
 
     private JobProcessor _processor;
+    private Timer _timer = new Timer(false);
 
     private ScheduledExecutorService _exec;
 
