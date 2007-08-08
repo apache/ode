@@ -101,6 +101,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     void save(MessageExchangeDAO dao) {
         super.save(dao);
         
+        dao.setPartnersKey(_foreignKey);
         if (_changes.contains(Change.ACK)) {
             _changes.remove(Change.ACK);
             MessageDAO responseDao = dao.createMessage(_response.getType());

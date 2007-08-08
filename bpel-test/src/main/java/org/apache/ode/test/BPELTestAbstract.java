@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
@@ -51,6 +50,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
@@ -103,29 +103,13 @@ public abstract class BPELTestAbstract {
         _deployed = new ArrayList<Deployment>();
 
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
-            emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
-            em = emf.createEntityManager();
-            _cf = new BpelDAOConnectionFactoryImpl(_txm);
+
             _server.setDaoConnectionFactory(_cf);
-            _txm = new MockTransactionManager() {
+            _txm = new MockTransactionManager();
 
-                @Override
-                protected void doBegin(TX tx) {
-                    // TODO Auto-generated method stub
-                    super.doBegin(tx);
-                }
-
-                @Override
-                protected void doCommit(TX tx) {
-                    em.getTransaction().commit();
-                }
-
-                @Override
-                protected void doRollback(TX tx) {
-                    em.getTransaction().rollback();
-                }
-
-            };
+            BPELDAOConnectionFactoryImpl cf = new BPELDAOConnectionFactoryImpl();
+            cf.setTransactionManager(_txm);
+            // cf.setDataSource(datasource);
             scheduler = new MockScheduler(_txm);
         } else {
             _txm = new MockTransactionManager();

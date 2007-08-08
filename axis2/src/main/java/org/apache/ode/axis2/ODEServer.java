@@ -52,6 +52,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -446,6 +447,7 @@ public class ODEServer {
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
+        _server.setTransactionManager(_txMgr);
         if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
             // dehy.setProcessMaxAge(10000);
@@ -481,20 +483,19 @@ public class ODEServer {
     }
 
     private void registerMexInterceptors() {
-        // TODO: put back.
-//        String listenersStr = _odeConfig.getMessageExchangeInterceptors();
-//        if (listenersStr != null) {
-//            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
-//                String interceptorCN = tokenizer.nextToken();
-//                try {
-//                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
-//                    __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
-//                } catch (Exception e) {
-//                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
-//                            + "loaded properly: " + e);
-//                }
-//            }
-//        }
+        String listenersStr = _odeConfig.getMessageExchangeInterceptors();
+        if (listenersStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String interceptorCN = tokenizer.nextToken();
+                try {
+                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+                    __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+                            + "loaded properly: " + e);
+                }
+            }
+        }
     }
 
     private class ProcessStoreListenerImpl implements ProcessStoreListener {

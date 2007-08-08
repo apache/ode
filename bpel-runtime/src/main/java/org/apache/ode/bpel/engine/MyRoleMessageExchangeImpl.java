@@ -46,14 +46,14 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     void load(MessageExchangeDAO dao) {
         super.load(dao);
         _cstatus = dao.getCorrelationStatus() == null ? null : CorrelationStatus.valueOf(dao.getCorrelationStatus());
-        _clientId = dao.getCorrelationId();
+        _clientId = dao.getPartnersKey();
     }
 
     @Override
     public void save(MessageExchangeDAO dao) {
         super.save(dao);
         dao.setCorrelationStatus(_cstatus == null ? null : _cstatus.toString());
-        dao.setCorrelationId(_clientId);
+        dao.setPartnersKey(_clientId);
         dao.setCallee(_callee);
         
         if (_changes.contains(Change.REQUEST)) {

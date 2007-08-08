@@ -186,8 +186,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * @param listener
      */
     public void registerBpelEventListener(BpelEventListener listener) {
-        // Do not synchronize, eventListeners is copy-on-write array.
         listener.startup(_configProperties);
+
+        // Do not synchronize, eventListeners is copy-on-write array.
         _contexts.eventListeners.add(listener);
     }
 
@@ -198,13 +199,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void unregisterBpelEventListener(BpelEventListener listener) {
         // Do not synchronize, eventListeners is copy-on-write array.
-        try {
-            listener.shutdown();
-        } catch (Exception e) {
-            __log.warn("Stopping BPEL event listener " + listener.getClass().getName()
-                    + " failed, nevertheless it has been unregistered.", e);
-        } finally {
-            _contexts.eventListeners.remove(listener);
+        if (_contexts.eventListeners.remove(listener)) {
+            try {
+                listener.shutdown();
+            } catch (Exception e) {
+                __log.warn("Stopping BPEL event listener " + listener.getClass().getName()
+                        + " failed, nevertheless it has been unregistered.", e);
+            }
         }
     }
 

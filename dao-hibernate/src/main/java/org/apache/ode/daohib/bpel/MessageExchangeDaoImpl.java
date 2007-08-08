@@ -122,11 +122,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         update();
     }
 
-    public String getCorrelationId() {
+    public String getPartnersKey() {
         return _hself.getClientKey();
     }
 
-    public void setCorrelationId(String clientKey) {
+    public void setPartnersKey(String clientKey) {
         _hself.setClientKey(clientKey);
         update();
     }

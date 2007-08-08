@@ -148,11 +148,13 @@ public interface MessageExchangeDAO {
     void setPartnerLinkModelId(int modelId);
 
     /**
-     * Get the correlation identifier/client id
+     * Get the the partner's identifier for this message exchange. Generally, the partner will have a different 
+     * identifier for each exchange. This key is used in sistuations when the partner needs to find the mex, 
+     * but only has their own identifier. 
      *
      * @return correlation identifier
      */
-    String getCorrelationId();
+    String getPartnersKey();
 
     /**
      * Set the correlation identifier/client id
@@ -160,7 +162,7 @@ public interface MessageExchangeDAO {
      * @param correlationId
      *          identifier
      */
-    void setCorrelationId(String correlationId);
+    void setPartnersKey(String correlationId);
 
     void setPattern(String string);
 

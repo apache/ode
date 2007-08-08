@@ -132,11 +132,11 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public String getCorrelationId() {
+	public String getPartnersKey() {
 		return correlationId;
 	}
 
-	public void setCorrelationId(String correlationId) {
+	public void setPartnersKey(String correlationId) {
 		this.correlationId = correlationId;
 
 	}

@@ -14,7 +14,7 @@ class MyRoleMessageExchangeCache {
     
     private static final int CLEANUP_PERIOD = 20;
 
-    private HashMap<String, WeakReference<MyRoleMessageExchangeImpl>> _cache;
+    private HashMap<String, WeakReference<MyRoleMessageExchangeImpl>> _cache = new HashMap<String, WeakReference<MyRoleMessageExchangeImpl>>();
 
     private int _inserts = 0;
     

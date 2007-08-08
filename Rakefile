@@ -15,28 +15,26 @@
 #    limitations under the License.
 #
 
-gem "buildr", "=1.1.3"
+gem "buildr", "~>1.2.4"
 require "buildr"
-# require "buildr/lib/buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
-
+require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.1-SNAPSHOT"
-NEXT_VERSION = "1.1"
+VERSION_NUMBER = "1.1-RC1"
+NEXT_VERSION = "1.1-RC2-SNAPSHOT"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
-AXIOM               = group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.4")
-AXIS2               = "org.apache.axis2:axis2:jar:1.1.1"
-AXIS2_WAR           = "org.apache.axis2:axis2:war:1.1.1"
-AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-tools",
+AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
+                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3-RC3"
+AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.1.1")
-AXIS2_PATCHED       = "org.apache.axis2:axis2-kernel-intalio:jar:1.1.1b"
+                        :under=>"org.apache.axis2", :version=>"1.3-RC3")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -59,7 +57,6 @@ GERONIMO            = struct(
 )
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.4.sp1", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
-HOWL_LOGGER         = "howl:howl-logger:jar:0.1.11"
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -72,7 +69,7 @@ JAVAX               = struct(
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0",
-  :resource			=>"javax.resource:connector:jar:1.0"
+  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
 JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
@@ -90,30 +87,23 @@ TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0"
-XERCES              = "xerces:xercesImpl:jar:2.8.0"
+XERCES              = "xerces:xercesImpl:jar:2.9.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.ws.commons.neethi:neethi:jar:2.0",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.1"
+  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
+  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
 XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
-JOTM				= struct(
-  :jotm				=>"jotm:jotm:jar:2.0.10",
-  :carol			=>"org.objectweb.carol:carol:jar:2.0.5",
-  :jrmp				=>"jotm:jotm_jrmp_stubs:jar:2.0.10",
-  :howl				=>"howl:howl-logger:jar:0.1.11"
-)
-
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
-repositories.deploy_to[:url] ||= "sftp://guest@localhost/home/guest"
+repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 # Changing releases tag names
 class Release
@@ -140,7 +130,7 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
-      AXIOM, AXIS2, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
+      AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
       XMLBEANS
 
@@ -156,7 +146,7 @@ define "ode" do
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
-      AXIS2_ALL, AXIS2_PATCHED, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
+      AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
@@ -246,13 +236,12 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils"),
-      COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, SAXON, WSDL4J, XMLBEANS
+      COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 
-    test.compile.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
+    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, XALAN
-    test.junit.with HIBERNATE, DOM4J
 
     package :jar
   end
@@ -260,8 +249,9 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
-	test.compile.with HSQLDB, JOTM.jotm
-	test.junit.with HSQLDB, JOTM.jotm, JOTM.carol, JOTM.jrmp, JAVAX.transaction, JOTM.howl, JAVAX.resource, JAVAX.connector, LOG4J
+	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
+	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
+          GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end
 
@@ -293,7 +283,7 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-jpa"),
-      DERBY, Java::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
@@ -323,13 +313,18 @@ define "ode" do
     dao_hibernate = project("dao-hibernate").compile.target
     bpel_store = project("bpel-store").compile.target
 
-    schemaexport = Hibernate.schemaexport
+    Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+      :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-        schemaexport.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-          :drop=>"no", :create=>"yes", :output=>target) do
-          fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml"
+        hibernate_schemaexport "" do |task, ant|
+          ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
+            :drop=>"no", :create=>"yes", :output=>target) do
+            task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
+              ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
+            end
+          end
         end
       end
     end
@@ -345,7 +340,7 @@ define "ode" do
       build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
 
-    package :zip, :include=>derby_db
+    package(:zip).include(derby_db)
   end
 
   desc "ODE OpenJPA DAO Implementation"
@@ -359,7 +354,7 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    %w{ derby mysql }.each do |db|
+    %w{ derby mysql oracle }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
@@ -378,7 +373,7 @@ define "ode" do
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
-    package :zip, :include=>derby_db
+    package(:zip).include(derby_db)
   end
 
   desc "ODE JAva Concurrent OBjects"
@@ -427,7 +422,7 @@ define "ode" do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.junit.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
+    test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
     test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-ojpa-derby").package(:zip))
 
   end
@@ -466,6 +461,7 @@ define "ode" do
   desc "ODE Utils"
   define "utils" do
     compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
+	test.exclude "*TestResources"
     package :jar
   end
 
@@ -474,10 +470,12 @@ end
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
 
-  def distro(project, id)
+  def distro(project, postfix)
+    id = project.parent.id + postfix
     project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
       zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
-      zip.path("examples").include project.path_to("src/examples"), :as=>"."
+      zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
+      # Libraries
       zip.merge project("ode:tools-bin").package(:zip)
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
         COMMONS.pool, COMMONS.collections, JAXEN,
@@ -486,13 +484,33 @@ define "apache-ode" do
         map(&:packages).flatten.each do |pkg|
         zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
       end
+      # Including third party licenses
+      Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
+      zip.include(project.path_to("target/LICENSE"))
+      # Include supported database schemas
+      Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
+        zip.include(f, :path=>"sql") unless f =~ /partial/
+      end
       yield zip
+      project.check zip, "should contain mysql.sql" do
+        it.should contain("sql/mysql.sql")
+      end
     end
   end
 
   desc "ODE Axis2 Based Distribution"
-  define "distro-axis2" do
-    parent.distro(self, "#{parent.id}-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
+  define "distro" do
+    parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
+    parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
+
+    # Preparing third party licenses
+    build do
+      Dir.mkdir(project.path_to("target")) unless File.exist?(project.path_to("target"))
+      cp parent.path_to("LICENSE"), project.path_to("target/LICENSE")
+      File.open(project.path_to("target/LICENSE"), "a+") do |l|
+        l <<  Dir["#{project.path_to("license")}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
+      end
+    end
 
     project("ode:axis2-war").task("start").enhance do |task|
       target = "#{task.path}/webapp/WEB-INF/processes"
@@ -505,11 +523,6 @@ define "apache-ode" do
     end
   end
 
-  desc "ODE JBI Based Distribution"
-  define "distro-jbi" do
-    parent.distro(self, "#{parent.id}-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
-  end
-
   package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
     if File.exist?(".svn")
       `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
@@ -520,5 +533,5 @@ define "apache-ode" do
     end
   end
 
-  package :zip, :id=>"#{id}-docs", :include=>javadoc(project("ode").projects).target
+  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end

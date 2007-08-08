@@ -145,7 +145,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _channel;
 	}
 
-	public String getCorrelationId() {
+	public String getPartnersKey() {
 		return _correlationId;
 	}
 
@@ -252,7 +252,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_channel = channel;
 	}
 
-	public void setCorrelationId(String correlationId) {
+	public void setPartnersKey(String correlationId) {
 		_correlationId = correlationId;
 	}
 
