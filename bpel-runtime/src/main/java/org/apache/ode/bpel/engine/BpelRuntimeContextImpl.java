@@ -33,12 +33,7 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
-import org.apache.ode.bpel.evt.ProcessCompletionEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
-import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
-import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -50,12 +45,8 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.*;
 import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
@@ -477,9 +468,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
         dataDAO.set(initData);
-
-        writeProperties(variable, initData, dataDAO);
-
+        writeProperties(variable, initData, dataDAO);        
         return dataDAO.get();
     }
 
