@@ -230,8 +230,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
 
                 return ret;
             } catch (FaultException e) {
-                __log.error("bpws:getVariableData(" + args + ") threw FaultException");
-
+                __log.error("bpws:getVariableData(" + args + ") threw FaultException", e);
                 throw new WrappedFaultException.JaxenFunctionException(e);
             }
         }
