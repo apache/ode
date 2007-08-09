@@ -156,7 +156,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 messageRoute = correlator.findRoute(key);
                 if (messageRoute != null) {
                     if (__log.isDebugEnabled()) {
-                        __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
+                        __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " ROUTED TO (grp,index,iid) = (" + messageRoute.getGroupId() + "," + messageRoute.getIndex() + ", " + messageRoute.getTargetInstance().getInstanceId() +  ")");
+   
                     }
                     matchedKey = key;
                     break;

@@ -770,6 +770,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.setExecutionStateCounter(newcount);
         _dao.setExecutionState(bos.toByteArray());
         _instanceWorker.setCachedState(newcount, _soup);
+        
+        __log.debug("CACHE SAVE: #" + newcount + " for instance " + _dao.getInstanceId());
     }
 
     void injectMyRoleMessageExchange(final String responsechannel, final int idx, MessageExchangeDAO mexdao) {
@@ -1153,47 +1155,4 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         fetchPartnerLinkDAO(pLink).setPartnerSessionId(session);
 
     }
-
-    /**
-     * Attempt to match message exchanges on a correlator.
-     * 
-     */
-    boolean matcherEvent(String correlatorId, CorrelationKey ckey) {
-        if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
-        }
-        CorrelatorDAO correlator = _dao.getProcess().getCorrelator(correlatorId);
-
-        // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
-        // So we want to acquire the lock before we do anthing else.
-        MessageRouteDAO mroute = correlator.findRoute(ckey);
-        if (mroute == null) {
-            // Ok, this means that a message arrived before we did, so nothing to do.
-            __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
-            return false;
-        }
-
-        // Now see if there is a message that matches this selector.
-        MessageExchangeDAO mexdao = correlator.dequeueMessage(ckey);
-        if (mexdao != null) {
-            __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
-
-            // We have a match, so we can get rid of the routing entries.
-            correlator.removeRoutes(mroute.getGroupId(), _dao);
-
-            // Found message matching one of our selectors.
-            if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao + " on CKEY " + ckey);
-            }
-
-            injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
-            return true;
-        } else {
-            __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
-
-        }
-        
-        return false;
-    }
-
 }

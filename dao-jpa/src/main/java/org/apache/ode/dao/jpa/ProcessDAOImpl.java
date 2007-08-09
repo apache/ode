@@ -48,8 +48,13 @@ import java.util.List;
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
-    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._processInstance FROM CorrelationSetDAOImpl as cs WHERE cs._correlationKey = :ckey"),
-    @NamedQuery(name="CorrelatorByKey", query="SELECT c FROM CorrelatorDAOImpl as c WHERE c._correlatorKey = :ckey")
+    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._processInstance " +
+            "FROM CorrelationSetDAOImpl as cs " +
+            "WHERE cs._correlationKey = :ckey"),
+            
+    @NamedQuery(name="CorrelatorByKey", query="SELECT c " +
+            "FROM CorrelatorDAOImpl as c" +
+            " WHERE c._correlatorKey = :ckey AND c._process = :process")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
@@ -80,7 +85,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     }
 	
 	public CorrelatorDAO addCorrelator(String correlator) {
-		CorrelatorDAOImpl corr = new CorrelatorDAOImpl(correlator);
+		CorrelatorDAOImpl corr = new CorrelatorDAOImpl(correlator, this);
 		_correlators.add(corr);
         return corr;
     }
@@ -88,6 +93,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     public CorrelatorDAO getCorrelator(String correlatorId) {
         Query qry = getEM().createNamedQuery("CorrelatorByKey");
         qry.setParameter("ckey", correlatorId);
+        qry.setParameter("process", this);
         List res = qry.getResultList();
         if (res.size() == 0) return null;
         return (CorrelatorDAO) res.get(0);

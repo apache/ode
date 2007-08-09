@@ -41,8 +41,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -278,7 +280,7 @@ class BpelProcess {
             // If we did not get an ACK during this method, then mark this MEX as needing an ASYNC wake-up
             if (mexdao.getStatus() != Status.ACK)
                 mexdao.setStatus(Status.ASYNC);
-            
+
             assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
         }
 
@@ -329,12 +331,45 @@ class BpelProcess {
 
     private void executeContinueInstanceMatcherEvent(ProcessInstanceDAO instanceDao, String correlatorId,
             CorrelationKey correlationKey) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
-        assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
-        if (brc.matcherEvent(correlatorId, correlationKey))
+        if (__log.isDebugEnabled()) {
+            __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + correlationKey);
+        }
+
+        CorrelatorDAO correlator = instanceDao.getProcess().getCorrelator(correlatorId);
+
+        // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
+        // So we want to acquire the lock before we do anthing else.
+        MessageRouteDAO mroute = correlator.findRoute(correlationKey);
+        if (mroute == null) {
+            // Ok, this means that a message arrived before we did, so nothing to do.
+            __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
+            return;
+        }
+
+        // Now see if there is a message that matches this selector.
+        MessageExchangeDAO mexdao = correlator.dequeueMessage(correlationKey);
+        if (mexdao != null) {
+            __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
+
+            // We have a match, so we can get rid of the routing entries.
+            correlator.removeRoutes(mroute.getGroupId(), instanceDao);
+
+            // Found message matching one of our selectors.
+            if (__log.isDebugEnabled()) {
+                __log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao + " on CKEY " + correlationKey);
+            }
+
+            BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
+            assert worker.isWorkerThread();
+
+            BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+            brc.injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
             brc.execute();
+        } else {
+            __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
+
+        }
 
     }
 
@@ -997,7 +1032,7 @@ class BpelProcess {
     }
 
     void onMyRoleMexAck(MessageExchangeDAO mexdao, Status old) {
-        
+
         if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
 
             BpelProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
@@ -1032,7 +1067,7 @@ class BpelProcess {
 
             if (old == Status.ASYNC)
                 caller.p2pWakeup(pmex);
-            
+
         } else /* not p2p */{
             // TODO: force a myrole mex to be created if it is not in cache.
             for (WeakReference<MyRoleMessageExchangeImpl> wr : _mexStateListeners) {
@@ -1216,7 +1251,7 @@ class BpelProcess {
         } finally {
             if (mexdao.getStatus() != Status.ACK)
                 mexdao.setStatus(Status.ASYNC);
-            
+
         }
 
         assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
@@ -1250,14 +1285,12 @@ class BpelProcess {
         myRoleMex.setTimeout(partnerRoleMex.getTimeout());
         myRoleMex.setRequest(partnerRoleMex.getRequest());
         myRoleMex.setInvocationStyle(partnerRoleMex.getInvocationStyle());
-        
 
-        // Piped cross-references. 
+        // Piped cross-references.
         myRoleMex.setPipedMessageExchangeId(partnerRoleMex.getMessageExchangeId());
         myRoleMex.setPipedPID(getPID());
         partnerRoleMex.setPipedPID(target.getPID());
         partnerRoleMex.setPipedMessageExchangeId(myRoleMex.getMessageExchangeId());
-        
 
         // Properties used by stateful-exchange protocol.
         String mySessionId = partnerRoleMex.getPartnerLink().getMySessionId();
@@ -1295,12 +1328,12 @@ class BpelProcess {
 
         try {
             iworker.execInCurrentThread(new Callable<Void>() {
-    
+
                 public Void call() throws Exception {
                     executeContinueInstancePartnerRoleResponseReceived(prolemex);
                     return null;
                 }
-    
+
             });
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
