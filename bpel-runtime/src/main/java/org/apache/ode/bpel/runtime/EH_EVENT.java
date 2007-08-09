@@ -36,6 +36,8 @@ import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
@@ -222,29 +224,27 @@ class EH_EVENT extends BpelJacobRunnable {
                                     _scopeFrame,
                                     _comps,
                                     _fault);
-                            
-                            if (_oevent.variable != null) { 
+
+                            if (_oevent.variable != null) {
                                 Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
-                                
+
                                 if (msgEl != null) {
                                     try {
-                                      getBpelRuntimeContext().initializeVariable(ehScopeFrame.resolve(
-                                              _oevent.variable),msgEl);
+                                        VariableInstance vinst = ehScopeFrame.resolve(_oevent.variable);
+                                        getBpelRuntimeContext().initializeVariable(vinst, msgEl);
+
+                                        ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                        _scopeFrame.fillEventInfo(se);
+                                        if (_oevent.debugInfo != null)
+                                            se.setLineNo(_oevent.debugInfo.startLine);
+                                        getBpelRuntimeContext().sendEvent(se);
                                     } catch (Exception ex) {
-                                      __log.fatal(ex);
-                                      throw new InvalidProcessException(ex);
+                                        __log.fatal(ex);
+                                        throw new InvalidProcessException(ex);
                                     }
                                 }
                             }
 
-                            
-                            Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
-                            try {
-                                getBpelRuntimeContext().initializeVariable(ehScopeFrame.resolve(_oevent.variable),msgEl);
-                            } catch (Exception ex) {
-                                __log.error(ex);
-                                throw new InvalidProcessException(ex);
-                            }
 
                             try {
                                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
@@ -282,25 +282,25 @@ class EH_EVENT extends BpelJacobRunnable {
                             }
 
 
-                            
+
                             // load 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
                             ActivityInfo child = new ActivityInfo(genMonotonic(),
                                     _oevent.activity,
                                     newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
 
-                            
+
                             _active.add(child);
 
                             LinkFrame lf = new LinkFrame(null);
 
                             instance(new SCOPE(child,ehScopeFrame, lf));
-                            
+
                             // If we previously terminated the other activiites, then we do the same
                             // here; this is easier then undoing the receive.
                             if (_childrenTerminated)
                                 replication(child.self).terminate();
-                           
+
 
                             if (_terminated || _stopped || _fault != null)
                                 instance(new WAITING(null));

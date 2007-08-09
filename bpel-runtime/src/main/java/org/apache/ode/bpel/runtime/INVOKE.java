@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
@@ -113,6 +115,11 @@ public class INVOKE extends ACTIVITY {
                         }
 
                         getBpelRuntimeContext().initializeVariable(outputVar, response);
+                        // Generating event
+                        ScopeEvent se = new VariableModificationEvent(outputVar.declaration.name);
+                        if (_oinvoke.debugInfo != null)
+                            se.setLineNo(_oinvoke.debugInfo.startLine);
+                        sendEvent(se);
 
                         try {
                             for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.initCorrelationsOutput) {
@@ -140,8 +147,7 @@ public class INVOKE extends ACTIVITY {
                             fault = createFault(e.getQName(), _oinvoke);
                         }
 
-                        // TODO update output variable with data from non-initiate
-                        // correlation sets
+                        // TODO update output variable with data from non-initiate correlation sets
 
                         _self.parent.completed(fault, CompensationHandler.emptySet());
                         getBpelRuntimeContext().releasePartnerMex(mexId);

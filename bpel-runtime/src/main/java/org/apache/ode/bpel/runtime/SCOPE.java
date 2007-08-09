@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.*;
 import org.apache.ode.bpel.runtime.channels.*;
 import org.apache.ode.jacob.ChannelListener;
@@ -291,8 +293,14 @@ class SCOPE extends ACTIVITY {
                                 _fault);
                         if (catchBlock.faultVariable != null) {
                             try {
-                                ntive.initializeVariable(faultHandlerScopeFrame.resolve(catchBlock.faultVariable),
-                                        _fault.getFaultMessage());
+                                VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
+                                ntive.initializeVariable(vinst, _fault.getFaultMessage());
+
+                                // Generating event
+                                ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                if (_oscope.debugInfo != null)
+                                    se.setLineNo(_oscope.debugInfo.startLine);
+                                sendEvent(se);
                             } catch (Exception ex) {
                                 __log.fatal(ex);
                                 throw new InvalidProcessException(ex);
