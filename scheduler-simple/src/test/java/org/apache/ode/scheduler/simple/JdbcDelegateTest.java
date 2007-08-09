@@ -43,7 +43,7 @@ public class JdbcDelegateTest extends TestCase {
         _ds = new DelegateSupport();
         _del = _ds.delegate();
     }
-    
+     
     
     public void testGetNodeIds() throws Exception {
         // should have no node ids in the db, empty list (not null)

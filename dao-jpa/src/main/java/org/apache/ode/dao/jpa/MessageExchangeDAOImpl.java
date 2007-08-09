@@ -25,7 +25,10 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Element;
@@ -112,18 +115,17 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     private CorrelatorDAOImpl _correlator;
     
-    
     @Basic @Column(name="ISTYLE")
     private String _istyle;
 
-    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="P2P_PIPE_PEER")
-    private MessageExchangeDAO _pipedMex;
-    
     @Basic @Column(name="TIMEOUT")
     private long _timeout;
     
     @Basic @Column(name="FAILURE_TYPE")
     private String _failureType;
+    
+    @Basic @Column(name="PIPED_PID")
+    private String _pipedPid;
 
     public MessageExchangeDAOImpl() {}
     
@@ -240,8 +242,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _response;
 	}
 
-	public String getStatus() {
-		return _status;
+	public Status getStatus() {
+		return _status == null ? null : Status.valueOf(_status);
 	}
 
 	public void setCallee(QName callee) {
@@ -313,8 +315,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_response = (MessageDAOImpl)msg;
 	}
 
-	public void setStatus(String status) {
-		_status = status;
+	public void setStatus(Status status) {
+		_status = status == null ?  null : status.toString();
 	}
 
     public String getPipedMessageExchangeId() {
@@ -357,32 +359,25 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
         _correlator = correlator;
     }
 
-    public String getInvocationStyle() {
-        return _istyle;
+    public InvocationStyle getInvocationStyle() {
+        return _istyle == null ? null : InvocationStyle.valueOf(_istyle);
     }
 
-    public MessageExchangeDAO getPipedMessageExchange() {
-        return _pipedMex;
-    }
 
     public long getTimeout() {
         return _timeout;
     }
 
-    public void setFailureType(String failureType) {
-        _failureType = failureType;
+    public void setFailureType(FailureType failureType) {
+        _failureType = failureType == null ? null :failureType.toString();
     }
     
-    public String getFailureType() {
-        return _failureType;
+    public FailureType getFailureType() {
+        return _failureType == null ? null : FailureType.valueOf(_failureType);
     }
 
-    public void setInvocationStyle(String invocationStyle) {
-        _istyle = invocationStyle;
-    }
-
-    public void setPipedMessageExchange(MessageExchangeDAO mex) {
-        _pipedMex = mex;
+    public void setInvocationStyle(InvocationStyle invocationStyle) {
+        _istyle = invocationStyle == null ? null : invocationStyle.toString();
     }
 
     public void setTimeout(long timeout) {
@@ -395,5 +390,13 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void setAckType(AckType ackType) {
         _ackType = ackType == null ? null :ackType.toString();
+    }
+
+    public QName getPipedPID() {
+        return _pipedPid == null ? null : QName.valueOf(_pipedPid);
+    }
+
+    public void setPipedPID(QName pipedPid) {
+        _pipedPid = pipedPid == null ? null : pipedPid.toString();
     }
 }

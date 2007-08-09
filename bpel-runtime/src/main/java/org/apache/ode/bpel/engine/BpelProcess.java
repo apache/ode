@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -69,7 +70,6 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -185,22 +185,22 @@ class BpelProcess {
      * @param mex
      */
     void invokeProcess(final MessageExchangeDAO mexdao) {
-        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+        InvocationStyle istyle = mexdao.getInvocationStyle();
 
         _hydrationLatch.latch(1);
         try {
             // The following check is mostly for sanity purposes. MexImpls should prevent this from
             // happening.
             PartnerLinkMyRoleImpl target = getMyRoleForService(mexdao.getCallee());
-            Status oldstatus = Status.valueOf(mexdao.getStatus());
+            Status oldstatus = mexdao.getStatus();
             if (target == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mexdao.getMessageExchangeId());
                 __log.error(errmsg);
-                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_ENDPOINT.toString());
+                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_ENDPOINT);
                 mexdao.setFaultExplanation(errmsg);
-                mexdao.setStatus(Status.ACK.toString());
+                mexdao.setStatus(Status.ACK);
                 mexdao.setAckType(AckType.FAILURE);
-                fireMexStateEvent(mexdao, oldstatus, Status.ACK);
+                onMyRoleMexAck(mexdao, oldstatus);
                 return;
             }
 
@@ -208,19 +208,19 @@ class BpelProcess {
             if (op == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mexdao.getMessageExchangeId());
                 __log.error(errmsg);
-                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION.toString());
+                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION);
                 mexdao.setFaultExplanation(errmsg);
-                mexdao.setStatus(Status.ACK.toString());
+                mexdao.setStatus(Status.ACK);
                 mexdao.setAckType(AckType.FAILURE);
-                fireMexStateEvent(mexdao, oldstatus, Status.ACK);
+                onMyRoleMexAck(mexdao, oldstatus);
                 return;
             }
 
             // "Acknowledge" any one-way invokes
             if (op.getOutput() == null) {
-                mexdao.setStatus(Status.ACK.toString());
+                mexdao.setStatus(Status.ACK);
                 mexdao.setAckType(AckType.ONEWAY);
-                fireMexStateEvent(mexdao, oldstatus, Status.ACK);
+                onMyRoleMexAck(mexdao, oldstatus);
             }
 
             mexdao.setProcess(getProcessDAO());
@@ -245,37 +245,41 @@ class BpelProcess {
 
             } else if (cstatus == CorrelationStatus.MATCHED) {
                 // This should not occur for in-memory processes, since they are technically not allowed to
-                // have any <receive>/<pick> elements that are not start activities. 
+                // have any <receive>/<pick> elements that are not start activities.
                 if (isInMemory())
                     __log.warn("In-memory process " + _pid + " is participating in a non-createinstance exchange!");
-                
-                
-                // We don't like to do the work in the same TX that did the matching, since this creates fertile 
-                // conditions for deadlock in the correlation tables. However if invocation style is transacted, 
+
+                // We don't like to do the work in the same TX that did the matching, since this creates fertile
+                // conditions for deadlock in the correlation tables. However if invocation style is transacted,
                 // we need to do the work right then and there.
-                
-                if (istyle == InvocationStyle.TRANSACTED)
+
+                if (istyle == InvocationStyle.TRANSACTED || istyle == InvocationStyle.P2P) {
                     doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
                         public Void call() {
                             executeContinueInstanceMyRoleRequestReceived(mexdao);
                             return null;
                         }
                     });
-                else /* non-transacted style */ {
+                } else /* non-transacted style */{
                     WorkEvent we = new WorkEvent();
                     we.setType(WorkEvent.Type.MYROLE_INVOKE);
                     we.setIID(mexdao.getInstance().getInstanceId());
                     we.setMexId(mexdao.getMessageExchangeId());
                     we.setProcessId(_pid);
-    
+
                     scheduleWorkEvent(we, null);
                 }
             } else if (cstatus == CorrelationStatus.QUEUED) {
                 ; // do nothing
             }
-            // TODO: handle correlation status (i.e. execute instance).
         } finally {
             _hydrationLatch.release(1);
+
+            // If we did not get an ACK during this method, then mark this MEX as needing an ASYNC wake-up
+            if (mexdao.getStatus() != Status.ACK)
+                mexdao.setStatus(Status.ASYNC);
+            
+            assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
         }
 
     }
@@ -304,6 +308,36 @@ class BpelProcess {
         instance.execute();
     }
 
+    void executeContinueInstanceResume(ProcessInstanceDAO instanceDao) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
+        assert worker.isWorkerThread();
+
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+        brc.execute();
+
+    }
+
+    void executeContinueInstanceTimerReceived(ProcessInstanceDAO instanceDao, String timerChannel) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
+        assert worker.isWorkerThread();
+
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+        if (brc.injectTimerEvent(timerChannel))
+            brc.execute();
+
+    }
+
+    private void executeContinueInstanceMatcherEvent(ProcessInstanceDAO instanceDao, String correlatorId,
+            CorrelationKey correlationKey) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
+        assert worker.isWorkerThread();
+
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+        if (brc.matcherEvent(correlatorId, correlationKey))
+            brc.execute();
+
+    }
+
     void executeContinueInstancePartnerRoleResponseReceived(MessageExchangeDAO mexdao) {
         assert _hydrationLatch.isLatched(1);
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
@@ -315,52 +349,12 @@ class BpelProcess {
         brc.execute();
     }
 
-
-    void executeContinueInstanceResume(ProcessInstanceDAO instanceDao) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
-        assert worker.isWorkerThread();
-        
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
-        brc.execute();
-        
-    }
-
-    void executeContinueInstanceTimerReceived(ProcessInstanceDAO instanceDao, String timerChannel) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
-        assert worker.isWorkerThread();
-        
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
-        if (brc.injectTimerEvent(timerChannel))
-            brc.execute();
-        
-    }
-
-    private void executeContinueInstanceMatcherEvent(ProcessInstanceDAO instanceDao, String correlatorId, CorrelationKey correlationKey) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
-        assert worker.isWorkerThread();
-        
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);       
-        if(brc.matcherEvent(correlatorId, correlationKey))
-            brc.execute();
-        
-    }
-
-    private void executeContinueInstancePartnerResponse(MessageExchangeDAO mexDao, String channel) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(mexDao.getInstance().getInstanceId());
-        assert worker.isWorkerThread();
-        
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexDao.getInstance());      
-        brc.injectPartnerResponse(mexDao.getMessageExchangeId(), channel);
-        brc.execute();
-        
-    }
-
-    private void enqueueInstanceWork(Long instanceId, Runnable runnable) {
+    void enqueueInstanceWork(Long instanceId, Runnable runnable) {
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
         iworker.enqueue(runnable);
     }
 
-    private void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
+    void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
         iworker.enqueue(_server.new TransactedRunnable(runnable));
     }
@@ -515,7 +509,7 @@ class BpelProcess {
 
         ProcessInstanceDAO instanceDAO = getProcessDAO().getInstance(we.getIID());
         MessageExchangeDAO mexDao = we.getMexId() == null ? null : loadMexDao(we.getMexId());
-        
+
         if (instanceDAO == null) {
             if (__log.isDebugEnabled()) {
                 __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
@@ -525,7 +519,7 @@ class BpelProcess {
 
         if (__log.isDebugEnabled()) {
             __log.debug("handleWorkEvent: " + we.getType() + " event for process instance " + we.getIID());
-        }        
+        }
 
         switch (we.getType()) {
         case MYROLE_INVOKE:
@@ -538,7 +532,7 @@ class BpelProcess {
             executeContinueInstanceResume(instanceDAO);
             break;
         case PARTNER_RESPONSE:
-            executeContinueInstancePartnerResponse(mexDao, we.getChannel());
+            executeContinueInstancePartnerRoleResponseReceived(mexDao);
             break;
         case MATCHER:
             executeContinueInstanceMatcherEvent(instanceDAO, we.getCorrelatorId(), we.getCorrelationKey());
@@ -789,7 +783,7 @@ class BpelProcess {
     }
 
     MyRoleMessageExchangeImpl recreateMyRoleMex(MessageExchangeDAO mexdao) {
-        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+        InvocationStyle istyle = mexdao.getInvocationStyle();
 
         _hydrationLatch.latch(1);
         try {
@@ -1002,15 +996,51 @@ class BpelProcess {
 
     }
 
-    void fireMexStateEvent(MessageExchangeDAO mexdao, Status old, Status news) {
-        // TODO: force a myrole mex to be created if it is not in cache.
+    void onMyRoleMexAck(MessageExchangeDAO mexdao, Status old) {
+        
+        if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
 
-        if (old != news)
+            BpelProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
+            if (caller == null) {
+                // process no longer deployed....
+
+                return;
+            }
+
+            MessageExchangeDAO pmex = caller.loadMexDao(mexdao.getPipedMessageExchangeId());
+            if (pmex == null) {
+                // Mex no longer there.... odd..
+
+                return;
+            }
+
+            // Need to copy the response and state from myrolemex --> partnerrolemex
+
+            boolean compat = !(caller.isInMemory() ^ isInMemory());
+            if (compat) {
+                // both processes are in-mem or both are persisted, can share the message
+                pmex.setResponse(mexdao.getResponse());
+            } else /* one process in-mem, other persisted */{
+
+                MessageDAO presponse = pmex.createMessage(mexdao.getResponse().getType());
+                presponse.setData(mexdao.getResponse().getData());
+                pmex.setResponse(presponse);
+            }
+            pmex.setStatus(mexdao.getStatus());
+            pmex.setAckType(mexdao.getAckType());
+            pmex.setFailureType(mexdao.getFailureType());
+
+            if (old == Status.ASYNC)
+                caller.p2pWakeup(pmex);
+            
+        } else /* not p2p */{
+            // TODO: force a myrole mex to be created if it is not in cache.
             for (WeakReference<MyRoleMessageExchangeImpl> wr : _mexStateListeners) {
                 MyRoleMessageExchangeImpl mymex = wr.get();
                 if (mymex != null && mymex.getMessageExchangeId() != null)
-                    mymex.onStateChanged(mexdao, old, news);
+                    mymex.onAsyncAck(mexdao);
             }
+        }
 
     }
 
@@ -1159,28 +1189,122 @@ class BpelProcess {
 
     }
 
-    /**
-     * Invoke a partner via the integration layer.
-     * 
-     * @param mexDao
-     * @param brc
-     */
-    void invokeIL(MessageExchangeDAO mexDao) {
-        _hydrationLatch.latch(1);
-        try {
-            OPartnerLink oplink = (OPartnerLink) _oprocess.getChild(mexDao.getPartnerLinkModelId());
-            PartnerLinkPartnerRoleImpl partnerRole = _partnerRoles.get(oplink);
-            partnerRole.invokeIL(mexDao);
-        } finally {
-            _hydrationLatch.release(1);
-        }
-    }
-
     public void scheduleWorkEvent(WorkEvent we, Date timeToFire) {
         // if (isInMemory())
         // throw new InvalidProcessException("In-mem process execution resulted in event scheduling.");
 
         _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+    }
+
+    void invokePartner(MessageExchangeDAO mexdao) {
+        OPartnerLink oplink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+        PartnerLinkPartnerRoleImpl partnerRole = _partnerRoles.get(oplink);
+        Endpoint partnerEndpoint = getInitialPartnerRoleEndpoint(oplink);
+        BpelProcess p2pProcess = null;
+        if (partnerEndpoint != null)
+            p2pProcess = _server.route(partnerEndpoint.serviceName, new DbBackedMessageImpl(mexdao.getRequest()));
+
+        Operation operation = oplink.getPartnerRoleOperation(mexdao.getOperation());
+
+        try {
+            if (p2pProcess != null) {
+                /* P2P (process-to-process) invocation, special logic */
+                invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, mexdao);
+            } else {
+                partnerRole.invokeIL(mexdao);
+            }
+        } finally {
+            if (mexdao.getStatus() != Status.ACK)
+                mexdao.setStatus(Status.ASYNC);
+            
+        }
+
+        assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
+
+    }
+
+    /**
+     * Invoke a partner process directly (via the engine), bypassing the Integration Layer. Obviously this can only be used when an
+     * process is partners with another process hosted on the same engine.
+     * 
+     * @param operation
+     * @param outgoingMessage
+     * @param partnerRoleMex
+     */
+    private void invokeP2P(BpelProcess target, QName serviceName, Operation operation, MessageExchangeDAO partnerRoleMex) {
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log
+                    .debug("Invoking in a p2p interaction, partnerrole " + partnerRoleMex.getMessageExchangeId() + " target="
+                            + target);
+        }
+
+        partnerRoleMex.setInvocationStyle(InvocationStyle.P2P);
+
+        MessageExchangeDAO myRoleMex = target.createMessageExchange(new GUID().toString(),
+                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        myRoleMex.setStatus(Status.REQ);
+        myRoleMex.setCallee(serviceName);
+
+        myRoleMex.setOperation(partnerRoleMex.getOperation());
+        myRoleMex.setPattern(partnerRoleMex.getPattern());
+        myRoleMex.setTimeout(partnerRoleMex.getTimeout());
+        myRoleMex.setRequest(partnerRoleMex.getRequest());
+        myRoleMex.setInvocationStyle(partnerRoleMex.getInvocationStyle());
+        
+
+        // Piped cross-references. 
+        myRoleMex.setPipedMessageExchangeId(partnerRoleMex.getMessageExchangeId());
+        myRoleMex.setPipedPID(getPID());
+        partnerRoleMex.setPipedPID(target.getPID());
+        partnerRoleMex.setPipedMessageExchangeId(myRoleMex.getMessageExchangeId());
+        
+
+        // Properties used by stateful-exchange protocol.
+        String mySessionId = partnerRoleMex.getPartnerLink().getMySessionId();
+        String partnerSessionId = partnerRoleMex.getPartnerLink().getPartnerSessionId();
+
+        if (BpelProcess.__log.isDebugEnabled()) {
+            __log.debug("Setting myRoleMex session ids for p2p interaction, mySession " + partnerSessionId + " - partnerSess "
+                    + mySessionId);
+        }
+
+        if (mySessionId != null)
+            partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
+        if (partnerSessionId != null)
+            partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
+
+        if (partnerSessionId != null)
+            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
+        if (mySessionId != null)
+            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
+
+        if (__log.isDebugEnabled())
+            __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
+
+        target.invokeProcess(myRoleMex);
+
+    }
+
+    /**
+     * Handle in-line P2P responses. Called from the child's transaction.
+     * 
+     * @param myrolemex
+     */
+    private void p2pWakeup(final MessageExchangeDAO prolemex) {
+        BpelInstanceWorker iworker = _instanceWorkerCache.get(prolemex.getInstance().getInstanceId());
+
+        try {
+            iworker.execInCurrentThread(new Callable<Void>() {
+    
+                public Void call() throws Exception {
+                    executeContinueInstancePartnerRoleResponseReceived(prolemex);
+                    return null;
+                }
+    
+            });
+        } catch (Exception ex) {
+            throw new BpelEngineException(ex);
+        }
     }
 
 }

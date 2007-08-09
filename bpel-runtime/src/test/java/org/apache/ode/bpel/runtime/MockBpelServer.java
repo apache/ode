@@ -208,9 +208,7 @@ class MockBpelServer {
 
     protected MessageExchangeContext createMessageExchangeContext() {
         _mexContext = new MessageExchangeContext() {
-            public void invokePartner(PartnerRoleMessageExchange mex) {
-            }
-
+           
             public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex) {
             }
 
@@ -224,12 +222,7 @@ class MockBpelServer {
                 return null;
             }
 
-            public void invokePartnerAsynch(PartnerRoleMessageExchange mex) throws ContextException {
-                // TODO Auto-generated method stub
-
-            }
-
-            public void invokePartnerBlocking(PartnerRoleMessageExchange mex) throws ContextException {
+            public void invokePartnerUnreliable(PartnerRoleMessageExchange mex) throws ContextException {
                 // TODO Auto-generated method stub
 
             }
@@ -244,10 +237,6 @@ class MockBpelServer {
 
             }
 
-            public void onReliableReply(MyRoleMessageExchange myRoleMex) throws BpelEngineException {
-                // TODO Auto-generated method stub
-
-            }
         };
         return _mexContext;
     }

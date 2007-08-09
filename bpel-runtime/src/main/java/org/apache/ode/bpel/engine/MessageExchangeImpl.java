@@ -165,18 +165,18 @@ abstract class MessageExchangeImpl implements MessageExchange {
         if (_explanation == null)
             _explanation = dao.getFaultExplanation();
         if (_status == null)
-            _status = Status.valueOf(dao.getStatus());
+            _status = dao.getStatus();
     }
 
     void save(MessageExchangeDAO dao) {
         dao.setPartnerLinkModelId(_oplink.getId());
         dao.setOperation(_operation.getName());
-        dao.setStatus(_status.toString());
-        dao.setInvocationStyle(getInvocationStyle().toString());
+        dao.setStatus(_status);
+        dao.setInvocationStyle(getInvocationStyle());
         dao.setFault(_fault);
         dao.setFaultExplanation(_explanation);
         dao.setTimeout(_timeout);
-        dao.setFailureType(_failureType == null ? null : _failureType.toString());
+        dao.setFailureType(_failureType);
         dao.setAckType(_ackType);
 
        

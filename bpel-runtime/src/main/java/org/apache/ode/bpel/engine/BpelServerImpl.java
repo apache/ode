@@ -527,7 +527,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         throw new BpelEngineException(errmsg);
                     }
 
-                    InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+                    InvocationStyle istyle = mexdao.getInvocationStyle();
                     if (istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
                         assertTransaction();
 

@@ -71,7 +71,7 @@ public class HMessageExchange extends HObject {
 
     private String _callee;
 
-    private HMessageExchange _p2pPeer;
+    private String _p2pPeer;
 
     private Map<String, String> _properties = new HashMap<String, String>();
 
@@ -84,6 +84,8 @@ public class HMessageExchange extends HObject {
     private String _mexId;
 
     private String _ackType;
+
+    private String _pipedPid;
 
     /**
      * 
@@ -368,14 +370,14 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="P2P_PEER"
+     * @hibernate.property column="P2P_PEER"
      * @return
      */
-    public HMessageExchange getPipedMessageExchange() {
+    public String getPipedMessageExchange() {
         return _p2pPeer;
     }
 
-    public void setPipedMesageExchange(HMessageExchange p2ppeer) {
+    public void setPipedMesageExchange(String p2ppeer) {
         _p2pPeer = p2ppeer;
     }
 
@@ -405,5 +407,17 @@ public class HMessageExchange extends HObject {
 
     public void setAckType(String ackType) {
         _ackType = ackType;
+    }
+
+    /**
+     * @hibernate.property column="PIPED_PID"
+     * @return
+     */
+    public String getPipedPID() {
+        return _pipedPid;
+    }
+
+    public void setPipedPID(String ppid) {
+        _pipedPid = ppid;
     }
 }

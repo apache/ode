@@ -22,5 +22,10 @@ public enum InvocationStyle {
     /**
      * Unreliable style -- the "default"
      */
-    UNRELIABLE
+    UNRELIABLE, 
+    
+    /**
+     * Process-2-Process, used when "including" one process in another. 
+     */
+    P2P
 }

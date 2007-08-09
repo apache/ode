@@ -19,7 +19,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 class BpelInstanceWorker implements Runnable {
 
     private static final Log __log = LogFactory.getLog(BpelInstanceWorker.class);
-
+    
     final BpelProcess _process;
 
     final Long _iid;
@@ -77,6 +77,11 @@ class BpelInstanceWorker implements Runnable {
      *             forwarded from {@link Callable#call()}
      */
     <T> T execInCurrentThread(Callable<T> callable) throws Exception {
+        // If we are in the current thread we can just keep working. allows re-entrant calls.
+        
+        if (isWorkerThread())
+            return callable.call();
+        
         __log.debug("Importing thread " + Thread.currentThread() + " for IID " + _iid);
         final Semaphore ready = new Semaphore(0);
         final Semaphore finished = new Semaphore(0);
@@ -103,7 +108,7 @@ class BpelInstanceWorker implements Runnable {
         __log.debug("Executing worker for IID " + _iid + " in imported thread " + Thread.currentThread());
         _activeInstance.set(_iid);
         try {
-            return callable.call();
+            return doInstanceWork(callable);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -126,7 +131,7 @@ class BpelInstanceWorker implements Runnable {
         try {
 
             do {
-                Runnable next;
+                final Runnable next;
                 synchronized (this) {
                     if (_todoQueue.isEmpty()) {
                         // This is the only way to drop out of this method short of some disasterous error. This is
@@ -141,14 +146,44 @@ class BpelInstanceWorker implements Runnable {
                 }
 
                 try {
-                    next.run();
+                    doInstanceWork(new Callable<Void>() {
+                        public Void call() throws Exception {
+                            next.run();
+                            return null;
+                        }
+                    });
                 } catch (Throwable t) {
-                    __log.error("Unexpected error in instance thread.", t);
+                    // This is rather serious as it is too late to recover at this point. 
+                    __log.fatal("Unexpected error in instance " + _iid + " thread " + Thread.currentThread() + 
+                            "; the error was not handled, it is likely that this has corrupted the state of the" +
+                            "instance!", t);
+                    // TODO: use the recovery mechanism to mark the instance as corrupted. 
                 }
             } while (true);
         } finally {
             _activeInstance.set(null);
             _workerThread = null;
+        }
+    }
+
+    
+    /**
+     * Wrapper routine for all instance work. Set a break-point here if you'd like to follow the execution of an instance.
+     * 
+     * @param <T>
+     * @param work
+     * @return
+     * @throws Exception
+     */
+    private <T> T doInstanceWork(Callable<T> work) throws Exception {
+        __log.debug("Doing work for instance " + _iid +" in thread " + Thread.currentThread());
+        try {
+            return work.call();
+        } catch (Exception ex) {
+            __log.error("Work for instance " + _iid + " in thread "  + Thread.currentThread() + " resulted in an exception." ,ex);
+            throw ex;
+        } finally {
+            __log.debug("Finished work for instance " + _iid + " in thread " + Thread.currentThread());
         }
     }
 

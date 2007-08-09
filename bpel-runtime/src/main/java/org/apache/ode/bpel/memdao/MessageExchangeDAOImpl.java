@@ -32,7 +32,10 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.w3c.dom.Element;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
@@ -43,7 +46,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private MessageDAO request;
 	private String operation;
 	private QName portType;
-	private String status;
+	private Status status;
 	private int partnerLinkModelId;
 	private String correlationId;
 	private String pattern;
@@ -58,11 +61,12 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private QName callee;
 	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
-    private String _istyle;
-    private MessageExchangeDAO _pipedExchange;
-    private String _failureType;
+    private InvocationStyle _istyle;
+    private String _pipedExchange;
+    private FailureType _failureType;
     private long _timeout;
     private AckType _ackType;
+    private QName _pipedPID;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -98,12 +102,12 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Status status) {
 		this.status = status;
 
 	}
 
-	public String getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
@@ -190,7 +194,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     }
 
 
-
     public void setCorrelationStatus(String cstatus) {
 		this.correlationStatus = cstatus;
 	}
@@ -269,29 +272,29 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
     }
 
-    public String getInvocationStyle() {
+    public InvocationStyle getInvocationStyle() {
         return _istyle;
     }
 
-    public MessageExchangeDAO getPipedMessageExchange() {
+    public String getPipedMessageExchangeId() {
         return _pipedExchange;
     }
 
-    public void setFailureType(String failureType) {
+    public void setFailureType(FailureType failureType) {
         _failureType = failureType;
     }
 
-    public String getFailureType() {
+    public FailureType getFailureType() {
         return _failureType;
     }
     
-    public void setInvocationStyle(String invocationStyle) {
+    public void setInvocationStyle(InvocationStyle invocationStyle) {
         _istyle = invocationStyle;
         
     }
 
-    public void setPipedMessageExchange(MessageExchangeDAO mex) {
-        _pipedExchange = mex;
+    public void setPipedMessageExchangeId(String pipedMexId) {
+        _pipedExchange = pipedMexId;
         
     }
 
@@ -309,5 +312,14 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public void setAckType(AckType ackType) {
         _ackType = ackType;
+    }
+
+    public QName getPipedPID() {
+        return _pipedPID;
+    }
+
+    public void setPipedPID(QName pipedPid) {
+        _pipedPID = pipedPid;
+        
     }
 }

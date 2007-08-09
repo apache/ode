@@ -37,6 +37,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.o.OPartnerLink;
+import org.omg.PortableServer._ServantActivatorStub;
 import org.w3c.dom.Element;
 
 /**
@@ -59,7 +60,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
     }
 
     PartnerRoleMessageExchangeImpl createPartnerRoleMex(MessageExchangeDAO mexdao) {
-        InvocationStyle istyle = InvocationStyle.valueOf(mexdao.getInvocationStyle());
+        InvocationStyle istyle = mexdao.getInvocationStyle();
         PartnerRoleMessageExchangeImpl mex;
         Operation op = _plinkDef.getPartnerRoleOperation(mexdao.getOperation());
         EndpointReference myroleEPR = _plinkDef.hasMyRole() ? _process.getInitialMyRoleEPR(_plinkDef) : null;
@@ -115,12 +116,16 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
         boolean oneway = MessageExchangePattern.valueOf(mexDao.getPattern()) == MessageExchangePattern.REQUEST_ONLY;
 
-        if (_process.isInMemory()) {
-            invokeInMem(mexDao, partnerEpr, myRoleEpr, operation, supportedStyles, oneway);
-        } else {
-            invokePersisted(mexDao, partnerEpr, myRoleEpr, operation, supportedStyles);
+        try {
+            if (_process.isInMemory()) {
+                invokeInMem(mexDao, partnerEpr, myRoleEpr, operation, supportedStyles, oneway);
+            } else {
+                invokePersisted(mexDao, partnerEpr, myRoleEpr, operation, supportedStyles);
+            }
+        } finally {
+            if (mexDao.getStatus() != Status.ACK)
+                mexDao.setStatus(Status.ASYNC);
         }
-
     }
 
     private void invokePersisted(MessageExchangeDAO mexDao, EndpointReference partnerEpr, EndpointReference myRoleEpr,
@@ -134,8 +139,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         } else {
             // This really should not happen, indicates IL is screwy.
             __log.error("Integration Layer did not agree to any known invocation style for EPR " + partnerEpr);
-            mexDao.setFailureType(FailureType.COMMUNICATION_ERROR.toString());
-            mexDao.setStatus(Status.ACK.toString());
+            mexDao.setFailureType(FailureType.COMMUNICATION_ERROR);
+            mexDao.setStatus(Status.ACK);
             mexDao.setAckType(AckType.FAILURE);
             mexDao.setFaultExplanation("NoMatchingStyle");
         }
@@ -149,7 +154,10 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
                 _channel);
         // We schedule in-memory (no db) to guarantee "at most once" semantics.
         blockingMex.setState(State.INVOKE_XXX);
-        _process.scheduleInstanceWork(mexDao.getInstance().getInstanceId(), new UnreliableInvoker(blockingMex));
+        
+        // NOTE: in order to prevent dead-locks due to callbacks we cannot have the actual invoke of the partner
+        // occuring inside the instance worker thread. 
+        _process.scheduleRunnable(new UnreliableInvoker(blockingMex));
     }
 
     /**
@@ -324,7 +332,6 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             // Do the unreliable invoke (outside of tx context). A system failure here will result in the mex going
             // into an unknown state requiring manual intervention.
             Throwable err = null;
-            Status status;
             _unreliableMex.setState(State.INVOKE_XXX);
             try {
                 _contexts.mexContext.invokePartnerUnreliable(_unreliableMex);
@@ -339,39 +346,33 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             // We proceed handling the response in a transaction. Note that if for some reason the following transaction
             // fails, the unreliable invoke will be in an "unknown" state, and will require manual intervention to either
             // retry or force fail.
-            try {
+            _process.enqueueInstanceTransaction(_unreliableMex.getIID(),  new Runnable() {
+                public void run() {
 
-                _contexts.execTransaction(new Runnable() {
-                    public void run() {
-
-                        MessageExchangeDAO mexdao = _process.loadMexDao(_unreliableMex.getMessageExchangeId());
-                        if (ferr != null) {
-                            MexDaoUtil.setFailed(mexdao, FailureType.OTHER, ferr.toString());
-                            _unreliableMex.setState(State.DEAD);
-                        } else if (_unreliableMex.getStatus() == Status.ACK) {
-                            _unreliableMex.save(mexdao);
-                            _unreliableMex.setState(State.DEAD);
-                        } else if (_unreliableMex.getStatus() == Status.REQ && !_unreliableMex._asyncReply) {
-                            MexDaoUtil.setFailed(mexdao, FailureType.NO_RESPONSE, "No Response");
-                            _unreliableMex.setState(State.DEAD);
-                        } else if (_unreliableMex._asyncReply) {
-                            _unreliableMex.setState(State.ASYNC);
-                            return;
-                        } else {
-                            // We should have exhausted the possibilities.
-                            throw new BpelEngineException("InternalError: Unexpected message exchange state!");
-                        }
-
-                        _process.executeContinueInstancePartnerRoleResponseReceived(mexdao);
-
+                    MessageExchangeDAO mexdao = _process.loadMexDao(_unreliableMex.getMessageExchangeId());
+                    if (ferr != null) {
+                        MexDaoUtil.setFailed(mexdao, FailureType.OTHER, ferr.toString());
+                        _unreliableMex.setState(State.DEAD);
+                    } else if (_unreliableMex.getStatus() == Status.ACK) {
+                        _unreliableMex.save(mexdao);
+                        _unreliableMex.setState(State.DEAD);
+                    } else if (_unreliableMex.getStatus() == Status.REQ && !_unreliableMex._asyncReply) {
+                        MexDaoUtil.setFailed(mexdao, FailureType.NO_RESPONSE, "No Response");
+                        _unreliableMex.setState(State.DEAD);
+                    } else if (_unreliableMex._asyncReply) {
+                        _unreliableMex.setState(State.ASYNC);
+                        return; // prevent continuation (nothing to do yet).
+                    } else {
+                        // Internal error that should not be possible. 
+                        __log.fatal("InternalError: Unexpected message exchange state!");
+                        MexDaoUtil.setFailed(mexdao, FailureType.OTHER, "Unexpected message exchange state");
                     }
 
-                });
-            } catch (Throwable t) {
-                _unreliableMex.setState(State.DEAD);
-                __log.error("Transaction Failed (TODO!!!!): Need to mark instance for user action", t);
-                // TODO: Schedule something to pick up the job (we cant just retry bc the invoke is complete!
-            }
+                    _process.executeContinueInstancePartnerRoleResponseReceived(mexdao);
+
+                }
+
+            });
 
         }
 

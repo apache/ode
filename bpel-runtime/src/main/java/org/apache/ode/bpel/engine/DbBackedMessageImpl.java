@@ -9,21 +9,22 @@ class DbBackedMessageImpl extends MessageImpl {
 
     private MessageDAO _dao;
     
+    public DbBackedMessageImpl(MessageDAO dao) {
+        _dao = dao;
+    }
+
     @Override
     public Element getMessage() {
-        // TODO Auto-generated method stub
-        return null;
+        return _dao.getData();
     }
 
     @Override
     public QName getType() {
-        // TODO Auto-generated method stub
-        return null;
+        return _dao.getType();
     }
 
     @Override
     public void setMessage(Element msg) {
-        // TODO Auto-generated method stub
         
     }
 

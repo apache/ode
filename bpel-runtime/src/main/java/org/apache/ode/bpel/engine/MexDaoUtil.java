@@ -18,14 +18,14 @@ import org.w3c.dom.Element;
 class MexDaoUtil {
 
     static void setFailed(MessageExchangeDAO mex, FailureType ftype, String explanation) {
-        mex.setStatus(Status.ACK.toString());
+        mex.setStatus(Status.ACK);
         mex.setAckType(AckType.FAILURE);
-        mex.setFailureType(ftype.toString());
+        mex.setFailureType(ftype);
         mex.setFaultExplanation(explanation);
     }
 
     static void setFaulted(MessageExchangeDAO mex, QName faultType, Element faultmsg) {
-        mex.setStatus(Status.ACK.toString());
+        mex.setStatus(Status.ACK);
         mex.setAckType(AckType.FAULT);
         mex.setFailureType(null);
         mex.setFault(faultType);
@@ -35,7 +35,7 @@ class MexDaoUtil {
     }
 
     static void setResponse(MessageExchangeDAO mex, Element response) {
-        mex.setStatus(Status.ACK.toString());
+        mex.setStatus(Status.ACK);
         mex.setAckType(AckType.RESPONSE);
         mex.setFailureType(null);
         mex.setFault(null);

@@ -26,72 +26,64 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
     boolean _done = false;
-    ResponseFuture _future;
-    
-    public UnreliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
-        super(process, mexId, oplink, operation, callee);
-    }
 
-    /**
-     * Override the setStatus(...) to notify our future when there is a response/failure.
-     */
-    protected void ack(AckType acktype) {
-        super.ack(acktype);
-        if (_future != null) {
-            _future.done(Status.ACK);
-        }
+    ResponseFuture _future;
+
+    public UnreliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
+            QName callee) {
+        super(process, mexId, oplink, operation, callee);
     }
 
     public Future<Status> invokeAsync() {
         if (_future != null)
             return _future;
-        
+
         if (_request == null)
             throw new IllegalStateException("Must call setRequest(...)!");
-        
+
         _future = new ResponseFuture();
         _process.enqueueTransaction(new Callable<Void>() {
 
             public Void call() throws Exception {
-                request();
-                MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
-                save(dao);
-                _process.invokeProcess(dao);
+                MessageExchangeDAO dao = doInvoke();
+
+                if (dao.getStatus() == Status.ACK) {
+                    // not really an async ack, same idea.
+                    onAsyncAck(dao);
+                }
+
                 return null;
             }
-            
+
         });
-      
-        
+
         return _future;
 
     }
 
-  
     @Override
     public InvocationStyle getInvocationStyle() {
         return InvocationStyle.UNRELIABLE;
     }
-    
 
     @Override
     public Status invokeBlocking() throws BpelEngineException, TimeoutException {
-        if (_done) 
+
+        if (_done)
             return getStatus();
 
         Future<Status> future = _future != null ? _future : invokeAsync();
-        
+
         try {
-            future.get(Math.max(_timeout,1), TimeUnit.MILLISECONDS);
+            future.get(Math.max(_timeout, 1), TimeUnit.MILLISECONDS);
             _done = true;
             return getStatus();
         } catch (InterruptedException e) {
             throw new BpelEngineException(e);
         } catch (ExecutionException e) {
             throw new BpelEngineException(e.getCause());
-        } 
-    }    
-    
+        }
+    }
 
     private static class ResponseFuture implements Future<Status> {
         private Status _status;
@@ -138,6 +130,36 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 this.notifyAll();
             }
         }
+    }
+
+    @Override
+    protected void onAsyncAck(MessageExchangeDAO mexdao) {
+        final MemBackedMessageImpl response;
+        final QName fault = mexdao.getFault();
+        final FailureType failureType = mexdao.getFailureType();
+        final AckType ackType = mexdao.getAckType();
+        final String explanation = mexdao.getFaultExplanation();
+        switch (mexdao.getAckType()) {
+        case RESPONSE:
+        case FAULT:
+            response = new MemBackedMessageImpl(mexdao.getResponse().getData(), mexdao.getResponse().getType(), false);
+            break;
+        default:
+            response = null;
+        }
+
+        // Lets be careful, the TX can still rollback!
+        _process.scheduleRunnable(new Runnable() {
+            public void run() {
+                _response = response;
+                _fault = fault;
+                _failureType = failureType;
+                ack(ackType);
+                _future.done(Status.ACK);
+
+            }
+
+        });
     }
 
 }

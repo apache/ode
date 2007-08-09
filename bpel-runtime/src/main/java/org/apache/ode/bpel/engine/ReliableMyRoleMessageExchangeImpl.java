@@ -24,6 +24,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -40,8 +41,6 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
 
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
-    public static final int TIMEOUT = 2 * 60 * 1000;
-
     
     public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
         super(process, mexId, oplink, operation, callee);
@@ -56,19 +55,9 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
             return;
         
         if (getStatus() != Status.NEW)
-            throw new BpelEngineException("Invalid state: " + getStatus());
+            throw new IllegalStateException("Invalid state: " + getStatus());
         
-        if (!processInterceptors(InterceptorInvoker.__onBpelServerInvoked, getDAO())) {
-            throw new BpelEngineException("Intercepted.");
-        }
-        
-        if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
-        
-        request();
-        
-        save(getDAO());
-        scheduleInvoke();
+        doInvoke();
     }
 
 
@@ -77,5 +66,18 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
         return InvocationStyle.RELIABLE;
     }
 
+    protected void onAsyncAck(MessageExchangeDAO mexdao) {
+        switch (mexdao.getAckType()) {
+        case RESPONSE: 
+
+            break;
+        case FAULT:
+            
+            break;
+        case FAILURE:
+
+            break;
+        }
+    }
 
 }

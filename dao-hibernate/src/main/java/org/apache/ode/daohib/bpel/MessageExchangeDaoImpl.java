@@ -30,7 +30,10 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -84,13 +87,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         update();
     }
 
-    public void setStatus(String status) {
-        _hself.setState(status);
+    public void setStatus(Status status) {
+        _hself.setState(status == null ? null : status.toString());
         update();
     }
 
-    public String getStatus() {
-        return _hself.getState();
+    public Status getStatus() {
+        return _hself.getState() == null ?  null : Status.valueOf(_hself.getState());
     }
 
     public MessageDAO createMessage(QName type) {
@@ -305,32 +308,33 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         // no-op for now, could be used to do some cleanup
     }
 
-    public String getInvocationStyle() {
-        return _hself.getInvocationStyle();
+    public InvocationStyle getInvocationStyle() {
+        return _hself.getInvocationStyle() == null ? null : InvocationStyle.valueOf(_hself.getInvocationStyle());
     }
 
-    public MessageExchangeDAO getPipedMessageExchange() {
-        return new MessageExchangeDaoImpl(_sm,_hself.getPipedMessageExchange());
+    public String getPipedMessageExchangeId() {
+        return _hself.getPipedMessageExchange();
     }
 
     public long getTimeout() {
         return _hself.getTimeout();
     }
 
-    public void setFailureType(String failureType) {
-        _hself.setFailureType(failureType);
+    public void setFailureType(FailureType failureType) {
+        _hself.setFailureType(failureType == null ? null : failureType.toString());
     }
     
-    public String getFailureType() {
-        return _hself.getFailureType();
+    public FailureType getFailureType() {
+        return _hself.getFailureType() == null ? null : FailureType.valueOf(_hself.getFailureType());
+
     }
 
-    public void setInvocationStyle(String invocationStyle) {
-        _hself.setInvocationStyle(invocationStyle);
+    public void setInvocationStyle(InvocationStyle invocationStyle) {
+        _hself.setInvocationStyle(invocationStyle == null ? null : invocationStyle.toString());
     }
 
-    public void setPipedMessageExchange(MessageExchangeDAO mexId) {
-        _hself.setPipedMesageExchange(((MessageExchangeDaoImpl)mexId)._hself);
+    public void setPipedMessageExchangeId(String pipedMex) {
+        _hself.setPipedMesageExchange(pipedMex);
     }
 
     public void setTimeout(long timeout) {
@@ -343,5 +347,14 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public void setAckType(AckType ackType) {
         _hself.setAckType(ackType == null ? null : ackType.toString());
+    }
+
+    public QName getPipedPID() {
+        return _hself.getPipedPID() == null ? null : QName.valueOf(_hself.getPipedPID());
+    }
+
+    public void setPipedPID(QName pipedPid) {
+        _hself.setPipedPID(pipedPid == null ? null : pipedPid.toString());
+        
     }
 }

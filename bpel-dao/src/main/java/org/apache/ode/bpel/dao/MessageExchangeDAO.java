@@ -23,7 +23,10 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.w3c.dom.Element;
 
 /**
@@ -46,13 +49,13 @@ public interface MessageExchangeDAO {
      * Get the invocation style. 
      * @return
      */
-    String getInvocationStyle();
+    InvocationStyle getInvocationStyle();
     
     /**
      * Set the invocation style. 
      * @param invocationStyle
      */
-    void setInvocationStyle(String invocationStyle);
+    void setInvocationStyle(InvocationStyle invocationStyle);
     
     
     /**
@@ -103,14 +106,14 @@ public interface MessageExchangeDAO {
      *
      * @param status state to be set
      */
-    void setStatus(String status);
+    void setStatus(Status status);
 
     /**
      * Get state of last message sent/received.
      *
      * @return the state
      */
-    String getStatus();
+    Status getStatus();
 
     /**
      * Create a new message associated with this message-exchange
@@ -253,15 +256,15 @@ public interface MessageExchangeDAO {
      *  
      * @return other side of the message pipe 
      */
-    MessageExchangeDAO getPipedMessageExchange();
+    String getPipedMessageExchangeId();
     
-    void setPipedMessageExchange(MessageExchangeDAO mexId);
-
+    void setPipedMessageExchangeId(String pipedMexId);
+    
     void release();
 
-    void setFailureType(String failureType);
+    void setFailureType(FailureType failureType);
 
-    String getFailureType();
+    FailureType getFailureType();
 
     long getTimeout();
 
@@ -270,5 +273,9 @@ public interface MessageExchangeDAO {
     void setAckType(AckType ackType);
     
     AckType getAckType();
+
+    QName getPipedPID();
+    
+    void setPipedPID(QName pipedPid);
 
  }

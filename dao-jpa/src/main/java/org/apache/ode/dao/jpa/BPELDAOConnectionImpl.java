@@ -152,7 +152,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	}
 	
     public MessageExchangeDAO getMessageExchange(String mexid) {
-        List l = _em.createQuery("select x from MesssageExchangeDAOImpl x where x._mexId = ?1")
+        List l = _em.createQuery("select x from MessageExchangeDAOImpl x where x._id = ?1")
         .setParameter(1, mexid).getResultList();
         if (l.size() == 0) return null;
         MessageExchangeDAOImpl m = (MessageExchangeDAOImpl) l.get(0);

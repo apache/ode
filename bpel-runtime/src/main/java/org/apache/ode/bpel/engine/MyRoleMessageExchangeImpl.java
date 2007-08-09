@@ -1,6 +1,5 @@
 package org.apache.ode.bpel.engine;
 
-import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
@@ -11,18 +10,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.engine.MessageExchangeImpl.Change;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 import org.apache.ode.bpel.o.OPartnerLink;
-import org.w3c.dom.Element;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
@@ -116,19 +113,38 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     }
 
-    protected void scheduleInvoke() {
+  
+    protected MessageExchangeDAO doInvoke() {
 
-        assert !_process.isInMemory() : "Cannot schedule invokes for in-memory processes.";
-        assert _contexts.isTransacted() : "Cannot schedule outside of transaction context.";
+        if (getStatus() != Status.NEW)
+            throw new IllegalStateException("Invalid state: " + getStatus());
+        
+        request();
+        
+        MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        save(dao);
+        
+        if (__log.isDebugEnabled())
+            __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
+        
+        try {
+            if (!processInterceptors(InterceptorInvoker.__onBpelServerInvoked, dao)) {
+                assert getStatus() == Status.ACK;
+                return dao;
+            }
 
-        // Schedule a new job for invocation
-        final WorkEvent we = new WorkEvent();
-        we.setType(WorkEvent.Type.MYROLE_INVOKE);
-        we.setProcessId(_process.getPID());
-        we.setMexId(_mexId);
-
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-
+            _process.invokeProcess(dao);
+        } finally {
+            if (dao.getStatus() == Status.ACK) {
+                _failureType = dao.getFailureType();
+                _fault = dao.getFault();
+                _explanation  = dao.getFaultExplanation();
+                ack(dao.getAckType());
+            }
+        }
+        
+        return dao;
+        
     }
 
     /**
@@ -143,94 +159,44 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), mexDao.getProcess(), null);
 
         for (MessageExchangeInterceptor i : _contexts.globalIntereceptors)
-            if (!processInterceptor(i, this, ictx, invoker))
+            if (!processInterceptor(i, this, ictx, invoker, mexDao))
                 return false;
 
         return true;
     }
 
-    protected boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx,
-            InterceptorInvoker invoker) {
+    protected boolean processInterceptor(
+            MessageExchangeInterceptor i, 
+            MyRoleMessageExchangeImpl mex, 
+            InterceptorContext ictx,
+            InterceptorInvoker invoker,
+            MessageExchangeDAO mexdao) {
         __log.debug(invoker + "--> interceptor " + i);
         try {
             invoker.invoke(i, mex, ictx);
         } catch (FaultMessageExchangeException fme) {
             __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
-            mex.serverFaulted(fme.getFaultName(), fme.getFaultData());
+            MexDaoUtil.setFaulted(mexdao, fme.getFaultName(), fme.getFaultData() == null ? null : fme.getFaultData().getMessage());
             return false;
         } catch (AbortMessageExchangeException ame) {
             __log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: " + ame.getMessage());
-            mex.serverFailed(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex.getMessageExchangeId(), i
-                    .toString(), ame.getMessage()), null);
+            MexDaoUtil.setFailed(mexdao, FailureType.ABORTED, __msgs.msgInterceptorAborted(mex.getMessageExchangeId(), i
+                    .toString(), ame.getMessage()));
             return false;
         }
         return true;
     }
 
-    protected void onStateChanged(MessageExchangeDAO mexdao, Status oldstatus, final Status newstatus) {
-        MessageDAO response = mexdao.getResponse();
-        if (newstatus == Status.ACK)
-            switch (mexdao.getAckType()) {
-            case RESPONSE: {
-                final Element msg = response.getData();
-                final QName msgtype = response.getType();
-                _process.scheduleRunnable(new Runnable() {
-                    public void run() {
-                        serverResponded(new MemBackedMessageImpl(msg, msgtype, true));
-                    }
-                });
-            }
-                break;
-            case FAULT: {
-                final QName fault = mexdao.getFault();
-                final Element faultMsg = response.getData();
-                final QName msgtype = response.getType();
-                _process.scheduleRunnable(new Runnable() {
-                    public void run() {
-                        serverFaulted(fault, new MemBackedMessageImpl(faultMsg, msgtype, true));
-                    }
+   
     
-                });
-            }
-                break;
-            case FAILURE:
-                final String failureExplanation = mexdao.getFaultExplanation();
-                final FailureType ftype = FailureType.valueOf(mexdao.getFailureType());
-                _process.scheduleRunnable(new Runnable() {
-                    public void run() {
-                        serverFailed(ftype, failureExplanation, null); // TODO add failure detail
-                    }
+    protected abstract void onAsyncAck(MessageExchangeDAO mexdao);
     
-                });
-                break;
-            }
-    }
-
+    
     protected void finalize() {
         _process.unregisterMyRoleMex(this);
     }
-
     
-    void serverFaulted(QName faultType, Message outputFaultMessage) throws BpelEngineException {
-        _fault = faultType;
-        _response = (MessageImpl) outputFaultMessage;
-        ack(AckType.FAULT);
-    }
+    
 
-   
-    void serverResponded(Message outputMessage) {
-        _fault = null;
-        _explanation = null;
-        _response = (MessageImpl) outputMessage;
-        _response.makeReadOnly();
-        ack(AckType.RESPONSE);
-
-    }
-
-    void serverFailed(FailureType type, String reason, Element details) {
-        _failureType = type;
-        _explanation = reason;
-        ack(AckType.FAILURE);
-    }
-
+ 
 }

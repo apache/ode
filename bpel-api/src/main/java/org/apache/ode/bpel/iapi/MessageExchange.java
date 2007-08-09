@@ -47,9 +47,12 @@ public interface MessageExchange {
         /** New message exchange, has not been "invoked" */
         NEW,
 
-        /** The request was sent. */
+        /** The request was sent, blocking while waiting for the service to respond. */
         REQ,
 
+        /** The request was sent, no longer blocking. */
+        ASYNC,
+        
         /** The acknowledgement (either response/fault/failure) was sent. */
         ACK,
 
