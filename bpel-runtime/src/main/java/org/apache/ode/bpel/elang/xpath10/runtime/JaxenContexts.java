@@ -192,6 +192,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                     return variableNode;
                 }
             }catch(FaultException e){
+                __log.error("bpws:getVariableValue threw FaultException", e);
                 throw new WrappedFaultException.JaxenUnresolvableException(e);
             }
         }
@@ -257,6 +258,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
             try {
                 return _xpathEvalCtx.readMessageProperty(var, property);
             } catch (FaultException e) {
+                __log.error("bpws:getVariableProperty(" + args + ") threw FaultException", e);
                 throw new WrappedFaultException.JaxenFunctionException(e);
             }
         }
@@ -272,6 +274,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
             try {
                 return _xpathEvalCtx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
             } catch (FaultException e) {
+                __log.error("bpws:getLinkStatus(" + args + ") threw FaultException", e);
                 throw new WrappedFaultException.JaxenFunctionException(e);
             }
         }
