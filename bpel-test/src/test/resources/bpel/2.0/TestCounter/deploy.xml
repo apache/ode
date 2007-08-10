@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:tns="http://example.com/bpel/counter">
+  <process name="tns:counter">
+    <active>true</active>
+    <provide partnerLink="operations">
+      <service name="tns:counterService" port="port"/>
+    </provide>
+  </process>
+</deploy>
