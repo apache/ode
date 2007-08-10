@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<b:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable http://docs.oasis-open.org/wsbpel/2.0/CS01/process/executable/ws-bpel_executable.xsd"
+           xmlns:b="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+           name="counter"
+           xmlns:t="http://example.com/bpel/counter"
+           targetNamespace="http://example.com/bpel/counter">
+
+    <b:import importType="http://schemas.xmlsoap.org/wsdl/"
+              location="counter.wsdl"
+              namespace="http://example.com/bpel/counter" />
+
+    <b:partnerLinks>
+        <b:partnerLink name="operations" partnerLinkType="t:plink" myRole="me" />
+    </b:partnerLinks>
+
+    <b:variables>
+        <b:variable name="counter" messageType="t:responseMessage" />
+        <b:variable name="initiation" messageType="t:requestMessage" />
+    </b:variables>
+
+    <b:sequence>
+        <b:receive partnerLink="operations" createInstance="yes" operation="initialize" portType="t:port"
+                   variable="initiation">
+        </b:receive>
+        <b:assign>
+            <b:copy>
+                <b:from>0</b:from>
+                <b:to variable="counter" part="value"></b:to>
+            </b:copy>
+        </b:assign>
+        <b:while>
+            <b:condition>10 &gt; $counter.value</b:condition>
+            <b:sequence>
+                <b:assign>
+                    <b:copy>
+                        <b:from>$counter.value+1</b:from>
+                        <b:to>$counter.value</b:to>
+                    </b:copy>
+                </b:assign>
+            </b:sequence>
+        </b:while>
+        <b:reply partnerLink="operations" operation="initialize" variable="counter"/>
+    </b:sequence>
+</b:process>
