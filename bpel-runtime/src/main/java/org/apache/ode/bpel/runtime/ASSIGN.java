@@ -493,6 +493,7 @@ class ASSIGN extends ACTIVITY {
             __log.debug("lvaluePtr type " + lvaluePtr.getNodeType());
             __log.debug("lvaluePtr " + DOMUtils.domToString(lvaluePtr));
             __log.debug("lvalue " + lvalue);
+            __log.debug("rvalue " + rvalue);
         }
 
         switch (lvaluePtr.getNodeType()) {
