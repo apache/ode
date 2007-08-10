@@ -43,6 +43,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -94,7 +95,7 @@ public class ExternalService implements PartnerRoleChannel {
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out handler.
             MessageContext mctx = new MessageContext();
-            writeHeader(mctx.getOptions(), odeMex);
+            writeHeader(mctx, odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
 
@@ -183,13 +184,13 @@ public class ExternalService implements PartnerRoleChannel {
             __log.error(errmsg, axisFault);
             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
-
     }
 
     /**
      * Extracts endpoint information from ODE message exchange to stuff them into Axis MessageContext.
      */
-    private void writeHeader(Options options, PartnerRoleMessageExchange odeMex) {
+    private void writeHeader(MessageContext ctxt, PartnerRoleMessageExchange odeMex) {
+        Options options = ctxt.getOptions();
         WSAEndpoint targetEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
         WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
 
@@ -214,10 +215,16 @@ public class ExternalService implements PartnerRoleChannel {
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
-
             options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
+        }
+
+        if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
+            EndpointReference annonEpr =
+                    new EndpointReference("http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous");
+            ctxt.setReplyTo(annonEpr);
+            ctxt.setMessageID("uuid:"+new UUID().toString());
         }
     }
 
