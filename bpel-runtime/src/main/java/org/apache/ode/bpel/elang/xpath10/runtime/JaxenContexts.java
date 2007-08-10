@@ -170,9 +170,18 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 Node variableNode = _xpathEvalCtx.readVariable(variable, part);
                 if (variableNode == null)
                     throw new WrappedFaultException.JaxenUnresolvableException(
-                            new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + localName));
+                            new FaultException(variable.getOwner().constants.qnSelectionFailure,
+                                    "Unknown variable " + localName));
                 OVarType type = variable.type;
-                if (type instanceof OMessageVarType) type = ((OMessageVarType)type).parts.get(partName).type;
+                if (type instanceof OMessageVarType) {
+                    OMessageVarType.Part typePart = ((OMessageVarType)type).parts.get(partName);
+                    if (typePart == null) {
+                        throw new WrappedFaultException.JaxenUnresolvableException(
+                                new FaultException(variable.getOwner().constants.qnSelectionFailure,
+                                        "Unknown part " + partName + " for variable " + localName));
+                    }
+                    type = typePart.type;
+                }
 
                 if (type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
                     String text = variableNode.getTextContent();
