@@ -57,8 +57,9 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
     private ProcessDAOImpl _process;
 
     public CorrelatorDAOImpl(){}
-    public CorrelatorDAOImpl(String correlatorKey) {
+    public CorrelatorDAOImpl(String correlatorKey, ProcessDAOImpl process) {
         _correlatorKey = correlatorKey;
+        _process = process;
     }
 
     public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey) {
