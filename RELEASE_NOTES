@@ -27,6 +27,7 @@ getting the WSDL documents for processes with a slash in their name).
 designer.
 * Migrated our build to buildr completely (http://buildr.rubyforge.org)
 * Bug fixes including but not limited to: ODE-163, ODE-158, ODE-153,
-ODE-150, ODE-148, ODE-143, ODE-130.
+ODE-150, ODE-148, ODE-143, ODE-130 (check all issues under ODE 1.1 in
+JIRA for more).
 
 
