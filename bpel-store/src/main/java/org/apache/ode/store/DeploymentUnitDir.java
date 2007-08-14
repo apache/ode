@@ -156,6 +156,7 @@ class DeploymentUnitDir  {
             bpelc.setProcessWSDL(bpel11wsdl.toURI());
         
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
+        bpelc.setBaseDirectory(_duDirectory);
         try {
             bpelc.compile(bpelFile);
         } catch (IOException e) {
@@ -225,7 +226,7 @@ class DeploymentUnitDir  {
 
             WSDLFactory4BPEL wsdlFactory = (WSDLFactory4BPEL) WSDLFactoryBPEL20.newInstance();
             WSDLReader r = wsdlFactory.newWSDLReader();
-            DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory);
+            DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory, _duDirectory);
             URI basedir = _duDirectory.toURI();
             ArrayList<File> wsdls = listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
             for (File file : wsdls) {
