@@ -147,8 +147,8 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
             if (target == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
@@ -285,8 +285,8 @@ public class BpelProcess {
      * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public void handleWorkEvent(Map<String, Object> jobData) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             markused();
 
             if (__log.isDebugEnabled()) {
@@ -456,8 +456,8 @@ public class BpelProcess {
     }
 
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -468,8 +468,8 @@ public class BpelProcess {
     }
 
     Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -480,8 +480,8 @@ public class BpelProcess {
     }
 
     EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
             if (myRole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -496,8 +496,8 @@ public class BpelProcess {
     }
 
     PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + partnerLink);
@@ -531,9 +531,8 @@ public class BpelProcess {
      * Ask the process to dehydrate.
      */
     void dehydrate() {
-        _hydrationLatch.latch(0);
-
         try {
+            _hydrationLatch.latch(0);
             // We don't actually need to do anything, the latch will run the doDehydrate method
             // when necessary..
         } finally {
@@ -543,9 +542,8 @@ public class BpelProcess {
     }
 
     void hydrate() {
-        _hydrationLatch.latch(1);
-
         try {
+            _hydrationLatch.latch(1);
             // We don't actually need to do anything, the latch will run the doHydrate method
             // when necessary..
         } finally {
@@ -554,8 +552,8 @@ public class BpelProcess {
     }
     
     OProcess getOProcess() {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             return _oprocess;
         } finally {
             _hydrationLatch.release(1);
@@ -563,8 +561,8 @@ public class BpelProcess {
     }
 
     private Map<Endpoint, PartnerLinkMyRoleImpl> getEndpointToMyRoleMap() {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             return _endpointToMyRoleMap;
         } finally {
             _hydrationLatch.release(1);
@@ -572,8 +570,8 @@ public class BpelProcess {
     }
 
     public ReplacementMap getReplacementMap() {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             return _replacementMap;
         } finally {
             _hydrationLatch.release(1);
