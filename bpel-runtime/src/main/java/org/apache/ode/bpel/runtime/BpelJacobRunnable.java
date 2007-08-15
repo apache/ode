@@ -93,6 +93,8 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
             OProcess.OProperty property = cset.declaration.properties.get(i);
             propValues[i] = getBpelRuntimeContext().readProperty(variable, property);
             propNames[i] = property.name.toString();
+            if (__log.isDebugEnabled())
+              __log.debug("Setting correlation property " + propNames[i] + "=" + propValues[i]);
         }
 
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);

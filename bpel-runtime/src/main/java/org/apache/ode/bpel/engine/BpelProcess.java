@@ -59,6 +59,7 @@ import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -216,12 +217,13 @@ public class BpelProcess {
         PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, alias);
         Node lValue = ectx.getRootNode();
 
-        if (alias.location != null)
+        if (alias.location != null) {
             try {
                 lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
             } catch (EvaluationException ec) {
                 throw new FaultException(getOProcess().constants.qnSelectionFailure, alias.getDescription());
             }
+        }
 
         if (lValue == null) {
             String errmsg = __msgs.msgPropertyAliasReturnedNullSet(alias.getDescription(), target);
@@ -234,8 +236,7 @@ public class BpelProcess {
         if (lValue.getNodeType() == Node.ELEMENT_NODE) {
             // This is a bit hokey, we concatenate all the children's values; we
             // really should be checking to make sure that we are only dealing
-            // with
-            // text and attribute nodes.
+            // with text and attribute nodes.
             StringBuffer val = new StringBuffer();
             NodeList nl = lValue.getChildNodes();
             for (int i = 0; i < nl.getLength(); ++i) {

@@ -69,6 +69,7 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -388,6 +389,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
+        // Special case of messageType variables with no part
+        if (variable.declaration.type instanceof OMessageVarType) {
+            OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
+            if (msgType.parts.size() == 0) {
+                Document doc = DOMUtils.newDocument();
+                Element root = doc.createElement("message");
+                doc.appendChild(root);
+                return root;
+            }
+        }
+
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 

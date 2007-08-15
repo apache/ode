@@ -142,7 +142,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     void setPortOp(PortType portType, Operation operation) {
         if (__log.isTraceEnabled())
-            __log.trace("Mex[" + getMessageExchangeId()  + "].setPortOp("+portType+","+operation+")");
+            __log.trace("Mex[" + getMessageExchangeId()  + "].setPortOp(...)");
         _portType = portType;
         _operation = operation;
     }
