@@ -174,13 +174,24 @@ class BpelProcess {
         return "BpelProcess[" + _pid + "]";
     }
 
-    void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, long activityId, String action, FaultData fault) {
+    void recoverActivity(ProcessInstanceDAO instanceDAO, final String channel, final long activityId, final String action, final FaultData fault) {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
         markused();
-        throw new AssertionError("TODO: fixme");// TODO
-        // BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
-        // processInstance.recoverActivity(channel, activityId, action, fault);
+        BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceDAO.getInstanceId());
+        final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker,instanceDAO);
+        try {
+            iworker.execInCurrentThread(new Callable<Void> () {
+
+                public Void call() throws Exception {
+                    processInstance.recoverActivity(channel, activityId, action, fault);
+                    return null;
+                }
+                
+            });
+        } catch (Exception e) {
+            throw new BpelEngineException(e);
+        }
     }
 
     /**
