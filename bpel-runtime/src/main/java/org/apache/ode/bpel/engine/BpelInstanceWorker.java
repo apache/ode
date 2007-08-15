@@ -78,8 +78,9 @@ class BpelInstanceWorker implements Runnable {
      */
     <T> T execInCurrentThread(Callable<T> callable) throws Exception {
 
+        // Allow recursive invocations. This allows us to nest P2P invocations to an arbitrary depth.
         if (isWorkerThread())
-            throw new BpelEngineException("InternalError: Attempt to reenter instance worker " + toString());
+            return doInstanceWork(callable);
         
         final Semaphore ready = new Semaphore(0);
         final Semaphore finished = new Semaphore(0);
@@ -103,14 +104,10 @@ class BpelInstanceWorker implements Runnable {
         }
 
 
-        _activeInstance.set(_iid);
         try {
             return doInstanceWork(callable);
-        } catch (Exception ex) {
-            throw ex;
         } finally {
             finished.release();
-            _activeInstance.set(null);
         }
 
     }
@@ -172,12 +169,14 @@ class BpelInstanceWorker implements Runnable {
      */
     private <T> T doInstanceWork(Callable<T> work) throws Exception {
         __log.debug("Doing work for instance " + instanceId() +" in thread " + Thread.currentThread());
+        _activeInstance.set(_iid);
         try {
             return work.call();
         } catch (Exception ex) {
             __log.error("Work for instance " + instanceId() + " in thread "  + Thread.currentThread() + " resulted in an exception." ,ex);
             throw ex;
         } finally {
+            _activeInstance.set(null);
             __log.debug("Finished work for instance " + instanceId() + " in thread " + Thread.currentThread());
         }
     }

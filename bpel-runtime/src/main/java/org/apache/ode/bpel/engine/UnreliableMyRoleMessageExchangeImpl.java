@@ -154,6 +154,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 _response = response;
                 _fault = fault;
                 _failureType = failureType;
+                _explanation = explanation;
                 ack(ackType);
                 _future.done(Status.ACK);
 

@@ -46,14 +46,14 @@ public class UnreliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessage
             __log.debug("asyncResponseReceived: for IID " + getIID() );
         }
 
-        _process.scheduleInstanceWork(getIID(), _process._server.new TransactedRunnable(new Runnable() {
+        _process.enqueueInstanceTransaction(getIID(), new Runnable() {
             public void run() {
                 MessageExchangeDAO dao = getDAO();
                 save(dao);
                 _process.executeContinueInstancePartnerRoleResponseReceived(dao);
             }
 
-        }));
+        });
     }
 
     @Override

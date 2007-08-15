@@ -535,7 +535,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
                         return process.createPartnerRoleMex(mexdao);
                     case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-                        return process.recreateMyRoleMex(mexdao);
+                        return process.lookupMyRoleMex(mexdao);
                     default:
                         String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
                         __log.fatal(errmsg);

@@ -18,7 +18,7 @@ import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent;
 import org.apache.ode.bpel.o.OPartnerLink;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
@@ -128,11 +128,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
             __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
         
         try {
-            if (!processInterceptors(InterceptorInvoker.__onBpelServerInvoked, dao)) {
-                assert getStatus() == Status.ACK;
-                return dao;
-            }
-
+         
             _process.invokeProcess(dao);
         } finally {
             if (dao.getStatus() == Status.ACK) {
@@ -147,56 +143,8 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
         
     }
 
-    /**
-     * Process the message-exchange interceptors.
-     * 
-     * @param mex
-     *            message exchange
-     * @return <code>true</code> if execution should continue, <code>false</code> otherwise
-     */
-    protected boolean processInterceptors(InterceptorInvoker invoker, MessageExchangeDAO mexDao) {
-        // TODO: should we give the in-mem dao connection for interceptors on in-mem processes?
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), mexDao.getProcess(), null);
 
-        for (MessageExchangeInterceptor i : _contexts.globalIntereceptors)
-            if (!processInterceptor(i, this, ictx, invoker, mexDao))
-                return false;
+    
+    protected abstract void onAsyncAck(MessageExchangeDAO mexdao);    
 
-        return true;
-    }
-
-    protected boolean processInterceptor(
-            MessageExchangeInterceptor i, 
-            MyRoleMessageExchangeImpl mex, 
-            InterceptorContext ictx,
-            InterceptorInvoker invoker,
-            MessageExchangeDAO mexdao) {
-        __log.debug(invoker + "--> interceptor " + i);
-        try {
-            invoker.invoke(i, mex, ictx);
-        } catch (FaultMessageExchangeException fme) {
-            __log.debug("interceptor " + i + " caused invoke on " + this + " to be aborted with FAULT " + fme.getFaultName());
-            MexDaoUtil.setFaulted(mexdao, fme.getFaultName(), fme.getFaultData() == null ? null : fme.getFaultData().getMessage());
-            return false;
-        } catch (AbortMessageExchangeException ame) {
-            __log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: " + ame.getMessage());
-            MexDaoUtil.setFailed(mexdao, FailureType.ABORTED, __msgs.msgInterceptorAborted(mex.getMessageExchangeId(), i
-                    .toString(), ame.getMessage()));
-            return false;
-        }
-        return true;
-    }
-
-   
-    
-    protected abstract void onAsyncAck(MessageExchangeDAO mexdao);
-    
-    
-    protected void finalize() {
-        _process.unregisterMyRoleMex(this);
-    }
-    
-    
-
- 
 }

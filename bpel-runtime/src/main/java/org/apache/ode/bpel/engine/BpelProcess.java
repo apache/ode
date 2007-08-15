@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import javax.wsdl.Operation;
@@ -60,10 +58,13 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
+import org.apache.ode.bpel.intercept.FailMessageExchangeException;
+import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
@@ -145,7 +146,8 @@ class BpelProcess {
 
     final BpelServerImpl _server;
 
-    final private List<WeakReference<MyRoleMessageExchangeImpl>> _mexStateListeners = new CopyOnWriteArrayList<WeakReference<MyRoleMessageExchangeImpl>>();
+    /** Weak-reference cache of all the my-role message exchange objects. */
+    final private MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache(this);
 
     BpelProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
         _server = server;
@@ -198,10 +200,7 @@ class BpelProcess {
             if (target == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mexdao.getMessageExchangeId());
                 __log.error(errmsg);
-                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_ENDPOINT);
-                mexdao.setFaultExplanation(errmsg);
-                mexdao.setStatus(Status.ACK);
-                mexdao.setAckType(AckType.FAILURE);
+                MexDaoUtil.setFailed(mexdao, MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg);
                 onMyRoleMexAck(mexdao, oldstatus);
                 return;
             }
@@ -210,10 +209,13 @@ class BpelProcess {
             if (op == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mexdao.getMessageExchangeId());
                 __log.error(errmsg);
-                mexdao.setFailureType(MessageExchange.FailureType.UNKNOWN_OPERATION);
-                mexdao.setFaultExplanation(errmsg);
-                mexdao.setStatus(Status.ACK);
-                mexdao.setAckType(AckType.FAILURE);
+                MexDaoUtil.setFailed(mexdao, MessageExchange.FailureType.UNKNOWN_OPERATION, errmsg);
+                onMyRoleMexAck(mexdao, oldstatus);
+                return;
+            }
+
+            if (!processInterceptors(mexdao, InterceptorInvoker.__onProcessInvoked)) {
+                __log.debug("Aborting processing of mex " + mexdao.getMessageExchangeId() + " due to interceptors.");
                 onMyRoleMexAck(mexdao, oldstatus);
                 return;
             }
@@ -226,12 +228,6 @@ class BpelProcess {
             }
 
             mexdao.setProcess(getProcessDAO());
-
-            // TODO: fix this
-            // if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
-            // __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
-            // return;
-            // }
 
             markused();
             CorrelationStatus cstatus = target.invokeMyRole(mexdao);
@@ -384,30 +380,9 @@ class BpelProcess {
         brc.execute();
     }
 
-    void enqueueInstanceWork(Long instanceId, Runnable runnable) {
-        BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
-        iworker.enqueue(runnable);
-    }
-
     void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
         iworker.enqueue(_server.new TransactedRunnable(runnable));
-    }
-
-    /**
-     * Schedule work for a given instance; work will occur if transaction commits.
-     * 
-     * @param instanceId
-     * @param name
-     */
-    void scheduleInstanceWork(final Long instanceId, final Runnable runnable) {
-        _contexts.registerCommitSynchronizer(new Runnable() {
-            public void run() {
-                BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
-                iworker.enqueue(new ProcessRunnable(runnable));
-            }
-        });
-
     }
 
     private <T> T doInstanceWork(Long instanceId, final Callable<T> callable) {
@@ -487,16 +462,23 @@ class BpelProcess {
      *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
-    boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        // InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), getProcessDAO(), _pconf);
-        //
-        // for (MessageExchangeInterceptor i : _mexInterceptors)
-        // if (!mex.processInterceptor(i, mex, ictx, invoker))
-        // return false;
-        // for (MessageExchangeInterceptor i : getEngine().getInterceptors())
-        // if (!mex.processInterceptor(i, mex, ictx, invoker))
-        // return false;
-        //
+    boolean processInterceptors(MessageExchangeDAO mexdao, InterceptorInvoker invoker) {
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), mexdao, getProcessDAO(), _pconf);
+
+        try {
+            for (MessageExchangeInterceptor interceptor : _mexInterceptors)
+                invoker.invoke(interceptor, ictx);
+
+            for (MessageExchangeInterceptor interceptor : _server._contexts.globalIntereceptors)
+                invoker.invoke(interceptor, ictx);
+        } catch (FailMessageExchangeException e) {
+            MexDaoUtil.setFailed(mexdao,FailureType.ABORTED, e.getMessage());
+            return false;
+        } catch (FaultMessageExchangeException e) {
+            MexDaoUtil.setFaulted(mexdao, e.getFaultName(), e.getFaultData());
+            return false;
+        }
+
         return true;
     }
 
@@ -813,10 +795,28 @@ class BpelProcess {
 
         }
 
-        registerMyRoleMex(mex);
+        _myRoleMexCache.put(mex);
         return mex;
     }
 
+    /**
+     * Lookup a {@link MyRoleMessageExchangeImpl} object in the cache, re-creating it if not found.
+     * 
+     * @param mexdao
+     *            DB representation of the mex.
+     * @return client representation
+     */
+    MyRoleMessageExchangeImpl lookupMyRoleMex(MessageExchangeDAO mexdao) {
+        return _myRoleMexCache.get(mexdao); // this will re-create if necessary
+    }
+
+    /**
+     * Create (or recreate) a {@link MyRoleMessageExchangeImpl} object from data in the db. This method is used by the
+     * {@link MyRoleMessageExchangeCache} to re-create objects when they are not found in the cache.
+     * 
+     * @param mexdao
+     * @return
+     */
     MyRoleMessageExchangeImpl recreateMyRoleMex(MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
 
@@ -1016,21 +1016,6 @@ class BpelProcess {
         }
     }
 
-    void registerMyRoleMex(MyRoleMessageExchangeImpl mymex) {
-        _mexStateListeners.add(new WeakReference<MyRoleMessageExchangeImpl>(mymex));
-    }
-
-    void unregisterMyRoleMex(MyRoleMessageExchangeImpl mymex) {
-        ArrayList<WeakReference<MyRoleMessageExchangeImpl>> needsRemoval = new ArrayList<WeakReference<MyRoleMessageExchangeImpl>>();
-        for (WeakReference<MyRoleMessageExchangeImpl> wref : _mexStateListeners) {
-            MyRoleMessageExchangeImpl mex = wref.get();
-            if (mex == null || mex == mymex)
-                needsRemoval.add(wref);
-        }
-        _mexStateListeners.removeAll(needsRemoval);
-
-    }
-
     void onMyRoleMexAck(MessageExchangeDAO mexdao, Status old) {
 
         if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
@@ -1069,11 +1054,11 @@ class BpelProcess {
                 caller.p2pWakeup(pmex);
 
         } else /* not p2p */{
-            // TODO: force a myrole mex to be created if it is not in cache.
-            for (WeakReference<MyRoleMessageExchangeImpl> wr : _mexStateListeners) {
-                MyRoleMessageExchangeImpl mymex = wr.get();
-                if (mymex != null && mymex.getMessageExchangeId() != null)
-                    mymex.onAsyncAck(mexdao);
+            // Do an Async wakeup if we are in the ASYNC state. If we're not, we'll pick up the ACK when we unwind
+            // the stack.
+            if (old == Status.ASYNC) {
+                MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao);
+                mymex.onAsyncAck(mexdao);
             }
         }
 
@@ -1241,6 +1226,11 @@ class BpelProcess {
 
         Operation operation = oplink.getPartnerRoleOperation(mexdao.getOperation());
 
+        if (!processInterceptors(mexdao, InterceptorInvoker.__onPartnerInvoked))  {
+            __log.debug("Partner invocation intercepted.");
+            return;
+        }
+        
         try {
             if (p2pProcess != null) {
                 /* P2P (process-to-process) invocation, special logic */
@@ -1324,10 +1314,9 @@ class BpelProcess {
      * @param myrolemex
      */
     private void p2pWakeup(final MessageExchangeDAO prolemex) {
-        BpelInstanceWorker iworker = _instanceWorkerCache.get(prolemex.getInstance().getInstanceId());
 
         try {
-            iworker.execInCurrentThread(new Callable<Void>() {
+            doInstanceWork(prolemex.getInstance().getInstanceId(), new Callable<Void>() {
 
                 public Void call() throws Exception {
                     executeContinueInstancePartnerRoleResponseReceived(prolemex);

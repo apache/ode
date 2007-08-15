@@ -20,7 +20,7 @@ package org.apache.ode.bpel.intercept;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.iapi.Message;
+import org.w3c.dom.Element;
 
 /**
  * Exception thrown by {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor}
@@ -32,9 +32,9 @@ public final class FaultMessageExchangeException extends AbortMessageExchangeExc
 	private static final long serialVersionUID = 1L;
 
 	private QName _faultName;
-	private Message _faultData;
+	private Element _faultData;
 
-	public FaultMessageExchangeException(String errmsg, QName faultName, Message faultData) {
+	public FaultMessageExchangeException(String errmsg, QName faultName, Element faultData) {
 		super(errmsg);
 		
 		_faultName = faultName;
@@ -45,7 +45,7 @@ public final class FaultMessageExchangeException extends AbortMessageExchangeExc
 		return _faultName;
 	}
 	
-	public Message getFaultData() {
+	public Element getFaultData() {
 		return _faultData;
 	}
 }
