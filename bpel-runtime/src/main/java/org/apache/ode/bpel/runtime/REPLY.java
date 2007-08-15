@@ -46,13 +46,12 @@ class REPLY extends ACTIVITY {
         }
         FaultData fault = null;
 
-        // TODO: Check for fault without message.
 
         try {
-            Node msg = getBpelRuntimeContext()
+            Node msg = oreply.variable == null ? null : getBpelRuntimeContext()
                     .fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
-            assert msg instanceof Element;
+            assert msg == null || msg instanceof Element; // note msg can be null for faults 
 
             for (Iterator i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
                 OScope.CorrelationSet cset = (OScope.CorrelationSet) i.next();
@@ -65,9 +64,7 @@ class REPLY extends ACTIVITY {
                     .reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
                             oreply.messageExchangeId,
                             (Element)msg,
-                            (oreply.fault != null)
-                                    ? oreply.fault
-                                    : null);
+                            oreply.fault);
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);

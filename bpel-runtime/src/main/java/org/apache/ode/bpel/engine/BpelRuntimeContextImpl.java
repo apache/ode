@@ -520,8 +520,19 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // Get the "my-role" mex from the DB.
         MessageExchangeDAO myrolemex = _dao.getConnection().getMessageExchange(mexRef);
 
-        // TODO: add some checks here/could get npe
-        MessageDAO message = myrolemex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput().getMessage()
+        Operation operation = plinkInstnace.partnerLink.getMyRoleOperation(opName);
+        if (operation == null || operation.getOutput() == null) {
+            // reply to operation that is either not defined or one-way
+            // Perhaps this should be detected at compile time? 
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest,
+                    "Undefined two-way operation \"" + opName + "\".");
+            
+        }
+        
+        // TODO what if msg==null? i.e. for a reply-with-fault.
+        
+        MessageDAO message = myrolemex.createMessage(
+                operation.getOutput().getMessage()
                 .getQName());
         message.setData(msg);
 

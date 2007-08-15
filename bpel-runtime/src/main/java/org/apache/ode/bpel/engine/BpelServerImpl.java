@@ -545,7 +545,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             };
 
             try {
-                if (inmemdao != null || _contexts.isTransacted()) // TODO: hmmmmm, catch-22, need to be able to infer if TRANSACTED/RELIABLE just from mex id ? here || istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
+                if (inmemdao != null || _contexts.isTransacted()) 
                     return loadMex.call();
                 else 
                     return enqueueTransaction(loadMex).get();

@@ -81,14 +81,13 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     
 
     public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
-        // TODO: add code here to handle MEXs that we've "forgotten" about due to system failure etc.. mostly
+        // Add code here to handle MEXs that we've "forgotten" about due to system failure etc.. mostly
         // useful for RELIABLE, but nice to have with ASYNC/BLOCKING as well. 
     }
 
 
     public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-        
+
     }
 
 

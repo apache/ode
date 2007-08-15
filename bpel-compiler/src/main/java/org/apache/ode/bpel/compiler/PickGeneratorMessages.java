@@ -33,14 +33,12 @@ public class PickGeneratorMessages extends CompilationMessageBundle {
                 + " second set was \"{0}\".", setName);
     }
 
-    // TODO: better error message
     public CompilationMessage errForOrUntilMustBeGiven() {
-        return this.formatCompilationMessage("errForOrUntilMustBeGiven");
+        return this.formatCompilationMessage("An <onAlarm> block must include a <for> or <until> block.");
     }
 
-    // TODO: better error message
     public CompilationMessage errOnAlarmWithCreateInstance() {
-        return this.formatCompilationMessage("errOnAlarmWithCreateInstance");
+        return this.formatCompilationMessage("An <onAlarm> may not be used when createInstance=yes.");
     }
 
     public CompilationMessage errRendezvousNotSupported() {

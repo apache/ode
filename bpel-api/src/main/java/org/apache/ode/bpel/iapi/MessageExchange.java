@@ -198,7 +198,6 @@ public interface MessageExchange {
      * Get the operation description for this message exchange.
      * It is possible that the description cannot be resolved, for example if
      * the EPR is unknown or if the operation does not exist.
-     * TODO: How to get rid of the WSDL4j dependency?
      * @return WSDL operation description or <code>null</code> if not availble
      */
     Operation getOperation();
@@ -207,7 +206,6 @@ public interface MessageExchange {
      * Get the port type description for this message exchange.
      * It is possible that the description cannot be resolved, for example if
      * the EPR is unknown or if the operation does not exist.
-     * TODO: How to get rid of the WSDL4j dependency?
      * @return WSDL port type description or <code>null</code> if not available.
      */
     PortType getPortType();

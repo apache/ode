@@ -11,8 +11,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
 /**
  * Transacted my-role message exchange.
  * 
- * TODO: IMPLEMENT!
- * 
+
  * @author Maciej Szefler
  * 
  */

@@ -36,7 +36,4 @@ public class OFaultHandler extends OBase {
         super(owner);
     }
 
-    public Collection<OLink> outgoinglinks() {
-        throw new UnsupportedOperationException(); // TODO: implement me!
-    }
 }

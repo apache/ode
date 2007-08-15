@@ -40,7 +40,6 @@ public interface EndpointReference {
    * structure is up to the integration layer. This method is
    * used by the BPEL engine to persist EPR references in the 
    * database. 
-   * TODO: avoid using DOM
    * @return destination for the generated XML
    */
   Document toXML(); 

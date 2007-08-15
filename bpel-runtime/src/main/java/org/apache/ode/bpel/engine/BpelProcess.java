@@ -1070,7 +1070,14 @@ class BpelProcess {
             if (old == Status.ASYNC) {
                 MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao);
                 mymex.onAsyncAck(mexdao);
+                
+                try {
+                    _contexts.mexContext.onMyRoleMessageExchangeStateChanged(mymex);
+                } catch (Throwable t) {
+                    __log.error("Integration layer threw an unexepcted exception.", t);
+                }
             }
+            
         }
 
     }

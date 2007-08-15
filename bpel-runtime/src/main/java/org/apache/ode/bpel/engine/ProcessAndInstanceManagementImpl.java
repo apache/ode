@@ -359,7 +359,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     // INSTANCE ACTIONS
     //
     public InstanceInfoDocument fault(Long iid, QName faultname, Element faultData) {
-        // TODO: Implement
+        // TODO: implement me!
         return genInstanceInfoDocument(iid);
     }
 
@@ -765,7 +765,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             }
         }
 
-        // TODO: add documents to the above data structure.
     }
 
     /**
@@ -1234,8 +1233,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     else if ("version".equals(orderKey))
                         c = new Comparator<ProcessConf>() {
                             public int compare(ProcessConf o1, ProcessConf o2) {
-                                // TODO: implement version comparisons.
-                                return 0;
+                                return (int) (o1.getVersion() - o2.getVersion());
                             }
                         };
                     else if ("deployed".equals(orderKey))

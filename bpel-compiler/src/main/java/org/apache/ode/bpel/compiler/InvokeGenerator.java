@@ -52,30 +52,27 @@ class InvokeGenerator extends DefaultActivityGenerator {
 
         oinvoke.partnerLink = _context.resolvePartnerLink(src.getPartnerLink());
         oinvoke.operation = _context.resolvePartnerRoleOperation(oinvoke.partnerLink, src.getOperation());
-        assert oinvoke.operation.getInput() != null; // ensured by
-        // resolvePartnerRoleOperation
-        assert oinvoke.operation.getInput().getMessage() != null; // ensured
-        // by
-        // resolvePartnerRoleOperation
-        // TODO: Add portType checking if specified by user
-        // if (portType != null &&
-        // !portType.equals(onMessage.partnerLink.myRolePortType.getQName()))
-        // throw new CompilationException(CMSGSG.errPortTypeMismatch(portType,
-        // onMessage.partnerLink.myRolePortType.getQName()));
+        assert oinvoke.operation.getInput() != null; // ensured by reolvePartnerRoleOperation
+        assert oinvoke.operation.getInput().getMessage() != null; // ensured by resolvePartnerRoleOperation
+        if (src.getPortType() != null) {
+            if (!src.getPortType().equals(oinvoke.partnerLink.partnerRolePortType.getQName())
+                    throw new CompilationException(__imsgs.errPortTypeMismatch(src.getPortType(), oinvoke.partnerLink.partnerRolePortType.getQName()));
+        }
+
         if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null) {
-            // Input var can be omitted if input message has no part 
+            // Input var can be omitted if input message has no part
             if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
                 if (src.getInputVar() == null)
                     throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
-                oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput()
-                        .getMessage().getQName());
+                oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput().getMessage()
+                        .getQName());
             }
         }
         if (oinvoke.operation.getOutput() != null && oinvoke.operation.getOutput().getMessage() != null) {
             if (src.getOutputVar() == null)
                 throw new CompilationException(__imsgs.errInvokeNoOutputMessageForOutputOp(oinvoke.operation.getName()));
-            oinvoke.outputVar = _context.resolveMessageVariable(src.getOutputVar(), oinvoke.operation.getOutput()
-                    .getMessage().getQName());
+            oinvoke.outputVar = _context.resolveMessageVariable(src.getOutputVar(), oinvoke.operation.getOutput().getMessage()
+                    .getQName());
         }
         List<Correlation> correlations = src.getCorrelations();
         List<Correlation> incorrelations = CollectionsX.filter(new ArrayList<Correlation>(), correlations,
@@ -102,25 +99,20 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 });
 
         if (oinvoke.inputVar != null) {
-            doCorrelations(outcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput);
-            doCorrelations(inoutcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput);
+            doCorrelations(outcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput, oinvoke.initCorrelationsInput);
+            doCorrelations(inoutcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput, oinvoke.initCorrelationsInput);
         }
         if (oinvoke.outputVar != null) {
-            doCorrelations(incorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
-            doCorrelations(inoutcorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
+            doCorrelations(incorrelations, oinvoke.outputVar, oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
+            doCorrelations(inoutcorrelations, oinvoke.outputVar, oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
         }
-        
 
-//        Partner link could be initialized with magic session in a previous receive.
-//        if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
-//            if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {
-//                throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
-//            }
-//        }
+        // Partner link could be initialized with magic session in a previous receive.
+        // if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
+        // if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {
+        // throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
+        // }
+        // }
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var,
