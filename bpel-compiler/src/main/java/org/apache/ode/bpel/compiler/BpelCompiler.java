@@ -938,8 +938,12 @@ abstract class BpelCompiler implements CompilerContext {
         alias.varType = messageType;
         // bpel 2.0 excludes declaration of part;
         // bpel 1.1 requires it
-        if (src.getPart() != null)
+        if (src.getPart() != null) {
             alias.part = messageType.parts.get(src.getPart());
+            if (alias.part == null)
+                throw new CompilationException(__cmsgs.errUnknownPartInAlias(src.getPart(),
+                        messageType.messageType.toString()));
+        }
         if (src.getQuery() != null)
             alias.location = compileExpr(src.getQuery());
         property.aliases.add(alias);
