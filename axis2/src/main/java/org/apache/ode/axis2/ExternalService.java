@@ -222,7 +222,7 @@ public class ExternalService implements PartnerRoleChannel {
 
         if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
             EndpointReference annonEpr =
-                    new EndpointReference("http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous");
+                    new EndpointReference("http://www.w3.org/2005/08/addressing/anonymous");
             ctxt.setReplyTo(annonEpr);
             ctxt.setMessageID("uuid:"+new UUID().toString());
         }
