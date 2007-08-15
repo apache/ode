@@ -454,4 +454,12 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return formatCompilationMessage("Missing portType {0} on partnerLinkType {1} for partnerRole {2}", portType, plnkType, partnerRole);
     }
 
+    /**
+     * The part {0} declared in property alias for messageType {1} couldn't be found.
+     */
+    public CompilationMessage errUnknownPartInAlias(String part, String message) {
+        return this.formatCompilationMessage("The part {0} declared in property alias for " +
+                "messageType {1} couldn't be found.", part, message);
+    }
+
 }
