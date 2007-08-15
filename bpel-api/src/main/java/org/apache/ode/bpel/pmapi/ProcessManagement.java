@@ -106,7 +106,7 @@ public interface ProcessManagement {
   /**
    * Retire a process.
    * @param pid identifier of the process to retire
-   * @param retired TODO
+   * @param retired new value of retired flag
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
   ProcessInfoDocument setRetired(QName pid, boolean retired)

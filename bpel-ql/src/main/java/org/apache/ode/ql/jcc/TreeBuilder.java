@@ -48,7 +48,6 @@ public class TreeBuilder extends Builder<String> {
         org.apache.ode.ql.jcc.ASTStart start = new Parser(query).start();
         return build(start);
       }catch(ParseException ex) {
-        //TODO create common exception which will indicate parsing exception
         throw new RuntimeException(ex.getMessage(), ex);
       }
     }
@@ -119,7 +118,6 @@ public class TreeBuilder extends Builder<String> {
             ASTOrderType astType = (ASTOrderType)extractChildNode(node, 1);
             type = OrderByType.valueOf(astType.getValue().toUpperCase());
         } else {
-            //TODO
             throw new IllegalArgumentException();
         }
         Identifier id = createIdentifier(node, 0);
@@ -185,7 +183,6 @@ public class TreeBuilder extends Builder<String> {
         if(node instanceof ASTProperty) {
             return new org.apache.ode.ql.tree.nodes.Property(((ASTProperty)node).getName());
         }
-        //TODO
         throw new IllegalArgumentException("");
     }
     private ASTValue extractValue(Node parentNode, int index) {
@@ -196,14 +193,12 @@ public class TreeBuilder extends Builder<String> {
     private Node extractChildNode(Node parentNode, int index, Class expected) {
         Node node = extractChildNode(parentNode, index);
         if(!(expected.isAssignableFrom(node.getClass()))) {
-            //TODO
             throw new IllegalArgumentException("");
         }
         return node;
     }
     private Node extractChildNode(Node parentNode, int index) {
         if(parentNode.jjtGetNumChildren()<=index) {
-            //TODO
             throw new IllegalArgumentException("");
         }
         return parentNode.jjtGetChild(index);

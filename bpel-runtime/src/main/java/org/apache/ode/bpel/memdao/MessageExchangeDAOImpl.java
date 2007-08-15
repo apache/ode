@@ -112,7 +112,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	}
 
 	public MessageDAO createMessage(QName type) {
-		MessageDAO messageDAO = new MessageDAOImpl(this);
+		MessageDAO messageDAO = new MessageDAOImpl();
 		messageDAO.setType(type);
 		return messageDAO;
 	}

@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.intercept;
 
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * No-Op implementation of the

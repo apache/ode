@@ -37,7 +37,6 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -1012,8 +1011,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public QName getPartnerFault(String mexId) {
-        MessageExchangeDAO mex = _getPartnerResponse(mexId).getMessageExchange();
-        return mex.getFault();
+        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        if (dao == null) {
+            // this should not happen....
+            String msg = "Engine requested non-existent message exchange: " + mexId;
+            __log.fatal(msg);
+            throw new BpelEngineException(msg);
+        }
+        return dao.getFault();
     }
 
     public QName getPartnerResponseType(String mexId) {

@@ -20,16 +20,15 @@
 package org.apache.ode.daohib.bpel;
 
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.utils.DOMUtils;
 import org.hibernate.Session;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 
 public class MessageDaoImpl extends HibernateDao implements MessageDAO {
 
@@ -70,10 +69,5 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         }
 
     }
-
-    public MessageExchangeDAO getMessageExchange() {
-        return new MessageExchangeDaoImpl(_sm,_hself.getMessageExchange());
-    }
-
 
 }

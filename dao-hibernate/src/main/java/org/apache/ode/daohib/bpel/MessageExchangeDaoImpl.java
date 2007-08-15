@@ -100,7 +100,6 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         HMessage message = new HMessage();
         message.setType(type == null ? null : type.toString());
         message.setCreated(new Date());
-        message.setMessageExchange(_hself);
         getSession().save(message);
         return new MessageDaoImpl(_sm, message);
 
