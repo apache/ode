@@ -89,12 +89,12 @@ public class NStateLatch {
                             _transitions[state].run();
                         } finally {
                             _transitioning = false;
-                            _depth ++;
                         }
                     _state = state;
                 }
             }
         } finally {
+            _depth ++;
             _lock.unlock();
         }
     }
