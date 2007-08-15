@@ -10,7 +10,7 @@ Linux
 export PATH=$PATH:PATH_TO_ODE/bin
 
 The sendsoap command can either be executed using sendsoap.bat under
-Windows or sendsoap.sh with Linux (replace accordingly in the
+Windows or sendsoap with Linux (replace accordingly in the
 following command line examples).
 
 Hello World 2
