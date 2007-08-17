@@ -60,19 +60,35 @@ public class SessionOutHandler extends AbstractHandler {
             if (header == null) {
                 header = factory.createSOAPHeader(messageContext.getEnvelope());
             }
+            
             if (otargetSession != null && otargetSession instanceof MutableEndpoint) {
 
-                WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
-
-                OMElement to = factory.createOMElement("To", wsAddrNS);
+            	WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
+            	
+            	OMElement to = factory.createOMElement("To", wsAddrNS);
                 header.addChild(to);
                 to.setText(targetEpr.getUrl());
 
-                String soapAction = (String) messageContext.getProperty("soapAction");
+                String action = messageContext.getSoapAction(); 
                 OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
                 header.addChild(wsaAction);
-                wsaAction.setText(soapAction);
+                wsaAction.setText(action);
 
+                // we only set the ReplyTo and MessageID headers if doing Request-Response
+                org.apache.axis2.addressing.EndpointReference replyToEpr = messageContext.getReplyTo();
+                if (replyToEpr != null) {
+                	OMElement replyTo = factory.createOMElement("ReplyTo", wsAddrNS);
+                	OMElement address = factory.createOMElement("Address", wsAddrNS);
+                	replyTo.addChild(address);
+                    header.addChild(replyTo);
+                    address.setText(replyToEpr.getAddress());
+                    
+                    String messageId = messageContext.getMessageID();
+                    OMElement messageIdElem = factory.createOMElement("MessageID", wsAddrNS);
+                    header.addChild(messageIdElem);
+                    messageIdElem.setText(messageId);                
+                }
+	            
                 if (targetEpr.getSessionId() != null) {
                     OMElement session = factory.createOMElement("session", intalioSessNS);
                     header.addChild(session);

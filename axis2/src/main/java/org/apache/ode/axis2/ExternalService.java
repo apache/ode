@@ -43,6 +43,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -108,9 +109,8 @@ public class ExternalService implements PartnerRoleChannel {
             }
 
             Options options = new Options();
+            options.setAction(mctx.getSoapAction());
             options.setTo(axisEPR);
-            String soapAction = _converter.getSoapAction(odeMex.getOperationName());
-            options.setAction(soapAction);
             options.setTimeOutInMilliSeconds(60000);
 
             CachedServiceClient cached = _cachedClients.get();
@@ -187,6 +187,23 @@ public class ExternalService implements PartnerRoleChannel {
     }
 
     /**
+     * Extracts the action to be used for the given operation.  It first checks to see
+     * if a value is specified using WS-Addressing in the portType, it then falls back onto 
+     * getting it from the SOAP Binding.
+     * @param operation the name of the operation to get the Action for
+     * @return The action value for the specified operation
+     */
+    private String getAction(String operation)
+	{
+    	String action = _converter.getWSAInputAction(operation);
+        if (action == null || "".equals(action))
+        {
+        	action = _converter.getSoapAction(operation);	
+        }
+		return action;
+	}
+
+	/**
      * Extracts endpoint information from ODE message exchange to stuff them into Axis MessageContext.
      */
     private void writeHeader(MessageContext ctxt, PartnerRoleMessageExchange odeMex) {
@@ -204,9 +221,7 @@ public class ExternalService implements PartnerRoleChannel {
             targetEPR.setSessionId(partnerSessionId);
         }
         options.setProperty("targetSessionEndpoint", targetEPR);
-        String soapAction = _converter.getSoapAction(odeMex.getOperationName());
-        options.setProperty("soapAction", soapAction);
-
+        
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
@@ -220,12 +235,15 @@ public class ExternalService implements PartnerRoleChannel {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
         }
 
-        if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
-            EndpointReference annonEpr =
-                    new EndpointReference("http://www.w3.org/2005/08/addressing/anonymous");
-            ctxt.setReplyTo(annonEpr);
-            ctxt.setMessageID("uuid:"+new UUID().toString());
-        }
+        String action = getAction(odeMex.getOperationName());
+        ctxt.setSoapAction(action);
+        
+	    if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
+	    	EndpointReference annonEpr =
+	    		new EndpointReference(Namespaces.WS_ADDRESSING_ANON_URI);
+	    	ctxt.setReplyTo(annonEpr);
+	    	ctxt.setMessageID("uuid:" + new UUID().toString());
+	    }
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {

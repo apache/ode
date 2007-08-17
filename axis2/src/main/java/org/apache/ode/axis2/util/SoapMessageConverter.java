@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.Messages;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
 
@@ -43,12 +44,14 @@ import javax.wsdl.BindingOperation;
 import javax.wsdl.BindingOutput;
 import javax.wsdl.Definition;
 import javax.wsdl.Fault;
+import javax.wsdl.Input;
 import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.ElementExtensible;
+import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
@@ -64,7 +67,6 @@ import java.util.List;
  * representation and vice versa.
  *
  * @author Maciej Szefler ( m s z e f l e r (at) g m a i l . c o m )
- *
  */
 public class SoapMessageConverter {
 
@@ -458,15 +460,33 @@ public class SoapMessageConverter {
         return ee.isEmpty() ? null : ee.iterator().next();
 
     }
+    
+    /**
+     * Attempts to extract the WS-Addressing "Action" attribute value from the operation definition.
+     * When WS-Addressing is being used by a service provider, the "Action" is specified in the 
+     * portType->operation instead of the SOAP binding->operation.  
+     * 
+     * @param operation The name of the operation to extract the SOAP Action from
+     * @return the SOAPAction value if one is specified, otherwise empty string
+     */
+    public String getWSAInputAction(String operation) {
+      BindingOperation bop = _binding.getBindingOperation(operation, null, null);
+      if (bop == null) return "";
+
+      Input input = bop.getOperation().getInput();
+      if (input != null) {
+        Object actionQName = input.getExtensionAttribute(new QName(Namespaces.WS_ADDRESSING_NS, "Action"));
+        if (actionQName != null && actionQName instanceof QName)
+          return ((QName)actionQName).getLocalPart();
+      }
+      return "";
+    }
 
     /**
      * Attempts to extract the SOAP Action is defined in the WSDL document.
      *
-     * @param def
-     * @param service
-     * @param port
-     * @param operation
-     * @return
+     * @param operation The name of the operation to extract the SOAP Action from
+     * @return the SOAPAction value if one is specified, otherwise empty string
      */
     public String getSoapAction(String operation) {
         BindingOperation bop = _binding.getBindingOperation(operation, null, null);
@@ -478,7 +498,7 @@ public class SoapMessageConverter {
 
         return "";
     }
-
+    
     public QName parseSoapFault(Element odeMsgEl, SOAPEnvelope envelope, Operation operation) throws AxisFault {
         SOAPFault flt = envelope.getBody().getFault();
         SOAPFaultDetail detail = flt.getDetail();
