@@ -52,14 +52,12 @@
     <sequence>
       <if>
 	<condition>$var1/TestPart = 'abc'</condition>
-	<then>
 	  <assign>
 	    <copy>
 	      <from>'case1'</from>
 	      <to>$var2</to>
 	    </copy>
 	  </assign>
-	</then>
 	<elseif>
 	  <condition>$var1/TestPart = 'def'</condition>
 	  <assign>

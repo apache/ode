@@ -124,8 +124,7 @@
         </copy>
        </assign>
 	   <if name="switch">
-       <condition>bpws:getVariableData('Request', 'payload', '/typ:AsyncRequest/typ:Order/typ:OrderType/text()') = 'BookOrder'</condition>
-       <then>
+         <condition>bpws:getVariableData('Request', 'payload', '/typ:AsyncRequest/typ:Order/typ:OrderType/text()') = 'BookOrder'</condition>
 	       <invoke name="BookOrderInvoke"
 	        operation="BookOrder"
 	        inputVariable="Request"
@@ -136,7 +135,6 @@
 	          <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
 	         </correlations>
 	       </invoke>
-	     </then>
 	     <else>
 	       <invoke name="PaperOrderInvoke"
 	        operation="PaperOrder"
