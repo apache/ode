@@ -20,7 +20,6 @@
 
 <process name="DynPartnerMain"
          targetNamespace="http://ode/bpel/unit-test"
-         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref"
          xmlns:tns="http://ode/bpel/unit-test"
@@ -28,8 +27,8 @@
          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
          xmlns:test="http://ode/bpel/unit-test.wsdl"
          xmlns:resp="http://ode/bpel/responder.wsdl"
-    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import location="Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
      importType="http://schemas.xmlsoap.org/wsdl/" />

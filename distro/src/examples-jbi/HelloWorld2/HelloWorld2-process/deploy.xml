@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-	xmlns:pns="urn:/HelloWorld2.bpel"
+        xmlns:pns="urn:/HelloWorld2.bpel"
         xmlns:sns="urn:/HelloWorld2.wsdl" >
 
 
