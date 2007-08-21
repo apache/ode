@@ -18,12 +18,11 @@
   ~ under the License.
   -->
 <process name="HelloWorld2-RPC"
-        targetNamespace="urn:/HelloWorld2-RPC.bpel"
-        xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-        xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-        xmlns:tns="urn:/HelloWorld2-RPC.bpel"
-        xmlns:hello="urn:/HelloWorld2-RPC.wsdl"
-        xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+         targetNamespace="urn:/HelloWorld2-RPC.bpel"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="urn:/HelloWorld2-RPC.bpel"
+         xmlns:hello="urn:/HelloWorld2-RPC.wsdl"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
     <import location="HelloWorld2-RPC.wsdl"
             namespace="urn:/HelloWorld2-RPC.wsdl"
