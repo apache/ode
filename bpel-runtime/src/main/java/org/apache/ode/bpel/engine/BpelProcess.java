@@ -748,7 +748,7 @@ public class BpelProcess {
                             bounceProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
                             return null;
                         }
-                    });
+                    }).get(); // needs to be synchronous
                 } catch (Exception ex) {
                     String errmsg = "DbError";
                     __log.error(errmsg, ex);
