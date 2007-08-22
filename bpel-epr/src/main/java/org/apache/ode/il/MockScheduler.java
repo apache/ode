@@ -19,20 +19,26 @@
 
 package org.apache.ode.il;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Scheduler;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -63,23 +69,29 @@ public class MockScheduler implements Scheduler {
         }
     };
 
-    public String schedulePersistedJob(final Map<String, Object> detail, Date date) throws ContextException {
+    public String schedulePersistedJob(final Map<String, Object> detail, final Date date) throws ContextException {
         if (date != null) {
-            _timer.schedule(new TimerTask() {
-                public void run() {
-                    try {
-                        execIsolatedTransaction(new Callable() {
-                            public Object call() throws Exception {
-                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
-                                doExecute(ji);
-                                return null;
+            registerSynchronizer(new Synchronizer() {
+                public void afterCompletion(boolean success) {
+                    if (!success) return;
+                    _timer.schedule(new TimerTask() {
+                        public void run() {
+                            try {
+                                execIsolatedTransaction(new Callable() {
+                                    public Object call() throws Exception {
+                                        JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                                        doExecute(ji);
+                                        return null;
+                                    }
+                                });
+                            } catch (Exception e) {
+                                throw new ContextException("Failure when scheduling a new volatile job.", e);
                             }
-                        });
-                    } catch (Exception e) {
-                        throw new ContextException("Failure when scheduling a new volatile job.", e);
-                    }
+                        }
+                    }, date);
                 }
-            }, date);
+                public void beforeCompletion() { }
+            });
             return null;
         } else {
             return scheduleVolatileJob(true, detail);
@@ -89,6 +101,7 @@ public class MockScheduler implements Scheduler {
     public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
         registerSynchronizer(new Synchronizer() {
             public void afterCompletion(boolean success) {
+                if (!success) return;
                 try {
                     if (transacted) {
                         execIsolatedTransaction(new Callable() {
