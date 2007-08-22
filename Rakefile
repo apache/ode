@@ -24,8 +24,8 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.1-RC4-SNAPSHOT"
-NEXT_VERSION = "1.2"
+VERSION_NUMBER = "1.1-RC5"
+NEXT_VERSION = "1.1"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -318,13 +318,15 @@ define "ode" do
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-        hibernate_schemaexport "" do |task, ant|
+        # Protection against a buildr bug until the fix is released, avoids build failure
+        class << task ; attr_accessor :ant ; end
+        task.enhance { |task| task.ant = Buildr::Hibernate.schemaexport }
+        
+        hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-            :drop=>"no", :create=>"yes", :output=>target) do
-            task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
-              ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
-            end
-          end
+                           :drop=>"no", :create=>"yes", :output=>target) do
+            ant.fileset(:dir=>source.to_s) { ant.include :name=>"**/*.hbm.xml" }
+                           end
         end
       end
     end
