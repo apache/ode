@@ -6,7 +6,7 @@ Apache ODE 1.1 is the first official release of ODE since the project
 graduation from the Apache Incubator. It's mostly a bug fix release
 but also introduces a few performance improvements and enhancements.
  
-Apache ODE 1.0 requires Java 1.5.x. The WAR distribution can run in
+Apache ODE 1.1 requires Java 1.5.x. The WAR distribution can run in
 most J2EE servlet container. The JBI distribution should be able to
 run in any JBI container but has only been tested with ServiceMix
 3.1 so far. See the BUILDING file if you want to build your own
