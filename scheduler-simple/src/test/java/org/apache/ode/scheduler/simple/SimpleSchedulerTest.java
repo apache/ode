@@ -184,10 +184,11 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         try {
             _scheduler.schedulePersistedJob(newDetail("immediate"), new Date(System.currentTimeMillis()));
             _scheduler.schedulePersistedJob(newDetail("near"), new Date(System.currentTimeMillis() + 1100));
-            _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 2500));
+            _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 15000));
         } finally {
             _txm.commit();
         }
+        _scheduler.stop();
 
         _scheduler = newScheduler("n3");
         _scheduler.setNearFutureInterval(2000);
