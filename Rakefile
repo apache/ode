@@ -72,7 +72,7 @@ JAVAX               = struct(
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
-JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
+JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
