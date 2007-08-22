@@ -88,7 +88,7 @@
    </plnk:partnerLinkType>
    
   <vprop:property name="testProbeID" type="xsd:string"/>
-  <vprop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
+  <vprop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage"/>
   
   <vprop:property name="testPath" type="xsd:string"/>
   <vprop:propertyAlias propertyName="tns:testPath" messageType="tns:requestMessage" part="requestMessageData">
