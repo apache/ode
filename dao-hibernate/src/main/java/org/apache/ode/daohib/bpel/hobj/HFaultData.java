@@ -56,7 +56,7 @@ public class HFaultData extends HObject {
 
 
   /**
-   * @hibernate.property column="EXPLANATION"
+   * @hibernate.property column="EXPLANATION" length="4000"
    */
   public String getExplanation() {
     return _explanation;
@@ -64,8 +64,8 @@ public class HFaultData extends HObject {
 
   public void setExplanation(String explanation) {
       // Don't want to make this a blob, truncating to avoid errors
-      if (explanation != null && explanation.length() > 255)
-          explanation = explanation.substring(0, 254);
+      if (explanation != null && explanation.length() > 4000)
+          explanation = explanation.substring(0, 3999);
     _explanation = explanation;
   }
 
