@@ -86,7 +86,8 @@ class ASSIGN extends ACTIVITY {
 
         if (faultData != null) {
             __log.error("Assignment Fault: " + faultData.getFaultName()
-                    + ",lineNo=" + faultData.getFaultLineNo());
+                    + ",lineNo=" + faultData.getFaultLineNo()
+                    + ",faultExplanation=" + faultData.getExplanation());
             _self.parent.completed(faultData, CompensationHandler.emptySet());
         } else {
             _self.parent.completed(null, CompensationHandler.emptySet());
