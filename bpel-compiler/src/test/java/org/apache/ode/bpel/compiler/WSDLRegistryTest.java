@@ -68,9 +68,12 @@ public class WSDLRegistryTest extends TestCase {
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
     WSDLReader reader = factory.newWSDLReader();
-    
-    //ResourceFinder finder = new DefaultResourceFinder(new File(wsd.getPath()).getParentFile());
-    ResourceFinder finder = new DefaultResourceFinder(new File(wsd.toURI().getPath()).getParentFile());
+
+
+    File parent = new File(wsd.toURI().getPath()).getParentFile();
+    ResourceFinder finder = new DefaultResourceFinder(parent, parent);
+
+
     WSDLLocatorImpl loc = new WSDLLocatorImpl(finder,wsd.toURI());
     Definition4BPEL wsdl = (Definition4BPEL) reader.readWSDL(loc);
     _registry.addDefinition(wsdl, finder, wsd.toURI());

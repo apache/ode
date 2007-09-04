@@ -171,7 +171,6 @@ class WSDLRegistry {
                         throw ce;
 
                     _ctx.recoveredFromError(new SourceLocationImpl(defuri), ce);
-
                     continue;
                 }
 
@@ -179,6 +178,10 @@ class WSDLRegistry {
                 addDefinition((Definition4BPEL) im.getDefinition(), rf, defuri.resolve(im.getLocationURI()));
             }
         }
+    }
+
+    public void addSchemas(Map<URI, byte[]> capture) {
+        _schemas.putAll(capture);
     }
 
     @SuppressWarnings("unchecked")
@@ -195,15 +198,15 @@ class WSDLRegistry {
                     ((List<ExtensibilityElement>)def.getTypes().getExtensibilityElements()).iterator();
                  iter.hasNext();) {
                 ExtensibilityElement ee = iter.next();
-
                 
                 if (ee instanceof XMLSchemaType) {
                     String schema = ((XMLSchemaType)ee).getXMLSchema();
-                    Map<URI, byte[]> capture = null;
+
 
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
+
                     try {
-                        capture = XSUtils.captureSchema(defuri, schema, resolver);
+                        Map<URI, byte[]> capture = XSUtils.captureSchema(defuri, schema, resolver);
                         _schemas.putAll(capture);
 
                         try {

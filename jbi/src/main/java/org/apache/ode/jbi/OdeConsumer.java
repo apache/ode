@@ -119,6 +119,8 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
 
     }
 
+
+
     public void onJbiMessageExchange(MessageExchange jbiMex) throws MessagingException {
         if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY)
                 && !jbiMex.getPattern().equals(MessageExchangePattern.IN_OUT)) {

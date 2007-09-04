@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/message" xmlns:tns="http://www.example.org/message" elementFormDefault="qualified">
+
+    <element name="start" type="string"></element>
+
+    <complexType name="Data">
+    	<sequence>
+    		<element name="Name" type="string"></element>
+    		<element name="Age" type="string"></element>
+    	</sequence>
+    </complexType>
+</schema>

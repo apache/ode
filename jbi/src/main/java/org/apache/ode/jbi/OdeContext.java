@@ -81,6 +81,7 @@ final class OdeContext {
 
     MessageExchangeContextImpl _mexContext;
 
+    SimpleScheduler _scheduler;
 
     ExecutorService _executorService;
 
@@ -95,7 +96,6 @@ final class OdeContext {
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
 
-    public SimpleScheduler _scheduler;
 
     /**
      * Gets the delivery channel.

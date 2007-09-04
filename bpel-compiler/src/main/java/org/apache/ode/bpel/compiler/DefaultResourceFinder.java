@@ -38,32 +38,43 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultResourceFinder implements ResourceFinder {
     private static final Log __log = LogFactory.getLog(DefaultResourceFinder.class);
 
-    private File _suDir;
+    private File _relativeDir;
+    private File _absoluteDir;
 
     /**
      * Default constructor: resolve relative URIs against current working directory.
      */
     public DefaultResourceFinder() {
-        _suDir = new File("");
+        _absoluteDir = new File("");
+        _relativeDir = _absoluteDir;
     }
 
     /**
      * Constructor: resolve relative URIs against specified directory.
-     * @param suDir base path for relative URIs.
+     * @param relativeDir base path for relative URLs.
+     * @param absoluteDir base path for absolute URLs.
      */
-    public DefaultResourceFinder(File suDir) {
-        if (suDir == null) {
-            throw new IllegalArgumentException("Argument 'suDir' is null");
+    public DefaultResourceFinder(File relativeDir, File absoluteDir) {
+        checkDir("relativeDir", relativeDir);
+        checkDir("absoluteDir", absoluteDir);
+        _relativeDir = relativeDir;
+        _absoluteDir = absoluteDir;
         }
-        if (!suDir.exists()) {
-            throw new IllegalArgumentException("Directory does not exist: " + suDir);
+
+    private void checkDir(String arg, File dir) {
+        if (dir == null) {
+            throw new IllegalArgumentException("Argument '"+arg+"' is null");
         }
-        _suDir = suDir;
+        if (!dir.exists()) {
+            throw new IllegalArgumentException("Directory does not exist: " + dir);
+        }
     }
 
-
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
-        URI suURI = _suDir.toURI();
+        URI absolute = _absoluteDir.toURI();
+        if (__log.isDebugEnabled()) {
+            __log.debug("openResource: uri="+uri+" relativeDir="+_relativeDir+" absoluteDir="+_absoluteDir);
+        }
 
         if (uri.isAbsolute() && uri.getScheme().equals("file")) {
             try {
@@ -76,13 +87,13 @@ public class DefaultResourceFinder implements ResourceFinder {
 
         // Note that if we get an absolute URI, the relativize operation will simply
         // return the absolute URI.
-        URI relative = suURI.relativize(uri);
+        URI relative = _relativeDir.toURI().relativize(uri);
         if (relative.isAbsolute() && !relative.getScheme().equals("urn")) {
            __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
            return null;
         }
 
-        File f = new File(suURI.getPath(),relative.getPath());
+        File f = new File(absolute.getPath(), relative.getPath());
         if (!f.exists()) {
             __log.debug("fileNotFound: " + f);
             return null;

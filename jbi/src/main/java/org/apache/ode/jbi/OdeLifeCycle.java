@@ -38,6 +38,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -112,6 +113,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             // Register BPEL event listeners configured in ode-jbi.properties.
             registerEventListeners();
 
+            registerMexInterceptors();
+
             __log.debug("Starting JCA connector.");
             initConnector();
 
@@ -159,19 +162,19 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.error(errmsg, ex);
             throw new JBIException(errmsg, ex);
         }
-        
+
         _ode._dataSource = _db.getDataSource();
     }
 
     /**
      * Load the "ode-jbi.properties" file from the install directory.
-     * 
+     *
      * @throws JBIException
      */
     private void initProperties() throws JBIException {
         OdeConfigProperties config = new OdeConfigProperties(new File(_ode.getContext().getInstallRoot(),
                 OdeConfigProperties.CONFIG_FILE_NAME));
-        
+
         try {
             config.load();
         } catch (FileNotFoundException fnf) {
@@ -198,7 +201,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
         _ode._scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource));
+
         _ode._scheduler.setJobProcessor(_ode._server);
+
         _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
 
         _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
@@ -209,7 +214,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
-	_ode._server.setConfigProperties(_ode._config.getProperties());
+        _ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
 
@@ -217,7 +222,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     /**
      * Initialize the data store.
-     * 
+     *
      * @throws JBIException
      */
     private void initDao() throws JBIException {
@@ -268,6 +273,21 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
+    private void registerMexInterceptors() {
+        String listenersStr = _ode._config.getMessageExchangeInterceptors();
+        if (listenersStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String interceptorCN = tokenizer.nextToken();
+                try {
+                    _ode._server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+                    __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+                            + "loaded properly: " + e);
+                }
+            }
+        }
+    }
 
     public synchronized void start() throws JBIException {
         if (_started)
@@ -344,7 +364,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     /**
      * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
      * must be called before the transformation engine can be started again with a call to start().
-     * 
+     *
      * @throws javax.jbi.JBIException
      *             if the transformation engine is unable to shut down.
      */

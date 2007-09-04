@@ -55,7 +55,7 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
 
   public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier)
       throws XNIException, IOException {
-    if (__log.isTraceEnabled()) {
+    if (__log.isDebugEnabled()) {
       StringBuffer buf = new StringBuffer("resolveEntity: base=");
       buf.append(resourceIdentifier.getBaseSystemId());
       buf.append(", literal=");
@@ -66,7 +66,7 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
       buf.append(resourceIdentifier.getNamespace());
       buf.append(", publicId=");
       buf.append(resourceIdentifier.getPublicId());
-      __log.trace(buf.toString());
+      __log.debug(buf.toString());
     }
 
     XMLInputSource src = _resolver.resolveEntity(resourceIdentifier);
@@ -89,6 +89,7 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
           FileUtils.encodePath(resourceIdentifier.getLiteralSystemId() == null ? resourceIdentifier
               .getNamespace() : resourceIdentifier.getLiteralSystemId()));
 
+      __log.debug("Captured: "+systemId);
       _capture.put(systemId, data);
     } catch (URISyntaxException use) {
       __log.error("Invalid URI: " + resourceIdentifier.getLiteralSystemId());

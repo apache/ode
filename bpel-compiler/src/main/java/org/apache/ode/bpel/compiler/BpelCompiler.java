@@ -84,11 +84,14 @@ import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
+import org.apache.ode.utils.xsd.XSUtils;
+import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.w3c.dom.Node;
 
 import javax.wsdl.Definition;
@@ -103,6 +106,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -171,9 +175,7 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public void addWsdlImport(URI from, URI wsdlImport, SourceLocation sloc) {
-
         Definition4BPEL def;
-        
         try {
             WSDLReader r = _wsdlFactory.newWSDLReader();
             WSDLLocatorImpl locator = new WSDLLocatorImpl(_resourceFinder, from.resolve(wsdlImport));
@@ -195,7 +197,32 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public void addXsdImport(URI from, URI location, SourceLocation sloc) {
-        // TODO: implement.
+        URI resFrom = from.resolve(location);
+        if (__log.isDebugEnabled())
+            __log.debug("Adding XSD import from " + resFrom + " location " + location);
+        XMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(_resourceFinder,
+                location, new HashMap<URI,String>(), true);
+        try {
+            Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom.toString(), resolver);
+            InputStream xsdStream = _resourceFinder.openResource(resFrom);
+            byte[] data;
+            try {
+                data = StreamUtils.read(xsdStream);
+            } finally {
+                xsdStream.close();
+            }
+            schemas.put(resFrom, data);
+            _wsdlRegistry.addSchemas(schemas);
+        } catch (XsdException e) {
+            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            recoveredFromError(sloc, ce);
+        } catch (MalformedURLException e) {
+            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            recoveredFromError(sloc, ce);
+        } catch (IOException e) {
+            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            recoveredFromError(sloc, ce);
+        }
     }
 
     public void setResourceFinder(ResourceFinder finder) {
@@ -911,8 +938,12 @@ abstract class BpelCompiler implements CompilerContext {
         alias.varType = messageType;
         // bpel 2.0 excludes declaration of part;
         // bpel 1.1 requires it
-        if (src.getPart() != null)
+        if (src.getPart() != null) {
             alias.part = messageType.parts.get(src.getPart());
+            if (alias.part == null)
+                throw new CompilationException(__cmsgs.errUnknownPartInAlias(src.getPart(),
+                        messageType.messageType.toString()));
+        }
         if (src.getQuery() != null)
             alias.location = compileExpr(src.getQuery());
         property.aliases.add(alias);

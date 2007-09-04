@@ -41,22 +41,10 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
-        <servlet-name>AxisRESTServlet</servlet-name>
-        <display-name>Apache-Axis Servlet (REST)</display-name>
-        <servlet-class>
-            org.apache.axis2.transport.http.AxisRESTServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>AxisAdminServlet</servlet-name>
         <display-name>Apache-Axis AxisAdmin Servlet (REST)</display-name>
-        <servlet-class>
-            org.apache.axis2.transport.http.AxisAdminServlet</servlet-class>
+        <servlet-class>org.apache.axis2.transport.http.AxisAdminServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>AxisRESTServlet</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>
-
 
     <servlet-mapping>
         <servlet-name>AxisServlet</servlet-name>

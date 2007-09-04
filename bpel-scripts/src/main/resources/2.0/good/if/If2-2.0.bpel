@@ -19,22 +19,22 @@
   -->
 
 <process name="if2-2.0"
-	 targetNamespace="http://ode/bpel/unit-test" 
-	 xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns:tns="http://ode/bpel/unit-test"
-	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	 xmlns:test="http://ode/bpel/unit-test.wsdl" 
-	 suppressJoinFailure="yes">
+         targetNamespace="http://ode/bpel/unit-test" 
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl" 
+         suppressJoinFailure="yes">
 
   <import namespace="http://ode/bpel/unit-test"
-	  importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="./test.wsdl" />
+          importType="http://schemas.xmlsoap.org/wsdl/"
+          location="./test.wsdl" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink" 
-		 partnerLinkType="test:TestPartnerLinkType" 
-		 myRole="me" />
+                 partnerLinkType="test:TestPartnerLinkType" 
+                 myRole="me" />
   </partnerLinks>
   
   <variables>
@@ -44,52 +44,50 @@
   
   <sequence>   
     <receive name="startReceive"
-	     createInstance="yes"
-	     partnerLink="testPartnerLink"
-	     portType="test:TestPortType"
-	     operation="testOperation"
-	     variable="var1"/>
+             createInstance="yes"
+             partnerLink="testPartnerLink"
+             portType="test:TestPortType"
+             operation="testOperation"
+             variable="var1"/>
     <sequence>
       <if>
-	<condition>$var1/TestPart = 'def'</condition>
-	<then>
-	  <assign>
-	    <copy>
-	      <from>'case1'</from>
-	      <to>$var2</to>
-	    </copy>
-	  </assign>
-	</then>
-	<elseif>
-	  <condition>$var1/TestPart = 'abc'</condition>
-	  <assign>
-	    <copy>
-	      <from>'case2'</from>
-	      <to>$var2</to>
-	    </copy>
-	  </assign>
-	</elseif>
-	<else>
-	  <assign>
-	    <copy>
-	      <from>'otherwise'</from>
-	      <to>$var2</to>
-	    </copy>
-	  </assign>
-	</else>  
+        <condition>$var1/TestPart = 'def'</condition>
+        <assign>
+          <copy>
+            <from>'case1'</from>
+            <to>$var2</to>
+          </copy>
+        </assign>
+        <elseif>
+          <condition>$var1/TestPart = 'abc'</condition>
+          <assign>
+            <copy>
+              <from>'case2'</from>
+              <to>$var2</to>
+            </copy>
+          </assign>
+        </elseif>
+        <else>
+          <assign>
+            <copy>
+              <from>'otherwise'</from>
+              <to>$var2</to>
+            </copy>
+          </assign>
+        </else>  
       </if>  
       <assign name="b">
-	<copy>
-	  <from>$var2</from>
-	  <to>$var1/TestPart</to>
-	</copy>
+        <copy>
+          <from>$var2</from>
+          <to>$var1/TestPart</to>
+        </copy>
       </assign>
     </sequence>
     <reply name="endReply" 
-	   operation="testOperation" 
-	   partnerLink="testPartnerLink"
-	   portType="test:TestPortType" 
-	   variable="var1"/>
+           operation="testOperation" 
+           partnerLink="testPartnerLink"
+           portType="test:TestPortType" 
+           variable="var1"/>
   </sequence>
   
 </process>
