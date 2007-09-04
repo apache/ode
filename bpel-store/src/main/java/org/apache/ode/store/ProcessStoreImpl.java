@@ -277,14 +277,21 @@ public class ProcessStoreImpl implements ProcessStore {
         });
 
         // We want the events to be fired outside of the bounds of the writelock.
-        for (ProcessConfImpl process : processes) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(), process.getDeploymentUnit()
-                    .getName()));
-            fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
+        try {
+            for (ProcessConfImpl process : processes) {
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(), process.getDeploymentUnit()
+                        .getName()));
+                fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
+            }
+        } catch (Exception e) {
+            // A problem at that point means that engine deployment failed, we don't want the store to keep the du
+            __log.warn("Deployment failed within the engine, store undeploying process.");
+            undeploy(deploymentUnitDirectory);
+            if (e instanceof ContextException) throw (ContextException) e;
+            else throw new ContextException("Deployment failed within the engine.", e);
         }
 
         return deployed;
-
     }
 
     public Collection<QName> undeploy(final File dir) {
