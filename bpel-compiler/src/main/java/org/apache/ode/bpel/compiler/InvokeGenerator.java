@@ -55,7 +55,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
         assert oinvoke.operation.getInput() != null; // ensured by reolvePartnerRoleOperation
         assert oinvoke.operation.getInput().getMessage() != null; // ensured by resolvePartnerRoleOperation
         if (src.getPortType() != null) {
-            if (!src.getPortType().equals(oinvoke.partnerLink.partnerRolePortType.getQName())
+            if (!src.getPortType().equals(oinvoke.partnerLink.partnerRolePortType.getQName()))
                     throw new CompilationException(__imsgs.errPortTypeMismatch(src.getPortType(), oinvoke.partnerLink.partnerRolePortType.getQName()));
         }
 
