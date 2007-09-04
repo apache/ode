@@ -9,9 +9,9 @@ Getting the source code
 
 First you will have to make sure that you have [Subversion|http://svn.tigris.org]. If you don't know what Subversion is or don't  have it installed, check [here|http://svnbook.red-bean.com]. Once installed run:
 
-svn checkout http://svn.apache.org/repos/asf/incubator/ode/trunk ode
+svn checkout http://svn.apache.org/repos/asf/ode/trunk ode
 
-For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://incubator.apache.org/ode/source-code.html).
+For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://ode.apache.org/source-code.html).
 
 Building With Buildr
 --------------------
@@ -20,7 +20,7 @@ Buildr requires a Ruby interpreter. If you're running Linux or Mac OS you most p
 
  * Ruby 1.8.x with RubyGems 0.9 or later. For Windows users using the Ruby One-Click Installer is the easiest (http://rubyforge.org/projects/rubyinstaller/). For Linux or Mac OS users, a Ruby interpreter is usually preinstalled. Just make sure to have the ruby-dev package (mkmf is needed for RJB).
 
- * Buildr. Install it by running 'gem install buildr'. A proper JAVA_HOME environment variable must be set. Make sure to choose either win32 or ruby platforms (don't choose java for Antwrap, that's JRuby).
+ * Buildr. Install it by running 'gem install buildr -v 1.2.4'. A proper JAVA_HOME environment variable must be set. Make sure to choose either win32 or ruby platforms (don't choose java for Antwrap, that's JRuby).
 
 Building is then pretty simple. Open a command in the source root directory and run:
 

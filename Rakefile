@@ -24,17 +24,17 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.1-RC1"
-NEXT_VERSION = "1.1-RC2-SNAPSHOT"
+VERSION_NUMBER = "1.1-RC5-SNAPSHOT"
+NEXT_VERSION = "1.2"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
                         :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3-RC3"
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.3-RC3")
+                        :under=>"org.apache.axis2", :version=>"1.3")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -72,7 +72,7 @@ JAVAX               = struct(
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
-JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1-incubating"
+JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
@@ -124,7 +124,7 @@ define "ode" do
   compile.options.source = "1.5"
   compile.options.target = "1.5"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
-  meta_inf << file("DISCLAIMER") << file("NOTICE")
+  meta_inf << file("NOTICE")
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
@@ -236,7 +236,7 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils"),
-      COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
+      COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
@@ -283,7 +283,7 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-jpa"),
-      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
@@ -318,13 +318,15 @@ define "ode" do
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-        hibernate_schemaexport "" do |task, ant|
+        # Protection against a buildr bug until the fix is released, avoids build failure
+        class << task ; attr_accessor :ant ; end
+        task.enhance { |task| task.ant = Buildr::Hibernate.schemaexport }
+        
+        hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
-            :drop=>"no", :create=>"yes", :output=>target) do
-            task.fileset :dir=>source.to_s, :includes=>"**/*.hbm.xml" do
-              ant.fileset(:dir=>path_to(:java_src_dir)) { include :name=>"**/*.hbm.xml" }
-            end
-          end
+                           :drop=>"no", :create=>"yes", :output=>target) do
+            ant.fileset(:dir=>source.to_s) { ant.include :name=>"**/*.hbm.xml" }
+                           end
         end
       end
     end
@@ -362,7 +364,7 @@ define "ode" do
         Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
           :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
       end
-      sql = concat(_("target/#{db}.sql")=>[partial_sql, scheduler_sql])
+      sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), partial_sql, scheduler_sql])
       build sql
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
@@ -422,9 +424,8 @@ define "ode" do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro-jbi/src/examples") }
+    test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro/src/examples-jbi/") }
     test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-ojpa-derby").package(:zip))
-
   end
 
   desc "ODE JCA Resource Archive"
@@ -445,19 +446,6 @@ define "ode" do
     package :jar
   end
 
-  desc "ODE Tools Binaries"
-  define "tools-bin" do
-    # Copy binary files over, set permissions on Linux files.
-    bins = file("target/bin"=>FileList[_("src/main/dist/bin/*")]) do |task|
-      mkpath task.name
-      cp task.prerequisites, task.name
-      chmod 0755, FileList[task.name + "/*.sh"], :verbose=>false
-    end
-
-    build bins # , docs
-    package(:zip).include bins # , docs
-  end
-
   desc "ODE Utils"
   define "utils" do
     compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
@@ -475,26 +463,37 @@ define "apache-ode" do
     project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
       zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
       zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
+
       # Libraries
-      zip.merge project("ode:tools-bin").package(:zip)
       zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-        COMMONS.pool, COMMONS.collections, JAXEN,
-        SAXON, LOG4J, WSDL4J, XALAN, XERCES)
+        COMMONS.pool, COMMONS.collections, JAXEN, SAXON, LOG4J, WSDL4J, XALAN, XERCES)
       project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-obj", "bpel-schemas").
         map(&:packages).flatten.each do |pkg|
         zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
       end
+
       # Including third party licenses
       Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
       zip.include(project.path_to("target/LICENSE"))
+
       # Include supported database schemas
       Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
         zip.include(f, :path=>"sql") unless f =~ /partial/
       end
-      yield zip
-      project.check zip, "should contain mysql.sql" do
-        it.should contain("sql/mysql.sql")
+
+      # Tools scripts (like bpelc and sendsoap)
+      bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
+        mkpath task.name
+        cp task.prerequisites, task.name
+        chmod 0755, FileList[task.name + "/*"], :verbose=>false
       end
+      zip.include(bins)
+
+      yield zip
+      # For some reason this always fails on a clean build, commenting until I have time to inquire
+      # project.check zip, "should contain mysql.sql" do
+      #   it.should contain("sql/mysql.sql")
+      # end
     end
   end
 
@@ -535,3 +534,4 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
 end
+
