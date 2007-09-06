@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xml:lang="en"
+         xmlns="http://usefulinc.com/ns/doap#" 
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:asfext="http://projects.apache.org/ns/asfext#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<!--
+  =======================================================================
+
+   Copyright (c) 2006 The Apache Software Foundation.  
+   All rights reserved.
+
+  =======================================================================
+-->
+  <Project rdf:about="http://ode.apache.org">
+    <created>2007-07-31</created>
+    <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
+    <name>Apache ODE</name>
+    <homepage rdf:resource="http://ode.apache.org" />
+    <asfext:pmc rdf:resource="http://ode.apache.org" />
+    <shortdesc>Apache ODE is a WS-BPEL implementation that supports web services orchestration using flexible process definitions.</shortdesc>
+    <description>Apache ODE (Orchestration Director Engine) executes business processes written following the WS-BPEL standard. It talks to web services, sending and receiving messages, handling data manipulation and error recovery as described by your process definition. It supports both long and short living process executions to orchestrate all the services that are part of your application.
+
+WS-BPEL is an XML-based language defining several constructs to write business processes. It defines a set of basic control structures like conditions or loops as well as elements to invoke web services and receive messages from services. It relies on WSDL to express web services interfaces. Message structures can be manipulated, assigning parts or the whole of them to variables that can in turn be used to send other messages.</description>
+    <bug-database rdf:resource="https://issues.apache.org/jira/browse/ODE" />
+    <mailing-list rdf:resource="http://ode.apache.org/mailing-lists.html" />
+    <download-page rdf:resource="http://ode.apache.org/getting-ode.html" />
+    <programming-language>Java</programming-language>
+    <category rdf:resource="http://projects.apache.org/category/xml" />
+    <category rdf:resource="http://projects.apache.org/category/network-server" />
+    <release>
+      <Version>
+        <name>1.0-incubating</name>
+        <created>2007-05-27</created>
+        <revision>tagged</revision>
+      </Version>
+    </release>
+    <repository>
+      <SVNRepository>
+        <location rdf:resource="http://svn.apache.org/repos/asf/ode"/>
+        <browse rdf:resource="http://svn.apache.org/viewvc/ode"/>
+      </SVNRepository>
+    </repository>
+    <maintainer>
+      <foaf:Person>
+        <foaf:name>Matthieu Riou</foaf:name>
+          <foaf:mbox rdf:resource="mailto:mriou@apache.org"/>
+      </foaf:Person>
+    </maintainer>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>WS-BPEL</asfext:title>
+      <asfext:body>OASIS</asfext:body>
+      <asfext:id>wsbpel</asfext:id>
+      <asfext:url rdf:resource="http://www.oasis-open.org/committees/wsbpel/"/>
+    </asfext:Standard></asfext:implements>
+  </Project>
+</rdf:RDF>
