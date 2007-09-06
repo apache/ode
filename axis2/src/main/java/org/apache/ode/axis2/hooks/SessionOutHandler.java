@@ -28,9 +28,9 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.epr.EndpointFactory;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.il.epr.EndpointFactory;
+import org.apache.ode.il.epr.MutableEndpoint;
+import org.apache.ode.il.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.utils.Namespaces;
 
