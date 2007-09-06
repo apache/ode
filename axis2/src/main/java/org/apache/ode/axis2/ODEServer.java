@@ -46,6 +46,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
+import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
@@ -465,7 +466,16 @@ public class ODEServer {
         return _server;
     }
 
+    /**
+     * Register event listeners configured in the configuration.
+     *
+     */
     private void registerEventListeners() {
+        
+        // let's always register the debugging listener....
+        _server.registerBpelEventListener(new DebugBpelEventListener());
+        
+        // then, whatever else they want.
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {

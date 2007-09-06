@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.common.evt;
+package org.apache.ode.bpel.evtproc;
 
 import java.util.Properties;
 
