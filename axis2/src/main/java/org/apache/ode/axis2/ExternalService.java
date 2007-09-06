@@ -113,6 +113,8 @@ public class ExternalService implements PartnerRoleChannel {
             options.setTo(axisEPR);
             options.setTimeOutInMilliSeconds(60000);
 
+            AuthenticationHelper.setHttpAuthentication(odeMex, options);
+
             CachedServiceClient cached = _cachedClients.get();
             long now = System.currentTimeMillis();
             if (cached == null || cached._expire < now) {
