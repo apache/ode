@@ -382,6 +382,10 @@ class BpelProcess {
 
     void executeContinueInstancePartnerRoleResponseReceived(MessageExchangeDAO mexdao) {
         assert _hydrationLatch.isLatched(1);
+        ProcessInstanceDAO instanceDao = mexdao.getInstance();
+        if (instanceDao == null)
+            throw new BpelEngineException("InternalError: No instance for partner mex " + mexdao);
+        
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
@@ -392,6 +396,9 @@ class BpelProcess {
     }
 
     void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
+        if (instanceId == null)
+            throw new NullPointerException("instanceId was null!");
+        
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
         iworker.enqueue(_server.new TransactedRunnable(runnable));
     }
@@ -1249,6 +1256,7 @@ class BpelProcess {
             return;
         }
         
+        mexdao.setStatus(Status.REQ);
         try {
             if (p2pProcess != null) {
                 /* P2P (process-to-process) invocation, special logic */

@@ -152,8 +152,11 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         UnreliablePartnerRoleMessageExchangeImpl blockingMex = new UnreliablePartnerRoleMessageExchangeImpl(_process, mexDao
                 .getInstance().getInstanceId(), mexDao.getMessageExchangeId(), _plinkDef, operation, partnerEpr, myRoleEpr,
                 _channel);
+        
         // We schedule in-memory (no db) to guarantee "at most once" semantics.
         blockingMex.setState(State.INVOKE_XXX);
+        
+        blockingMex.request();
         
         // NOTE: in order to prevent dead-locks due to callbacks we cannot have the actual invoke of the partner
         // occuring inside the instance worker thread. 
