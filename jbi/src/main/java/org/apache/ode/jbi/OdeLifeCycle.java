@@ -88,12 +88,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode = OdeContext.getInstance();
             _ode.setContext(context);
             
-            // Use system property to determine if DeliveryChannel.sendSync or DeliveryChannel.send is used.
-            if (Boolean.getBoolean("org.apache.ode.jbi.sendSynch"))
-                _ode._consumer = new OdeConsumerSync(_ode);
-            else 
-                _ode._consumer = new OdeConsumerAsync(_ode);
-
+            _ode._consumer = new OdeConsumer(_ode);
+            
             if (_ode.getContext().getWorkspaceRoot() != null)
                 TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
 
@@ -204,21 +200,20 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        _ode._scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ode._dataSource));
-        _ode._scheduler.setJobProcessor(_ode._server);
-        _ode._scheduler.setExecutorService(_ode._executorService);
-        _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+        SimpleScheduler sched =new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource));
+        sched.setJobProcessor(_ode._server);
+        sched.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+        _ode._scheduler = sched;
 
         _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
         _ode._store.loadAll();
 
-        _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl(_ode._scheduler));
         _ode._server.setDaoConnectionFactory(_ode._daocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
-	_ode._server.setConfigProperties(_ode._config.getProperties());
+        _ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
 

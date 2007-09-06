@@ -40,6 +40,8 @@ import java.util.*;
  * Implementation of the instance/process management interaction. This class implements
  * the methods necessary to support process debugging. It also implements all the methods in the
  * newer Process/Instance Management interface (pmapi).
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
  */
 public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
         implements BpelManagementFacade {
@@ -183,14 +185,8 @@ public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
      * @param procid
      */
     public OProcess getProcessDef(String procid) throws ManagementException {
-        if (_server._engine == null)
-            throw new ProcessingException("ServiceProvider required for debugger operation.");
 
-        BpelProcess process = _server._engine._activeProcesses.get(QName.valueOf(procid));
-        if (process == null)
-            throw new InvalidRequestException("The process \"" + procid + "\" is not available. Please make sure it is deployed and encompassing System is activated." );
-
-        return process.getOProcess();
+        return _server.getOProcess(QName.valueOf(procid));
     }
 
     public void step(final Long iid) throws ManagementException {

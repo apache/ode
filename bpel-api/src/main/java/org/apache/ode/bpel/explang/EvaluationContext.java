@@ -31,6 +31,9 @@ import org.w3c.dom.Node;
  * Context for evaluating expressions. Implementations of the
  * {@link ExpressionLanguageRuntime} interface use this interface to access BPEL
  * variables, property sets and link statuses.
+ * 
+ * FIXME: this is the only thing that uses bpel.o objects in this module... smells fishy,
+ * FIXME: prob should change this interface to not use these. -mbs
  */
 public interface EvaluationContext {
 

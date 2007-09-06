@@ -19,6 +19,17 @@
 
 package org.apache.ode.axis2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -42,25 +53,12 @@ import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -89,8 +87,6 @@ public class ODEServer {
     protected TransactionManager _txMgr;
 
     protected BpelDAOConnectionFactory _daoCF;
-
-    protected ExecutorService _executorService;
 
     protected Scheduler _scheduler;
 
@@ -297,7 +293,7 @@ public class ODEServer {
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         destroyService(serviceName, portName);
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server, _txMgr);
+        ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server);
         if (_odeConfig.isReplicateEmptyNS()) {
             __log.debug("Setting service with empty namespace replication");
             odeService.setReplicateEmptyNS(true);
@@ -323,7 +319,7 @@ public class ODEServer {
             return extService;
 
         try {
-            extService = new ExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
+            extService = new ExternalService(def, serviceName, portName, _axisConfig, _scheduler, _server);
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
             throw new ContextException("Error creating external service.", ex);
@@ -431,9 +427,9 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()));
-        scheduler.setExecutorService(_executorService);
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_db.getDataSource()));
         scheduler.setTransactionManager(_txMgr);
+
         return scheduler;
     }
 
@@ -441,21 +437,17 @@ public class ODEServer {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
-        if (_odeConfig.getThreadPoolMaxSize() == 0)
-            _executorService = Executors.newCachedThreadPool();
-        else
-            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize());
 
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_server);
 
         _server.setDaoConnectionFactory(_daoCF);
-        _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
         _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);
+        _server.setTransactionManager(_txMgr);
         if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
             // dehy.setProcessMaxAge(10000);

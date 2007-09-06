@@ -66,6 +66,8 @@ public class HProcessInstance extends HObject {
 
     private long _seq;
 
+    private int _execStateCounter;
+
     /**
      *
      */
@@ -263,6 +265,19 @@ public class HProcessInstance extends HObject {
 
     public void setActivityFailureDateTime(Date dateTime) {
         _activityFailureDateTime = dateTime;
+    }
+
+    /**
+     * @hibernate.property column="EXEC_STATE_COUNT"
+     * @return
+     */
+    public int getExecutionStateCounter() {
+        return _execStateCounter;
+    }
+
+    public void setExecutionStateCounter(int stateCounter) {
+        _execStateCounter = stateCounter;
+        
     }
 
 }

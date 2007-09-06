@@ -44,24 +44,7 @@ public class JacobMessages extends MessageBundle {
         methodName, className);
   }
 
-  // TODO
-  public String msgContDeHydrationErr(String channel, String name) {
-    throw new UnsupportedOperationException();
-  }
 
-  /**
-   * Error indicating that a re-hydration of a saved _continuation object could
-   * not be completed.
-   * 
-   * @param channel
-   *          channel with the dangling _continuation
-   * @param mlClassName
-   *          name of de-hydrated {@link org.apache.ode.jacob.ChannelListener} object
-   * 
-   */
-  public String msgContHydrationErr(String channel, String mlClassName) {
-    throw new UnsupportedOperationException();
-  }
 
   /**
    * Internal error indicating that a required client method was not accessible

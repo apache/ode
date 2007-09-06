@@ -59,8 +59,24 @@ public class WorkEvent {
         return _jobDetail;
     }
 
+    public String toString() {
+        return "WorkEvent" + _jobDetail;
+    }
+    
     public enum Type {
-        TIMER, RESUME, INVOKE_RESPONSE, MATCHER, INVOKE_INTERNAL
+        TIMER, 
+        
+        RESUME, 
+        
+        /** Response from partner (i.e. the result of a partner-role invoke) has been received. */
+        PARTNER_RESPONSE, 
+        
+        MATCHER, 
+        
+        /** Invoke a "my role" operation (i.e. implemented by the process). */
+        MYROLE_INVOKE, 
+        
+        MYROLE_INVOKE_ASYNC_RESPONSE
     }
 
     public String getChannel() {
@@ -99,16 +115,6 @@ public class WorkEvent {
     
     public void setCorrelationKey(CorrelationKey ckey) {
         _jobDetail.put("ckey", ckey == null ? null : ckey.toCanonicalString());
-    }
-
-    public void setInMem(boolean inmem) {
-        _jobDetail.put("inmem", inmem);
-    }
-
-    public boolean isInMem() {
-        Boolean bool = (Boolean) _jobDetail.get("inmem");
-        if (bool == null) return false;
-        else return bool;
     }
 
     public void setProcessId(QName pid) {

@@ -64,16 +64,24 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         _session = _sm.getSession();
     }
 
-    public MessageExchangeDAO createMessageExchange(char dir) {
+    public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
         HMessageExchange mex = new HMessageExchange();
+        mex.setMexId(mexId);
         mex.setDirection(dir);
         _session.save(mex);
         return new MessageExchangeDaoImpl(_sm, mex);
     }
 
-    public MessageExchangeDAO getMessageExchange(String mexid) {
-        HMessageExchange mex = (HMessageExchange) _session.get(HMessageExchange.class, new Long(mexid));
-        return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
+    public MessageExchangeDAO getMessageExchange(String mexId) {
+        try {
+            Criteria criteria = _session.createCriteria(HProcess.class);
+            criteria.add(Expression.eq("mexId", mexId));
+            HMessageExchange mex = (HMessageExchange) criteria.uniqueResult();
+            return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
+        } catch (HibernateException e) {
+            __log.error("DbError", e);
+            throw e;
+        }
     }
 
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
@@ -131,7 +139,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return daos;
     }
 
-    
     @SuppressWarnings("unchecked")
     static Iterator<HProcessInstance> _instanceQuery(Session session, boolean countOnly, InstanceFilter filter) {
         Criteria crit = session.createCriteria(HProcessInstance.class);
@@ -214,8 +221,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         try {
             CollectionsX.transformEx(ret, hevents, new UnaryFunctionEx<HBpelEvent, BpelEvent>() {
                 public BpelEvent apply(HBpelEvent x) throws Exception {
-                    return (BpelEvent) SerializableUtils.toObject(x.getData().getBinary(), BpelEvent.class
-                            .getClassLoader());
+                    return (BpelEvent) SerializableUtils.toObject(x.getData().getBinary(), BpelEvent.class.getClassLoader());
                 }
 
             });

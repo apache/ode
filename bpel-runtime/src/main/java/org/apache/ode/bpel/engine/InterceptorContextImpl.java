@@ -19,23 +19,28 @@
 package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent;
 
 /**
- * Implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext}
+ * Implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent}
  * interface.
+ * 
  * @author Maciej Szefler (m s z e f l e r @ g m a i l . c o m)
  *
  */
-public class InterceptorContextImpl implements InterceptorContext{
+class InterceptorContextImpl implements InterceptorEvent{
     private ProcessDAO _processDao;
     private BpelDAOConnection _connection;
     private ProcessConf _pconf;
+    private MessageExchangeDAO _mexdao;
 
-    public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO, ProcessConf pconf) {
+    InterceptorContextImpl(BpelDAOConnection connection, MessageExchangeDAO mexdao,
+            ProcessDAO processDAO, ProcessConf pconf) {
         _connection = connection;
+        _mexdao = mexdao;
         _processDao = processDAO;
         _pconf = pconf;
     }
@@ -50,6 +55,10 @@ public class InterceptorContextImpl implements InterceptorContext{
 
     public ProcessConf getProcessConf() {
         return _pconf;
+    }
+
+    public MessageExchangeDAO getMessageExchangeDAO() {
+        return _mexdao;
     }
 
 }

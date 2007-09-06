@@ -47,34 +47,27 @@ public interface MessageExchange {
         /** New message exchange, has not been "invoked" */
         NEW,
 
-        /** The request is being sent to the "server" */
-        REQUEST,
+        /** The request was sent, blocking while waiting for the service to respond. */
+        REQ,
 
-        /** Waiting for an asynchronous response from the "server" */
+        /** The request was sent, no longer blocking. */
         ASYNC,
+        
+        /** The acknowledgement (either response/fault/failure) was sent. */
+        ACK,
 
-        /** The one way request has been sent to the server. */
-        // ONE_WAY, - supported as ASYNC + getMessageExchangePatter() - See JIRA ODE-54
+        /** The acknowledgement was processed. */
+        COMPLETED
 
-        /** Processing the response received from the "server". */
-        RESPONSE,
-
-        /** Processing the fault received from the "server". */
-        FAULT,
-
-        /** Processing a failure. */
-        FAILURE,
-
-        /** Message exchange completed succesfully. */
-        COMPLETED_OK,
-
-        /** Message exchange completed with a fault. */
-        COMPLETED_FAULT,
-
-        /** Message exchange completed with a failure. */
-        COMPLETED_FAILURE,
     }
 
+    public enum AckType {
+        RESPONSE,
+        ONEWAY,
+        FAULT,
+        FAILURE
+    }
+    
     /**
      * Enumeration of the types of failures.
      */
@@ -113,6 +106,19 @@ public interface MessageExchange {
     String getMessageExchangeId()
             throws BpelEngineException;
 
+
+    /**
+     * Get the invocation style for this message exchange. 
+     * @return
+     */
+    InvocationStyle getInvocationStyle();
+    
+    /**
+     * Get the time-out in ms. 
+     * @return
+     */
+    long getTimeout();
+    
     /**
      * Get the name of the operation (WSDL 1.1) / message exchange (WSDL 1.2?).
      *
@@ -130,6 +136,7 @@ public interface MessageExchange {
             throws BpelEngineException;
 
 
+    AckType getAckType();
 
     /**
      * Return the type of message-exchange that resulted form this invocation
@@ -147,8 +154,13 @@ public interface MessageExchange {
      */
     Message createMessage(QName msgType);
 
-    boolean isTransactionPropagated()
-            throws BpelEngineException;
+    /**
+     * Indicates whether a transactions in associated with the message exchange. If this is the case, then the object must be used
+     * from a context (i.e. thread) that is associated with the same transaction. The TRANSACTED and RELIABLE invocation styles will
+     * have this flag set to <code>true</code>. ASYNC and BLOCKING styles will always have this set to <code>false</code>.
+     * @return <code>true<code> if there is a transaction associated with the object, <code>false</code> otherwise.
+     */
+    boolean isTransactional();
 
     /**
      * Get the message exchange status.
@@ -186,7 +198,6 @@ public interface MessageExchange {
      * Get the operation description for this message exchange.
      * It is possible that the description cannot be resolved, for example if
      * the EPR is unknown or if the operation does not exist.
-     * TODO: How to get rid of the WSDL4j dependency?
      * @return WSDL operation description or <code>null</code> if not availble
      */
     Operation getOperation();
@@ -195,7 +206,6 @@ public interface MessageExchange {
      * Get the port type description for this message exchange.
      * It is possible that the description cannot be resolved, for example if
      * the EPR is unknown or if the operation does not exist.
-     * TODO: How to get rid of the WSDL4j dependency?
      * @return WSDL port type description or <code>null</code> if not available.
      */
     PortType getPortType();
@@ -223,6 +233,13 @@ public interface MessageExchange {
      */
     public Set<String> getPropertyNames();
 
+    /**
+     * Report whether the operation is "safe" in the sense of the WSDL1.2 meaning of the term. That is,
+     * is the operation side-effect free?
+     * @return <code>true</code> if the operation is safe, <code>false</code> otherwise. 
+     */
+    public boolean isSafe();
+    
     /**
      * Should be called by the external partner when it's done with the
      * message exchange. Ncessary for a better resource management and

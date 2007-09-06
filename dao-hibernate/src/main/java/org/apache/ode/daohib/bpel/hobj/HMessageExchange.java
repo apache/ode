@@ -18,10 +18,11 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 
 /**
  * Hibernate-managed table for keeping track of message exchanges.
@@ -47,7 +48,7 @@ public class HMessageExchange extends HObject {
     private HMessage _request;
 
     private HMessage _response;
-    
+
     private HPartnerLink _partnerLink;
 
     private String _clientKey;
@@ -70,15 +71,41 @@ public class HMessageExchange extends HObject {
 
     private String _callee;
 
-    private String _pipedMessageExchangeId;
+    private String _p2pPeer;
 
     private Map<String, String> _properties = new HashMap<String, String>();
+
+    private long _timeout;
+
+    private String _istyle;
+
+    private String _failureType;
+
+    private String _mexId;
+
+    private String _ackType;
+
+    private String _pipedPid;
 
     /**
      * 
      */
     public HMessageExchange() {
         super();
+    }
+
+    /**
+     * 
+     * @hibernate.property
+     * @hibernate.column name="MEXID" not-null="true" unique="true"
+     */
+
+    public String getMexId() {
+        return _mexId;
+    }
+
+    public void setMexId(String mexId) {
+        _mexId = mexId;
     }
 
     /**
@@ -299,8 +326,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false"
-     *                cascade="delete"
+     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false" cascade="delete"
      * @hibernate.collection-key column="MEX"
      * @hibernate.collection-index column="NAME" type="string"
      * @hibernate.collection-element column="VALUE" type="string" length="8000"
@@ -318,20 +344,80 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PARTNERLINK" 
+     * @hibernate.many-to-one column="PARTNERLINK"
      */
     public HPartnerLink getPartnerLink() {
         return _partnerLink;
     }
 
     /**
-     * @hibernate.property column="PIPED_ID"
+     * @hibernate.property column="TIMEOUT"
+     * 
      */
-    public String getPipedMessageExchangeId() {
-        return _pipedMessageExchangeId;
+    public long getTimeout() {
+        return _timeout;
     }
 
-    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
-        _pipedMessageExchangeId = pipedMessageExchangeId;
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
+    }
+
+    /**
+     * @hibernate.property column="ISTYLE"
+     */
+    public String getInvocationStyle() {
+        return _istyle;
+    }
+
+    /**
+     * @hibernate.property column="P2P_PEER"
+     * @return
+     */
+    public String getPipedMessageExchange() {
+        return _p2pPeer;
+    }
+
+    public void setPipedMesageExchange(String p2ppeer) {
+        _p2pPeer = p2ppeer;
+    }
+
+    public void setFailureType(String failureType) {
+        _failureType = failureType;
+    }
+
+    /**
+     * @hibernate.property column="FAILURE_TYPE"
+     * @return
+     */
+    public String getFailureType() {
+        return _failureType;
+    }
+
+    public void setInvocationStyle(String invocationStyle) {
+        _istyle = invocationStyle;
+    }
+
+    /**
+     * @hibernate.property column="ACK_TYPE"
+     * @return
+     */
+    public String getAckType() {
+        return _ackType;
+    }
+
+    public void setAckType(String ackType) {
+        _ackType = ackType;
+    }
+
+    /**
+     * @hibernate.property column="PIPED_PID"
+     * @return
+     */
+    public String getPipedPID() {
+        return _pipedPid;
+    }
+
+    public void setPipedPID(String ppid) {
+        _pipedPid = ppid;
     }
 }

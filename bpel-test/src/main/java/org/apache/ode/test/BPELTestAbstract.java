@@ -18,17 +18,36 @@
  */
 package org.apache.ode.test;
 
-import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
@@ -41,28 +60,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.w3c.dom.Element;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public abstract class BPELTestAbstract {
-	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
-	
+    private static final String SHOW_EVENTS_ON_CONSOLE = "no";
+
     protected BpelServerImpl _server;
 
     protected ProcessStore store;
@@ -89,6 +89,8 @@ public abstract class BPELTestAbstract {
     /** What's actually been deployed. */
     private List<Deployment> _deployed;
 
+    private MockTransactionManager _txm;
+
     @Before
     public void setUp() throws Exception {
         _failures = new CopyOnWriteArrayList<Failure>();
@@ -99,39 +101,24 @@ public abstract class BPELTestAbstract {
         _deployed = new ArrayList<Deployment>();
 
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
-            emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
-            em = emf.createEntityManager();
-            _cf = new BPELDAOConnectionFactoryImpl();
+
             _server.setDaoConnectionFactory(_cf);
-            scheduler = new MockScheduler() {
-                @Override
-                public void begin() {
-                    super.begin();
-                    em.getTransaction().begin();
-                }
+            _txm = new MockTransactionManager();
 
-                @Override
-                public void commit() {
-                    super.commit();
-                    em.getTransaction().commit();
-                }
-
-                @Override
-                public void rollback() {
-                    super.rollback();
-                    em.getTransaction().rollback();
-                }
-
-            };
+            BPELDAOConnectionFactoryImpl cf = new BPELDAOConnectionFactoryImpl();
+            cf.setTransactionManager(_txm);
+            // cf.setDataSource(datasource);
+            scheduler = new MockScheduler(_txm);
         } else {
-            scheduler = new MockScheduler();
-            _cf = new BpelDAOConnectionFactoryImpl(scheduler);
+            _txm = new MockTransactionManager();
+            scheduler = new MockScheduler(_txm);
+            _cf = new BpelDAOConnectionFactoryImpl(_txm);
             _server.setDaoConnectionFactory(_cf);
         }
-        _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(scheduler));
         _server.setScheduler(scheduler);
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
+        _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
         store = new ProcessStoreImpl(null, "jpa", true);
         store.registerListener(new ProcessStoreListener() {
@@ -147,7 +134,7 @@ public abstract class BPELTestAbstract {
             }
         });
         _server.setConfigProperties(getConfigProperties());
-        _server.registerBpelEventListener(new DebugBpelEventListener());
+        // _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
     }
@@ -162,19 +149,18 @@ public abstract class BPELTestAbstract {
                 System.err.println("Error undeploying " + d);
             }
         }
-        
 
         if (em != null)
             em.close();
         if (emf != null)
             emf.close();
-        
+
         _server.stop();
         _failures = null;
         _deployed = null;
         _deployments = null;
         _invocations = null;
-        
+
     }
 
     protected void negative(String deployDir) throws Throwable {
@@ -244,22 +230,24 @@ public abstract class BPELTestAbstract {
         }
     }
 
-    protected Invocation addInvoke(String id, QName target, String operation, String request, String responsePattern) throws Exception {
+    protected Invocation addInvoke(String id, QName target, String operation, String request, String responsePattern)
+            throws Exception {
 
         Invocation inv = new Invocation(id);
         inv.target = target;
         inv.operation = operation;
         inv.request = DOMUtils.stringToDOM(request);
-        inv.expectedStatus = null;
         if (responsePattern != null) {
-            inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+            inv.expectedFinalStatus = AckType.RESPONSE;
+
             inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
-        }
+        } else
+            inv.expectedFinalStatus = AckType.ONEWAY;
 
         _invocations.add(inv);
         return inv;
     }
-    
+
     protected void go() throws Exception {
         try {
             doDeployments();
@@ -271,23 +259,22 @@ public abstract class BPELTestAbstract {
 
     protected void checkFailure() {
         StringBuffer sb = new StringBuffer("Failure report:\n");
-    	for (Failure failure : _failures) {
+        for (Failure failure : _failures) {
             sb.append(failure);
             sb.append('\n');
         }
-    	if (_failures.size() != 0) {
-        	System.err.println(sb.toString());
+        if (_failures.size() != 0) {
+            System.err.println(sb.toString());
             Assert.fail(sb.toString());
-    	}
+        }
     }
 
-    
     protected Deployment deploy(String location) {
         Deployment deployment = new Deployment(makeDeployDir(location));
         doDeployment(deployment);
         return deployment;
     }
-    
+
     protected void doDeployments() {
         for (Deployment d : _deployments)
             doDeployment(d);
@@ -303,7 +290,7 @@ public abstract class BPELTestAbstract {
 
         try {
             procs = store.deploy(d.deployDir);
-            
+
             _deployed.add(d);
         } catch (Exception ex) {
             if (d.expectedException == null) {
@@ -311,9 +298,8 @@ public abstract class BPELTestAbstract {
                 failure(d, "DEPLOY: Unexpected exception: " + ex, ex);
             } else if (!d.expectedException.isAssignableFrom(ex.getClass())) {
                 ex.printStackTrace();
-                failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);                
+                failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);
             }
-
 
             return;
         }
@@ -342,7 +328,7 @@ public abstract class BPELTestAbstract {
                 failure(d, "Undeployment failed.", ex);
             }
         }
-        
+
         _deployments.clear();
     }
 
@@ -352,6 +338,7 @@ public abstract class BPELTestAbstract {
             store.undeploy(d.deployDir);
         }
     }
+
     protected void doInvokes() throws Exception {
         ArrayList<Thread> testThreads = new ArrayList<Thread>();
         for (Invocation i : _invocations) {
@@ -374,6 +361,7 @@ public abstract class BPELTestAbstract {
     private void failure(Object where, String message, Exception ex) {
         Failure f = new Failure(where, message, ex);
         _failures.add(f);
+        ex.printStackTrace();
         Assert.fail(f.toString());
     }
 
@@ -394,28 +382,27 @@ public abstract class BPELTestAbstract {
             Assert.fail("Resource not found: " + deployxml);
         }
         try {
-			return new File(deployxmlurl.toURI().getPath()).getParentFile();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-			return null;
-		}
+            return new File(deployxmlurl.toURI().getPath()).getParentFile();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+            return null;
+        }
     }
 
     /**
-     * Override this to provide configuration properties for Ode extensions 
-     * like BpelEventListeners.
+     * Override this to provide configuration properties for Ode extensions like BpelEventListeners.
      * 
      * @return
      */
     protected Properties getConfigProperties() {
-    	// could also return null, returning an empty properties 
-    	// object is more fail-safe.
-    	Properties p = new Properties();
-    	p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
-    	return p;
+        // could also return null, returning an empty properties
+        // object is more fail-safe.
+        Properties p = new Properties();
+        p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+        return p;
     }
-    
+
     protected static class Failure {
         Object where;
 
@@ -442,7 +429,7 @@ public abstract class BPELTestAbstract {
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
             if (ex != null) {
-            	sbuf.append("; got exception msg: " + ex.getMessage());
+                sbuf.append("; got exception msg: " + ex.getMessage());
             }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
@@ -499,11 +486,8 @@ public abstract class BPELTestAbstract {
         /** If non-null, expect an exception of this class (or subclass) on invoke. */
         public Class expectedInvokeException = null;
 
-        /** If non-null, expecte this status right after invoke. */
-        public MessageExchange.Status expectedStatus = null;
-
         /** If non-null, expect this status after response received. */
-        public MessageExchange.Status expectedFinalStatus = MessageExchange.Status.COMPLETED_OK;
+        public AckType expectedFinalStatus = AckType.RESPONSE;
 
         /** If non-null, expect this correlation status right after invoke. */
         public CorrelationStatus expectedCorrelationStatus = null;
@@ -550,21 +534,17 @@ public abstract class BPELTestAbstract {
             } catch (Exception ex) {
             }
 
-            scheduler.begin();
             try {
-                mex = _server.getEngine().createMessageExchange(new GUID().toString(), _invocation.target, _invocation.operation);
-                mexContext.clearCurrentResponse();
+                mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _invocation.target, _invocation.operation,
+                        new GUID().toString());
 
                 Message request = mex.createMessage(_invocation.requestType);
                 request.setMessage(_invocation.request);
                 _invocation.invokeTime = System.currentTimeMillis();
-                running = mex.invoke(request);
+                mex.setRequest(request);
+                mex.invokeBlocking();
 
-                Status status = mex.getStatus();
                 CorrelationStatus cstatus = mex.getCorrelationStatus();
-                if (_invocation.expectedStatus != null && !status.equals(_invocation.expectedStatus))
-                    failure(_invocation, "Unexpected message exchange status", _invocation.expectedStatus, status);
-
                 if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))
                     failure(_invocation, "Unexpected correlation status", _invocation.expectedCorrelationStatus, cstatus);
 
@@ -575,19 +555,13 @@ public abstract class BPELTestAbstract {
                     failure(_invocation, "Unexpected invocation exception.", _invocation.expectedInvokeException, ex.getClass());
 
                 return;
-            } finally {
-                scheduler.commit();
             }
+
+            if (mex.getStatus() != Status.ACK)
+                failure(_invocation, "No ACK status", Status.ACK.toString(), mex.getStatus().toString());
 
             if (isFailed())
                 return;
-
-            try {
-                running.get(_invocation.maximumWaitMs, TimeUnit.MILLISECONDS);
-            } catch (Exception ex) {
-                failure(_invocation, "Exception on future object.", ex);
-                return;
-            }
 
             long ctime = System.currentTimeMillis();
             long itime = ctime - _invocation.invokeTime;
@@ -600,32 +574,29 @@ public abstract class BPELTestAbstract {
             if (isFailed())
                 return;
 
-            scheduler.begin();
-            try {
-                Status finalstat = mex.getStatus();
-                if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
-                    if (finalstat.equals(Status.FAULT)) {
-                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: " 
-                    			+ mex.getFault() + " | " + mex.getFaultExplanation());
-                    } else {
-                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
-                    }
+            AckType finalstat = mex.getAckType();
+            if (_invocation.expectedFinalStatus != null && _invocation.expectedFinalStatus != finalstat) {
+                if (finalstat.equals(AckType.FAULT)) {
+                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: "
+                            + mex.getFault() + " | " + mex.getFaultExplanation());
+                } else {
+                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
 
-                if (_invocation.expectedFinalCorrelationStatus != null
-                        && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
-                    failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
-                            .getCorrelationStatus());
+                    if (_invocation.expectedFinalCorrelationStatus != null
+                            && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
+                        failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
+                                .getCorrelationStatus());
+                    }
+                    if (_invocation.expectedResponsePattern != null) {
+                        if (mex.getResponse() == null)
+                            failure(_invocation, "Expected response, but got none.", null);
+                        String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
+                        Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
+                        if (!matcher.matches())
+                            failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern,
+                                    responseStr);
+                    }
                 }
-                if (_invocation.expectedResponsePattern != null) {
-                    if (mex.getResponse() == null)
-                        failure(_invocation, "Expected response, but got none.", null);
-                    String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
-                    Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
-                    if (!matcher.matches())
-                        failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
-                }
-            } finally {
-                scheduler.commit();
             }
         }
     }

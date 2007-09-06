@@ -19,130 +19,203 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.engine.WorkEvent.Type;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.xmlbeans.XmlCursor.ChangeStamp;
 import org.w3c.dom.Element;
 
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
+import com.sun.corba.se.spi.activation._ActivatorImplBase;
 
-class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
-    private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
+/**
+ * Base-class implementation of the interface used to expose a partner invocation to the integration layer.
+ * 
+ * @author Maciej Szefler
+ */
+abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
+    private static final Log __log = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
-    private PartnerRoleChannel _channel;
-    private EndpointReference _myRoleEPR;
-    
-    PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
-            Operation operation, 
-            EndpointReference epr,
-            EndpointReference myRoleEPR,
-            PartnerRoleChannel channel) {
-        super(engine, dao);
+    protected final PartnerRoleChannel _partnerRoleChannel;
+
+    protected EndpointReference _myRoleEPR;
+
+    protected String _responseChannel;
+
+    protected volatile String _foreignKey;
+
+    protected Lock _accessLock = new ReentrantLock();
+
+    protected Condition _stateChanged = _accessLock.newCondition();
+    protected Condition _acked = _accessLock.newCondition();
+
+    private QName _caller;
+
+    /** the states for a partner mex. */
+    enum State {
+        /** state when we're in one of the MexContext.invokeXXX methods. */
+        INVOKE_XXX,
+
+        /** hold all actions (blocks the IL) */
+        HOLD,
+
+        /** the MEX is ASYNC ("in the wild"), i.e. a response can come at any momemnt from any thread. */
+        ASYNC,
+
+        /** the MEX is dead, it should no longer be accessed by the IL */
+        DEAD
+    };
+
+    protected State _state = State.INVOKE_XXX;
+
+    PartnerRoleMessageExchangeImpl(BpelProcess process, Long iid, String mexId, OPartnerLink oplink, Operation operation,
+            EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+        super(process, iid, mexId, oplink, oplink.partnerRolePortType, operation);
         _myRoleEPR = myRoleEPR;
-        setPortOp(portType, operation);
-        _channel = channel;
+        _partnerRoleChannel = channel;
+    }
+
+    @Override
+    void load(MessageExchangeDAO dao) {
+        super.load(dao);
+        _caller = dao.getProcess().getProcessId();
+    }
+
+    @Override
+    void save(MessageExchangeDAO dao) {
+        super.save(dao);
+        
+        dao.setPartnersKey(_foreignKey);
+        if (_changes.contains(Change.ACK)) {
+            _changes.remove(Change.ACK);
+            MessageDAO responseDao = dao.createMessage(_response.getType());
+            responseDao.setData(_response.getMessage());
+            dao.setResponse(responseDao);
+        }
+
+
+    }
+
+    @Override
+    void ack(AckType acktype) {
+        _accessLock.lock();
+        try {
+            super.ack(acktype);
+            _changes.add(Change.ACK);
+            _acked.signalAll();
+        } finally {
+            _accessLock.unlock();
+        }
+    }
+    
+    public void replyAsync(String foreignKey) {
+        throw new IllegalStateException("replyAsync() is not supported for invocation style " + getInvocationStyle());
     }
 
     public void replyOneWayOk() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyOneWayOk mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyOneWayOk mex=" + getMessageExchangeId());
         }
-        setStatus(Status.ASYNC);
-    }
 
-    public void replyAsync() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyAsync mex=" + getMessageExchangeId());
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            ack(AckType.ONEWAY);
+        } finally {
+            _accessLock.unlock();
         }
-        setStatus(Status.ASYNC);
     }
 
     public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFault mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyWithFault mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
-        setFault(faultType, outputFaultMessage);
-        if (isAsync)
-            continueAsync();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _fault = faultType;
+            _failureType = null;
+            _response = (MessageImpl) outputFaultMessage;
+            ack(AckType.FAULT);            
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
+        }
     }
 
     public void reply(Message response) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("reply mex=" + getMessageExchangeId());
+        if (__log.isDebugEnabled()) {
+            __log.debug("reply mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
-        setResponse(response);
-        if (isAsync)
-            continueAsync();
+
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _response = (MessageImpl) response;
+            _fault = null;
+            _failureType = null;
+            ack(AckType.RESPONSE);
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
+        }
 
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFailure mex=" + getMessageExchangeId() + " failureType="+type+" description="+description
-                      +" details="+details);
+        if (__log.isDebugEnabled()) {
+            __log.debug("replyWithFailure mex=" + getMessageExchangeId());
         }
-        boolean isAsync = isAsync();
-        setFailure(type, description, details);
-        if (isAsync)
-            continueAsync();
-    }
 
-    /**
-     * Continue from the ASYNC state.
-     * 
-     */
-    private void continueAsync() {
-        // If there is no channel waiting for us, there is nothing to do.
-        if (getDAO().getChannel() == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("no channel on mex=" + getMessageExchangeId());
-            }
-            return;
+        _accessLock.lock();
+        try {
+            checkReplyContextOk();
+            _failureType = type;
+            _explanation = description;
+            _fault = null;
+            _response = null;
+            ack(AckType.FAILURE);
+            if (_state == State.ASYNC)
+                asyncACK();
+        } finally {
+            _accessLock.unlock();
         }
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("create work event for mex=" + getMessageExchangeId());
-        }
-        WorkEvent we = new WorkEvent();
-        we.setIID(getDAO().getInstance().getInstanceId());
-        we.setType(Type.INVOKE_RESPONSE);
-        if (_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory())
-            we.setInMem(true);
-        we.setChannel(getDAO().getChannel());
-        we.setMexId(getDAO().getMessageExchangeId());
-        if (we.isInMem())
-            _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-        else
-            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-    }
-
-    /**
-     * Check if we are in the ASYNC state.
-     * 
-     * @return
-     */
-    private boolean isAsync() {
-        return getStatus() == Status.ASYNC;
     }
 
     public QName getCaller() {
-        return _dao.getProcess().getProcessId();
+        return _caller;
+    }
+
+    public PartnerRoleChannel getPartnerRoleChannel() {
+        return _partnerRoleChannel;
+    }
+
+    public EndpointReference getMyRoleEndpointReference() {
+        return _myRoleEPR;
     }
 
     public String toString() {
         try {
-            return "{PartnerRoleMex#" + getMessageExchangeId() + " [PID " + getCaller() + "] calling " + _epr + "."
-                    + getOperationName() + "(...)}";
+            return "{PartnerRoleMex#" + _mexId + " [PID " + getCaller() + "] calling " + _epr + "." + getOperationName() + "(...)}";
 
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";
@@ -150,12 +223,55 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
 
     }
 
-    public PartnerRoleChannel getChannel() {
-        return _channel;
+    /**
+     * Resume an instance. This happens if the response for the partner invocation were not "immediately" available, that is if the
+     * IL was not able to supply a response in the scope of the
+     * {@link MessageExchangeContext#invokePartnerReliable(PartnerRoleMessageExchange)} or
+     * {@link MessageExchangeContext#invokePartnerAsynch(PartnerRoleMessageExchange)}. Note that this is actually the common case
+     * for ASYNC and RELIABLE invocations.
+     * 
+     */
+    protected abstract void asyncACK();
+    
+    
+    protected void checkReplyContextOk() {
+        // Prevent duplicate replies.
+        while (_state == State.HOLD)
+            try {
+                _stateChanged.await();
+            } catch (InterruptedException e) {
+                throw new BpelEngineException("Thread Interrupted.", e);
+            }
+
+        if (_state == State.DEAD)
+            throw new IllegalStateException("Object used in inappropriate context. ");
+
+        if (getStatus() != MessageExchange.Status.REQ)
+            throw new IllegalStateException("Invalid message exchange state, expect REQ but got " + getStatus());
+
     }
 
-    public EndpointReference getMyRoleEndpointReference() {
-        return _myRoleEPR;
+    void setState(State newstate) {
+        _accessLock.lock();
+        try {
+            _state = newstate;
+            _stateChanged.signalAll();
+        } finally {
+            _accessLock.unlock();
+        }
+    }
+    
+    public boolean waitForAck(long timeout) throws InterruptedException  {
+        _accessLock.lock();
+        try {
+            if (getStatus() != Status.ACK) 
+                return _acked.await(timeout,TimeUnit.MILLISECONDS);
+            else
+                return true;
+        } finally {
+            _accessLock.unlock();
+        }
     }
 
+    
 }

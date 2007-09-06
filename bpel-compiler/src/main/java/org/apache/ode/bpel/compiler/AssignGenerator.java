@@ -169,7 +169,6 @@ class AssignGenerator extends DefaultActivityGenerator {
                     if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }
-                // TODO: check for irrelevant properties.
                 return vref;
             } else if (from.isPartnerLinkVal()) {
                 PartnerLinkVal plv = from.getAsPartnerLinkVal();
@@ -230,7 +229,6 @@ class AssignGenerator extends DefaultActivityGenerator {
                     if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }
-                // TODO: check for irrelevant properties.
                 return vref;
             } else if (to.isPartnerLinkVal()) {
                 OAssign.PartnerLinkRef plref = new OAssign.PartnerLinkRef(_context.getOProcess());

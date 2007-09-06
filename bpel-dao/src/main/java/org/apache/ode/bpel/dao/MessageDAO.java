@@ -23,16 +23,24 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 
-// TODO: Abstract out the data representation.
+/**
+ * Representation of a message (i.e. request/response) in the database.
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ * 
+ */
 public interface MessageDAO {
 
-  void setType(QName type);
-  
-  QName getType();
-  
-  void setData(Element value);
-  
-  Element getData();
+    /** Set the message type (i.e. the <wsdl:message> type). */
+    void setType(QName type);
 
-  MessageExchangeDAO getMessageExchange();
+    /** Get the message type (i.e. the <wsdl:message> type). */
+    QName getType();
+
+    /** Set the message data (content). */
+    void setData(Element value);
+
+    /** Get the message data (content). */
+    Element getData();
+
 }

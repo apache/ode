@@ -77,10 +77,13 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     private short _previousState;
 	@Lob @Column(name="EXECUTION_STATE")
     private byte[] _executionState;
-	@Basic @Column(name="SEQUENCE")
+    @Basic @Column(name="SEQUENCE")
     private long _sequence;
 	@Basic @Column(name="DATE_CREATED")
     private Date _dateCreated = new Date();
+    
+    @Basic @Column(name="EXEC_STATE_COUNTER")
+    private int _execStateCounter;
 	
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="ROOT_SCOPE_ID")
 	private ScopeDAOImpl _rootScope;
@@ -295,5 +298,11 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 
     public BpelDAOConnection getConnection() {
         return new BPELDAOConnectionImpl(getEM());
+    }
+    public int getExecutionStateCounter() {
+        return _execStateCounter;
+    }
+    public void setExecutionStateCounter(int stateCounter) {
+        _execStateCounter = stateCounter;
     }
 }

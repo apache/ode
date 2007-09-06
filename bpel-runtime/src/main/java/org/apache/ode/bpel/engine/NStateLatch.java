@@ -119,4 +119,8 @@ public class NStateLatch {
             _lock.unlock();
         }
     }
+    
+    public boolean isLatched(int state) {
+        return _state == state && _depth > 0;
+    }
 }
