@@ -200,11 +200,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        _ode._scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource));
-
-        _ode._scheduler.setJobProcessor(_ode._server);
-
-        _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+        SimpleScheduler sched =new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource));
+        sched.setJobProcessor(_ode._server);
+        sched.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+        _ode._scheduler = sched;
 
         _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
         _ode._store.loadAll();

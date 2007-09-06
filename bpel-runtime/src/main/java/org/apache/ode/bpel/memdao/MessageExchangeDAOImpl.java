@@ -40,33 +40,33 @@ import org.w3c.dom.Element;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
-    private String messageExchangeId;
-	private MessageDAO response;
-	private Date createTime;
-	private MessageDAO request;
-	private String operation;
-	private QName portType;
-	private Status status;
-	private int partnerLinkModelId;
-	private String correlationId;
-	private String pattern;
-	private Element ePR;
-	private String channel;
-	private QName fault;
-    private String faultExplanation;
-    private String correlationStatus;
-	private ProcessDAO process;
-	private ProcessInstanceDAO instance;
-	private char direction;
-	private QName callee;
-	private Properties properties = new Properties();
-    private PartnerLinkDAOImpl _plink;
-    private InvocationStyle _istyle;
-    private String _pipedExchange;
-    private FailureType _failureType;
-    private long _timeout;
-    private AckType _ackType;
-    private QName _pipedPID;
+    String messageExchangeId;
+	MessageDAO response;
+	Date createTime;
+	MessageDAO request;
+	String operation;
+	QName portType;
+	Status status;
+	int partnerLinkModelId;
+	String correlationId;
+	String pattern;
+	Element ePR;
+	String channel;
+	QName fault;
+    String faultExplanation;
+    String correlationStatus;
+	ProcessDAO process;
+	ProcessInstanceDAO instance;
+	char direction;
+	QName callee;
+	Properties properties = new Properties();
+    PartnerLinkDAOImpl _plink;
+    InvocationStyle _istyle;
+    String _pipedExchange;
+    FailureType _failureType;
+    long _timeout;
+    AckType _ackType;
+    QName _pipedPID;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -265,7 +265,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         _plink = null;
         request = null;
         response = null;
-        BpelDAOConnectionImpl.removeMessageExchange(getMessageExchangeId());
     }
 
     public String toString() {

@@ -18,7 +18,6 @@
  */
 package org.apache.ode.test;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -62,8 +61,8 @@ import org.junit.Before;
 import org.w3c.dom.Element;
 
 public abstract class BPELTestAbstract {
-	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
-	
+    private static final String SHOW_EVENTS_ON_CONSOLE = "no";
+
     protected BpelServerImpl _server;
 
     protected ProcessStore store;
@@ -91,7 +90,6 @@ public abstract class BPELTestAbstract {
     private List<Deployment> _deployed;
 
     private MockTransactionManager _txm;
-
 
     @Before
     public void setUp() throws Exception {
@@ -136,7 +134,7 @@ public abstract class BPELTestAbstract {
             }
         });
         _server.setConfigProperties(getConfigProperties());
-        //_server.registerBpelEventListener(new DebugBpelEventListener());
+        // _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
     }
@@ -244,7 +242,7 @@ public abstract class BPELTestAbstract {
 
             inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
         } else
-            inv.expectedFinalStatus = AckType.ONEWAY; 
+            inv.expectedFinalStatus = AckType.ONEWAY;
 
         _invocations.add(inv);
         return inv;
@@ -261,14 +259,14 @@ public abstract class BPELTestAbstract {
 
     protected void checkFailure() {
         StringBuffer sb = new StringBuffer("Failure report:\n");
-    	for (Failure failure : _failures) {
+        for (Failure failure : _failures) {
             sb.append(failure);
             sb.append('\n');
         }
-    	if (_failures.size() != 0) {
-        	System.err.println(sb.toString());
+        if (_failures.size() != 0) {
+            System.err.println(sb.toString());
             Assert.fail(sb.toString());
-    	}
+        }
     }
 
     protected Deployment deploy(String location) {
@@ -384,12 +382,12 @@ public abstract class BPELTestAbstract {
             Assert.fail("Resource not found: " + deployxml);
         }
         try {
-			return new File(deployxmlurl.toURI().getPath()).getParentFile();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-			return null;
-		}
+            return new File(deployxmlurl.toURI().getPath()).getParentFile();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -398,11 +396,11 @@ public abstract class BPELTestAbstract {
      * @return
      */
     protected Properties getConfigProperties() {
-    	// could also return null, returning an empty properties 
-    	// object is more fail-safe.
-    	Properties p = new Properties();
-    	p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
-    	return p;
+        // could also return null, returning an empty properties
+        // object is more fail-safe.
+        Properties p = new Properties();
+        p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+        return p;
     }
 
     protected static class Failure {
@@ -431,7 +429,7 @@ public abstract class BPELTestAbstract {
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
             if (ex != null) {
-            	sbuf.append("; got exception msg: " + ex.getMessage());
+                sbuf.append("; got exception msg: " + ex.getMessage());
             }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
@@ -488,10 +486,8 @@ public abstract class BPELTestAbstract {
         /** If non-null, expect an exception of this class (or subclass) on invoke. */
         public Class expectedInvokeException = null;
 
-
         /** If non-null, expect this status after response received. */
         public AckType expectedFinalStatus = AckType.RESPONSE;
-
 
         /** If non-null, expect this correlation status right after invoke. */
         public CorrelationStatus expectedCorrelationStatus = null;
@@ -539,8 +535,8 @@ public abstract class BPELTestAbstract {
             }
 
             try {
-                mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _invocation.target, _invocation.operation, new GUID()
-                        .toString());
+                mex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _invocation.target, _invocation.operation,
+                        new GUID().toString());
 
                 Message request = mex.createMessage(_invocation.requestType);
                 request.setMessage(_invocation.request);
@@ -563,10 +559,9 @@ public abstract class BPELTestAbstract {
 
             if (mex.getStatus() != Status.ACK)
                 failure(_invocation, "No ACK status", Status.ACK.toString(), mex.getStatus().toString());
-            
+
             if (isFailed())
                 return;
-
 
             long ctime = System.currentTimeMillis();
             long itime = ctime - _invocation.invokeTime;
@@ -580,29 +575,29 @@ public abstract class BPELTestAbstract {
                 return;
 
             AckType finalstat = mex.getAckType();
-            if (_invocation.expectedFinalStatus != null && _invocation.expectedFinalStatus != finalstat)
-                    if (finalstat.equals(Status.FAULT)) {
-                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: " 
-                    			+ mex.getFault() + " | " + mex.getFaultExplanation());
-                    } else {
-                failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+            if (_invocation.expectedFinalStatus != null && _invocation.expectedFinalStatus != finalstat) {
+                if (finalstat.equals(AckType.FAULT)) {
+                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: "
+                            + mex.getFault() + " | " + mex.getFaultExplanation());
+                } else {
+                    failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
 
-
-            if (_invocation.expectedFinalCorrelationStatus != null
-                    && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
-                failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
-                        .getCorrelationStatus());
+                    if (_invocation.expectedFinalCorrelationStatus != null
+                            && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
+                        failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
+                                .getCorrelationStatus());
+                    }
+                    if (_invocation.expectedResponsePattern != null) {
+                        if (mex.getResponse() == null)
+                            failure(_invocation, "Expected response, but got none.", null);
+                        String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
+                        Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
+                        if (!matcher.matches())
+                            failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern,
+                                    responseStr);
+                    }
+                }
             }
-            if (_invocation.expectedResponsePattern != null) {
-                if (mex.getResponse() == null)
-                    failure(_invocation, "Expected response, but got none.", null);
-                String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
-                Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
-                if (!matcher.matches())
-                    failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern,
-                            responseStr);
-            }
-
         }
     }
 }

@@ -18,6 +18,22 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
@@ -30,27 +46,9 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
-
-import javax.transaction.RollbackException;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
@@ -65,8 +63,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
 
-    private static Map<String, MessageExchangeDAO> _mexStore = Collections
-            .synchronizedMap(new HashMap<String, MessageExchangeDAO>());
+    private final List<MessageExchangeDAOImpl> _mexList = new LinkedList<MessageExchangeDAOImpl>();
+    private final Map<String, MessageExchangeDAOImpl> _mexStore = new HashMap<String, MessageExchangeDAOImpl>();
 
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
     private static volatile long _lastRemoval = 0;
@@ -184,34 +182,63 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         throw new UnsupportedOperationException("Can't query process configuration using a transient DAO.");
     }
 
-    public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
-        MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir, mexId);
-        _mexStore.put(mexId, mex);
-        long now = System.currentTimeMillis();
-        _mexAge.put(id, now);
-
-        if (now > _lastRemoval + (TIME_TO_LIVE/10)) {
-            _lastRemoval = now;
-            Object[] oldMexs = _mexAge.keySet().toArray();
-            for (int i=oldMexs.length-1; i>0; i--) {
-                String oldMex = (String) oldMexs[i];
-                Long age = _mexAge.get(oldMex);
-                if (age != null && now-age > TIME_TO_LIVE) {
-                    removeMessageExchange(oldMex);
-                    _mexAge.remove(oldMex);
-                }
-            }
+    public MessageExchangeDAO createMessageExchange(final String mexId, char dir) {
+        MessageExchangeDAOImpl mex = new MessageExchangeDAOImpl(dir, mexId);
+        mex.createTime  = new Date();
+        
+        // FIXME: Why is this necessary? We should explicitly remove these thigs -mbs
+        
+        synchronized (_mexStore) {
+            _mexStore.put(mexId, mex);
+            _mexList.add(mex);
         }
 
+
+        cleanupDeadWood();
+        
         // Removing right away on rollback
         onRollback(new Runnable() {
             public void run() {
-                removeMessageExchange(id);
-                _mexAge.remove(id);
+                synchronized (_mexStore) {
+                    MessageExchangeDAOImpl mexdao = _mexStore.remove(mexId);
+                    
+                    if (mexdao != null) 
+                        _mexList.remove(mexdao);
+                }
             }
         });
 
         return mex;
+    }
+
+
+    
+    /**
+     * Remove old message exchanges from the Mex store.
+     * 
+     */
+    private void cleanupDeadWood() {
+        long now = System.currentTimeMillis();
+        
+        if (now  > _lastRemoval + (TIME_TO_LIVE/10)) {
+            _lastRemoval = now;
+            
+            synchronized (_mexStore) {
+                LinkedList trash = new LinkedList<MessageExchangeDAOImpl>();
+                for (MessageExchangeDAOImpl mexdao : _mexList) {
+                    long createtime = mexdao._createTime.getTime();
+                    if (now-createtime> TIME_TO_LIVE) {
+                        trash.add(mexdao);
+                    } else 
+                        break;
+                }
+                
+                _mexList.removeAll(trash);
+                _mexStore.values().removeAll(trash);
+            }
+        }
+
+        
     }
 
     public MessageExchangeDAO getMessageExchange(String mexid) {
@@ -337,15 +364,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         throw new UnsupportedOperationException();
     }
 
-    static void removeMessageExchange(String mexId) {
-        // Cleaning up mex
-        if (__log.isDebugEnabled()) __log.debug("Removing mex " + mexId + " from memory store.");
-        MessageExchangeDAO mex = _mexStore.remove(mexId);
-        if (mex == null)
-            __log.warn("Couldn't find mex " + mexId + " for cleanup.");
-        _mexAge.remove(mexId);
-    }
-
     public void defer(final Runnable runnable) {
         try {
             _txm.getTransaction().registerSynchronization(new Synchronization() {
@@ -360,11 +378,21 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    public void onRollback(final Runnable runnable) {
-        _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-            public void afterCompletion(boolean success) {
-                if (!success) runnable.run();
-            }
-            public void beforeCompletion() {
     }
+    
+    
+    public void onRollback(final Runnable runnable) {
+        try {
+            _txm.getTransaction().registerSynchronization(new Synchronization() {
+                public void afterCompletion(int status) {
+                    if (status != Status.STATUS_COMMITTED) runnable.run();
+                }
+                
+                public void beforeCompletion() {}
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
 }

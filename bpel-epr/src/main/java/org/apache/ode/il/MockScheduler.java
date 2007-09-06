@@ -19,21 +19,23 @@
 
 package org.apache.ode.il;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
  * 
@@ -78,18 +80,6 @@ public class MockScheduler implements Scheduler {
                     }
                 }, delay, TimeUnit.MILLISECONDS);
             }
-                                });
-                            } catch (Exception e) {
-                                throw new ContextException("Failure when scheduling a new volatile job.", e);
-                            }
-                        }
-                    }, date);
-                public void beforeCompletion() { }
-            });
-            return null;
-        } else {
-    }
-                if (!success) return;
 
             public void beforeCompletion() {
             }
