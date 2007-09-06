@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.intercept;
 
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * No-Op implementation of the
@@ -31,25 +29,20 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  */
 public class NoOpInterceptor implements MessageExchangeInterceptor {
 
-	public void onBpelServerInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onBpelServerInvoked(InterceptorEvent ic) throws FailMessageExchangeException, FaultMessageExchangeException {
+        
+    }
 
-	public void onProcessInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onNewInstanceInvoked(InterceptorEvent ic) throws FailMessageExchangeException, FaultMessageExchangeException {
+        
+    }
 
-	public void onPartnerInvoked(PartnerRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onPartnerInvoked(InterceptorEvent ic) throws FailMessageExchangeException, FaultMessageExchangeException {
 
-	public void onNewInstanceInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
+    }
 
-	}
+    public void onProcessInvoked(InterceptorEvent ic) throws FailMessageExchangeException, FaultMessageExchangeException {
+        
+    }
 
 }

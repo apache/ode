@@ -18,12 +18,12 @@
  */
 package org.apache.ode.bpel.intercept;
 
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * An example of a  simple interceptor providing a "throttling"  capability - that is an 
@@ -36,8 +36,7 @@ public class ThrottlingInterceptor extends NoOpInterceptor {
     private static final QName PROP_MAX_INSTANCES = new QName("urn:org.apache.ode.bpel.intercept", "maxInstances");
 
     @Override
-    public void onNewInstanceInvoked(MyRoleMessageExchange mex,
-                                     InterceptorContext ic) throws FailMessageExchangeException {
+    public void onNewInstanceInvoked(InterceptorEvent ic) throws FailMessageExchangeException {
         int maxInstances;
         try {
             maxInstances = Integer.valueOf(getSimpleProperty(PROP_MAX_INSTANCES, ic));
@@ -56,7 +55,7 @@ public class ThrottlingInterceptor extends NoOpInterceptor {
      * @param ic interceptor context
      * @return value of the property, or <code>null</code> if not set
      */
-    private String getSimpleProperty(QName propertyName, InterceptorContext ic) {
+    private String getSimpleProperty(QName propertyName, InterceptorEvent ic) {
         Map<QName, Node> props =  ic.getProcessConf().getProperties();
         for (Map.Entry<QName, Node> prop : props.entrySet()) {
             if (prop.getKey().equals(propertyName))

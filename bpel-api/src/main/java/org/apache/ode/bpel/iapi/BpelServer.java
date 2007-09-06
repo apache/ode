@@ -18,12 +18,13 @@
  */
 package org.apache.ode.bpel.iapi;
 
+import java.util.Set;
+
 import javax.xml.namespace.QName;
 
 
 /**
- * Interface implemented by the BPEL server. Provides methods for
- * life-cycle management.
+ * Interface implemented by the BPEL server. Provides methods for life-cycle management and process invocation. 
  * 
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
@@ -98,12 +99,6 @@ public interface BpelServer {
 
 
     /**
-     * Get the {@link BpelEngine} interface for handling transaction operations.
-     * @return transactional {@link BpelEngine} interfacce
-     */
-    BpelEngine getEngine();
-
-    /**
      * Register a process with the server.
      * @param pid process to register
      * @throws BpelEngineException
@@ -117,4 +112,40 @@ public interface BpelServer {
      */
     void unregister(QName pid) throws BpelEngineException;
 
+    
+    /**
+     * Inquire of the engine the invocation styles that are supported for a given service. 
+     * @param serviceId service identifier 
+     * @return set of supported {@link InvocationStyle}s
+     */
+    Set<InvocationStyle> getSupportedInvocationStyle(QName serviceId);
+    
+    /**
+     * Create a "my role" message exchange for invoking a BPEL process.
+     * 
+     * @param serviceId
+     *            the service id of the process being called, if known
+     * @param operation
+     *            name of the operation
+     * 
+     * @return {@link MyRoleMessageExchange} the newly created message exchange
+     */
+    MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, 
+            QName serviceId, 
+            String operation,
+            String foreignKey)
+            throws BpelEngineException;
+
+    /**
+     * Retrieve a message identified by the given identifer.
+     * 
+     * @param mexId
+     *            message exhcange identifier
+     * @return associated message exchange
+     */
+    MessageExchange getMessageExchange(String mexId) 
+        throws BpelEngineException;
+
+    MessageExchange getMessageExchangeByForeignKey(String foreignKey) 
+        throws BpelEngineException;
 }

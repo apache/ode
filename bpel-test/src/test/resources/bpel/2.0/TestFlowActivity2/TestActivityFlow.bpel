@@ -189,23 +189,25 @@
 			inputVariable="probeInput" outputVariable="probeInput"> </invoke>
 		<if>
 			<condition>bpws:getVariableProperty("request", "wns:loopInd") = 'min'</condition>
-            <sequence>
-                <assign name="flow1-min-assign">
-                    <copy>
-                        <from>5</from>
-                        <to variable="internalState" part="loop1"/>
-                    </copy>
-                    <copy>
-                        <from>
-                            <literal><![CDATA[case min: set loop iterations = 5]]></literal>
-                        </from>
-                        <to variable="probeInput" part="probeName"/>
-                    </copy>
-                </assign>
-                <invoke name="probe8" partnerLink="probe" portType="prb:probeMessagePT"
-                    operation="probe" inputVariable="probeInput" outputVariable="probeInput"
-                > </invoke>
-            </sequence>
+			<then>
+				<sequence>
+					<assign name="flow1-min-assign">
+						<copy>
+							<from>5</from>
+							<to variable="internalState" part="loop1"/>
+						</copy>
+						<copy>
+							<from>
+								<literal><![CDATA[case min: set loop iterations = 5]]></literal>
+							</from>
+							<to variable="probeInput" part="probeName"/>
+						</copy>
+					</assign>
+					<invoke name="probe8" partnerLink="probe" portType="prb:probeMessagePT"
+						operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+					> </invoke>
+				</sequence>
+			</then>
 			<elseif>
 				<condition>$request.requestMessageData/loopIndicator = 'max'</condition>
 				<sequence>

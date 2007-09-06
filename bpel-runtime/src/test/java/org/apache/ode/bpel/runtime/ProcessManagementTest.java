@@ -116,6 +116,5 @@ public class ProcessManagementTest extends TestCase {
         _processQName = new QName(NAMESPACE, process);
         _server.invoke(_processQName, "instantiate",
                        DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
-        _server.waitForBlocking();
     }
 }

@@ -145,7 +145,7 @@ public interface InstanceManagement {
      * Get an instance by id.
      * @param iid
      * @return information about a specific instance
-     * @throws InstanceNotFoundException TODO
+     * @throws InstanceNotFoundException 
      */
     InstanceInfoDocument getInstanceInfo(Long iid) throws InstanceNotFoundException;
 

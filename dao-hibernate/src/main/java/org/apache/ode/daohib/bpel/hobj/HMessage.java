@@ -27,20 +27,9 @@ package org.apache.ode.daohib.bpel.hobj;
  */
 public class HMessage extends HObject {
 
-  private HMessageExchange _mex;
   private String _type;
   private HLargeData _data;
   
-  
-  public void setMessageExchange(HMessageExchange mex) {
-    _mex = mex;
-  }
-  
-  /** @hibernate.many-to-one column="MEX" */
-  public HMessageExchange getMessageExchange() {
-    return _mex;
-  }
-
   public void setType(String type) {
     _type = type;
   }

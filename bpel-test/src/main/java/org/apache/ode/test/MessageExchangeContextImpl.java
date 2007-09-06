@@ -38,19 +38,24 @@
 
 package org.apache.ode.test;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import java.io.IOException;
 
 /**
  * This is a simple MessageExchangeContext implementation
@@ -67,10 +72,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 	// Probe Service is a simple concatination service
 	private static final QName probePT = new QName(PROBE_NS,"probeMessagePT");
 	private static final QName faultPT = new QName(FAULT_NS,"faultMessagePT");
+
 	
-	private Message currentResponse;
-	
-	public void invokePartner(PartnerRoleMessageExchange mex)
+	public void invokePartnerUnreliable(PartnerRoleMessageExchange mex)
 			throws ContextException {
 		QName calledPT = mex.getPortType().getQName();
 		
@@ -84,13 +88,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	}
 
-	public void onAsyncReply(MyRoleMessageExchange myRoleMex)
+	public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
-		Status mStat = myRoleMex.getStatus();
-        if ( mStat == Status.RESPONSE ) {
-			currentResponse = myRoleMex.getResponse();
-		}
-		myRoleMex.complete();
+
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {
@@ -101,10 +101,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		if ( elm1 != null && elm2 != null ) {
 			String cat = elm2.getTextContent()+" -> "+elm1.getTextContent();
 			elm2.setTextContent(cat);
-			msg.setMessagePart("probeData", elm2);
             final Message response = prmx.createMessage(prmx.getOperation().getOutput().getMessage().getQName());
-
             response.setMessage(msg.getMessage());
+            response.setMessagePart("probeData", elm2);
 			prmx.reply(response);
 		}
 	}
@@ -157,13 +156,26 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		}
 
 	}
-	
-	public Message getCurrentResponse() {
-		return currentResponse;
-	}
-	
-	public void clearCurrentResponse() {
-		currentResponse = null;
-	}
+
+
+    public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
+        return Collections.singleton(InvocationStyle.UNRELIABLE);
+    }
+
+    public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
+        // TODO Auto-generated method stub
+        
+    }
+
 
 }

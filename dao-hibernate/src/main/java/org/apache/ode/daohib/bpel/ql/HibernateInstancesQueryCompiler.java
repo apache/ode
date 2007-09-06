@@ -334,7 +334,6 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
         try {
           value.setValue(ISO8601DateParser.parse((String) value.getValue()));
         } catch (ParseException ex) {
-          // TODO
           throw new RuntimeException(ex);
         }
       }
@@ -521,7 +520,6 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
               objValues.add(ISO8601DateParser.parse((String) value.getValue()));
             }
           } catch (ParseException ex) {
-            // TODO
             throw new RuntimeException(ex);
           }
         } else {

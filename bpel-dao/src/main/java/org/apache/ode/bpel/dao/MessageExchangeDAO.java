@@ -18,11 +18,16 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 import java.util.Date;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.w3c.dom.Element;
 
 /**
  * Data access object for a message exchange.
@@ -40,6 +45,19 @@ public interface MessageExchangeDAO {
      */
     String getMessageExchangeId();
 
+    /**
+     * Get the invocation style. 
+     * @return
+     */
+    InvocationStyle getInvocationStyle();
+    
+    /**
+     * Set the invocation style. 
+     * @param invocationStyle
+     */
+    void setInvocationStyle(InvocationStyle invocationStyle);
+    
+    
     /**
      * Get output message (could be fault message)
      *
@@ -88,14 +106,14 @@ public interface MessageExchangeDAO {
      *
      * @param status state to be set
      */
-    void setStatus(String status);
+    void setStatus(Status status);
 
     /**
      * Get state of last message sent/received.
      *
      * @return the state
      */
-    String getStatus();
+    Status getStatus();
 
     /**
      * Create a new message associated with this message-exchange
@@ -133,11 +151,13 @@ public interface MessageExchangeDAO {
     void setPartnerLinkModelId(int modelId);
 
     /**
-     * Get the correlation identifier/client id
+     * Get the the partner's identifier for this message exchange. Generally, the partner will have a different 
+     * identifier for each exchange. This key is used in sistuations when the partner needs to find the mex, 
+     * but only has their own identifier. 
      *
      * @return correlation identifier
      */
-    String getCorrelationId();
+    String getPartnersKey();
 
     /**
      * Set the correlation identifier/client id
@@ -145,7 +165,7 @@ public interface MessageExchangeDAO {
      * @param correlationId
      *          identifier
      */
-    void setCorrelationId(String correlationId);
+    void setPartnersKey(String correlationId);
 
     void setPattern(String string);
 
@@ -171,8 +191,6 @@ public interface MessageExchangeDAO {
      *          response channel
      */
     void setChannel(String string);
-
-    boolean getPropagateTransactionFlag();
 
     QName getFault();
 
@@ -210,14 +228,14 @@ public interface MessageExchangeDAO {
     char getDirection();
 
     /**
-     * Get the "callee"--the id of the process being invoked in a myRole
+     * Get the "callee"--the id of the service being invoked in a myRole
      * exchange.
      * @return
      */
     QName getCallee();
 
     /**
-     * Set the "callee"--the id of the process being invoked in a myRole
+     * Set the "callee"--the id of the service being invoked in a myRole
      * exchange.
      * @param callee
      */
@@ -234,13 +252,30 @@ public interface MessageExchangeDAO {
     PartnerLinkDAO getPartnerLink();
 
     /**
-     * Gets the mex id for the message exchange that has been piped with
-     * this one in a process to process interaction. 
-     * @return
+     * Gets the message exchange that has been piped with this one in a process to process interaction.
+     *  
+     * @return other side of the message pipe 
      */
     String getPipedMessageExchangeId();
-    void setPipedMessageExchangeId(String mexId);
-
+    
+    void setPipedMessageExchangeId(String pipedMexId);
+    
     void release();
 
-}
+    void setFailureType(FailureType failureType);
+
+    FailureType getFailureType();
+
+    long getTimeout();
+
+    void setTimeout(long timeout);
+
+    void setAckType(AckType ackType);
+    
+    AckType getAckType();
+
+    QName getPipedPID();
+    
+    void setPipedPID(QName pipedPid);
+
+ }

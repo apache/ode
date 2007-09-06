@@ -25,6 +25,10 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Element;
@@ -91,6 +95,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private String _correlationKeys;
     @Basic @Column(name="PIPED_ID")
     private String _pipedMessageExchangeId;
+    
+    @Basic @Column(name="ACK_TYPE")
+    private String _ackType;
 
     @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MexProperty> _props = new ArrayList<MexProperty>();
@@ -100,19 +107,31 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private PartnerLinkDAOImpl _partnerLink;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="REQUEST_MESSAGE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="REQUEST_MESSAGE_ID")
 	private MessageDAOImpl _request;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="RESPONSE_MESSAGE_ID")
+    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="RESPONSE_MESSAGE_ID")
 	private MessageDAOImpl _response;
 
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     private CorrelatorDAOImpl _correlator;
+    
+    @Basic @Column(name="ISTYLE")
+    private String _istyle;
+
+    @Basic @Column(name="TIMEOUT")
+    private long _timeout;
+    
+    @Basic @Column(name="FAILURE_TYPE")
+    private String _failureType;
+    
+    @Basic @Column(name="PIPED_PID")
+    private String _pipedPid;
 
     public MessageExchangeDAOImpl() {}
     
-	public MessageExchangeDAOImpl(char direction){
+	public MessageExchangeDAOImpl(String mexId, char direction){
 		_direction = direction;
-		_id = new UUID().toString();
+		_id = mexId;
 	}
 	
 	public MessageDAO createMessage(QName type) {
@@ -128,7 +147,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _channel;
 	}
 
-	public String getCorrelationId() {
+	public String getPartnersKey() {
 		return _correlationId;
 	}
 
@@ -223,8 +242,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _response;
 	}
 
-	public String getStatus() {
-		return _status;
+	public Status getStatus() {
+		return _status == null ? null : Status.valueOf(_status);
 	}
 
 	public void setCallee(QName callee) {
@@ -235,7 +254,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_channel = channel;
 	}
 
-	public void setCorrelationId(String correlationId) {
+	public void setPartnersKey(String correlationId) {
 		_correlationId = correlationId;
 	}
 
@@ -296,8 +315,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_response = (MessageDAOImpl)msg;
 	}
 
-	public void setStatus(String status) {
-		_status = status;
+	public void setStatus(Status status) {
+		_status = status == null ?  null : status.toString();
 	}
 
     public String getPipedMessageExchangeId() {
@@ -338,5 +357,46 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void setCorrelator(CorrelatorDAOImpl correlator) {
         _correlator = correlator;
+    }
+
+    public InvocationStyle getInvocationStyle() {
+        return _istyle == null ? null : InvocationStyle.valueOf(_istyle);
+    }
+
+
+    public long getTimeout() {
+        return _timeout;
+    }
+
+    public void setFailureType(FailureType failureType) {
+        _failureType = failureType == null ? null :failureType.toString();
+    }
+    
+    public FailureType getFailureType() {
+        return _failureType == null ? null : FailureType.valueOf(_failureType);
+    }
+
+    public void setInvocationStyle(InvocationStyle invocationStyle) {
+        _istyle = invocationStyle == null ? null : invocationStyle.toString();
+    }
+
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
+    }
+
+    public AckType getAckType() {
+        return _ackType == null ? null : AckType.valueOf(_ackType);
+    }
+
+    public void setAckType(AckType ackType) {
+        _ackType = ackType == null ? null :ackType.toString();
+    }
+
+    public QName getPipedPID() {
+        return _pipedPid == null ? null : QName.valueOf(_pipedPid);
+    }
+
+    public void setPipedPID(QName pipedPid) {
+        _pipedPid = pipedPid == null ? null : pipedPid.toString();
     }
 }

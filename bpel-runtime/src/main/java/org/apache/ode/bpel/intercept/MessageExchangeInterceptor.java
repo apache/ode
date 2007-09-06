@@ -19,14 +19,14 @@
 package org.apache.ode.bpel.intercept;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 
 /**
- * Hook into the BPEL server that enables intercepting of message exchange
- * invocation.
+ * Hook into the BPEL server that enables intercepting of parntner/server invocations. This interface operates at 
+ * a level that is a bit lower than the IAPI, as it allows access to internal engine datastructures. Caution should
+ * be used when implementing interceptors. 
  * 
  * @author Maciej Szefler
  * 
@@ -40,7 +40,7 @@ public interface MessageExchangeInterceptor {
      * @param mex
      *            message exchange
      */
-    void onBpelServerInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
+    void onBpelServerInvoked(InterceptorEvent ic)
         throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
@@ -50,7 +50,7 @@ public interface MessageExchangeInterceptor {
      * @param mex
      *            message exchange
      */
-    void onProcessInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
+    void onProcessInvoked(InterceptorEvent ic)
         throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
@@ -61,7 +61,7 @@ public interface MessageExchangeInterceptor {
      * @param mex
      *            message exchange
      */
-    void onNewInstanceInvoked(MyRoleMessageExchange mex, InterceptorContext ic)
+    void onNewInstanceInvoked(InterceptorEvent ic)
         throws FailMessageExchangeException, FaultMessageExchangeException;
 
     /**
@@ -71,17 +71,30 @@ public interface MessageExchangeInterceptor {
      * @param mex
      *            message exchange
      */
-    void onPartnerInvoked(PartnerRoleMessageExchange mex, InterceptorContext ic)
+    void onPartnerInvoked(InterceptorEvent ic)
         throws FailMessageExchangeException, FaultMessageExchangeException;
 
 
-    public interface InterceptorContext {
+    /**
+     * Representation of an intercept event. 
+     * 
+     * @author Maciej Szefler <mszefler at gmail dot com>
+     *
+     */
+    public interface InterceptorEvent {
 
+        /** Get the connection to the data store. */
         BpelDAOConnection getConnection();
-
+        
+        /** Get the DB representation of the process. */
         ProcessDAO getProcessDAO();
 
+        /** Get the process configuration. */
         ProcessConf getProcessConf();
+        
+        /** Get the database representation of the message exchange. */
+        MessageExchangeDAO getMessageExchangeDAO();
+        
 
     }
 }

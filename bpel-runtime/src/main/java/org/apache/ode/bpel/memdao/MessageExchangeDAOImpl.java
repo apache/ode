@@ -19,46 +19,54 @@
 
 package org.apache.ode.bpel.memdao;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
-    private String messageExchangeId;
-	private MessageDAO response;
-	private Date createTime;
-	private MessageDAO request;
-	private String operation;
-	private QName portType;
-	private String status;
-	private int partnerLinkModelId;
-	private String correlationId;
-	private String pattern;
-	private Element ePR;
-	private Element callbackEPR;
-	private String channel;
-	private boolean propagateTransactionFlag;
-	private QName fault;
-    private String faultExplanation;
-    private String correlationStatus;
-	private ProcessDAO process;
-	private ProcessInstanceDAO instance;
-	private char direction;
-	private QName callee;
-	private Properties properties = new Properties();
-    private PartnerLinkDAOImpl _plink;
-    private String pipedMessageExchangeId;
+    String messageExchangeId;
+	MessageDAO response;
+	Date createTime;
+	MessageDAO request;
+	String operation;
+	QName portType;
+	Status status;
+	int partnerLinkModelId;
+	String correlationId;
+	String pattern;
+	Element ePR;
+	String channel;
+	QName fault;
+    String faultExplanation;
+    String correlationStatus;
+	ProcessDAO process;
+	ProcessInstanceDAO instance;
+	char direction;
+	QName callee;
+	Properties properties = new Properties();
+    PartnerLinkDAOImpl _plink;
+    InvocationStyle _istyle;
+    String _pipedExchange;
+    FailureType _failureType;
+    long _timeout;
+    AckType _ackType;
+    QName _pipedPID;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -94,17 +102,17 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Status status) {
 		this.status = status;
 
 	}
 
-	public String getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
 	public MessageDAO createMessage(QName type) {
-		MessageDAO messageDAO = new MessageDAOImpl(this);
+		MessageDAO messageDAO = new MessageDAOImpl();
 		messageDAO.setType(type);
 		return messageDAO;
 	}
@@ -128,11 +136,11 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public String getCorrelationId() {
+	public String getPartnersKey() {
 		return correlationId;
 	}
 
-	public void setCorrelationId(String correlationId) {
+	public void setPartnersKey(String correlationId) {
 		this.correlationId = correlationId;
 
 	}
@@ -156,15 +164,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 		return ePR;
 	}
 
-	public void setCallbackEPR(Element epr) {
-		this.callbackEPR = epr;
-
-	}
-
-	public Element getCallbackEPR() {
-		return callbackEPR;
-	}
-
+	
 	public String getPattern() {
 		return pattern;
 	}
@@ -175,10 +175,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	public void setChannel(String string) {
 		this.channel = string;
-	}
-
-	public boolean getPropagateTransactionFlag() {
-		return propagateTransactionFlag;
 	}
 
 	public QName getFault() {
@@ -196,7 +192,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void setFaultExplanation(String explanation) {
         this.faultExplanation = explanation;
     }
-
 
 
     public void setCorrelationStatus(String cstatus) {
@@ -263,13 +258,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         return retVal;
     }
 
-    public String getPipedMessageExchangeId() {
-        return pipedMessageExchangeId;
-    }
-
-    public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
-        this.pipedMessageExchangeId = pipedMessageExchangeId;
-    }
 
     public void release() {
         instance = null;
@@ -277,10 +265,60 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         _plink = null;
         request = null;
         response = null;
-        BpelDAOConnectionImpl.removeMessageExchange(getMessageExchangeId());
     }
 
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
+    }
+
+    public InvocationStyle getInvocationStyle() {
+        return _istyle;
+    }
+
+    public String getPipedMessageExchangeId() {
+        return _pipedExchange;
+    }
+
+    public void setFailureType(FailureType failureType) {
+        _failureType = failureType;
+    }
+
+    public FailureType getFailureType() {
+        return _failureType;
+    }
+    
+    public void setInvocationStyle(InvocationStyle invocationStyle) {
+        _istyle = invocationStyle;
+        
+    }
+
+    public void setPipedMessageExchangeId(String pipedMexId) {
+        _pipedExchange = pipedMexId;
+        
+    }
+
+    public long getTimeout() {
+        return _timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
+    }
+
+    public AckType getAckType() {
+        return _ackType;
+    }
+
+    public void setAckType(AckType ackType) {
+        _ackType = ackType;
+    }
+
+    public QName getPipedPID() {
+        return _pipedPID;
+    }
+
+    public void setPipedPID(QName pipedPid) {
+        _pipedPID = pipedPid;
+        
     }
 }

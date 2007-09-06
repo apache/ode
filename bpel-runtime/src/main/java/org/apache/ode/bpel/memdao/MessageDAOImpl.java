@@ -19,20 +19,17 @@
 
 package org.apache.ode.bpel.memdao;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 
 public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 	private QName type;
 	private Element data;
-	private MessageExchangeDAO messageExchange;
 	
-	public MessageDAOImpl(MessageExchangeDAO messageExchange) {
-		this.messageExchange = messageExchange;
+	public MessageDAOImpl() {
 	}
 
 	public void setType(QName type) {
@@ -54,8 +51,5 @@ public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 		return data;
 	}
 
-	public MessageExchangeDAO getMessageExchange() {
-		return messageExchange;
-	}
-
+	
 }

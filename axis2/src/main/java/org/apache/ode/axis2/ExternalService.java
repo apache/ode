@@ -19,6 +19,12 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Callable;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -38,26 +44,19 @@ import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
 /**
- * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used
- * services.
- *
+ * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used services.
+ * 
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ExternalService implements PartnerRoleChannel {
@@ -68,22 +67,27 @@ public class ExternalService implements PartnerRoleChannel {
 
     private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
 
-    private ExecutorService _executorService;
     private Definition _definition;
+
     private QName _serviceName;
+
     private String _portName;
+
     private AxisConfiguration _axisConfig;
+
     private boolean _isReplicateEmptyNS = false;
+
     private SoapMessageConverter _converter;
+
     private Scheduler _sched;
+
     private BpelServer _server;
 
-    public ExternalService(Definition definition, QName serviceName, String portName, ExecutorService executorService,
-            AxisConfiguration axisConfig, Scheduler sched, BpelServer server) throws AxisFault {
+    public ExternalService(Definition definition, QName serviceName, String portName, AxisConfiguration axisConfig,
+            Scheduler sched, BpelServer server) throws AxisFault {
         _definition = definition;
         _serviceName = serviceName;
         _portName = portName;
-        _executorService = executorService;
         _axisConfig = axisConfig;
         _sched = sched;
         _converter = new SoapMessageConverter(definition, serviceName, portName, _isReplicateEmptyNS);
@@ -101,8 +105,7 @@ public class ExternalService implements PartnerRoleChannel {
             _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
 
             SOAPEnvelope soapEnv = mctx.getEnvelope();
-            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference())
-                    .getUrl());
+            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
             if (__log.isDebugEnabled()) {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                 __log.debug("Message: " + soapEnv);
@@ -119,7 +122,7 @@ public class ExternalService implements PartnerRoleChannel {
                 cached = new CachedServiceClient();
                 ConfigurationContext ctx = new ConfigurationContext(_axisConfig);
                 cached._client = new ServiceClient(ctx, null);
-                cached._expire = now+EXPIRE_SERVICE_CLIENT;
+                cached._expire = now + EXPIRE_SERVICE_CLIENT;
                 _cachedClients.set(cached);
             }
             final OperationClient operationClient = cached._client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
@@ -132,51 +135,22 @@ public class ExternalService implements PartnerRoleChannel {
                 final String mexId = odeMex.getMessageExchangeId();
                 final Operation operation = odeMex.getOperation();
 
-                // Defer the invoke until the transaction commits.
-                _sched.registerSynchronizer(new Scheduler.Synchronizer() {
-
-                    public void afterCompletion(boolean success) {
-                        // If the TX is rolled back, then we don't send the request.
-                        if (!success)
-                            return;
-
-                        // The invocation must happen in a separate thread, holding on the afterCompletion
-                        // blocks other operations that could have been listed there as well.
-                        _executorService.submit(new Callable<Object>() {
-                            public Object call() throws Exception {
-                                try {
-                                    operationClient.execute(true);
-                                    MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-                                    MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
-                                    if (flt != null) {
-                                        reply(mexId, operation, flt, true);
-                                    } else {
-                                        reply(mexId, operation, response, false);
-                                    }
-                                } catch (Throwable t) {
-                                    String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
-                                    __log.error(errmsg, t);
-                                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
-                                }
-                                return null;
-                            }
-                        });
+                try {
+                    operationClient.execute(true);
+                    MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+                    MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
+                    if (flt != null) {
+                        reply(mexId, operation, flt, true);
+                    } else {
+                        reply(mexId, operation, response, false);
                     }
-
-                    public void beforeCompletion() {
-                    }
-
-                });
-                odeMex.replyAsync();
-
-            } else /** one-way case * */
-            {
-                _executorService.submit(new Callable<Object>() {
-                    public Object call() throws Exception {
-                        operationClient.execute(false);
-                        return null;
-                    }
-                });
+                } catch (Throwable t) {
+                    String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
+                    __log.error(errmsg, t);
+                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                }
+            } else /* one-way case */{
+                operationClient.execute(false);
                 odeMex.replyOneWayOk();
             }
         } catch (AxisFault axisFault) {
@@ -225,8 +199,7 @@ public class ExternalService implements PartnerRoleChannel {
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
-                    __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: "
-                            + myRoleSessionId);
+                    __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
@@ -275,20 +248,12 @@ public class ExternalService implements PartnerRoleChannel {
         return _serviceName;
     }
 
-    private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg,
-            final Element details) {
-        // ODE MEX needs to be invoked in a TX.
+    private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg, final Element details) {
         try {
-            _sched.execIsolatedTransaction(new Callable<Void>() {
-                public Void call() throws Exception {
-                    PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
-                    odeMex.replyWithFailure(error, errmsg, details);
-                    return null;
-                }
-            });
-
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getMessageExchange(odeMexId);
+            odeMex.replyWithFailure(error, errmsg, details);
         } catch (Exception e) {
-            String emsg = "Error executing replyWithFailure transaction; reply will be lost.";
+            String emsg = "Error executing replyWithFailure; reply will be lost.";
             __log.error(emsg, e);
 
         }
@@ -313,47 +278,39 @@ public class ExternalService implements PartnerRoleChannel {
             return;
         }
 
-        // ODE MEX needs to be invoked in a TX.
         try {
-            _sched.execIsolatedTransaction(new Callable<Void>() {
-                public Void call() throws Exception {
-                    PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
-                    Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(
-                            faultType.getLocalPart()).getMessage().getQName()) : odeMex.createMessage(odeMex
-                            .getOperation().getOutput().getMessage().getQName());
-                    try {
-                        if (__log.isDebugEnabled()) {
-                            __log.debug("Received response for MEX " + odeMex);
-                        }
-                        response.setMessage(odeMsgEl);
-                        if (fault) {
-                            if (faultType != null) {
-                                if (__log.isDebugEnabled()) {
-                                    __log.debug("FAULT RESPONSE(" + faultType + "): " + DOMUtils.domToString(odeMsgEl));
-                                }
-                                odeMex.replyWithFault(faultType, response);
-                            } else {
-                                if (__log.isDebugEnabled()) {
-                                    __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
-                                }
-                                odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
-                                        .getFault().getText(), null);
-                            }
-                        } else {
-                            if (__log.isDebugEnabled()) {
-                                __log.debug("RESPONSE (NORMAL): " + DOMUtils.domToString(odeMsgEl));
-                            }
-                            odeMex.reply(response);
-
-                        }
-                    } catch (Exception ex) {
-                        String errmsg = "Unable to process response: " + ex.getMessage();
-                        __log.error(errmsg, ex);
-                        odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
-                    }
-                    return null;
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getMessageExchange(odeMexId);
+            Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(faultType.getLocalPart()).getMessage()
+                    .getQName()) : odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
+            try {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Received response for MEX " + odeMex);
                 }
-            });
+                response.setMessage(odeMsgEl);
+                if (fault) {
+                    if (faultType != null) {
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("FAULT RESPONSE(" + faultType + "): " + DOMUtils.domToString(odeMsgEl));
+                        }
+                        odeMex.replyWithFault(faultType, response);
+                    } else {
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
+                        }
+                        odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody().getFault().getText(), null);
+                    }
+                } else {
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("RESPONSE (NORMAL): " + DOMUtils.domToString(odeMsgEl));
+                    }
+                    odeMex.reply(response);
+
+                }
+            } catch (Exception ex) {
+                String errmsg = "Unable to process response: " + ex.getMessage();
+                __log.error(errmsg, ex);
+                odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
+            }
 
         } catch (Exception e) {
             String errmsg = "Error executing reply transaction; reply will be lost.";
@@ -364,6 +321,7 @@ public class ExternalService implements PartnerRoleChannel {
     // INNER CLASS
     static class CachedServiceClient {
         ServiceClient _client;
+
         long _expire;
     }
 

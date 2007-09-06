@@ -190,4 +190,8 @@ public class Messages extends MessageBundle {
         return format("Scheduled job failed; jobDetail={0}", jobDetail);
     }
 
+    public String msgDbConsistencyError(String detail) {
+        return format("Database consistency error: {0}", detail);
+    }
+
 }

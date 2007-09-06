@@ -18,15 +18,17 @@
  */
 package org.apache.ode.test;
 
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.MessageExchange;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
 	
@@ -64,9 +66,9 @@ public class BasicActivities20Test extends BPELTestAbstract {
             null);
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
-        inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
-        
+        inv.expectedFinalStatus = AckType.RESPONSE;
+
+
         go();
     }
     
@@ -82,8 +84,8 @@ public class BasicActivities20Test extends BPELTestAbstract {
             null);
         inv.minimumWaitMs=4*1000L;
         inv.maximumWaitMs=7*1000L;
-        inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        inv.expectedFinalStatus = AckType.RESPONSE;
+        
         
         go();
     }
@@ -98,8 +100,8 @@ public class BasicActivities20Test extends BPELTestAbstract {
             "<message><body><start xmlns=\"http://ode.apache.org/example\">start</start></body></message>",
             null);
         inv.maximumWaitMs=20*1000L;
-        inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        inv.expectedFinalStatus = AckType.RESPONSE;
+
 
         go();
     }

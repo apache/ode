@@ -20,24 +20,20 @@
 package org.apache.ode.dao.jpa;
 
 
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
-
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 
 @Entity
@@ -53,15 +49,12 @@ public class MessageDAOImpl implements MessageDAO {
     private String _data;
 	@Transient
     private Element _element;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="MESSAGE_EXCHANGE_ID")
-	private MessageExchangeDAOImpl _messageExchange;
 
 	public MessageDAOImpl() {
 		
 	}
 	public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
 		_type = type.toString();
-		_messageExchange = me;
 	}
 	
 	public Element getData() {
@@ -74,10 +67,6 @@ public class MessageDAOImpl implements MessageDAO {
 		}
 		
 		return _element;
-	}
-
-	public MessageExchangeDAO getMessageExchange() {
-		return _messageExchange;
 	}
 
 	public QName getType() {
