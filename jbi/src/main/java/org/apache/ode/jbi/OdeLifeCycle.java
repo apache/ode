@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.il.dbutil.Database;
@@ -214,6 +215,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
         _ode._server.setConfigProperties(_ode._config.getProperties());
+        _ode._server.registerBpelEventListener(new DebugBpelEventListener());
 
         _ode._server.init();
 
