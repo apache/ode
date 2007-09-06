@@ -667,7 +667,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // TODO: think we should move the dao creation into bpelprocess --mbs
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
-        mexDao.setStatus(MessageExchange.Status.NEW);
+        mexDao.setStatus(MessageExchange.Status.REQ);
         mexDao.setOperation(operation.getName());
         mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
         mexDao.setPartnerLinkModelId(partnerLink.partnerLink.getId());

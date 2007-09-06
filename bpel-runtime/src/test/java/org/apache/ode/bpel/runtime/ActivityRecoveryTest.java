@@ -18,7 +18,15 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
+import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
@@ -44,11 +52,6 @@ import org.jmock.core.Stub;
 import org.jmock.core.matcher.StatelessInvocationMatcher;
 import org.jmock.core.stub.CustomStub;
 import org.jmock.core.stub.StubSequence;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
 
 /**
  * Test activity recovery and failure handling.
@@ -81,7 +84,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureToRecovery");
-        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertEquals(TInstanceStatus.COMPLETED, lastInstance().getStatus());
         assertNoFailures();
     }
 
@@ -221,6 +224,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
                 return null;
             }
         });
+        
+        partner.expects(atLeastOnce()).method("getSupportedInvocationStyle").will(returnValue(Collections.singleton(InvocationStyle.UNRELIABLE)));
+        
         // There will be multiple calls to invoke.
         partner.expects(atLeastOnce()).match(invokeOnOperation("invoke")).will(new CustomStub("invoke failing service") {
             public Object invoke(Invocation invocation) {
@@ -229,16 +235,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
                     Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
                     response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
                     mex.reply(response);
-                } else {
+                } else { 
                     mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
                 }
-                return null;
-            }
-        });
-        // Faulting a process would send the fault message asynchronously.
-        // (Which might be a bug, but right now we swallow it).
-        partner.expects(atMostOnce()).method("onAsyncReply").will(new CustomStub("async reply") {
-            public Object invoke(Invocation invocation) {
                 return null;
             }
         });
@@ -273,7 +272,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         // Decides which method to call the TestService mock based on the operation.
         return new StatelessInvocationMatcher() {
             public boolean matches(Invocation invocation) {
-                return invocation.invokedMethod.getName().equals("invokePartner") &&
+                return invocation.invokedMethod.getName().equals("invokePartnerUnreliable") &&
                     invocation.parameterValues.size() == 1 &&
                     ((PartnerRoleMessageExchange) invocation.parameterValues.get(0)).getOperation().getName().equals(opName);
             }

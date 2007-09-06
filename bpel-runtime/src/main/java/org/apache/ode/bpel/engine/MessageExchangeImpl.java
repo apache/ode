@@ -142,6 +142,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _process = process;
         _contexts = process._contexts;
         _mexId = mexId;
+        _iid = iid;
         _oplink = oplink;
         _portType  = ptype;
         _operation = operation;
@@ -160,12 +161,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _timeout = dao.getTimeout();
         _iid = dao.getInstance() != null ? dao.getInstance().getInstanceId() : null;
         _ackType = dao.getAckType();
-        if (_fault == null)
-            _fault = dao.getFault();
-        if (_explanation == null)
-            _explanation = dao.getFaultExplanation();
-        if (_status == null)
-            _status = dao.getStatus();
+        _status = dao.getStatus();
+        _fault = dao.getFault();
+        _explanation = dao.getFaultExplanation();
     }
 
     void save(MessageExchangeDAO dao) {
@@ -191,6 +189,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
         for (String modprop : _modifiedProperties) {
             dao.setProperty(modprop, _properties.get(modprop));
         }
+        
+        _modifiedProperties.clear();
 
     }
 
