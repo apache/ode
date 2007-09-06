@@ -31,10 +31,10 @@ ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
                         :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3-RC3"
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.3-RC3")
+                        :under=>"org.apache.axis2", :version=>"1.3")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
