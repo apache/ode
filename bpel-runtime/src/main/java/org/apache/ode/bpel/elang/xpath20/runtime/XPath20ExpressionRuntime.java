@@ -46,11 +46,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * XPath 2.0 Expression Language run-time subsytem.
@@ -103,13 +99,23 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             result = (List) someRes;
             __log.debug("Returned list of size " + result.size());
             if ((result.size() == 1) && !(result.get(0) instanceof Node)) {
-              Document d = DOMUtils.newDocument();
-              // Giving our node a parent just in case it's an LValue expression
-              Element wrapper = d.createElement("wrapper");
-              Text text = d.createTextNode(result.get(0).toString());
-              wrapper.appendChild(text);
-              d.appendChild(wrapper);
-              result = Collections.singletonList(text);
+                // Dealing with a Java class
+                Object simpleType = result.get(0);
+                // Dates get a separate treatment as we don't want to call toString on them
+                String textVal;
+                if (simpleType instanceof Date)
+                    textVal = ISO8601DateParser.format((Date) simpleType);
+                else
+                    textVal = simpleType.toString();
+
+                // Wrapping in a document
+                Document d = DOMUtils.newDocument();
+                // Giving our node a parent just in case it's an LValue expression
+                Element wrapper = d.createElement("wrapper");
+                Text text = d.createTextNode(textVal);
+                wrapper.appendChild(text);
+                d.appendChild(wrapper);
+                result = Collections.singletonList(text);
             }
         } else if (someRes instanceof NodeList) {
             NodeList retVal = (NodeList) someRes;

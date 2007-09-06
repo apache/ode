@@ -576,12 +576,12 @@
 
     <service name="ProcessManagementService">
         <port name="ProcessManagementPort" binding="tns:ProcessManagementBinding">
-            <soap:address location="http://localhost:8080/ode/services/processmgmt"/>
+            <soap:address location="http://localhost:8080/ode/processes/ProcessManagement"/>
         </port>
     </service>
     <service name="InstanceManagementService">
         <port name="InstanceManagementPort" binding="tns:InstanceManagementBinding">
-            <soap:address location="http://localhost:8080/ode/services/instancemgmt"/>
+            <soap:address location="http://localhost:8080/ode/processes/InstanceManagement"/>
         </port>
     </service>
 

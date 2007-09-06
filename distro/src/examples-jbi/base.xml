@@ -48,7 +48,7 @@
         <condition property="ode.script.extension" value=".bat">
             <os family="windows"/>
         </condition>
-        <condition property="ode.script.extension" value=".sh">
+        <condition property="ode.script.extension" value="">
             <os family="unix"/>
         </condition>
         <condition property="ode.exe.extension" value=".exe">

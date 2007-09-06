@@ -20,8 +20,8 @@
 
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
   <SOAP-ENV:Body>
-	<Hello>
-        <text xmlns="urn:/HelloWorld2-RPC.wsdl">hello</text>
-    </Hello>
+    <xns:Hello xmlns:xns="urn:/HelloWorld2-RPC.wsdl">
+      <text>hello</text>
+    </xns:Hello>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

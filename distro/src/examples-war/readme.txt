@@ -10,7 +10,7 @@ Linux
 export PATH=$PATH:PATH_TO_ODE/bin
 
 The sendsoap command can either be executed using sendsoap.bat under
-Windows or sendsoap.sh with Linux (replace accordingly in the
+Windows or sendsoap with Linux (replace accordingly in the
 following command line examples).
 
 Hello World 2
@@ -21,8 +21,8 @@ process with the command:
 
 sendsoap http://localhost:8080/ode/processes/helloWorld testRequest.soap
 
-Please make sure that you execute the command from the HelloWorld2
-example directory. The response should be a SOAP message containing the
+Please make sure that you execute the command from the example 
+directory. The response should be a SOAP message containing the
 'hello world' string.
 
 Dynamic Partner
@@ -38,8 +38,8 @@ After deployment, start a process with the command:
 
 sendsoap http://localhost:8080/ode/processes/DynMainService testRequest.soap
 
-Please make sure that you execute the command from the HelloWorld2
-example directory. The response should be an 'OK' SOAP message, showing
+Please make sure that you execute the command from the example 
+directory. The response should be an 'OK' SOAP message, showing
 that all invocations have been successful.
 
 Magic Session
@@ -54,6 +54,6 @@ After deployment, start a process with the command:
 
 sendsoap http://localhost:8080/ode/processes/MSMainExecuteService testRequest.soap
 
-Please make sure that you execute the command from the HelloWorld2
-example directory. The response should be an 'OK' SOAP message, showing
+Please make sure that you execute the command from the example 
+directory. The response should be an 'OK' SOAP message, showing
 that all invocations have been successful.

@@ -42,12 +42,7 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
-import org.apache.ode.bpel.evt.ProcessCompletionEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
-import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
-import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -58,7 +53,6 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -85,6 +79,7 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * 
@@ -385,6 +380,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
+        // Special case of messageType variables with no part
+        if (variable.declaration.type instanceof OMessageVarType) {
+            OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
+            if (msgType.parts.size() == 0) {
+                Document doc = DOMUtils.newDocument();
+                Element root = doc.createElement("message");
+                doc.appendChild(root);
+                return root;
+            }
+        }
+
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
@@ -463,9 +469,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
         dataDAO.set(initData);
-
-        writeProperties(variable, initData, dataDAO);
-
+        writeProperties(variable, initData, dataDAO);        
         return dataDAO.get();
     }
 
@@ -1081,18 +1085,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Node getPartData(Element message, Part part) {
-        Element partEl = DOMUtils.findChildByName((Element) message, new QName(null, part.name), false);
+    	// borrowed from ASSIGN.evalQuery()
+        QName partName = new QName(null, part.name);
+        Node ret = DOMUtils.findChildByName((Element) message, partName);
+        if (part.type instanceof OElementVarType) {
+            QName elName = ((OElementVarType) part.type).elementType;
+            ret = DOMUtils.findChildByName((Element) ret, elName);
+        }
 
-        // This could occur if the message does not contain the required part.
-        if (partEl == null)
-            return null;
-
-        Node container = DOMUtils.getFirstChildElement(partEl);
-        if (container == null)
-            container = partEl.getFirstChild(); // either a text node / element
-        // /
-        // xsd-type-wrapper
-        return container;
+        return ret;
     }
 
     public Element getSourceEPR(String mexId) {

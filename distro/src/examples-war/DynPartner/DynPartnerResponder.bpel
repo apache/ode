@@ -20,7 +20,6 @@
 
 <process name="DynPartnerResponder"
          targetNamespace="http://ode/bpel/responder"
-         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns:tns="http://ode/bpel/responder"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"

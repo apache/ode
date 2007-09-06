@@ -79,6 +79,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -202,8 +203,7 @@ class BpelProcess {
     void invokeProcess(final MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
 
-        _hydrationLatch.latch(1);
-        try {
+            _hydrationLatch.latch(1);
             // The following check is mostly for sanity purposes. MexImpls should prevent this from
             // happening.
             PartnerLinkMyRoleImpl target = getMyRoleForService(mexdao.getCallee());
@@ -433,12 +433,13 @@ class BpelProcess {
         PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, alias);
         Node lValue = ectx.getRootNode();
 
-        if (alias.location != null)
+        if (alias.location != null) {
             try {
                 lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
             } catch (EvaluationException ec) {
                 throw new FaultException(getOProcess().constants.qnSelectionFailure, alias.getDescription());
             }
+        }
 
         if (lValue == null) {
             String errmsg = __msgs.msgPropertyAliasReturnedNullSet(alias.getDescription(), target);
@@ -451,8 +452,7 @@ class BpelProcess {
         if (lValue.getNodeType() == Node.ELEMENT_NODE) {
             // This is a bit hokey, we concatenate all the children's values; we
             // really should be checking to make sure that we are only dealing
-            // with
-            // text and attribute nodes.
+            // with text and attribute nodes.
             StringBuffer val = new StringBuffer();
             NodeList nl = lValue.getChildNodes();
             for (int i = 0; i < nl.getLength(); ++i) {
@@ -503,6 +503,7 @@ class BpelProcess {
     void handleWorkEvent(final JobInfo jobInfo) throws JobProcessorException {
         assert !_contexts.isTransacted() : "work events must be received outside of a transaction";
 
+            _hydrationLatch.latch(1);
         markused();
 
         final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
@@ -682,8 +683,8 @@ class BpelProcess {
     }
 
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -694,8 +695,8 @@ class BpelProcess {
     }
 
     Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -706,8 +707,8 @@ class BpelProcess {
     }
 
     EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
             if (myRole == null)
                 throw new IllegalStateException("Unknown partner link " + link);
@@ -722,8 +723,8 @@ class BpelProcess {
     }
 
     PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
             if (prole == null)
                 throw new IllegalStateException("Unknown partner link " + partnerLink);
@@ -757,9 +758,8 @@ class BpelProcess {
      * Ask the process to dehydrate.
      */
     void dehydrate() {
-        _hydrationLatch.latch(0);
-
         try {
+            _hydrationLatch.latch(0);
             // We don't actually need to do anything, the latch will run the doDehydrate method
             // when necessary..
         } finally {
@@ -769,9 +769,8 @@ class BpelProcess {
     }
 
     void hydrate() {
-        _hydrationLatch.latch(1);
-
         try {
+            _hydrationLatch.latch(1);
             // We don't actually need to do anything, the latch will run the doHydrate method
             // when necessary..
         } finally {
@@ -780,8 +779,8 @@ class BpelProcess {
     }
 
     OProcess getOProcess() {
-        _hydrationLatch.latch(1);
         try {
+            _hydrationLatch.latch(1);
             return _oprocess;
         } finally {
             _hydrationLatch.release(1);
@@ -831,8 +830,7 @@ class BpelProcess {
     MyRoleMessageExchangeImpl recreateMyRoleMex(MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
 
-        _hydrationLatch.latch(1);
-        try {
+            _hydrationLatch.latch(1);
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             if (plink == null) {
                 String errmsg = __msgs.msgDbConsistencyError("MexDao #" + mexdao.getMessageExchangeId()
@@ -868,8 +866,7 @@ class BpelProcess {
 
     PartnerRoleMessageExchangeImpl createPartnerRoleMex(MessageExchangeDAO mexdao) {
 
-        _hydrationLatch.latch(1);
-        try {
+            _hydrationLatch.latch(1);
             OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(plink);
             return prole.createPartnerRoleMex(mexdao);
@@ -1216,7 +1213,7 @@ class BpelProcess {
                             bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
                             return null;
                         }
-                    });
+                    }).get(); // needs to be synchronous
                 } catch (Exception ex) {
                     String errmsg = "DbError";
                     __log.error(errmsg, ex);

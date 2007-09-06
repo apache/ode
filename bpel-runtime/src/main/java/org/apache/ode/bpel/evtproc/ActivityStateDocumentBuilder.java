@@ -23,14 +23,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
-import org.apache.ode.bpel.engine.BpelEventListener;
 import org.apache.ode.bpel.evt.ActivityEnabledEvent;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.ActivityExecEndEvent;
 import org.apache.ode.bpel.evt.ActivityExecStartEvent;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.pmapi.*;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.pmapi.ActivityInfoDocument;
+import org.apache.ode.bpel.pmapi.TActivityInfo;
+import org.apache.ode.bpel.pmapi.TActivityStatus;
+import org.apache.ode.bpel.pmapi.TScopeRef;
 
 /**
  * Class used to generate {@link org.apache.ode.bpel.pmapi.istate.InstanceDocument}
@@ -134,5 +138,13 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
     info.getScope().setName(event.getScopeName());
     info.getScope().setSiid("" + event.getScopeId());
   }
+
+	public void shutdown() {
+		// do nothing
+	}
+	
+	public void startup(Properties configProperties) {
+		// do nothing
+	}
 }
 

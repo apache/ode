@@ -38,6 +38,8 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Element;
@@ -207,8 +209,13 @@ class PICK extends ACTIVITY {
             
         }
 
-        getBpelRuntimeContext().initializeVariable(_scopeFrame.resolve(onMessage.variable), msgEl);
-
+        VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
+        getBpelRuntimeContext().initializeVariable(vinst, msgEl);
+        // Generating event
+        ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+        if (_opick.debugInfo != null)
+            se.setLineNo(_opick.debugInfo.startLine);
+        sendEvent(se);
     }
 
     private class WAITING extends BpelJacobRunnable {

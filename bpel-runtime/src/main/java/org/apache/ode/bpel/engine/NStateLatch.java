@@ -1,4 +1,26 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.bpel.engine;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -13,12 +35,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * can change state only when the count is zero. Every time the latch changes state an 
  * optional {@link Runnable} corresponding to the new state is executed. 
  * 
- * 
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
- *
  */
 public class NStateLatch {
-    
+    static final Log __log = LogFactory.getLog(NStateLatch.class);
+
     /** Current state. */
     private int _state = -1;
 
@@ -53,7 +74,6 @@ public class NStateLatch {
         
         _lock.lock();
         try {
-
             if (_transitioning )
                 throw new IllegalStateException("Manipulating latch from transition. ");
             
@@ -67,22 +87,14 @@ public class NStateLatch {
                         try {
                             _transitioning = true;
                             _transitions[state].run();
-                        } catch (Throwable t) {
-                            t.printStackTrace();
                         } finally {
                             _transitioning = false;
                         }
-
-                        
                     _state = state;
-                    
                 }
             }
-
-            _depth ++;
-            
-            
         } finally {
+            _depth ++;
             _lock.unlock();
         }
     }
@@ -95,7 +107,7 @@ public class NStateLatch {
                 throw new IllegalStateException("Manipulating latch from transition. ");
 
             if (_state != state)
-                throw new IllegalStateException("Wrong state.");
+                __log.error("Latch error, was releasing for state " + state + " but actually in " + _state);
             if (_depth <= 0)
                 throw new IllegalStateException("Too many release() calls.");
             

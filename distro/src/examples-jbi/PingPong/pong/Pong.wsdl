@@ -21,7 +21,7 @@
         targetNamespace="urn:/Pong.wsdl"
         xmlns:tns="urn:/Pong.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>

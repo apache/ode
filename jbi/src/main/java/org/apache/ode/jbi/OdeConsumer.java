@@ -120,6 +120,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     }
 
 
+    protected abstract void inOutDone(InOut inout);
 
     public void onJbiMessageExchange(MessageExchange jbiMex) throws MessagingException {
         if (!jbiMex.getPattern().equals(MessageExchangePattern.IN_ONLY)
@@ -129,11 +130,13 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
         }
         if (jbiMex.getStatus() == ExchangeStatus.ACTIVE) {
             if (jbiMex.getPattern().equals(MessageExchangePattern.IN_OUT)) {
+                inOutDone((InOut) jbiMex);
                 outResponse((InOut) jbiMex);
             }
             jbiMex.setStatus(ExchangeStatus.DONE);
             _ode.getChannel().send(jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.ERROR) {
+            inOutDone((InOut) jbiMex);
             outFailure((InOut) jbiMex);
         } else if (jbiMex.getStatus() == ExchangeStatus.DONE) {
             ; // anything todo here? 

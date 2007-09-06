@@ -581,6 +581,10 @@ public abstract class BPELTestAbstract {
 
             AckType finalstat = mex.getAckType();
             if (_invocation.expectedFinalStatus != null && _invocation.expectedFinalStatus != finalstat)
+                    if (finalstat.equals(Status.FAULT)) {
+                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: " 
+                    			+ mex.getFault() + " | " + mex.getFaultExplanation());
+                    } else {
                 failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
 
 

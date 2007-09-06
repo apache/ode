@@ -86,7 +86,8 @@ class ASSIGN extends ACTIVITY {
 
         if (faultData != null) {
             __log.error("Assignment Fault: " + faultData.getFaultName()
-                    + ",lineNo=" + faultData.getFaultLineNo());
+                    + ",lineNo=" + faultData.getFaultLineNo()
+                    + ",faultExplanation=" + faultData.getExplanation());
             _self.parent.completed(faultData, CompensationHandler.emptySet());
         } else {
             _self.parent.completed(null, CompensationHandler.emptySet());
@@ -493,6 +494,7 @@ class ASSIGN extends ACTIVITY {
             __log.debug("lvaluePtr type " + lvaluePtr.getNodeType());
             __log.debug("lvaluePtr " + DOMUtils.domToString(lvaluePtr));
             __log.debug("lvalue " + lvalue);
+            __log.debug("rvalue " + rvalue);
         }
 
         switch (lvaluePtr.getNodeType()) {

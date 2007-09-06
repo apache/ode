@@ -62,8 +62,8 @@ class REPLY extends ACTIVITY {
             //		send reply
             getBpelRuntimeContext()
                     .reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                            oreply.messageExchangeId,
-                            (Element)msg,
+                            oreply.messageExchangeId, (Element)msg,
+                            (oreply.fault != null) ? oreply.fault : null);
                             oreply.fault);
         } catch (FaultException e) {
             __log.error(e);

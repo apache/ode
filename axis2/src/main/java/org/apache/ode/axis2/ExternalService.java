@@ -49,6 +49,8 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -98,7 +100,7 @@ public class ExternalService implements PartnerRoleChannel {
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out handler.
             MessageContext mctx = new MessageContext();
-            writeHeader(mctx.getOptions(), odeMex);
+            writeHeader(mctx, odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
 
@@ -110,9 +112,8 @@ public class ExternalService implements PartnerRoleChannel {
             }
 
             Options options = new Options();
+            options.setAction(mctx.getSoapAction());
             options.setTo(axisEPR);
-            String soapAction = _converter.getSoapAction(odeMex.getOperationName());
-            options.setAction(soapAction);
             options.setTimeOutInMilliSeconds(60000);
 
             CachedServiceClient cached = _cachedClients.get();
@@ -157,13 +158,30 @@ public class ExternalService implements PartnerRoleChannel {
             __log.error(errmsg, axisFault);
             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
-
     }
 
     /**
+     * Extracts the action to be used for the given operation.  It first checks to see
+     * if a value is specified using WS-Addressing in the portType, it then falls back onto 
+     * getting it from the SOAP Binding.
+     * @param operation the name of the operation to get the Action for
+     * @return The action value for the specified operation
+     */
+    private String getAction(String operation)
+	{
+    	String action = _converter.getWSAInputAction(operation);
+        if (action == null || "".equals(action))
+        {
+        	action = _converter.getSoapAction(operation);	
+        }
+		return action;
+	}
+
+	/**
      * Extracts endpoint information from ODE message exchange to stuff them into Axis MessageContext.
      */
-    private void writeHeader(Options options, PartnerRoleMessageExchange odeMex) {
+    private void writeHeader(MessageContext ctxt, PartnerRoleMessageExchange odeMex) {
+        Options options = ctxt.getOptions();
         WSAEndpoint targetEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
         WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
 
@@ -177,9 +195,7 @@ public class ExternalService implements PartnerRoleChannel {
             targetEPR.setSessionId(partnerSessionId);
         }
         options.setProperty("targetSessionEndpoint", targetEPR);
-        String soapAction = _converter.getSoapAction(odeMex.getOperationName());
-        options.setProperty("soapAction", soapAction);
-
+        
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
@@ -187,11 +203,20 @@ public class ExternalService implements PartnerRoleChannel {
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
-
             options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
         }
+
+        String action = getAction(odeMex.getOperationName());
+        ctxt.setSoapAction(action);
+        
+	    if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
+	    	EndpointReference annonEpr =
+	    		new EndpointReference(Namespaces.WS_ADDRESSING_ANON_URI);
+	    	ctxt.setReplyTo(annonEpr);
+	    	ctxt.setMessageID("uuid:" + new UUID().toString());
+	    }
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {

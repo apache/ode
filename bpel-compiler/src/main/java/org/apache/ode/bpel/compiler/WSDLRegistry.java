@@ -202,7 +202,6 @@ class WSDLRegistry {
                 if (ee instanceof XMLSchemaType) {
                     String schema = ((XMLSchemaType)ee).getXMLSchema();
 
-
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
 
                     try {

@@ -18,6 +18,8 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -84,6 +86,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
         inv.maximumWaitMs=7*1000L;
         inv.expectedFinalStatus = AckType.RESPONSE;
         
+        
         go();
     }
 
@@ -98,6 +101,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
             null);
         inv.maximumWaitMs=20*1000L;
         inv.expectedFinalStatus = AckType.RESPONSE;
+
 
         go();
     }

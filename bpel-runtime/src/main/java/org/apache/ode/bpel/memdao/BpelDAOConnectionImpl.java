@@ -50,12 +50,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
+    public static long TIME_TO_LIVE = 10*60*1000;
 
     private TransactionManager _txm;
 
@@ -67,6 +69,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             .synchronizedMap(new HashMap<String, MessageExchangeDAO>());
 
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
+    private static volatile long _lastRemoval = 0;
 
     BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, TransactionManager txm) {
         _store = store;
@@ -184,6 +187,30 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
         MessageExchangeDAO mex = new MessageExchangeDAOImpl(dir, mexId);
         _mexStore.put(mexId, mex);
+        long now = System.currentTimeMillis();
+        _mexAge.put(id, now);
+
+        if (now > _lastRemoval + (TIME_TO_LIVE/10)) {
+            _lastRemoval = now;
+            Object[] oldMexs = _mexAge.keySet().toArray();
+            for (int i=oldMexs.length-1; i>0; i--) {
+                String oldMex = (String) oldMexs[i];
+                Long age = _mexAge.get(oldMex);
+                if (age != null && now-age > TIME_TO_LIVE) {
+                    removeMessageExchange(oldMex);
+                    _mexAge.remove(oldMex);
+                }
+            }
+        }
+
+        // Removing right away on rollback
+        onRollback(new Runnable() {
+            public void run() {
+                removeMessageExchange(id);
+                _mexAge.remove(id);
+            }
+        });
+
         return mex;
     }
 
@@ -312,10 +339,11 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     static void removeMessageExchange(String mexId) {
         // Cleaning up mex
-        __log.debug("Removing mex " + mexId + " from memory store.");
+        if (__log.isDebugEnabled()) __log.debug("Removing mex " + mexId + " from memory store.");
         MessageExchangeDAO mex = _mexStore.remove(mexId);
         if (mex == null)
             __log.warn("Couldn't find mex " + mexId + " for cleanup.");
+        _mexAge.remove(mexId);
     }
 
     public void defer(final Runnable runnable) {
@@ -332,5 +360,11 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    public void onRollback(final Runnable runnable) {
+        _scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+                if (!success) runnable.run();
+            }
+            public void beforeCompletion() {
     }
 }
