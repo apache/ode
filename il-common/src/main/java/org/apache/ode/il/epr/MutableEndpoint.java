@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.epr;
+package org.apache.ode.il.epr;
 
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.w3c.dom.Node;

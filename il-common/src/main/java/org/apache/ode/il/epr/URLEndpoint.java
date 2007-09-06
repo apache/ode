@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.epr;
+package org.apache.ode.il.epr;
 
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;

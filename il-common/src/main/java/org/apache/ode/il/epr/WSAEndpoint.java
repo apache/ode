@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.epr;
+package org.apache.ode.il.epr;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
