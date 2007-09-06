@@ -128,7 +128,7 @@ define "ode" do
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
+    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "il-common", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
@@ -143,7 +143,7 @@ define "ode" do
   desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
-      "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+      "il-common", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
@@ -209,7 +209,7 @@ define "ode" do
   end
 
   desc "ODE Interface Layers Common"
-  define "bpel-epr" do
+  define "il-common" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
       COMMONS.logging, DERBY, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, JAVAX.connector, COMMONS.lang
     package :jar
@@ -238,7 +238,7 @@ define "ode" do
       "bpel-store", "jacob", "jacob-ap", "utils"),
       COMMONS.logging, COMMONS.collections, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 
-    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
+    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "il-common"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, XALAN
@@ -282,7 +282,7 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "bpel-epr", "dao-jpa"),
+      "bpel-store", "utils", "il-common", "dao-jpa"),
       DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
@@ -299,7 +299,7 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
-    test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
+    test.with project("il-common"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
 
     package :jar
@@ -369,7 +369,7 @@ define "ode" do
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
 
-    test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-epr", "dao-jpa", "utils"),
+    test.with projects("bpel-api", "bpel-dao", "bpel-obj", "il-common", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
       GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
@@ -394,7 +394,7 @@ define "ode" do
 
   desc "ODE JBI Integration Layer"
   define "jbi" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj",
+    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "il-common", "bpel-obj",
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
@@ -402,7 +402,7 @@ define "ode" do
     package(:jbi).tap do |jbi|
       libs = artifacts(package(:jar),
         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-        "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+        "il-common", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils"),
         ANT, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
