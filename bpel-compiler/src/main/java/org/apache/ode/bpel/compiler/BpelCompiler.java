@@ -859,10 +859,14 @@ abstract class BpelCompiler implements CompilerContext {
                     v.declaringScope = implicitScope;
                     implicitScope.addLocalVariable(v);
                 }
-                if (source instanceof ScopeActivity)
-                    implicitScope.activity = compile(((ScopeActivity) source).getChildActivity());
-                else
+                if (source instanceof ScopeActivity) {
+                    Activity scopeChild = ((ScopeActivity) source).getChildActivity();
+                    if (scopeChild == null)
+                        throw new CompilationException(__cmsgs.errEmptyScope().setSource(source));
+                    implicitScope.activity = compile(scopeChild);
+                } else {
                     implicitScope.activity = compileActivity(false, source);
+                }
             }
         });
 
