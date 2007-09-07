@@ -120,7 +120,9 @@ public class ManagementService {
                 SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
                 outMsgContext.setEnvelope(envelope);
 
-                envelope.getBody().addChild(convertToOM(soapFactory, result));
+                OMElement wrapper = soapFactory.createOMElement(new QName("http://www.apache.org/ode/pmapi", methodName+"Response"));
+                wrapper.addChild(convertToOM(soapFactory, result));
+                envelope.getBody().addChild(wrapper);
 
                 if (__log.isDebugEnabled()) {
                     __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
@@ -134,7 +136,7 @@ public class ManagementService {
         } catch (IllegalAccessException e) {
             throw new OdeFault("Couldn't invoke method named " + methodName + " in management interface!", e);
         } catch (InvocationTargetException e) {
-            throw new OdeFault("Invocation of method " + methodName + " in management interface failed!", e);
+            throw new OdeFault("Invocation of method " + methodName + " in management interface failed!", e.getTargetException());
         }
     }
 
