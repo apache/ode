@@ -462,4 +462,9 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
                 "messageType {1} couldn't be found.", part, message);
     }
 
+    /** Empty scopes are forbidden. */
+    public CompilationMessage errEmptyScope() {
+        return this.formatCompilationMessage("Empty scopes are forbidden.");
+    }
+
 }

@@ -33,6 +33,7 @@ import org.apache.ode.bpel.o.OForEach;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.Namespaces;
 
 /**
  * Generates code for <code>&lt;forEach&gt;</code> activities.
@@ -69,14 +70,17 @@ public class ForEachGenerator extends DefaultActivityGenerator {
         if (s.getVariableDecl(forEach.getCounterName()) != null)
             throw new CompilationException(__cmsgs.errForEachAndScopeVariableRedundant(forEach.getCounterName()).setSource(src));
 
-        OXsdTypeVarType counterVarType = new OXsdTypeVarType(_context.getOProcess());
-        counterVarType.xsdType = new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "unsignedInt");
-        OScope.Variable countervar = new OScope.Variable(_context.getOProcess(),counterVarType);
-        
-        if (__log.isDebugEnabled()) __log.debug("Compiling forEach inner scope.");
-        oforEach.innerScope = _context.compileSLC(forEach.getChild(), new OScope.Variable[]{countervar});
+        OXsdTypeVarType counterType = new OXsdTypeVarType(oforEach.getOwner());
+        counterType.simple = true;
+        counterType.xsdType = new QName(Namespaces.XML_SCHEMA, "int");
+        OScope.Variable counterVar = new OScope.Variable(oforEach.getOwner(), counterType);
+        counterVar.name = forEach.getCounterName();
 
-        oforEach.counterVariable = oforEach.innerScope.getLocalVariable(forEach.getCounterName());
+        if (__log.isDebugEnabled()) __log.debug("Compiling forEach inner scope.");
+        oforEach.innerScope = _context.compileSLC(forEach.getChild(), new OScope.Variable[]{counterVar});
+
+        // oforEach.innerScope.addLocalVariable(counterVar);
+        oforEach.counterVariable = counterVar;
     }
 
 }
