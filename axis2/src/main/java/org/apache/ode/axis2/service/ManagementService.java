@@ -121,7 +121,9 @@ public class ManagementService {
                 outMsgContext.setEnvelope(envelope);
 
                 OMElement wrapper = soapFactory.createOMElement(new QName("http://www.apache.org/ode/pmapi", methodName+"Response"));
-                wrapper.addChild(convertToOM(soapFactory, result));
+                OMElement parts = convertToOM(soapFactory, result);
+                parts = stripNamespace(soapFactory, parts);
+                wrapper.addChild(parts);
                 envelope.getBody().addChild(wrapper);
 
                 if (__log.isDebugEnabled()) {
@@ -216,6 +218,17 @@ public class ManagementService {
         } else throw new OdeFault("Couldn't convert object " + obj + " into a response element.");
     }
 
+    private static OMElement stripNamespace(SOAPFactory soapFactory, OMElement element) {
+        OMElement parent = soapFactory.createOMElement(new QName("", element.getLocalName()));
+        Iterator<OMElement> iter = element.getChildElements();
+        while (iter.hasNext()) {
+            OMElement child = iter.next();
+            child = child.cloneOMElement();
+            parent.addChild(child);
+        }
+        return parent;
+    }
+    
     private static boolean hasResponse(AxisOperation op) {
         switch(op.getAxisSpecificMEPConstant()) {
             case WSDLConstants.MEP_CONSTANT_IN_OUT: return true;
