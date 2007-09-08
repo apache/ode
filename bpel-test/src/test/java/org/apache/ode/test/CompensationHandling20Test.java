@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.junit.Ignore;
 import org.junit.Test;

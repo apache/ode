@@ -18,8 +18,6 @@
  */
 package org.apache.ode.test;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
