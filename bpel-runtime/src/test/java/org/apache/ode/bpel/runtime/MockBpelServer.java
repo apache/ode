@@ -20,9 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -35,7 +33,6 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -60,7 +57,7 @@ import org.w3c.dom.Element;
 
 class MockBpelServer {
 
-    BpelServerImpl _server;
+    DebugBpelServerImpl _server;
 
     ProcessStoreImpl _store;
 
@@ -70,7 +67,7 @@ class MockBpelServer {
 
     DataSource _dataSource;
 
-    SchedulerWrapper _scheduler;
+    MockScheduler _scheduler;
 
     BpelDAOConnectionFactory _daoCF;
 
@@ -86,7 +83,8 @@ class MockBpelServer {
 
     public MockBpelServer() {
         try {
-            _server = new BpelServerImpl();
+            _server = new DebugBpelServerImpl() ;
+            
             createTransactionManager();
             createDataSource();
             createDAOConnection();
@@ -170,7 +168,8 @@ class MockBpelServer {
             throw new RuntimeException("No transaction manager");
         if (_dataSource == null)
             throw new RuntimeException("No data source");
-        _scheduler = new SchedulerWrapper(_server, _txManager, _dataSource);
+        _scheduler = new MockScheduler(_txManager);
+        _scheduler.setJobProcessor(_server);
         return _scheduler;
     }
 
@@ -287,53 +286,15 @@ class MockBpelServer {
         return _bindContext;
     }
 
-    private class SchedulerWrapper implements Scheduler {
-
-        MockScheduler _scheduler;
-
-        long _nextSchedule;
-
-        SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
-            _scheduler = new MockScheduler(_txManager);
-            _scheduler.setJobProcessor(server);
-        }
-
-        public String schedulePersistedJob(Map<String, Object> jobDetail, Date when) throws ContextException {
-            String jobId = _scheduler.schedulePersistedJob(jobDetail, when);
-            _nextSchedule = when == null ? System.currentTimeMillis() : when.getTime();
-            return jobId;
-        }
-
-        public void cancelJob(String jobId) throws ContextException {
-            _scheduler.cancelJob(jobId);
-        }
-
-        public void start() {
-            _scheduler.start();
-        }
-
-        public void stop() {
-            _scheduler.stop();
-        }
-
-        public void shutdown() {
-            _scheduler.shutdown();
-        }
-
-        public void setJobProcessor(JobProcessor processor) throws ContextException {
-            _scheduler.setJobProcessor(processor);
-
-        }
-
-        public void jobCompleted(String jobId) {
-            _scheduler.jobCompleted(jobId);
-
-        }
+    
+    static class DebugBpelServerImpl extends BpelServerImpl {
+        public void waitForQuiessence() {
+            super.waitForQuiessence();
+        }        
     }
+
 
     public void waitForBlocking() {
-        // TODO Auto-generated method stub
-        
+        _server.waitForQuiessence();
     }
-
 }

@@ -49,6 +49,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
@@ -67,9 +68,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private String _correlationId;
 	@Basic @Column(name="CORRELATION_STATUS")
     private String _correlationStatus;
-	@Basic @Column(name="CREATE_TIME")
+	@Basic @Column(name="CREATE_TIME" , nullable = false)
     private Date _createTime;
-	@Basic @Column(name="DIRECTION")
+	@Basic @Column(name="DIRECTION" ,nullable=false)
     private char _direction;
 	@Lob   @Column(name="EPR")
     private String _epr;
@@ -79,11 +80,11 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private String _fault;
 	@Basic @Column(name="FAULT_EXPLANATION")
     private String _faultExplanation;
-	@Basic @Column(name="OPERATION")
+	@Basic @Column(name="OPERATION", nullable=false)
     private String _operation;
-	@Basic @Column(name="PARTNER_LINK_MODEL_ID")
+	@Basic @Column(name="PARTNER_LINK_MODEL_ID", nullable=false)
     private int _partnerLinkModelId;
-	@Basic @Column(name="PATTERN")
+	@Basic @Column(name="PATTERN", nullable=false)
     private String _pattern;
 	@Basic @Column(name="PORT_TYPE")
     private String _portType;
@@ -132,6 +133,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	public MessageExchangeDAOImpl(String mexId, char direction){
 		_direction = direction;
 		_id = mexId;
+        _createTime = new Date();
 	}
 	
 	public MessageDAO createMessage(QName type) {
@@ -203,8 +205,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		return _partnerLinkModelId;
 	}
 
-	public String getPattern() {
-		return _pattern;
+	public MessageExchangePattern getPattern() {
+		return _pattern == null ? null : MessageExchangePattern.valueOf(_pattern);
 	}
 
 	public QName getPortType() {
@@ -291,8 +293,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 		_partnerLinkModelId = modelId;
 	}
 
-	public void setPattern(String pattern) {
-		_pattern = pattern;
+	public void setPattern(MessageExchangePattern pattern) {
+		_pattern = pattern == null ? null : pattern.toString();
 	}
 
 	public void setPortType(QName porttype) {

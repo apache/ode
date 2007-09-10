@@ -71,6 +71,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 
     public MessageExchangeDAO createMessageExchange(String mexId, char dir) {
         MessageExchangeDAOImpl ret = new MessageExchangeDAOImpl(mexId, dir);
+        
         _em.persist(ret);
         return ret;
     }

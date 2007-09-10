@@ -59,6 +59,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
@@ -225,6 +226,7 @@ class BpelProcess {
                 return;
             }
 
+            mexdao.setPattern((op.getOutput() == null) ? MessageExchangePattern.REQUEST_ONLY : MessageExchangePattern.REQUEST_RESPONSE);
             if (!processInterceptors(mexdao, InterceptorInvoker.__onProcessInvoked)) {
                 __log.debug("Aborting processing of mex " + mexdao.getMessageExchangeId() + " due to interceptors.");
                 onMyRoleMexAck(mexdao, oldstatus);

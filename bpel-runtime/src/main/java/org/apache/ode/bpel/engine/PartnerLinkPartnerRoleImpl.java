@@ -37,7 +37,6 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.o.OPartnerLink;
-import org.omg.PortableServer._ServantActivatorStub;
 import org.w3c.dom.Element;
 
 /**
@@ -114,7 +113,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         Operation operation = _plinkDef.getPartnerRoleOperation(mexDao.getOperation());
         Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(_channel, partnerEpr);
 
-        boolean oneway = MessageExchangePattern.valueOf(mexDao.getPattern()) == MessageExchangePattern.REQUEST_ONLY;
+        boolean oneway = mexDao.getPattern() == MessageExchangePattern.REQUEST_ONLY;
 
         try {
             if (_process.isInMemory()) {
@@ -346,6 +345,26 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
             final Throwable ferr = err;
 
+            // For one-way invokes, theres nothing to follow up on. 
+            if (_unreliableMex._operation.getOutput() == null) {
+                _unreliableMex.setState(State.DEAD);
+                // todo Perhaps we should log a failure if ferr != null
+                return;
+            }
+            
+            // Handle system failure in a transaction
+            if (ferr != null) {
+                _process.enqueueInstanceTransaction(_unreliableMex.getIID(),  new Runnable() {
+                    public void run() {
+                        MessageExchangeDAO mexdao = _process.loadMexDao(_unreliableMex.getMessageExchangeId());
+                        MexDaoUtil.setFailed(mexdao, FailureType.OTHER, ferr.toString());
+                        _unreliableMex.setState(State.DEAD);
+                    }
+                } );
+                return;
+            }
+            
+            
             // We proceed handling the response in a transaction. Note that if for some reason the following transaction
             // fails, the unreliable invoke will be in an "unknown" state, and will require manual intervention to either
             // retry or force fail.
@@ -353,10 +372,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
                 public void run() {
 
                     MessageExchangeDAO mexdao = _process.loadMexDao(_unreliableMex.getMessageExchangeId());
-                    if (ferr != null) {
-                        MexDaoUtil.setFailed(mexdao, FailureType.OTHER, ferr.toString());
-                        _unreliableMex.setState(State.DEAD);
-                    } else if (_unreliableMex.getStatus() == Status.ACK) {
+                   if (_unreliableMex.getStatus() == Status.ACK) {
                         _unreliableMex.save(mexdao);
                         _unreliableMex.setState(State.DEAD);
                     } else if (_unreliableMex.getStatus() == Status.REQ && !_unreliableMex._asyncReply) {
