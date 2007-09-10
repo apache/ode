@@ -35,6 +35,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.w3c.dom.Element;
 
@@ -49,7 +50,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	Status status;
 	int partnerLinkModelId;
 	String correlationId;
-	String pattern;
+	MessageExchangePattern pattern;
 	Element ePR;
 	String channel;
 	QName fault;
@@ -145,8 +146,8 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public void setPattern(String string) {
-		this.pattern = string;
+	public void setPattern(MessageExchangePattern pattern) {
+		this.pattern = pattern;
 
 	}
 
@@ -165,7 +166,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	}
 
 	
-	public String getPattern() {
+	public MessageExchangePattern getPattern() {
 		return pattern;
 	}
 

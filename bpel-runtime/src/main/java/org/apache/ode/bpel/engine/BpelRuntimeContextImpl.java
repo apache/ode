@@ -120,8 +120,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao) {
         this(instanceWorker, dao, new ExecutionQueueImpl(null));
 
+        if (ProcessState.isFinished(dao.getState()))
+            throw new BpelEngineException("Invalid process state (process is finished)!!!");
+        
         // The following allows us to skip deserialization of the soup if our execution state in memory is the same
         // as that in the database.
+        
         Object cachedState = instanceWorker.getCachedState(dao.getExecutionStateCounter());
         if (cachedState != null) {
             if (__log.isDebugEnabled())
@@ -131,7 +135,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             _vpu.setContext(_soup);
         } else {
             if (__log.isDebugEnabled())
-                __log.debug("CACHE MISS: Loading state to resume instance " + dao.getInstanceId() + " from database ");
+                __log.debug("CACHE MISS: state #" + dao.getExecutionStateCounter() + " is stale; loading state to resume instance " + dao.getInstanceId() + " from database ");
             byte[] daoState = dao.getExecutionState();
             ByteArrayInputStream iis = new ByteArrayInputStream(daoState);
             try {
@@ -693,7 +697,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         mexDao.setProcess(_dao.getProcess());
         mexDao.setInstance(_dao);
         mexDao.setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE
-                : MessageExchangePattern.REQUEST_ONLY).toString());
+                : MessageExchangePattern.REQUEST_ONLY));
         mexDao.setChannel(channel == null ? null : channel.export());
 
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
@@ -967,9 +971,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
                 Status status = mexDao.getStatus();
-                MessageExchangePattern pattern = MessageExchange.MessageExchangePattern.valueOf(mexDao.getPattern());
                 InvocationStyle istyle = mexDao.getInvocationStyle();
-                if (pattern == MessageExchangePattern.REQUEST_ONLY) {
+                if (mexDao.getPattern() == MessageExchangePattern.REQUEST_ONLY) {
                     mexDao.setAckType(AckType.ONEWAY);
                     mexDao.setStatus(Status.COMPLETED);
                     continue;

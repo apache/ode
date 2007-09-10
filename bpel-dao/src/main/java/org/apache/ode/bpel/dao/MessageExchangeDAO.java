@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.w3c.dom.Element;
 
@@ -167,7 +168,7 @@ public interface MessageExchangeDAO {
      */
     void setPartnersKey(String correlationId);
 
-    void setPattern(String string);
+    void setPattern(MessageExchangePattern pattern);
 
     void setOperation(String opname);
 
@@ -175,7 +176,7 @@ public interface MessageExchangeDAO {
 
     Element getEPR();
 
-    String getPattern();
+    MessageExchangePattern getPattern();
 
     /**
      * Get the response channel.

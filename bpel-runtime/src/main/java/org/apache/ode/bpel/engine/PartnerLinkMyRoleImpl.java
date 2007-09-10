@@ -248,7 +248,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         // send process instance event
         NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace, _process
-                .getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
+                .getOProcess().getName()), processDAO.getProcessId(), newInstance.getInstanceId());
         evt.setPortType(mex.getPortType());
         evt.setOperation(operation.getName());
         evt.setMexId(mex.getMessageExchangeId());

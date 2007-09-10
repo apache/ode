@@ -33,6 +33,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
@@ -133,8 +134,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         update();
     }
 
-    public void setPattern(String pattern) {
-        _hself.setPattern(pattern);
+    public void setPattern(MessageExchangePattern pattern) {
+        _hself.setPattern(pattern == null ? null : pattern.toString());
         update();
 
     }
@@ -192,8 +193,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         }
     }
 
-    public String getPattern() {
-        return _hself.getPattern();
+    public MessageExchangePattern getPattern() {
+        return _hself.getPattern() == null ? null : MessageExchangePattern.valueOf(_hself.getPattern());
     }
 
     public String getChannel() {

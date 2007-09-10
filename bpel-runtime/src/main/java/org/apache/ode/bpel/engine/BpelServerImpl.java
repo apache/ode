@@ -144,6 +144,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public BpelServerImpl() {
     }
 
+    protected void waitForQuiessence() {
+        _mngmtLock.writeLock().lock();
+        _mngmtLock.writeLock().unlock();
+    }
+    
     public void start() {
         _mngmtLock.writeLock().lock();
         try {
