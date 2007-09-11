@@ -640,6 +640,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         sendEvent(evt);
         sendEvent(new ProcessTerminationEvent());
 
+        _dao.finishCompletion();
         cleanupOutstandingMyRoleExchanges();
     }
 
