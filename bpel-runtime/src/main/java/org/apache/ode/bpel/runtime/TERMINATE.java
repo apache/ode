@@ -23,15 +23,15 @@ package org.apache.ode.bpel.runtime;
  */
 class TERMINATE extends ACTIVITY {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public TERMINATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
-    super(self, scopeFrame, linkFrame);
-  }
+    public TERMINATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
+        super(self, scopeFrame, linkFrame);
+    }
 
-  public final void run() {
-    getBpelRuntimeContext().terminate();
-    _self.parent.completed(null, CompensationHandler.emptySet());
-  }
+    public final void run() {
+        getBpelRuntimeContext().terminate();
+        _self.parent.completed(null, CompensationHandler.emptySet());
+    }
 
 }
