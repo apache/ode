@@ -95,7 +95,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         _testService.expects(once()).method("completed").after("invoke");
 
         execute("FailureToRecovery");
-        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertEquals( TInstanceStatus.COMPLETED,lastInstance().getStatus());
         assertNoFailures();
     }
 
