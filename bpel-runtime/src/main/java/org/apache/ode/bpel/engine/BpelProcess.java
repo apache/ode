@@ -175,23 +175,30 @@ class BpelProcess {
         return "BpelProcess[" + _pid + "]";
     }
 
-    void recoverActivity(ProcessInstanceDAO instanceDAO, final String channel, final long activityId, final String action, final FaultData fault) {
+    void recoverActivity(ProcessInstanceDAO instanceDAO, final String channel, final long activityId, final String action,
+            final FaultData fault) {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
-        markused();
-        BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceDAO.getInstanceId());
-        final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker,instanceDAO);
-        try {
-            iworker.execInCurrentThread(new Callable<Void> () {
 
-                public Void call() throws Exception {
-                    processInstance.recoverActivity(channel, activityId, action, fault);
-                    return null;
-                }
-                
-            });
-        } catch (Exception e) {
-            throw new BpelEngineException(e);
+        _hydrationLatch.latch(1);
+        try {
+            markused();
+            BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceDAO.getInstanceId());
+            final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker, instanceDAO);
+            try {
+                iworker.execInCurrentThread(new Callable<Void>() {
+
+                    public Void call() throws Exception {
+                        processInstance.recoverActivity(channel, activityId, action, fault);
+                        return null;
+                    }
+
+                });
+            } catch (Exception e) {
+                throw new BpelEngineException(e);
+            }
+        } finally {
+            _hydrationLatch.release(1);
         }
     }
 
@@ -226,7 +233,8 @@ class BpelProcess {
                 return;
             }
 
-            mexdao.setPattern((op.getOutput() == null) ? MessageExchangePattern.REQUEST_ONLY : MessageExchangePattern.REQUEST_RESPONSE);
+            mexdao.setPattern((op.getOutput() == null) ? MessageExchangePattern.REQUEST_ONLY
+                    : MessageExchangePattern.REQUEST_RESPONSE);
             if (!processInterceptors(mexdao, InterceptorInvoker.__onProcessInvoked)) {
                 __log.debug("Aborting processing of mex " + mexdao.getMessageExchangeId() + " due to interceptors.");
                 onMyRoleMexAck(mexdao, oldstatus);
@@ -387,7 +395,7 @@ class BpelProcess {
         ProcessInstanceDAO instanceDao = mexdao.getInstance();
         if (instanceDao == null)
             throw new BpelEngineException("InternalError: No instance for partner mex " + mexdao);
-        
+
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
@@ -400,7 +408,7 @@ class BpelProcess {
     void enqueueInstanceTransaction(Long instanceId, final Runnable runnable) {
         if (instanceId == null)
             throw new NullPointerException("instanceId was null!");
-        
+
         BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceId);
         iworker.enqueue(_server.new TransactedRunnable(runnable));
     }
@@ -492,7 +500,7 @@ class BpelProcess {
             for (MessageExchangeInterceptor interceptor : _server._contexts.globalIntereceptors)
                 invoker.invoke(interceptor, ictx);
         } catch (FailMessageExchangeException e) {
-            MexDaoUtil.setFailed(mexdao,FailureType.ABORTED, e.getMessage());
+            MexDaoUtil.setFailed(mexdao, FailureType.ABORTED, e.getMessage());
             return false;
         } catch (FaultMessageExchangeException e) {
             MexDaoUtil.setFaulted(mexdao, e.getFaultName(), e.getFaultData());
@@ -1079,14 +1087,14 @@ class BpelProcess {
             if (old == Status.ASYNC) {
                 MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao);
                 mymex.onAsyncAck(mexdao);
-                
+
                 try {
                     _contexts.mexContext.onMyRoleMessageExchangeStateChanged(mymex);
                 } catch (Throwable t) {
                     __log.error("Integration layer threw an unexepcted exception.", t);
                 }
             }
-            
+
         }
 
     }
@@ -1253,11 +1261,11 @@ class BpelProcess {
 
         Operation operation = oplink.getPartnerRoleOperation(mexdao.getOperation());
 
-        if (!processInterceptors(mexdao, InterceptorInvoker.__onPartnerInvoked))  {
+        if (!processInterceptors(mexdao, InterceptorInvoker.__onPartnerInvoked)) {
             __log.debug("Partner invocation intercepted.");
             return;
         }
-        
+
         mexdao.setStatus(Status.REQ);
         try {
             if (p2pProcess != null) {

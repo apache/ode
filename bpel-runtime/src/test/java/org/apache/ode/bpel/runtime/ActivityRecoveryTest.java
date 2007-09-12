@@ -108,7 +108,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         execute("FailureToRecovery");
         recover("retry");
         recover("retry");
-        assertTrue(lastInstance().getStatus() == TInstanceStatus.COMPLETED);
+        assertEquals(TInstanceStatus.COMPLETED, lastInstance().getStatus());
         assertNoFailures();
     }
 
@@ -340,7 +340,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      */
     protected void recover(String action) {
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(lastInstance(), null, null);
-        assertTrue(recoveries.size() == 1);
+        assertEquals(1,recoveries.size());
         TActivityInfo activity = recoveries.get(0);
         assertNotNull(activity);
         _management.recoverActivity(Long.valueOf(lastInstance().getIid()), Long.valueOf(activity.getAiid()), action);
