@@ -16,7 +16,6 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
   xmlns:pns="http://ode/bpel/unit-testAssign1"
   xmlns:wns="http://ode/bpel/unit-testAssign1.wsdl">
