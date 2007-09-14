@@ -39,12 +39,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -59,7 +54,6 @@ import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -81,34 +75,26 @@ public class BpelProcess {
 
     private volatile Map<OPartnerLink, PartnerLinkMyRoleImpl> _myRoles;
 
-    /** Mapping from {"Service Name" (QNAME) / port} to a myrole. */
-    private volatile Map<Endpoint, PartnerLinkMyRoleImpl> _endpointToMyRoleMap;
+    /** Mapping from a myrole to a {"Service Name" (QNAME) / port}. It's actually more a tuple than a map as
+     * it's important to note that the same process with the same endpoint can have 2 different myroles. */
+    private volatile Map<PartnerLinkMyRoleImpl, Endpoint> _endpointToMyRoleMap;
 
     // Backup hashmaps to keep initial endpoints handy after dehydration
     private Map<Endpoint, EndpointReference> _myEprs = new HashMap<Endpoint, EndpointReference>();
-
     private Map<Endpoint, EndpointReference> _partnerEprs = new HashMap<Endpoint, EndpointReference>();
-
     private Map<Endpoint, PartnerRoleChannel> _partnerChannels = new HashMap<Endpoint, PartnerRoleChannel>();
 
     final QName _pid;
-
     private volatile OProcess _oprocess;
-
     // Has the process already been hydrated before?
     private boolean _hydratedOnce = false;
-
     /** Last time the process was used. */
     private volatile long _lastUsed;
 
     BpelEngineImpl _engine;
-
     DebuggerSupport _debugger;
-
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
-
     private ReplacementMap _replacementMap;
-
     final ProcessConf _pconf;
 
     /** {@link MessageExchangeInterceptor}s registered for this process. */
@@ -150,8 +136,8 @@ public class BpelProcess {
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
         try {
             _hydrationLatch.latch(1);
-            PartnerLinkMyRoleImpl target = getMyRoleForService(mex.getServiceName());
-            if (target == null) {
+            List<PartnerLinkMyRoleImpl> targets = getMyRolesForService(mex.getServiceName());
+            if (targets.isEmpty()) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
                 __log.error(errmsg);
                 mex.setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg, null);
@@ -166,7 +152,43 @@ public class BpelProcess {
             }
 
             markused();
-            target.invokeMyRole(mex);
+
+            // Ideally, if Java supported closure, the routing code would return null or the appropriate
+            // closure to handle the route.
+            PartnerLinkMyRoleImpl.RoutingInfo routing = null;
+            boolean routed = false;
+            for (PartnerLinkMyRoleImpl target : targets) {
+                routing = target.findRoute(mex);
+                boolean createInstance = target.isCreateInstance(mex);
+
+                if (mex.getStatus() != MessageExchange.Status.FAILURE) {
+                    if (routing.messageRoute == null && createInstance) {
+                        // No route but we can create a new instance
+                        target.invokeNewInstance(mex, routing);
+                        routed = true; break;
+                    } else if (routing.messageRoute != null) {
+                        // Found a route, hitting it
+                        target.invokeInstance(mex, routing);
+                        routed = true; break;
+                    }
+                }
+            }
+
+            // Nothing found, saving for later
+            if (!routed) {
+                // TODO this is kind of hackish when no match and more than one myrole is selected.
+                // we save the routing on the last myrole
+                // actually the message queue should be attached to the instance instead of the correlator
+                targets.get(targets.size()-1).noRoutingMatch(mex, routing);
+            }
+
+            // Now we have to update our message exchange status. If the <reply> was not hit during the
+            // invocation, then we will be in the "REQUEST" phase which means that either this was a one-way
+            // or a two-way that needs to delivery the reply asynchronously.
+            if (mex.getStatus() == MessageExchange.Status.REQUEST) {
+                mex.setStatus(MessageExchange.Status.ASYNC);
+            }
+
             markused();
         } finally {
             _hydrationLatch.release(1);
@@ -178,20 +200,27 @@ public class BpelProcess {
         }
     }
 
-    private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
-        for (Map.Entry<Endpoint, PartnerLinkMyRoleImpl> e : getEndpointToMyRoleMap().entrySet()) {
-            if (e.getKey().serviceName.equals(serviceName))
-                return e.getValue();
+    /** Several myroles can use the same service in a given process */
+    private List<PartnerLinkMyRoleImpl> getMyRolesForService(QName serviceName) {
+        List<PartnerLinkMyRoleImpl> myRoles = new ArrayList<PartnerLinkMyRoleImpl>(5);
+        for (Map.Entry<PartnerLinkMyRoleImpl,Endpoint> e : getEndpointToMyRoleMap().entrySet()) {
+            if (e.getValue().serviceName.equals(serviceName))
+                myRoles.add(e.getKey());
         }
-        return null;
+        return myRoles;
     }
 
     void initMyRoleMex(MyRoleMessageExchangeImpl mex) {
         markused();
+
         PartnerLinkMyRoleImpl target = null;
-        for (Endpoint endpoint : getEndpointToMyRoleMap().keySet()) {
-            if (endpoint.serviceName.equals(mex.getServiceName()))
-                target = getEndpointToMyRoleMap().get(endpoint);
+        for (Map.Entry<PartnerLinkMyRoleImpl,Endpoint> e : getEndpointToMyRoleMap().entrySet()) {
+            if (e.getValue().serviceName.equals(mex.getServiceName())) {
+                // First one is fine as we're only interested in the portType and operation here and
+                // even if a process has 2 myrole partner links
+                target = e.getKey();
+                break;
+            }
         }
         if (target != null) {
             mex.setPortOp(target._plinkDef.myRolePortType, target._plinkDef.getMyRoleOperation(mex.getOperationName()));
@@ -350,7 +379,7 @@ public class BpelProcess {
     private void setRoles(OProcess oprocess) {
         _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
         _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
-        _endpointToMyRoleMap = new HashMap<Endpoint, PartnerLinkMyRoleImpl>();
+        _endpointToMyRoleMap = new HashMap<PartnerLinkMyRoleImpl, Endpoint>();
 
         // Create myRole endpoint name mapping (from deployment descriptor)
         HashMap<OPartnerLink, Endpoint> myRoleEndpoints = new HashMap<OPartnerLink, Endpoint>();
@@ -385,7 +414,7 @@ public class BpelProcess {
                     throw new IllegalArgumentException("No service name for myRole plink " + pl.getName());
                 PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(this, pl, endpoint);
                 _myRoles.put(pl, myRole);
-                _endpointToMyRoleMap.put(endpoint, myRole);
+                _endpointToMyRoleMap.put(myRole, endpoint);
             }
 
             if (pl.hasPartnerRole()) {
@@ -561,7 +590,7 @@ public class BpelProcess {
         }
     }
 
-    private Map<Endpoint, PartnerLinkMyRoleImpl> getEndpointToMyRoleMap() {
+    private Map<PartnerLinkMyRoleImpl,Endpoint> getEndpointToMyRoleMap() {
         try {
             _hydrationLatch.latch(1);
             return _endpointToMyRoleMap;
