@@ -274,7 +274,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
-            process.hydrate();
+            if (_dehydrationPolicy == null) process.hydrate();
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
