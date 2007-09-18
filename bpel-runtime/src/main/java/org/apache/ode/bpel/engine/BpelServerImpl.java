@@ -325,7 +325,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             BpelProcess p = _registeredProcesses.remove(pid);
             if (p == null)
                 return;
-            
+
+            // TODO Looks like there are some possible bugs here, if a new version of a process gets
+            // deployed, the service will be removed.
             p.deactivate();
             while (_serviceMap.values().remove(p))
                 ;
