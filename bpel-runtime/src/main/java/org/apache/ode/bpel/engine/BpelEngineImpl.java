@@ -193,13 +193,26 @@ public class BpelEngineImpl implements BpelEngine {
                 Map.Entry<Endpoint,BpelProcess> processEntry = serviceIter.next();
                 if (processEntry.getValue()._pid.equals(process)) {
                     serviceIter.remove();
+                    System.out.println("### Removing PID " + process);
                     processEndpoint = processEntry.getKey();
                 }
             }
 
             // Only deactivating if no other process (version) need that endpoint anymore
-            if (_serviceMap.get(processEndpoint) == null)
+            // We're only routing using an endpoint/process map for now which means that deploying
+            // several versions of the same process using the same endpoint (which is the common
+            // case) will override previous deployments endpoints. So checking the endpoint is not
+            // enough, we also have to check other versions of the same process.
+            // A bit clunky, the maps held here should be retought a bit.
+            boolean otherVersions = false;
+            for (BpelProcess bpelProcess : _activeProcesses.values()) {
+                if (bpelProcess._pconf.getType().equals(p._pconf.getType()))
+                    otherVersions = true;
+            }
+            if (_serviceMap.get(processEndpoint) == null && !otherVersions) {
+                System.out.println("### Removing service for " + p._pid + " - " + otherVersions);
                 p.deactivate();
+            }
         }
         return p;
     }
