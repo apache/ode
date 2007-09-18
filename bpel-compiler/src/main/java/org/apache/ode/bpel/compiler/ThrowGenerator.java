@@ -37,7 +37,9 @@ class ThrowGenerator extends DefaultActivityGenerator {
         ThrowActivity throwDef = (ThrowActivity)src;
         OThrow othrow = (OThrow) output;
         othrow.faultName = throwDef.getFaultName();
-        if(throwDef.getFaultVariable() != null)
+        if(throwDef.getFaultVariable() != null) {
             othrow.faultVariable = _context.resolveVariable(throwDef.getFaultVariable());
+            othrow.variableRd.add(othrow.faultVariable);
+        }
     }
 }

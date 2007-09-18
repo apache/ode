@@ -42,6 +42,8 @@ class ReceiveGenerator extends PickReceiveGenerator {
 
     onMessage.activity = new OEmpty(_context.getOProcess(), opick);
     opick.onMessages.add(onMessage);
+    if (onMessage.variable != null)
+        opick.variableWr.add(onMessage.variable);
   }
 
 }

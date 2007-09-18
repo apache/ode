@@ -20,6 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
@@ -217,8 +218,7 @@ class MockBpelServer {
             }
 
             public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
-                // TODO Auto-generated method stub
-                return null;
+                return Collections.singleton(InvocationStyle.UNRELIABLE);
             }
 
             public void invokePartnerUnreliable(PartnerRoleMessageExchange mex) throws ContextException {

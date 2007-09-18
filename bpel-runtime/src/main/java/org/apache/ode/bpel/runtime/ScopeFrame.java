@@ -47,6 +47,8 @@ class ScopeFrame implements Serializable {
 
     /** The fault context for this scope. */
     private FaultData _faultData;
+    
+    final InstanceGlobals globals;
 
     /** Constructor used to create "fault" scopes. */
     ScopeFrame( OScope scopeDef,
@@ -54,19 +56,27 @@ class ScopeFrame implements Serializable {
                 ScopeFrame parent,
                 Set<CompensationHandler> visibleCompensationHandlers,
                 FaultData fault) {
-        this(scopeDef,scopeInstanceId,parent,visibleCompensationHandlers);
+        this(scopeDef,scopeInstanceId,parent,visibleCompensationHandlers, parent.globals);
         _faultData = fault;
 
     }
-
+    public ScopeFrame( OScope scopeDef,
+            Long scopeInstanceId,
+            ScopeFrame parent,
+            Set<CompensationHandler> visibleCompensationHandlers) {
+        this(scopeDef,scopeInstanceId,parent,visibleCompensationHandlers,parent.globals);
+    }
+    
     public ScopeFrame( OScope scopeDef,
                        Long scopeInstanceId,
                        ScopeFrame parent,
-                       Set<CompensationHandler> visibleCompensationHandlers) {
+                       Set<CompensationHandler> visibleCompensationHandlers,
+                       InstanceGlobals globals) {
         this.oscope = scopeDef;
         this.scopeInstanceId = scopeInstanceId;
         this.parent = parent;
         this.availableCompensations = visibleCompensationHandlers;
+        this.globals = globals;
     }
 
 

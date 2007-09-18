@@ -66,6 +66,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                     throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
                 oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput().getMessage()
                         .getQName());
+                oinvoke.variableRd.add(oinvoke.inputVar);
             }
         }
         if (oinvoke.operation.getOutput() != null && oinvoke.operation.getOutput().getMessage() != null) {
@@ -73,6 +74,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 throw new CompilationException(__imsgs.errInvokeNoOutputMessageForOutputOp(oinvoke.operation.getName()));
             oinvoke.outputVar = _context.resolveMessageVariable(src.getOutputVar(), oinvoke.operation.getOutput().getMessage()
                     .getQName());
+            oinvoke.variableWr.add(oinvoke.outputVar);
         }
         List<Correlation> correlations = src.getCorrelations();
         List<Correlation> incorrelations = CollectionsX.filter(new ArrayList<Correlation>(), correlations,
