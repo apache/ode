@@ -56,6 +56,7 @@ class ReplyGenerator extends DefaultActivityGenerator  {
         oreply.messageExchangeId = replyDef.getMessageExchangeId();
         if (replyDef.getVariable() != null) {
             oreply.variable = _context.resolveVariable(replyDef.getVariable());
+            oreply.variableRd.add(oreply.variable);
             if (!(oreply.variable.type instanceof OMessageVarType))
                 throw new CompilationException(_cmsgsGeneral.errMessageVariableRequired(oreply.variable.name));
         }

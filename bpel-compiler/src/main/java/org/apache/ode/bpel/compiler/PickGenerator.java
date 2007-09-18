@@ -51,6 +51,8 @@ class PickGenerator extends PickReceiveGenerator {
               sOnMessage.getCorrelations());
       oOnMessage.activity = _context.compile(sOnMessage.getActivity());
       opick.onMessages.add(oOnMessage);
+      if (oOnMessage.variable != null)
+          opick.variableWr.add(oOnMessage.variable);
     }
 
     try {
