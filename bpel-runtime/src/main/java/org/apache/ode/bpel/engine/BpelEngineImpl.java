@@ -193,7 +193,6 @@ public class BpelEngineImpl implements BpelEngine {
                 Map.Entry<Endpoint,BpelProcess> processEntry = serviceIter.next();
                 if (processEntry.getValue()._pid.equals(process)) {
                     serviceIter.remove();
-                    System.out.println("### Removing PID " + process);
                     processEndpoint = processEntry.getKey();
                 }
             }
@@ -210,7 +209,6 @@ public class BpelEngineImpl implements BpelEngine {
                     otherVersions = true;
             }
             if (_serviceMap.get(processEndpoint) == null && !otherVersions) {
-                System.out.println("### Removing service for " + p._pid + " - " + otherVersions);
                 p.deactivate();
             }
         }
