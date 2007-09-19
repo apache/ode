@@ -121,18 +121,19 @@ public abstract class BPELTestAbstract {
         _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
         store = new ProcessStoreImpl(null, "jpa", true);
-        store.registerListener(new ProcessStoreListener() {
-            public void onProcessStoreEvent(ProcessStoreEvent event) {
-                // bounce the process
-                _server.unregister(event.pid);
-                if (event.type != ProcessStoreEvent.Type.UNDEPLOYED) {
-                    ProcessConfImpl conf = (ProcessConfImpl) store.getProcessConfiguration(event.pid);
-                    // Test processes always run with in-mem DAOs
-                    conf.setTransient(true);
-                    _server.register(conf);
-                }
-            }
-        });
+        // not needed: we do eclipcitly in doDeployment
+//        store.registerListener(new ProcessStoreListener() {
+//            public void onProcessStoreEvent(ProcessStoreEvent event) {
+//                // bounce the process
+//                _server.unregister(event.pid);
+//                if (event.type != ProcessStoreEvent.Type.UNDEPLOYED) {
+//                    ProcessConfImpl conf = (ProcessConfImpl) store.getProcessConfiguration(event.pid);
+//                    // Test processes always run with in-mem DAOs
+//                    conf.setTransient(true);
+//                    _server.register(conf);
+//                }
+//            }
+//        });
         _server.setConfigProperties(getConfigProperties());
         // _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
@@ -307,8 +308,8 @@ public abstract class BPELTestAbstract {
         try {
             for (QName procName : procs) {
                 ProcessConfImpl conf = (ProcessConfImpl) store.getProcessConfiguration(procName);
-                // Test processes always run with in-mem DAOs
-                conf.setTransient(true);
+                // We want to use our own cf
+                conf.setTransient(false);
                 _server.register(conf);
             }
         } catch (Exception ex) {
