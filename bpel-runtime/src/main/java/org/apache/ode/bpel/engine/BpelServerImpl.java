@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -120,6 +121,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     private ReadWriteLock _mngmtLock = new ReentrantReadWriteLock();
 
+    /**
+     * The last time we started a {@link ServerCallable}. Useful for keeping track of idleness.
+     */
+    private final AtomicLong _lastTimeOfServerCallable = new AtomicLong(System.currentTimeMillis());
+
     static {
         // TODO Clean this up and factorize engine configuration
         try {
@@ -145,10 +151,28 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     protected void waitForQuiessence() {
-        _mngmtLock.writeLock().lock();
-        _mngmtLock.writeLock().unlock();
+        do {
+            _mngmtLock.writeLock().lock();
+            _mngmtLock.writeLock().unlock();
+            long ltime = _lastTimeOfServerCallable.get();
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                ;
+            }
+            _mngmtLock.writeLock().lock();
+            _mngmtLock.writeLock().unlock();
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException ie) {
+                ;
+            }
+            if (_lastTimeOfServerCallable.get() == ltime)
+                return;
+        } while (true);
+
     }
-    
+
     public void start() {
         _mngmtLock.writeLock().lock();
         try {
@@ -159,7 +183,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("BPEL SERVER starting.");
 
-
             if (_exec == null)
                 _exec = Executors.newCachedThreadPool();
 
@@ -168,13 +191,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 __log.fatal(errmsg);
                 throw new IllegalStateException(errmsg);
             }
-            
-            if (_contexts.scheduler == null) { 
+
+            if (_contexts.scheduler == null) {
                 String errmsg = "Scheduler not specified; call setScheduler(...)!";
                 __log.fatal(errmsg);
                 throw new IllegalStateException(errmsg);
             }
-            
+
             _contexts.scheduler.start();
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
@@ -433,10 +456,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
                         Date future = new Date(System.currentTimeMillis() + (60 * 1000));
                         __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
-                        _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);            
+                        _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);
                         return null;
                     }
-                    
+
                 });
                 return;
             }
@@ -452,7 +475,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public void setTransactionManager(TransactionManager txm) {
         _contexts.txManager = txm;
     }
-    
+
     public void setDehydrationPolicy(DehydrationPolicy dehydrationPolicy) {
         _dehydrationPolicy = dehydrationPolicy;
     }
@@ -501,14 +524,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 assertTransaction();
             else
                 assertNoTransaction();
-            
-            
+
             return target.createNewMyRoleMex(istyle, targetService, operation, clientKey);
         } finally {
             _mngmtLock.readLock().unlock();
         }
     }
-    
+
     public MessageExchange getMessageExchange(final String mexId) throws BpelEngineException {
 
         _mngmtLock.readLock().lock();
@@ -552,9 +574,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             };
 
             try {
-                if (inmemdao != null || _contexts.isTransacted()) 
+                if (inmemdao != null || _contexts.isTransacted())
                     return loadMex.call();
-                else 
+                else
                     return enqueueTransaction(loadMex).get();
             } catch (ContextException e) {
                 throw new BpelEngineException(e);
@@ -589,18 +611,18 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     MessageExchangeDAO getInMemMexDAO(String mexId) {
         _mngmtLock.readLock().lock();
         try {
-          for (BpelProcess p : _registeredProcesses.values()) {
-              MessageExchangeDAO mexDao = p.getInMemMexDAO(mexId);
-              if (mexDao != null)
-                  return mexDao;
-          }
+            for (BpelProcess p : _registeredProcesses.values()) {
+                MessageExchangeDAO mexDao = p.getInMemMexDAO(mexId);
+                if (mexDao != null)
+                    return mexDao;
+            }
         } finally {
             _mngmtLock.readLock().unlock();
         }
-        
+
         return null;
     }
-    
+
     OProcess getOProcess(QName processId) {
         _mngmtLock.readLock().lock();
         try {
@@ -616,7 +638,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-
     <T> Future<T> enqueueTransaction(final Callable<T> transaction) throws ContextException {
         return _exec.submit(new ServerCallable<T>(new TransactedCallable<T>(transaction)));
     }
@@ -624,9 +645,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     void enqueueRunnable(final Runnable runnable) {
         _exec.submit(new ServerRunnable(runnable));
     }
-    
+
     /**
-     * Schedule a {@link Runnable} object for execution after the completion of the current transaction. 
+     * Schedule a {@link Runnable} object for execution after the completion of the current transaction.
+     * 
      * @param runnable
      */
     void scheduleRunnable(final Runnable runnable) {
@@ -636,12 +658,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             public void run() {
                 _exec.submit(new ServerRunnable(runnable));
             }
-            
+
         });
-        
+
     }
 
-    
     protected void assertTransaction() {
         if (!_contexts.isTransacted())
             throw new BpelEngineException("Operation must be performed in a transaction!");
@@ -731,48 +752,58 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    
-   
-    
+    private void ticktock() {
+        _lastTimeOfServerCallable.set(System.currentTimeMillis());
+
+    }
+
     class ServerRunnable implements Runnable {
         final Runnable _work;
+
         ServerRunnable(Runnable work) {
             _work = work;
         }
-        
+
         public void run() {
+            ticktock();
             _mngmtLock.readLock().lock();
             try {
+                ticktock();
                 _work.run();
+                ticktock();
             } catch (Throwable ex) {
+                ticktock();
                 __log.fatal("Internal Error", ex);
             } finally {
                 _mngmtLock.readLock().unlock();
             }
         }
-        
+
     }
-    
-   
-    
-    class ServerCallable<T> implements Callable<T>{
+
+    class ServerCallable<T> implements Callable<T> {
         final Callable<T> _work;
+
         ServerCallable(Callable<T> work) {
             _work = work;
         }
-        
-        public T call () throws Exception {
+
+        public T call() throws Exception {
+            ticktock();
             _mngmtLock.readLock().lock();
             try {
+                ticktock();
                 return _work.call();
             } catch (Exception ex) {
+                ticktock();
                 __log.fatal("Internal Error", ex);
                 throw ex;
             } finally {
                 _mngmtLock.readLock().unlock();
+                ticktock();
             }
         }
-        
+
     }
 
     class TransactedCallable<T> implements Callable<T> {
@@ -786,7 +817,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             return _contexts.execTransaction(_work);
         }
     }
-
 
     class TransactedRunnable implements Runnable {
         Runnable _work;
