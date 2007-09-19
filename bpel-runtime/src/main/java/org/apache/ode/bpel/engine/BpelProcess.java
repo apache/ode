@@ -141,7 +141,7 @@ class BpelProcess {
 
     private final Set<InvocationStyle> _invocationStyles;
 
-    private BpelDAOConnectionFactoryImpl _inMemDao;
+    private final BpelDAOConnectionFactoryImpl _inMemDao;
 
     private Random _random = new Random();
 

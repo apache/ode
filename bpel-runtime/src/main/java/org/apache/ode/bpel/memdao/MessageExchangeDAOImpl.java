@@ -214,7 +214,6 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	public void setInstance(ProcessInstanceDAO dao) {
 		this.instance = dao;
-
 	}
 
 	public ProcessInstanceDAO getInstance() {

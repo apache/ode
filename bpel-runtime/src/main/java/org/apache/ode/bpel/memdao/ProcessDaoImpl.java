@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -54,7 +51,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     protected final Map<Long, Long> _instancesAge = new ConcurrentHashMap<Long, Long>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
-    private BpelDAOConnectionImpl _conn;
+    private final BpelDAOConnectionImpl _conn;
     private Collection<Long> _instancesToRemove = new ConcurrentLinkedQueue<Long>();
     private static volatile long _lastRemoval = 0;
 
@@ -64,7 +61,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public ProcessDaoImpl(BpelDAOConnectionImpl conn, Map<QName, ProcessDaoImpl> store,
                           QName processId, QName type, String guid, long version) {
         if (__log.isDebugEnabled()) {
-            __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
+            __log.debug("Creating ProcessDao object for process \"" + processId + "\". (conn=" + conn + ")");
         }
 
         _guid = guid;
