@@ -32,16 +32,17 @@ import java.util.Properties;
  * Connection factory for the in-memory state store.
  */
 public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
-    private static final Map<QName, ProcessDaoImpl> __StateStore = new HashMap<QName, ProcessDaoImpl>();
-
+    private final Map<QName, ProcessDaoImpl> _StateStore = new HashMap<QName, ProcessDaoImpl>();
     private TransactionManager _txm;
+    private BpelDAOConnectionImpl _conn; 
 
     public BpelDAOConnectionFactoryImpl(TransactionManager txm) {
         _txm = txm;
+        _conn = new BpelDAOConnectionImpl(_StateStore, _txm);
     }
 
     public BpelDAOConnection getConnection() {
-        return new BpelDAOConnectionImpl(__StateStore, _txm);
+        return _conn;
     }
 
     /**

@@ -242,7 +242,9 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public MessageExchangeDAO getMessageExchange(String mexid) {
-        return _mexStore.get(mexid);
+        synchronized (_mexStore) {
+            return _mexStore.get(mexid);
+        }
     }
 
     private int compareInstanceUsingKey(String key, ProcessInstanceDAO instanceDAO1, ProcessInstanceDAO instanceDAO2) {
