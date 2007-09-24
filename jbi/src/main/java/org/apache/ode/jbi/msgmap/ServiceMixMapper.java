@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
  * Message mapper for dealing with the degenerate messages that servicemix components such as servicemix-http provide. These
  * messages are not normalized and hence do not conform to the JBI specification. They are in fact whatever the SOAP body element
  * happens to be. This mapper will make a reasonable attempt to handle these messages, which means don't count on it working.
- * 
+ *
  */
 public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
 
@@ -59,7 +59,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
                 __log.debug("isRecognized() message: " + prettyPrint(msg));
             }
         } catch (MessageTranslationException e) {
-            __log.debug("Unable to parse message: ", e);
+            __log.warn("Unable to parse message: ", e);
             return Recognized.FALSE;
         }
 
@@ -130,7 +130,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
                 throw new MessageTranslationException("Message for fault \"" + fault + "\" does not contain an element part.");
 
             if (firstPartEl == null) {
-                // Oooops, our assumption did not pan out; we'll do our best i.e. create empty content. 
+                // Oooops, our assumption did not pan out; we'll do our best i.e. create empty content.
                 __log.warn("Proceessing fault \"" + fault + "\" with empty content (check your BPEL).");
 
                 Document doc = newDocument();
