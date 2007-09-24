@@ -167,7 +167,7 @@ public class Messages extends MessageBundle {
     }
 
     String msgPropertyAliasDerefFailedOnMessage(String aliasDescription, String reason) {
-        return this.format("Unable to evaluate apply property alias \"{0}\" to incoming message: {1}", aliasDescription, reason);
+        return this.format("Unable to evaluate property alias \"{0}\" to incoming message: {1}", aliasDescription, reason);
     }
 
     public String msgDeployStarting(File deploymentUnitDirectory) {
