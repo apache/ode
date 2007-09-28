@@ -111,6 +111,9 @@ public class DOMUtils {
         return sRet;
     }
 
+    /**
+     * @deprecated relies on XMLSerializer which is a deprecated Xerces class, use domToString instead
+     */
     static public String prettyPrint(Element e) throws IOException {
         OutputFormat format = new OutputFormat(e.getOwnerDocument());
         format.setLineWidth(65);
@@ -793,7 +796,24 @@ public class DOMUtils {
                 domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", uri);
             else
                 domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, uri);
+        }
+    }
 
+    public static void copyNSContext(Element source, Element dest) {
+        Map<String, String> sourceNS = getParentNamespaces(source);
+        sourceNS.putAll(getMyNamespaces(source));
+        Map<String, String> destNS = getParentNamespaces(dest);
+        destNS.putAll(getMyNamespaces(dest));
+        // (source - dest) to avoid adding twice the same ns on dest
+        for (String pr : destNS.keySet()) sourceNS.remove(pr);
+
+        for (Map.Entry<String, String> entry : sourceNS.entrySet()) {
+            String prefix = entry.getKey();
+            String uri = entry.getValue();
+            if (prefix == null || "".equals(prefix))
+                dest.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", uri);
+            else
+                dest.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, uri);
         }
     }
 
