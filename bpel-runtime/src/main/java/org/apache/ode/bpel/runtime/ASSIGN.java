@@ -467,8 +467,7 @@ class ASSIGN extends ACTIVITY {
             return (lval == ptr) ? replacement :  lval;
         }
 
-        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr
-                .getLocalName());
+        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr.getLocalName());
         NodeList nl = src.getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i)
             replacement.appendChild(doc.importNode(nl.item(i), true));
@@ -476,6 +475,8 @@ class ASSIGN extends ACTIVITY {
         for (int i = 0; i < attrs.getLength(); ++i)
             replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
         parent.replaceChild(replacement, ptr);
+        DOMUtils.copyNSContext(ptr, replacement);
+        
         return (lval == ptr) ? replacement :  lval;
     }
 
