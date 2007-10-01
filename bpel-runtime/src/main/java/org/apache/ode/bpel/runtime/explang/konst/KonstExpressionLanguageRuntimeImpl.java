@@ -38,61 +38,62 @@ public class KonstExpressionLanguageRuntimeImpl implements ExpressionLanguageRun
   public void initialize(Map properties) throws ConfigurationException {
   }
 
-  public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException , EvaluationException {
+  public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException  {
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof String)
       return (String) konst.getVal();
-    throw new TypeCastException(TypeCastException.TYPE_STRING, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
   }
 
-  public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+  public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException {
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof Boolean)
       return ((Boolean)konst.getVal()).booleanValue();
-    throw new TypeCastException(TypeCastException.TYPE_BOOLEAN, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
+
   }
 
-  public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+  public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException{
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof Number)
       return (Number)konst.getVal();
-    throw new TypeCastException(TypeCastException.TYPE_NUMBER, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
   }
 
   public List evaluate(OExpression cexp, EvaluationContext ctx)
-          throws FaultException, EvaluationException {
+          throws FaultException {
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof List)
       return (List) konst.getVal();
-    throw new TypeCastException(TypeCastException.TYPE_NODELIST, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
   }
 
-  public Node evaluateNode(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
+  public Node evaluateNode(OExpression cexp, EvaluationContext context) throws FaultException{
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof Node)
       return (Node) konst.getVal();
-    throw new TypeCastException(TypeCastException.TYPE_NODE, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
   }
 
   public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context)
-          throws FaultException , EvaluationException {
+          throws FaultException  {
     OConstantExpression konst = (OConstantExpression) cexp;
 
     if (konst.getVal() instanceof Calendar)
       return (Calendar) konst.getVal();
 
-    throw new TypeCastException(TypeCastException.TYPE_DATE, konst.getVal().toString());
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
 
   }
 
   public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context)
-          throws FaultException, EvaluationException {
+          throws FaultException{
 
     OConstantExpression konst = (OConstantExpression) cexp;
 
     if (konst.getVal() instanceof Duration)
       return (Duration) konst.getVal();
+    throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
 
-    throw new TypeCastException(TypeCastException.TYPE_DURATION, konst.getVal().toString());
   }
 }

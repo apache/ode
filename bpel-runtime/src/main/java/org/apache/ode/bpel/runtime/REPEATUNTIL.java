@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.ORepeatUntil;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -76,13 +75,7 @@ public class REPEATUNTIL extends ACTIVITY {
      * @throws FaultException in case of standard expression fault (e.g. selection failure)
      */
     private boolean checkCondition() throws FaultException {
-        try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().untilCondition,getEvaluationContext());
-        } catch (EvaluationException e) {
-            String msg = "Unexpected expression evaluation error checking repeatUntil condition.";
-            __log.error(msg, e);
-            throw new InvalidProcessException(msg,e);
-        }
+        return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().untilCondition,getEvaluationContext());
     }
 
     private class WAITER extends BpelJacobRunnable {

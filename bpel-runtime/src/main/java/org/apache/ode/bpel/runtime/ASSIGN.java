@@ -25,7 +25,6 @@ import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OAssign;
 import org.apache.ode.bpel.o.OAssign.DirectRef;
 import org.apache.ode.bpel.o.OAssign.LValueExpression;
@@ -189,19 +188,10 @@ class ASSIGN extends ACTIVITY {
         } else if (from instanceof OAssign.Expression) {
             List l;
             OExpression expr = ((OAssign.Expression) from).expression;
-            try {
-                l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr,
-                        getEvaluationContext());
-            } catch (EvaluationException e) {
-                String msg = __msgs.msgEvalException(from.toString(), e
-                        .getMessage());
-                if (__log.isDebugEnabled())
-                    __log.debug(from + ": " + msg);
-                if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure,
-                        msg);
-            }
+
+            l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr,
+                    getEvaluationContext());
+
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled())
@@ -633,13 +623,9 @@ class ASSIGN extends ACTIVITY {
         public Node evaluateQuery(Node root, OExpression expr)
                 throws FaultException {
             _rootNode = root;
-            try {
-                return getBpelRuntimeContext().getExpLangRuntime()
-                        .evaluateNode(expr, this);
-            } catch (org.apache.ode.bpel.explang.EvaluationException e) {
-                throw new InvalidProcessException("Expression Failed: " + expr,
-                        e);
-            }
+            return getBpelRuntimeContext().getExpLangRuntime()
+                    .evaluateNode(expr, this);
+
         }
 
         public Node getPartData(Element message, Part part) throws FaultException {

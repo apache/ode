@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OWhile;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -57,24 +56,25 @@ class WHILE extends ACTIVITY {
             condResult = checkCondition();
         } catch (FaultException fe) {
             __log.error(fe);
-            _self.parent.completed(createFault(fe.getQName(), _self.o),_compHandlers);
+            _self.parent.completed(createFault(fe.getQName(), _self.o), _compHandlers);
             return;
         }
 
         if (condResult) {
-            ActivityInfo child = new ActivityInfo(genMonotonic(),
-                    getOWhile().activity,
-                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+            ActivityInfo child = new ActivityInfo(genMonotonic(), getOWhile().activity, newChannel(TerminationChannel.class),
+                    newChannel(ParentScopeChannel.class));
             instance(createChild(child, _scopeFrame, _linkFrame));
             instance(new WAITER(child));
-        } else /* stop. */ {
+        } else /* stop. */{
             _self.parent.completed(null, _compHandlers);
         }
     }
 
-    /* (non-Javadoc)
-    * @see java.lang.Object#toString()
-    */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         return "<T:Act:While:" + _self.o + ">";
     }
@@ -84,28 +84,25 @@ class WHILE extends ACTIVITY {
     }
 
     private OWhile getOWhile() {
-        return (OWhile)_self.o;
+        return (OWhile) _self.o;
     }
 
     /**
      * Evaluates the while condition.
-     *
+     * 
      * @return <code>true</code> if the while condition is satisfied, <code>false</code> otherwise.
-     * @throws FaultException in case of standard expression fault (e.g. selection failure)
+     * @throws FaultException
+     *             in case of standard expression fault (e.g. selection failure)
      */
     private boolean checkCondition() throws FaultException {
-        try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getOWhile().whileCondition,getEvaluationContext());
-        } catch (EvaluationException e) {
-            String msg = "Unexpected expression evaluation error checking while condition.";
-            __log.error(msg, e);
-            throw new InvalidProcessException(msg,e);
-        }
+        return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getOWhile().whileCondition, getEvaluationContext());
     }
 
     private class WAITER extends BpelJacobRunnable {
         private static final long serialVersionUID = -7645042174027252066L;
+
         private ActivityInfo _child;
+
         private boolean _terminated;
 
         WAITER(ActivityInfo child) {
@@ -125,7 +122,7 @@ class WHILE extends ACTIVITY {
                 private static final long serialVersionUID = 3907167240907524405L;
 
                 public void compensate(OScope scope, SynchChannel ret) {
-                    _self.parent.compensate(scope,ret);
+                    _self.parent.compensate(scope, ret);
                     instance(WAITER.this);
                 }
 
@@ -137,8 +134,13 @@ class WHILE extends ACTIVITY {
                         instance(WHILE.this);
                 }
 
-                public void cancelled() { completed(null, CompensationHandler.emptySet()); }
-                public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                public void cancelled() {
+                    completed(null, CompensationHandler.emptySet());
+                }
+
+                public void failure(String reason, Element data) {
+                    completed(null, CompensationHandler.emptySet());
+                }
             }));
         }
     }

@@ -24,7 +24,6 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
@@ -62,35 +61,34 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
     public void initialize(Map properties) throws ConfigurationException {
     }
 
-    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException {
         try {
             return compile((OXPath10Expression) cexp).stringValueOf(createContext((OXPath10Expression) cexp, ctx));
         } catch (JaxenException e) {
-            handleJaxenException(e);
+            handleJaxenException(cexp, e);
         }
         throw new AssertionError("UNREACHABLE");
     }
 
-    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException,
-            EvaluationException {
+    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException {
         try {
             return compile((OXPath10Expression) cexp).booleanValueOf(createContext((OXPath10Expression) cexp, ctx));
         } catch (JaxenException e) {
-            handleJaxenException(e);
+            handleJaxenException(cexp, e);
         }
         throw new AssertionError("UNREACHABLE");
     }
 
-    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException {
         try {
             return compile((OXPath10Expression) cexp).numberValueOf(createContext((OXPath10Expression) cexp, ctx));
         } catch (JaxenException e) {
-            handleJaxenException(e);
+            handleJaxenException(cexp, e);
         }
         throw new AssertionError("UNREACHABLE");
     }
 
-    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException{
         try {
             XPath compiledXPath = compile((OXPath10Expression) cexp);
             Context context = createContext((OXPath10Expression) cexp, ctx);
@@ -111,12 +109,12 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
             return retVal;
 
         } catch (JaxenException je) {
-            handleJaxenException(je);
+            handleJaxenException(cexp, je);
         }
         throw new AssertionError("UNREACHABLE");
     }
 
-    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException{
         List retVal = evaluate(cexp, ctx);
         if (retVal.size() == 0)
             throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
@@ -126,8 +124,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         return (Node) retVal.get(0);
     }
 
-    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException,
-            EvaluationException {
+    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException {
 
         String literal = evaluateAsString(cexp, context);
         try {
@@ -139,8 +136,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         }
     }
 
-    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException,
-            EvaluationException {
+    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException{
         String literal = this.evaluateAsString(cexp, context);
         try {
             Duration duration = new org.apache.ode.utils.xsd.Duration(literal);
@@ -175,13 +171,13 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         return xpath;
     }
 
-    private void handleJaxenException(JaxenException je) throws EvaluationException, FaultException {
+    private void handleJaxenException(OExpression cexp, JaxenException je) throws FaultException {
         if (je instanceof WrappedFaultException) {
             throw ((WrappedFaultException) je).getFaultException();
         } else if (je.getCause() instanceof WrappedFaultException) {
             throw ((WrappedFaultException) je.getCause()).getFaultException();
         } else {
-            throw new EvaluationException(je.getMessage(), je);
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, je.getMessage(), je);
         }
 
     }
