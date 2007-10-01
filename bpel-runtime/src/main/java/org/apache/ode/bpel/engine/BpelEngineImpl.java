@@ -306,10 +306,9 @@ public class BpelEngineImpl implements BpelEngine {
                 else instance = _contexts.dao.getConnection().getInstance(we.getIID());
 
                 if (instance == null) {
-                    __log.error(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
-                    // nothing we can do, this instance is not in the database, it will
-                    // always
-                    // fail.
+                    __log.debug(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+                    // nothing we can do, this instance is not in the database, it will always fail, not 
+                    // exactly an error since can occur in normal course of events.
                     return;
                 }
                 ProcessDAO processDao = instance.getProcess();
