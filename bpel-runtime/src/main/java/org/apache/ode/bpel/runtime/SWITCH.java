@@ -50,15 +50,15 @@ class SWITCH extends ACTIVITY {
     for (Iterator i = oswitch.getCases().iterator(); i.hasNext();) {
       OSwitch.OCase ocase = (OSwitch.OCase) i.next();
       try{
-      	if(getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(ocase.expression, evalCtx)){
-          matchedOCase = ocase;
-          break;
-        }
-      } catch (EvaluationException e) {
-        String msg = "Unexpected evaluation exception.";
-        __log.error(msg,e);
-        // TODO: Better location information.
-        throw new InvalidProcessException(msg,e);
+    	  try {
+	      	if(getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(ocase.expression, evalCtx)){
+	          matchedOCase = ocase;
+	          break;
+	        }
+	      } catch (EvaluationException e) {
+	    	  __log.error("Sub-Language execution failure evaluating " + ocase.expression, e);
+	        throw new FaultException(oswitch.getOwner().constants.qnSubLanguageExecutionFault, e.getMessage());
+	      }
       }catch(FaultException e){
       	__log.error(e.getMessage(),e);
         faultData = createFault(e.getQName(), ocase);
