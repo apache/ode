@@ -48,7 +48,6 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -451,11 +450,7 @@ class BpelProcess {
         Node lValue = ectx.getRootNode();
 
         if (alias.location != null)
-            try {
-                lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
-            } catch (EvaluationException ec) {
-                throw new FaultException(getOProcess().constants.qnSelectionFailure, alias.getDescription());
-            }
+            lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
 
         if (lValue == null) {
             String errmsg = __msgs.msgPropertyAliasReturnedNullSet(alias.getDescription(), target);

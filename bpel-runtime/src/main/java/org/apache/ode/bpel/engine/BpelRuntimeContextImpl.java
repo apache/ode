@@ -117,6 +117,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private boolean _executed;
 
+    private boolean _forceFlush;
+
     BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO dao) {
         this(instanceWorker, dao, new ExecutionQueueImpl(null));
 
@@ -751,7 +753,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // Execute the process state reductions
         boolean canReduce = true;
-        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
+        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce && !_forceFlush) {
             canReduce = _vpu.execute();
         }
 
@@ -1177,5 +1179,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             __log.debug("initializing partner " + pLink + "  sessionId to " + session);
         fetchPartnerLinkDAO(pLink).setPartnerSessionId(session);
 
+    }
+
+    public void forceFlush() {
+        _forceFlush = true;
     }
 }

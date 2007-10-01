@@ -25,24 +25,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Link stack frame allowing resolution of {@link OLink} objects to the
- * current {@link LinkInfo} in context.
+ * Link stack frame allowing resolution of {@link OLink} objects to the current {@link LinkInfo} in context.
  */
 class LinkFrame implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	LinkFrame next;
-  Map<OLink, LinkInfo> links = new HashMap<OLink, LinkInfo>();
+    private static final long serialVersionUID = 1L;
 
-  LinkFrame(LinkFrame next) {
-    this.next = next;
-  }
+    LinkFrame next;
 
-  LinkInfo resolve(OLink link) {
-    LinkInfo li = links.get(link);
-    if (li == null && next != null)
-      return next.resolve(link);
-    return li;
-  }
+    Map<OLink, LinkInfo> links = new HashMap<OLink, LinkInfo>();
+
+    LinkFrame(LinkFrame next) {
+        this.next = next;
+    }
+
+    LinkInfo resolve(OLink link) {
+        LinkInfo li = links.get(link);
+        if (li == null && next != null)
+            return next.resolve(link);
+        return li;
+    }
 
 }

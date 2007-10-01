@@ -28,7 +28,6 @@ import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
@@ -74,25 +73,25 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
-    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException{
         return (String)evaluate(cexp, ctx, XPathConstants.STRING);
     }
 
     /**
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
-    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException{
         return (Boolean) evaluate(cexp, ctx, XPathConstants.BOOLEAN);
     }
 
-    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException {
         return (Number) evaluate(cexp, ctx, XPathConstants.NUMBER);
     }
 
     /**
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
-    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException {
         List result;
         Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
         if (someRes instanceof List) {
@@ -133,7 +132,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         return result;
     }
 
-    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException  {
         List retVal = evaluate(cexp, ctx);
         if (retVal.size() == 0)
             throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
@@ -142,7 +141,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         return (Node) retVal.get(0);
     }
 
-    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
+    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException {
         String literal = evaluateAsString(cexp, context);
         try {
             return ISO8601DateParser.parseCal(literal);
@@ -153,7 +152,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         }
     }
 
-    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
+    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext context) throws FaultException  {
         String literal = this.evaluateAsString(cexp, context);
         try {
             return new Duration(literal);
@@ -164,7 +163,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         }
     }
 
-    private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException, EvaluationException {
+    private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException {
         try {
             net.sf.saxon.xpath.XPathFactoryImpl xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
 
@@ -194,13 +193,13 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                     if (cause.getCause() != null) cause = cause.getCause();
                 }
             }
-            throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, cause.getMessage(), cause);
         } catch (WrappedResolverException wre) {
             wre.printStackTrace();
             throw (FaultException)wre.getCause();
         } catch (Throwable t) {
             t.printStackTrace();
-            throw new EvaluationException("Error while executing an XPath expression: ", t);
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.getMessage(), t);
         }
 
     }

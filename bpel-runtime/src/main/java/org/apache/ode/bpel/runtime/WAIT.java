@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OWait;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
@@ -54,10 +53,6 @@ class WAIT extends ACTIVITY {
                     + "; Reason: " + e.getMessage());
             _self.parent.completed(createFault(e.getQName(), _self.o), CompensationHandler.emptySet());
             return;
-        } catch (EvaluationException ee) {
-            String msg = "Unexpected error evaluating wait condition.";
-            __log.error(msg, ee);
-            throw new InvalidProcessException(msg,ee);
         }
 
 
@@ -99,7 +94,7 @@ class WAIT extends ACTIVITY {
     }
 
 
-    protected Date getDueDate() throws FaultException, EvaluationException {
+    protected Date getDueDate() throws FaultException {
 
         OWait wait = (OWait)_self.o;
 

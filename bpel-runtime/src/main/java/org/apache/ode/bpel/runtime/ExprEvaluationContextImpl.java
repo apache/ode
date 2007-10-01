@@ -35,13 +35,11 @@ import org.w3c.dom.Node;
 import java.util.Map;
 
 /**
- * The context in which BPEL expressions are evaluated. This class is handed of
- * the {@link org.apache.ode.bpel.o.OExpression} instances to provide access to
- * variables, link statuses, and the like.
+ * The context in which BPEL expressions are evaluated. This class is handed of the {@link org.apache.ode.bpel.o.OExpression}
+ * instances to provide access to variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
-    private static final Log __log = LogFactory
-            .getLog(ExprEvaluationContextImpl.class);
+    private static final Log __log = LogFactory.getLog(ExprEvaluationContextImpl.class);
 
     private BpelRuntimeContext _native;
 
@@ -51,26 +49,22 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
     private Node _root;
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-                                     BpelRuntimeContext ntv) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, BpelRuntimeContext ntv) {
         _native = ntv;
         _scopeInstance = scopeInstace;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-                                     BpelRuntimeContext ntv, Node root) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, BpelRuntimeContext ntv, Node root) {
         this(scopeInstace, ntv);
         _root = root;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce,
-                                     BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce, BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
         this(scopeInstnce, ntv);
         _linkVals = linkVals;
     }
 
-    public Node readVariable(OScope.Variable variable, OMessageVarType.Part part)
-            throws FaultException {
+    public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) throws FaultException {
         if (__log.isTraceEnabled())
             __log.trace("readVariable(" + variable + "," + part + ")");
 
@@ -78,26 +72,21 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
         Node ret;
         if (variable.type instanceof OConstantVarType) {
-            ret = ((OConstantVarType)variable.type).getValue();
+            ret = ((OConstantVarType) variable.type).getValue();
         } else {
             VariableInstance varInstance = _scopeInstance.resolve(variable);
-            if (varInstance == null) return null;
+            if (varInstance == null)
+                return null;
             ret = _native.fetchVariableData(varInstance, part, false);
         }
         return ret;
     }
 
     public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
-        try {
-            return _native.getExpLangRuntime().evaluateNode(expr,
-                    new ExprEvaluationContextImpl(_scopeInstance, _native, root));
-        } catch (org.apache.ode.bpel.explang.EvaluationException e) {
-            throw new InvalidProcessException("Expression Failed: " + expr, e);
-        }
+        return _native.getExpLangRuntime().evaluateNode(expr, new ExprEvaluationContextImpl(_scopeInstance, _native, root));
     }
 
-    public String readMessageProperty(OScope.Variable variable,
-                                      OProcess.OProperty property) throws FaultException {
+    public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property) throws FaultException {
         VariableInstance varInstance = _scopeInstance.resolve(variable);
         return _native.readProperty(varInstance, property);
     }
@@ -107,8 +96,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
     }
 
     public String toString() {
-        return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance
-                + ", activeLinks=" + _linkVals + "}";
+        return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance + ", activeLinks=" + _linkVals + "}";
     }
 
     public Node getRootNode() {

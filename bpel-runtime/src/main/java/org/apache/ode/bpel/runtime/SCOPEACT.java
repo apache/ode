@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
@@ -47,6 +49,8 @@ import org.w3c.dom.Element;
  * A scope activity. The scope activity creates a new scope frame and proceeeds using the {@link SCOPE} template.
  */
 public class SCOPEACT extends ACTIVITY {
+    private static final Log __log = LogFactory.getLog(SCOPEACT.class);
+    
     private static final long serialVersionUID = -4593029783757994939L;
 
     public SCOPEACT(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
@@ -55,7 +59,9 @@ public class SCOPEACT extends ACTIVITY {
 
     public void run() {
 
+        
         if (((OScope) _self.o).isolatedScope) {
+            __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
             instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class)));
 
         } else {
@@ -144,6 +150,8 @@ public class SCOPEACT extends ACTIVITY {
         @Override
         public void run() {
 
+            __log.debug("LINKSTATUSINTERCEPTOR: running ");
+
             Set<ChannelListener> mlset = new HashSet<ChannelListener>();
             
             if (_status == null)
@@ -153,6 +161,8 @@ public class SCOPEACT extends ACTIVITY {
     
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
+                        __log.debug("LINKSTATUSINTERCEPTOR: status received " + retVal);
+                        
                         _status = (Boolean) retVal;
                         for (OLink available : _statuses.keySet())
                             _linkFrame.resolve(available).channel.linkStatus(_statuses.get(available) && _status);
@@ -226,6 +236,7 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
             if (_locksNeeded.isEmpty()) {
                 // acquired all locks.
+                __log.debug("ISOLATIONGUARD: got all required locks: " + _locksAcquired);
 
                 ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntimeContext().createScopeInstance(
                         _scopeFrame.scopeInstanceId, (OScope) _self.o), _scopeFrame, null);
@@ -240,8 +251,11 @@ public class SCOPEACT extends ACTIVITY {
                 instance(new SCOPE(_self, newFrame, linkframe));
                 return;
             } else {
+                __log.debug("ISOLATIONGUARD: don't have all locks still need: " + _locksNeeded);
+
                 // try to acquire the locks in sequence (IMPORTANT) not all at once.
                 IsolationLock il = _locksNeeded.get(0);
+                
                 if (il.writeLock)
                     il.lockChannel.writeLock(_synchChannel);
                 else
@@ -251,6 +265,7 @@ public class SCOPEACT extends ACTIVITY {
                     private static final long serialVersionUID = 2857261074409098274L;
 
                     public void ret() {
+                        __log.debug("ISOLATIONGUARD: got lock: " + _locksNeeded.get(0));
                         _locksAcquired.add(_locksNeeded.remove(0));
                         instance(ISOLATEDGUARD.this);
                     }
@@ -267,7 +282,7 @@ public class SCOPEACT extends ACTIVITY {
      * @author Maciej Szefler <mszefler at gmail dot com>
      *
      */
-    private static class UNLOCKER extends BpelJacobRunnable {
+    private class UNLOCKER extends BpelJacobRunnable {
 
         private static final long serialVersionUID = -476393080609348172L;
 
@@ -294,6 +309,7 @@ public class SCOPEACT extends ACTIVITY {
         @Override
         public void run() {
 
+            __log.debug("running UNLOCKER");
             object(new ParentScopeChannelListener(_self) {
 
                 public void cancelled() {
@@ -332,6 +348,11 @@ public class SCOPEACT extends ACTIVITY {
          * 
          */
         private void unlockAll() {
+            __log.debug("UNLOCKER: unlockAll: " + _locks);
+
+            if (((OScope)SCOPEACT.this._self.o).atomicScope)
+                getBpelRuntimeContext().forceFlush();
+                
             for (IsolationLock il : _locks)
                 il.lockChannel.unlock(_synchChannel);
             _locks.clear();

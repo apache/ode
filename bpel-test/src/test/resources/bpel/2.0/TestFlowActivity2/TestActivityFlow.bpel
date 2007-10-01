@@ -61,12 +61,15 @@
 				<link name="probe1-to-probe3"/>
 				<link name="probe2-to-probe3"/>
 			</links>
+			
+
 			<receive name="receive1" partnerLink="request" portType="wns:testFlowActivityPT"
 				operation="request" variable="request" createInstance="yes">
 				<sources>
 					<source linkName="receive-to-assign1"/>
 				</sources>
 			</receive>
+
 			<!-- Copy input variables to internal accumulators -->
 			<!-- After the copy the process splits into two execution paths -->
 			<sequence>

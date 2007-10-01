@@ -28,21 +28,24 @@ import javax.xml.namespace.QName;
  */
 public class FaultException extends Exception {
   private static final long serialVersionUID = 389190682205802035L;
-  private QName _qname;
+  private final QName _qname;
 
+  
+  public FaultException(QName qname, String message, Throwable cause) {
+      super(qname.toString() + ": " + message, cause);
+      _qname = qname;
+  }
   /**
    * Create a new instance.
    * @param qname the <code>QName</code> of the fault
    * @param message a descriptive message for the exception
    */
   public FaultException(QName qname, String message) {
-    super(message);
-    _qname = qname;
+    this(qname, message, null);
   }
 
   public FaultException(QName qname) {
-    super(qname.toString());
-    _qname = qname;
+    this(qname, null, null);
   }
 
   /**

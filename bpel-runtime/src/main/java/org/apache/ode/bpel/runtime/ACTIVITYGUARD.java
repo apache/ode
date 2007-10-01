@@ -26,7 +26,6 @@ import org.apache.ode.bpel.evt.ActivityExecEndEvent;
 import org.apache.ode.bpel.evt.ActivityExecStartEvent;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
@@ -118,7 +117,7 @@ class ACTIVITYGUARD extends ACTIVITY {
             });
             for (Iterator<OLink> i = _oactivity.targetLinks.iterator();i.hasNext();) {
                 final OLink link = i.next();
-                mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).sub) {
+                mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).channel) {
                     private static final long serialVersionUID = 1024137371118887935L;
 
                     public void linkStatus(boolean value) {
@@ -138,14 +137,9 @@ class ACTIVITYGUARD extends ACTIVITY {
         if (transitionCondition == null)
             return true;
 
-        try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
-                    new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext()));
-        } catch (EvaluationException e) {
-            String msg = "Error in transition condition detected at runtime; condition=" + transitionCondition;
-            __log.error(msg,e);
-            throw new InvalidProcessException(msg, e);
-        }
+        return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
+                new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext()));
+
     }
 
     /**
@@ -220,9 +214,9 @@ class ACTIVITYGUARD extends ACTIVITY {
                             LinkInfo linfo = _linkFrame.resolve(olink);
                             try {
                                 boolean val = evaluateTransitionCondition(olink.transitionCondition);
-                                linfo.pub.linkStatus(val);
+                                linfo.channel.linkStatus(val);
                             } catch (FaultException e) {
-                                linfo.pub.linkStatus(false);
+                                linfo.channel.linkStatus(false);
                                 __log.error(e);
                                 if (fault == null)
                                     fault = createFault(e.getQName(),olink.transitionCondition);

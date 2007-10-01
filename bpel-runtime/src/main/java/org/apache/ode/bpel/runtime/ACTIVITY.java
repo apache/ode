@@ -95,7 +95,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     protected void dpe(Collection<OLink> links) {
         // Dead path all of the ougoing links (nothing has been activated yet!)
         for (Iterator<OLink> i = links.iterator(); i.hasNext();)
-            _linkFrame.resolve(i.next()).pub.linkStatus(false);
+            _linkFrame.resolve(i.next()).channel.linkStatus(false);
     }
 
     /**

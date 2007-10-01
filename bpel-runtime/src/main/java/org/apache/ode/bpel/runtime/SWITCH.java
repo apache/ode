@@ -20,7 +20,6 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OSwitch;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 
@@ -54,11 +53,6 @@ class SWITCH extends ACTIVITY {
           matchedOCase = ocase;
           break;
         }
-      } catch (EvaluationException e) {
-        String msg = "Unexpected evaluation exception.";
-        __log.error(msg,e);
-        // TODO: Better location information.
-        throw new InvalidProcessException(msg,e);
       }catch(FaultException e){
       	__log.error(e.getMessage(),e);
         faultData = createFault(e.getQName(), ocase);

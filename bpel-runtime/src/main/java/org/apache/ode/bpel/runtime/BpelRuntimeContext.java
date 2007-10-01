@@ -161,6 +161,7 @@ public interface BpelRuntimeContext {
 
     void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation);
 
+    void forceFlush();
     /**
      * Should be invoked by process template, signalling process completion
      * with no faults.

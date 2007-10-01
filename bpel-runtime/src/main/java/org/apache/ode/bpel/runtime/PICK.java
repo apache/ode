@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPickReceive;
@@ -123,10 +122,6 @@ class PICK extends ACTIVITY {
             dpe(_opick.outgoingLinks);
             _self.parent.completed(fault, CompensationHandler.emptySet());
             return;
-        } catch (EvaluationException e) {
-            String msg = "Unexpected evaluation error evaluating alarm.";
-            __log.error(msg, e);
-            throw new InvalidProcessException(msg, e);
         }
 
         // Dead path all the alarms that have no chace of coming first.

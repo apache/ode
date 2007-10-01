@@ -21,7 +21,6 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OExpressionLanguage;
@@ -34,66 +33,109 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A registry of {@link ExpressionLanguageRuntime} objects that is able to map
- * a given expression to the appropriate language runtime.
+ * A registry of {@link ExpressionLanguageRuntime} objects that is able to map a given expression to the appropriate 
+ * language runtime. We also do some exception guarding here so that the core of the engine does not have to deal
+ * with random exceptions from not-quite perfect expression runtime imlementation.
  */
-public class ExpressionLanguageRuntimeRegistry  {
-  private final Map<OExpressionLanguage, ExpressionLanguageRuntime> _runtimes =
-    new HashMap<OExpressionLanguage, ExpressionLanguageRuntime>();
+public class ExpressionLanguageRuntimeRegistry {
+    private final Map<OExpressionLanguage, ExpressionLanguageRuntime> _runtimes = new HashMap<OExpressionLanguage, ExpressionLanguageRuntime>();
 
-  public ExpressionLanguageRuntimeRegistry()  {}
-
-  public void registerRuntime(OExpressionLanguage oelang) throws ConfigurationException {
-    try {
-      String className = oelang.properties.get("runtime-class");
-      // backward compatibility.
-      className = className.replace("com.fs.pxe.","org.apache.ode.");
-      Class cls = Class.forName(className);
-      ExpressionLanguageRuntime elangRT = (ExpressionLanguageRuntime) cls.newInstance();
-      elangRT.initialize(oelang.properties);
-      _runtimes.put(oelang, elangRT);
-    } catch (ConfigurationException ce) {
-      throw ce;
-    } catch (IllegalAccessException e) {
-      throw new ConfigurationException("Illegal Access Error", e);
-    } catch (InstantiationException e) {
-      throw new ConfigurationException("Instantiation Error", e);
-    } catch (ClassNotFoundException e) {
-      throw new ConfigurationException("Class Not Found Error", e);
+    public ExpressionLanguageRuntimeRegistry() {
     }
 
-  }
+    public void registerRuntime(OExpressionLanguage oelang) throws ConfigurationException {
+        try {
+            String className = oelang.properties.get("runtime-class");
+            // backward compatibility.
+            className = className.replace("com.fs.pxe.", "org.apache.ode.");
+            Class cls = Class.forName(className);
+            ExpressionLanguageRuntime elangRT = (ExpressionLanguageRuntime) cls.newInstance();
+            elangRT.initialize(oelang.properties);
+            _runtimes.put(oelang, elangRT);
+        } catch (ConfigurationException ce) {
+            throw ce;
+        } catch (IllegalAccessException e) {
+            throw new ConfigurationException("Illegal Access Error", e);
+        } catch (InstantiationException e) {
+            throw new ConfigurationException("Instantiation Error", e);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationException("Class Not Found Error", e);
+        }
 
-  public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException , EvaluationException {
-    return findRuntime(cexp).evaluateAsString(cexp, ctx);
-  }
+    }
 
-  public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluateAsBoolean(cexp, ctx);
-  }
+    public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateAsString(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluateAsNumber(cexp, ctx);
-  }
+    public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateAsBoolean(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluate(cexp, ctx);
-  }
+    public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateAsNumber(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluateNode(cexp, ctx);
-  }
+    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluate(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  public Calendar evaluateAsDate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluateAsDate(cexp, ctx);
-  }
+    public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateNode(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  public Duration evaluateAsDuration(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
-    return findRuntime(cexp).evaluateAsDuration(cexp, ctx);
-  }
+    public Calendar evaluateAsDate(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateAsDate(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
 
-  private ExpressionLanguageRuntime findRuntime(OExpression cexp) {
-    return _runtimes.get(cexp.expressionLanguage);
-  }
+    public Duration evaluateAsDuration(OExpression cexp, EvaluationContext ctx) throws FaultException {
+        try {
+            return findRuntime(cexp).evaluateAsDuration(cexp, ctx);
+        } catch (FaultException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.toString(), t);
+        }
+    }
+
+    private ExpressionLanguageRuntime findRuntime(OExpression cexp) {
+        return _runtimes.get(cexp.expressionLanguage);
+    }
 
 }

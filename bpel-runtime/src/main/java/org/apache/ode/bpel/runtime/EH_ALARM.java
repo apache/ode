@@ -20,7 +20,6 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
@@ -85,8 +84,6 @@ class EH_ALARM extends BpelJacobRunnable {
         if (_oalarm.forExpr != null)
             try {
                 getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(alarm);
-            } catch (EvaluationException e) {
-                throw new InvalidProcessException(e);
             } catch (FaultException e) {
                 __log.error(e);
                 _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
@@ -95,8 +92,6 @@ class EH_ALARM extends BpelJacobRunnable {
         else if (_oalarm.untilExpr != null)
             try {
                 alarm.setTime(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(_oalarm.untilExpr, getEvaluationContext()).getTime());
-            } catch (EvaluationException e) {
-                throw new InvalidProcessException(e);
             } catch (FaultException e) {
                 __log.error(e);
                 _psc.completed(createFault(e.getQName(),_oalarm.untilExpr), _comps);
@@ -213,8 +208,6 @@ class EH_ALARM extends BpelJacobRunnable {
                         Calendar next = Calendar.getInstance();
                         try {
                             getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(next);
-                        } catch (EvaluationException e) {
-                            throw new InvalidProcessException(e);
                         } catch (FaultException e) {
                             __log.error(e);
                             _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);

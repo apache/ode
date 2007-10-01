@@ -36,23 +36,23 @@ public interface ExpressionLanguageRuntime {
   void initialize(Map properties) throws ConfigurationException;
 
   String evaluateAsString(OExpression cexp, EvaluationContext ctx)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   List evaluate(OExpression cexp, EvaluationContext ctx)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   Calendar evaluateAsDate(OExpression cexp, EvaluationContext context)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   Duration evaluateAsDuration(OExpression cexp, EvaluationContext context)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 
   Node evaluateNode(OExpression cexp, EvaluationContext context)
-          throws FaultException, EvaluationException;
+          throws FaultException;
 }

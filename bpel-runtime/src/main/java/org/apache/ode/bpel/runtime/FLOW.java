@@ -55,7 +55,7 @@ class FLOW extends ACTIVITY {
         for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
             OLink link = i.next();
             LinkStatusChannel lsc = newChannel(LinkStatusChannel.class);
-            myLinkFrame.links.put(link,new LinkInfo(link,lsc,lsc));
+            myLinkFrame.links.put(link,new LinkInfo(link,lsc));
         }
 
         for (Iterator<OActivity> i = _oflow.parallelActivities.iterator(); i.hasNext();) {
