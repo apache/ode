@@ -335,24 +335,26 @@ public class DOMUtils {
         HashMap<String,String> pref = new HashMap<String,String>();
         Map mine = getMyNamespaces(el);
         Node n = el.getParentNode();
-        do {
-            if (n instanceof Element) {
-                Element l = (Element) n;
-                NamedNodeMap nnm = l.getAttributes();
-                int len = nnm.getLength();
-                for (int i = 0; i < len; ++i) {
-                    Attr a = (Attr) nnm.item(i);
-                    if (isNSAttribute(a)) {
-                        String key = getNSPrefixFromNSAttr(a);
-                        String uri = a.getValue();
-                        // prefer prefix bindings that are lower down in the tree.
-                        if (pref.containsKey(key) || mine.containsKey(key)) continue;
-                        pref.put(key, uri);
-                    }
-                }
-            }
-            n = n.getParentNode();
-        } while (n != null && n.getNodeType() != Node.DOCUMENT_NODE);
+        if (n != null) {
+	        do {
+	            if (n instanceof Element) {
+	                Element l = (Element) n;
+	                NamedNodeMap nnm = l.getAttributes();
+	                int len = nnm.getLength();
+	                for (int i = 0; i < len; ++i) {
+	                    Attr a = (Attr) nnm.item(i);
+	                    if (isNSAttribute(a)) {
+	                        String key = getNSPrefixFromNSAttr(a);
+	                        String uri = a.getValue();
+	                        // prefer prefix bindings that are lower down in the tree.
+	                        if (pref.containsKey(key) || mine.containsKey(key)) continue;
+	                        pref.put(key, uri);
+	                    }
+	                }
+	            }
+	            n = n.getParentNode();
+	        } while (n != null && n.getNodeType() != Node.DOCUMENT_NODE);
+        }
         return pref;
     }
 
