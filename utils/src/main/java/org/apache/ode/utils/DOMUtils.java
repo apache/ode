@@ -333,7 +333,7 @@ public class DOMUtils {
      */
     public static Map<String, String> getParentNamespaces(Element el) {
         HashMap<String,String> pref = new HashMap<String,String>();
-        Map mine = getMyNamespaces(el);
+        Map<String,String> mine = getMyNamespaces(el);
         Node n = el.getParentNode();
         if (n != null) {
 	        do {
@@ -585,13 +585,13 @@ public class DOMUtils {
      * @param el
      */
     public static void pancakeNamespaces(Element el) {
-        Map ns = getParentNamespaces(el);
+        Map<String, String> ns = getParentNamespaces(el);
         Document d = el.getOwnerDocument();
         assert d != null;
-        Iterator it = ns.keySet().iterator();
+        Iterator<String> it = ns.keySet().iterator();
         while (it.hasNext()) {
-            String key = (String) it.next();
-            String uri = (String) ns.get(key);
+            String key = it.next();
+            String uri = ns.get(key);
             Attr a = d.createAttributeNS(NS_URI_XMLNS,
                     (key.length() != 0)?("xmlns:" + key):("xmlns"));
             a.setValue(uri);
