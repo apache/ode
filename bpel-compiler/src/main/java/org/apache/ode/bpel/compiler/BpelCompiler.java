@@ -18,6 +18,31 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -36,6 +61,7 @@ import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
+import org.apache.ode.bpel.compiler.bom.Extension;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -84,37 +110,15 @@ import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
-import org.apache.ode.utils.xsd.XSUtils;
-import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.ode.utils.xsd.XSUtils;
+import org.apache.ode.utils.xsd.XsdException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 /**
  * Compiler for converting BPEL process descriptions (and their associated WSDL and XSD documents) into compiled representations
@@ -164,6 +168,8 @@ abstract class BpelCompiler implements CompilerContext {
 
     private final HashMap<String, OExpressionLanguage> _expLanguages = new HashMap<String, OExpressionLanguage>();
 
+    private final Set<String> _declaredExtensionNS = new HashSet<String>();
+    
     private WSDLFactory4BPEL _wsdlFactory;
 
     private OExpressionLanguage _konstExprLang;
@@ -681,6 +687,11 @@ abstract class BpelCompiler implements CompilerContext {
             for (PropertyAlias propertyAlias : def1.getPropertyAliases()) {
                 compile(propertyAlias);
             }
+        }
+
+        // compile extensions
+        for (Extension e : _processDef.getExtensions()) {
+        	compileExtension(e);
         }
 
         OScope procesScope = new OScope(_oprocess, null);
@@ -1496,6 +1507,26 @@ abstract class BpelCompiler implements CompilerContext {
         return oXslSheet;
     }
 
+    /**
+     * Registers a declared extension.
+     * Since compilation may take place independently of the target 
+     * engine configuration, the compiler will not check whether a
+     * extension implementation is registered.
+     */
+    private void compileExtension(Extension ext){
+        OProcess.OExtension oextension = new OProcess.OExtension(_oprocess);
+        oextension.namespaceURI = ext.getNamespaceURI();
+        oextension.mustUnderstand = ext.isMustUnderstand();
+        
+        oextension.debugInfo = createDebugInfo(_processDef, "Extension " + ext.getNamespaceURI());
+
+        _oprocess.declaredExtensions.add(oextension);
+        _declaredExtensionNS.add(ext.getNamespaceURI());
+
+        if (__log.isDebugEnabled())
+            __log.debug("Compiled extension " + oextension);
+    }
+    
     private String loadXsltSheet(URI uri) {
 
         // TODO: lots of null returns, should have some better error messages.
@@ -1527,11 +1558,14 @@ abstract class BpelCompiler implements CompilerContext {
         for (OActivity act : _compiledActivities) {
             if (act instanceof OAssign) {
                 OAssign assign = (OAssign) act;
-                for (OAssign.Copy copy : assign.copy) {
-                    if (copy.to instanceof OAssign.PartnerLinkRef) {
-                        if (((OAssign.PartnerLinkRef) copy.to).partnerLink.getName().equals(plink))
-                            return true;
-                    }
+                for (OAssign.OAssignOperation operation: assign.operations) {
+                	if (operation instanceof OAssign.Copy) {
+                		OAssign.Copy copy = (OAssign.Copy)operation;
+	                    if (copy.to instanceof OAssign.PartnerLinkRef) {
+	                        if (((OAssign.PartnerLinkRef) copy.to).partnerLink.getName().equals(plink))
+	                            return true;
+	                    }
+                	}
                 }
             }
         }
@@ -1609,6 +1643,10 @@ abstract class BpelCompiler implements CompilerContext {
     protected void registerExpressionLanguage(String expLangUri, String classname) throws Exception {
         Class cls = Class.forName(classname);
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
+    }
+
+    public boolean isExtensionDeclared(String namespace) {
+    	return _declaredExtensionNS.contains(namespace);
     }
 
     public List<OActivity> getActivityStack() {

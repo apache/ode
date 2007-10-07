@@ -18,12 +18,15 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
 import org.apache.ode.bpel.compiler.bom.Copy;
+import org.apache.ode.bpel.compiler.bom.ExtensionAssignOperation;
 import org.apache.ode.bpel.compiler.bom.ExtensionVal;
 import org.apache.ode.bpel.compiler.bom.From;
 import org.apache.ode.bpel.compiler.bom.LiteralVal;
@@ -31,22 +34,23 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
+import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OAssign.RValue;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OAssign.RValue;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.SerializableElement;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 
 /**
  * Generates code for <code>&lt;assign&gt;</code> activities. 
  * 
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
+ * @author Tammo van Lessen (University of Stuttgart)
  */
 class AssignGenerator extends DefaultActivityGenerator {
     private static final Log __log = LogFactory.getLog(AssignGenerator.class);
@@ -61,25 +65,49 @@ class AssignGenerator extends DefaultActivityGenerator {
     public void compile(OActivity dest, Activity source) {
         OAssign oassign = (OAssign) dest;
         AssignActivity ad = (AssignActivity) source;
-        for (Copy scopy : ad.getCopies()) {
-            OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
-            ocopy.keepSrcElementName = scopy.isKeepSrcElement();
-            ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
-                    source.getExtensibilityElements());
-            try {
-                if (scopy.getFrom() == null)
-                    throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
-                ocopy.from = compileFrom(scopy.getFrom());
-                if (scopy.getTo() == null)
-                    throw new CompilationException(__cmsgs.errMissingToSpec().setSource(scopy));
-                ocopy.to = compileTo(scopy.getTo());
+        
+        for (AssignOperation operation : ad.getOperations()) {
+        	if (operation instanceof Copy) {
+        		Copy scopy = (Copy)operation;
+        		OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
+                ocopy.keepSrcElementName = scopy.isKeepSrcElement();
+                ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
+                        source.getExtensibilityElements());
+                try {
+                    if (scopy.getFrom() == null)
+                        throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
+                    ocopy.from = compileFrom(scopy.getFrom());
+                    if (scopy.getTo() == null)
+                        throw new CompilationException(__cmsgs.errMissingToSpec().setSource(scopy));
+                    ocopy.to = compileTo(scopy.getTo());
 
-                verifyCopy(ocopy);
-                oassign.copy.add(ocopy);
+                    verifyCopy(ocopy);
+                    oassign.operations.add(ocopy);
 
-            } catch (CompilationException ce) {
-                _context.recoveredFromError(scopy, ce);
-            }
+                } catch (CompilationException ce) {
+                    _context.recoveredFromError(scopy, ce);
+                }
+        	} else if (operation instanceof ExtensionAssignOperation) {
+        		ExtensionAssignOperation sop = (ExtensionAssignOperation)operation;
+        		OAssign.ExtensionAssignOperation oext = new OAssign.ExtensionAssignOperation(_context.getOProcess());
+        		oext.debugInfo = new DebugInfo(_context.getSourceLocation(), sop.getLineNo(), source.getExtensibilityElements());
+        		try {
+        			if (source.is20Draft()) {
+        				throw new CompilationException(__cmsgs.errExtensibleAssignNotSupported());
+        			}
+        			Element el = sop.getNestedElement();
+        			if (el == null) {
+            			throw new CompilationException(__cmsgs.errMissingExtensionAssignOperationElement().setSource(sop));
+        			}
+        			if (!_context.isExtensionDeclared(el.getNamespaceURI())) {
+        				throw new CompilationException(__cmsgs.errUndeclaredExtensionAssignOperation().setSource(sop));
+        			}
+        			oext.nestedElement = new SerializableElement(el);
+            		oassign.operations.add(oext);
+        		} catch (CompilationException ce) {
+        			_context.recoveredFromError(sop, ce);
+            	}
+        	}
         }
     }
 

@@ -73,11 +73,15 @@ class ASSIGN extends ACTIVITY {
 
         FaultData faultData = null;
 
-        for (OAssign.Copy aCopy : oassign.copy) {
+        for (OAssign.OAssignOperation operation : oassign.operations) {
             try {
-                copy(aCopy);
+                if (operation instanceof OAssign.Copy) {
+                	copy((OAssign.Copy)operation);
+                } else if (operation instanceof OAssign.ExtensionAssignOperation) {
+                	invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation)operation);
+                }
             } catch (FaultException fault) {
-                faultData = createFault(fault.getQName(), aCopy, fault
+                faultData = createFault(fault.getQName(), operation, fault
                         .getMessage());
                 break;
             }
@@ -568,6 +572,10 @@ class ASSIGN extends ACTIVITY {
         return lvalue;
     }
 
+    private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
+    	throw new UnsupportedOperationException("ExtensionAssignOperations are not yet supported.");
+    }
+    
     private class EvaluationContextProxy implements EvaluationContext {
 
         private Variable _var;

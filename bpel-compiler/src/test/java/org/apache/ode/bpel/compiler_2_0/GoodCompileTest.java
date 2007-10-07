@@ -37,6 +37,7 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign7-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign8-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/assign/Assign9-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/assign/AssignExt-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/AsyncProcess/AsyncProcess2.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/compensation/comp1-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/compensation/comp2-2.0.bpel"));
@@ -75,7 +76,7 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/xpath20-func/GetVariableData4-xp2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/xpath20-func/GetVariableProperty1-xp2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/xsd-import/helloworld-Server.bpel"));
-        
+        suite.addTest(new GoodCompileTCase("/2.0/good/extensionActivity/ExtensionActivity1-2.0.bpel"));
         return suite;
     }
 

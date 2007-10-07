@@ -204,4 +204,9 @@ public class MockCompilerContext implements CompilerContext {
 
     public void recoveredFromError(SourceLocation location, CompilationException error) {
     }
+    
+	public boolean isExtensionDeclared(String namespace) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

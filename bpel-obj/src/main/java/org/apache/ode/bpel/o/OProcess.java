@@ -18,9 +18,6 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.utils.stl.CollectionsX;
-import org.apache.ode.utils.stl.MemberOfFunction;
-
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.io.IOException;
@@ -60,6 +57,9 @@ public class OProcess extends OBase {
     public final Set<OPartnerLink> allPartnerLinks = new HashSet<OPartnerLink>();
 
     public final List<OProperty> properties = new ArrayList<OProperty>();
+    
+    /** All declared extensions in the process. **/
+    public final Set<OExtension> declaredExtensions = new HashSet<OExtension>();
 
 
     /** Date process was compiled. */
@@ -186,6 +186,18 @@ public class OProcess extends OBase {
             return buf.toString();
         }
 
+    }
+    
+    public static class OExtension extends OBase {
+        static final long serialVersionUID = -1L  ;
+        public String namespaceURI;
+        public boolean mustUnderstand;
+        
+        public OExtension(OProcess process) { super(process); }
+
+        public String toString() {
+            return "{OExtension " + namespaceURI + (mustUnderstand ? " mustUnderstand" : "") + "}";
+        }
     }
 
     public QName getQName() {
