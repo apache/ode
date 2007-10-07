@@ -334,7 +334,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setPipedMessageExchangeId(String pipedMex) {
-        _hself.setPipedMesageExchange(pipedMex);
+        _hself.setPipedMessageExchange(pipedMex);
     }
 
     public void setTimeout(long timeout) {
