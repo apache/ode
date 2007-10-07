@@ -82,6 +82,8 @@ public class OdeConfigProperties {
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
     public static final String PROP_DAOCF = "dao.factory";
+    
+    public static final String PROP_EXTENSION_BUNDLES= "extension.bundles";
 
     private File _cfgFile;
 
@@ -266,6 +268,10 @@ public class OdeConfigProperties {
 
     public String getDbInternalPassword() {
         return getProperty(PROP_DB_INTERNAL_PASSWORD);
+    }
+
+    public String getExtensionActivityBundles() {
+    	return getProperty(PROP_EXTENSION_BUNDLES);
     }
 
 }
