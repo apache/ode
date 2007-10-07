@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import org.apache.ode.bpel.evt.ActivityEnabledEvent;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.ActivityExecEndEvent;
@@ -87,6 +88,12 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
                 actinf.getActivityInfo().setDtEnabled(dtEnabled);
                 _activities.put(event.getActivityId(), actinf);
             }
+            if (event instanceof ActivityDisabledEvent) {
+                actinf.getActivityInfo().setStatus(TActivityStatus.DEAD);
+                Calendar dtDied = Calendar.getInstance();
+                dtDied.setTime(event.getTimestamp());
+                actinf.getActivityInfo().setDtDied(dtDied);
+            } 
             if (event instanceof ActivityExecStartEvent) {
                 actinf.getActivityInfo().setStatus(TActivityStatus.STARTED);
                 Calendar dtStarted = Calendar.getInstance();

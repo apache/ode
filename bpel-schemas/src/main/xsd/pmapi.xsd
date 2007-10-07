@@ -139,6 +139,11 @@
                     <documentation>Activity is in failure state, recovery required.</documentation>
                 </annotation>
             </enumeration>
+            <enumeration value="DEAD">
+                <annotation>
+                    <documentation>Activity has been disabled by DPE.</documentation>
+                </annotation>
+            </enumeration>
         </restriction>
     </simpleType>
     <simpleType name="tScopeStatus">
@@ -440,6 +445,12 @@
                 <annotation>
                     <documentation>The date/time when the activity was
                         completed.</documentation>
+                </annotation>
+            </element>
+            <element name="dt-died" type="xs:dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>The date/time when the activity has been
+                        eliminated.</documentation>
                 </annotation>
             </element>
             <element name="failure" type="pmapi:tFailureInfo" minOccurs="0">
