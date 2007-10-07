@@ -36,6 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.InvocationStyle;
@@ -430,7 +431,8 @@ public abstract class BPELTestAbstract {
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
             if (ex != null) {
-                sbuf.append("; got exception msg: " + ex.getMessage());
+            	sbuf.append("; got exception:\n");
+            	sbuf.append(ExceptionUtils.getFullStackTrace(ex));
             }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
