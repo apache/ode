@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -115,6 +116,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             registerEventListeners();
 
             registerMexInterceptors();
+            
+            registerExtensionActivityBundles();
 
             __log.debug("Starting JCA connector.");
             initConnector();
@@ -286,6 +289,22 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
                             + "loaded properly: " + e);
+                }
+            }
+        }
+    }
+
+ 	private void registerExtensionActivityBundles() {
+        String listenersStr = _ode._config.getExtensionActivityBundles();
+        if (listenersStr != null) {
+        	// TODO replace StringTokenizer by regex
+        	for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String bundleCN = tokenizer.nextToken();
+                try {
+                    _ode._server.registerExtensionBundle((AbstractExtensionBundle) Class.forName(bundleCN).newInstance());
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
+                            "loaded properly.");
                 }
             }
         }

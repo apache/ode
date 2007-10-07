@@ -44,6 +44,7 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
@@ -155,6 +156,8 @@ public class ODEServer {
             registerEventListeners();
 
             registerMexInterceptors();
+            
+            registerExtensionActivityBundles();
 
             try {
                 _server.start();
@@ -503,6 +506,22 @@ public class ODEServer {
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
                             + "loaded properly: " + e);
+                }
+            }
+        }
+    }
+
+ 	private void registerExtensionActivityBundles() {
+        String listenersStr = _odeConfig.getExtensionActivityBundles();
+        if (listenersStr != null) {
+        	// TODO replace StringTokenizer by regex
+        	for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+                String bundleCN = tokenizer.nextToken();
+                try {
+                    _server.registerExtensionBundle((AbstractExtensionBundle) Class.forName(bundleCN).newInstance());
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
+                            "loaded properly.");
                 }
             }
         }
