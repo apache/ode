@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
@@ -107,6 +108,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     protected void dpe(OActivity activity) {
         dpe(activity.sourceLinks);
         dpe(activity.outgoingLinks);
+        sendEvent(new ActivityDisabledEvent());
         // TODO: register listeners for target / incoming links
     }
 
