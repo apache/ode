@@ -377,7 +377,7 @@ public class HMessageExchange extends HObject {
         return _p2pPeer;
     }
 
-    public void setPipedMesageExchange(String p2ppeer) {
+    public void setPipedMessageExchange(String p2ppeer) {
         _p2pPeer = p2ppeer;
     }
 
