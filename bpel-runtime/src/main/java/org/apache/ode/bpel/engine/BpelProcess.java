@@ -123,6 +123,8 @@ class BpelProcess {
     DebuggerSupport _debugger;
 
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
+    
+    Set<String> _mustUnderstandExtensions;
 
     private ReplacementMap _replacementMap;
 
@@ -1157,6 +1159,7 @@ class BpelProcess {
             _endpointToMyRoleMap = null;
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
+            _mustUnderstandExtensions = null;
         }
 
         private void doHydrate() {
@@ -1184,6 +1187,23 @@ class BpelProcess {
                 }
             }
             _expLangRuntimeRegistry = elangRegistry;
+
+            // Checking for registered extension bundles, throw an exception when
+            // a "mustUnderstand" extension is not available
+            _mustUnderstandExtensions = new HashSet<String>();
+            for (OProcess.OExtension extension : _oprocess.declaredExtensions) {
+            	if (extension.mustUnderstand) {
+            		if (_contexts.extensionRegistry.get(extension.namespaceURI) == null) {
+            			String msg = __msgs.msgExtensionMustUnderstandError(_pid, extension.namespaceURI);
+            			__log.error(msg);
+            			throw new BpelEngineException(msg);
+            		} else {
+            			_mustUnderstandExtensions.add(extension.namespaceURI);
+            		}
+            	} else {
+        			__log.warn("The process declares the extension namespace " + extension.namespaceURI + " that is unkown to the engine");
+        		}
+            }
 
             setRoles(_oprocess);
 

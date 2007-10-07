@@ -42,6 +42,9 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
+import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -68,6 +71,7 @@ import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
@@ -79,6 +83,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
@@ -1184,4 +1189,67 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void forceFlush() {
         _forceFlush = true;
     }
+    
+	public void executeExtension(QName extensionId, ExtensionContext context, SerializableElement element, ExtensionResponseChannel extResponseChannel) throws FaultException {
+		__log.debug("Execute extension activity");
+		final String channelId = extResponseChannel.export();
+		ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
+		if (ea == null) {
+			if (_bpelProcess._mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
+				//TODO
+				__log.warn("Lookup of extension activity " + extensionId + " failed.");
+				throw new FaultException(new QName("urn:bpel20", "extlookup-failed"), "Lookup of extension activity " + extensionId + " failed.");
+			} else {
+				// act like <empty> - do nothing
+				completeExtensionExecution(channelId, null);
+				return;
+			}
+		}
+		
+		try {
+			// should be running in a pooled thread
+			ea.run(context, element);
+			completeExtensionExecution(channelId, null);
+		} catch (RuntimeException e) {
+			__log.error("Error during execution of extension activity.", e);
+			completeExtensionExecution(channelId, e);
+		} 
+	}
+
+	private void completeExtensionExecution(final String channelId, final Throwable t) {
+		if (t != null) {
+	        _vpu.inject(new BpelJacobRunnable() {
+	            private static final long serialVersionUID = -1L;
+
+	            public void run() {
+	               importChannel(channelId, ExtensionResponseChannel.class).onFailure(t);
+	            }
+	        });
+		} else {
+	        _vpu.inject(new BpelJacobRunnable() {
+	            private static final long serialVersionUID = -1L;
+
+	            public void run() {
+	               importChannel(channelId, ExtensionResponseChannel.class).onCompleted();
+	            }
+	        });
+		}
+	}
+
+	private ExtensionOperation createExtensionActivityImplementation(QName name) {
+		if (name == null) {
+			return null;
+		}
+		AbstractExtensionBundle bundle = _contexts.extensionRegistry.get(name.getNamespaceURI());
+		if (bundle == null) {
+			return null;
+		} else {
+			try {
+				return (ExtensionOperation)bundle.getExtensionOperationInstance(name.getLocalPart());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+    }
+
 }

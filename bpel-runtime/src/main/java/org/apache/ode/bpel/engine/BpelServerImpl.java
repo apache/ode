@@ -42,6 +42,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -243,6 +244,15 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         for (BpelEventListener l : _contexts.eventListeners) {
             unregisterBpelEventListener(l);
         }
+    }
+
+    public void registerExtensionBundle(AbstractExtensionBundle bundle) {
+    	_contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
+    	bundle.registerExtensionActivities();
+    }
+
+    public void unregisterExtensionBundle(String nsURI) {
+    	_contexts.extensionRegistry.remove(nsURI);
     }
 
     public void stop() {
