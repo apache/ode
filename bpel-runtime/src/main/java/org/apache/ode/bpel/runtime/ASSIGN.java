@@ -18,26 +18,36 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OAssign.DirectRef;
-import org.apache.ode.bpel.o.OAssign.LValueExpression;
-import org.apache.ode.bpel.o.OAssign.PropertyRef;
-import org.apache.ode.bpel.o.OAssign.VariableRef;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OAssign.DirectRef;
+import org.apache.ode.bpel.o.OAssign.LValueExpression;
+import org.apache.ode.bpel.o.OAssign.PropertyRef;
+import org.apache.ode.bpel.o.OAssign.VariableRef;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -50,11 +60,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import javax.xml.namespace.QName;
-import java.util.List;
-
 /**
  * Assign activity run-time template.
+ * 
+ * @author Ode team
+ * @author Tammo van Lessen (University of Stuttgart) - extensionAssignOperation
  */
 class ASSIGN extends ACTIVITY {
     private static final long serialVersionUID = 1L;
@@ -573,7 +583,32 @@ class ASSIGN extends ACTIVITY {
     }
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-    	throw new UnsupportedOperationException("ExtensionAssignOperations are not yet supported.");
+    	try {
+	    	final ExtensionContext helper = new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
+	    	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
+
+    		getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(eao.nestedElement.getElement()), helper, eao.nestedElement, responseChannel);
+
+    		object(new ExtensionResponseChannelListener(responseChannel) {
+				private static final long serialVersionUID = 1L;
+
+				public void onCompleted() {
+					_self.parent.completed(null, CompensationHandler.emptySet());
+            	}
+            	
+            	public void onFailure(Throwable t) {
+            		StringWriter sw = new StringWriter();
+            		t.printStackTrace(new PrintWriter(sw));
+            		FaultData fault = createFault(new QName(Bpel20QNames.NS_WSBPEL2_0, "subLanguageExecutionFault"), _self.o, sw.getBuffer().toString());
+                    _self.parent.completed(fault, CompensationHandler.emptySet());
+            	};
+            });
+
+    	} catch (FaultException fault) {
+            __log.error(fault);
+            FaultData faultData = createFault(fault.getQName(), _self.o, fault.getMessage());
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
+		}
     }
     
     private class EvaluationContextProxy implements EvaluationContext {

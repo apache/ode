@@ -194,4 +194,10 @@ public class Messages extends MessageBundle {
         return format("Database consistency error: {0}", detail);
     }
 
+    public String msgExtensionMustUnderstandError(QName name, String extensionUri) {
+        return format("Deployment of process \"{0}\" failed. The process model requires the " +
+        		"engine to understand language extensions defined by {1}. No extension bundle " +
+        		"has been registered for this namespace.", name, extensionUri);
+    }
+
 }
