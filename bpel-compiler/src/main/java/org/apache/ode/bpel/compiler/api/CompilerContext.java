@@ -131,5 +131,5 @@ public interface CompilerContext {
 
     OActivity getCurrent();
 
-
+    boolean isExtensionDeclared(String namespace);
 }

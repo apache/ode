@@ -39,6 +39,11 @@ public class StaticCheckSuite extends TestSuite {
     suite.addTest(new StaticCheckTCase("LinkMissingSourceActivity"));
     suite.addTest(new StaticCheckTCase("LinkMissingTargetActivity"));
     suite.addTest(new StaticCheckTCase("DuplicateVariableDecl"));
+    suite.addTest(new StaticCheckTCase("UndeclaredExtensionActivity"));
+    suite.addTest(new StaticCheckTCase("UndeclaredExtensionAssignOperation"));
+    suite.addTest(new StaticCheckTCase("MissingExtensionActivityElement"));
+    suite.addTest(new StaticCheckTCase("MissingExtensionAssignOperationElement"));
+    suite.addTest(new StaticCheckTCase("ExtensibleAssignNotSupported"));
     // We simply can't test the next one without using the BOM; both the parser
     // and schema validation would rule it out.
     //suite.addTest(new StaticCheckTest("CompensateNAtoContext"));

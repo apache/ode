@@ -267,4 +267,8 @@ class MockCompilerContext implements CompilerContext {
 	public void recoveredFromError(SourceLocation location,
 			CompilationException error) {
 	}
+
+	public boolean isExtensionDeclared(String namespace) {
+		return false;
+	}
 }

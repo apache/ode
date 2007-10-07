@@ -130,7 +130,7 @@ public class BpelObject implements SourceLocation {
         return e.getElement();
     }
 
-    public Element getFirstExtensibilityElementElement() {
+    public Element getFirstExtensibilityElement() {
     	Element child = null;
     	NodeList nl = getElement().getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i) {

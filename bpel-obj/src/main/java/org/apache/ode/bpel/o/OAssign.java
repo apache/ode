@@ -18,35 +18,49 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.SerializableElement;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
     
-    public final List<Copy> copy = new ArrayList<Copy>();
+    public final List<OAssignOperation> operations = new ArrayList<OAssignOperation>();
 
     public OAssign(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
 
-
     public String toString() {
         return "{OAssign : " + name + ", joinCondition=" + joinCondition + "}";
     }
 
-    /**
-     * Assignmenet copy entry, i.e. what the assignment consits of.
+    /** 
+     * Base class for assign operations.
      */
-    public static class Copy extends OBase {
+    public static abstract class OAssignOperation extends OBase {
+    	public enum Type {Copy, ExtensionOperation};
+
+    	public OAssignOperation(OProcess owner) {
+    		super(owner);
+    	}
+
+    	public abstract Type getType();
+    }
+    
+    /**
+     * Assignment copy entry, i.e. what the assignment consists of.
+     */
+    public static class Copy extends OAssignOperation {
         private static final long serialVersionUID = 1L;
         public LValue to;
         public RValue from;
@@ -59,6 +73,30 @@ public class OAssign extends OActivity {
         public String toString() {
             return "{OCopy " + to + "=" + from + "}";
         }
+
+		public Type getType() {
+			return Type.Copy;
+		}
+    }
+
+    /**
+     * Assignment extension operation entry, i.e. what the assignment consists of.
+     */
+    public static class ExtensionAssignOperation extends OAssignOperation {
+        private static final long serialVersionUID = 1L;
+        public SerializableElement nestedElement;
+
+        public ExtensionAssignOperation(OProcess owner) {
+            super(owner);
+        }
+
+        public String toString() {
+            return "{OExtensionAssignOperation; " + nestedElement.getElement().getTagName() + "}";
+        }
+
+        public Type getType() {
+			return Type.ExtensionOperation;
+		}
     }
 
     public interface LValue {

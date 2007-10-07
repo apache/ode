@@ -26,7 +26,8 @@
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-  xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+  xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+  xmlns:plnk2="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
   <wsdl:documentation>
     WSDL filed used by a lot of the test cases. Provides a message type
@@ -100,6 +101,11 @@
     <plnk:role name="me" portType="tns:PortType1"/>
     <plnk:role name="you" portType="tns:PortType1"/>
   </plnk:partnerLinkType>
+
+  <plnk2:partnerLinkType name="PartnerLinkType1">
+    <plnk2:role name="me" portType="tns:PortType1"/>
+    <plnk2:role name="you" portType="tns:PortType1"/>
+  </plnk2:partnerLinkType>
 
 </wsdl:definitions>
 
