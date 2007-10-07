@@ -84,7 +84,7 @@ public class ManagementService {
             wsdlReader.setFeature("javax.wsdl.verbose", false);
 
             File wsdlFile = new File(rootpath + "/pmapi.wsdl");
-            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
+            def = wsdlReader.readWSDL(wsdlFile.toURI().getPath());
             AxisService processService = ODEAxisService.createService(
                     axisConfig, new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService"),
                     "ProcessManagementPort", "ProcessManagement", def, new ProcessMessageReceiver());
