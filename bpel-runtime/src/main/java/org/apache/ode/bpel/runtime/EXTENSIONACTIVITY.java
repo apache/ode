@@ -56,7 +56,7 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
     public final void run() {
         try {
         	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
-        	final ExtensionContext helper = new ExtensionContextImpl(_scopeFrame, getBpelRuntimeContext());
+        	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
         	
         	getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(_oext.nestedElement.getElement()), helper, new SerializableElement(_oext.nestedElement.getElement()), responseChannel);
         	
