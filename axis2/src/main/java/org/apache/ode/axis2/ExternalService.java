@@ -112,6 +112,7 @@ public class ExternalService implements PartnerRoleChannel {
             options.setAction(mctx.getSoapAction());
             options.setTo(axisEPR);
             options.setTimeOutInMilliSeconds(60000);
+            options.setExceptionToBeThrownOnSOAPFault(false);
 
             AuthenticationHelper.setHttpAuthentication(odeMex, options);
 
@@ -150,10 +151,13 @@ public class ExternalService implements PartnerRoleChannel {
                                     operationClient.execute(true);
                                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
+                                    if (response != null && __log.isDebugEnabled())
+                                        __log.debug("Got service response: " + response.getEnvelope().toString());
+
                                     if (flt != null) {
                                         reply(mexId, operation, flt, true);
                                     } else {
-                                        reply(mexId, operation, response, false);
+                                        reply(mexId, operation, response, response.isFault());
                                     }
                                 } catch (Throwable t) {
                                     String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
@@ -306,11 +310,13 @@ public class ExternalService implements PartnerRoleChannel {
         try {
             if (fault) {
                 faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
+                if (__log.isDebugEnabled()) __log.debug("Reply is a fault, found type: " + faultType);
             } else {
                 faultType = null;
                 _converter.parseSoapResponse(odeMsgEl, reply.getEnvelope(), operation);
             }
         } catch (AxisFault af) {
+            __log.warn("Message format error, failing.", af);
             replyWithFailure(odeMexId, FailureType.FORMAT_ERROR, af.getMessage(), null);
             return;
         }
@@ -320,8 +326,9 @@ public class ExternalService implements PartnerRoleChannel {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
+                    QName nonNullFT = faultType != null ? faultType : new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
                     Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(
-                            faultType.getLocalPart()).getMessage().getQName()) : odeMex.createMessage(odeMex
+                            nonNullFT.getLocalPart()).getMessage().getQName()) : odeMex.createMessage(odeMex
                             .getOperation().getOutput().getMessage().getQName());
                     try {
                         if (__log.isDebugEnabled()) {

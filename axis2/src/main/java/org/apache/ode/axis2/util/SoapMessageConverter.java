@@ -22,10 +22,7 @@ package org.apache.ode.axis2.util;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultDetail;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.namespace.Constants;
@@ -258,7 +255,20 @@ public class SoapMessageConverter {
 
     }
 
-    public OMElement createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
+    public SOAPFault createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
+        OMElement detail = buildSoapDetail(message, faultName, op);
+
+        SOAPFault fault = _soapFactory.createSOAPFault();
+        SOAPFaultCode code = _soapFactory.createSOAPFaultCode(fault);
+        code.setText(new QName(Namespaces.SOAP_ENV_NS, "Server"));
+        SOAPFaultReason reason = _soapFactory.createSOAPFaultReason(fault);
+        reason.setText(faultName);
+        SOAPFaultDetail soapDetail = _soapFactory.createSOAPFaultDetail(fault);
+        soapDetail.addDetailEntry(detail.getFirstElement());
+        return fault;
+    }
+
+    private OMElement buildSoapDetail(Element message, QName faultName, Operation op) throws AxisFault {
         if (faultName.getNamespaceURI() == null || !faultName.getNamespaceURI().equals(_def.getTargetNamespace()))
             return toFaultDetail(faultName, message);
         Fault f = op.getFault(faultName.getLocalPart());
@@ -519,7 +529,8 @@ public class SoapMessageConverter {
         if (flt.getDetail() == null)
             return null;
 
-        QName elName = flt.getDetail().getQName();
+        // The detail is a dummy <detail> node containing the interesting fault element
+        QName elName = flt.getDetail().getFirstElement().getQName();
         for (Fault f : (Collection<Fault>)operation.getFaults().values()) {
             if (f.getMessage() == null)
                 continue;  // should have checked in ctor
@@ -533,7 +544,6 @@ public class SoapMessageConverter {
 
             if (p.getElementName().equals(elName))
                 return f;
-
         }
 
         return null;
