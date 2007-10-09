@@ -20,8 +20,7 @@
 package org.apache.ode.axis2;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
@@ -173,7 +172,7 @@ public class ODEService {
                     onResponse(odeMex, outMsgContext);
                     commit = true;
                 } catch (AxisFault af) {
-                    __log.error("Error processing response for MEX " + odeMex, af);
+                    __log.warn("MEX produced a fault " + odeMex, af);
                     commit = true;
                     throw af;
                 } catch (Exception e) {
@@ -216,9 +215,12 @@ public class ODEService {
             case FAULT:
                 if (__log.isDebugEnabled())
                     __log.debug("Fault response message: " + mex.getFault());
-                OMElement detail = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
-                String reason = mex.getFault()+" "+mex.getFaultExplanation();
-                throw new AxisFault(mex.getFault(), reason, null, null, detail);
+                SOAPFault fault = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
+                msgContext.getEnvelope().getBody().addFault(fault);
+
+                if (__log.isDebugEnabled())
+                    __log.debug("Returning fault: " + msgContext.getEnvelope().toString());
+                break;
             case ASYNC:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
