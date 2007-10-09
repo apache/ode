@@ -156,7 +156,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
         return _exec.submit(new Callable<T>() {
             public T call() throws Exception {
-                return execTransaction(transaction);
+                try {
+                    return execTransaction(transaction);
+                } catch (Exception e) {
+                    __log.error("An exception occured while executing an isolated transaction, " +
+                            "the transaction is going to be abandoned.", e);
+                    return null;
+                }
             }
         });
     }
