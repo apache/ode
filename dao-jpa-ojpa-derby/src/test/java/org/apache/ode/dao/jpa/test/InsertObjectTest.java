@@ -32,6 +32,8 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.utils.DOMUtils;
@@ -98,11 +100,11 @@ public class InsertObjectTest extends TestCase {
     }
 	
 	private MessageExchangeDAO createMessageExchange(ProcessDAO p, ProcessInstanceDAO pi, PartnerLinkDAO pl ) throws SAXException, IOException {
-		MessageExchangeDAO me = pi.getConnection().createMessageExchange('0');
+		MessageExchangeDAO me = pi.getConnection().createMessageExchange("testId", MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
 		
 		me.setCallee(new QName(TEST_NS,"testCallee"));
 		me.setChannel("testChannel");
-		me.setCorrelationId("testCorrelationId");
+		//me.setCorrelationId("testCorrelationId");
 		me.setCorrelationStatus("testCorrelationStatus");
 		me.setEPR(DOMUtils.stringToDOM("<testEPR>EPR</testEPR>"));
 		me.setFault(new QName("testFault"));
@@ -111,14 +113,14 @@ public class InsertObjectTest extends TestCase {
 		me.setOperation("testOperation");
 		me.setPartnerLink(pl);
 		me.setPartnerLinkModelId(1);
-		me.setPattern("testPattern");
+		me.setPattern(MessageExchangePattern.UNKNOWN);
 		me.setPortType(new QName(TEST_NS,"testPortType"));
 		me.setProcess(p);
 		me.setProperty("testProp1Key", "testProp1");
 		me.setProperty("testProp2Key", "testProp2");
 		me.setRequest(createMessage(me,"testRequest"));
 		me.setResponse(createMessage(me,"testResponse"));
-		me.setStatus("testStatus");
+		me.setStatus(Status.NEW);
 		
 		return me;
 	}
