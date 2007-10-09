@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -45,14 +46,6 @@ public interface ExtensionContext {
 	 */
 	Map<String, OScope.Variable> getVisibleVariables() throws FaultException;
 	
-	/**
-	 * Returns a list of links.
-	 * 
-	 * @return an unmodifiable list of visible variables.
-	 * @throws FaultException
-	 */
-	List<OLink> getLinks() throws FaultException;
-
 	/**
      * Read the value of a BPEL variable.
      *
@@ -124,5 +117,16 @@ public interface ExtensionContext {
      * @return instance id
      */
     Long getProcessId();
+    
+    /**
+     * Returns the name of the invoking activity.
+     * @return activity name
+     */
+    String getActivityName();
+    
+    /**
+     * Low-level-method
+     */
+    OActivity getOActivity();
     
 }

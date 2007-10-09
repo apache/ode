@@ -584,7 +584,7 @@ class ASSIGN extends ACTIVITY {
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
     	try {
-	    	final ExtensionContext helper = new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
+	    	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
 	    	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
 
     		getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(eao.nestedElement.getElement()), helper, eao.nestedElement, responseChannel);

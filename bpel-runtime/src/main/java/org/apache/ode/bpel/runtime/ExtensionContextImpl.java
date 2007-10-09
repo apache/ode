@@ -39,17 +39,14 @@ public class ExtensionContextImpl implements ExtensionContext {
 
 	private BpelRuntimeContext _context;
 	private ScopeFrame _scopeFrame;
+	private OActivity _activity;
 
-	public ExtensionContextImpl(ScopeFrame scopeFrame, BpelRuntimeContext context) {
+	public ExtensionContextImpl(OActivity activity, ScopeFrame scopeFrame, BpelRuntimeContext context) {
 		_context = context;
 		_scopeFrame = scopeFrame;
+		_activity = activity;
 	}
 	
-	public List<OLink> getLinks() throws FaultException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public Long getProcessId() {
 		return _context.getPid();
 	}
@@ -109,4 +106,12 @@ public class ExtensionContextImpl implements ExtensionContext {
 	private Variable getVisibleVariable(String varName) {
     	return _scopeFrame.oscope.getVisibleVariable(varName);
     }
+
+	public String getActivityName() {
+		return _activity.name;
+	}
+
+	public OActivity getOActivity() {
+		return _activity;
+	}
 }
