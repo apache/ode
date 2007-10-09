@@ -27,8 +27,7 @@ import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
@@ -128,7 +127,6 @@ public class ODEService {
                 __log.debug("Handling response for MEX " + odeMex);
                 onResponse(odeMex, outMsgContext);
             }
-
         } catch (Exception e) {
             String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " caused an exception.";
             __log.error(errmsg, e);
@@ -156,9 +154,12 @@ public class ODEService {
             case FAULT:
                 if (__log.isDebugEnabled())
                     __log.debug("Fault response message: " + mex.getFault());
-                OMElement detail = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
-                String reason = mex.getFault()+" "+mex.getFaultExplanation();
-                throw new AxisFault(mex.getFault(), reason, null, null, detail);
+                SOAPFault fault = _converter.createSoapFault(mex.getFaultResponse().getMessage(), mex.getFault(), mex.getOperation());
+                msgContext.getEnvelope().getBody().addFault(fault);
+
+                if (__log.isDebugEnabled())
+                    __log.debug("Returning fault: " + msgContext.getEnvelope().toString());
+                break;
             case ONEWAY:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
