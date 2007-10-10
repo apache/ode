@@ -46,11 +46,7 @@
                     <xsd:element name="iid" type="xsd:long"/>
                 </xsd:all>
             </xsd:complexType>
-            <xsd:complexType name="faultType">
-                <xsd:all>
-                    <xsd:element name="ManagementFault" type="xsd:string"/>
-                </xsd:all>
-            </xsd:complexType>
+            <xsd:element name="ManagementFault" type="xsd:string"/>
         </xsd:schema>
     </types>
 
@@ -227,59 +223,59 @@
         <part name="instance-info" type="typ:tInstanceInfo"/>
     </message>
     <message name="managementFault">
-        <part name="managementFault" type="typ:ManagementFault"/>
+        <part name="managementFault" element="typ:ManagementFault"/>
     </message>
 
     <portType name="ProcessManagementPortType">
         <operation name="listProcesses">
             <input message="tns:listProcessesInput"/>
             <output message="tns:listProcessesOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listAllProcesses">
             <input message="tns:listAllProcessesInput"/>
             <output message="tns:listAllProcessesOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listProcessesCustom">
             <input message="tns:listProcessesCustomInput"/>
             <output message="tns:listProcessesCustomOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getProcessInfo">
             <input message="tns:getProcessInfoInput"/>
             <output message="tns:getProcessInfoOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getProcessInfoCustom">
             <input message="tns:getProcessInfoCustomInput"/>
             <output message="tns:getProcessInfoCustomOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="setProcessProperty">
             <input message="tns:setProcessPropertyInput"/>
             <output message="tns:setProcessPropertyOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="setProcessPropertyNode">
             <input message="tns:setProcessPropertyNodeInput"/>
             <output message="tns:setProcessPropertyNodeOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getExtensibilityElements">
             <input message="tns:getExtensibilityElementsInput"/>
             <output message="tns:getExtensibilityElementsOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="activate">
             <input message="tns:activateInput"/>
             <output message="tns:activateOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="setRetired">
             <input message="tns:setRetiredInput"/>
             <output message="tns:setRetiredOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
     </portType>
 
@@ -287,82 +283,82 @@
         <operation name="listInstances">
             <input message="tns:listInstancesInput"/>
             <output message="tns:listInstancesOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="queryInstances">
             <input message="tns:queryInstancesInput"/>
             <output message="tns:queryInstancesOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listAllInstances">
             <input message="tns:listAllInstancesInput"/>
             <output message="tns:listAllInstancesOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listAllInstancesWithLimit">
             <input message="tns:listAllInstancesWithLimitInput"/>
             <output message="tns:listAllInstancesWithLimitOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getInstanceInfo">
             <input message="tns:getInstanceInfoInput"/>
             <output message="tns:getInstanceInfoOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getScopeInfo">
             <input message="tns:getScopeInfoInput"/>
             <output message="tns:getScopeInfoOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getScopeInfoWithActivity">
             <input message="tns:getScopeInfoWithActivityInput"/>
             <output message="tns:getScopeInfoWithActivityOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getVariableInfo">
             <input message="tns:getVariableInfoInput"/>
             <output message="tns:getVariableInfoOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listEvents">
             <input message="tns:listEventsInput"/>
             <output message="tns:listEventsOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="getEventTimeline">
             <input message="tns:getEventTimelineInput"/>
             <output message="tns:getEventTimelineOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="suspend">
             <input message="tns:suspendInput"/>
             <output message="tns:suspendOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="resume">
             <input message="tns:resumeInput"/>
             <output message="tns:resumeOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="terminate">
             <input message="tns:terminateInput"/>
             <output message="tns:terminateOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="fault">
             <input message="tns:faultInput"/>
             <output message="tns:faultOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="delete">
             <input message="tns:deleteInput"/>
             <output message="tns:deleteOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="recoverActivity">
             <input message="tns:recoverActivityInput"/>
             <output message="tns:recoverActivityOutput"/>
-            <fault name="ManagementFault" message="tns:ManagementFault"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
     </portType>
 
@@ -376,7 +372,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -388,7 +384,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -400,7 +396,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -412,7 +408,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -424,7 +420,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -436,7 +432,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -448,7 +444,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -460,7 +456,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -472,7 +468,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -484,7 +480,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -500,7 +496,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -512,7 +508,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -524,7 +520,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -536,7 +532,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -548,7 +544,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -560,7 +556,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -572,7 +568,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -584,7 +580,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -596,7 +592,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -608,7 +604,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -620,7 +616,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -632,7 +628,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -644,7 +640,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -656,7 +652,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -668,7 +664,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
@@ -680,7 +676,7 @@
             <output>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
             </output>
-            <fault>
+            <fault name="ManagementFault">
                 <soap:fault name="ManagementFault" use="literal"/>
              </fault>
         </operation>
