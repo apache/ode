@@ -21,6 +21,8 @@ package org.apache.ode.axis2.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,8 +40,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
@@ -60,6 +61,8 @@ import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.bpel.pmapi.ManagementException;
+import org.apache.ode.utils.Namespaces;
 import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.Node;
 
@@ -108,33 +111,38 @@ public class ManagementService {
 
         String methodName = msgContext.getAxisOperation().getName().getLocalPart();
         try {
+            MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
+            outMsgContext.getOperationContext().addMessageContext(outMsgContext);
+
+            SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+            outMsgContext.setEnvelope(envelope);
+
             // Our services are defined in WSDL which requires operation names to be different
             Method invokedMethod = findMethod(mgmtClass, methodName);
             Object[] params = extractParams(invokedMethod, msgContext.getEnvelope().getBody().getFirstElement());
-            Object result = invokedMethod.invoke(mgmtObject, params);
+            Object result = null;
+            try {
+                result = invokedMethod.invoke(mgmtObject, params);
+                if (hasResponse(msgContext.getAxisOperation())) {
+                    OMElement wrapper = soapFactory.createOMElement(new QName("http://www.apache.org/ode/pmapi", methodName+"Response"));
+                    OMElement parts = convertToOM(soapFactory, result);
+                    parts = stripNamespace(soapFactory, parts);
+                    wrapper.addChild(parts);
+                    envelope.getBody().addChild(wrapper);
 
-            if (hasResponse(msgContext.getAxisOperation())) {
-                MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
-                outMsgContext.getOperationContext().addMessageContext(outMsgContext);
-
-                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-                outMsgContext.setEnvelope(envelope);
-
-                OMElement wrapper = soapFactory.createOMElement(new QName("http://www.apache.org/ode/pmapi", methodName+"Response"));
-                OMElement parts = convertToOM(soapFactory, result);
-                parts = stripNamespace(soapFactory, parts);
-                wrapper.addChild(parts);
-                envelope.getBody().addChild(wrapper);
-
-                if (__log.isDebugEnabled()) {
-                    __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
-                            "." + msgContext.getAxisOperation().getName());
-                    __log.debug("Reply mgmt message " + outMsgContext.getEnvelope());
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("Reply mgmt for " + msgContext.getAxisService().getName() +
+                                "." + msgContext.getAxisOperation().getName());
+                        __log.debug("Reply mgmt message " + outMsgContext.getEnvelope());
+                    }
                 }
-                AxisEngine engine = new AxisEngine(
-                        msgContext.getOperationContext().getServiceContext().getConfigurationContext());
-                engine.send(outMsgContext);
+            } catch (ManagementException e) {
+                // Building a nicely formatted fault
+                envelope.getBody().addFault(toSoapFault(e, soapFactory));
             }
+            AxisEngine engine = new AxisEngine(
+                    msgContext.getOperationContext().getServiceContext().getConfigurationContext());
+            engine.send(outMsgContext);
         } catch (IllegalAccessException e) {
             throw new OdeFault("Couldn't invoke method named " + methodName + " in management interface!", e);
         } catch (InvocationTargetException e) {
@@ -237,6 +245,22 @@ public class ManagementService {
             case WSDLConstants.MEP_CONSTANT_ROBUST_OUT_ONLY: return true;
             default: return false;
         }
+    }
+
+    private static SOAPFault toSoapFault(ManagementException e, SOAPFactory soapFactory) {
+        SOAPFault fault = soapFactory.createSOAPFault();
+        SOAPFaultCode code = soapFactory.createSOAPFaultCode(fault);
+        code.setText(new QName(Namespaces.SOAP_ENV_NS, "Server"));
+        SOAPFaultReason reason = soapFactory.createSOAPFaultReason(fault);
+        reason.setText(e.toString());
+
+        OMElement detail = soapFactory.createOMElement(new QName(Namespaces.ODE_PMAPI, e.getClass().getSimpleName()));
+        StringWriter stack = new StringWriter();
+        e.printStackTrace(new PrintWriter(stack));
+        detail.setText(stack.toString());
+        SOAPFaultDetail soapDetail = soapFactory.createSOAPFaultDetail(fault);
+        soapDetail.addDetailEntry(detail);
+        return fault;
     }
 
     class ProcessMessageReceiver extends AbstractMessageReceiver {
