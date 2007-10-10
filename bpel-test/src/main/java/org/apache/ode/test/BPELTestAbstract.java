@@ -38,6 +38,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
@@ -165,6 +166,18 @@ public abstract class BPELTestAbstract {
 
     }
 
+    public void registerExtensionBundle(AbstractExtensionBundle bundle) {
+    	_server.registerExtensionBundle(bundle);
+    }
+    
+    public void unregisterExtensionBundle(AbstractExtensionBundle bundle) {
+    	_server.unregisterExtensionBundle(bundle.getNamespaceURI());
+    }
+
+    public void unregisterExtensionBundle(String nsURI) {
+    	_server.unregisterExtensionBundle(nsURI);
+    }
+
     protected void negative(String deployDir) throws Throwable {
         try {
             go(new File(deployDir));
@@ -250,7 +263,7 @@ public abstract class BPELTestAbstract {
         return inv;
     }
 
-    protected void go() throws Exception {
+    public void go() throws Exception {
         try {
             doDeployments();
             doInvokes();
@@ -584,22 +597,22 @@ public abstract class BPELTestAbstract {
                             + mex.getFault() + " | " + mex.getFaultExplanation());
                 } else {
                     failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
-
-                    if (_invocation.expectedFinalCorrelationStatus != null
-                            && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
-                        failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
-                                .getCorrelationStatus());
-                    }
-                    if (_invocation.expectedResponsePattern != null) {
-                        if (mex.getResponse() == null)
-                            failure(_invocation, "Expected response, but got none.", null);
-                        String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
-                        Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
-                        if (!matcher.matches())
-                            failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern,
-                                    responseStr);
-                    }
                 }
+            }
+
+            if (_invocation.expectedFinalCorrelationStatus != null
+            		&& !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
+            	failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
+            			.getCorrelationStatus());
+            }
+            if (_invocation.expectedResponsePattern != null) {
+            	if (mex.getResponse() == null)
+            		failure(_invocation, "Expected response, but got none.", null);
+            	String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
+            	Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
+            	if (!matcher.matches())
+            		failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern,
+            				responseStr);
             }
         }
     }
