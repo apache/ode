@@ -456,6 +456,21 @@ define "ode" do
 
 end
 
+  define "ode-extensions" do
+    define "extensions" do
+	  desc "E4X Assign Extension"
+	  define "e4x" do
+	    compile.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:utils")
+		test.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:jacob", "ode:bpel-schemas",
+		      "ode:bpel-scripts", "ode:scheduler-simple", "ode:bpel-test", "ode:utils", "ode:bpel-compiler",
+			  "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
+		      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
+		      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN,
+			  DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+      end
+	end
+  end
+
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
 
