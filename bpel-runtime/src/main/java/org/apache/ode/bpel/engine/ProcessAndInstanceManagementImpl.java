@@ -518,7 +518,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         BpelProcess process = _server.getBpelProcess(procid);
         if (process == null)
-            throw new InvalidRequestException("The process \"" + procid + "\" is available.");
+            throw new ProcessNotFoundException("The process \"" + procid + "\" does not exist.");
 
         return process._debugger;
     }
