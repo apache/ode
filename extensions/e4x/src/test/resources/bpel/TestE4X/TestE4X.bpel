@@ -58,7 +58,7 @@
 			<extensionAssignOperation>
 				<js:snippet>
 				var request = context.readVariable('myVar');
-				request.TestPart += ' 1World';
+				request.TestPart += ' World';
 				context.writeVariable('otherMsgVar', request);
 				</js:snippet>
 			</extensionAssignOperation>
