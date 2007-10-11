@@ -22,9 +22,7 @@
   <xsl:param name="middle"/>
 
   <xsl:template match="/">
-    <!-- Per the WS-BPEL spec, only the single child of the root of the 
-         result tree is considered (so the root element here is "suppressed"
-         in the engine) -->
+    <!-- The root element is the one that will be used as a base for the assignment rvalue -->
     <xsl:element name="root">
       <xsl:element name="hello">
         <xsl:value-of select="concat(*/content/text(), $middle, ' World')"/>
