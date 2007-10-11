@@ -18,7 +18,7 @@
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
         xmlns:pns="http://pxe/bpel/unit-test"
-        xmlns:wns="http://ode/bpel/unit-test.wsdl">
+        xmlns:wns="http://pxe/bpel/unit-test.wsdl">
 
     <process name="pns:HelloXslWorld">
         <active>true</active>

@@ -68,7 +68,7 @@
     </wsdl:binding>
     <wsdl:service name="HelloXslService">
                 <wsdl:port name="HelloXslPort" binding="tns:HelloXslSoapBinding">
-                <soap:address location="http://localhost:8080/pxe/soap/helloXslWorld"/>
+                <soap:address location="http://localhost:8080/ode/processes/helloXslWorld"/>
                 </wsdl:port>
     </wsdl:service>
     
