@@ -32,6 +32,7 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
@@ -270,5 +271,9 @@ class MockCompilerContext implements CompilerContext {
 
 	public boolean isExtensionDeclared(String namespace) {
 		return false;
+	}
+
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+		return null;
 	}
 }

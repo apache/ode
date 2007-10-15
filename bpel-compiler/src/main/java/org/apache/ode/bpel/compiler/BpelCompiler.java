@@ -50,6 +50,7 @@ import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
@@ -177,6 +178,8 @@ abstract class BpelCompiler implements CompilerContext {
     private Map<QName, Node> _customProcessProperties;
 
     private URI _processURI;
+
+	private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
 
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
@@ -1645,10 +1648,18 @@ abstract class BpelCompiler implements CompilerContext {
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
 
+    protected void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
+    	_extensionValidators = extensionValidators;
+    }
+    
     public boolean isExtensionDeclared(String namespace) {
     	return _declaredExtensionNS.contains(namespace);
     }
 
+    public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+    	return _extensionValidators.get(extensionElementName);
+    }
+    
     public List<OActivity> getActivityStack() {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);
         Collections.reverse(rval);

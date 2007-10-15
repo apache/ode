@@ -18,11 +18,23 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
@@ -32,16 +44,6 @@ import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-
-import javax.xml.namespace.QName;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.Map;
 
 /**
  * <p>
@@ -64,6 +66,7 @@ public class BpelC {
     private ResourceFinder _wsdlFinder;
     private URI _bpel11wsdl;
     private Map<String,Object> _compileProperties;
+    private Map<QName, ExtensionValidator> _extensionValidators;
     private boolean _dryRun = false;
 
     public static BpelC newBpelCompiler() {
@@ -135,6 +138,15 @@ public class BpelC {
      */
     public void setCompileProperties(Map<String, Object> compileProperties) {
         _compileProperties = compileProperties;
+    }
+
+    /**
+     * Registers extension validators to eventually validate the content of extensibility
+     * elements. 
+     * @param extensionValidators
+     */
+    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
+        _extensionValidators = extensionValidators;
     }
 
     /**
@@ -244,6 +256,9 @@ public class BpelC {
             if (_compileProperties != null) {
                 if (_compileProperties.get(PROCESS_CUSTOM_PROPERTIES) != null)
                     compiler.setCustomProperties((Map<QName, Node>) _compileProperties.get(PROCESS_CUSTOM_PROPERTIES));
+            }
+            if (_extensionValidators != null) {
+            	compiler.setExtensionValidators(_extensionValidators);
             }
         } catch (CompilationException ce) {
             this.invalidate();

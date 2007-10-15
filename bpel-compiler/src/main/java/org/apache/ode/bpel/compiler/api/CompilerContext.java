@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.compiler.api;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -132,4 +133,8 @@ public interface CompilerContext {
     OActivity getCurrent();
 
     boolean isExtensionDeclared(String namespace);
+    
+    //void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators);
+    
+    ExtensionValidator getExtensionValidator(QName extensionElementName);
 }

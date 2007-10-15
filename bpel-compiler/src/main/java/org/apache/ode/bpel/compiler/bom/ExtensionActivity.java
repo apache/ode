@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
  *
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class ExtensionActivity extends CompositeActivity {
+public class ExtensionActivity extends CompositeActivity implements ExtensibleElement {
 	private Activity _childActivity;
 
 	public ExtensionActivity(Element el) {
@@ -92,6 +92,10 @@ public class ExtensionActivity extends CompositeActivity {
 		}
 
 		return _childActivity.getChildren(Activity.class);
+	}
+
+	public Element getNestedElement() {
+		return getFirstExtensibilityElement();
 	}
 
 }

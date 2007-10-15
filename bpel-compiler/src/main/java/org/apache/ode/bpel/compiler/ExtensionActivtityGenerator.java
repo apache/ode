@@ -19,11 +19,13 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.ExtensionActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExtensionActivity;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.SerializableElement;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -47,7 +49,11 @@ class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 			if (!_context.isExtensionDeclared(child.getNamespaceURI())) {
 				throw new CompilationException(__cmsgs.errUndeclaredExtensionActivity().setSource(src));
 			}
-	        oactivity.nestedElement = new SerializableElement(child);
+	        ExtensionValidator validator = _context.getExtensionValidator(DOMUtils.getElementQName(child));
+	        if (validator != null) {
+	        	validator.validate(src);
+	        }
+			oactivity.nestedElement = new SerializableElement(child);
 	        compileChildren(oactivity, (ExtensionActivity) src);
 
         } catch (CompilationException e) {

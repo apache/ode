@@ -16,29 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.extension.e4x;
+package org.apache.ode.bpel.runtime.extension;
 
-
-import org.apache.ode.test.MockExtensionContext;
-import org.apache.ode.utils.DOMUtils;
-import org.junit.Test;
+import org.apache.ode.bpel.common.FaultException;
 import org.w3c.dom.Element;
 
 /**
+ * This is the basis interface for implementations of  
+ * <code>&lt;extensionAssignOperation&gt;</code> and <code>&lt;extensionActivity&gt;</code>
+ * nodes.
+ * 
+ * Implementations of this interface must provide a default constructor as they are created
+ * using reflection.
+ * 
+ * @see AbstractExtensionBundle
+ * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class JSOperationTest {
+public interface ExtensionOperation {
 
-	@Test public void test() throws Exception {
-		StringBuffer s = new StringBuffer();
-		s.append("var request = context.readVariable('request');\n");
-		s.append("request.TestPart += ' World';\n");
-		s.append("context.writeVariable('request', request);\n");
-
-		MockExtensionContext c = new MockExtensionContext();
-		c.getVariables().put("request", DOMUtils.stringToDOM("<message><TestPart>Hello</TestPart></message>"));
-		JSExtensionOperation jso = new JSExtensionOperation();
-		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
-	}
+	void run(ExtensionContext context, Element element) throws FaultException;
 }

@@ -68,6 +68,10 @@
       	<ext:doIt/>
       </extensionActivity>
 
+      <extensionActivity>
+      	<ext:doIt2>test</ext:doIt2>
+      </extensionActivity>
+
 	  </flow>
        <reply name="end"  
               partnerLink="helloPartnerLink"
