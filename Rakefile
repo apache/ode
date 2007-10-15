@@ -128,7 +128,7 @@ define "ode" do
 
   desc "ODE Axis Integration Layer"
   define "axis2" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "il-common", "bpel-runtime",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
@@ -283,10 +283,10 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "il-common", "dao-jpa"),
+      "bpel-store", "utils", "il-common", "dao-jpa", "bpel-obj"),
       DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, COMMONS.lang
 
-    test.with projects("bpel-obj", "jacob", "bpel-schemas",
+    test.with projects("jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN
@@ -395,7 +395,7 @@ define "ode" do
 
   desc "ODE JBI Integration Layer"
   define "jbi" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "il-common", "bpel-obj",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common", "bpel-obj",
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
@@ -456,20 +456,29 @@ define "ode" do
 
 end
 
-  define "ode-extensions" do
-    define "extensions" do
-	  desc "E4X Assign Extension"
-	  define "e4x" do
-	    compile.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:utils")
-		test.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:jacob", "ode:bpel-schemas",
-		      "ode:bpel-scripts", "ode:scheduler-simple", "ode:bpel-test", "ode:utils", "ode:bpel-compiler",
-			  "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
-		      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
-		      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN,
-			  DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
-      end
-	end
+define "ode-extensions", :base_dir => "extensions" do
+  [:version, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
+  project.group = "org.apache.ode.extensions"
+
+  desc "E4X Extension"
+  define "e4x", :version=>"1.0-beta" do
+    compile.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:bpel-runtime", "ode:bpel-compiler", "ode:utils")
+    test.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:bpel-obj", "ode:jacob", "ode:bpel-schemas",
+              "ode:bpel-scripts", "ode:scheduler-simple", "ode:bpel-test", "ode:utils", "ode:bpel-compiler",
+              "ode:bpel-dao", "ode:bpel-runtime", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
+              COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
+              JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN,
+              DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+    package :jar
   end
+
+  desc "JMS BPEL event publisher"
+  define "jms-eventpublisher", :version=>"1.0-beta" do
+    compile.with "org.apache.activemq:apache-activemq:jar:4.2-incubator-SNAPSHOT", projects("ode:bpel-schemas", "ode:bpel-api"),
+		XMLBEANS
+	package :jar
+  end
+end
 
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
@@ -487,6 +496,22 @@ define "apache-ode" do
         map(&:packages).flatten.each do |pkg|
         zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
       end
+
+      #Include extensions
+	  #(create a extensions folder, put extension folders in there, add README per extension if available, 
+	  # add README.extensions to extensions folder)
+      project("ode-extensions").projects.each do |p|
+        p.packages.flatten.select{|pkg| pkg.type == :jar && !pkg.classifier}.each do |art|
+          zip.include(art, :path=>"extensions/#{art.id}")
+		  if File.exist?(p.path_to("README"))
+		    zip.path("extensions/#{art.id}").include p.path_to("README")
+		  end
+          p.compile.classpath.select{|pkg| pkg.group != project("ode").group}.each do |lib|
+            zip.include(lib, :path=>"extensions/#{art.id}/lib")
+          end
+        end
+      end
+	  zip.path("extensions").include project("ode-extensions").path_to("README.extensions")
 
       # Including third party licenses
       Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
@@ -548,6 +573,6 @@ define "apache-ode" do
     end
   end
 
-  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
+  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target) unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 end
 
