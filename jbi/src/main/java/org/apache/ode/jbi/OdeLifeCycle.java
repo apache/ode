@@ -21,6 +21,8 @@ package org.apache.ode.jbi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
@@ -31,16 +33,18 @@ import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
-import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -295,18 +299,28 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
  	private void registerExtensionActivityBundles() {
-        String listenersStr = _ode._config.getExtensionActivityBundles();
-        if (listenersStr != null) {
+        String extensionsStr = _ode._config.getExtensionActivityBundles();
+        if (extensionsStr != null) {
+        	Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
         	// TODO replace StringTokenizer by regex
-        	for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+        	for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
                 String bundleCN = tokenizer.nextToken();
                 try {
-                    _ode._server.registerExtensionBundle((AbstractExtensionBundle) Class.forName(bundleCN).newInstance());
+                	// instantiate bundle
+                	AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
+                	
+                	// register extension bundle (BPEL server)
+                	_ode._server.registerExtensionBundle(bundle);
+                	
+                	//add validators
+                	validators.putAll(bundle.getExtensionValidators());
                 } catch (Exception e) {
                     __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
                 }
             }
+        	// register extension bundle (BPEL store)
+        	_ode._store.setExtensionValidators(validators);
         }
     }
 
