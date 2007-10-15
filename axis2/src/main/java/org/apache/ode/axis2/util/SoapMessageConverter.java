@@ -264,7 +264,8 @@ public class SoapMessageConverter {
         SOAPFaultReason reason = _soapFactory.createSOAPFaultReason(fault);
         reason.setText(faultName);
         SOAPFaultDetail soapDetail = _soapFactory.createSOAPFaultDetail(fault);
-        soapDetail.addDetailEntry(detail.getFirstElement());
+        if (detail != null)
+            soapDetail.addDetailEntry(detail.getFirstElement());
         return fault;
     }
 

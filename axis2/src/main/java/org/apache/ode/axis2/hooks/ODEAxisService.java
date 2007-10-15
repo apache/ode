@@ -25,11 +25,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
+import javax.wsdl.*;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
@@ -101,6 +97,23 @@ public class ODEAxisService extends AxisService {
 
   public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
                              String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
+      for (Object binding : wsdlDef.getAllBindings().values()) {
+          for (Object bindOp : ((Binding) binding).getBindingOperations()) {
+              System.out.println("Bind Op " + ((BindingOperation) bindOp).getName());
+              for (Object bindFault : ((BindingOperation) bindOp).getBindingFaults().values()) {
+                  System.out.println("Bind fault " + ((BindingFault)bindFault).getName());
+              }
+          }
+      }
+
+      for (Object pts : wsdlDef.getAllPortTypes().values()) {
+          for (Object op : ((PortType) pts).getOperations()) {
+              for (Object fault : ((Operation) op).getFaults().values()) {
+                  System.out.println("Op Fault " + ((Fault)fault).getName());
+              }
+          }
+      }
+
         WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
     AxisService axisService = serviceBuilder.populateService();
     axisService.setName(axisName);
