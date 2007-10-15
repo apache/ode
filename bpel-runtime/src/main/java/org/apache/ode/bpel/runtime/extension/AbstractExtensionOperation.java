@@ -16,29 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.extension.e4x;
+package org.apache.ode.bpel.runtime.extension;
 
-
-import org.apache.ode.test.MockExtensionContext;
-import org.apache.ode.utils.DOMUtils;
-import org.junit.Test;
-import org.w3c.dom.Element;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 
 /**
+ * Base class for creating new extension implementations.
+ * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class JSOperationTest {
+public abstract class AbstractExtensionOperation implements ExtensionValidator,
+															ExtensionOperation {
 
-	@Test public void test() throws Exception {
-		StringBuffer s = new StringBuffer();
-		s.append("var request = context.readVariable('request');\n");
-		s.append("request.TestPart += ' World';\n");
-		s.append("context.writeVariable('request', request);\n");
-
-		MockExtensionContext c = new MockExtensionContext();
-		c.getVariables().put("request", DOMUtils.stringToDOM("<message><TestPart>Hello</TestPart></message>"));
-		JSExtensionOperation jso = new JSExtensionOperation();
-		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+	public void validate(ExtensibleElement element) throws CompilationException {
+		// default behavior: pass
 	}
+
 }

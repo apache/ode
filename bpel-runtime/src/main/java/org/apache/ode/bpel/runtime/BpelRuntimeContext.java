@@ -20,7 +20,6 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
@@ -33,6 +32,7 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -260,5 +260,5 @@ public interface BpelRuntimeContext {
 
     void releasePartnerMex(String mexId);
     
-    void executeExtension(QName extensionId, ExtensionContext context, SerializableElement element, ExtensionResponseChannel extResponseChannel) throws FaultException;
+    void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException;
 }

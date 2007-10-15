@@ -21,6 +21,8 @@ package org.apache.ode.axis2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -42,9 +44,9 @@ import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
@@ -55,6 +57,7 @@ import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -512,18 +515,28 @@ public class ODEServer {
     }
 
  	private void registerExtensionActivityBundles() {
-        String listenersStr = _odeConfig.getExtensionActivityBundles();
-        if (listenersStr != null) {
+        String extensionsStr = _odeConfig.getExtensionActivityBundles();
+        if (extensionsStr != null) {
+        	Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
         	// TODO replace StringTokenizer by regex
-        	for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
+        	for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
                 String bundleCN = tokenizer.nextToken();
                 try {
-                    _server.registerExtensionBundle((AbstractExtensionBundle) Class.forName(bundleCN).newInstance());
+                	// instantiate bundle
+                	AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
+                	
+                	// register extension bundle (BPEL server)
+                	_server.registerExtensionBundle(bundle);
+                	
+                	//add validators
+                	validators.putAll(bundle.getExtensionValidators());
                 } catch (Exception e) {
                     __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
                 }
             }
+        	// register extension bundle (BPEL store)
+        	_store.setExtensionValidators(validators);
         }
     }
 

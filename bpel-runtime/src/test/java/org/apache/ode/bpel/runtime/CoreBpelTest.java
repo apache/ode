@@ -18,40 +18,41 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
+
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OCatch;
 import org.apache.ode.bpel.o.OEmpty;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OSequence;
 import org.apache.ode.bpel.o.OThrow;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
-import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Test core BPEL processing capabilities.
@@ -418,7 +419,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     }
 
 	public void executeExtension(QName extensionId, ExtensionContext context,
-			SerializableElement element,
+			Element element,
 			ExtensionResponseChannel extResponseChannel) throws FaultException {
 		// TODO Auto-generated method stub
 		

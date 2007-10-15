@@ -27,11 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.o.OExtensionActivity;
 import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.SerializableElement;
 
@@ -58,7 +58,7 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
         	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
         	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
         	
-        	getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(_oext.nestedElement.getElement()), helper, new SerializableElement(_oext.nestedElement.getElement()), responseChannel);
+        	getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(_oext.nestedElement.getElement()), helper, _oext.nestedElement.getElement(), responseChannel);
         	
             object(new ExtensionResponseChannelListener(responseChannel) {
 				private static final long serialVersionUID = -1L;

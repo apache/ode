@@ -21,24 +21,24 @@ package org.apache.ode.extension.e4x;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.eapi.ExtensionContext;
-import org.apache.ode.bpel.eapi.ExtensionOperation;
-import org.apache.ode.utils.SerializableElement;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionOperation;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.xml.XMLLib;
 import org.mozilla.javascript.xml.XMLLib.Factory;
+import org.w3c.dom.Element;
 
 /**
  * Implementation of a Javascript extension assign operation.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class JSExtensionOperation implements ExtensionOperation {
+public class JSExtensionOperation extends AbstractExtensionOperation {
 	
-	public void run(ExtensionContext context, SerializableElement element) throws FaultException {
+	public void run(ExtensionContext context, Element element) throws FaultException {
 
 		ContextFactory contextFactory = new ContextFactory() {
 			//Enforce usage of plain DOM
@@ -54,7 +54,7 @@ public class JSExtensionOperation implements ExtensionOperation {
 			ScriptableObject.defineClass(scope, ExtensionContextWrapper.class);
 			Scriptable wrappedContext = ctx.newObject(scope, "ExtensionContext", new Object[] {context, ctx});
 			ScriptableObject.putProperty(scope, "context", wrappedContext);
-			String source = element.getElement().getTextContent();
+			String source = element.getTextContent();
 			ctx.evaluateString(scope, source, context.getActivityName(), 1, null);
 		} catch (Exception e) {
 			throw new FaultException(new QName("ExtensionEvaluationFault", JSExtensionBundle.NS), e.getMessage());

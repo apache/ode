@@ -16,24 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.eapi;
+package org.apache.ode.bpel.compiler.api;
 
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.utils.SerializableElement;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 
 /**
- * This is the basis interface for implementations of  
- * <code>&lt;extensionAssignOperation&gt;</code> and <code>&lt;extensionActivity&gt;</code>
- * nodes.
- * 
- * Implementations of this interface must provide a default constructor as they are created
- * using reflection.
- * 
- * @see AbstractExtensionBundle
+ * Interface that allows Ode extensions to validate an extension element's
+ * content during compilation.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public interface ExtensionOperation {
+public interface ExtensionValidator {
 
-	void run(ExtensionContext context, SerializableElement element) throws FaultException;
+	void validate(ExtensibleElement element) throws CompilationException;
+
 }

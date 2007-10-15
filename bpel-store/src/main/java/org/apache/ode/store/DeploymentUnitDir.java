@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
@@ -67,7 +68,8 @@ class DeploymentUnitDir  {
 
     private HashMap<QName, CBPInfo> _processes = new HashMap<QName,CBPInfo>();
     private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName,TDeployment.Process>();
-
+    private Map<QName, ExtensionValidator> _extensionValidators;
+    
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
 
@@ -156,6 +158,7 @@ class DeploymentUnitDir  {
             bpelc.setProcessWSDL(bpel11wsdl.toURI());
         
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
+        bpelc.setExtensionValidators(_extensionValidators);
         bpelc.setBaseDirectory(_duDirectory);
         try {
             bpelc.compile(bpelFile);
@@ -364,4 +367,7 @@ class DeploymentUnitDir  {
         _version = version;
     }
 
+    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
+    	_extensionValidators = extensionValidators;
+    }
 }

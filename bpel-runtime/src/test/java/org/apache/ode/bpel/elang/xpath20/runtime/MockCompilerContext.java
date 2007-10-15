@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
@@ -206,7 +207,9 @@ public class MockCompilerContext implements CompilerContext {
     }
     
 	public boolean isExtensionDeclared(String namespace) {
-		// TODO Auto-generated method stub
 		return false;
+	}
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+		return null;
 	}
 }

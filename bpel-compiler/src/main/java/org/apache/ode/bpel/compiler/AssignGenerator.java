@@ -23,6 +23,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
 import org.apache.ode.bpel.compiler.bom.Copy;
@@ -102,6 +103,10 @@ class AssignGenerator extends DefaultActivityGenerator {
         			if (!_context.isExtensionDeclared(el.getNamespaceURI())) {
         				throw new CompilationException(__cmsgs.errUndeclaredExtensionAssignOperation().setSource(sop));
         			}
+        	        ExtensionValidator validator = _context.getExtensionValidator(DOMUtils.getElementQName(el));
+        	        if (validator != null) {
+        	        	validator.validate(sop);
+        	        }
         			oext.nestedElement = new SerializableElement(el);
             		oassign.operations.add(oext);
         		} catch (CompilationException ce) {

@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.eapi;
+package org.apache.ode.bpel.runtime.extension;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
@@ -26,6 +25,7 @@ import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.w3c.dom.Node;
 
 
@@ -128,5 +128,9 @@ public interface ExtensionContext {
      * Low-level-method
      */
     OActivity getOActivity();
+    
+    BpelRuntimeContext getBpelRuntimeContext();
+    
+    //ScopeFrame getScopeFrame();
     
 }

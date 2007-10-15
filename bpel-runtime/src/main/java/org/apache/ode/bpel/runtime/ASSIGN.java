@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
@@ -49,6 +48,7 @@ import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -587,7 +587,7 @@ class ASSIGN extends ACTIVITY {
 	    	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
 	    	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
 
-    		getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(eao.nestedElement.getElement()), helper, eao.nestedElement, responseChannel);
+    		getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(eao.nestedElement.getElement()), helper, eao.nestedElement.getElement(), responseChannel);
 
     		object(new ExtensionResponseChannelListener(responseChannel) {
 				private static final long serialVersionUID = 1L;

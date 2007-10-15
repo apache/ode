@@ -19,16 +19,15 @@
 package org.apache.ode.bpel.runtime;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.w3c.dom.Node;
 
 
@@ -113,5 +112,9 @@ public class ExtensionContextImpl implements ExtensionContext {
 
 	public OActivity getOActivity() {
 		return _activity;
+	}
+
+	public BpelRuntimeContext getBpelRuntimeContext() {
+		return _context;
 	}
 }

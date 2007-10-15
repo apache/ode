@@ -18,16 +18,22 @@
  */
 package org.apache.ode.test;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
-import org.apache.ode.bpel.eapi.ExtensionContext;
-import org.apache.ode.bpel.eapi.ExtensionOperation;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionOperation;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.SerializableElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
 /**
  * Test ODE's extensibility
@@ -79,8 +85,20 @@ public class ExtensibilityTest extends BPELTestAbstract {
 		teb.recycle();
 	}
 
+	@Test public void testExtensionActivityCompilerError() throws Throwable {
+		_server.registerExtensionBundle(teb);
+		TestExtensionBundle.cmpString = "error";
+		go("/bpel/2.0/TestExtensionActivity");
+        Deployment deployment = new Deployment(makeDeployDir("/bpel/2.0/TestExtensionActivityMustUnderstand"));
+        deployment.expectedException = CompilationException.class;
+        doDeployment(deployment);
+		_server.unregisterExtensionBundle(teb.getNamespaceURI());
+		teb.recycle();
+	}
+	
 	private static class TestExtensionBundle extends AbstractExtensionBundle {
 		private static boolean wasExecuted = false;
+		private static String cmpString = "test";
 		
 		public String getNamespaceURI() {
 			return "urn:ode:test-extension-bundle";
@@ -88,6 +106,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 
 		public void registerExtensionActivities() {
 			registerExtensionOperation("doIt", TestExtensionActivity.class);
+			registerExtensionOperation("doIt2", TestExtensionValidatorActivity.class);
 			registerExtensionOperation("doAssign", TestExtensionAssignOperation.class);
 		}
 		
@@ -97,6 +116,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 		
 		public void recycle() {
 			wasExecuted = false;
+			cmpString = "test";
 		}
 	}
 
@@ -104,7 +124,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 		private static final long serialVersionUID = 1L;
 
 		public void run(ExtensionContext context,
-				SerializableElement element) throws FaultException {
+				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
 		}
 	}
@@ -112,7 +132,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 	public static class TestExtensionAssignOperation implements ExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(ExtensionContext context, SerializableElement element)
+		public void run(ExtensionContext context, Element element)
 				throws FaultException {
 			//Node val = context.readVariable("myVar");
 			StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -122,6 +142,23 @@ public class ExtensibilityTest extends BPELTestAbstract {
 			} catch (Exception e) {
 				e.printStackTrace();
 				Assert.fail();
+			}
+		}
+	}
+
+	public static class TestExtensionValidatorActivity extends AbstractExtensionOperation {
+		private static final long serialVersionUID = 1L;
+
+		public void run(ExtensionContext context,
+				Element element) throws FaultException {
+			TestExtensionBundle.wasExecuted = true;
+		}
+
+		@Override
+		public void validate(ExtensibleElement element)
+				throws CompilationException {
+			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
+				throw new CompilationException(new CompilationMessage());
 			}
 		}
 	}

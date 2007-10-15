@@ -16,12 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.eapi;
+package org.apache.ode.bpel.runtime.extension;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 
 /**
 * Abstract class that bundles and registers <code>&lt;extensionActivity&gt;</code> and
@@ -30,6 +36,7 @@ import java.util.Set;
 * @author Tammo van Lessen (University of Stuttgart)
 */
 public abstract class AbstractExtensionBundle {
+	private static Log __log = LogFactory.getLog(AbstractExtensionBundle.class);
 	private Map<String, Class<? extends ExtensionOperation>> extensionsByName = new HashMap<String, Class<? extends ExtensionOperation>>();
 
 	/**
@@ -68,4 +75,18 @@ public abstract class AbstractExtensionBundle {
 		return getExtensionOperationClass(localName).newInstance();
 	}
 
+	public final Map<QName, ExtensionValidator> getExtensionValidators() {
+		Map<QName, ExtensionValidator> result = new HashMap<QName, ExtensionValidator>();
+		String ns = getNamespaceURI();
+		for (String localName : extensionsByName.keySet()) {
+			if (ExtensionValidator.class.isAssignableFrom(extensionsByName.get(localName))) {
+				try {
+					result.put(new QName(ns, localName), (ExtensionValidator)getExtensionOperationInstance(localName));
+				} catch (Exception e) {
+					__log.warn("Could not instantiate extension validator for '{" + ns + "}" + localName);
+				}
+			}
+		}
+		return result;
+	}
 }

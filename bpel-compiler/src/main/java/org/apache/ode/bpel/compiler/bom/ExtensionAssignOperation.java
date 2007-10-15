@@ -28,7 +28,8 @@ import org.w3c.dom.NodeList;
  *  
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class ExtensionAssignOperation extends BpelObject implements AssignOperation {
+public class ExtensionAssignOperation extends BpelObject implements AssignOperation,
+																	ExtensibleElement {
 	private Element _childElement;
 	
     public ExtensionAssignOperation(Element el) {
@@ -36,7 +37,9 @@ public class ExtensionAssignOperation extends BpelObject implements AssignOperat
     }
 
     public Element getNestedElement() {
-        if (_childElement == null) {
+        //XXX
+    	//return getFirstExtensibilityElement(); 
+    	if (_childElement == null) {
 	    	NodeList nl = getElement().getChildNodes();
 	        for (int i = 0; i < nl.getLength(); ++i) {
 	            Node node = nl.item(i);

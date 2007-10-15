@@ -42,10 +42,12 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
-import org.apache.ode.bpel.eapi.ExtensionContext;
-import org.apache.ode.bpel.eapi.ExtensionOperation;
-import org.apache.ode.bpel.evt.*;
+import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
+import org.apache.ode.bpel.evt.ProcessCompletionEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
+import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
+import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -76,6 +78,9 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -83,10 +88,9 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.utils.SerializableElement;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.Document;
 
 /**
  * 
@@ -1190,7 +1194,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _forceFlush = true;
     }
     
-	public void executeExtension(QName extensionId, ExtensionContext context, SerializableElement element, ExtensionResponseChannel extResponseChannel) throws FaultException {
+	public void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException {
 		__log.debug("Execute extension activity");
 		final String channelId = extResponseChannel.export();
 		ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
@@ -1207,7 +1211,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 		}
 		
 		try {
-			// should be running in a pooled thread
 			ea.run(context, element);
 			completeExtensionExecution(channelId, null);
 		} catch (RuntimeException e) {
