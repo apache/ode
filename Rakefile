@@ -474,7 +474,7 @@ define "ode-extensions", :base_dir => "extensions" do
 
   desc "JMS BPEL event publisher"
   define "jms-eventpublisher", :version=>"1.0-beta" do
-    compile.with "org.apache.activemq:apache-activemq:jar:4.2-incubator-SNAPSHOT", projects("ode:bpel-schemas", "ode:bpel-api"),
+    compile.with "org.apache.activemq:apache-activemq:jar:5.0-20071016.032635-24", projects("ode:bpel-schemas", "ode:bpel-api"),
 		XMLBEANS
 	package :jar
   end
