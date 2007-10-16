@@ -21,6 +21,8 @@ package org.apache.ode.extension.e4x;
 
 import org.apache.ode.test.MockExtensionContext;
 import org.apache.ode.utils.DOMUtils;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -29,7 +31,7 @@ import org.w3c.dom.Element;
  */
 public class JSOperationTest {
 
-	@Test public void test() throws Exception {
+	@Test public void testHelloWorld() throws Exception {
 		StringBuffer s = new StringBuffer();
 		s.append("var request = context.readVariable('request');\n");
 		s.append("request.TestPart += ' World';\n");
@@ -40,5 +42,26 @@ public class JSOperationTest {
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
 		jso.run(c, e);
+		String res = DOMUtils.domToString(c.getVariables().get("request"));
+		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<message><TestPart>Hello World</TestPart></message>", res);
 	}
+	
+	@Test public void testArrayCopy() throws Exception {
+		StringBuffer s = new StringBuffer();
+		s.append("var item = context.readVariable('item');\n");
+		s.append("var items = context.readVariable('items');\n");
+		s.append("items.TestPart.items.item += item.TestPart.item;\n");
+		s.append("items.TestPart.items.item.(@hyped=='true').price *= 2;");
+		s.append("context.writeVariable('items', items);\n");
+
+		MockExtensionContext c = new MockExtensionContext();
+		c.getVariables().put("item", DOMUtils.stringToDOM("<message><TestPart><item hyped=\"true\"><name>BPEL consulting</name><price>3000</price></item></TestPart></message>"));
+		c.getVariables().put("items", DOMUtils.stringToDOM("<message><TestPart><items><item><name>WSDL consulting</name><price>2500</price></item></items></TestPart></message>"));
+		JSExtensionOperation jso = new JSExtensionOperation();
+		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
+		jso.run(c, e);
+		String res = DOMUtils.domToString(c.getVariables().get("items"));
+		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<message><TestPart><items><item><name>WSDL consulting</name><price>2500</price></item><item hyped=\"true\"><name>BPEL consulting</name><price>6000</price></item></items></TestPart></message>", res);
+	}
+
 }
