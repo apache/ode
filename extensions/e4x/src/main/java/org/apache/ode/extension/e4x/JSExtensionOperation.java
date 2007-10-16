@@ -40,14 +40,7 @@ public class JSExtensionOperation extends AbstractExtensionOperation {
 	
 	public void run(ExtensionContext context, Element element) throws FaultException {
 
-		ContextFactory contextFactory = new ContextFactory() {
-			//Enforce usage of plain DOM
-			protected Factory getE4xImplementationFactory() {
-				return XMLLib.Factory.create("org.mozilla.javascript.xmlimpl.XMLLibImpl");
-			}
-		};
-
-		ContextFactory.initGlobal(contextFactory);
+		CustomContextFactory.init();
 		Context ctx = Context.enter();
 		try {
 			Scriptable scope = ctx.initStandardObjects();
@@ -61,5 +54,19 @@ public class JSExtensionOperation extends AbstractExtensionOperation {
 		} finally {
 			Context.exit();
 		}
+	}
+	
+	private static class CustomContextFactory extends ContextFactory {
+		//Enforce usage of plain DOM
+		protected Factory getE4xImplementationFactory() {
+			return XMLLib.Factory.create("org.mozilla.javascript.xmlimpl.XMLLibImpl");
+		}
+		
+		static void init() {
+			if (!ContextFactory.hasExplicitGlobal()) {
+				ContextFactory.initGlobal(new CustomContextFactory());
+			}
+		}
+		
 	}
 }
