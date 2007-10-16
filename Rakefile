@@ -27,6 +27,7 @@ require "buildr/hibernate"
 VERSION_NUMBER = "1.2-SNAPSHOT"
 NEXT_VERSION = "1.2"
 
+ACTIVEMQ            = "org.apache.activemq:apache-activemq:jar:4.1.1"
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
@@ -474,9 +475,8 @@ define "ode-extensions", :base_dir => "extensions" do
 
   desc "JMS BPEL event publisher"
   define "jms-eventpublisher", :version=>"1.0-beta" do
-    compile.with "org.apache.activemq:apache-activemq:jar:5.0-20071016.032635-24", projects("ode:bpel-schemas", "ode:bpel-api"),
-		XMLBEANS
-	package :jar
+    compile.with ACTIVEMQ, projects("ode:bpel-schemas", "ode:bpel-api"), XMLBEANS
+    package :jar
   end
 end
 
