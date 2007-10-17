@@ -629,8 +629,10 @@ class BpelProcess {
             }
 
             if (pl.hasPartnerRole()) {
-                PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, _pconf.getInvokeEndpoints().get(
-                        pl.getName()));
+            	Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
+                if (endpoint == null)
+                    throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deloy.xml");
+            	PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
             }
         }
