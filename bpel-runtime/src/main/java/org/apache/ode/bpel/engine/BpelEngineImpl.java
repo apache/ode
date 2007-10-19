@@ -419,7 +419,12 @@ public class BpelEngineImpl implements BpelEngine {
         // Note that the eventListeners list is a copy-on-write array, so need
         // to mess with synchronization.
         for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
-            l.onEvent(event);
+    		try {
+    			l.onEvent(event);
+    		} catch (Throwable t) {
+    			// catch all possible exceptions
+    			__log.warn("Got an exception while notifying BpelEventListener '" + l + "'.", t);
+    		}
         }
     }
 
