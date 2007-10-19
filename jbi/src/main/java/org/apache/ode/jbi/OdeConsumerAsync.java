@@ -102,7 +102,7 @@ class OdeConsumerAsync extends OdeConsumer {
             Object[] inouts = _mexTimeouts.keySet().toArray();
             for (int i=0; i<inouts.length; i++) {
                 long timeout = _mexTimeouts.get(inouts[i]);
-                if (timeout >= now) {
+                if (now >= timeout) {
                     _mexTimeouts.remove(inouts[i]);
                     final PartnerRoleMessageExchange pmex = _outstandingExchanges.remove(inouts[i]);
 
@@ -110,17 +110,17 @@ class OdeConsumerAsync extends OdeConsumer {
                         continue;
 
                     __log.warn("Timeout on JBI message exchange " + inouts[i]);
-        try {
-            _ode._scheduler.execIsolatedTransaction(new Callable<Void>() {
-                public Void call() throws Exception {
-                    pmex.replyWithFailure(FailureType.NO_RESPONSE, "Response not received after " + _responseTimeout + "ms.", null);
-                    return null;
+                    try {
+                        _ode._scheduler.execIsolatedTransaction(new Callable<Void>() {
+                            public Void call() throws Exception {
+                                pmex.replyWithFailure(FailureType.NO_RESPONSE, "Response not received after " + _responseTimeout + "ms.", null);
+                                return null;
+                            }
+                        });
+                    } catch (Exception ex) {
+                        __log.error("Error executing transaction:  ", ex);
+                    }
                 }
-            });
-        } catch (Exception ex) {
-            __log.error("Error executing transaction:  ", ex);
-        }
-    }
             }
         }
     }
