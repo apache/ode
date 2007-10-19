@@ -48,6 +48,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -941,11 +942,19 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         event.setProcessInstanceId(_dao.getInstanceId());
         _bpelProcess._debugger.onEvent(event);
 
-        // notify the listeners
-        _bpelProcess._server.fireEvent(event);
+        //filter events
+        List<String> scopeNames = null;
+        if (event instanceof ScopeEvent) {
+            scopeNames = ((ScopeEvent) event).getParentScopesNames();
+        }
 
-        // saving
-        _bpelProcess.saveEvent(event, _dao);
+        if (_bpelProcess._pconf.isEventEnabled(scopeNames, event.getType())) {
+	        // notify the listeners
+	        _bpelProcess._server.fireEvent(event);
+	
+	        // saving
+	        _bpelProcess.saveEvent(event, _dao);
+        }
     }
 
     /**
