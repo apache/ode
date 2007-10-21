@@ -690,14 +690,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     void fireEvent(BpelEvent event) {
         // Note that the eventListeners list is a copy-on-write array, so need
         // to mess with synchronization.
-        
     	for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
-    		try {
-    			l.onEvent(event);
-    		} catch (Throwable t) {
-    			// catch all possible exceptions
-    			__log.warn("Got an exception while notifying BpelEventListener '" + l + "'.", t);
-    		}
+   			l.onEvent(event);
         }
     }
 
