@@ -155,7 +155,7 @@ class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
 
         PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getMessageExchangeByForeignKey(jbiMex.getExchangeId());
         if (pmex == null) {
-            __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
+            __log.warn("Received a response for unknown partner role message exchange " + jbiMex.getExchangeId());
             return;
         }
      
