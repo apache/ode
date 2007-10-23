@@ -46,6 +46,7 @@ class THROW extends ACTIVITY {
         FaultData fault = null;
         if(_othrow.faultVariable != null){
             try {
+                sendVariableReadEvent(_scopeFrame.resolve(_othrow.faultVariable));
                 Node faultVariable = getBpelRuntimeContext().fetchVariableData(_scopeFrame.resolve(_othrow.faultVariable), false);
                 fault = createFault(_othrow.faultName, (Element)faultVariable,_othrow.faultVariable.type,_othrow);
             } catch (FaultException e) {

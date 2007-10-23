@@ -49,6 +49,7 @@ class REPLY extends ACTIVITY {
         // TODO: Check for fault without message.
 
         try {
+            sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
             Node msg = getBpelRuntimeContext()
                     .fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 

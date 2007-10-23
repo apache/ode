@@ -21,6 +21,7 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OLink;
@@ -60,6 +61,12 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return new Key(_self.o,_self.aId);
     }
 
+    protected void sendVariableReadEvent(VariableInstance var) {
+    	VariableReadEvent vre = new VariableReadEvent();
+    	vre.setVarName(var.declaration.name);
+    	sendEvent(vre);
+    }
+    
     protected void sendEvent(ActivityEvent event) {
         event.setActivityName(_self.o.name);
         event.setActivityType(_self.o.getType());
