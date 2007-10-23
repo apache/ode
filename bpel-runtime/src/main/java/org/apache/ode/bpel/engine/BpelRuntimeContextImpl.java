@@ -389,7 +389,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
-        // Special case of messageType variables with no part
+    	
+    	// Special case of messageType variables with no part
         if (variable.declaration.type instanceof OMessageVarType) {
             OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
             if (msgType.parts.size() == 0) {
