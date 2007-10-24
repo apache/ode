@@ -621,7 +621,7 @@ class BpelProcess {
         for (OPartnerLink pl : oprocess.getAllPartnerLinks()) {
             if (pl.hasMyRole()) {
                 Endpoint endpoint = myRoleEndpoints.get(pl);
-                if (endpoint == null)
+                if (endpoint == null && pl.initializePartnerRole)
                     throw new IllegalArgumentException("No service name for myRole plink " + pl.getName());
                 PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(this, pl, endpoint);
                 _myRoles.put(pl, myRole);
@@ -1203,17 +1203,19 @@ class BpelProcess {
 
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
-                    PartnerRoleChannel channel = _contexts.bindingContext.createPartnerRoleChannel(_pid,
-                            prole._plinkDef.partnerRolePortType, prole._initialPartner);
-                    prole._channel = channel;
-                    _partnerChannels.put(prole._initialPartner, prole._channel);
-                    EndpointReference epr = channel.getInitialEndpointReference();
-                    if (epr != null) {
-                        prole._initialEPR = epr;
-                        _partnerEprs.put(prole._initialPartner, epr);
+                    if (prole._initialPartner != null) {
+                        PartnerRoleChannel channel = _contexts.bindingContext.createPartnerRoleChannel(_pid,
+                                prole._plinkDef.partnerRolePortType, prole._initialPartner);
+                        prole._channel = channel;
+                        _partnerChannels.put(prole._initialPartner, prole._channel);
+                        EndpointReference epr = channel.getInitialEndpointReference();
+                        if (epr != null) {
+                            prole._initialEPR = epr;
+                            _partnerEprs.put(prole._initialPartner, epr);
+                        }
+                        __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
+                                + prole._initialEPR);
                     }
-                    __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
-                            + prole._initialEPR);
                 }
                 _hydratedOnce = true;
             }
