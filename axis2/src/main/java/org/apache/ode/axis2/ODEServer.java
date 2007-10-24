@@ -64,6 +64,8 @@ import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -105,6 +107,7 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
+    private ManagementService _mgtService;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         boolean success = false;
@@ -159,7 +162,7 @@ public class ODEServer {
             registerEventListeners();
 
             registerMexInterceptors();
-            
+
             registerExtensionActivityBundles();
 
             try {
@@ -173,7 +176,9 @@ public class ODEServer {
             File deploymentDir = new File(_workRoot, "processes");
             _poller = new DeploymentPoller(deploymentDir, this);
 
-            new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+            _mgtService = new ManagementService();
+            _mgtService.enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+
             new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
                     .getAbsolutePath());
 
@@ -472,15 +477,24 @@ public class ODEServer {
         return _server;
     }
 
+    public InstanceManagement getInstanceManagement() {
+        return _mgtService.getInstanceMgmt();
+    }
+
+    public ProcessManagement getProcessManagement() {
+        return _mgtService.getProcessMgmt();
+    }
+
+
     /**
      * Register event listeners configured in the configuration.
      *
      */
     private void registerEventListeners() {
-        
+
         // let's always register the debugging listener....
         _server.registerBpelEventListener(new DebugBpelEventListener());
-        
+
         // then, whatever else they want.
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
@@ -514,29 +528,29 @@ public class ODEServer {
         }
     }
 
- 	private void registerExtensionActivityBundles() {
+    private void registerExtensionActivityBundles() {
         String extensionsStr = _odeConfig.getExtensionActivityBundles();
         if (extensionsStr != null) {
-        	Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
-        	// TODO replace StringTokenizer by regex
-        	for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
+            Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+            // TODO replace StringTokenizer by regex
+            for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
                 String bundleCN = tokenizer.nextToken();
                 try {
-                	// instantiate bundle
-                	AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
-                	
-                	// register extension bundle (BPEL server)
-                	_server.registerExtensionBundle(bundle);
-                	
-                	//add validators
-                	validators.putAll(bundle.getExtensionValidators());
+                    // instantiate bundle
+                    AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
+
+                    // register extension bundle (BPEL server)
+                    _server.registerExtensionBundle(bundle);
+
+                    //add validators
+                    validators.putAll(bundle.getExtensionValidators());
                 } catch (Exception e) {
                     __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
                 }
             }
-        	// register extension bundle (BPEL store)
-        	_store.setExtensionValidators(validators);
+            // register extension bundle (BPEL store)
+            _store.setExtensionValidators(validators);
         }
     }
 
@@ -551,23 +565,23 @@ public class ODEServer {
     private void handleEvent(ProcessStoreEvent pse) {
         __log.debug("Process store event: " + pse);
         switch (pse.type) {
-        case ACTVIATED:
-        case RETIRED:
-            // bounce the process
-            _server.unregister(pse.pid);
-            ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
-            if (pconf != null)
-                _server.register(pconf);
-            else {
-                __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
-            }
-            break;
-        case DISABLED:
-        case UNDEPLOYED:
-            _server.unregister(pse.pid);
-            break;
-        default:
-            __log.debug("Ignoring store event: " + pse);
+            case ACTVIATED:
+            case RETIRED:
+                // bounce the process
+                _server.unregister(pse.pid);
+                ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
+                if (pconf != null)
+                    _server.register(pconf);
+                else {
+                    __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
+                }
+                break;
+            case DISABLED:
+            case UNDEPLOYED:
+                _server.unregister(pse.pid);
+                break;
+            default:
+                __log.debug("Ignoring store event: " + pse);
         }
     }
 }
