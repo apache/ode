@@ -58,7 +58,7 @@ public class Messages extends MessageBundle {
     String msgProcessRegistered(QName pid) {
         return format("Registered process {0}.", pid);
     }
-    
+
     String msgProcessUnregistered(QName pid) {
         return format("Unregistered process {0}.", pid);
     }
