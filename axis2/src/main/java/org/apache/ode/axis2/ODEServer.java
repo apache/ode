@@ -43,6 +43,8 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -104,7 +106,8 @@ public class ODEServer {
 
     private BpelServerConnector _connector;
 
-
+    private ManagementService _mgtService;
+    
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         boolean success = false;
         try {
@@ -170,7 +173,9 @@ public class ODEServer {
             File deploymentDir = new File(_workRoot, "processes");
             _poller = new DeploymentPoller(deploymentDir, this);
 
-            new ManagementService().enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+            _mgtService = new ManagementService();
+            _mgtService.enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+            
             new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
                     .getAbsolutePath());
 
@@ -473,6 +478,14 @@ public class ODEServer {
         return _server;
     }
 
+    public InstanceManagement getInstanceManagement() {
+    	return _mgtService.getInstanceMgmt();
+    }
+    
+    public ProcessManagement getProcessManagement() {
+    	return _mgtService.getProcessMgmt();
+    }
+    
     private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {

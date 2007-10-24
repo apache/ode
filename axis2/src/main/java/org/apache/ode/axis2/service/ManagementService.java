@@ -290,4 +290,14 @@ public class ManagementService {
         if (clazz.equals(String.class)) return str;
         return null;
     }
+    
+    public ProcessManagement getProcessMgmt()
+	{
+		return _processMgmt;
+	}
+
+	public InstanceManagement getInstanceMgmt()
+	{
+		return _instanceMgmt;
+	}
 }
