@@ -296,12 +296,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         try {
             BpelProcess p = null;
             if (_engine != null) {
-                _engine.unregisterProcess(pid);
-                _registeredProcesses.remove(p);
+                p = _engine.unregisterProcess(pid);
+                if (p != null)
+                {
+                	_registeredProcesses.remove(p);
+                	__log.info(__msgs.msgProcessUnregistered(pid));
+                }
             }
-
-            __log.info(__msgs.msgProcessUnregistered(pid));
-
         } catch (Exception ex) {
             __log.error(__msgs.msgProcessUnregisterFailed(pid), ex);
             throw new BpelEngineException(ex);
