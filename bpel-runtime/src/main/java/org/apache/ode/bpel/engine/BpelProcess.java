@@ -419,8 +419,8 @@ public class BpelProcess {
 
             if (pl.hasPartnerRole()) {
             	Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
-                if (endpoint == null)
-                    throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deloy.xml");
+                if (endpoint == null && pl.initializePartnerRole)
+                    throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deploy.xml");
                 PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
             }
@@ -731,17 +731,20 @@ public class BpelProcess {
 
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
-                    PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid,
-                            prole._plinkDef.partnerRolePortType, prole._initialPartner);
-                    prole._channel = channel;
-                    _partnerChannels.put(prole._initialPartner, prole._channel);
-                    EndpointReference epr = channel.getInitialEndpointReference();
-                    if (epr != null) {
-                        prole._initialEPR = epr;
-                        _partnerEprs.put(prole._initialPartner, epr);
+                    // Null for initializePartnerRole = false
+                    if (prole._initialPartner != null) {
+                        PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid,
+                                prole._plinkDef.partnerRolePortType, prole._initialPartner);
+                        prole._channel = channel;
+                        _partnerChannels.put(prole._initialPartner, prole._channel);
+                        EndpointReference epr = channel.getInitialEndpointReference();
+                        if (epr != null) {
+                            prole._initialEPR = epr;
+                            _partnerEprs.put(prole._initialPartner, epr);
+                        }
+                        __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
+                                + prole._initialEPR);
                     }
-                    __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
-                            + prole._initialEPR);
                 }
                 _hydratedOnce = true;
             }
