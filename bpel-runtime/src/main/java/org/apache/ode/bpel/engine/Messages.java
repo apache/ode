@@ -55,10 +55,14 @@ public class Messages extends MessageBundle {
         return format("Unkown EPR: {0}", epr);
     }
 
-    String msgProcessUnregistered(QName process) {
-        return format("Process {0} has been unregistered.", process);
+    String msgProcessRegistered(QName pid) {
+        return format("Registered process {0}.", pid);
     }
 
+    String msgProcessUnregistered(QName pid) {
+        return format("Unregistered process {0}.", pid);
+    }
+    
     String msgProcessUnregisterFailed(QName process) {
         return format("Failed to unregister process {0}! Check database for consistency!", process);
     }
@@ -130,10 +134,6 @@ public class Messages extends MessageBundle {
 
     String msgOperationInterrupted() {
         return format("Operation was interrupted.");
-    }
-
-    String msgProcessRegistered(QName pid) {
-        return format("Activated process {0}.", pid);
     }
 
     String msgServerStarted() {
