@@ -527,7 +527,7 @@ public class SoapMessageConverter {
 
     @SuppressWarnings("unchecked")
     private Fault inferFault(Operation operation, SOAPFault flt) {
-        if (flt.getDetail() == null)
+        if (flt.getDetail() == null || flt.getDetail().getFirstElement() == null)
             return null;
 
         // The detail is a dummy <detail> node containing the interesting fault element
