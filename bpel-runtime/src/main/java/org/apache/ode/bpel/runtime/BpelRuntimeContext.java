@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 import javax.wsdl.Operation;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.xml.namespace.QName;
 
@@ -140,7 +141,7 @@ public interface BpelRuntimeContext {
     String readProperty(VariableInstance var, OProcess.OProperty property)
             throws FaultException;
 
-    Node initializeVariable(VariableInstance var, Node initData);
+    Node initializeVariable(VariableInstance var, Node initData) ;
 
     /**
      * Writes a partner EPR.
@@ -256,4 +257,6 @@ public interface BpelRuntimeContext {
     String getSourceSessionId(String mexId);
 
     void releasePartnerMex(String mexId);
+
+    void initializeExternalVariable(VariableInstance instance, HashMap<String, String> keymap);
 }

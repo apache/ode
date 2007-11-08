@@ -26,6 +26,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -335,7 +337,7 @@ public class DOMUtils {
         HashMap<String,String> pref = new HashMap<String,String>();
         Map mine = getMyNamespaces(el);
         Node n = el.getParentNode();
-        do {
+        while (n != null && n.getNodeType() != Node.DOCUMENT_NODE) {
             if (n instanceof Element) {
                 Element l = (Element) n;
                 NamedNodeMap nnm = l.getAttributes();
@@ -352,7 +354,7 @@ public class DOMUtils {
                 }
             }
             n = n.getParentNode();
-        } while (n != null && n.getNodeType() != Node.DOCUMENT_NODE);
+        } 
         return pref;
     }
 
@@ -994,6 +996,29 @@ public class DOMUtils {
             __builders.set(builder);
         }
         return builder;
+    }
+
+    public static List<Element> findChildrenByName(Element parent, QName name) {
+        if (parent == null)
+            throw new IllegalArgumentException("null parent");
+        if (name == null)
+            throw new IllegalArgumentException("null name");
+
+        LinkedList<Element> ret = new LinkedList<Element>();
+        NodeList nl = parent.getChildNodes();
+        for (int i = 0; i < nl.getLength(); ++i) {
+            Node c = nl.item(i);
+            if(c.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            // For a reason that I can't fathom, when using in-mem DAO we actually get elements with
+            // no localname.
+            String nodeName = c.getLocalName() != null ? c.getLocalName() : c.getNodeName();
+            if (new QName(c.getNamespaceURI(),nodeName).equals(name))
+                ret.add((Element)c);
+        }
+
+        
+        return ret;
     }
 
 }

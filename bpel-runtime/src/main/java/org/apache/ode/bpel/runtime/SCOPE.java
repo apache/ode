@@ -20,10 +20,12 @@ package org.apache.ode.bpel.runtime;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.*;
 import org.apache.ode.bpel.runtime.channels.*;
 import org.apache.ode.jacob.ChannelListener;
@@ -54,6 +56,30 @@ class SCOPE extends ACTIVITY {
     }
 
     public void run() {
+
+
+        for (OScope.Variable var : _oscope.variables.values()) {
+            if (var.extVar == null)
+                continue;
+            
+            HashMap<String,String> keymap = new HashMap<String,String>();
+            for (Map.Entry<String, OExpression> mapping : var.extVar.keyDeclaration.entrySet()) {
+                String val;
+                try {
+                    val = getBpelRuntimeContext().getExpLangRuntime().evaluateAsString(mapping.getValue(), getEvaluationContext());
+                } catch (FaultException e) {
+                    __log.error("Unable to initialize external variable key.", e);
+                    FaultData fd = createFault(e.getQName(), var.extVar, "Unable to initialize external variable key: " + e.getMessage());
+                    _self.parent.completed(fd,null);
+                    return;
+                }
+                keymap.put(mapping.getKey(),val);
+            }
+                            
+            getBpelRuntimeContext().initializeExternalVariable(_scopeFrame.resolve(var), keymap);
+        }
+        
+        
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,

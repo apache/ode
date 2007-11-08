@@ -36,6 +36,7 @@ import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
+import org.apache.ode.bpel.compiler.bom.ExtVarKeyMapping;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -67,6 +68,7 @@ import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.o.OExtVar;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -92,6 +94,7 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.wsdl.Definition;
@@ -1341,11 +1344,15 @@ abstract class BpelCompiler implements CompilerContext {
         ovar.name = src.getName();
         ovar.declaringScope = oscope;
         ovar.debugInfo = createDebugInfo(src, null);
+        
+        ovar.extVar = compileExtVar(src);
+
         oscope.addLocalVariable(ovar);
 
         if (__log.isDebugEnabled())
             __log.debug("Compiled variable " + ovar);
     }
+
 
     private void compile(TerminationHandler terminationHandler) {
         OScope oscope = _structureStack.topScope();
@@ -1615,6 +1622,27 @@ abstract class BpelCompiler implements CompilerContext {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);
         Collections.reverse(rval);
         return rval;
+    }
+
+    /**
+     * Compile external variable declaration.
+     * @param src variable object
+     * @return compiled {@link OExtVar} representation. 
+     */
+    private OExtVar compileExtVar(Variable src) {
+        if (!src.isExternal())
+            return null;
+
+        OExtVar oextvar = new OExtVar(_oprocess);
+        oextvar.externalVariableId = src.getExternalId();
+        oextvar.debugInfo = createDebugInfo(src, null);
+        for (ExtVarKeyMapping mapping : src.getExtVarMappings()) {
+            String key = mapping.getKey();
+            OExpression oexpr = compileExpr(mapping.getExpression());
+            oextvar.keyDeclaration.put(key, oexpr);
+        }
+        
+        return oextvar;
     }
 
     private static class StructureStack {

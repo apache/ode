@@ -49,6 +49,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Test core BPEL processing capabilities.
@@ -410,6 +411,11 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     }
 
     public void forceFlush() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void initializeExternalVariable(VariableInstance instance, HashMap<String, String> keymap) {
         // TODO Auto-generated method stub
         
     }

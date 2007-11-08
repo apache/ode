@@ -32,6 +32,7 @@ import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.DOMUtils;
@@ -210,6 +211,7 @@ public class FOREACH extends ACTIVITY {
                 _oforEach.innerScope), _scopeFrame, null);
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
         getBpelRuntimeContext().initializeVariable(vinst, counterNode);
+
         // Generating event
         ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
         if (_oforEach.debugInfo != null)

@@ -18,6 +18,24 @@
  */
 package org.apache.ode.store;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Definition;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dd.TDeployment;
@@ -33,25 +51,11 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface.
@@ -341,6 +345,14 @@ public class ProcessConfImpl implements ProcessConf {
         String relative = cbpPath.substring(basePath.length());
         if (relative.startsWith(File.separator)) relative = relative.substring(1);
         return relative;
+    }
+
+    public List<Element> getExtensionElement(QName qname) {
+        try {
+            return DOMUtils.findChildrenByName(DOMUtils.stringToDOM(_pinfo.toString()), qname);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
 }

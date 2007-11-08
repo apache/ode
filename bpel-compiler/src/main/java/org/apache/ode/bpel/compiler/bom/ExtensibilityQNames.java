@@ -22,7 +22,7 @@ import javax.xml.namespace.QName;
 
 
 public abstract class ExtensibilityQNames {
-    /**
+    /*
      * Activity Recovery extensibility elements.
      */
     public static final String NS_ACTIVITY_RECOVERY         = "http://ode.apache.org/activityRecovery";
@@ -30,6 +30,21 @@ public abstract class ExtensibilityQNames {
     public static final QName FAILURE_HANDLING_RETRY_FOR    = new QName(NS_ACTIVITY_RECOVERY, "retryFor");
     public static final QName FAILURE_HANDLING_RETRY_DELAY  = new QName(NS_ACTIVITY_RECOVERY, "retryDelay");
     public static final QName FAILURE_HANDLING_FAULT_ON     = new QName(NS_ACTIVITY_RECOVERY, "faultOnFailure");
+
+
+
+    //
+    // External variables 
+    //
+    
+    /** Namespace for external variables. */
+    private static final String EXTVAR_NS = "http://www.apache.org/ode/extensions/externalVariables";
+    
+    /** Attribute name for external variable id. */
+    public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "ext-var-id");
+    
+    /** Element name of external variable key mapping. */
+    public static final QName EXTVAR_MAPPING = new QName(EXTVAR_NS, "key-map");
 
 }
 
