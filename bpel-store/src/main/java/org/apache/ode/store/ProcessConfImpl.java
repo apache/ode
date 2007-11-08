@@ -55,7 +55,6 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 /**
  * Implementation of the {@link org.apache.ode.bpel.iapi.ProcessConf} interface.
