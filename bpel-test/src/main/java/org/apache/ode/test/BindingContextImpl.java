@@ -37,6 +37,9 @@
  */
 package org.apache.ode.test;
 
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -44,9 +47,6 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
 
 public class BindingContextImpl implements BindingContext {
 	

@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+package org.apache.ode.bpel.extvar.jdbc;
 
 /**
- * Base class for variable types. 
+ * Enumeration of methods in which a new external variable row initialization is handled. 
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ *
  */
-public abstract class OVarType extends OBase {
+public enum InitType {
+    /** Just try to update the row, if does not already  exist, fails. */
+    update,
     
-    public OVarType(OProcess owner) {
-        super(owner);
-    }
+    /** Just insert the row, if already exist fails. */
+    insert,
     
-    /**
-     * Create a new instance of this variable.
-     * @return a "skeleton" representation of this variable
-     */
-    public abstract Node newInstance(Document doc);  
-  
+    /** Try updating the row, if no exist, then try inserting. */
+    update_insert,
     
+    /** First delete the row, then insert a new one. */
+    delete_insert
+
 }

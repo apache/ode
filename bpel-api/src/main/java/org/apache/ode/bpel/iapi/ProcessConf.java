@@ -29,6 +29,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
@@ -145,6 +146,13 @@ public interface ProcessConf {
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getInvokeEndpoints();
+    
+    /**
+     * Generic facility to get additional stuff out of the process descriptor. 
+     * @param qname name of the extension element.
+     * @return list of extension elements 
+     */
+    List<Element> getExtensionElement(QName qname);
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
     

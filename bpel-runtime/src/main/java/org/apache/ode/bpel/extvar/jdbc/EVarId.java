@@ -16,25 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.extvar.jdbc;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import javax.xml.namespace.QName;
 
 /**
- * Base class for variable types. 
+ * Key for identifiying an external variable. 
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ *
  */
-public abstract class OVarType extends OBase {
+class EVarId {
+    final QName pid;
+    final String varId;
     
-    public OVarType(OProcess owner) {
-        super(owner);
+    
+    EVarId(QName pid, String varId) {
+        this.pid = pid;
+        this.varId = varId;
     }
     
-    /**
-     * Create a new instance of this variable.
-     * @return a "skeleton" representation of this variable
-     */
-    public abstract Node newInstance(Document doc);  
-  
+    public boolean equals(Object o) {
+        return ((EVarId)o).varId.equals(varId ) && ((EVarId)o).pid.equals(pid);
+    }
     
+    public int hashCode() {
+        return varId.hashCode() ^ pid.hashCode(); 
+    }
+    
+    public String toString() {
+        return pid + "#" + varId;
+    }
 }
