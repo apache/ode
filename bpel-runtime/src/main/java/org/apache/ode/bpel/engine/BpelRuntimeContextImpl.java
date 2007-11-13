@@ -33,6 +33,7 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.engine.extvar.ExternalVariableKeyMapSerializer;
 import org.apache.ode.bpel.evt.*;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -67,6 +68,8 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apche.ode.bpel.evar.IncompleteKeyException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
@@ -78,7 +81,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -387,7 +392,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
         return cs.getValue();
     }
-
+    
+    /**
+     * Save the external variable keys that are evaluated at the time of scope instantiation.
+     */
+    public void initializeExternalVariable(VariableInstance variable, HashMap<String, String> keys) {
+        // Important to note here that the collection of keys that we are saving may not be
+        // the whole set required to retrieve the object. If that's the case then the variable
+        // will need to be assigned to before it can be read, at which point the keys will be
+        // updated. However if the key set is complete, then the variable can be read even if it
+        // was never written to in the process.
+        Element el = ExternalVariableKeyMapSerializer.toXML(keys);
+        ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
+        XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
+        dataDAO.set(el);
+    }
+    
     public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
     	
     	// Special case of messageType variables with no part
@@ -409,7 +429,35 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     "The variable " + variable.declaration.name + " isn't properly initialized.");
         }
 
-        return dataDAO.get();
+        
+        if (variable.declaration.extVar != null) {
+            // Note, that when using external variables, the database will contain not the actual value of the 
+            // variable, but a name-value map used to uniquely identify the external variable instance.  
+            Map<String, String> keys = ExternalVariableKeyMapSerializer.toMap((Element)dataDAO.get());
+            try {
+                Node ret = _bpelProcess.getEVM().read(variable.declaration.extVar.externalVariableId, keys ,_iid);
+                if (ret == null) {
+                    throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedVariable, 
+                            "The external variable \"" + variable.declaration.name + "\" has not been initialized.");
+                    
+                }
+                return ret;
+            } catch (IncompleteKeyException ike) {
+                // This indicates that the external variable needed to be written do, put has not been.
+                __log.error("External variable could not be read due to incomplete key; the following key " +
+                        "components were missing: " + ike.getMissing());
+                throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedVariable, 
+                        "The extenral variable \"" + variable.declaration.name + "\" has not been properly initialized;" +
+                                "the following key compoenents were missing:" + ike.getMissing());
+            } catch (ExternalVariableModuleException e) {
+                __log.error("Unexpected EVM error.", e);
+                throw new BpelEngineException(e);
+            }
+
+        } else /* not external */ {
+            return dataDAO.get();
+        }
+
     }
 
     public Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
@@ -480,9 +528,36 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
 
-        dataDAO.set(initData);
-        writeProperties(variable, initData, dataDAO);        
-        return dataDAO.get();
+
+        Node ret;
+        
+        if (variable.declaration.extVar != null) /*external variable */ {
+            // Note, that when using external variables, the database will contain not the actual value of the 
+            // variable, but a name-value map used to uniquely identify the external variable instance. When 
+            // initializing the external variable, we need to:
+            // 1) call the ext-var subystem to initialize the variable
+            // 3) save the computed keys (modified by 1 above) in the database. 
+
+            Map<String, String> keys = ExternalVariableKeyMapSerializer.toMap((Element)dataDAO.get());
+            // Note that keys gets modified by initExternalVariable
+            try {
+                ret = _bpelProcess.getEVM().write(variable.declaration.extVar.externalVariableId, keys, initData, _iid);
+            } catch (ExternalVariableModuleException e) {
+                __log.error("External variable initialization error.", e);
+                // TODO: need to report this
+                throw new BpelEngineException("External varaible initialization error", e);
+            }
+            Element xmlkey = ExternalVariableKeyMapSerializer.toXML(keys);
+            dataDAO.set(xmlkey);
+                        
+        } else /* normal variable */ {
+            dataDAO.set(initData);
+            ret = dataDAO.get();
+        }
+        
+        writeProperties(variable, ret, dataDAO);        
+        
+        return ret;
     }
 
     public void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {

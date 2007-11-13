@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import java.util.List;
+
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
@@ -87,4 +89,30 @@ public class Variable extends BpelObject {
 
     }
 
+    //
+    // Stuff related to external variables.
+    //
+    
+    /**
+     * Get the external variable identifier (each one will be defined in the deployment descriptor)
+     */
+    public String getExternalId() {
+        return getAttribute(ExtensibilityQNames.EXTVAR_ATTR, null);
+    }
+
+    /**
+     * Is this an external variable? It is if it has the above attribute.
+     * @return
+     */
+    public boolean isExternal() {
+        return null != getExternalId();
+    }
+    
+    /**
+     * Get the external variable mappings.
+     * @return
+     */
+    public List<ExtVarKeyMapping> getExtVarMappings() {
+        return getChildren(ExtVarKeyMapping.class);
+    }
 }

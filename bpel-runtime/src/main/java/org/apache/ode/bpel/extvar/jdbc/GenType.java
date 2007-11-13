@@ -16,25 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+package org.apache.ode.bpel.extvar.jdbc;
 
 /**
- * Base class for variable types. 
+ * Generator type enumaration.
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ *
  */
-public abstract class OVarType extends OBase {
+enum GenType {
+    /** plain old column */
+    none,
     
-    public OVarType(OProcess owner) {
-        super(owner);
-    }
+    /** sequence column */
+    sequence,
     
-    /**
-     * Create a new instance of this variable.
-     * @return a "skeleton" representation of this variable
-     */
-    public abstract Node newInstance(Document doc);  
-  
+    /** SQL expression column */
+    expression,
     
+    /** server-generated uuid column */
+    uuid, 
+    
+    /** process-id column */
+    pid, 
+    
+    /** instance-id column */
+    iid, 
+    
+    /** create timestamp */
+    ctimestamp, 
+    
+    /** update timestamp */
+    utimestamp
 }

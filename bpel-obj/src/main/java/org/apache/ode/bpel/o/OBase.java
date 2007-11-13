@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.utils.ObjectPrinter;
-
 import java.io.Serializable;
 
 

@@ -26,9 +26,13 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apche.ode.bpel.evar.ExternalVariableModule;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.xml.namespace.QName;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the
@@ -53,5 +57,7 @@ class Contexts {
     /** Global event listeners. Must be copy-on-write!!! */
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
 
+    /** Mapping from external variable engine identifier to the engine implementation. */
+    final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
 
 }

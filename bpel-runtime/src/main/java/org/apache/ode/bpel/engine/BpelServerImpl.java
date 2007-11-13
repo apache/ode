@@ -51,6 +51,7 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
+import org.apche.ode.bpel.evar.ExternalVariableModule;
 
 /**
  * <p>
@@ -82,6 +83,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * Guarded by _mngmtLock.writeLock(). 
      */
     private final Set<BpelProcess> _registeredProcesses = new HashSet<BpelProcess>();
+
 
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
@@ -139,6 +141,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         } finally {
             _mngmtLock.writeLock().unlock();
         }
+    }
+    
+    
+    public void registerExternalVariableEngine(ExternalVariableModule eve) {
+        _contexts.externalVariableEngines.put(eve.getName(), eve);
     }
 
     /**
@@ -337,7 +344,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             return true;
         if (_state == j)
             return false;
-        throw new IllegalStateException("Unexpected state: " + i);
+        return false;
+//        throw new IllegalStateException("Unexpected state: " + i);
     }
 
     /* TODO: We need to have a method of cleaning up old deployment data. */

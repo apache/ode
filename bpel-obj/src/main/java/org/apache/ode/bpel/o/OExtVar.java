@@ -18,23 +18,30 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import java.util.HashMap;
 
 /**
- * Base class for variable types. 
+ * Compiled representation of an external variable declaration.
+ * 
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ *
  */
-public abstract class OVarType extends OBase {
+public class OExtVar extends OBase {
+    private static final long serialVersionUID = 1L;
+
+    /** 
+     * Unique identifier for the external variable. Will be referenced in the deployment descriptor.
+     */
+    public String externalVariableId;
     
-    public OVarType(OProcess owner) {
+    /** 
+     * The declaration of keys, i.e. this specifies how the values that are avaialble to the external
+     * engine for the purposes of locating the external contents of the variable.  
+     */
+    public final HashMap<String, OExpression> keyDeclaration = new HashMap<String, OExpression>();
+    
+    public OExtVar(OProcess owner) {
         super(owner);
     }
-    
-    /**
-     * Create a new instance of this variable.
-     * @return a "skeleton" representation of this variable
-     */
-    public abstract Node newInstance(Document doc);  
-  
-    
+
 }

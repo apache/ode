@@ -26,6 +26,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -335,26 +337,24 @@ public class DOMUtils {
         HashMap<String,String> pref = new HashMap<String,String>();
         Map<String,String> mine = getMyNamespaces(el);
         Node n = el.getParentNode();
-        if (n != null) {
-	        do {
-	            if (n instanceof Element) {
-	                Element l = (Element) n;
-	                NamedNodeMap nnm = l.getAttributes();
-	                int len = nnm.getLength();
-	                for (int i = 0; i < len; ++i) {
-	                    Attr a = (Attr) nnm.item(i);
-	                    if (isNSAttribute(a)) {
-	                        String key = getNSPrefixFromNSAttr(a);
-	                        String uri = a.getValue();
-	                        // prefer prefix bindings that are lower down in the tree.
-	                        if (pref.containsKey(key) || mine.containsKey(key)) continue;
-	                        pref.put(key, uri);
-	                    }
-	                }
-	            }
-	            n = n.getParentNode();
-	        } while (n != null && n.getNodeType() != Node.DOCUMENT_NODE);
-        }
+        while (n != null && n.getNodeType() != Node.DOCUMENT_NODE) {
+            if (n instanceof Element) {
+                Element l = (Element) n;
+                NamedNodeMap nnm = l.getAttributes();
+                int len = nnm.getLength();
+                for (int i = 0; i < len; ++i) {
+                    Attr a = (Attr) nnm.item(i);
+                    if (isNSAttribute(a)) {
+                        String key = getNSPrefixFromNSAttr(a);
+                        String uri = a.getValue();
+                        // prefer prefix bindings that are lower down in the tree.
+                        if (pref.containsKey(key) || mine.containsKey(key)) continue;
+                        pref.put(key, uri);
+                    }
+                }
+            }
+            n = n.getParentNode();
+        } 
         return pref;
     }
 
@@ -996,6 +996,29 @@ public class DOMUtils {
             __builders.set(builder);
         }
         return builder;
+    }
+
+    public static List<Element> findChildrenByName(Element parent, QName name) {
+        if (parent == null)
+            throw new IllegalArgumentException("null parent");
+        if (name == null)
+            throw new IllegalArgumentException("null name");
+
+        LinkedList<Element> ret = new LinkedList<Element>();
+        NodeList nl = parent.getChildNodes();
+        for (int i = 0; i < nl.getLength(); ++i) {
+            Node c = nl.item(i);
+            if(c.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            // For a reason that I can't fathom, when using in-mem DAO we actually get elements with
+            // no localname.
+            String nodeName = c.getLocalName() != null ? c.getLocalName() : c.getNodeName();
+            if (new QName(c.getNamespaceURI(),nodeName).equals(name))
+                ret.add((Element)c);
+        }
+
+        
+        return ret;
     }
 
 }
