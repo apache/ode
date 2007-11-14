@@ -134,7 +134,7 @@ class DbExternalVariable {
                 s = locator.get(kc.name);
             }
 
-            Object rv = rowval == null ? null : rowval.get(kc.name);
+            Object rv = rowval == null ? null : kc.getValue(rowval, locator.iid);
             if (s == null && rv == null) {
                 throw new IncompleteKeyException(Collections.singleton(kc.name));
             } else if (s != null && rv != null) {
@@ -309,7 +309,7 @@ class DbExternalVariable {
             elname = new QName(null, name);
         }
 
-        public Object getValue(String name, RowVal values, Long iid) {
+        public Object getValue(RowVal values, Long iid) {
             switch (genType) {
             case ctimestamp:
             case utimestamp:
