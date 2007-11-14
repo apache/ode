@@ -26,6 +26,7 @@ import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.*;
 import org.apache.ode.bpel.runtime.channels.*;
 import org.apache.ode.jacob.ChannelListener;
@@ -72,6 +73,11 @@ class SCOPE extends ACTIVITY {
                     FaultData fd = createFault(e.getQName(), var.extVar, "Unable to initialize external variable key: " + e.getMessage());
                     _self.parent.completed(fd,null);
                     return;
+                } catch (EvaluationException ee) {
+            	   __log.error("Unable to initialize external variable key.", ee);
+                   FaultData fd = createFault(var.getOwner().constants.qnSubLanguageExecutionFault, var.extVar, "Unable to initialize external variable key: " + ee.getMessage());
+                   _self.parent.completed(fd,null);
+                   return;
                 }
                 keymap.put(mapping.getKey(),val);
             }
