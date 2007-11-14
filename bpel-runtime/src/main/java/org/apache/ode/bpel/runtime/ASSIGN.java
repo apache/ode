@@ -170,17 +170,20 @@ class ASSIGN extends ACTIVITY {
         Node retVal;
         if (from instanceof DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
+            sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
             Node data = getBpelRuntimeContext().fetchVariableData(
                     _scopeFrame.resolve(dref.variable), false);
             retVal = DOMUtils.findChildByName((Element)data, dref.elName);
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
+            sendVariableReadEvent(_scopeFrame.resolve(varRef.variable));
             Node data = getBpelRuntimeContext().fetchVariableData(
                     _scopeFrame.resolve(varRef.variable), false);
             retVal = evalQuery(data, varRef.part, varRef.location,
                     getEvaluationContext());
         } else if (from instanceof OAssign.PropertyRef) {
             OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
+            sendVariableReadEvent(_scopeFrame.resolve(propRef.variable));
             Node data = getBpelRuntimeContext().fetchVariableData(
                     _scopeFrame.resolve(propRef.variable), false);
 

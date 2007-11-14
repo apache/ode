@@ -48,6 +48,9 @@ class REPLY extends ACTIVITY {
 
 
         try {
+            if (oreply.variable != null)
+               sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
+
             Node msg = oreply.variable == null ? null : getBpelRuntimeContext()
                     .fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
