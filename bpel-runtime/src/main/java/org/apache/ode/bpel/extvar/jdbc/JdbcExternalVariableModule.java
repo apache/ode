@@ -362,7 +362,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                     .prepareStatement(dbev.insert);
             int idx = 1;
             for (Column c : dbev.inscolumns) {
-                Object val = c.getValue(c.name, values, null);
+                Object val = c.getValue(values, null);
                 values.put(c.name, val);
                 stmt.setObject(idx, val);
                 idx++;
