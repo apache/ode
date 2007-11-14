@@ -21,6 +21,6 @@ package org.apache.ode.bpel.evt;
 /**
  * Signals that a variable has been accessed.
  */
-public class VariableReadEvent extends ScopeEvent {
+public class VariableReadEvent extends VariableEvent  {
   private static final long serialVersionUID = 1L;
 }

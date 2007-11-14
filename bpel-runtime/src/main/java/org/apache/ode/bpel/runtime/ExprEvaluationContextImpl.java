@@ -21,6 +21,9 @@ package org.apache.ode.bpel.runtime;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evt.ProcessEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OConstantVarType;
 import org.apache.ode.bpel.o.OExpression;
@@ -77,12 +80,16 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
             VariableInstance varInstance = _scopeInstance.resolve(variable);
             if (varInstance == null)
                 return null;
+            VariableReadEvent vre = new VariableReadEvent();
+            vre.setVarName(varInstance.declaration.name);
+            sendEvent(vre);
             ret = _native.fetchVariableData(varInstance, part, false);
         }
         return ret;
     }
 
-    public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
+
+	public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
         return _native.getExpLangRuntime().evaluateNode(expr, new ExprEvaluationContextImpl(_scopeInstance, _native, root));
     }
 
@@ -114,5 +121,10 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
     public boolean narrowTypes() {
         return true;
     }
+
+    private void sendEvent(ScopeEvent se) {
+    	_scopeInstance.fillEventInfo(se);
+    	_native.sendEvent(se);
+	}
 
 }
