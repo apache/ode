@@ -27,5 +27,9 @@
 		<provide partnerLink="request">
 			<service name="wns:testCompensationHandlersService" port="wns:testCompensationHandlersPort"/>
 		</provide>
+        <invoke partnerLink="probe">
+			<service name="ignore" port="ignore"/>
+		</invoke>
+
 	</process>
 </deploy>

@@ -40,11 +40,9 @@
 	<!-- test namespace syntax within XPATH expression -->
 	<partnerLinks>
 		<partnerLink name="request" partnerLinkType="wns:TestXPathNamespace1Request" myRole="TestXPathNamespace1Service"/>
-		<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService"  initializePartnerRole="yes"/>
 	</partnerLinks>
 	<variables>
 		<variable name="request" messageType="wns:requestMessage1"/>
-		<variable name="probeInput" messageType="prb:probeMessage"/>
 		<variable name="reply" messageType="wns:replyMessage1"/>
 	</variables>
 	<sequence>
