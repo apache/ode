@@ -45,8 +45,10 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     private static final Log __log = LogFactory.getLog(JdbcExternalVariableModule.class);
 
+    public static final String JDBC_NS = "http://ode.apache.org/externalVariables/jdbc";
+    
     /** Unique QName for the engine, this should be the element used for the external-variable configuration. */
-    public static final QName NAME = new QName("http://www.apache.org/ode/extensions/externalVariables", "jdbc");
+    public static final QName NAME = new QName(JDBC_NS, "jdbc");
 
     /** Manually configured data sources. */
     private final HashMap<String, DataSource> _dataSources = new HashMap<String, DataSource>();
@@ -58,9 +60,9 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         EVarId evarId = new EVarId(pid, extVarId);
         DataSource ds = null;
 
-        Element jndiDs = DOMUtils.findChildByName(config, new QName(null, "datasource-jndi"));
-        Element jndiRef = DOMUtils.findChildByName(config, new QName(null, "datasource-ref"));
-        Element initMode = DOMUtils.findChildByName(config, new QName(null, "init-mode"));
+        Element jndiDs = DOMUtils.findChildByName(config, new QName(JDBC_NS, "datasource-jndi"));
+        Element jndiRef = DOMUtils.findChildByName(config, new QName(JDBC_NS, "datasource-ref"));
+        Element initMode = DOMUtils.findChildByName(config, new QName(JDBC_NS, "init-mode"));
         if (jndiRef != null) {
             String refname = jndiRef.getTextContent().trim();
             ds = _dataSources.get(refname);
@@ -122,7 +124,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                     throw new ExternalVariableModuleException("Invalid <init-mode> value: " + initMode.getTextContent().trim());
                 }
 
-            Element tableName = DOMUtils.findChildByName(config, new QName(null, "table"));
+            Element tableName = DOMUtils.findChildByName(config, new QName(JDBC_NS, "table"));
             if (tableName == null || tableName.getTextContent().trim().equals(""))
                 throw new ExternalVariableModuleException("Must specify <table> for external variable " + evarId);
             String table = tableName.getTextContent().trim();
@@ -152,7 +154,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
             tables.close();
 
-            List<Element> columns = DOMUtils.findChildrenByName(config, new QName(null, "column"));
+            List<Element> columns = DOMUtils.findChildrenByName(config, new QName(JDBC_NS, "column"));
 
             for (Element col : columns) {
                 String name = col.getAttribute("name");

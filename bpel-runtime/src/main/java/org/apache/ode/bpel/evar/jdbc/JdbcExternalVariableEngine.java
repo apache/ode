@@ -28,7 +28,7 @@ public class JdbcExternalVariableEngine implements ExternalVariableModule {
     private static final Log __log = LogFactory.getLog(JdbcExternalVariableEngine.class);
 
     /** Unique QName for the engine, this should be the element used for the external-variable configuration. */
-    public static final QName NAME = new QName("http://www.apache.org/ode/extensions/externalVariables", "jdbc");
+    public static final QName NAME = new QName("http://ode.apache.org/externalVariables/jdbc", "jdbc");
 
     /** Manually configured data sources. */
     private final HashMap<String, DataSource> _dataSources = new HashMap<String, DataSource>();

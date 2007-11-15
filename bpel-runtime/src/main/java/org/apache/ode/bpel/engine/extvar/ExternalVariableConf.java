@@ -29,7 +29,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
 public class ExternalVariableConf {
-    public final static QName EXTVARCONF_ELEMENT = new QName("http://www.apache.org/ode/extensions/externalVariables", 
+    public final static QName EXTVARCONF_ELEMENT = new QName("http://ode.apache.org/externalVariables", 
             "externalVariable");
     
     
