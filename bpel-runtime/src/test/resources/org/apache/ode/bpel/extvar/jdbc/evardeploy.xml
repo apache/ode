@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -17,41 +18,32 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-	xmlns:pns="http://ode/bpel/unit-test" 
-	xmlns:wns="http://ode/bpel/unit-test.wsdl"
-	xmlns:evar="http://www.apache.org/ode/extensions/externalVariables">
+    xmlns:pns="http://ode/bpel/unit-test" 
+    xmlns:wns="http://ode/bpel/unit-test.wsdl"
+    xmlns:xvar="http://ode.apache.org/externalVariables"
+    xmlns:jdbc="http://ode.apache.org/externalVariables/jdbc" >
 
-
-	<process name="pns:HelloWorld2">
-		<active>true</active>
-		<provide partnerLink="helloPartnerLink">
-			<service name="wns:HelloService" port="HelloPort"/>
-		</provide>
-		
-		<evar:externalVariable id="evar1" > 
-			<evar:jdbc xmlns="">				        
-				<datasource-ref>testds</datasource-ref>
-				<table>extvartable1</table>
-				<init mode="insert"/> 
-				<column name="id1" 	        
-					key="yes" 				
-					generator="uuid" /> 
-				<column name="id2"          
-				    column-name="_id2_"     
-					key="yes" 				
-					generator="uuid" />     
-				<column name="pid" 
-					generator="pid" />      
-				<column name="iid"
-					generator="iid" />      
-				<column name="cts" 
-					generator="ctimestamp" />   
-				<column name="uts" 
-					generator="utimestamp" />   
-				<column name="foo" />		
-				<column name="bar" />		
-			</evar:jdbc>			
-		</evar:externalVariable>
-		
-	</process>
+    <process name="pns:HelloWorld2">
+        <active>true</active>
+        <provide partnerLink="helloPartnerLink">
+            <service name="wns:HelloService" port="HelloPort"/>
+        </provide>
+        
+        <xvar:externalVariable id="evar1" > 
+            <jdbc:jdbc>                        
+                <jdbc:datasource-ref>testds</jdbc:datasource-ref>
+                <jdbc:table>extvartable1</jdbc:table>
+                <jdbc:init mode="insert"/> 
+                <jdbc:column name="id1" key="yes" generator="uuid" /> 
+                <jdbc:column name="id2" column-name="_id2_" key="yes" generator="uuid" />     
+                <jdbc:column name="pid" generator="pid" />
+                <jdbc:column name="iid" generator="iid" />
+                <jdbc:column name="cts" generator="ctimestamp" />
+                <jdbc:column name="uts" generator="utimestamp" />
+                <jdbc:column name="foo" />
+                <jdbc:column name="bar" />
+            </jdbc:jdbc>
+        </xvar:externalVariable>
+        
+    </process>
 </deploy>

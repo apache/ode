@@ -38,10 +38,10 @@ public abstract class ExtensibilityQNames {
     //
     
     /** Namespace for external variables. */
-    private static final String EXTVAR_NS = "http://www.apache.org/ode/extensions/externalVariables";
+    private static final String EXTVAR_NS = "http://ode.apache.org/externalVariables";
     
     /** Attribute name for external variable id. */
-    public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "ext-var-id");
+    public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "id");
     
     /** Element name of external variable key mapping. */
     public static final QName EXTVAR_MAPPING = new QName(EXTVAR_NS, "key-map");

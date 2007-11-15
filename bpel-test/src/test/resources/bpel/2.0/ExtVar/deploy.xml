@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -19,8 +20,8 @@
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
 	xmlns:pns="http://ode/bpel/unit-test" 
 	xmlns:wns="http://ode/bpel/unit-test.wsdl"
-	xmlns:evar="http://www.apache.org/ode/extensions/externalVariables">
-
+    xmlns:xvar="http://ode.apache.org/externalVariables"
+    xmlns:jdbc="http://ode.apache.org/externalVariables/jdbc" >
 
 	<process name="pns:HelloWorld2">
 		<active>true</active>
@@ -28,19 +29,16 @@
 			<service name="wns:HelloService" port="HelloPort"/>
 		</provide>
 		
-		<evar:externalVariable id="evar1" >
-			<evar:jdbc xmlns="">				       
-				<datasource-ref>testds</datasource-ref>
-				<table>extvartable1</table>
-				<column name="pid" 
-				    key="yes"
-					generator="pid" />      
-				<column name="cts" 
-					generator="ctimestamp" />   
-				<column name="uts" 
-					generator="utimestamp" />   
-			</evar:jdbc>			
-		</evar:externalVariable>
+		<xvar:externalVariable id="evar1" >
+			<jdbc:jdbc>				       
+				<jdbc:datasource-ref>testds</jdbc:datasource-ref>
+				<jdbc:table>extvartable1</jdbc:table>
+				<jdbc:column name="pid" key="yes" generator="pid" />      
+				<jdbc:column name="cts" generator="ctimestamp" />
+				<jdbc:column name="uts" generator="utimestamp" />
+			</jdbc:jdbc>			
+		</xvar:externalVariable>
 		
 	</process>
 </deploy>
+

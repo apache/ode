@@ -24,7 +24,7 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:foo="http://foo/extvar"
-    xmlns:evar="http://www.apache.org/ode/extensions/externalVariables"
+    xmlns:xvar="http://ode.apache.org/externalVariables"
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
@@ -48,8 +48,7 @@
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
      <variable name="tmpDate" type="xsd:dateTime"/>     
-     <variable name="external" element="foo:row" evar:ext-var-id="evar1" />
-
+     <variable name="external" element="foo:row" xvar:id="evar1" />
    </variables>
         
    <sequence>   
