@@ -43,6 +43,7 @@ import org.jaxen.VariableContext;
 import org.jaxen.XPathFunctionContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
@@ -55,6 +56,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import net.sf.saxon.dom.NodeWrapper;
 
 
 /**
@@ -311,7 +314,11 @@ class JaxenContexts implements FunctionContext, VariableContext {
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
                 } else {
-                    varElmt = (Element) args.get(1);
+                    if (args.get(1) instanceof NodeWrapper)
+                        varElmt = (Element) ((NodeWrapper)args.get(1)).getUnderlyingNode();
+                    else varElmt = (Element) args.get(1);
+                    
+//                    varElmt = (Element) args.get(1);
                 }
             } catch (ClassCastException e) {
                 throw new WrappedFaultException.JaxenFunctionException(
@@ -348,7 +355,10 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 }
             }
 
-            DOMSource source = new DOMSource(varElmt);
+            Document varDoc = DOMUtils.newDocument();
+            varDoc.appendChild(varDoc.importNode(varElmt, true));
+
+            DOMSource source = new DOMSource(varDoc);
             // Using a StreamResult as a DOMResult doesn't behaves properly when the result
             // of the transformation is just a string.
             StringWriter writerResult = new StringWriter();
