@@ -19,23 +19,23 @@
   -->
 
 <wsdl:definitions 
-    targetNamespace="http://pxe/bpel/unit-test.wsdl"
+    targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:tns="http://pxe/bpel/unit-test.wsdl"
+    xmlns:tns="http://ode/bpel/unit-test.wsdl"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:types="http://pxe/bpel/types"
+    xmlns:types="http://ode/bpel/types"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
     <wsdl:types>
-        <xsd:schema targetNamespace="http://pxe/bpel/types">
-                <xsd:complexType name="ContentCT">
+        <xsd:schema targetNamespace="http://ode/bpel/types">
+            <xsd:complexType name="ContentCT">
                 <xsd:sequence>
                     <xsd:element name="content" type="xsd:string"/>
                 </xsd:sequence>
-                </xsd:complexType>
+            </xsd:complexType>
         </xsd:schema>
     </wsdl:types>
 
@@ -56,12 +56,12 @@
             <soap:operation soapAction="" style="rpc"/>
             <wsdl:input>
                 <soap:body
-                    namespace="http://pxe/bpel/unit-test.wsdl"
+                    namespace="http://ode/bpel/unit-test.wsdl"
                     use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body
-                    namespace="http://pxe/bpel/unit-test.wsdl" 
+                    namespace="http://ode/bpel/unit-test.wsdl"
                     use="literal"/>
             </wsdl:output>
         </wsdl:operation>

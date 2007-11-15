@@ -17,18 +17,18 @@
   ~ under the License.
   -->
 <process name="HelloXslWorld" 
-    targetNamespace="http://pxe/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-    xmlns:tns="http://pxe/bpel/unit-test"
+    xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:types="http://pxe/bpel/types"
-    xmlns:test="http://pxe/bpel/unit-test.wsdl"
+    xmlns:types="http://ode/bpel/types"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
     <import location="HelloXslWorld.wsdl"
-        namespace="http://pxe/bpel/unit-test.wsdl"
+        namespace="http://ode/bpel/unit-test.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
     
     <partnerLinks>
