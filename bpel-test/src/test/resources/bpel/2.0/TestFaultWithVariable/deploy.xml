@@ -27,5 +27,11 @@
 		<provide partnerLink="request">
 			<service name="wns:TestFaultWithVariableService" port="wns:TestFaultWithVariablePort"/>
 		</provide>
+		<invoke partnerLink="probe">
+			<service name="ignore" port="ignore"/>
+		</invoke>
+		<invoke partnerLink="fault">
+			<service name="ignore" port="ignore"/>
+		</invoke>
 	</process>
 </deploy>

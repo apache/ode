@@ -39,15 +39,12 @@
 
   <partnerLinks>
   	<partnerLink name="request" partnerLinkType="wns:TestSimpleVariableTypeRequest" myRole="TestSimpleVariableTypeService"/>
-  	<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
   </partnerLinks>
 
   <variables>
     <variable name="request" 
                messageType="wns:requestMessage"/>
     <variable name="testType" type="xsd:string"/>
-    <variable name="probeInput" 
-               messageType="prb:probeMessage"/>
     <variable name="reply" 
                messageType="wns:replyMessage"/>
   </variables>
