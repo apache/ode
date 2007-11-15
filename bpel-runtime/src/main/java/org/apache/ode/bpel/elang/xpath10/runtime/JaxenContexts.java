@@ -348,7 +348,10 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 }
             }
 
-            DOMSource source = new DOMSource(varElmt);
+            Document varDoc = DOMUtils.newDocument();
+            varDoc.appendChild(varDoc.importNode(varElmt, true));
+
+            DOMSource source = new DOMSource(varDoc);
             // Using a StreamResult as a DOMResult doesn't behaves properly when the result
             // of the transformation is just a string.
             StringWriter writerResult = new StringWriter();
