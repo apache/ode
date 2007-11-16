@@ -41,6 +41,7 @@ import org.jaxen.FunctionContext;
 import org.jaxen.UnresolvableException;
 import org.jaxen.VariableContext;
 import org.jaxen.XPathFunctionContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
