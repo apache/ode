@@ -113,6 +113,7 @@ public class XSUtils {
 
         XMLSchemaLoader schemaLoader = new XMLSchemaLoader();
         schemaLoader.setEntityResolver(cr);
+        schemaLoader.setFeature("http://apache.org/xml/features/honour-all-schemaLocations", true);
 
         LoggingXmlErrorHandler eh = new LoggingXmlErrorHandler(__log);
         schemaLoader.setErrorHandler(eh);
