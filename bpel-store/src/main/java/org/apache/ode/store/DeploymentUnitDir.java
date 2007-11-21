@@ -75,19 +75,19 @@ class DeploymentUnitDir  {
 
     private static final FileFilter _wsdlFilter = new FileFilter() {
         public boolean accept(File path) {
-            return path.getName().endsWith(".wsdl");
+            return path.getName().endsWith(".wsdl") && path.isFile();
         }
     };
 
     private static final FileFilter _cbpFilter = new FileFilter() {
         public boolean accept(File path) {
-            return path.getName().endsWith(".cbp");
+            return path.getName().endsWith(".cbp") && path.isFile();
         }
     };
 
     private static final FileFilter _bpelFilter = new FileFilter() {
         public boolean accept(File path) {
-            return path.getName().endsWith(".bpel");
+            return path.getName().endsWith(".bpel") && path.isFile();
         }
     };
 
