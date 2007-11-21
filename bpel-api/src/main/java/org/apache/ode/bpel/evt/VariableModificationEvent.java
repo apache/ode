@@ -18,13 +18,27 @@
  */
 package org.apache.ode.bpel.evt;
 
-public class VariableModificationEvent extends VariableEvent {
-  private static final long serialVersionUID = 1L;
-  public VariableModificationEvent() {
-    super();
-  }
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-  public VariableModificationEvent(String varName) {
-    super(varName);
-  }
+public class VariableModificationEvent extends VariableEvent {
+    private static final long serialVersionUID = 1L;
+
+    private Node newValue;
+
+    public VariableModificationEvent() {
+        super();
+    }
+
+    public VariableModificationEvent(String varName) {
+        super(varName);
+    }
+
+    public Node getNewValue() {
+        return newValue;
+    }
+
+    public void setNewValue(Node newValue) {
+        this.newValue = newValue;
+    }
 }

@@ -214,7 +214,8 @@ public class FOREACH extends ACTIVITY {
         getBpelRuntimeContext().initializeVariable(vinst, counterNode);
 
         // Generating event
-        ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+        se.setNewValue(counterNode);
         if (_oforEach.debugInfo != null)
             se.setLineNo(_oforEach.debugInfo.startLine);
         sendEvent(se);
