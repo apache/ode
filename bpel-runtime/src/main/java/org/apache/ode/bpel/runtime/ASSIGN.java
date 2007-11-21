@@ -330,6 +330,7 @@ class ASSIGN extends ACTIVITY {
             __log.debug("Assign.copy(" + ocopy + ")");
 
         final BpelRuntimeContext napi = getBpelRuntimeContext();
+        ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
         // the database.
@@ -349,6 +350,8 @@ class ASSIGN extends ACTIVITY {
                         .resolve(((VariableRef) ocopy.from).getVariable());
                 Element lvalue = (Element) napi.fetchVariableData(rval, false);
                 napi.initializeVariable(lval, lvalue);
+                se = new VariableModificationEvent(lval.declaration.name);
+                ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
                 // This really should have been cought by the compiler.
                 __log
@@ -405,6 +408,7 @@ class ASSIGN extends ACTIVITY {
                 PartnerLinkInstance plval = _scopeFrame
                         .resolve(pLinkRef.partnerLink);
                 replaceEndpointRefence(plval, rvalue);
+                se = new PartnerLinkModificationEvent(((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
             } else {
                 // Sneakily converting the EPR if it's not the format expected by the lvalue
                 if (ocopy.from instanceof OAssign.PartnerLinkRef) {
@@ -421,25 +425,16 @@ class ASSIGN extends ACTIVITY {
                     lvalue = replaceContent(lvalue, lvaluePtr, rvalue
                             .getTextContent());
                 }
-                final VariableInstance lval = _scopeFrame.resolve(ocopy.to
-                        .getVariable());
+                final VariableInstance lval = _scopeFrame.resolve(ocopy.to.getVariable());
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
                                 "' value '" + DOMUtils.domToString(lvalue) +"'");
                 napi.commitChanges(lval, lvalue);
+                se = new VariableModificationEvent(lval.declaration.name);
+                ((VariableModificationEvent)se).setNewValue(lvalue);
             }
         }
 
-        ScopeEvent se;
-        if (ocopy.to instanceof OAssign.PartnerLinkRef) {
-            // myRole can't be updated, only a partnerRole is updated.
-            se = new PartnerLinkModificationEvent(
-                    ((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
-        } else {
-            final VariableInstance lval = _scopeFrame.resolve(ocopy.to
-                    .getVariable());
-            se = new VariableModificationEvent(lval.declaration.name);
-        }
         if (ocopy.debugInfo != null)
             se.setLineNo(ocopy.debugInfo.startLine);
         sendEvent(se);

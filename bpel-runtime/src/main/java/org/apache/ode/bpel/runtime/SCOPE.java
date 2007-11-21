@@ -297,7 +297,8 @@ class SCOPE extends ACTIVITY {
                                 ntive.initializeVariable(vinst, _fault.getFaultMessage());
 
                                 // Generating event
-                                ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                se.setNewValue(_fault.getFaultMessage());
                                 if (_oscope.debugInfo != null)
                                     se.setLineNo(_oscope.debugInfo.startLine);
                                 sendEvent(se);
