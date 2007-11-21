@@ -116,7 +116,8 @@ public class INVOKE extends ACTIVITY {
 
                         getBpelRuntimeContext().initializeVariable(outputVar, response);
                         // Generating event
-                        ScopeEvent se = new VariableModificationEvent(outputVar.declaration.name);
+                        VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
+                        se.setNewValue(response);
                         if (_oinvoke.debugInfo != null)
                             se.setLineNo(_oinvoke.debugInfo.startLine);
                         sendEvent(se);

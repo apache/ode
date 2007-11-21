@@ -233,7 +233,8 @@ class EH_EVENT extends BpelJacobRunnable {
                                         VariableInstance vinst = ehScopeFrame.resolve(_oevent.variable);
                                         getBpelRuntimeContext().initializeVariable(vinst, msgEl);
 
-                                        ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                        se.setNewValue(msgEl);
                                         _scopeFrame.fillEventInfo(se);
                                         if (_oevent.debugInfo != null)
                                             se.setLineNo(_oevent.debugInfo.startLine);
