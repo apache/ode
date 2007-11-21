@@ -212,7 +212,8 @@ class PICK extends ACTIVITY {
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
         getBpelRuntimeContext().initializeVariable(vinst, msgEl);
         // Generating event
-        ScopeEvent se = new VariableModificationEvent(vinst.declaration.name);
+        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+        se.setNewValue(msgEl);
         if (_opick.debugInfo != null)
             se.setLineNo(_opick.debugInfo.startLine);
         sendEvent(se);
