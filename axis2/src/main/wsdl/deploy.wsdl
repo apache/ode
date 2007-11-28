@@ -30,7 +30,7 @@
     <xsd:schema elementFormDefault="qualified"
     	targetNamespace="http://www.apache.org/ode/deployapi">
     	<xsd:import namespace="http://www.w3.org/2005/05/xmlmime"
-    		schemaLocation="http://www.w3.org/2005/05/xmlmime" />
+    		schemaLocation="xmlmime.xsd" />
     	<xsd:complexType name="package">
     		<xsd:all>
     			<xsd:element name="zip" type="xmime:base64Binary"
