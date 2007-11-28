@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.channels;
+package org.apache.ode.bpel.runtime.extension;
 
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
+import org.w3c.dom.Element;
 
 /**
- * Response channel for extension activity executions.
- *
+ * Base class for creating new asynchronous extension implementations.
+ * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-@ChannelType
-public interface ExtensionResponse {
+public abstract class AbstractAsyncExtensionOperation implements ExtensionValidator,
+															ExtensionOperation {
 
-	void onCompleted();
-	void onFailure(Throwable t);
+	public void validate(ExtensibleElement element) throws CompilationException {
+		// default behavior: pass
+	}
+
+	public abstract void run(ExtensionContext context, Element element)
+			throws FaultException;
 	
 }

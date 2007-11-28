@@ -18,15 +18,13 @@
  */
 package org.apache.ode.test;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.runtime.extension.AbstractAsyncExtensionOperation;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionOperation;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
@@ -126,6 +124,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 		public void run(ExtensionContext context,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
+			context.complete();
 		}
 	}
 	
@@ -142,16 +141,19 @@ public class ExtensibilityTest extends BPELTestAbstract {
 			} catch (Exception e) {
 				e.printStackTrace();
 				Assert.fail();
+			} finally {
+				context.complete();
 			}
 		}
 	}
 
-	public static class TestExtensionValidatorActivity extends AbstractExtensionOperation {
+	public static class TestExtensionValidatorActivity extends AbstractAsyncExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
 		public void run(ExtensionContext context,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
+			context.complete();
 		}
 
 		@Override

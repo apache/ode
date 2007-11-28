@@ -18,30 +18,28 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Collection;
+import java.util.Date;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
-import org.apache.ode.utils.SerializableElement;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Operation;
-import java.util.Collection;
-import java.util.Date;
-
-import javax.xml.namespace.QName;
 
 /**
  * <p>A facade for accessing all the BPEL functionality that is not implemented
@@ -260,5 +258,7 @@ public interface BpelRuntimeContext {
 
     void releasePartnerMex(String mexId);
     
-    void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException;
+    //void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException;
+    
+    ExtensionOperation createExtensionActivityImplementation(QName name);
 }

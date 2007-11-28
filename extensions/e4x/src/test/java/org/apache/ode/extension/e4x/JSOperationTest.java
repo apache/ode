@@ -22,7 +22,6 @@ package org.apache.ode.extension.e4x;
 import org.apache.ode.test.MockExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -44,6 +43,8 @@ public class JSOperationTest {
 		jso.run(c, e);
 		String res = DOMUtils.domToString(c.getVariables().get("request"));
 		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<message><TestPart>Hello World</TestPart></message>", res);
+		Assert.assertTrue(c.completed);
+		Assert.assertFalse(c.faulted);
 	}
 	
 	@Test public void testArrayCopy() throws Exception {
@@ -62,6 +63,8 @@ public class JSOperationTest {
 		jso.run(c, e);
 		String res = DOMUtils.domToString(c.getVariables().get("items"));
 		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<message><TestPart><items><item><name>WSDL consulting</name><price>2500</price></item><item hyped=\"true\"><name>BPEL consulting</name><price>6000</price></item></items></TestPart></message>", res);
+		Assert.assertTrue(c.completed);
+		Assert.assertFalse(c.faulted);
 	}
 
 }

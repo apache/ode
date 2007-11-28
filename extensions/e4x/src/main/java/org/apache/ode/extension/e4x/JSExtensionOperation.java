@@ -21,7 +21,7 @@ package org.apache.ode.extension.e4x;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionOperation;
+import org.apache.ode.bpel.runtime.extension.AbstractSyncExtensionOperation;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -36,9 +36,9 @@ import org.w3c.dom.Element;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class JSExtensionOperation extends AbstractExtensionOperation {
+public class JSExtensionOperation extends AbstractSyncExtensionOperation {
 	
-	public void run(ExtensionContext context, Element element) throws FaultException {
+	public void runSync(ExtensionContext context, Element element) throws FaultException {
 
 		CustomContextFactory.init();
 		Context ctx = Context.enter();

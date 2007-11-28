@@ -103,16 +103,6 @@ public interface ExtensionContext {
             throws FaultException;
     
     /**
-     * Obtain the status of a control link.
-     *
-     * @param olink
-     *          link to check
-     * @return <code>true</code> if the link is active, <code>false</code>
-     *         otherwise.
-     */
-    boolean isLinkActive(OLink olink) throws FaultException;
-    
-    /**
      * Reads the current process instance id.
      * @return instance id
      */
@@ -131,6 +121,10 @@ public interface ExtensionContext {
     
     BpelRuntimeContext getBpelRuntimeContext();
     
+   
     //ScopeFrame getScopeFrame();
+    void complete();
     
+    void completeWithFault(Throwable t);
+    void completeWithFault(FaultException fault);
 }

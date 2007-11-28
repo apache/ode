@@ -61,6 +61,8 @@ public class OProcess extends OBase {
     /** All declared extensions in the process. **/
     public final Set<OExtension> declaredExtensions = new HashSet<OExtension>();
 
+    /** All must-understand extensions in the process. **/
+    public final Set<OExtension> mustUnderstandExtensions = new HashSet<OExtension>();
 
     /** Date process was compiled. */
     public Date compileDate;

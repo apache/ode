@@ -18,15 +18,24 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.w3c.dom.Node;
 
@@ -35,15 +44,18 @@ import org.w3c.dom.Node;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class ExtensionContextImpl implements ExtensionContext {
-
+	private static final Log __log = LogFactory.getLog(ExtensionContextImpl.class);
+	
 	private BpelRuntimeContext _context;
 	private ScopeFrame _scopeFrame;
-	private OActivity _activity;
+	private ActivityInfo _activityInfo;
+	
+	private boolean hasCompleted = false;
 
-	public ExtensionContextImpl(OActivity activity, ScopeFrame scopeFrame, BpelRuntimeContext context) {
+	public ExtensionContextImpl(ActivityInfo activityInfo, ScopeFrame scopeFrame, BpelRuntimeContext context) {
+		_activityInfo = activityInfo;
 		_context = context;
 		_scopeFrame = scopeFrame;
-		_activity = activity;
 	}
 	
 	public Long getProcessId() {
@@ -66,11 +78,6 @@ public class ExtensionContextImpl implements ExtensionContext {
         }
 		
 		return visVars;
-	}
-
-	public boolean isLinkActive(OLink olink) throws FaultException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public String readMessageProperty(Variable variable, OProperty property)
@@ -100,6 +107,9 @@ public class ExtensionContextImpl implements ExtensionContext {
 			throws FaultException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
 		_context.commitChanges(vi, value);
+        VariableModificationEvent vme = new VariableModificationEvent(variable.name);
+        vme.setNewValue(value);
+        sendEvent(vme);
 	}
 
 	private Variable getVisibleVariable(String varName) {
@@ -107,14 +117,60 @@ public class ExtensionContextImpl implements ExtensionContext {
     }
 
 	public String getActivityName() {
-		return _activity.name;
+		return _activityInfo.o.name;
 	}
 
 	public OActivity getOActivity() {
-		return _activity;
+		return _activityInfo.o;
 	}
 
 	public BpelRuntimeContext getBpelRuntimeContext() {
 		return _context;
+	}
+	
+	public void sendEvent(ScopeEvent event) {
+        if (event.getLineNo() == -1 && _activityInfo.o.debugInfo != null) {
+        	event.setLineNo(_activityInfo.o.debugInfo.startLine);
+        }
+        _scopeFrame.fillEventInfo(event);
+        getBpelRuntimeContext().sendEvent(event);
+	}
+	
+	public void complete() {
+		if (!hasCompleted) {
+			_activityInfo.parent.completed(null, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+	}
+	
+	public void completeWithFault(Throwable t) {
+		if (!hasCompleted) {
+			StringWriter sw = new StringWriter();
+			t.printStackTrace(new PrintWriter(sw));
+			FaultData fault = new FaultData(new QName(Bpel20QNames.NS_WSBPEL2_0, "subLanguageExecutionFault"), _activityInfo.o, sw.getBuffer().toString());
+	        _activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+	}
+	
+	public void completeWithFault(FaultException ex) {
+		if (!hasCompleted) {
+			FaultData fault = new FaultData(ex.getQName(), _activityInfo.o, ex.getMessage());
+			_activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+
 	}
 }
