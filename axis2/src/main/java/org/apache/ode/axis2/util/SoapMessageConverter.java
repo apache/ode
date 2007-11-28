@@ -434,10 +434,12 @@ public class SoapMessageConverter {
         if (headerEl == null)
             return;
 
-
-        Element destPart = getForeignIn(odeMessage);
+        Element destPart = odeMessage.getOwnerDocument().createElementNS(null, p.getName());
+        odeMessage.appendChild(destPart);
         destPart.appendChild(odeMessage.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
 
+        Element destPart1 = getForeignIn(odeMessage);
+        destPart1.appendChild(odeMessage.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
     }
 
     /**
