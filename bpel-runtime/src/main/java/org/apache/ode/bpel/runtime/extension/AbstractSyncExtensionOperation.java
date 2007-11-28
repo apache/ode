@@ -18,20 +18,35 @@
  */
 package org.apache.ode.bpel.runtime.extension;
 
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
+import org.w3c.dom.Element;
 
 /**
  * Base class for creating new extension implementations.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public abstract class AbstractExtensionOperation implements ExtensionValidator,
+public abstract class AbstractSyncExtensionOperation implements ExtensionValidator,
 															ExtensionOperation {
 
 	public void validate(ExtensibleElement element) throws CompilationException {
 		// default behavior: pass
 	}
 
+	protected abstract void runSync(ExtensionContext context, Element element) throws FaultException;
+	
+	public void run(ExtensionContext context, Element element)
+			throws FaultException {
+		try {
+			runSync(context, element);
+			context.complete();
+		} catch (FaultException f) {
+			context.completeWithFault(f);
+		} catch (Exception e) {
+			context.completeWithFault(e);
+		}
+	}
 }

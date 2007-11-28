@@ -36,4 +36,5 @@ import org.w3c.dom.Element;
 public interface ExtensionOperation {
 
 	void run(ExtensionContext context, Element element) throws FaultException;
+	
 }

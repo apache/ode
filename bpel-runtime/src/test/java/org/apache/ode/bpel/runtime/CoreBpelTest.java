@@ -43,12 +43,11 @@ import org.apache.ode.bpel.o.OSequence;
 import org.apache.ode.bpel.o.OThrow;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
@@ -418,11 +417,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         
     }
 
-	public void executeExtension(QName extensionId, ExtensionContext context,
-			Element element,
-			ExtensionResponseChannel extResponseChannel) throws FaultException {
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 }

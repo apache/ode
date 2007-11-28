@@ -18,22 +18,16 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.o.OExtensionActivity;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.SerializableElement;
 
 /**
  * JacobRunnable that delegates the work of the <code>extensionActivity</code> activity
@@ -54,31 +48,25 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
 	}
 
     public final void run() {
-        try {
-        	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
-        	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
-        	
-        	getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(_oext.nestedElement.getElement()), helper, _oext.nestedElement.getElement(), responseChannel);
-        	
-            object(new ExtensionResponseChannelListener(responseChannel) {
-				private static final long serialVersionUID = -1L;
+    	final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntimeContext());
+    	final QName extensionId = DOMUtils.getElementQName(_oext.nestedElement.getElement());
+    	try {
+    		ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
+    		if (ea == null) {
+    			if (_oext.getOwner().mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
+    				__log.warn("Lookup of extension activity " + extensionId + " failed.");
+    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+    			} else {
+    				// act like <empty> - do nothing
+    				context.complete();
+    				return;
+    			}
+    		}
 
-				public void onCompleted() {
-					_self.parent.completed(null, CompensationHandler.emptySet());
-            	}
-            	
-            	public void onFailure(Throwable t) {
-            		StringWriter sw = new StringWriter();
-            		t.printStackTrace(new PrintWriter(sw));
-            		FaultData fault = createFault(new QName(Bpel20QNames.NS_WSBPEL2_0, "subLanguageExecutionFault"), _oext, sw.getBuffer().toString());
-                    _self.parent.completed(fault, CompensationHandler.emptySet());
-            	};
-            });
-
+    		ea.run(context, _oext.nestedElement.getElement());
 		} catch (FaultException fault) {
             __log.error(fault);
-            FaultData faultData = createFault(fault.getQName(), _oext, fault.getMessage());
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            context.completeWithFault(fault);
 		}
 
     }

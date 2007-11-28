@@ -74,13 +74,11 @@ import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
@@ -1204,52 +1202,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _forceFlush = true;
     }
     
-	public void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException {
-		__log.debug("Execute extension activity");
-		final String channelId = extResponseChannel.export();
-		ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
-		if (ea == null) {
-			if (_bpelProcess._mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
-				//TODO
-				__log.warn("Lookup of extension activity " + extensionId + " failed.");
-				throw new FaultException(new QName("urn:bpel20", "extlookup-failed"), "Lookup of extension activity " + extensionId + " failed.");
-			} else {
-				// act like <empty> - do nothing
-				completeExtensionExecution(channelId, null);
-				return;
-			}
-		}
-		
-		try {
-			ea.run(context, element);
-			completeExtensionExecution(channelId, null);
-		} catch (RuntimeException e) {
-			__log.error("Error during execution of extension activity.", e);
-			completeExtensionExecution(channelId, e);
-		} 
-	}
-
-	private void completeExtensionExecution(final String channelId, final Throwable t) {
-		if (t != null) {
-	        _vpu.inject(new BpelJacobRunnable() {
-	            private static final long serialVersionUID = -1L;
-
-	            public void run() {
-	               importChannel(channelId, ExtensionResponseChannel.class).onFailure(t);
-	            }
-	        });
-		} else {
-	        _vpu.inject(new BpelJacobRunnable() {
-	            private static final long serialVersionUID = -1L;
-
-	            public void run() {
-	               importChannel(channelId, ExtensionResponseChannel.class).onCompleted();
-	            }
-	        });
-		}
-	}
-
-	private ExtensionOperation createExtensionActivityImplementation(QName name) {
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
 		if (name == null) {
 			return null;
 		}

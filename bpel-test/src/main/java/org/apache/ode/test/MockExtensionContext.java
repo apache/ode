@@ -38,6 +38,8 @@ import org.w3c.dom.Node;
  */
 public class MockExtensionContext implements ExtensionContext {
 	private Map<String, Node> variables = new HashMap<String, Node>();
+	public boolean completed;
+	public boolean faulted;
 	
 	public Map<String, Node> getVariables() {
 		return variables;
@@ -91,4 +93,19 @@ public class MockExtensionContext implements ExtensionContext {
 	public void writeVariable(Variable variable, Node value) throws FaultException {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
+
+	public void complete() {
+		this.completed = true;
+	}
+
+	public void completeWithFault(Throwable t) {
+		this.completed = true;
+		this.faulted = true;
+	}
+
+	public void completeWithFault(FaultException fault) {
+		this.completed = true;
+		this.faulted = true;
+	}
+	
 }

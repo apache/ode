@@ -1523,8 +1523,11 @@ abstract class BpelCompiler implements CompilerContext {
         
         oextension.debugInfo = createDebugInfo(_processDef, "Extension " + ext.getNamespaceURI());
 
-        _oprocess.declaredExtensions.add(oextension);
         _declaredExtensionNS.add(ext.getNamespaceURI());
+        _oprocess.declaredExtensions.add(oextension);
+        if (ext.isMustUnderstand()) {
+        	_oprocess.mustUnderstandExtensions.add(oextension);
+        }
 
         if (__log.isDebugEnabled())
             __log.debug("Compiled extension " + oextension);

@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -27,7 +25,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
@@ -45,10 +43,9 @@ import org.apache.ode.bpel.o.OAssign.VariableRef;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -581,31 +578,25 @@ class ASSIGN extends ACTIVITY {
     }
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
+    	final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntimeContext());
+    	final QName extensionId = DOMUtils.getElementQName(eao.nestedElement.getElement());
     	try {
-	    	final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntimeContext());
-	    	final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
+    		ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
+    		if (ea == null) {
+    			if (eao.getOwner().mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
+    				__log.warn("Lookup of extension activity " + extensionId + " failed.");
+    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+    			} else {
+    				// act like <empty> - do nothing
+    				context.complete();
+    				return;
+    			}
+    		}
 
-    		getBpelRuntimeContext().executeExtension(DOMUtils.getElementQName(eao.nestedElement.getElement()), helper, eao.nestedElement.getElement(), responseChannel);
-
-    		object(new ExtensionResponseChannelListener(responseChannel) {
-				private static final long serialVersionUID = 1L;
-
-				public void onCompleted() {
-					_self.parent.completed(null, CompensationHandler.emptySet());
-            	}
-            	
-            	public void onFailure(Throwable t) {
-            		StringWriter sw = new StringWriter();
-            		t.printStackTrace(new PrintWriter(sw));
-            		FaultData fault = createFault(new QName(Bpel20QNames.NS_WSBPEL2_0, "subLanguageExecutionFault"), _self.o, sw.getBuffer().toString());
-                    _self.parent.completed(fault, CompensationHandler.emptySet());
-            	};
-            });
-
+    		ea.run(context, eao.nestedElement.getElement());
     	} catch (FaultException fault) {
             __log.error(fault);
-            FaultData faultData = createFault(fault.getQName(), _self.o, fault.getMessage());
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            context.completeWithFault(fault);
 		}
     }
     
