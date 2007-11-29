@@ -96,7 +96,7 @@ WS_COMMONS          = struct(
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
-XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
+XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
