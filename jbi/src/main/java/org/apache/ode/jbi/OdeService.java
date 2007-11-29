@@ -156,7 +156,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             } finally {
                 // If we got an error that wasn't sent.  
                 if (jbiMex.getStatus() == ExchangeStatus.ACTIVE && !success) {
-                    if (err != null && jbiMex.getError() != null)  {
+                    if (err != null && jbiMex.getError() == null)  {
                         jbiMex.setError(err);
                     }
                     jbiMex.setStatus(ExchangeStatus.ERROR);     
