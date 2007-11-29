@@ -127,7 +127,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             } finally {
                 if (!success) {
                     jbiMex.setStatus(ExchangeStatus.ERROR);
-                    if (err != null && jbiMex.getError() != null)
+                    if (err != null && jbiMex.getError() == null)
                         jbiMex.setError(err);
                 } else {
                     if (jbiMex.getStatus() == ExchangeStatus.ACTIVE)
