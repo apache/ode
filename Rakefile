@@ -76,8 +76,8 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:#{Buildr::OpenJPA::VERSION}",
-                       "net.sourceforge.serp:serp:jar:1.12.0"]
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.0.1",
+                       "net.sourceforge.serp:serp:jar:1.13.1"]
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
                         :under=>"org.apache.servicemix", :version=>"3.1-incubating")

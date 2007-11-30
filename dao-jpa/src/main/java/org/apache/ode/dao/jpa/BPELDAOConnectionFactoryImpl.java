@@ -137,7 +137,6 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     private class TxMgrProvider implements ManagedRuntime {
         public TxMgrProvider() {
         }
-
         public TransactionManager getTransactionManager() throws Exception {
             return _tm;
         }
@@ -149,88 +148,9 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
             // there is no generic support for setting the rollback cause
             return null;
         }
-    }
-
-    private class DebugTxMgr implements TransactionManager {
-        private TransactionManager _tm;
-
-        public DebugTxMgr(TransactionManager tm) {
-            _tm = tm;
-        }
-
-        public void begin() throws NotSupportedException, SystemException {
-            _tm.begin();
-        }
-
-        public void commit() throws HeuristicMixedException, HeuristicRollbackException, IllegalStateException, RollbackException, SecurityException, SystemException {
-            _tm.commit();
-        }
-
-        public int getStatus() throws SystemException {
-            return _tm.getStatus();
-        }
-
-        public Transaction getTransaction() throws SystemException {
-            Transaction tx = _tm.getTransaction();
-            __log.debug("JPA get transaction" + tx);
-            return new DebugTx(tx);
-        }
-
-        public void resume(Transaction transaction) throws IllegalStateException, InvalidTransactionException, SystemException {
-            _tm.resume(transaction);
-        }
-
-        public void rollback() throws IllegalStateException, SecurityException, SystemException {
-            _tm.rollback();
-        }
-
-        public void setRollbackOnly() throws IllegalStateException, SystemException {
-            _tm.setRollbackOnly();
-        }
-
-        public void setTransactionTimeout(int i) throws SystemException {
-            _tm.setTransactionTimeout(i);
-        }
-
-        public Transaction suspend() throws SystemException {
-            return _tm.suspend();
+        public Object getTransactionKey() throws Exception, SystemException {
+            return _tm.getTransaction();
         }
     }
 
-    private class DebugTx implements Transaction {
-        private Transaction _tx;
-
-        public DebugTx(Transaction tx) {
-            _tx = tx;
-        }
-
-        public void commit() throws HeuristicMixedException, HeuristicRollbackException, RollbackException, SecurityException, SystemException {
-            _tx.commit();
-        }
-
-        public boolean delistResource(XAResource xaResource, int i) throws IllegalStateException, SystemException {
-            return _tx.delistResource(xaResource, i);
-        }
-
-        public boolean enlistResource(XAResource xaResource) throws IllegalStateException, RollbackException, SystemException {
-            return _tx.enlistResource(xaResource);
-        }
-
-        public int getStatus() throws SystemException {
-            return _tx.getStatus();
-        }
-
-        public void registerSynchronization(Synchronization synchronization) throws IllegalStateException, RollbackException, SystemException {
-            __log.debug("Synchronization registration on " + synchronization.getClass().getName());
-            _tx.registerSynchronization(synchronization);
-        }
-
-        public void rollback() throws IllegalStateException, SystemException {
-            _tx.rollback();
-        }
-
-        public void setRollbackOnly() throws IllegalStateException, SystemException {
-            _tx.setRollbackOnly();
-        }
-    }
 }
