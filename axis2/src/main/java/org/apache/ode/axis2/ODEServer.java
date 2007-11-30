@@ -55,7 +55,8 @@ import org.apache.ode.utils.fs.TempFileManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
+import javax.transaction.*;
+import javax.transaction.xa.XAResource;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -72,6 +73,7 @@ import java.util.concurrent.Executors;
 public class ODEServer {
 
     protected final Log __log = LogFactory.getLog(getClass());
+    protected final Log __logTx = LogFactory.getLog("org.apache.ode.tx");
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -384,6 +386,8 @@ public class ODEServer {
             Class txFactClass = this.getClass().getClassLoader().loadClass(txFactoryName);
             Object txFact = txFactClass.newInstance();
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
+            if (__logTx.isDebugEnabled())
+                _txMgr = new DebugTxMgr(_txMgr);
         } catch (Exception e) {
             __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
             throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
@@ -549,4 +553,103 @@ public class ODEServer {
             __log.debug("Ignoring store event: " + pse);
         }
     }
+
+    // Transactional debugging stuff, to track down all these little annoying bugs.
+    private class DebugTxMgr implements TransactionManager {
+        private TransactionManager _tm;
+
+        public DebugTxMgr(TransactionManager tm) {
+            _tm = tm;
+        }
+
+        public void begin() throws NotSupportedException, SystemException {
+            __logTx.debug("Txm begin");
+            _tm.begin();
+        }
+
+        public void commit() throws HeuristicMixedException, HeuristicRollbackException, IllegalStateException, RollbackException, SecurityException, SystemException {
+            __logTx.debug("Txm commit");
+            for (StackTraceElement traceElement : Thread.currentThread().getStackTrace()) {
+                __logTx.debug(traceElement.toString());
+            }
+            _tm.commit();
+        }
+
+        public int getStatus() throws SystemException {
+            __logTx.debug("Txm status");
+            return _tm.getStatus();
+        }
+
+        public Transaction getTransaction() throws SystemException {
+            Transaction tx = _tm.getTransaction();
+            __logTx.debug("Txm get tx " + tx);
+            return tx == null ? null : new DebugTx(tx);
+        }
+
+        public void resume(Transaction transaction) throws IllegalStateException, InvalidTransactionException, SystemException {
+            __logTx.debug("Txm resume");
+            _tm.resume(transaction);
+        }
+
+        public void rollback() throws IllegalStateException, SecurityException, SystemException {
+            __logTx.debug("Txm rollback");
+            _tm.rollback();
+        }
+
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+            __logTx.debug("Txm set rollback");
+            _tm.setRollbackOnly();
+        }
+
+        public void setTransactionTimeout(int i) throws SystemException {
+            __logTx.debug("Txm set tiemout " + i);
+            _tm.setTransactionTimeout(i);
+        }
+
+        public Transaction suspend() throws SystemException {
+            __logTx.debug("Txm suspend");
+            return _tm.suspend();
+        }
+    }
+
+    private class DebugTx implements Transaction {
+        private Transaction _tx;
+
+        public DebugTx(Transaction tx) {
+            _tx = tx;
+        }
+
+        public void commit() throws HeuristicMixedException, HeuristicRollbackException, RollbackException, SecurityException, SystemException {
+            __logTx.debug("Tx commit");
+            _tx.commit();
+        }
+
+        public boolean delistResource(XAResource xaResource, int i) throws IllegalStateException, SystemException {
+            return _tx.delistResource(xaResource, i);
+        }
+
+        public boolean enlistResource(XAResource xaResource) throws IllegalStateException, RollbackException, SystemException {
+            return _tx.enlistResource(xaResource);
+        }
+
+        public int getStatus() throws SystemException {
+            return _tx.getStatus();
+        }
+
+        public void registerSynchronization(Synchronization synchronization) throws IllegalStateException, RollbackException, SystemException {
+            __logTx.debug("Synchronization registration on " + synchronization.getClass().getName());
+            _tx.registerSynchronization(synchronization);
+        }
+
+        public void rollback() throws IllegalStateException, SystemException {
+            __logTx.debug("Tx rollback");
+            _tx.rollback();
+        }
+
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+            __logTx.debug("Tx set rollback");
+            _tx.setRollbackOnly();
+        }
+    }
+
 }
