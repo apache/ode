@@ -20,6 +20,7 @@ require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
+require "buildr/antlr"
 require "buildr/jetty"
 require "buildr/hibernate"
 
@@ -30,6 +31,7 @@ NEXT_VERSION = "1.2"
 ACTIVEMQ            = "org.apache.activemq:apache-activemq:jar:4.1.1"
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
+ANTLR               = "org.antlr:antlr:jar:3.0"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
                         :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
@@ -77,8 +79,8 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa-all:jar:#{Buildr::OpenJPA::VERSION}",
-                       "net.sourceforge.serp:serp:jar:1.12.0"]
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.0.1",
+                       "net.sourceforge.serp:serp:jar:1.13.1"]
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
                         :under=>"org.apache.servicemix", :version=>"3.1-incubating")
@@ -97,7 +99,7 @@ WS_COMMONS          = struct(
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
-XMLBEANS            = "xmlbeans:xbean:jar:2.2.0"
+XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
@@ -439,6 +441,14 @@ define "ode" do
   desc "ODE JCA Server"
   define "jca-server" do
     compile.with projects("jca-ra", "utils"), COMMONS.logging
+    package :jar
+  end
+
+  desc "ODE SimPEL"
+  define "simpel" do
+    pkg_name = "org.apache.ode.simpel.antlr"
+    compile.from antlr(_("src/main/antlr"), {:in_package=>pkg_name, :token=>pkg_name})
+    compile.with file(_("lib/e4x-grammar-0.1.jar")), ANTLR
     package :jar
   end
 
