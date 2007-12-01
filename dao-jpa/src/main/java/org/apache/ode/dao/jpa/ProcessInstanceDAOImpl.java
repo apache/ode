@@ -225,10 +225,7 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public ScopeDAO getScope(Long scopeInstanceId) {
-        Query qry = getEM().createNamedQuery("ScopeById");
-        qry.setParameter("sid", scopeInstanceId);
-        qry.setParameter("instance", this);
-        return (ScopeDAO) qry.getSingleResult();
+        return getEM().find(ScopeDAOImpl.class, scopeInstanceId);
 	}
 
 	public Collection<ScopeDAO> getScopes(String scopeName) {
