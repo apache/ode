@@ -122,6 +122,9 @@ public class ODEAxisService extends AxisService {
                     + wsdlDefinition.getDocumentBaseURI());
     }
     Port port = service.getPort(portName);
+    if (port == null) {
+        throw new OdeFault("Couldn't find port " + portName + " in definition " + wsdlServiceName);
+    }
     for (Object oext : port.getExtensibilityElements()) {
       if (oext instanceof SOAPAddress)
                 url = ((SOAPAddress) oext).getLocationURI();
