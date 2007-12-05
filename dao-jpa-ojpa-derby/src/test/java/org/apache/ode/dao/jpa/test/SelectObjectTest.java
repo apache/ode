@@ -98,7 +98,6 @@ public class SelectObjectTest extends TestCase {
 		assertNotNull(p.getType());
 		assertNotNull(p.getProcessId());
 		assertEquals( p.getVersion() , 1 );
-		assertTrue( p.getNumInstances() > 0 );
 		
 		// Assert the CorrelatorDAO
 		CorrelatorDAO corr = p.getCorrelator(CORRELATOR_ID1);
