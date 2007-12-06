@@ -199,54 +199,6 @@ public class INVOKE extends ACTIVITY {
         } else return null;
     }
 
-    private void retryOrFailure(String reason, Element data) {
-        _lastFailure = new Date();
-        _failureReason = reason;
-        _failureData = data;
-
-        OFailureHandling failureHandling = _oinvoke.getFailureHandling();
-        if (failureHandling != null && failureHandling.faultOnFailure) {
-            // No attempt to retry or enter activity recovery state, simply fault.
-            if (__log.isDebugEnabled())
-                __log.debug("ActivityRecovery: Invoke activity " + _self.aId + " faulting on failure");
-            FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oinvoke, reason);
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
-            return;
-        }
-        // If maximum number of retries, enter activity recovery state.  
-        if (failureHandling == null || _invoked > failureHandling.retryFor) {
-            requireRecovery();
-            return;
-        }
-        
-        if (__log.isDebugEnabled())
-            __log.debug("ActivityRecovery: Retrying invoke activity " + _self.aId);
-        Date future = new Date(new Date().getTime() + 
-            (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
-        final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
-        getBpelRuntimeContext().registerTimer(timerChannel, future);
-        object(false, new TimerResponseChannelListener(timerChannel) {
-          private static final long serialVersionUID = -261911108068231376L;
-            public void onTimeout() {
-                instance(INVOKE.this);
-            }
-            public void onCancel() {
-                INVOKE.this.requireRecovery();
-            }
-        }.or(new TerminationChannelListener(_self.self) {
-            private static final long serialVersionUID = -4416795170896911290L;
-
-            public void terminate() {
-                _self.parent.completed(null, CompensationHandler.emptySet());
-                object(new TimerResponseChannelListener(timerChannel) {
-                    private static final long serialVersionUID = 4822348066868313717L;
-                    public void onTimeout() { }
-                    public void onCancel() { }
-                });
-            }
-        }));
-    }
-
     private void requireRecovery() {
         if (__log.isDebugEnabled())
             __log.debug("ActivityRecovery: Invoke activity " + _self.aId + " requires recovery");
