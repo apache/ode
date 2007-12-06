@@ -36,6 +36,7 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -109,8 +110,7 @@ public class INVOKE extends ACTIVITY {
                         try {
                             response = getBpelRuntimeContext().getPartnerResponse(mexId);
                         } catch (Exception e) {
-                            __log.error(e);
-                            // TODO: Better error handling
+                            __log.error("Exception while processing invoke response", e);
                             throw new RuntimeException(e);
                         }
 
@@ -169,7 +169,14 @@ public class INVOKE extends ACTIVITY {
                         // because there is no fault, instead we'll re-incarnate the invoke
                         // and either retry or indicate failure condition.
                         // admin to resume the process.
-                        _self.parent.failure(getBpelRuntimeContext().getPartnerFaultExplanation(mexId), null);
+                        String reason = getBpelRuntimeContext().getPartnerFaultExplanation(mexId);
+                        __log.error("Failure during invoke: " + reason);
+                        try {
+                            Element el = DOMUtils.stringToDOM("<invokeFailure><![CDATA["+reason+"]]></invokeFailure>");
+                            _self.parent.failure(reason, el);
+                        } catch (Exception e) {
+                            _self.parent.failure(reason, null);
+                        }
                         getBpelRuntimeContext().releasePartnerMex(mexId);
                     }
                 });
