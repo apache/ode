@@ -48,7 +48,6 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
-
     public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
 
     public static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";
@@ -78,6 +77,8 @@ public class OdeConfigProperties {
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
     public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
+
+    public static final String PROP_MEX_INMEM_TTL = "mex.inmem.ttl";
 
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
@@ -237,6 +238,10 @@ public class OdeConfigProperties {
 
     public String getMessageExchangeInterceptors() {
         return getProperty(PROP_MEX_INTERCEPTORS);
+    }
+
+    public long getInMemMexTtl() {
+        return Long.valueOf(getProperty(PROP_MEX_INMEM_TTL, ""+10*60*1000));
     }
 
     public boolean isDehydrationEnabled() {
