@@ -54,19 +54,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
-    public static long TIME_TO_LIVE = 10*60*1000;
 
     private Scheduler _scheduler;
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
+    private long _mexTtl;
+
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
     protected static Map<String, Long> _mexAge = new ConcurrentHashMap<String, Long>();
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
     private static volatile long _lastRemoval = 0;
 
-    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, Scheduler scheduler) {
+    BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, Scheduler scheduler, long mexTtl) {
         _store = store;
         _scheduler = scheduler;
+        _mexTtl = mexTtl;
     }
 
     public ProcessDAO getProcess(QName processId) {
@@ -182,13 +184,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         _mexStore.put(id,mex);
         _mexAge.put(id, now);
 
-        if (now > _lastRemoval + (TIME_TO_LIVE/10)) {
+        if (now > _lastRemoval + (_mexTtl / 10)) {
             _lastRemoval = now;
             Object[] oldMexs = _mexAge.keySet().toArray();
             for (int i=oldMexs.length-1; i>0; i--) {
                 String oldMex = (String) oldMexs[i];
                 Long age = _mexAge.get(oldMex);
-                if (age != null && now-age > TIME_TO_LIVE) {
+                if (age != null && now-age > _mexTtl) {
                     removeMessageExchange(oldMex);
                     _mexAge.remove(oldMex);
                 }

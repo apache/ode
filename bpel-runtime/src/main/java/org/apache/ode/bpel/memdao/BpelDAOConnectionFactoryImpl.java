@@ -34,13 +34,18 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     private static final Map<QName, ProcessDaoImpl> __StateStore = new HashMap<QName, ProcessDaoImpl>();
 
     private Scheduler _scheduler;
+    private long _mexTtl = 10*60*1000;
 
     public BpelDAOConnectionFactoryImpl(Scheduler sched) {
         _scheduler = sched;
     }
+    public BpelDAOConnectionFactoryImpl(Scheduler sched, long ttl) {
+        _scheduler = sched;
+        _mexTtl = ttl;
+    }
 
     public BpelDAOConnection getConnection() {
-        return new BpelDAOConnectionImpl(__StateStore, _scheduler);
+        return new BpelDAOConnectionImpl(__StateStore, _scheduler, _mexTtl);
     }
 
     /**
