@@ -58,7 +58,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     private Scheduler _scheduler;
     private Map<QName, ProcessDaoImpl> _store;
     private List<BpelEvent> _events = new LinkedList<BpelEvent>();
-    private long _mexTtl;
+    long _mexTtl;
 
     private static Map<String,MessageExchangeDAO> _mexStore = Collections.synchronizedMap(new HashMap<String,MessageExchangeDAO>());
     protected static Map<String, Long> _mexAge = new ConcurrentHashMap<String, Long>();
