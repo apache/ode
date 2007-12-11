@@ -220,13 +220,13 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
      */
     void discardOldInstances() {
         long now = System.currentTimeMillis();
-        if (now > _lastRemoval + (BpelDAOConnectionImpl.TIME_TO_LIVE/10)) {
+        if (now > _lastRemoval + (_conn._mexTtl/10)) {
             _lastRemoval = now;
             Object[] oldInstances = _instancesAge.keySet().toArray();
             for (int i=oldInstances.length-1; i>=0; i--) {
                 Long id = (Long) oldInstances[i];
                 Long age = _instancesAge.get(id);
-                if (age != null && now-age > BpelDAOConnectionImpl.TIME_TO_LIVE) {
+                if (age != null && now-age > _conn._mexTtl) {
                     __log.warn("Discarding in-memory instance "+id+" because it exceeded its time-to-live: "+_instances.get(id));
                     _instances.remove(id);
                     _instancesAge.remove(id);
