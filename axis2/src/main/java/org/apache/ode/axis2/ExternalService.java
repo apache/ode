@@ -22,6 +22,7 @@ package org.apache.ode.axis2;
 import java.util.concurrent.Callable;
 
 import javax.wsdl.Definition;
+import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
@@ -37,6 +38,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
@@ -286,7 +288,13 @@ public class ExternalService implements PartnerRoleChannel {
 
         try {
             PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getMessageExchange(odeMexId);
-            QName nonNullFT = faultType != null ? faultType : new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
+            QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
+            if (faultType != null) {
+                Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
+                if (f != null && f.getMessage().getQName() != null)
+                    nonNullFT = f.getMessage().getQName();
+                else __log.debug("Fault " + faultType + " isn't referenced in the service definition, unknown fault.");
+            }
             Message response = fault ? odeMex.createMessage(odeMex.getOperation()
                     .getFault(nonNullFT.getLocalPart()).getMessage().getQName()) : odeMex
                     .createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
@@ -305,7 +313,8 @@ public class ExternalService implements PartnerRoleChannel {
                         if (__log.isDebugEnabled()) {
                             __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
                         }
-                        odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody().getFault().getText(), null);
+                        odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody().getFault().getText(), 
+                                OMUtils.toDOM(reply.getEnvelope().getBody()));
                     }
                 } else {
                     if (__log.isDebugEnabled()) {
