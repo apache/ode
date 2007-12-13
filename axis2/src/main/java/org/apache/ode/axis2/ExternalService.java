@@ -31,17 +31,13 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.uuid.UUID;
@@ -49,6 +45,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
+import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.util.concurrent.Callable;
@@ -326,9 +323,16 @@ public class ExternalService implements PartnerRoleChannel {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
-                    QName nonNullFT = faultType != null ? faultType : new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
-                    Message response = fault ? odeMex.createMessage(odeMex.getOperation().getFault(
-                            nonNullFT.getLocalPart()).getMessage().getQName()) : odeMex.createMessage(odeMex
+                    // Checking for the fault
+                    QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
+                    if (faultType != null) {
+                        Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
+                        if (f != null && f.getMessage().getQName() != null)
+                            nonNullFT = f.getMessage().getQName();
+                        else __log.debug("Fault " + faultType + " isn't referenced in the service definition, unknown fault.");
+                    }
+                    // Setting the response
+                    Message response = fault ? odeMex.createMessage(nonNullFT) : odeMex.createMessage(odeMex
                             .getOperation().getOutput().getMessage().getQName());
                     try {
                         if (__log.isDebugEnabled()) {
@@ -346,7 +350,7 @@ public class ExternalService implements PartnerRoleChannel {
                                     __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
                                 }
                                 odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
-                                        .getFault().getText(), null);
+                                        .getFault().getText(), OMUtils.toDOM(reply.getEnvelope().getBody()));
                             }
                         } else {
                             if (__log.isDebugEnabled()) {
