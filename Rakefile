@@ -444,14 +444,6 @@ define "ode" do
     package :jar
   end
 
-  desc "ODE SimPEL"
-  define "simpel" do
-    pkg_name = "org.apache.ode.simpel.antlr"
-    compile.from antlr(_("src/main/antlr"), {:in_package=>pkg_name, :token=>pkg_name})
-    compile.with file(_("lib/e4x-grammar-0.1.jar")), ANTLR
-    package :jar
-  end
-
   desc "ODE Tools"
   define "tools" do
     compile.with projects("bpel-compiler", "utils"), ANT, COMMONS.httpclient, COMMONS.logging
