@@ -62,8 +62,12 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 		_processInst = processInst;
         _correlator = correlator;
     }
-	
-	public CorrelationKey getCorrelationKey() {
+
+    public Long getId() {
+        return _id;
+    }
+
+    public CorrelationKey getCorrelationKey() {
 		return new CorrelationKey(_correlationKey);
 	}
 	
