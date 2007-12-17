@@ -42,7 +42,7 @@ import java.util.Iterator;
 
 @Entity
 @Table(name="ODE_CORRELATOR")
-public class CorrelatorDAOImpl implements CorrelatorDAO {
+public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
     @Id @Column(name="CORRELATOR_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -109,9 +109,10 @@ public class CorrelatorDAOImpl implements CorrelatorDAO {
     void removeLocalRoutes(String routeGroupId, ProcessInstanceDAO target) {
         for (Iterator itr=_routes.iterator(); itr.hasNext(); ) {
             MessageRouteDAOImpl mr = (MessageRouteDAOImpl)itr.next();
-            if ( mr.getGroupId().equals(routeGroupId) &&
-                    mr.getTargetInstance().equals(target))
+            if ( mr.getGroupId().equals(routeGroupId) && mr.getTargetInstance().equals(target)) {
                 itr.remove();
+                getEM().remove(mr);
+            }
         }
     }
 }
