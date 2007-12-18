@@ -331,7 +331,12 @@ public class SoapMessageConverter {
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null)
-            extractSoapBodyParts(odeMessage, envelope.getBody(), soapBody, op.getOutput().getMessage(), op.getName() + "Response");
+            extractSoapBodyParts(odeMessage, envelope.getBody(), 
+                    soapBody, op.getOutput().getMessage(), op.getName() + "Response");
+
+        List<SOAPHeader> soapHeaders = getSOAPHeaders(bo);
+        for (SOAPHeader sh : soapHeaders)
+            extractSoapHeaderPart(odeMessage, envelope.getHeader(), sh, op.getInput().getMessage());
     }
 
     @SuppressWarnings("unchecked")
