@@ -31,6 +31,8 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apche.ode.bpel.evar.IncompleteKeyException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -85,12 +87,10 @@ public interface BpelRuntimeContext {
      * @param var variable to read
      * @return
      */
-    Node fetchVariableData(VariableInstance var, boolean forWriting)
+    Node readVariable(Long scopeInstanceId, String varname, boolean forWriting)
             throws FaultException;
 
-    Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
-            throws FaultException;
-
+  
     /**
      * Fetches the my-role endpoint reference data.
      * @param pLink
@@ -141,7 +141,6 @@ public interface BpelRuntimeContext {
     String readProperty(VariableInstance var, OProcess.OProperty property)
             throws FaultException;
 
-    Node initializeVariable(VariableInstance var, Node initData) ;
 
     /**
      * Writes a partner EPR.
@@ -154,7 +153,7 @@ public interface BpelRuntimeContext {
 
     Node convertEndpointReference(Element epr, Node targetNode);
 
-    void commitChanges(VariableInstance var, Node changes);
+    Node writeVariable(VariableInstance var, Node changes);
 
     boolean isCorrelationInitialized(CorrelationSetInstance cset);
 
@@ -242,8 +241,6 @@ public interface BpelRuntimeContext {
 
     QName getPartnerResponseType(String mexId);
 
-    Node getPartData(Element message, Part part);
-
     Element getSourceEPR(String mexId);
 
     void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
@@ -257,5 +254,26 @@ public interface BpelRuntimeContext {
 
     void releasePartnerMex(String mexId);
 
-    void initializeExternalVariable(VariableInstance instance, HashMap<String, String> keymap);
+    /**
+     * Read an external variable. 
+     * @param externalVariableId identifier
+     * @param reference variable reference
+     * @return external variable value
+     * @throws ExternalVariableModuleException
+     */
+	Node readExtVar(String externalVariableId, Node reference) throws ExternalVariableModuleException;
+	 
+	/**
+	 * Write an external variable. 
+	 * @param externalVariableId external variable id
+	 * @param value new value
+	 * @return update reference
+	 * @throws ExternalVariableModuleException
+	 */
+	ValueReferencePair writeExtVar(String externalVariableId, Node reference, Node value) throws ExternalVariableModuleException ;
+	
+	public class ValueReferencePair {
+		public Node value;
+		public Node reference;
+	}
 }

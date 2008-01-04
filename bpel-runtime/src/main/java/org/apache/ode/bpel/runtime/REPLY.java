@@ -50,8 +50,7 @@ class REPLY extends ACTIVITY {
 
         try {
             sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
-            Node msg = getBpelRuntimeContext()
-                    .fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
+            Node msg = fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
             assert msg instanceof Element;
 

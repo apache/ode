@@ -18,14 +18,30 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.runtime.BpelRuntimeContext.ValueReferencePair;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.utils.DOMUtils;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apche.ode.bpel.evar.IncompleteKeyException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 
 /**
@@ -33,6 +49,7 @@ import java.util.Set;
  */
 class ScopeFrame implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final Log __log = LogFactory.getLog(ScopeFrame.class);
 
     /** The compiled scope representation. */
     final OScope oscope;
@@ -135,5 +152,127 @@ class ScopeFrame implements Serializable {
         if (event.getLineNo() == -1 && oscope.debugInfo !=  null)
             event.setLineNo(oscope.debugInfo.startLine);
     }
+    
+
+    //
+    // Move all the external variable stuff in here so that it can be used by the expr-lang evaluation
+    // context.
+    // 
+    
+    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting) throws FaultException {
+    	
+    	// Special case of messageType variables with no part
+        if (variable.declaration.type instanceof OMessageVarType) {
+            OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
+            if (msgType.parts.size() == 0) {
+                Document doc = DOMUtils.newDocument();
+                Element root = doc.createElement("message");
+                doc.appendChild(root);
+                return root;
+            }
+        }
+
+    
+        if (variable.declaration.extVar != null) {
+            // Note, that when using external variables, the database will not contain the value of the
+        	// variable, instead we need to go the external variable subsystems. 
+
+        	Element reference = (Element) fetchVariableData(brc, resolve(variable.declaration.extVar.related), false);
+            try {
+                Node ret = brc.readExtVar(variable.declaration.extVar.externalVariableId, reference );
+                if (ret == null) {
+                    throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable, 
+                            "The external variable \"" + variable.declaration.name + "\" has not been initialized.");
+                    
+                }
+                return ret;
+            } catch (IncompleteKeyException ike) {
+                // This indicates that the external variable needed to be written do, put has not been.
+                __log.error("External variable could not be read due to incomplete key; the following key " +
+                        "components were missing: " + ike.getMissing());
+                throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable, 
+                        "The extenral variable \"" + variable.declaration.name + "\" has not been properly initialized;" +
+                                "the following key compoenents were missing:" + ike.getMissing());
+            } catch (ExternalVariableModuleException e) {
+                __log.error("Unexpected EVM error.", e);
+                throw new BpelEngineException(e);
+            }
+
+        } else /* not external */ {
+            Node data = brc.readVariable(variable.scopeInstance,variable.declaration.name, forWriting);
+            
+            if (data == null) {
+                throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable,
+                        "The variable " + variable.declaration.name + " isn't properly initialized.");
+            }
+
+            return data;
+        }
+
+	}
+    
+
+    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance var, OMessageVarType.Part part, boolean forWriting)
+            throws FaultException {
+        Node container = fetchVariableData(brc, var, forWriting);
+
+        // If we want a specific part, we will need to navigate through the
+        // message/part structure
+        if (var.declaration.type instanceof OMessageVarType && part != null) {
+            container = getPartData((Element) container, part);
+        }
+        return container;
+    }
+    
+
+
+    Node initializeVariable(BpelRuntimeContext brc, VariableInstance lvar, Node val)  {
+
+        if (lvar.declaration.extVar != null) /*external variable */ {
+            try {
+            	VariableInstance related = resolve(lvar.declaration.extVar.related);
+            	
+            	Node reference = null;
+            	try {
+            		reference = fetchVariableData(brc, related, true);
+            	} catch (FaultException fe) {
+            		// In this context this is not necessarily a problem, since the assignment may re-init the related var
+            	}
+            	
+                ValueReferencePair vrp  = brc.writeExtVar(lvar.declaration.extVar.externalVariableId, reference, val);
+                commitChanges(brc,related, vrp.reference);
+                return vrp.value;
+            } catch (ExternalVariableModuleException e) {
+                __log.error("External variable initialization error.", e);
+                // TODO: need to report this
+                throw new BpelEngineException("External varaible initialization error", e);
+            }
+                        
+        } else /* normal variable */ {
+            return brc.writeVariable(lvar,val);
+        }
+        
+
+        
+	}
+
+    Node commitChanges(BpelRuntimeContext context, VariableInstance lval, Node lvalue) {
+    	return initializeVariable(context, lval, lvalue);
+    	
+	}
+
+
+    Node getPartData(Element message, Part part) {
+    	// borrowed from ASSIGN.evalQuery()
+        QName partName = new QName(null, part.name);
+        Node ret = DOMUtils.findChildByName((Element) message, partName);
+        if (part.type instanceof OElementVarType) {
+            QName elName = ((OElementVarType) part.type).elementType;
+            ret = DOMUtils.findChildByName((Element) ret, elName);
+        }
+
+        return ret;
+    }
+    
 }
   

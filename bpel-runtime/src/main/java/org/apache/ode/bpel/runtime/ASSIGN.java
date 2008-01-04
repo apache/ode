@@ -117,14 +117,14 @@ class ASSIGN extends ACTIVITY {
                     val = tempwrapper;
                 } else
                     doc.appendChild(val);
-                lval = getBpelRuntimeContext().initializeVariable(lvar, val);
+                lval = initializeVariable(lvar, val);
             } else
-                lval = napi.fetchVariableData(lvar, true);
+                lval = fetchVariableData(lvar, true);
         }
         return lval;
     }
 
-    /**
+	/**
      * Get the r-value. There are several possibilities:
      * <ul>
      * <li>a message is selected - an element representing the whole message is
@@ -158,21 +158,19 @@ class ASSIGN extends ACTIVITY {
         if (from instanceof DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
+            Node data = fetchVariableData(
                     _scopeFrame.resolve(dref.variable), false);
             retVal = DOMUtils.findChildByName((Element)data, dref.elName);
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(varRef.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
-                    _scopeFrame.resolve(varRef.variable), false);
+            Node data = fetchVariableData(_scopeFrame.resolve(varRef.variable), false);
             retVal = evalQuery(data, varRef.part, varRef.location,
                     getEvaluationContext());
         } else if (from instanceof OAssign.PropertyRef) {
             OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(propRef.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
-                    _scopeFrame.resolve(propRef.variable), false);
+            Node data = fetchVariableData(_scopeFrame.resolve(propRef.variable), false);
 
             retVal = evalQuery(data, propRef.propertyAlias.part,
                     propRef.propertyAlias.location, getEvaluationContext());
@@ -320,7 +318,7 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-    private void copy(OAssign.Copy ocopy) throws FaultException {
+	private void copy(OAssign.Copy ocopy) throws FaultException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
@@ -344,8 +342,8 @@ class ASSIGN extends ACTIVITY {
                         .getVariable());
                 final VariableInstance rval = _scopeFrame
                         .resolve(((VariableRef) ocopy.from).getVariable());
-                Element lvalue = (Element) napi.fetchVariableData(rval, false);
-                napi.initializeVariable(lval, lvalue);
+                Element lvalue = (Element) fetchVariableData(rval, false);
+                initializeVariable(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
@@ -425,7 +423,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
                                 "' value '" + DOMUtils.domToString(lvalue) +"'");
-                napi.commitChanges(lval, lvalue);
+                commitChanges(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             }
@@ -436,7 +434,7 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
-    private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
         if (rvalue.getNodeType() == Node.TEXT_NODE ||

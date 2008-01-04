@@ -39,6 +39,7 @@ import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowVal;
 import org.apache.ode.utils.DOMUtils;
 import org.apche.ode.bpel.evar.ExternalVariableModule;
 import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apche.ode.bpel.evar.IncompleteKeyException;
 import org.w3c.dom.Element;
 
 public class JdbcExternalVariableModule implements ExternalVariableModule {
@@ -119,7 +120,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             DbExternalVariable dbev = new DbExternalVariable(evarId, ds);
             if (initMode != null)
                 try {
-                    dbev.initType = InitType.valueOf(initMode.getTextContent().trim());
+                    dbev._initType = InitType.valueOf(initMode.getTextContent().trim());
                 } catch (Exception ex) {
                     throw new ExternalVariableModuleException("Invalid <init-mode> value: " + initMode.getTextContent().trim());
                 }
@@ -242,26 +243,26 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         if (evar == null)
             throw new ExternalVariableModuleException("No such variable. "); // todo
 
-        RowVal val = evar.parseXmlRow((Element) newval.value);
-        RowKey key = evar.generateKey(newval.locator, val);
+        RowVal val = evar.parseXmlRow(evar.new RowVal(), (Element) newval.value);
+        RowKey key = evar.keyFromLocator(newval.locator);
 
-        if (key != null && evar.initType == InitType.delete_insert) {
+        if (key.isComplete() && evar._initType == InitType.delete_insert) {
             // do delete...
             // TODO
         }
 
         // should we try an update first? to do this we need to have all the required keys
         // and there should be some keys
-        boolean tryupdatefirst = (evar.initType == InitType.update || evar.initType == InitType.update_insert)
-                && !evar.keycolumns.isEmpty() && key != null;
+        boolean tryupdatefirst = (evar._initType == InitType.update || evar._initType == InitType.update_insert)
+                && !evar._keycolumns.isEmpty() && key.isComplete();
 
-        boolean insert = evar.initType != InitType.update;
+        boolean insert = evar._initType != InitType.update;
 
         try {
             if (tryupdatefirst)
                 insert = execUpdate(evar, val) == 0;
             if (insert) {
-                key = execInsert(evar, val);
+                key = execInsert(evar, newval.locator, val);
                 // Transfer the keys obtained from the db.
                 key.write(newval.locator);
             }
@@ -282,8 +283,6 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         Element val;
         try {
             RowVal rowval = execSelect(evar, locator);
-            if (rowval == null)
-                return null;
             val = evar.renderXmlRow(rowval);
         } catch (SQLException se) {
             throw new ExternalVariableModuleException("SQL Error.", se);
@@ -294,7 +293,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     }
 
     /**
-     * Manually register a data source. Handy if you don't want to use JDBC to look these up.
+     * Manually register a data source. Handy if you don't want to use JNDI to look these up.
      * 
      * @param dsName
      * @param ds
@@ -308,13 +307,13 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         try {
             PreparedStatement stmt = conn.prepareStatement(dbev.update);
             int idx = 1;
-            for (Column c : dbev.updcolumns) {
+            for (Column c : dbev._updcolumns) {
                 Object val = values.get(c.name);
                 stmt.setObject(idx, val);
                 idx++;
             }
 
-            for (Column ck : dbev.keycolumns) {
+            for (Column ck : dbev._keycolumns) {
                 Object val = values.get(ck.name);
                 stmt.setObject(idx, val);
                 idx++;
@@ -329,7 +328,12 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     }
 
     RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
-        RowKey rowkey = dbev.generateKey(locator, null);
+        RowKey rowkey = dbev.keyFromLocator(locator);
+        
+        if (!rowkey.isComplete()) {
+        	throw new IncompleteKeyException(rowkey.getMissing());
+        }
+        
         RowVal ret = dbev.new RowVal();
         Connection conn = dbev.dataSource.getConnection();
         try {
@@ -341,7 +345,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             ResultSet rs = stmt.executeQuery();
             try {
                 if (rs.next()) {
-                    for (Column cr : dbev.columns) 
+                    for (Column cr : dbev._columns) 
                         ret.set(cr.idx,rs.getObject(cr.idx+1));
 
                 } else
@@ -356,15 +360,15 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         return ret;
     }
 
-    RowKey execInsert(DbExternalVariable dbev, RowVal values) throws SQLException {
+    RowKey execInsert(DbExternalVariable dbev, Locator locator, RowVal values) throws SQLException {
         RowKey keys = dbev.new RowKey();
         Connection conn = dbev.dataSource.getConnection();
         try {
-            PreparedStatement stmt = dbev.generatedKeys ? conn.prepareStatement(dbev.insert, dbev.autoColNames) : conn
+            PreparedStatement stmt = dbev.generatedKeys ? conn.prepareStatement(dbev.insert, dbev._autoColNames) : conn
                     .prepareStatement(dbev.insert);
             int idx = 1;
-            for (Column c : dbev.inscolumns) {
-                Object val = c.getValue(values, null);
+            for (Column c : dbev._inscolumns) {
+                Object val = c.getValue(c.name, values, locator.iid);
                 values.put(c.name, val);
                 stmt.setObject(idx, val);
                 idx++;
@@ -376,13 +380,12 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 // With JDBC 3, we can get the values of the key columns (if the db supports it)
                 ResultSet keyRS = stmt.getResultSet();
                 keyRS.next();
-                for (Column ck : dbev.keycolumns)
-                    keys.add(keyRS.getObject(ck.colname));
+                for (Column ck : keys._columns)
+                    keys.put(ck.name, keyRS.getObject(ck.colname));
             } else {
-                for (Column ck : dbev.keycolumns) {
+                for (Column ck : keys._columns) {
                     Object val = values.get(ck.name);
-                    if (val != null)
-                        keys.add(val);
+                    keys.put(ck.name,val);
                 }
             }
 

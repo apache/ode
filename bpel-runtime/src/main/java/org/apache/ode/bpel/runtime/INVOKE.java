@@ -114,7 +114,7 @@ public class INVOKE extends ACTIVITY {
                             throw new RuntimeException(e);
                         }
 
-                        getBpelRuntimeContext().initializeVariable(outputVar, response);
+                        initializeVariable(outputVar, response);
                         // Generating event
                         VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
                         se.setNewValue(response);
@@ -198,7 +198,7 @@ public class INVOKE extends ACTIVITY {
 
         if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
             sendVariableReadEvent(_scopeFrame.resolve(oinvoke.inputVar));
-            Node outboundMsg = getBpelRuntimeContext().fetchVariableData(
+            Node outboundMsg = fetchVariableData(
                 _scopeFrame.resolve(oinvoke.inputVar), false);
             // TODO outbound message should be updated with non-initiate correlation sets
             assert outboundMsg instanceof Element;

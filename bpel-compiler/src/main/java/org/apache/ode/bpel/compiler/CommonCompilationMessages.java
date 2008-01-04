@@ -467,4 +467,12 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("Empty scopes are forbidden.");
     }
 
+	public CompilationMessage errMustSpecifyRelatedVariable(String name) {
+		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify a related variable.", name);
+	}
+
+	public CompilationMessage errMustSpecifyExternalVariableId(String name) {
+		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
+	}
+
 }

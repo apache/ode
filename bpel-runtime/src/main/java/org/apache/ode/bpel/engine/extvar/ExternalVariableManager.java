@@ -25,14 +25,12 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apche.ode.bpel.evar.ExternalVariableModule;
 import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.IncompleteKeyException;
 import org.apche.ode.bpel.evar.ExternalVariableModule.Locator;
 import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
 import org.w3c.dom.Element;
@@ -131,38 +129,34 @@ public class ExternalVariableManager {
      * @return
      * @throws BpelEngineException
      */
-    public Node read(String externalVariableId, Map<String, String> keys, Long iid) throws ExternalVariableModuleException{
+    public Value read(String externalVariableId, Node reference, Long iid) throws ExternalVariableModuleException{
         EVar evar = _externalVariables.get(externalVariableId);
         if (evar == null) {
             // Should not happen if constructor is working.
             throw new BpelEngineException("InternalError: reference to unknown external variable " + externalVariableId);
         }
         
-        Locator locator = new Locator(externalVariableId, _pid,iid, keys);
+        Locator locator = new Locator(externalVariableId, _pid,iid, reference);
         Value newval;
         newval = evar._engine.readValue(locator );
         if (newval == null)
             return null;
-        keys.clear();
-        keys.putAll(newval.locator);
-        return newval.value;
+        return newval;
     }
 
     
-    public Node write(String externalVariableId, Map<String,String> keys, Node val, Long iid) throws ExternalVariableModuleException  {
+    public Value write(String externalVariableId, Node reference, Node val, Long iid) throws ExternalVariableModuleException  {
         EVar evar = _externalVariables.get(externalVariableId);
         if (evar == null) {
             // Should not happen if constructor is working.
             throw new BpelEngineException("InternalError: reference to unknown external variable " + externalVariableId);
         }
         
-        Locator locator = new Locator(externalVariableId,_pid,iid,new HashMap<String,String>(keys));
+        Locator locator = new Locator(externalVariableId,_pid,iid,reference);
         Value newval = new Value(locator,val,null);
         newval = evar._engine.writeValue(newval );
-        
-        keys.clear();
-        keys.putAll(newval.locator);
-        return newval.value;
+
+        return newval;
     }
 
    

@@ -18,6 +18,29 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.PortType;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -36,7 +59,6 @@ import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
-import org.apache.ode.bpel.compiler.bom.ExtVarKeyMapping;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -86,38 +108,15 @@ import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
-import org.apache.ode.utils.xsd.XSUtils;
-import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.ode.utils.xsd.XSUtils;
+import org.apache.ode.utils.xsd.XsdException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.PortType;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 /**
  * Compiler for converting BPEL process descriptions (and their associated WSDL
@@ -1644,11 +1643,13 @@ abstract class BpelCompiler implements CompilerContext {
         OExtVar oextvar = new OExtVar(_oprocess);
         oextvar.externalVariableId = src.getExternalId();
         oextvar.debugInfo = createDebugInfo(src, null);
-        for (ExtVarKeyMapping mapping : src.getExtVarMappings()) {
-            String key = mapping.getKey();
-            OExpression oexpr = compileExpr(mapping.getExpression());
-            oextvar.keyDeclaration.put(key, oexpr);
-        }
+
+        if (src.getExternalId() == null)
+        	throw new CompilationException(__cmsgs.errMustSpecifyExternalVariableId(src.getName()));
+        	
+        if (src.getRelated() == null)
+        	throw new CompilationException(__cmsgs.errMustSpecifyRelatedVariable(src.getName()));
+        oextvar.related = resolveVariable(src.getRelated());
         
         return oextvar;
     }
