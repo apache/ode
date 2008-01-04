@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.engine.extvar;
+package org.apache.ode.bpel.extvar.jdbc;
 
 import java.util.HashMap;
 import java.util.Map;

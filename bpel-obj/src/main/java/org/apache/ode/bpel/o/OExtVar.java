@@ -34,12 +34,9 @@ public class OExtVar extends OBase {
      */
     public String externalVariableId;
     
-    /** 
-     * The declaration of keys, i.e. this specifies how the values that are avaialble to the external
-     * engine for the purposes of locating the external contents of the variable.  
-     */
-    public final HashMap<String, OExpression> keyDeclaration = new HashMap<String, OExpression>();
-    
+    /** Related variable containing the identifying information. */
+    public OScope.Variable related; 
+      
     public OExtVar(OProcess owner) {
         super(owner);
     }

@@ -43,8 +43,8 @@ public abstract class ExtensibilityQNames {
     /** Attribute name for external variable id. */
     public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "id");
     
-    /** Element name of external variable key mapping. */
-    public static final QName EXTVAR_MAPPING = new QName(EXTVAR_NS, "key-map");
+    /** Attribute holding the name of the "related" variable. */
+	public static final QName EXTVAR_RELATED = new QName(EXTVAR_NS, "related-to");
 
 }
 

@@ -40,6 +40,7 @@ import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -414,5 +415,25 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         // TODO Auto-generated method stub
         
     }
+
+	public Node readExtVar(String externalVariableId, Node reference) throws ExternalVariableModuleException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ValueReferencePair writeExtVar(String externalVariableId, Node reference, Node value) throws ExternalVariableModuleException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Node writeVariable(VariableInstance var, Node changes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

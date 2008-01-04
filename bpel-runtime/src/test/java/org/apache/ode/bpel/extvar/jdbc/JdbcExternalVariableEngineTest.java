@@ -28,7 +28,6 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf.Variable;
-import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apche.ode.bpel.evar.ExternalVariableModule.Locator;
@@ -37,6 +36,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
@@ -114,8 +114,9 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         value = _engine.writeValue(value);
         assertNotNull(value);
         assertNotNull(value.locator);
-        assertTrue(value.locator.containsKey("id1"));
-        assertTrue(value.locator.containsKey("id2"));
+        System.out.println(DOMUtils.domToString(value.locator.reference));
+        assertTrue(DOMUtils.domToString((Element)value.locator.reference).indexOf("id1")!=-1);
+        assertTrue(DOMUtils.domToString((Element)value.locator.reference).indexOf("id2")!=-1);
     }
 
     @Test
@@ -146,11 +147,9 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         
         assertEquals(_iid,readVal.locator.iid);
         assertEquals(_pid,readVal.locator.pid);
-        assertEquals(2, readVal.locator.size());
-        assertTrue(readVal.locator.containsKey("id1"));
-        assertTrue(readVal.locator.containsKey("id2"));
-        assertEquals(value.locator.get("id1"), readVal.locator.get("id1"));
-        assertEquals(value.locator.get("id2"), readVal.locator.get("id2"));
+        assertEquals(2, DOMUtils.countKids((Element)readVal.locator.reference, Node.ELEMENT_NODE));
+        assertEquals(DOMUtils.domToString(value.locator.reference), DOMUtils.domToString(readVal.locator.reference));
+        
 
     }
 }

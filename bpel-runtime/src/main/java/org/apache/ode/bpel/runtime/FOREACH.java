@@ -211,7 +211,7 @@ public class FOREACH extends ACTIVITY {
                 _oforEach.innerScope, getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,
                 _oforEach.innerScope), _scopeFrame, null);
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
-        getBpelRuntimeContext().initializeVariable(vinst, counterNode);
+        initializeVariable(vinst, counterNode);
 
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);

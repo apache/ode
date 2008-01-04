@@ -256,10 +256,6 @@ public class BpelObjectFactory {
         _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_RETRY_DELAY, FailureHandling.RetryDelay.class);
         _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_FAULT_ON, FailureHandling.FaultOnFailure.class);
         
-        //
-        // External Variable Mappings
-        //
-        _mappings.put(ExtensibilityQNames.EXTVAR_MAPPING, ExtVarKeyMapping.class);
     }
 
     public static BpelObjectFactory getInstance() {

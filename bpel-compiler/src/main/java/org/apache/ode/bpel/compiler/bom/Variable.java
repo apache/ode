@@ -18,8 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.util.List;
-
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
@@ -109,10 +107,10 @@ public class Variable extends BpelObject {
     }
     
     /**
-     * Get the external variable mappings.
+     * External variable support - get the "related" variable name.
      * @return
      */
-    public List<ExtVarKeyMapping> getExtVarMappings() {
-        return getChildren(ExtVarKeyMapping.class);
+    public String getRelated() {
+    	return  getAttribute(ExtensibilityQNames.EXTVAR_RELATED, null);
     }
 }

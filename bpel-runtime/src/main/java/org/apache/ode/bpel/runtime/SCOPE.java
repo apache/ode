@@ -18,23 +18,40 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evt.ScopeFaultEvent;
-import org.apache.ode.bpel.evt.ScopeStartEvent;
-import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.runtime.channels.*;
-import org.apache.ode.jacob.ChannelListener;
-import org.apache.ode.jacob.SynchChannel;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
-import java.io.Serializable;
-import java.util.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.evt.ScopeFaultEvent;
+import org.apache.ode.bpel.evt.ScopeStartEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.o.OBase;
+import org.apache.ode.bpel.o.OCatch;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OEventHandler;
+import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.o.OFaultHandler;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.runtime.channels.CompensationChannel;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 
 /**
@@ -57,34 +74,6 @@ class SCOPE extends ACTIVITY {
     }
 
     public void run() {
-
-
-        for (OScope.Variable var : _oscope.variables.values()) {
-            if (var.extVar == null)
-                continue;
-            
-            HashMap<String,String> keymap = new HashMap<String,String>();
-            for (Map.Entry<String, OExpression> mapping : var.extVar.keyDeclaration.entrySet()) {
-                String val;
-                try {
-                    val = getBpelRuntimeContext().getExpLangRuntime().evaluateAsString(mapping.getValue(), getEvaluationContext());
-                } catch (FaultException e) {
-                    __log.error("Unable to initialize external variable key.", e);
-                    FaultData fd = createFault(e.getQName(), var.extVar, "Unable to initialize external variable key: " + e.getMessage());
-                    _self.parent.completed(fd,null);
-                    return;
-                } catch (EvaluationException ee) {
-            	   __log.error("Unable to initialize external variable key.", ee);
-                   FaultData fd = createFault(var.getOwner().constants.qnSubLanguageExecutionFault, var.extVar, "Unable to initialize external variable key: " + ee.getMessage());
-                   _self.parent.completed(fd,null);
-                   return;
-                }
-                keymap.put(mapping.getKey(),val);
-            }
-                            
-            getBpelRuntimeContext().initializeExternalVariable(_scopeFrame.resolve(var), keymap);
-        }
-        
         
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
@@ -326,7 +315,7 @@ class SCOPE extends ACTIVITY {
                         if (catchBlock.faultVariable != null) {
                             try {
                                 VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
-                                ntive.initializeVariable(vinst, _fault.getFaultMessage());
+                                initializeVariable(vinst, _fault.getFaultMessage());
 
                                 // Generating event
                                 VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);

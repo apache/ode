@@ -1,8 +1,6 @@
 package org.apche.ode.bpel.evar;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -83,7 +81,7 @@ public interface ExternalVariableModule {
      * @author Maciej Szefler <mszefler at gmail dot com>
      *
      */
-    public class Locator extends HashMap<String, String>{
+    public class Locator {
         
         private static final long serialVersionUID = 1L;
 
@@ -94,16 +92,19 @@ public interface ExternalVariableModule {
         
         /** Process identifier. */
         public final QName pid;
+        
+        /** External-variable module-specific identifying information. */
+        public Node reference;
                 
         public Locator(String varId, QName pid, Long iid) {
+            this(varId, pid, iid, null);
+        }
+
+        public Locator(String varId, QName pid, Long iid, Node reference) {
             this.varId = varId;
             this.pid = pid;
             this.iid = iid;
-        }
-
-        public Locator(String varId, QName pid, Long iid, Map<String,String> keys) {
-            this(varId,pid,iid);
-            putAll(keys);
+            this.reference = reference;
         }
         
     }
