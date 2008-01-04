@@ -19,7 +19,9 @@
 
 package org.apache.ode.axis2.hooks;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,6 +36,8 @@ import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
@@ -57,7 +61,7 @@ public class ODEAxisService extends AxisService {
     public static AxisService createService(AxisConfiguration axisConfig, ProcessConf pconf, QName wsdlServiceName,
             String portName) throws AxisFault {
         Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);
-    String serviceName = extractServiceName(wsdlDefinition, wsdlServiceName, portName);
+        String serviceName = extractServiceName(wsdlDefinition, wsdlServiceName, portName);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Create AxisService:"
@@ -74,98 +78,116 @@ public class ODEAxisService extends AxisService {
             serviceBuilder.setBaseUri(baseUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
             serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(baseUri));
-    serviceBuilder.setServerSide(true);
+            serviceBuilder.setServerSide(true);
+        
+            AxisService axisService = serviceBuilder.populateService();
+            axisService.setName(serviceName);
+            axisService.setWsdlFound(true);
+            axisService.setCustomWsdl(true);
+            axisService.setClassLoader(axisConfig.getServiceClassLoader());
 
-    AxisService axisService = serviceBuilder.populateService();
-    axisService.setName(serviceName);
-    axisService.setWsdlFound(true);
-    axisService.setClassLoader(axisConfig.getServiceClassLoader());
-
-    // In doc/lit we need to declare a mapping between operations and message element names
-    // to be able to route properly.
-    declarePartsElements(wsdlDefinition, wsdlServiceName, serviceName, portName);
-
-    Iterator operations = axisService.getOperations();
-    ODEMessageReceiver msgReceiver = new ODEMessageReceiver();
-    while (operations.hasNext()) {
-        AxisOperation operation = (AxisOperation) operations.next();
-        if (operation.getMessageReceiver() == null) {
-            operation.setMessageReceiver(msgReceiver);
-        }
-    }
-    return axisService;
+            // axis2 service configuration  
+        	URI axis2config = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2");
+            LOG.debug("Looking for Axis2 service configuration file: "+axis2config.toURL());
+            try {
+                InputStream ais = axis2config.toURL().openStream();
+                if (ais != null) {
+                    LOG.debug("Configuring service using: "+axis2config.toURL());
+                    ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
+                    ServiceBuilder builder = new ServiceBuilder(is, configCtx, axisService);
+                    builder.populateService(builder.buildOM());
+                }
+            } catch (FileNotFoundException except) {
+                LOG.debug("Axis2 service configuration not found: " + axis2config);
+            } catch (IOException except) {
+                LOG.warn("Exception while configuring service: " + axis2config, except);
+            }
+        
+            // In doc/lit we need to declare a mapping between operations and message element names
+            // to be able to route properly.
+            declarePartsElements(wsdlDefinition, wsdlServiceName, serviceName, portName);
+        
+            Iterator operations = axisService.getOperations();
+            ODEMessageReceiver msgReceiver = new ODEMessageReceiver();
+            while (operations.hasNext()) {
+                AxisOperation operation = (AxisOperation) operations.next();
+                if (operation.getMessageReceiver() == null) {
+                    operation.setMessageReceiver(msgReceiver);
+                }
+            }
+            return axisService;
         } catch (Exception e) {
             throw AxisFault.makeFault(e);
         }
-  }
-
-  public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
-                             String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
-        WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
-    AxisService axisService = serviceBuilder.populateService();
-    axisService.setName(axisName);
-    axisService.setWsdlFound(true);
-    axisService.setClassLoader(axisConfig.getServiceClassLoader());
-    Iterator operations = axisService.getOperations();
-    while (operations.hasNext()) {
-      AxisOperation operation = (AxisOperation) operations.next();
-      if (operation.getMessageReceiver() == null) {
-        operation.setMessageReceiver(receiver);
-      }
     }
-    return axisService;
-  }
+
+    public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
+                                            String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
+        WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
+        AxisService axisService = serviceBuilder.populateService();
+        axisService.setName(axisName);
+        axisService.setWsdlFound(true);
+        axisService.setClassLoader(axisConfig.getServiceClassLoader());
+        Iterator operations = axisService.getOperations();
+        while (operations.hasNext()) {
+            AxisOperation operation = (AxisOperation) operations.next();
+            if (operation.getMessageReceiver() == null) {
+                operation.setMessageReceiver(receiver);
+            }
+        }
+        return axisService;
+    }
 
     private static String extractServiceName(Definition wsdlDefinition, QName wsdlServiceName, String portName)
             throws AxisFault {
-    String url = null;
-    Service service = wsdlDefinition.getService(wsdlServiceName);
-    if (service == null) {
-            throw new OdeFault("Unable to find service " + wsdlServiceName + " from service WSDL definition "
-                    + wsdlDefinition.getDocumentBaseURI());
+        String url = null;
+        Service service = wsdlDefinition.getService(wsdlServiceName);
+        if (service == null) {
+                throw new OdeFault("Unable to find service " + wsdlServiceName + " from service WSDL definition "
+                        + wsdlDefinition.getDocumentBaseURI());
+        }
+        Port port = service.getPort(portName);
+        if (port == null) {
+            throw new OdeFault("Couldn't find port " + portName + " in definition " + wsdlServiceName);
+        }
+        for (Object oext : port.getExtensibilityElements()) {
+          if (oext instanceof SOAPAddress)
+                    url = ((SOAPAddress) oext).getLocationURI();
+        }
+        if (url == null) {
+                throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName
+                        + " (necessary to establish the process target address)!");
+        }
+        String serviceName = parseURLForService(url);
+        if (serviceName == null) {
+                throw new OdeFault("The soap:address used for service WSDL definition " + wsdlServiceName + " and port "
+                        + portName + " should be of the form http://hostname:port/ode/processes/myProcessEndpointName");
+        }
+        return serviceName;
     }
-    Port port = service.getPort(portName);
-    if (port == null) {
-        throw new OdeFault("Couldn't find port " + portName + " in definition " + wsdlServiceName);
-    }
-    for (Object oext : port.getExtensibilityElements()) {
-      if (oext instanceof SOAPAddress)
-                url = ((SOAPAddress) oext).getLocationURI();
-    }
-    if (url == null) {
-            throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName
-                    + " (necessary to establish the process target address)!");
-    }
-    String serviceName = parseURLForService(url);
-    if (serviceName == null) {
-            throw new OdeFault("The soap:address used for service WSDL definition " + wsdlServiceName + " and port "
-                    + portName + " should be of the form http://hostname:port/ode/processes/myProcessEndpointName");
-    }
-    return serviceName;
-  }
 
-  /**
+    /**
      * Obtain the service name from the request URL. The request URL is expected to use the path "/processes/" under
      * which all processes and their services are listed. Returns null if the path does not contain this part.
-   */
-  protected static String parseURLForService(String path) {
-      int index = path.indexOf("/processes/");
-      if (-1 != index) {
-          String service;
-
-          int serviceStart = index + "/processes/".length();
-          if (path.length() > serviceStart + 1) {
-              service = path.substring(serviceStart);
-              // Path may contain query string, not interesting for us.
-              int queryIndex = service.indexOf('?');
-              if (queryIndex > 0) {
-                  service = service.substring(0, queryIndex);
-              }
-              return service;
-          }
-      }
-      return null;
-  }
+     */
+    protected static String parseURLForService(String path) {
+        int index = path.indexOf("/processes/");
+        if (-1 != index) {
+            String service;
+            
+            int serviceStart = index + "/processes/".length();
+            if (path.length() > serviceStart + 1) {
+                service = path.substring(serviceStart);
+                // Path may contain query string, not interesting for us.
+                int queryIndex = service.indexOf('?');
+                if (queryIndex > 0) {
+                    service = service.substring(0, queryIndex);
+                }
+                return service;
+            }
+        }
+        return null;
+    }
 
     private static void declarePartsElements(Definition wsdlDefinition, QName wsdlServiceName, String axisServiceName,
             String portName) {
