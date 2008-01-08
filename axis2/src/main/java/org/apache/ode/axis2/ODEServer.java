@@ -389,7 +389,7 @@ public class ODEServer {
             Class txFactClass = this.getClass().getClassLoader().loadClass(txFactoryName);
             Object txFact = txFactClass.newInstance();
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
-            if (__logTx.isDebugEnabled())
+            if (__logTx.isDebugEnabled() && System.getProperty("ode.debug.tx") != null)
                 _txMgr = new DebugTxMgr(_txMgr);
         } catch (Exception e) {
             __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
