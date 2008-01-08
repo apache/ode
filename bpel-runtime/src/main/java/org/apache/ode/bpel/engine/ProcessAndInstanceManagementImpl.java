@@ -481,6 +481,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
         TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
         OProcess oprocess = _server.getOProcess(pid);
+        if (oprocess == null)
+            throw new ProcessNotFoundException("The process \"" + pid + "\" does not exist.");
 
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
