@@ -24,7 +24,7 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.1.1RC1-SNAPSHOT"
+VERSION_NUMBER = "1.1.1"
 NEXT_VERSION = "1.1.2"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
