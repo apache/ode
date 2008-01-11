@@ -54,9 +54,9 @@ DERBY               = "org.apache.derby:derby:jar:10.1.2.1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.1.2.1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
-  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:1.2-beta",
-  :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
-  :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
+  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
+  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
+  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
 )
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.4.sp1", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
@@ -71,7 +71,7 @@ JAVAX               = struct(
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0",
+  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
