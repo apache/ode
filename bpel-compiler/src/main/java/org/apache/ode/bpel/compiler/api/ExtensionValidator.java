@@ -28,6 +28,6 @@ import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
  */
 public interface ExtensionValidator {
 
-	void validate(ExtensibleElement element) throws CompilationException;
+	void validate(CompilerContext context, ExtensibleElement element) throws CompilationException;
 
 }

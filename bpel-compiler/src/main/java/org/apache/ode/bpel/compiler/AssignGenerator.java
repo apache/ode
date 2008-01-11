@@ -105,7 +105,7 @@ class AssignGenerator extends DefaultActivityGenerator {
         			}
         	        ExtensionValidator validator = _context.getExtensionValidator(DOMUtils.getElementQName(el));
         	        if (validator != null) {
-        	        	validator.validate(sop);
+        	        	validator.validate(_context, sop);
         	        }
         			oext.nestedElement = new SerializableElement(el);
             		oassign.operations.add(oext);

@@ -21,6 +21,7 @@ package org.apache.ode.test;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.runtime.extension.AbstractAsyncExtensionOperation;
@@ -157,7 +158,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 		}
 
 		@Override
-		public void validate(ExtensibleElement element)
+		public void validate(CompilerContext context, ExtensibleElement element)
 				throws CompilationException {
 			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
 				throw new CompilationException(new CompilationMessage());

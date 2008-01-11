@@ -20,6 +20,7 @@ package org.apache.ode.bpel.runtime.extension;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.w3c.dom.Element;
@@ -32,7 +33,7 @@ import org.w3c.dom.Element;
 public abstract class AbstractSyncExtensionOperation implements ExtensionValidator,
 															ExtensionOperation {
 
-	public void validate(ExtensibleElement element) throws CompilationException {
+	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
 		// default behavior: pass
 	}
 
