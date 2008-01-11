@@ -260,7 +260,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
         try {
             if (tryupdatefirst)
-                insert = execUpdate(evar, val) == 0;
+                insert = execUpdate(evar, key, val) == 0;
             if (insert) {
                 key = execInsert(evar, newval.locator, val);
                 // Transfer the keys obtained from the db.
@@ -302,20 +302,26 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         _dataSources.put(dsName, ds);
     }
 
-    int execUpdate(DbExternalVariable dbev, RowVal values) throws SQLException {
+    int execUpdate(DbExternalVariable dbev, RowKey key, RowVal values) throws SQLException {
         Connection conn = dbev.dataSource.getConnection();
         try {
             PreparedStatement stmt = conn.prepareStatement(dbev.update);
             int idx = 1;
             for (Column c : dbev._updcolumns) {
                 Object val = values.get(c.name);
-                stmt.setObject(idx, val);
+                if (val == null)
+                	stmt.setNull(idx, c.dataType);
+                else
+                	stmt.setObject(idx, val);
                 idx++;
             }
 
             for (Column ck : dbev._keycolumns) {
-                Object val = values.get(ck.name);
-                stmt.setObject(idx, val);
+                Object val = key.get(ck.name);
+                if (val == null)
+                	stmt.setNull(idx, ck.dataType);
+                else
+                	stmt.setObject(idx, val);
                 idx++;
             }
 
