@@ -114,10 +114,10 @@ public class DeploymentWebService {
                 if (operation.equals("deploy")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     OMElement zipPart = (OMElement) namePart.getNextOMSibling();
-                    OMElement zip = zipPart.getFirstElement();
-                    if (!zipPart.getQName().getLocalPart().equals("package") ||
-                            !zip.getQName().getLocalPart().equals("zip"))
-                        throw new OdeFault("Your message should contain a part named 'package' with a zip element");
+                    OMElement zip = (zipPart == null) ? null : zipPart.getFirstElement();
+                    if (zip == null || !zipPart.getQName().getLocalPart().equals("package") 
+                            || !zip.getQName().getLocalPart().equals("zip"))
+                        throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element"); 
 
                     OMText binaryNode = (OMText) zip.getFirstOMChild();
                     if (binaryNode == null) {
