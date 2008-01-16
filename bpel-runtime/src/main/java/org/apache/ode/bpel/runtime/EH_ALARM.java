@@ -161,7 +161,11 @@ class EH_ALARM extends BpelJacobRunnable {
                 })));
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
-                instance(new FIRE());
+                ActivityInfo child = new ActivityInfo(genMonotonic(),
+                        _oalarm.activity,
+                        newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+                instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
+                instance(new ACTIVE(child));
             }
 
         }
