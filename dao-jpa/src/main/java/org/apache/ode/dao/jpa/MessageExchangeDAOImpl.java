@@ -166,7 +166,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	}
 
 	public Element getEPR() {
-		if ( _eprElement == null && _epr != null ) {
+		if ( _eprElement == null && _epr != null && !"".equals(_epr)) {
 			try {
 				_eprElement = DOMUtils.stringToDOM(_epr);
 			} catch (Exception e) {
