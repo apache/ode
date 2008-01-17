@@ -80,7 +80,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	}
 
 	public Element getMyEPR() {
-		if ( _myEPRElement == null && _myEPR != null ) {
+		if ( _myEPRElement == null && _myEPR != null !"".equals(_myEPR)) {
 			try {
 				_myEPRElement = DOMUtils.stringToDOM(_myEPR);
 			} catch (Exception e) {
@@ -104,7 +104,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	}
 
 	public Element getPartnerEPR() {
-		if ( _partnerEPRElement == null && _partnerEPR != null ) {
+		if ( _partnerEPRElement == null && _partnerEPR != null && !"".equals(_partnerEPR)) {
 			try {
 				_partnerEPRElement = DOMUtils.stringToDOM(_partnerEPR);
 			} catch (Exception e) {
