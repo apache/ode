@@ -528,7 +528,12 @@ public class SoapMessageConverter {
         Element partel = odeMsgEl.getOwnerDocument().createElementNS(null,pdef.getName());
         odeMsgEl.appendChild(partel);
 
-        partel.appendChild(odeMsgEl.getOwnerDocument().importNode(OMUtils.toDOM(detail),true));
+        if (detail.getFirstChildWithName(pdef.getElementName()) != null) {
+            OMUtils.toDOM(detail.getFirstChildWithName(pdef.getElementName()));
+        } else {
+            partel.appendChild(odeMsgEl.getOwnerDocument().importNode(OMUtils.toDOM(detail),true));
+        }
+
         return new QName(_def.getTargetNamespace(), fdef.getName());
     }
 
