@@ -223,7 +223,7 @@
         <part name="instance-info" type="typ:tInstanceInfo"/>
     </message>
     <message name="managementFault">
-        <part name="managementFault" element="typ:ManagementFault"/>
+        <part name="managementFault" element="tns:ManagementFault"/>
     </message>
 
     <portType name="ProcessManagementPortType">
