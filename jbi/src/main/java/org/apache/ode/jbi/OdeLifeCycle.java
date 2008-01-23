@@ -23,13 +23,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
 import javax.jbi.component.ComponentContext;
 import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
@@ -41,6 +41,8 @@ import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
+import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -76,6 +78,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private BpelServerConnector _connector;
 
     private Database _db;
+    
+    private ObjectName _mbeanName;
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -86,7 +90,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     public ObjectName getExtensionMBeanName() {
-        return null;
+        return _mbeanName;
     }
 
     public void init(ComponentContext context) throws JBIException {
@@ -122,6 +126,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             registerMexInterceptors();
             
             registerExtensionActivityBundles();
+            
+            registerMBean();
 
             __log.debug("Starting JCA connector.");
             initConnector();
@@ -266,12 +272,41 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
+    private void registerMBean() throws JBIException {
+    	ProcessAndInstanceManagementMBean pmapi = new ProcessAndInstanceManagementMBean(_ode._server,_ode._store);
+        MBeanServer server = _ode.getContext().getMBeanServer();
+        try {
+	        if (server != null) {
+	            _mbeanName = _ode.getContext().getMBeanNames().createCustomComponentMBeanName("Management");
+	            if (server.isRegistered(_mbeanName)) {
+	                server.unregisterMBean(_mbeanName);
+	            }
+	            server.registerMBean(pmapi, _mbeanName);
+	        }
+        } catch (Exception e) {
+        	throw new JBIException(e);
+        }
+    }
+    
+    private void unregisterMBean() throws JBIException {
+    	try {
+    		if (_mbeanName != null) {
+	            MBeanServer server = _ode.getContext().getMBeanServer();
+	            assert server != null;
+	            if (server.isRegistered(_mbeanName)) {
+	                server.unregisterMBean(_mbeanName);
+	            }
+	        }
+	    } catch (Exception e) {
+	    	throw new JBIException(e);
+	    }
+    }
+    
     private void registerEventListeners() {
         String listenersStr = _ode._config.getEventListeners();
         if (listenersStr != null) {
-            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
-                String listenerCN = tokenizer.nextToken();
-                try {
+            for (String listenerCN : listenersStr.split("\\s*(,|;)\\s*")) {
+            	try {
                     _ode._server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
@@ -285,9 +320,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private void registerMexInterceptors() {
         String listenersStr = _ode._config.getMessageExchangeInterceptors();
         if (listenersStr != null) {
-            for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
-                String interceptorCN = tokenizer.nextToken();
-                try {
+            for (String interceptorCN : listenersStr.split("\\s*(,|;)\\s*")) {
+            	try {
                     _ode._server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {
@@ -303,9 +337,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         if (extensionsStr != null) {
         	Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
         	// TODO replace StringTokenizer by regex
-        	for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
-                String bundleCN = tokenizer.nextToken();
-                try {
+            for (String bundleCN : extensionsStr.split("\\s*(,|;)\\s*")) {
+            	try {
                 	// instantiate bundle
                 	AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
                 	
@@ -406,6 +439,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     public void shutDown() throws JBIException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        
+        unregisterMBean();
 
         if (_connector != null) {
             try {
