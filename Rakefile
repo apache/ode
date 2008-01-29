@@ -15,7 +15,6 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.2.4"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
@@ -38,6 +37,8 @@ AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.3")
+AXIS2_TEST          = group("httpcore", "httpcore-nio", "httpcore-niossl", 
+                            :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -177,6 +178,15 @@ define "ode" do
         jetty.undeploy url
       end
     end
+    
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet
+    test.setup task(:prepare_webapp) do |task|
+      cp_r _("src/main/webapp"), _("target/test-classes")
+      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
+      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test-classes/webapp/WEB-INF")
+      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test-classes/webapp/WEB-INF")
+    end
+    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
   end
 
   desc "ODE APIs"
