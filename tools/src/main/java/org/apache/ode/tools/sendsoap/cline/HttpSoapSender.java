@@ -92,8 +92,7 @@ public class HttpSoapSender extends BaseCommandlineTool {
       return "sendsoap";
     }
 
-    public static void doSend(URL u, InputStream is, OutputStream os,
-                              String proxyServer, int proxyPort,
+    public static String doSend(URL u, InputStream is, String proxyServer, int proxyPort,
                               String username, String password, String soapAction) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(8192);
         StreamUtils.copy(bos, is);
@@ -118,11 +117,7 @@ public class HttpSoapSender extends BaseCommandlineTool {
         httpPostMethod.setRequestHeader("Content-Type", "text/xml");
         httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
         httpClient.executeMethod(httpPostMethod);
-        String response = httpPostMethod.getResponseBodyAsString();
-        if (response != null) {
-            os.write(response.getBytes());
-            os.write("\n".getBytes());
-        }
+        return httpPostMethod.getResponseBodyAsString() + "\n";
     }
 
     public static void main(String[] argv) {
@@ -134,18 +129,10 @@ public class HttpSoapSender extends BaseCommandlineTool {
             consoleErr("INVALID COMMANDLINE: Try \"" + getProgramName() + " -h\" for help.");
             System.exit(-1);
         }
-        OutputStream os = null;
+        File fout = null;
         if (OUTFILE_FWA.isSet()) {
             String outfile = OUTFILE_FWA.getValue();
-            File f = new File(outfile);
-            try {
-                os = new FileOutputStream(f);
-            } catch (FileNotFoundException fnfe) {
-                consoleErr(COMMON.msgCannotWriteToFile(outfile));
-                System.exit(RETURN_CANT_WRITE);
-            }
-        } else {
-            os = System.out;
+            fout = new File(outfile);
         }
 
         URL u = null;
@@ -184,8 +171,14 @@ public class HttpSoapSender extends BaseCommandlineTool {
 
         initLogging();
         try{
-            doSend(u,is,os, PROXY_SERVER.getValue(), hasProxy ? Integer.parseInt(PROXY_PORT.getValue()) : 0,
+            String result = doSend(u,is, PROXY_SERVER.getValue(), hasProxy ? Integer.parseInt(PROXY_PORT.getValue()) : 0,
                     PROXY_USER.getValue(), PROXY_PASS.getValue(), SOAP_ACTION.getValue());
+            if (OUTFILE_FWA.isSet()) {
+                FileOutputStream fos = new FileOutputStream(fout);
+                fos.write(result.getBytes());
+                fos.close();
+            } else System.out.println(result);
+
         } catch (IOException ioe) {
             consoleErr(MESSAGES.msgIoErrorOnSend(ioe.getMessage()));
             System.exit(RETURN_SEND_ERROR);

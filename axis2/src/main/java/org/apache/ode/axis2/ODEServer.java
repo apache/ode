@@ -89,7 +89,6 @@ public class ODEServer {
 
     protected AxisConfiguration _axisConfig;
 
-
     protected TransactionManager _txMgr;
 
     protected BpelDAOConnectionFactory _daoCF;
@@ -109,27 +108,28 @@ public class ODEServer {
     private BpelServerConnector _connector;
 
     private ManagementService _mgtService;
-    
+
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
+        init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
+    }
+
+    public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
         boolean success = false;
         try {
             _axisConfig = axisConf;
-            _appRoot = new File(config.getServletContext().getRealPath("/WEB-INF"));
+            _appRoot = new File(contextPath);
             TempFileManager.setWorkingDirectory(_appRoot);
 
             __log.debug("Loading properties");
             String confDir = System.getProperty("org.apache.ode.configDir");
-            if (confDir == null)
-                _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
-            else
-                _odeConfig = new ODEConfigProperties(new File(confDir));
+            if (confDir == null) _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
+            else _odeConfig = new ODEConfigProperties(new File(confDir));
 
             try {
                 _odeConfig.load();
             } catch (FileNotFoundException fnf) {
                 String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
                 __log.warn(errmsg);
-
             } catch (Exception ex) {
                 String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
                 __log.error(errmsg, ex);
@@ -137,31 +137,22 @@ public class ODEServer {
             }
 
             String wdir = _odeConfig.getWorkingDir();
-            if (wdir == null)
-                _workRoot = _appRoot;
-            else
-                _workRoot = new File(wdir.trim());
+            if (wdir == null) _workRoot = _appRoot;
+            else _workRoot = new File(wdir.trim());
 
             __log.debug("Initializing transaction manager");
             initTxMgr();
-
             __log.debug("Creating data source.");
             initDataSource();
-
             __log.debug("Starting DAO.");
             initDAO();
-
-            __log.debug("DAO started.");
-
             __log.debug("Initializing BPEL process store.");
             initProcessStore();
-
             __log.debug("Initializing BPEL server.");
             initBpelServer();
 
             // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
-
             registerMexInterceptors();
 
             try {
