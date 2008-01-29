@@ -125,7 +125,7 @@ import org.w3c.dom.Node;
  * Compiler for converting BPEL process descriptions (and their associated WSDL and XSD documents) into compiled representations
  * suitable for execution by the ODE BPEL Service Provider. TODO: Move process validation into this class.
  */
-abstract class BpelCompiler implements CompilerContext {
+abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
     /** Class-severity logger. */
     protected static final Log __log = LogFactory.getLog(BpelCompiler.class);
 
@@ -154,8 +154,6 @@ abstract class BpelCompiler implements CompilerContext {
 
     /** History of compiled activities */
     private List<OActivity> _compiledActivities = new ArrayList<OActivity>();
-
-    private OProcess _oprocess;
 
     private ResourceFinder _resourceFinder;
 
@@ -741,26 +739,6 @@ abstract class BpelCompiler implements CompilerContext {
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));
         }
         return _oprocess;
-    }
-
-    private OConstants makeConstants() {
-        OConstants constants = new OConstants(_oprocess);
-        constants.qnConflictingReceive = new QName(getBpwsNamespace(), "conflictingReceive");
-        constants.qnCorrelationViolation = new QName(getBpwsNamespace(), "correlationViolation");
-        constants.qnForcedTermination = new QName(getBpwsNamespace(), "forcedTermination");
-        constants.qnJoinFailure = new QName(getBpwsNamespace(), "joinFailure");
-        constants.qnMismatchedAssignmentFailure = new QName(getBpwsNamespace(), "mismatchedAssignment");
-        constants.qnMissingReply = new QName(getBpwsNamespace(), "missingReply");
-        constants.qnMissingRequest = new QName(getBpwsNamespace(), "missingRequest");
-        constants.qnSelectionFailure = new QName(getBpwsNamespace(), "selectionFailure");
-        constants.qnUninitializedVariable = new QName(getBpwsNamespace(), "uninitializedVariable");
-        constants.qnXsltInvalidSource = new QName(getBpwsNamespace(), "xsltInvalidSource");
-        constants.qnSubLanguageExecutionFault = new QName(getBpwsNamespace(), "subLanguageExecutionFault");
-        constants.qnUninitializedPartnerRole = new QName(getBpwsNamespace(), "uninitializedPartnerRole");
-        constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
-        constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
-        constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
-        return constants;
     }
 
     // TODO unused?
@@ -1639,8 +1617,6 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     protected abstract String getDefaultExpressionLanguage();
-
-    protected abstract String getBpwsNamespace();
 
     protected void registerExpressionLanguage(String expLangUri, ExpressionCompiler expressionCompiler) {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);

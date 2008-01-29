@@ -265,12 +265,12 @@ public class SoapMessageConverter {
         reason.setText(faultName);
         SOAPFaultDetail soapDetail = _soapFactory.createSOAPFaultDetail(fault);
         if (detail != null)
-            soapDetail.addDetailEntry(detail.getFirstElement());
+            soapDetail.addDetailEntry(detail);
         return fault;
     }
 
     private OMElement buildSoapDetail(Element message, QName faultName, Operation op) throws AxisFault {
-        if (faultName.getNamespaceURI() == null || !faultName.getNamespaceURI().equals(_def.getTargetNamespace()))
+        if (faultName.getNamespaceURI() == null)
             return toFaultDetail(faultName, message);
         Fault f = op.getFault(faultName.getLocalPart());
         if (f == null)
@@ -529,7 +529,8 @@ public class SoapMessageConverter {
         odeMsgEl.appendChild(partel);
 
         if (detail.getFirstChildWithName(pdef.getElementName()) != null) {
-            OMUtils.toDOM(detail.getFirstChildWithName(pdef.getElementName()));
+            partel.appendChild(odeMsgEl.getOwnerDocument().importNode(
+                    OMUtils.toDOM(detail.getFirstChildWithName(pdef.getElementName())), true));
         } else {
             partel.appendChild(odeMsgEl.getOwnerDocument().importNode(OMUtils.toDOM(detail),true));
         }
