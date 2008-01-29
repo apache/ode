@@ -124,6 +124,11 @@ public class LoggingConnectionWrapper implements Connection {
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         if (shouldPrint()) print("prepareStmt: " + sql);
+        if (sql.indexOf("ODE_SCOPE") > 0) {
+            for (StackTraceElement traceElement : Thread.currentThread().getStackTrace()) {
+                print(traceElement.toString());
+            }
+        }
         return new LoggingStatementWrapper(_conn.prepareStatement(sql), _log);
     }
 

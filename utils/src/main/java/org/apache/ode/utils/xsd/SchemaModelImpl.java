@@ -19,6 +19,7 @@
 package org.apache.ode.utils.xsd;
 
 import org.apache.xerces.dom.DOMInputImpl;
+import org.apache.xerces.impl.Constants;
 import org.apache.xerces.impl.xs.XMLSchemaLoader;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
@@ -27,6 +28,10 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xerces.xs.LSInputList;
 import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSTypeDefinition;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.DOMErrorHandler;
+import org.w3c.dom.DOMError;
 import org.w3c.dom.ls.LSInput;
 
 import javax.xml.namespace.QName;
@@ -41,6 +46,7 @@ import java.util.Map;
  * Xerces based schema model.
  */
 public class SchemaModelImpl implements SchemaModel {
+    private static final Log __log = LogFactory.getLog(SchemaModelImpl.class);
     private XSModel _model;
 
     private SchemaModelImpl(XSModel model) {
@@ -61,6 +67,7 @@ public class SchemaModelImpl implements SchemaModel {
         XMLSchemaLoader schemaLoader = new XMLSchemaLoader();
         InternalSchemaResolver resolver = new InternalSchemaResolver();
         schemaLoader.setEntityResolver(resolver);
+        schemaLoader.setParameter(Constants.DOM_ERROR_HANDLER, new SchemaErrorHandler());
 
 
         final String[] uris = new String[schemas.size()];
@@ -88,7 +95,18 @@ public class SchemaModelImpl implements SchemaModel {
             }
         };
 
-        return new SchemaModelImpl(schemaLoader.loadInputList(list));
+        XSModel xsm = schemaLoader.loadInputList(list);
+        return new SchemaModelImpl(xsm);
+    }
+
+    private static class SchemaErrorHandler implements DOMErrorHandler {
+        public boolean handleError(DOMError error) {
+            __log.error("Schema error", ((Exception)error.getRelatedException()));
+            __log.error(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
+            __log.error(error.getRelatedData());
+            __log.error(error.getRelatedException());
+            return false;
+        }
     }
 
     /**
@@ -175,6 +193,8 @@ public class SchemaModelImpl implements SchemaModel {
                 location = resourceIdentifier.getNamespace();
             else if (resourceIdentifier.getLiteralSystemId() != null && _schemas.get(resourceIdentifier.getLiteralSystemId()) != null)
                 location = resourceIdentifier.getLiteralSystemId();
+            else if (resourceIdentifier.getBaseSystemId() != null && _schemas.get(resourceIdentifier.getBaseSystemId()) != null)
+                location = resourceIdentifier.getBaseSystemId();
 
             src.setByteStream(new ByteArrayInputStream(_schemas.get(location)));
             return src;

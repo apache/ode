@@ -27,6 +27,8 @@ import org.apache.ode.bpel.compiler.bom.PropertyAlias;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.XMLSchemaType;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.SchemaModelImpl;
@@ -35,22 +37,13 @@ import org.apache.ode.utils.xsd.XsdException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Import;
-import javax.wsdl.Message;
-import javax.wsdl.PortType;
-import javax.wsdl.Types;
+import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 import java.io.StringReader;
+import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -80,7 +73,13 @@ class WSDLRegistry {
                         + "<xsd:simpleType name=\"__bogusType__\">"
                         + "<xsd:restriction base=\"xsd:normalizedString\"/>"
                         + "</xsd:simpleType>" + "</xsd:schema>").getBytes());
-        
+        try {
+            _schemas.put(URI.create(Namespaces.WSDL_11), StreamUtils.read(getClass().getResource("/wsdl.xsd")));
+            _schemas.put(URI.create("http://www.w3.org/2001/xml.xsd"), StreamUtils.read(getClass().getResource("/xml.xsd")));
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't load default schemas.", e);
+        }
+
         _ctx = cc;
     }
 
