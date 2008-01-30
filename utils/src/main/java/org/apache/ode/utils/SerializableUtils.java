@@ -84,7 +84,7 @@ public class SerializableUtils {
         protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
           String name = desc.getName();
           try {
-              return Class.forName(name, true, cl);
+              return Class.forName(name, false, cl);
           } catch (ClassNotFoundException ex) {
               return super.resolveClass(desc);
           }
