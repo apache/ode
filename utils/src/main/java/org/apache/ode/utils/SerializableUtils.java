@@ -81,11 +81,13 @@ public class SerializableUtils {
     try {
       ObjectInputStream ois = new ObjectInputStream(binaryStream) {
 
-        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
-            ClassNotFoundException {
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
           String name = desc.getName();
-          Class c = cl.loadClass(name);
-          return c;
+          try {
+              return Class.forName(name, true, cl);
+          } catch (ClassNotFoundException ex) {
+              return super.resolveClass(desc);
+          }
         }
       };
       return ois.readObject();
