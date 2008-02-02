@@ -63,7 +63,7 @@ public class WSDLRegistryTest extends TestCase {
   }
 
   public void testAddWSDL() throws Exception {
-    URL wsd = new File("/home/mriou/tmp/informatica-wsdl/wsdl/address_cleansing_svc.wsdl").toURL();
+    URL wsd = getClass().getResource("/1.1/good/test.wsdl");
 
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
@@ -80,8 +80,8 @@ public class WSDLRegistryTest extends TestCase {
     SchemaModel m = _registry.getSchemaModel();
     assertNotNull(m);
 
-//    assertTrue("WSDL-Define type not visible.",m.knowsSchemaType(new QName("uri:testing", "TComplex1")));
-//    assertTrue("Type from import not visible.",m.knowsSchemaType(new QName("uri:test1", "TComplex2")));
+    assertTrue("WSDL-Define type not visible.",m.knowsSchemaType(new QName("uri:testing", "TComplex1")));
+    assertTrue("Type from import not visible.",m.knowsSchemaType(new QName("uri:test1", "TComplex2")));
     
     
   }
