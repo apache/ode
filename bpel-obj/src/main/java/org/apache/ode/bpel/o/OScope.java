@@ -19,9 +19,12 @@
 
 package org.apache.ode.bpel.o;
 
-import java.util.*;
-
-import org.w3c.dom.Node;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Compiled representation of a BPEL scope. Instances of this class

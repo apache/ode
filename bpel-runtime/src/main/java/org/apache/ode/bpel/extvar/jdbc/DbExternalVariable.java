@@ -30,6 +30,8 @@ import java.util.Set;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ISO8601DateParser;
@@ -46,6 +48,7 @@ import org.w3c.dom.NodeList;
  * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class DbExternalVariable {
+    private static final Log __log = LogFactory.getLog(DbExternalVariable.class);
 
 	private static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
 
@@ -75,12 +78,10 @@ class DbExternalVariable {
 
 	String table;
 
-	String schema;
+    String schema; // table schema
 
 	/** Does the database support retrieval of generated keys? */
 	boolean generatedKeys;
-
-	QName rowname = new QName(null, "row");
 
 	DbExternalVariable(EVarId evar, DataSource ds) {
 		this.evarId = evar;
@@ -112,20 +113,17 @@ class DbExternalVariable {
 
 	/**
 	 * Create a key from a locator.
-	 * 
-	 * @param locator
-	 * @return
 	 */
 	RowKey keyFromLocator(Locator locator) throws ExternalVariableModuleException {
 		RowKey rc = new RowKey();
 		parseXmlRow(rc, locator.reference);
 		
-		// Put in the static gooedies such as pid/iid
+        // Put in the static goodies such as pid/iid
 		for (Column c : rc._columns) {
 			switch (c.genType) {
 			case iid:
 			case pid:
-				rc.put(c.name, c.getValue(c.name, null, locator.iid));
+                rc.put(c.name, c.getValue(c.name, null, null, locator.iid));
 				break;
 			}
 		}
@@ -204,7 +202,6 @@ class DbExternalVariable {
 				sb.append(kc.colname);
 				sb.append(" = ?");
 			}
-
 		}
 
 		// If we have no key columns, we cannot do an update
@@ -212,7 +209,6 @@ class DbExternalVariable {
 			update = null;
 		else
 			update = sb.toString();
-
 	}
 
 	private void createInsert() {
@@ -256,15 +252,14 @@ class DbExternalVariable {
 
 	}
 
-	<T extends RowSubset> Element renderXmlRow(T value) {
+    <T extends RowSubset> Element renderXmlRow(QName varType, T value) {
 		Document doc = DOMUtils.newDocument();
-		Element el = doc.createElementNS(rowname.getNamespaceURI(), rowname
-				.getLocalPart());
+        Element el = doc.createElementNS(varType.getNamespaceURI(), varType.getLocalPart());
 		doc.appendChild(el);
+        if (value != null) {
 		for (Column c : value._columns) {
 			Object data = value.get(c.idx);
-			Element cel = doc.createElementNS(c.elname.getNamespaceURI(),
-					c.elname.getLocalPart());
+	            Element cel = doc.createElementNS(varType.getNamespaceURI(), c.name);
 			String strdat = c.toText(data);
 			if (strdat != null)
 				cel.appendChild(doc.createTextNode(strdat));
@@ -273,7 +268,7 @@ class DbExternalVariable {
 
 			el.appendChild(cel);
 		}
-
+        }
 		return el;
 	}
 
@@ -283,23 +278,29 @@ class DbExternalVariable {
 			return ret;
 		
 		NodeList nl = rowel.getChildNodes();
+        if (__log.isDebugEnabled()) __log.debug("parseXmlRow: element="+rowel.getLocalName());
 		for (int i = 0; i < nl.getLength(); ++i) {
 			Node n = nl.item(i);
 			if (n.getNodeType() != Node.ELEMENT_NODE)
 				continue;
 			String key = n.getLocalName();
 			String val = n.getTextContent();
+            if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" value: "+val);
 
 			Column column = ret.getColumn(key);
-			if (column == null)
+            if (column == null) {
+                if (__log.isDebugEnabled()) __log.debug("No matching column for key '"+key+"'");
 				continue;
+            }
 
 			String nil = ((Element) n).getAttributeNS(XSI_NS, "nil");
-			if (nil != null && "true".equalsIgnoreCase(nil))
+            if (nil != null && "true".equalsIgnoreCase(nil)) {
+                if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" is null (xsi:nil)");
 				ret.put(key, null);
-			else
+            } else {
 				ret.put(key, column.fromText(val));
 		}
+        }
 		return ret;
 	}
 
@@ -308,19 +309,19 @@ class DbExternalVariable {
 		int idx;
 
 		/** name of the column */
-		String name;
+        final String name;
 
 		/** database name of the column (in case we need to override */
-		String colname;
+        final String colname;
 
 		/** Is this a key column? */
-		boolean key;
+        final boolean key;
 
 		/** Type of value generator to use for creating values for this column. */
-		GenType genType;
+        final GenType genType;
 
 		/** The (SQL) expression used to populate the column. */
-		String expression;
+        final String expression;
 
 		/** The SQL data type of this column, one of java.sql.Types */
 		int dataType;
@@ -328,19 +329,15 @@ class DbExternalVariable {
 		/** Indicates NULL values are OK */
 		boolean nullok;
 
-		QName elname;
-
-		Column(String name, String colname, boolean key, GenType genType,
-				String expression) {
+        Column(String name, String colname, boolean key, GenType genType, String expression) {
 			this.name = name;
 			this.colname = colname == null ? name : colname;
 			this.key = key;
 			this.genType = genType;
 			this.expression = expression;
-			elname = new QName(null, name);
 		}
 
-		public Object getValue(String name, RowVal values, Long iid) {
+        public Object getValue(String name, RowKey keys, RowVal values, Long iid) {
 			switch (genType) {
 			case ctimestamp:
 			case utimestamp:
@@ -354,14 +351,15 @@ class DbExternalVariable {
 				return iid;
 			case none:
 			default:
+            	if (key && keys.get(name) != null) 
+            		return keys.get(name);
+            	else
 				return values.get(name);
 			}
 		}
 
 		/**
 		 * Return <code>true</code> if column is a date-like type.
-		 * 
-		 * @return
 		 */
 		boolean isDate() {
 			return dataType == Types.DATE;
@@ -377,8 +375,6 @@ class DbExternalVariable {
 
 		/**
 		 * Is this column best represented as an integer?
-		 * 
-		 * @return
 		 */
 		boolean isInteger() {
 			switch (dataType) {
@@ -394,8 +390,6 @@ class DbExternalVariable {
 
 		/**
 		 * Is this column best represented as a real number?
-		 * 
-		 * @return
 		 */
 		boolean isReal() {
 			switch (dataType) {
@@ -461,14 +455,9 @@ class DbExternalVariable {
 	}
 
 	/**
-	 * 
 	 * Key used to identify a row.
-	 * 
-	 * @author Maciej Szefler <mszefler at gmail dot com>
-	 * 
 	 */
 	class RowKey extends RowSubset {
-
 		private static final long serialVersionUID = 1L;
 
 		/**
@@ -480,40 +469,30 @@ class DbExternalVariable {
 
 		/**
 		 * Write the key to a locator.
-		 * 
-		 * @param locator
 		 */
-		void write(Locator locator) {
-			locator.reference = renderXmlRow(this);
+        void write(QName varType, Locator locator) {
+            locator.reference = renderXmlRow(varType, this);
 		}
 
 		public Set<String> getMissing() {
 			HashSet<String> missing = new HashSet<String>();
 			for (Column c : _keycolumns) {
-				if (get(c.idx) ==null)
+                if (get(c.idx) == null)
 					missing.add(c.name);
 			}
 			return missing;
 		}
-
-
-
 	}
 
 	/**
 	 * Row values.
-	 * 
-	 * @author Maciej Szefler <mszefler at gmail dot com>
-	 * 
 	 */
 	class RowVal extends RowSubset {
-
 		private static final long serialVersionUID = 1L;
 
 		RowVal() {
 			super(DbExternalVariable.this._columns);
 		}
-
 	}
 
 }

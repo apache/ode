@@ -18,30 +18,27 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Collection;
+import java.util.Date;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.IncompleteKeyException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Operation;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-
-import javax.xml.namespace.QName;
 
 /**
  * <p>A facade for accessing all the BPEL functionality that is not implemented
@@ -256,21 +253,13 @@ public interface BpelRuntimeContext {
 
     /**
      * Read an external variable. 
-     * @param externalVariableId identifier
-     * @param reference variable reference
-     * @return external variable value
-     * @throws ExternalVariableModuleException
      */
-	Node readExtVar(String externalVariableId, Node reference) throws ExternalVariableModuleException;
+	Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException;
 	 
 	/**
 	 * Write an external variable. 
-	 * @param externalVariableId external variable id
-	 * @param value new value
-	 * @return update reference
-	 * @throws ExternalVariableModuleException
 	 */
-	ValueReferencePair writeExtVar(String externalVariableId, Node reference, Node value) throws ExternalVariableModuleException ;
+	ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException ;
 	
 	public class ValueReferencePair {
 		public Node value;

@@ -59,13 +59,20 @@ public class ExternalVariableTest extends BPELTestAbstract {
         s.execute("insert into extvartable1(id1,pid,foo) values ('123','"
                 + new QName("http://ode/bpel/unit-test","HelloWorld2-1").toString()
                 + "','thefoo');");
-        conn.close();
 
+        s.execute("CREATE TABLE costPerCustomer (value0 varchar(250), key1 varchar(250) primary key)");
+        
+        conn.close();
     }
 
     @Test
     public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/ExtVar");
+    }
+
+    @Test
+    public void testExtVar2() throws Throwable {
+        go("/bpel/2.0/ExtVar2");
     }
 
 }

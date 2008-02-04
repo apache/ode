@@ -43,6 +43,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -81,6 +82,10 @@ class ASSIGN extends ACTIVITY {
                 faultData = createFault(fault.getQName(), aCopy, fault
                         .getMessage());
                 break;
+            } catch (ExternalVariableModuleException e) {
+            	__log.error("Exception while initializing external variable", e);
+                _self.parent.failure(e.toString(), null);
+                return;
             }
         }
 
@@ -102,7 +107,7 @@ class ASSIGN extends ACTIVITY {
         return (OAssign) _self.o;
     }
 
-    private Node evalLValue(OAssign.LValue to) throws FaultException {
+    private Node evalLValue(OAssign.LValue to) throws FaultException, ExternalVariableModuleException {
         final BpelRuntimeContext napi = getBpelRuntimeContext();
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
@@ -150,7 +155,7 @@ class ASSIGN extends ACTIVITY {
      * @throws IllegalStateException
      *             DOCUMENTME
      */
-    private Node evalRValue(OAssign.RValue from) throws FaultException {
+    private Node evalRValue(OAssign.RValue from) throws FaultException, ExternalVariableModuleException {
         if (__log.isDebugEnabled())
             __log.debug("Evaluating FROM expression \"" + from + "\".");
 
@@ -188,7 +193,7 @@ class ASSIGN extends ACTIVITY {
                         + DOMUtils.domToString(tempVal));
             retVal = tempVal;
         } else if (from instanceof OAssign.Expression) {
-            List l;
+            List<Node> l;
             OExpression expr = ((OAssign.Expression) from).expression;
             try {
                 l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr,
@@ -318,12 +323,11 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-	private void copy(OAssign.Copy ocopy) throws FaultException {
+	private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
 
-        final BpelRuntimeContext napi = getBpelRuntimeContext();
         ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
@@ -347,7 +351,7 @@ class ASSIGN extends ACTIVITY {
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
-                // This really should have been cought by the compiler.
+                // This really should have been caught by the compiler.
                 __log
                         .fatal("Message/Non-Message Assignment, should be caught by compiler:"
                                 + ocopy);

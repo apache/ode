@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.o;
 
-import java.util.HashMap;
 
 /**
  * Compiled representation of an external variable declaration.

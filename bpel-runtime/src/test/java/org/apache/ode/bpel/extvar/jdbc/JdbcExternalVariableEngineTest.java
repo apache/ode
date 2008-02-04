@@ -51,6 +51,7 @@ public class JdbcExternalVariableEngineTest extends TestCase {
     
     final Long _iid = 123L;
     final QName _pid = new QName("foo", "pid");
+    final QName _varType = new QName("foo", "foobar");
     
     ExternalVariableConf _econf;
     jdbcDataSource _ds;
@@ -111,7 +112,7 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
-        value = _engine.writeValue(value);
+        value = _engine.writeValue(_varType, value);
         assertNotNull(value);
         assertNotNull(value.locator);
         System.out.println(DOMUtils.domToString(value.locator.reference));
@@ -125,11 +126,12 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
-        value = _engine.writeValue(value);
+        value = _engine.writeValue(_varType, value);
         String domstr = DOMUtils.domToStringLevel2(value.value);
         Value newvalue = new Value(value.locator,DOMUtils.stringToDOM(domstr.replaceAll("<bar>bar</bar>", "<bar>boohoo</bar>")),null);
-        _engine.writeValue(newvalue);
-        Value reread = _engine.readValue(newvalue.locator);
+        _engine.writeValue(_varType, newvalue);
+        QName qname = new QName("http://example.com", "bar");
+        Value reread = _engine.readValue(qname, newvalue.locator);
         domstr = DOMUtils.domToString(reread.value);
         assertTrue(domstr.contains("boohoo"));
         assertFalse(domstr.contains(">bar<"));
@@ -140,10 +142,9 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         testConfigure();
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
-        value = _engine.writeValue(value);
+        value = _engine.writeValue(_varType, value);
         
-        
-        Value readVal = _engine.readValue(value.locator);
+        Value readVal = _engine.readValue(_varType, value.locator);
         
         assertEquals(_iid,readVal.locator.iid);
         assertEquals(_pid,readVal.locator.pid);

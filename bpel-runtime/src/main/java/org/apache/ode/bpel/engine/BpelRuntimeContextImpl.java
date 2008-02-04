@@ -65,6 +65,7 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
@@ -1309,15 +1310,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-	public Node readExtVar(String externalVariableId, Node reference) throws ExternalVariableModuleException {
-		Value val = _bpelProcess.getEVM().read(externalVariableId, reference, _iid);
+	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
+		Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
 		return val.value;
 	}
 
-	public ValueReferencePair writeExtVar(String externalVariableId, Node reference, Node value) throws ExternalVariableModuleException {
+	public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
 		ValueReferencePair vrp = new ValueReferencePair();
 		
-		Value val = _bpelProcess.getEVM().write(externalVariableId, reference, value, _iid);
+		Value val = _bpelProcess.getEVM().write(variable, reference, value, _iid);
 		vrp.reference = val.locator.reference;
 		vrp.value = val.value;
 		

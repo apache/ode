@@ -34,8 +34,10 @@
 				<jdbc:datasource-ref>testds</jdbc:datasource-ref>
 				<jdbc:table>extvartable1</jdbc:table>
 				<jdbc:column name="pid" key="yes" generator="pid" />      
+				<jdbc:column name="id1"/>      
 				<jdbc:column name="cts" generator="ctimestamp" />
 				<jdbc:column name="uts" generator="utimestamp" />
+				<jdbc:column name="foo"/>      
 			</jdbc:jdbc>			
 		</xvar:externalVariable>
 		

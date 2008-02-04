@@ -159,8 +159,9 @@ class ScopeFrame implements Serializable {
     // context.
     // 
     
-    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting) throws FaultException {
-    	
+    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting) 
+        throws FaultException
+    {
     	// Special case of messageType variables with no part
         if (variable.declaration.type instanceof OMessageVarType) {
             OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
@@ -172,18 +173,15 @@ class ScopeFrame implements Serializable {
             }
         }
 
-    
         if (variable.declaration.extVar != null) {
             // Note, that when using external variables, the database will not contain the value of the
         	// variable, instead we need to go the external variable subsystems. 
-
         	Element reference = (Element) fetchVariableData(brc, resolve(variable.declaration.extVar.related), false);
             try {
-                Node ret = brc.readExtVar(variable.declaration.extVar.externalVariableId, reference );
+                Node ret = brc.readExtVar(variable.declaration, reference );
                 if (ret == null) {
                     throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable, 
                             "The external variable \"" + variable.declaration.name + "\" has not been initialized.");
-                    
                 }
                 return ret;
             } catch (IncompleteKeyException ike) {
@@ -194,26 +192,22 @@ class ScopeFrame implements Serializable {
                         "The extenral variable \"" + variable.declaration.name + "\" has not been properly initialized;" +
                                 "the following key compoenents were missing:" + ike.getMissing());
             } catch (ExternalVariableModuleException e) {
-                __log.error("Unexpected EVM error.", e);
                 throw new BpelEngineException(e);
             }
-
         } else /* not external */ {
             Node data = brc.readVariable(variable.scopeInstance,variable.declaration.name, forWriting);
-            
             if (data == null) {
                 throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable,
                         "The variable " + variable.declaration.name + " isn't properly initialized.");
             }
-
             return data;
         }
-
 	}
     
 
     Node fetchVariableData(BpelRuntimeContext brc, VariableInstance var, OMessageVarType.Part part, boolean forWriting)
-            throws FaultException {
+        throws FaultException 
+    {
         Node container = fetchVariableData(brc, var, forWriting);
 
         // If we want a specific part, we will need to navigate through the
@@ -225,40 +219,68 @@ class ScopeFrame implements Serializable {
     }
     
 
-
-    Node initializeVariable(BpelRuntimeContext brc, VariableInstance lvar, Node val)  {
-
-        if (lvar.declaration.extVar != null) /*external variable */ {
-            try {
-            	VariableInstance related = resolve(lvar.declaration.extVar.related);
-            	
+    Node initializeVariable(BpelRuntimeContext context, VariableInstance var, Node value)  
+        throws ExternalVariableModuleException
+    {
+        if (var.declaration.extVar != null) /* external variable */ {
+            if (__log.isDebugEnabled())
+                __log.debug("Initialize external variable:"
+                        + " name="+var.declaration
+                        + " value="+DOMUtils.domToString(value));
+            VariableInstance related = resolve(var.declaration.extVar.related);
             	Node reference = null;
             	try {
-            		reference = fetchVariableData(brc, related, true);
+                reference = fetchVariableData(context, related, true);
             	} catch (FaultException fe) {
             		// In this context this is not necessarily a problem, since the assignment may re-init the related var
             	}
             	
-                ValueReferencePair vrp  = brc.writeExtVar(lvar.declaration.extVar.externalVariableId, reference, val);
-                commitChanges(brc,related, vrp.reference);
-                return vrp.value;
-            } catch (ExternalVariableModuleException e) {
-                __log.error("External variable initialization error.", e);
-                // TODO: need to report this
-                throw new BpelEngineException("External varaible initialization error", e);
-            }
+            if (reference != null)
+                value = context.readExtVar(var.declaration, reference);
                         
+            return value;
         } else /* normal variable */ {
-            return brc.writeVariable(lvar,val);
+            if (__log.isDebugEnabled())
+                if (__log.isDebugEnabled())
+                    __log.debug("Initialize variable:"
+                                + " name="+var.declaration
+                                + " value="+DOMUtils.domToString(value));
+            return context.writeVariable(var, value);
+        }
         }
         
 
-        
+    Node commitChanges(BpelRuntimeContext context, VariableInstance var, Node value)
+        throws ExternalVariableModuleException
+    {
+        return writeVariable(context, var, value);
 	}
 
-    Node commitChanges(BpelRuntimeContext context, VariableInstance lval, Node lvalue) {
-    	return initializeVariable(context, lval, lvalue);
     	
+    Node writeVariable(BpelRuntimeContext context, VariableInstance var, Node value) 
+        throws ExternalVariableModuleException
+    {
+        if (var.declaration.extVar != null) /* external variable */ {
+            __log.debug("Write external variable:"
+                    + " name="+var.declaration
+                    + " value="+DOMUtils.domToString(value));
+            VariableInstance related = resolve(var.declaration.extVar.related);
+            Node reference = null;
+            try {
+                reference = fetchVariableData(context, related, true);
+            } catch (FaultException fe) {
+                // In this context this is not necessarily a problem, since the assignment may re-init the related var
+            }
+
+            ValueReferencePair vrp  = context.writeExtVar(var.declaration, reference, value);
+            writeVariable(context, related, vrp.reference);
+            return vrp.value;
+        } else /* normal variable */ {
+            __log.debug("Write variable:"
+                    + " name="+var.declaration
+                    + " value="+DOMUtils.domToString(value));
+            return context.writeVariable(var, value);
+        }
 	}
 
 
@@ -270,9 +292,7 @@ class ScopeFrame implements Serializable {
             QName elName = ((OElementVarType) part.type).elementType;
             ret = DOMUtils.findChildByName((Element) ret, elName);
         }
-
         return ret;
     }
     
 }
-  
