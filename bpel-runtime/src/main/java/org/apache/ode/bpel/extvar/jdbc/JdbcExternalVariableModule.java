@@ -88,10 +88,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             } finally {
                 try {
                     ctx.close();
-                } catch (NamingException e) {
-                    ;
-                    ;
-                }
+                } catch (NamingException e) { /* ignore */ } 
             }
 
             if (dsCandidate == null)
@@ -237,18 +234,20 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     public void stop() {
     }
 
-    public Value writeValue(Value newval) throws ExternalVariableModuleException {
+    public Value writeValue(QName varType, Value newval) throws ExternalVariableModuleException {
         EVarId evarId = new EVarId(newval.locator.pid, newval.locator.varId);
         DbExternalVariable evar = _vars.get(evarId);
         if (evar == null)
             throw new ExternalVariableModuleException("No such variable. "); // todo
 
-        RowVal val = evar.parseXmlRow(evar.new RowVal(), (Element) newval.value);
         RowKey key = evar.keyFromLocator(newval.locator);
+        RowVal val = evar.parseXmlRow(evar.new RowVal(), (Element) newval.value);
+        if (__log.isDebugEnabled())
+            __log.debug("JdbcExternalVariable.writeValue() RowKey: " + key + " RowVal: " + val);
 
         if (key.isComplete() && evar._initType == InitType.delete_insert) {
             // do delete...
-            // TODO
+            throw new ExternalVariableModuleException("Delete not implemented. "); // todo
         }
 
         // should we try an update first? to do this we need to have all the required keys
@@ -258,13 +257,20 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
         boolean insert = evar._initType != InitType.update;
 
+        if (__log.isDebugEnabled())
+            __log.debug("tryUpdateFirst: " + tryupdatefirst
+                        + " insert: " + insert
+                        + " initType: " + evar._initType
+                        + " key.isEmpty: " + evar._keycolumns.isEmpty()
+                        + " key.isComplete: " + key.isComplete());
+        
         try {
             if (tryupdatefirst)
                 insert = execUpdate(evar, key, val) == 0;
             if (insert) {
-                key = execInsert(evar, newval.locator, val);
+                key = execInsert(evar, newval.locator, key, val);
                 // Transfer the keys obtained from the db.
-                key.write(newval.locator);
+                key.write(varType, newval.locator);
             }
         } catch (SQLException se) {
             throw new ExternalVariableModuleException("Error updating row.", se);
@@ -274,16 +280,16 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     }
 
-    public Value readValue(Locator locator) throws ExternalVariableModuleException {
+    public Value readValue(QName varType, Locator locator) throws ExternalVariableModuleException {
         EVarId evarId = new EVarId(locator.pid, locator.varId);
         DbExternalVariable evar = _vars.get(evarId);
         if (evar == null)
-            throw new ExternalVariableModuleException("No such variable. "); // todo
+            throw new ExternalVariableModuleException("No such variable: "+evarId);
         
         Element val;
         try {
             RowVal rowval = execSelect(evar, locator);
-            val = evar.renderXmlRow(rowval);
+            val = evar.renderXmlRow(varType, rowval);
         } catch (SQLException se) {
             throw new ExternalVariableModuleException("SQL Error.", se);
         }
@@ -305,10 +311,15 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     int execUpdate(DbExternalVariable dbev, RowKey key, RowVal values) throws SQLException {
         Connection conn = dbev.dataSource.getConnection();
         try {
+            if (__log.isDebugEnabled()) {
+                __log.debug("execUpdate: key=" + key + " values=" + values);
+                __log.debug("Prepare statement: " + dbev.update);
+            }
             PreparedStatement stmt = conn.prepareStatement(dbev.update);
             int idx = 1;
             for (Column c : dbev._updcolumns) {
                 Object val = values.get(c.name);
+                if (__log.isDebugEnabled()) __log.debug("Set value parameter "+idx+": "+val);
                 if (val == null)
                 	stmt.setNull(idx, c.dataType);
                 else
@@ -318,15 +329,14 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
             for (Column ck : dbev._keycolumns) {
                 Object val = key.get(ck.name);
+                if (__log.isDebugEnabled()) __log.debug("Set key parameter "+idx+": "+val);
                 if (val == null)
                 	stmt.setNull(idx, ck.dataType);
                 else
                 	stmt.setObject(idx, val);
                 idx++;
             }
-
             return stmt.executeUpdate();
-
         } finally {
             conn.close();
         }
@@ -335,6 +345,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
         RowKey rowkey = dbev.keyFromLocator(locator);
+        if (__log.isDebugEnabled()) __log.debug("execSelect: " + rowkey);
         
         if (!rowkey.isComplete()) {
         	throw new IncompleteKeyException(rowkey.getMissing());
@@ -343,17 +354,22 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         RowVal ret = dbev.new RowVal();
         Connection conn = dbev.dataSource.getConnection();
         try {
+            if (__log.isDebugEnabled()) __log.debug("Prepare statement: " + dbev.select);
             PreparedStatement stmt = conn.prepareStatement(dbev.select);
             int idx = 1;
-            for (Object k : rowkey)
+            for (Object k : rowkey) {
+                if (__log.isDebugEnabled()) __log.debug("Set key parameter "+idx+": "+k);
                 stmt.setObject(idx++, k);
+            }
 
             ResultSet rs = stmt.executeQuery();
             try {
                 if (rs.next()) {
-                    for (Column cr : dbev._columns) 
-                        ret.set(cr.idx,rs.getObject(cr.idx+1));
-
+                    for (Column cr : dbev._columns)  {
+                        Object val = rs.getObject(cr.idx+1);
+                        if (__log.isDebugEnabled()) __log.debug("Result column index "+cr.idx+": "+val);
+                        ret.set(cr.idx,val);
+                    }
                 } else
                     return null;
             } finally {
@@ -366,15 +382,16 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         return ret;
     }
 
-    RowKey execInsert(DbExternalVariable dbev, Locator locator, RowVal values) throws SQLException {
-        RowKey keys = dbev.new RowKey();
+    RowKey execInsert(DbExternalVariable dbev, Locator locator, RowKey keys, RowVal values) throws SQLException {
+        // RowKey keys = dbev.new RowKey();
         Connection conn = dbev.dataSource.getConnection();
         try {
-            PreparedStatement stmt = dbev.generatedKeys ? conn.prepareStatement(dbev.insert, dbev._autoColNames) : conn
-                    .prepareStatement(dbev.insert);
+            PreparedStatement stmt = dbev.generatedKeys 
+            		? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
+            		: conn.prepareStatement(dbev.insert);
             int idx = 1;
             for (Column c : dbev._inscolumns) {
-                Object val = c.getValue(c.name, values, locator.iid);
+                Object val = c.getValue(c.name, keys, values, locator.iid);
                 values.put(c.name, val);
                 stmt.setObject(idx, val);
                 idx++;
@@ -394,13 +411,10 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                     keys.put(ck.name,val);
                 }
             }
-
             return keys;
-
         } finally {
             conn.close();
         }
-
     }
 
 }

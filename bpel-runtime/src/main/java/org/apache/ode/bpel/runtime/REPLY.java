@@ -54,8 +54,8 @@ class REPLY extends ACTIVITY {
 
             assert msg instanceof Element;
 
-            for (Iterator i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
-                OScope.CorrelationSet cset = (OScope.CorrelationSet) i.next();
+            for (Iterator<OScope.CorrelationSet> i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
+                OScope.CorrelationSet cset = i.next();
                 initializeCorrelation(_scopeFrame.resolve(cset),
                         _scopeFrame.resolve(oreply.variable));
             }

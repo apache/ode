@@ -49,7 +49,6 @@ class RowSubset extends ArrayList<Object> {
 	 * @return
 	 */
 	boolean isComplete() {
-		
 		for (Object o : this) 
 			if (o == null)
 				return false;
@@ -81,5 +80,17 @@ class RowSubset extends ArrayList<Object> {
 
         int idx = _columns.indexOf(c);
         this.set(idx, val);
+    }
+    
+    public String toString() {
+        StringBuffer buf = new StringBuffer("RowSubset(");
+        for (int i=0; i<size(); i++) {
+            if (i>0) buf.append(", ");
+            buf.append(_columns.get(i).name);
+            buf.append("=");
+            buf.append(get(i));
+        }
+        buf.append(")");
+        return buf.toString();
     }
 }

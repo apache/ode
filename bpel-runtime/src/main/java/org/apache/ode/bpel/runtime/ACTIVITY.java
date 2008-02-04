@@ -22,8 +22,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -32,19 +30,13 @@ import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.BpelRuntimeContext.ValueReferencePair;
 import org.apache.ode.jacob.IndexedObject;
-import org.apache.ode.utils.DOMUtils;
 import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.IncompleteKeyException;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -56,8 +48,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     protected ActivityInfo _self;
 
     /**
-     * Permeability flag, if <code>false</code> we defer outgoing links until
-     * succesfull completion.
+     * Permeability flag, if <code>false</code> we defer outgoing links until successful completion.
      */
     protected boolean _permeable = true;
 
@@ -119,7 +110,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     protected void dpe(Collection<OLink> links) {
-        // Dead path all of the ougoing links (nothing has been activated yet!)
+        // Dead path all of the outgoing links (nothing has been activated yet!)
         for (Iterator<OLink> i = links.iterator(); i.hasNext();)
             _linkFrame.resolve(i.next()).pub.linkStatus(false);
     }
@@ -155,20 +146,27 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     // Syntactic sugar for methods that used to be on BpelRuntimeContext.. 
     //
     
-    Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
+    Node fetchVariableData(VariableInstance variable, boolean forWriting) 
+        throws FaultException
+    {
     	return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
 	}
 
     Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
-            throws FaultException {
+        throws FaultException 
+    {
       return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), var, part, forWriting);
     }
     
-    Node initializeVariable(VariableInstance lvar, Node val) {
+    Node initializeVariable(VariableInstance lvar, Node val) 
+        throws ExternalVariableModuleException
+    {
     	return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
     }
 
-    void commitChanges(VariableInstance lval, Node lvalue) {
+    void commitChanges(VariableInstance lval, Node lvalue) 
+        throws ExternalVariableModuleException
+    {
     	_scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
 	}
 

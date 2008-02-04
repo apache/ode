@@ -84,21 +84,18 @@ public interface ExternalVariableModule {
      * @param initialize indicates if this is the first time the value is being read
      * @return value of the variable
      */
-    public Value readValue(Locator locator) throws ExternalVariableModuleException;
+    public Value readValue(QName varType, Locator locator) throws ExternalVariableModuleException;
     
     /**
      * Update the value of the external variable.
      * @param newval new variable value 
      * @param initialize indicates if this is a variable initialization
      */
-    public Value writeValue(Value newval) throws ExternalVariableModuleException;
+    public Value writeValue(QName varType, Value newval) throws ExternalVariableModuleException;
     
     
     /**
      * Structure used to identify an external variable to the external variable subsystem.
-     * 
-     * @author Maciej Szefler <mszefler at gmail dot com>
-     *
      */
     public class Locator {
         
@@ -131,9 +128,6 @@ public interface ExternalVariableModule {
     /**
      * Data structure used to report the value of the variable to the BPEL engine from the external
      * sub system.
-     * 
-     * @author Maciej Szefler <mszefler at gmail dot com>
-     *
      */
     public class Value {
         /** Variable locator. See {@link Locator}. */

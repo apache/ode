@@ -24,8 +24,13 @@
 
     <complexType name="tRow">
         <sequence>
-            <element name="pid" type="string"></element>
-            <element name="foo" type="string"></element>
+            <element name="id1" type="string"/>
+            <element name="id2" type="string"/>
+            <element name="pid" type="string"/>
+            <element name="cts" type="string"/> <!-- create time -->
+            <element name="uts" type="string"/> <!-- update time -->
+            <element name="foo" type="string"/>
+            <element name="bar" type="string"/>
         </sequence>
     </complexType>
     

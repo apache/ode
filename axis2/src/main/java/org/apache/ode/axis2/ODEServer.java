@@ -35,6 +35,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
+import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
@@ -154,6 +155,8 @@ public class ODEServer {
             // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
             registerMexInterceptors();
+
+            registerExternalVariableModules();
 
             try {
                 _server.start();
@@ -514,6 +517,14 @@ public class ODEServer {
         }
     }
 
+    private void registerExternalVariableModules() {
+        JdbcExternalVariableModule jdbcext;
+        jdbcext = new JdbcExternalVariableModule();
+        jdbcext.registerDataSource("ode", _db.getDataSource());
+        _server.registerExternalVariableEngine(jdbcext);
+        
+    }
+    
     private class ProcessStoreListenerImpl implements ProcessStoreListener {
 
         public void onProcessStoreEvent(ProcessStoreEvent event) {

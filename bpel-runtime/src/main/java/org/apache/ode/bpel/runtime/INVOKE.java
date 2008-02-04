@@ -18,12 +18,16 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Collection;
+import java.util.Date;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OInvoke;
@@ -34,15 +38,10 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.utils.DOMUtils;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * JacobRunnable that performs the work of the <code>invoke</code> activity.
@@ -75,6 +74,10 @@ public class INVOKE extends ACTIVITY {
             __log.error(e);
             FaultData fault = createFault(e.getQName(), _oinvoke);
             _self.parent.completed(fault, CompensationHandler.emptySet());
+            return;
+        } catch (ExternalVariableModuleException e) {
+            __log.error(e);
+            _self.parent.failure(e.toString(), null);
             return;
         }
         ++_invoked;
@@ -114,7 +117,14 @@ public class INVOKE extends ACTIVITY {
                             throw new RuntimeException(e);
                         }
 
+                        try {
                         initializeVariable(outputVar, response);
+                        } catch (ExternalVariableModuleException e) {
+                        	__log.error("Exception while initializing external variable", e);
+                            _self.parent.failure(e.toString(), null);
+                            return;
+                        }
+                        
                         // Generating event
                         VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
                         se.setNewValue(response);
@@ -189,7 +199,7 @@ public class INVOKE extends ACTIVITY {
     }
 
     private Element setupOutbound(OInvoke oinvoke, Collection<OScope.CorrelationSet> outboundInitiations)
-        throws FaultException {
+        throws FaultException, ExternalVariableModuleException {
         if (outboundInitiations.size() > 0) {
             for (OScope.CorrelationSet c : outboundInitiations) {
                 initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
@@ -198,8 +208,7 @@ public class INVOKE extends ACTIVITY {
 
         if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
             sendVariableReadEvent(_scopeFrame.resolve(oinvoke.inputVar));
-            Node outboundMsg = fetchVariableData(
-                _scopeFrame.resolve(oinvoke.inputVar), false);
+            Node outboundMsg = fetchVariableData(_scopeFrame.resolve(oinvoke.inputVar), false);
             // TODO outbound message should be updated with non-initiate correlation sets
             assert outboundMsg instanceof Element;
             return (Element) outboundMsg;
