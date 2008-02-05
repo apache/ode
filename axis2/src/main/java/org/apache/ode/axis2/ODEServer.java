@@ -104,7 +104,9 @@ public class ODEServer {
         boolean success = false;
         try {
             _axisConfig = axisConf;
-            _appRoot = new File(contextPath);
+            String rootDir = System.getProperty("org.apache.ode.rootDir");
+            if (rootDir != null) _appRoot = new File(rootDir);
+            else _appRoot = new File(contextPath);
             TempFileManager.setWorkingDirectory(_appRoot);
 
             __log.debug("Loading properties");
