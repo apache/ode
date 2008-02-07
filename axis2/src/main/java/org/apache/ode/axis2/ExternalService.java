@@ -149,7 +149,7 @@ public class ExternalService implements PartnerRoleChannel {
                                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
                                     if (response != null && __log.isDebugEnabled())
-                                        __log.debug("Got service response: " + response.getEnvelope().toString());
+                                        __log.debug("Service response:\n" + response.getEnvelope().toString());
 
                                     if (flt != null) {
                                         reply(mexId, operation, flt, true);
@@ -341,23 +341,22 @@ public class ExternalService implements PartnerRoleChannel {
                         response.setMessage(odeMsgEl);
                         if (fault) {
                             if (faultType != null) {
-                                if (__log.isDebugEnabled()) {
-                                    __log.debug("FAULT RESPONSE(" + faultType + "): " + DOMUtils.domToString(odeMsgEl));
+                                if (__log.isWarnEnabled()) {
+                                    __log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
                                 }
                                 odeMex.replyWithFault(faultType, response);
                             } else {
-                                if (__log.isDebugEnabled()) {
-                                    __log.debug("FAULT RESPONSE(unknown fault type): " + DOMUtils.domToString(odeMsgEl));
+                                if (__log.isWarnEnabled()) {
+                                    __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());
                                 }
                                 odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
                                         .getFault().getText(), OMUtils.toDOM(reply.getEnvelope().getBody()));
                             }
                         } else {
-                            if (__log.isDebugEnabled()) {
-                                __log.debug("RESPONSE (NORMAL): " + DOMUtils.domToString(odeMsgEl));
+                            if (__log.isInfoEnabled()) {
+                                __log.info("Response:\n" + DOMUtils.domToString(odeMsgEl));
                             }
                             odeMex.reply(response);
-
                         }
                     } catch (Exception ex) {
                         String errmsg = "Unable to process response: " + ex.getMessage();
