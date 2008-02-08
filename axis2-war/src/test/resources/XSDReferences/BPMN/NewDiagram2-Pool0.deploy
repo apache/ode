@@ -1,0 +1,8 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:MatricePriseEnCharge="http://www.agora.msa.fr/TarifMaladie" xmlns:Pooldo="http://example.com/BPMN/NewDiagram2/Pooldo" xmlns:diag="http://example.com/BPMN/NewDiagram2" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/BPMN/NewDiagram2/Pool0" name="this:Pool0" fileName="BPMN/NewDiagram2-Pool0.bpel">
+  <dd:property name="PATH">BPMN/NewDiagram2</dd:property>
+  <dd:property name="SVG">BPMN/NewDiagram2.svg</dd:property>
+  <dd:provide partnerLink="pool0AndPooldoPlkVar">
+    <dd:service name="this:CanonicServiceForPooldo" port="canonicPort"/>
+  </dd:provide>
+</dd:process>

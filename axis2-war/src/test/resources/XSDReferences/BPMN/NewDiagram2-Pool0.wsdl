@@ -1,0 +1,40 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:xreftst="http://ode.apache.org/test/xsdref-test" xmlns:Pooldo="http://example.com/BPMN/NewDiagram2/Pooldo" xmlns:diag="http://example.com/BPMN/NewDiagram2" xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:this="http://example.com/BPMN/NewDiagram2/Pool0" targetNamespace="http://example.com/BPMN/NewDiagram2/Pool0">
+    <wsdl:types>
+        <xs:schema targetNamespace="http://ode.apache.org/test/xsdref-test">
+            <xs:include schemaLocation="../XSDSchema/xreftst.xsd"/>
+        </xs:schema>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/BPMN/NewDiagram2/Pool0">
+            <xs:element name="EventStartMessageRequest" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="EventStartMessageRequest">
+        <wsdl:part name="body" element="this:EventStartMessageRequest"/>
+    </wsdl:message>
+    <wsdl:message name="EventStartMessageResponse">
+        <wsdl:part name="body" element="xreftst:Listexreftst"/>
+    </wsdl:message>
+    <wsdl:portType name="ForPooldo">
+        <wsdl:operation name="EventStartMessage">
+            <wsdl:input message="this:EventStartMessageRequest" name="EventStartMessage"/>
+            <wsdl:output message="this:EventStartMessageResponse" name="EventStartMessageResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForPooldo" type="this:ForPooldo">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="EventStartMessage">
+            <soap:operation style="document" soapAction="http://example.com/BPMN/NewDiagram2/Pool0/ForPooldo/EventStartMessage"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForPooldo">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForPooldo">
+            <soap:address location="http://localhost:8080/ode/processes/testXSDko/BPMN/NewDiagram2/Pool0/Pooldo"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
