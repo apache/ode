@@ -1,0 +1,7 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:Pooldo="http://example.com/BPMN/NewDiagram2/Pooldo" xmlns:diag="http://example.com/BPMN/NewDiagram2" xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:PGMD_CURMED="http://www.agora.msa.fr/CURMED" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ResultatControleFacturation="http://ode.apache.org/test/xsdref-test" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:Pool0="http://example.com/BPMN/NewDiagram2/Pool0" targetNamespace="http://example.com/BPMN/NewDiagram2">
+    <wsdl:import namespace="http://example.com/BPMN/NewDiagram2/Pool0" location="NewDiagram2-Pool0.wsdl"/>
+    <pnlk:partnerLinkType name="Pool0AndPooldo">
+        <pnlk:role name="Pool0_for_Pooldo" portType="Pool0:ForPooldo"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

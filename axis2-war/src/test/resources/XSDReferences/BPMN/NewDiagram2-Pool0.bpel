@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xreftst="http://ode.apache.org/test/xsdref-test" xmlns:Pooldo="http://example.com/BPMN/NewDiagram2/Pooldo" xmlns:diag="http://example.com/BPMN/NewDiagram2" xmlns:this="http://example.com/BPMN/NewDiagram2/Pool0" xmlns:bpmn="http://www.intalio.com/bpms" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Pool0" bpmn:id="_9TjBEHjqEdyMF-4bCGAcTQ" name="Pool0" targetNamespace="http://example.com/BPMN/NewDiagram2/Pool0">
+  <bpel:import namespace="http://example.com/BPMN/NewDiagram2" location="NewDiagram2.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/BPMN/NewDiagram2/Pool0" location="NewDiagram2-Pool0.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="pool0AndPooldoPlkVar" partnerLinkType="diag:Pool0AndPooldo" myRole="Pool0_for_Pooldo"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="thisEventStartMessageRequest" messageType="this:EventStartMessageRequest"/>
+    <bpel:variable name="thisEventStartMessageResponse" messageType="this:EventStartMessageResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="pool0AndPooldoPlkVar" portType="this:ForPooldo" operation="EventStartMessage" variable="thisEventStartMessageRequest" createInstance="yes" bpmn:label="EventStartMessage" bpmn:id="_9mUzIHjqEdyMF-4bCGAcTQ"></bpel:receive>
+    <bpel:assign name="init-variables-Pool0">
+      <bpel:copy bpmn:label="$thisEventStartMessageResponse  out:_BpmbUHjrEdyMF-4bCGAcTQ">
+        <bpel:from>
+          <bpel:literal>
+<xreftst:Listexreftst>
+  <xreftst:xreftst>
+    <xreftst:LigneMatrice>
+      <xreftst:Type>
+      </xreftst:Type>
+      <xreftst:Montant>
+      </xreftst:Montant>
+      <xreftst:ProduitCouvrant>
+      </xreftst:ProduitCouvrant>
+    </xreftst:LigneMatrice>
+  </xreftst:xreftst>
+</xreftst:Listexreftst>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:empty bpmn:label="task" bpmn:id="_-IlysHjqEdyMF-4bCGAcTQ"/>
+    <bpel:reply partnerLink="pool0AndPooldoPlkVar" portType="this:ForPooldo" operation="EventStartMessage" variable="thisEventStartMessageResponse" bpmn:label="EventEndMessage" bpmn:id="__fUVEHjqEdyMF-4bCGAcTQ"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>
