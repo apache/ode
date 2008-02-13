@@ -718,7 +718,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         depinfo.setPackage(pconf.getPackage());
         depinfo.setDocument(pconf.getBpelDocument());
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
-        depinfo.setDeployer(pconf.getDeployer());
         if (custom.includeInstanceSummary()) {
             TInstanceSummary isum = info.addNewInstanceSummary();
             genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ACTIVE, pconf);
