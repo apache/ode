@@ -140,10 +140,6 @@ public class ProcessConfImpl implements ProcessConf {
         return _deployDate;
     }
 
-    public String getDeployer() {
-        return "";
-    }
-
     public List<File> getFiles() {
         return _du.allFiles();
     }
@@ -213,10 +209,6 @@ public class ProcessConfImpl implements ProcessConf {
 
     public Definition getDefinitionForService(QName serviceName) {
         return _du.getDefinitionForService(serviceName);
-    }
-
-    public Definition getDefinitionForPortType(QName portTypeName) {
-        return _du.getDefinitionForPortType(portTypeName);
     }
 
     public Map<String, Endpoint> getInvokeEndpoints() {

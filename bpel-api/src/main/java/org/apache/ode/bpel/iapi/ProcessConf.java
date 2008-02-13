@@ -87,18 +87,11 @@ public interface ProcessConf {
     Date getDeployDate();
 
     /**
-     * Get the userid of the deployer.
-     * @return
-     */
-    String getDeployer();
-
-    /**
      * Get the state of the process. 
      * @return process state.
      */
     ProcessState getState();
     
-
     /**
      * Get the files associated with the deployment.
      * @return
@@ -124,13 +117,6 @@ public interface ProcessConf {
      * @return definition
      */
     Definition getDefinitionForService(QName serviceName);
-
-    /**
-     * Gets the WSDL definition used in a process into which a PortType is defined.
-     * @param portTypeName
-     * @return definition
-     */
-    Definition getDefinitionForPortType(QName portTypeName);
 
     /**
      * Gets the list of endpoints a process should provide.
