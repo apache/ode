@@ -509,7 +509,7 @@ public class ProcessStoreImpl implements ProcessStore {
     private void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
         case ACTIVE:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, processId, duname));
             break;
         case DISABLED:
             fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId, duname));
