@@ -549,7 +549,7 @@ public class ODEServer {
     private void handleEvent(ProcessStoreEvent pse) {
         __log.debug("Process store event: " + pse);
         switch (pse.type) {
-            case ACTVIATED:
+            case ACTIVATED:
             case RETIRED:
                 // bounce the process
                 _server.unregister(pse.pid);

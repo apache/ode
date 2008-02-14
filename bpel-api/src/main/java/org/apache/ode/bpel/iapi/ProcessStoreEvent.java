@@ -43,7 +43,7 @@ public class ProcessStoreEvent implements Serializable {
          * A process that was previously disabled or retired has become activated. This
          * event is also sent whenver an active process is "discovered" 
          */
-        ACTVIATED,
+        ACTIVATED,
         
         /** A process has been disabled: it should no longer execute for new or old instances. */
         DISABLED,
