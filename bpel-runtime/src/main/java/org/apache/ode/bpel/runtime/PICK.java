@@ -192,13 +192,16 @@ class PICK extends ACTIVITY {
                     __log.fatal(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
-                
-                QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
-                if(!qn.equals(ptype.elementType)) {
-                    String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected " 
-                    + ptype.elementType + " but got " + qn;
-                    __log.fatal(errmsg);
-                    throw new InvalidContextException(errmsg);
+
+                // Relaxing that check a bit for SimPEL
+                if (!ptype.elementType.getLocalPart().equals("simpelWrapper")) {
+                    QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
+                    if(!qn.equals(ptype.elementType)) {
+                        String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
+                                + ptype.elementType + " but got " + qn;
+                        __log.fatal(errmsg);
+                        throw new InvalidContextException(errmsg);
+                    }
                 }
             }
             
