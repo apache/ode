@@ -70,6 +70,14 @@ public class ISO8601DateParser {
                     // insert milliseconds
                     buffer.insert(19, ".000");
                 }
+                if (buffer.charAt(19) == '.' && (buffer.length() < 22 ||
+                        (buffer.lastIndexOf("-") < 23 && buffer.lastIndexOf("-") > 19) ||
+                        (buffer.lastIndexOf("+") < 23 && buffer.lastIndexOf("+") > 0)))
+                    buffer.insert(20, "0");
+                if (buffer.charAt(19) == '.' && (buffer.length() < 22 ||
+                        (buffer.lastIndexOf("-") < 23 && buffer.lastIndexOf("-") > 19) ||
+                        (buffer.lastIndexOf("+") < 23 && buffer.lastIndexOf("+") > 0)))
+                    buffer.insert(20, "0");
                 if (buffer.length() > 23) {
                     // append timezone
                     pattern = pattern + "Z";
