@@ -94,7 +94,7 @@ class WAIT extends ACTIVITY {
                 }
             }));
         }else{
-            _self.parent.completed(null, null);
+            _self.parent.completed(null, CompensationHandler.emptySet());
         }
     }
 
