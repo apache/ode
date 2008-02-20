@@ -89,6 +89,23 @@ public class BasicActivities20Test extends BPELTestAbstract {
     }
 
     /**
+     * Test the wait "until" syntax.
+     */
+	@Test public void testWaitUntilPast() throws Throwable {
+        deploy("/bpel/2.0/TestWaitUntil");
+        DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        String isountil = idf.format(new Date(System.currentTimeMillis()-5000));
+        Invocation inv = addInvoke("WaitUntil", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation",
+            "<message><TestPart/><Time>"+isountil+"</Time></message>",
+            null);
+        inv.maximumWaitMs=2*1000L;
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+
+        go();
+    }
+
+    /**
      * Tests the wait "for" syntax.
      * @throws Throwable
      */
