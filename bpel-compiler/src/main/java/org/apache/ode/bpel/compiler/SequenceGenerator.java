@@ -24,6 +24,7 @@ import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.SequenceActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.utils.msg.MessageBundle;
 
 
 /**
@@ -31,6 +32,9 @@ import org.apache.ode.bpel.o.OSequence;
  */
 
 class SequenceGenerator extends DefaultActivityGenerator {
+
+    private static final CommonCompilationMessages __cmsgs =
+        MessageBundle.getMessages(CommonCompilationMessages.class);
 
     public OActivity newInstance(Activity src) {
         return new OSequence(_context.getOProcess(), _context.getCurrent());
@@ -42,6 +46,9 @@ class SequenceGenerator extends DefaultActivityGenerator {
     }
 
     protected void compileChildren(OSequence dest, CompositeActivity src) {
+        if (src.getActivities().size() == 0)
+            throw new CompilationException(__cmsgs.errEmptySequence().setSource(src));
+
         for (Activity child : src.getActivities()) {
             try {
                 OActivity compiledChild = _context.compile(child);
