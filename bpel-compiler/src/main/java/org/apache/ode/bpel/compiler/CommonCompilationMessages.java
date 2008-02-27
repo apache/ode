@@ -471,4 +471,8 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("Empty scopes are forbidden.");
     }
 
+	public CompilationMessage errEmptySequence() {
+		return this.formatCompilationMessage("Empty sequences are forbidden.");
+	}
+
 }
