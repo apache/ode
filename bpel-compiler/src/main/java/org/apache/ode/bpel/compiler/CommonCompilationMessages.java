@@ -475,4 +475,8 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
 		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
 	}
 
+	public CompilationMessage errEmptySequence() {
+		return this.formatCompilationMessage("Empty sequences are forbidden.");
+	}
+
 }
