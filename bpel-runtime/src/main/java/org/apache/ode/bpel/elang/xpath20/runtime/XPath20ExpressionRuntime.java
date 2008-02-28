@@ -150,6 +150,11 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
 
         Object date =literal.get(0);
         if (date instanceof Calendar) return (Calendar) date;
+        if (date instanceof Date) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime((Date) date);
+            return cal;
+        }
 
         try {
             return ISO8601DateParser.parseCal(date.toString());

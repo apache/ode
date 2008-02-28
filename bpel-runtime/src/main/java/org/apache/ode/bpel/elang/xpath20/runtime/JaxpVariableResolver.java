@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import net.sf.saxon.value.DateTimeValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -36,6 +37,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
+import java.util.Calendar;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -114,8 +116,11 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     private Object getSimpleContent(Node simpleNode, QName type) {
         String text = simpleNode.getTextContent();
         try {
-    		return XSTypes.toJavaObject(type,text);
-    	} catch (Exception e) { }
+    		Object jobj = XSTypes.toJavaObject(type,text);
+            // Saxon wants its own dateTime type and doesn't like Calendar or Date
+            if (jobj instanceof Calendar) return new DateTimeValue((Calendar) jobj, true);
+            else return jobj;
+        } catch (Exception e) { }
         // Elegant way failed, trying brute force
     	try {
     		return Integer.valueOf(text);

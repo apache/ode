@@ -11,7 +11,8 @@
     <bpel:variable name="variable" type="xs:dateTime"/>
   </bpel:variables>
   <bpel:sequence>
-    <bpel:receive partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task" variable="thisTaskRequestMsg" createInstance="yes" bpmn:label="Task" bpmn:id="_ZbmYUNw9Edye_tsy8V393Q"></bpel:receive>
+    <bpel:receive partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task"
+                  variable="thisTaskRequestMsg" createInstance="yes"/>
     <bpel:assign name="init-variables-Pool">
       <bpel:copy bpmn:label="$thisTaskResponseMsg">
         <bpel:from>
@@ -22,22 +23,24 @@
         <bpel:to>$thisTaskResponseMsg.body</bpel:to>
       </bpel:copy>
       <bpel:copy bpmn:label="$variable">
-        <bpel:from>
-          <bpel:literal>2011-01-01T00:00:00Z
-          </bpel:literal>
-        </bpel:from>
+        <bpel:from>xs:dateTime("2008-01-01T00:00:00Z")</bpel:from>
         <bpel:to>$variable</bpel:to>
       </bpel:copy>
     </bpel:assign>
     <bpel:assign bpmn:label="Task" bpmn:id="_e0Xz0Nw9Edye_tsy8V393Q">
       <bpel:copy>
-        <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">current-dateTime() + xdt:dayTimeDuration ("PT3S")</bpel:from>
+        <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">xs:dateTime($variable) + xdt:dayTimeDuration ("P1D")</bpel:from>
         <bpel:to>$variable</bpel:to>
       </bpel:copy>
+        <bpel:copy>
+          <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">$variable + xdt:dayTimeDuration ("P1D")</bpel:from>
+          <bpel:to>$variable</bpel:to>
+        </bpel:copy>
     </bpel:assign>
     <bpel:wait bpmn:label="EventIntermediateTimer" bpmn:id="_cLa0kNw9Edye_tsy8V393Q">
       <bpel:until>$variable</bpel:until>
     </bpel:wait>
-    <bpel:reply partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task" variable="thisTaskResponseMsg" bpmn:label="Task" bpmn:id="_e0Xz0Nw9Edye_tsy8V393Q"></bpel:reply>
+    <bpel:reply partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task"
+                variable="thisTaskResponseMsg"/>
   </bpel:sequence>
 </bpel:process>
