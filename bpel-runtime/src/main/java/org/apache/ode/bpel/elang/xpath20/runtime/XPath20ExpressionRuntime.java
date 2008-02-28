@@ -143,9 +143,17 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
-        String literal = evaluateAsString(cexp, context);
+        List literal = (List) evaluate(cexp, context, XPathConstants.NODESET);
+        if (literal.size() == 0)
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
+        if (literal.size() > 1)
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: " + cexp);
+
+        Object date =literal.get(0);
+        if (date instanceof Calendar) return (Calendar) date;
+
         try {
-            return ISO8601DateParser.parseCal(literal);
+            return ISO8601DateParser.parseCal(date.toString());
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);

@@ -32,7 +32,7 @@ public class ISO8601DateParser {
 
     public static Date parse(String date) throws java.text.ParseException {
         String pattern;
-        StringBuffer buffer = new StringBuffer(date);
+        StringBuffer buffer = new StringBuffer(date.trim());
         boolean timezoned = false;
 
         switch (buffer.length()) {
