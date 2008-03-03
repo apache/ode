@@ -317,13 +317,15 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
 	public Collection<CorrelationKey> getCorrelationKeys() {
         ArrayList<CorrelationKey> correlationKeys = new ArrayList<CorrelationKey>();
-        if (_correlationKeys.indexOf("^") > 0) {
-            for (StringTokenizer tokenizer = new StringTokenizer(_correlationKeys, "^"); tokenizer.hasMoreTokens();) {
-                String corrStr = tokenizer.nextToken();
-                correlationKeys.add(new CorrelationKey(corrStr));
-            }
-            return correlationKeys;
-        } else correlationKeys.add(new CorrelationKey(_correlationKeys));
+        if (_correlationKeys != null) {
+            if (_correlationKeys.indexOf("^") > 0) {
+                for (StringTokenizer tokenizer = new StringTokenizer(_correlationKeys, "^"); tokenizer.hasMoreTokens();) {
+                    String corrStr = tokenizer.nextToken();
+                    correlationKeys.add(new CorrelationKey(corrStr));
+                }
+                return correlationKeys;
+            } else correlationKeys.add(new CorrelationKey(_correlationKeys));
+        }
         return correlationKeys;
     }
 
