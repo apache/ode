@@ -1021,4 +1021,20 @@ public class DOMUtils {
         return ret;
     }
 
+    /**
+     * Somewhat eases the pain of dealing with both Lists and Nodelists by converting either
+     * passed as parameter to a List.
+     * @param nl a NodeList or a List
+     * @return a List
+     */
+    public static List<Node> toList(Object nl) {
+        if (nl == null) return null;
+        if (nl instanceof List) return (List<Node>) nl;
+
+        NodeList cnl = (NodeList) nl;
+        LinkedList<Node> ll = new LinkedList<Node>();
+        for (int m = 0; m < cnl.getLength(); m++) ll.add(cnl.item(m));
+        return ll;
+    }
+
 }
