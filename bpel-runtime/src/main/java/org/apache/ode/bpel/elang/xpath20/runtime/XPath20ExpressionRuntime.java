@@ -142,7 +142,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException {
-        List literal = (List) evaluate(cexp, context, XPathConstants.NODESET);
+        List literal = DOMUtils.toList(evaluate(cexp, context, XPathConstants.NODESET));
         if (literal.size() == 0)
             throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
         if (literal.size() > 1)
@@ -155,6 +155,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             cal.setTime((Date) date);
             return cal;
         }
+        if (date instanceof Element) date = ((Element)date).getTextContent();
 
         try {
             return ISO8601DateParser.parseCal(date.toString());

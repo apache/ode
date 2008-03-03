@@ -58,5 +58,8 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testDate() throws Throwable {
         go("/bpel/2.0/TestAssignDate");
     }
+    @Test public void testMsgDate() throws Throwable {
+        go("/bpel/2.0/TestMsgDate");
+    }
 
 }
