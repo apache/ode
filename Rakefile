@@ -57,7 +57,7 @@ GERONIMO            = struct(
   :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
   :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
 )
-HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.4.sp1", "asm:asm:jar:1.5.3",
+HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
