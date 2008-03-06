@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/duration"
+        xmlns:tns="http://www.example.org/duration" elementFormDefault="qualified">
+
+    <complexType name="Complext">
+    	<sequence>
+    		<element name="duration" type="duration"></element>
+    	</sequence>
+    </complexType>
+</schema>
