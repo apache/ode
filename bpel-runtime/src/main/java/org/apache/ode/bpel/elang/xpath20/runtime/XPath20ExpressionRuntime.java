@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
 import net.sf.saxon.trans.DynamicError;
+import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.xpath.XPathEvaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,11 +36,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.utils.xsl.XslTransformHandler;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerFactory;
@@ -105,6 +102,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                 String textVal;
                 if (simpleType instanceof Date)
                     textVal = ISO8601DateParser.format((Date) simpleType);
+                else if (simpleType instanceof DurationValue)
+                    textVal = ((DurationValue)simpleType).getStringValue();
                 else
                     textVal = simpleType.toString();
 
