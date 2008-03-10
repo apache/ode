@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPickReceive;
@@ -37,10 +38,9 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -208,7 +208,15 @@ class PICK extends ACTIVITY {
         }
 
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
-        getBpelRuntimeContext().initializeVariable(vinst, msgEl);
+        
+        try {
+        initializeVariable(vinst, msgEl);
+        } catch (ExternalVariableModuleException e) {
+        	__log.error("Exception while initializing external variable", e);
+            _self.parent.failure(e.toString(), null);
+            return;
+        }
+        	
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
         se.setNewValue(msgEl);

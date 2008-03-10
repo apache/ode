@@ -63,6 +63,7 @@ import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
 import org.apache.ode.bpel.compiler.bom.Extension;
+import org.apache.ode.bpel.compiler.bom.ExtVarKeyMapping;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -94,6 +95,7 @@ import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.o.OExtVar;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -1333,11 +1335,15 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
         ovar.name = src.getName();
         ovar.declaringScope = oscope;
         ovar.debugInfo = createDebugInfo(src, null);
+        
+        ovar.extVar = compileExtVar(src);
+
         oscope.addLocalVariable(ovar);
 
         if (__log.isDebugEnabled())
             __log.debug("Compiled variable " + ovar);
     }
+
 
     private void compile(TerminationHandler terminationHandler) {
         OScope oscope = _structureStack.topScope();
@@ -1643,6 +1649,29 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);
         Collections.reverse(rval);
         return rval;
+    }
+
+    /**
+     * Compile external variable declaration.
+     * @param src variable object
+     * @return compiled {@link OExtVar} representation. 
+     */
+    private OExtVar compileExtVar(Variable src) {
+        if (!src.isExternal())
+            return null;
+
+        OExtVar oextvar = new OExtVar(_oprocess);
+        oextvar.externalVariableId = src.getExternalId();
+        oextvar.debugInfo = createDebugInfo(src, null);
+
+        if (src.getExternalId() == null)
+        	throw new CompilationException(__cmsgs.errMustSpecifyExternalVariableId(src.getName()));
+        	
+        if (src.getRelated() == null)
+        	throw new CompilationException(__cmsgs.errMustSpecifyRelatedVariable(src.getName()));
+        oextvar.related = resolveVariable(src.getRelated());
+        
+        return oextvar;
     }
 
     private static class StructureStack {

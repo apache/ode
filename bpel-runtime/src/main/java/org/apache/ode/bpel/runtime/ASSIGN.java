@@ -49,6 +49,7 @@ import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -91,6 +92,10 @@ class ASSIGN extends ACTIVITY {
                 faultData = createFault(fault.getQName(), operation, fault
                         .getMessage());
                 break;
+            } catch (ExternalVariableModuleException e) {
+            	__log.error("Exception while initializing external variable", e);
+                _self.parent.failure(e.toString(), null);
+                return;
             }
         }
 
@@ -112,7 +117,7 @@ class ASSIGN extends ACTIVITY {
         return (OAssign) _self.o;
     }
 
-    private Node evalLValue(OAssign.LValue to) throws FaultException {
+    private Node evalLValue(OAssign.LValue to) throws FaultException, ExternalVariableModuleException {
         final BpelRuntimeContext napi = getBpelRuntimeContext();
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
@@ -127,14 +132,14 @@ class ASSIGN extends ACTIVITY {
                     val = tempwrapper;
                 } else
                     doc.appendChild(val);
-                lval = getBpelRuntimeContext().initializeVariable(lvar, val);
+                lval = initializeVariable(lvar, val);
             } else
-                lval = napi.fetchVariableData(lvar, true);
+                lval = fetchVariableData(lvar, true);
         }
         return lval;
     }
 
-    /**
+	/**
      * Get the r-value. There are several possibilities:
      * <ul>
      * <li>a message is selected - an element representing the whole message is
@@ -160,7 +165,7 @@ class ASSIGN extends ACTIVITY {
      * @throws IllegalStateException
      *             DOCUMENTME
      */
-    private Node evalRValue(OAssign.RValue from) throws FaultException {
+    private Node evalRValue(OAssign.RValue from) throws FaultException, ExternalVariableModuleException {
         if (__log.isDebugEnabled())
             __log.debug("Evaluating FROM expression \"" + from + "\".");
 
@@ -168,21 +173,19 @@ class ASSIGN extends ACTIVITY {
         if (from instanceof DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
+            Node data = fetchVariableData(
                     _scopeFrame.resolve(dref.variable), false);
             retVal = DOMUtils.findChildByName((Element)data, dref.elName);
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(varRef.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
-                    _scopeFrame.resolve(varRef.variable), false);
+            Node data = fetchVariableData(_scopeFrame.resolve(varRef.variable), false);
             retVal = evalQuery(data, varRef.part, varRef.location,
                     getEvaluationContext());
         } else if (from instanceof OAssign.PropertyRef) {
             OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(propRef.variable));
-            Node data = getBpelRuntimeContext().fetchVariableData(
-                    _scopeFrame.resolve(propRef.variable), false);
+            Node data = fetchVariableData(_scopeFrame.resolve(propRef.variable), false);
 
             retVal = evalQuery(data, propRef.propertyAlias.part,
                     propRef.propertyAlias.location, getEvaluationContext());
@@ -200,7 +203,7 @@ class ASSIGN extends ACTIVITY {
                         + DOMUtils.domToString(tempVal));
             retVal = tempVal;
         } else if (from instanceof OAssign.Expression) {
-            List l;
+            List<Node> l;
             OExpression expr = ((OAssign.Expression) from).expression;
 
             l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr,
@@ -321,12 +324,11 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-    private void copy(OAssign.Copy ocopy) throws FaultException {
+	private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
 
-        final BpelRuntimeContext napi = getBpelRuntimeContext();
         ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
@@ -345,12 +347,12 @@ class ASSIGN extends ACTIVITY {
                         .getVariable());
                 final VariableInstance rval = _scopeFrame
                         .resolve(((VariableRef) ocopy.from).getVariable());
-                Element lvalue = (Element) napi.fetchVariableData(rval, false);
-                napi.initializeVariable(lval, lvalue);
+                Element lvalue = (Element) fetchVariableData(rval, false);
+                initializeVariable(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
-                // This really should have been cought by the compiler.
+                // This really should have been caught by the compiler.
                 __log
                         .fatal("Message/Non-Message Assignment, should be caught by compiler:"
                                 + ocopy);
@@ -426,7 +428,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
                                 "' value '" + DOMUtils.domToString(lvalue) +"'");
-                napi.commitChanges(lval, lvalue);
+                commitChanges(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             }
@@ -437,7 +439,7 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
-    private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
         if (rvalue.getNodeType() == Node.TEXT_NODE ||

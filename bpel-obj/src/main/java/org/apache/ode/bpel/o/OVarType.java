@@ -36,4 +36,5 @@ public abstract class OVarType extends OBase {
      */
     public abstract Node newInstance(Document doc);  
   
+    
 }

@@ -51,13 +51,12 @@ class REPLY extends ACTIVITY {
             if (oreply.variable != null)
                sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
 
-            Node msg = oreply.variable == null ? null : getBpelRuntimeContext()
-                    .fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
+            Node msg = oreply.variable == null ? null : fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
             assert msg == null || msg instanceof Element; // note msg can be null for faults 
 
-            for (Iterator i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
-                OScope.CorrelationSet cset = (OScope.CorrelationSet) i.next();
+            for (Iterator<OScope.CorrelationSet> i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
+                OScope.CorrelationSet cset = i.next();
                 initializeCorrelation(_scopeFrame.resolve(cset),
                         _scopeFrame.resolve(oreply.variable));
             }

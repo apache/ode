@@ -26,6 +26,7 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Node;
 
 
@@ -77,7 +78,7 @@ public interface ExtensionContext {
      *          the value to be stored into the variable
      * @return the value of the variable, wrapped in a <code>Node</code>
      */
-    void writeVariable(OScope.Variable variable, Node value) throws FaultException;
+    void writeVariable(OScope.Variable variable, Node value) throws FaultException, ExternalVariableModuleException;
 
     /**
      * Write the value into a BPEL variable.
@@ -88,7 +89,7 @@ public interface ExtensionContext {
      *          the value to be stored into the variable
      * @return the value of the variable, wrapped in a <code>Node</code>
      */
-    void writeVariable(String variableName, Node value) throws FaultException;
+    void writeVariable(String variableName, Node value) throws FaultException, ExternalVariableModuleException;
 
     /**
      * Read the value of a BPEL property.

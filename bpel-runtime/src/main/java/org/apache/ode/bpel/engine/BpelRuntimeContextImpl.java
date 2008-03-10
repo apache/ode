@@ -23,7 +23,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -49,22 +51,27 @@ import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.engine.extvar.ExternalVariableKeyMapSerializer;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
@@ -87,15 +94,14 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-/**
- * 
- * 
- * @author Maciej Szefler
- */
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
@@ -394,41 +400,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
         return cs.getValue();
     }
-
-    public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
-    	
-    	// Special case of messageType variables with no part
-        if (variable.declaration.type instanceof OMessageVarType) {
-            OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
-            if (msgType.parts.size() == 0) {
-                Document doc = DOMUtils.newDocument();
-                Element root = doc.createElement("message");
-                doc.appendChild(root);
-                return root;
-            }
-        }
-
-        ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
-        XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
-
-        if (dataDAO.isNull()) {
-            throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedVariable, "The variable "
-                    + variable.declaration.name + " isn't properly initialized.");
-        }
-
-        return dataDAO.get();
-    }
-
-    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting) throws FaultException {
-        Node container = fetchVariableData(var, forWriting);
-
-        // If we want a specific part, we will need to navigate through the
-        // message/part structure
-        if (var.declaration.type instanceof OMessageVarType && part != null) {
-            container = getPartData((Element) container, part);
-        }
-        return container;
-    }
+  
 
     public Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
@@ -469,7 +441,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      *             in case of selection or other fault
      */
     public String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException {
-        Node varData = fetchVariableData(variable, false);
+        Node varData = readVariable(variable.scopeInstance, variable.declaration.name, false);
 
         OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
         String val = _bpelProcess.extractProperty((Element) varData, alias, variable.declaration.getDescription());
@@ -479,15 +451,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         return val;
-    }
-
-    public Node initializeVariable(VariableInstance variable, Node initData) {
-        ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
-        XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
-
-        dataDAO.set(initData);
-        writeProperties(variable, initData, dataDAO);        
-        return dataDAO.get();
     }
 
     public void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
@@ -516,12 +479,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return _contexts.eprContext.convertEndpoint(nodeQName, sourceNode).toXML();
     }
 
-    public void commitChanges(VariableInstance variable, Node changes) {
+
+	public Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException {
+		ScopeDAO scopedao = _dao.getScope(scopeInstanceId);
+		XmlDataDAO var = scopedao.getVariable(varname);
+		return var.isNull() ? null : var.get();
+	}
+	
+    public Node writeVariable(VariableInstance variable, Node changes) {
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
         dataDAO.set(changes);
 
         writeProperties(variable, changes, dataDAO);
+        return dataDAO.get();
     }
 
     public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg, QName fault)
@@ -1109,17 +1080,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         dao.release();
     }
 
-    public Node getPartData(Element message, Part part) {
-    	// borrowed from ASSIGN.evalQuery()
-        QName partName = new QName(null, part.name);
-        Node ret = DOMUtils.findChildByName((Element) message, partName);
-        if (part.type instanceof OElementVarType) {
-            QName elName = ((OElementVarType) part.type).elementType;
-            ret = DOMUtils.findChildByName((Element) ret, elName);
-        }
-
-        return ret;
-    }
 
     public Element getSourceEPR(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
@@ -1217,5 +1177,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 			}
         }
     }
+
+	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
+		Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
+		return val.value;
+	}
+
+	public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
+		ValueReferencePair vrp = new ValueReferencePair();
+		
+		Value val = _bpelProcess.getEVM().write(variable, reference, value, _iid);
+		vrp.reference = val.locator.reference;
+		vrp.value = val.value;
+		
+		return vrp;
+	}
 
 }

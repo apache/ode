@@ -157,7 +157,7 @@ class ACTIVITYGUARD extends ACTIVITY {
 
         try {
             return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(_oactivity.joinCondition,
-                    new ExprEvaluationContextImpl(null,null,_linkVals));
+                    new ExprEvaluationContextImpl(null, null,_linkVals));
         } catch (Exception e) {
             String msg = "Unexpected error evaluating a join condition: " + _oactivity.joinCondition;
             __log.error(msg,e);

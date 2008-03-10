@@ -19,9 +19,14 @@
 
 package org.apache.ode.bpel.runtime;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OForEach;
 import org.apache.ode.bpel.o.OScope;
@@ -30,20 +35,15 @@ import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class FOREACH extends ACTIVITY {
 
@@ -209,7 +209,15 @@ public class FOREACH extends ACTIVITY {
                 _oforEach.innerScope, getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,
                 _oforEach.innerScope), _scopeFrame, null);
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
-        getBpelRuntimeContext().initializeVariable(vinst, counterNode);
+
+        try {
+        initializeVariable(vinst, counterNode);
+        } catch (ExternalVariableModuleException e) {
+        	__log.error("Exception while initializing external variable", e);
+            _self.parent.failure(e.toString(), null);
+            return;
+        }
+
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
         se.setNewValue(counterNode);

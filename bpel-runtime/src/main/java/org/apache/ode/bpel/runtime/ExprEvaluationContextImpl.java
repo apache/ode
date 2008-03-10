@@ -18,10 +18,11 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evt.ProcessEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
@@ -29,13 +30,11 @@ import org.apache.ode.bpel.o.OConstantVarType;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.util.Map;
 
 /**
  * The context in which BPEL expressions are evaluated. This class is handed of the {@link org.apache.ode.bpel.o.OExpression}
@@ -44,13 +43,13 @@ import java.util.Map;
 public class ExprEvaluationContextImpl implements EvaluationContext {
     private static final Log __log = LogFactory.getLog(ExprEvaluationContextImpl.class);
 
-    private BpelRuntimeContext _native;
+	private BpelRuntimeContext _native;
 
-    private ScopeFrame _scopeInstance;
+	private ScopeFrame _scopeInstance;
 
-    private Map<OLink, Boolean> _linkVals;
+	private Map<OLink, Boolean> _linkVals;
 
-    private Node _root;
+	private Node _root;
 
     public ExprEvaluationContextImpl(ScopeFrame scopeInstace, BpelRuntimeContext ntv) {
         _native = ntv;
@@ -71,7 +70,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
         if (__log.isTraceEnabled())
             __log.trace("readVariable(" + variable + "," + part + ")");
 
-        // TODO: check for null _scopeInstance
+		// TODO: check for null _scopeInstance
 
         Node ret;
         if (variable.type instanceof OConstantVarType) {
@@ -83,11 +82,10 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
             VariableReadEvent vre = new VariableReadEvent();
             vre.setVarName(varInstance.declaration.name);
             sendEvent(vre);
-            ret = _native.fetchVariableData(varInstance, part, false);
+            ret = _scopeInstance.fetchVariableData(_native, varInstance, part, false);
         }
         return ret;
     }
-
 
 	public Node evaluateQuery(Node root, OExpression expr) throws FaultException {
         return _native.getExpLangRuntime().evaluateNode(expr, new ExprEvaluationContextImpl(_scopeInstance, _native, root));
@@ -98,33 +96,33 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
         return _native.readProperty(varInstance, property);
     }
 
-    public boolean isLinkActive(OLink olink) throws FaultException {
-        return _linkVals.get(olink);
-    }
+	public boolean isLinkActive(OLink olink) throws FaultException {
+		return _linkVals.get(olink);
+	}
 
     public String toString() {
         return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance + ", activeLinks=" + _linkVals + "}";
     }
 
-    public Node getRootNode() {
-        return _root;
-    }
+	public Node getRootNode() {
+		return _root;
+	}
 
-    public Node getPartData(Element message, Part part) throws FaultException {
-        return _native.getPartData(message, part);
-    }
+	public Node getPartData(Element message, Part part) throws FaultException {
+		return _scopeInstance.getPartData(message, part);
+	}
 
-    public Long getProcessId() {
-        return _native.getPid();
-    }
+	public Long getProcessId() {
+		return _native.getPid();
+	}
 
-    public boolean narrowTypes() {
-        return true;
-    }
+	public boolean narrowTypes() {
+		return true;
+	}
 
-    private void sendEvent(ScopeEvent se) {
-    	_scopeInstance.fillEventInfo(se);
-    	_native.sendEvent(se);
+	private void sendEvent(ScopeEvent se) {
+		_scopeInstance.fillEventInfo(se);
+		_native.sendEvent(se);
 	}
 
 }

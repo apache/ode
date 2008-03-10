@@ -18,20 +18,40 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
-import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.*;
-import org.apache.ode.bpel.runtime.channels.*;
+import org.apache.ode.bpel.o.OBase;
+import org.apache.ode.bpel.o.OCatch;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OEventHandler;
+import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.o.OFaultHandler;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.runtime.channels.CompensationChannel;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
-
-import javax.xml.namespace.QName;
-import java.io.Serializable;
-import java.util.*;
 import org.w3c.dom.Element;
 
 /**
@@ -54,6 +74,7 @@ class SCOPE extends ACTIVITY {
     }
 
     public void run() {
+        
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,
@@ -294,7 +315,7 @@ class SCOPE extends ACTIVITY {
                         if (catchBlock.faultVariable != null) {
                             try {
                                 VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
-                                ntive.initializeVariable(vinst, _fault.getFaultMessage());
+                                initializeVariable(vinst, _fault.getFaultMessage());
 
                                 // Generating event
                                 VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);

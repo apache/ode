@@ -19,28 +19,38 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.evt.ActivityDisabledEvent;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
+
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OConstants;
 import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.jacob.IndexedObject;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Base template for activities.
  */
 abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
+	private static final Log __log = LogFactory.getLog(ACTIVITY.class);
     protected ActivityInfo _self;
 
     /**
-     * Permeability flag, if <code>false</code> we defer outgoing links until
-     * succesfull completion.
+     * Permeability flag, if <code>false</code> we defer outgoing links until successful completion.
      */
     protected boolean _permeable = true;
 
@@ -62,6 +72,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return new Key(_self.o,_self.aId);
     }
 
+    
     protected void sendVariableReadEvent(VariableInstance var) {
     	VariableReadEvent vre = new VariableReadEvent();
     	vre.setVarName(var.declaration.name);
@@ -101,9 +112,13 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     protected void dpe(Collection<OLink> links) {
-        // Dead path all of the ougoing links (nothing has been activated yet!)
+        // Dead path all of the outgoing links (nothing has been activated yet!)
         for (Iterator<OLink> i = links.iterator(); i.hasNext();)
             _linkFrame.resolve(i.next()).channel.linkStatus(false);
+    }
+    
+    protected OConstants getConstants() {
+    	return _self.o.getOwner().constants;
     }
 
     /**
@@ -130,6 +145,43 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return -1;
     }
 
+    //
+    // Syntactic sugar for methods that used to be on BpelRuntimeContext.. 
+    //
+    
+    Node fetchVariableData(VariableInstance variable, boolean forWriting) 
+        throws FaultException
+    {
+    	return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
+	}
+
+    Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
+        throws FaultException 
+    {
+      return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), var, part, forWriting);
+    }
+    
+    Node initializeVariable(VariableInstance lvar, Node val) 
+        throws ExternalVariableModuleException
+    {
+    	return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
+    }
+
+    void commitChanges(VariableInstance lval, Node lvalue) 
+        throws ExternalVariableModuleException
+    {
+    	_scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
+	}
+
+    Node getPartData(Element message, Part part) {
+    	return _scopeFrame.getPartData(message, part);
+    }
+
+    
+    //
+    // End syntactic sugar.
+    //
+    
     public static final class Key implements Serializable {
         private static final long serialVersionUID = 1L;
 
