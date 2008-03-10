@@ -249,7 +249,7 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils"),
-      COMMONS.logging, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
+      BACKPORT, COMMONS.logging, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
       JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "il-common"),

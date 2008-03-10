@@ -22,7 +22,7 @@ import javax.xml.namespace.QName;
 
 
 public abstract class ExtensibilityQNames {
-    /**
+    /*
      * Activity Recovery extensibility elements.
      */
     public static final String NS_ACTIVITY_RECOVERY         = "http://ode.apache.org/activityRecovery";
@@ -33,5 +33,20 @@ public abstract class ExtensibilityQNames {
 
     public static final String NS_BPEL_EXTENSIBILITY = "http://ode.apache.org/bpelExtensibility";
     public static final QName UNKNOWN_EA_FAULT_NAME  = new QName(NS_BPEL_EXTENSIBILITY, "unknownExtensionImplementation");
+
+
+    //
+    // External variables 
+    //
+    
+    /** Namespace for external variables. */
+    private static final String EXTVAR_NS = "http://ode.apache.org/externalVariables";
+    
+    /** Attribute name for external variable id. */
+    public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "id");
+    
+    /** Attribute holding the name of the "related" variable. */
+	public static final QName EXTVAR_RELATED = new QName(EXTVAR_NS, "relates-to");
+
 }
 

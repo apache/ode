@@ -117,7 +117,7 @@ public class OAssign extends OActivity {
         }
 
         public String toString() {
-            return "{Literal " + xmlLiteral + "}";
+            return "{Literal " + DOMUtils.domToString(xmlLiteral) + "}";
         }
 
         private void writeObject(java.io.ObjectOutputStream out)

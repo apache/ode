@@ -20,6 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -28,16 +29,18 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -85,12 +88,10 @@ public interface BpelRuntimeContext {
      * @param var variable to read
      * @return
      */
-    Node fetchVariableData(VariableInstance var, boolean forWriting)
+    Node readVariable(Long scopeInstanceId, String varname, boolean forWriting)
             throws FaultException;
 
-    Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
-            throws FaultException;
-
+  
     /**
      * Fetches the my-role endpoint reference data.
      * @param pLink
@@ -141,7 +142,6 @@ public interface BpelRuntimeContext {
     String readProperty(VariableInstance var, OProcess.OProperty property)
             throws FaultException;
 
-    Node initializeVariable(VariableInstance var, Node initData);
 
     /**
      * Writes a partner EPR.
@@ -154,7 +154,7 @@ public interface BpelRuntimeContext {
 
     Node convertEndpointReference(Element epr, Node targetNode);
 
-    void commitChanges(VariableInstance var, Node changes);
+    Node writeVariable(VariableInstance var, Node changes);
 
     boolean isCorrelationInitialized(CorrelationSetInstance cset);
 
@@ -243,8 +243,6 @@ public interface BpelRuntimeContext {
 
     QName getPartnerResponseType(String mexId);
 
-    Node getPartData(Element message, Part part);
-
     Element getSourceEPR(String mexId);
 
     void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
@@ -261,4 +259,19 @@ public interface BpelRuntimeContext {
     //void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponseChannel extResponseChannel) throws FaultException;
     
     ExtensionOperation createExtensionActivityImplementation(QName name);
+
+    /**
+     * Read an external variable. 
+     */
+	Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException;
+	 
+	/**
+	 * Write an external variable. 
+	 */
+	ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException ;
+	
+	public class ValueReferencePair {
+		public Node value;
+		public Node reference;
+	}
 }

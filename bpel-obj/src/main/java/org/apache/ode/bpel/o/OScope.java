@@ -19,7 +19,12 @@
 
 package org.apache.ode.bpel.o;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Compiled representation of a BPEL scope. Instances of this class
@@ -169,6 +174,10 @@ public class OScope extends OActivity {
         public OScope declaringScope;
         public OVarType type;
 
+        /** If not-null indicates that this variable has an external representation. */
+        public OExtVar extVar;
+        
+        
         public Variable(OProcess owner, OVarType type) {
             super(owner);
             this.type = type;

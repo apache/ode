@@ -37,6 +37,7 @@ import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Node;
 
 
@@ -89,24 +90,24 @@ public class ExtensionContextImpl implements ExtensionContext {
 	public Node readVariable(Variable variable)
 			throws FaultException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
-		return _context.fetchVariableData(vi, true);
+		return _scopeFrame.fetchVariableData(_context, vi, true);
 	}
 
 	public void writeVariable(String variableName, Node value)
-			throws FaultException {
+			throws FaultException, ExternalVariableModuleException {
 		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		_context.commitChanges(vi, value);
+		_scopeFrame.commitChanges(_context, vi, value);
 	}
 
 	public Node readVariable(String variableName) throws FaultException {
 		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		return _context.fetchVariableData(vi, true);
+		return _scopeFrame.fetchVariableData(_context, vi, true);
 	}
 
 	public void writeVariable(Variable variable, Node value)
-			throws FaultException {
+			throws FaultException, ExternalVariableModuleException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
-		_context.commitChanges(vi, value);
+		_scopeFrame.commitChanges(_context, vi, value);
         VariableModificationEvent vme = new VariableModificationEvent(variable.name);
         vme.setNewValue(value);
         sendEvent(vme);

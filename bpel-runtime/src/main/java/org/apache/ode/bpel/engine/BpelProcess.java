@@ -45,8 +45,9 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
+import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -91,7 +92,7 @@ import org.w3c.dom.Text;
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author Matthieu Riou <mriou at apache dot org>
  */
-class BpelProcess {
+public class BpelProcess {
     static final Log __log = LogFactory.getLog(BpelProcess.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -149,6 +150,11 @@ class BpelProcess {
     /** Weak-reference cache of all the my-role message exchange objects. */
     final private MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache(this);
 
+    /** Deploy-time configuraton for external variables. */
+    private ExternalVariableConf _extVarConf;
+    
+    private ExternalVariableManager _evm;
+    
     BpelProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
         _server = server;
         _pid = conf.getProcessId();
@@ -170,10 +176,26 @@ class BpelProcess {
         _invocationStyles = Collections.unmodifiableSet(istyles);
     }
 
+    /**
+     * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it 
+     * is possible to change the external variable configuration at runtime.
+     * 
+     */
+    void initExternalVariables() {
+        List<Element> conf = _pconf.getExtensionElement(ExternalVariableConf.EXTVARCONF_ELEMENT);
+        _extVarConf = new ExternalVariableConf(conf);
+        _evm = new ExternalVariableManager(_pid, _extVarConf, _contexts.externalVariableEngines, _oprocess);
+    }
+    
+
     public String toString() {
         return "BpelProcess[" + _pid + "]";
     }
-
+ 
+    public ExternalVariableManager getEVM() {
+        return _evm;
+    }
+   
     void recoverActivity(ProcessInstanceDAO instanceDAO, final String channel, final long activityId, final String action,
             final FaultData fault) {
         if (__log.isDebugEnabled())
@@ -1194,7 +1216,8 @@ class BpelProcess {
             }
 
             setRoles(_oprocess);
-
+    		initExternalVariables();
+    
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
                     if (prole._initialPartner != null) {

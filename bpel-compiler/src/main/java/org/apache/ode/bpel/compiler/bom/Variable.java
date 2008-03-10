@@ -87,4 +87,30 @@ public class Variable extends BpelObject {
 
     }
 
+    //
+    // Stuff related to external variables.
+    //
+    
+    /**
+     * Get the external variable identifier (each one will be defined in the deployment descriptor)
+     */
+    public String getExternalId() {
+        return getAttribute(ExtensibilityQNames.EXTVAR_ATTR, null);
+    }
+
+    /**
+     * Is this an external variable? It is if it has the above attribute.
+     * @return
+     */
+    public boolean isExternal() {
+        return null != getExternalId();
+    }
+    
+    /**
+     * External variable support - get the "related" variable name.
+     * @return
+     */
+    public String getRelated() {
+    	return  getAttribute(ExtensibilityQNames.EXTVAR_RELATED, null);
+    }
 }

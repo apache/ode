@@ -20,6 +20,7 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +43,8 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apche.ode.bpel.evar.ExternalVariableModule;
+
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
@@ -68,6 +72,9 @@ class Contexts {
 
 	/** Global extension bundle registry **/
     final Map<String, AbstractExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, AbstractExtensionBundle>();
+    
+    /** Mapping from external variable engine identifier to the engine implementation. */
+    final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
 
     public boolean isTransacted() {
         try {
