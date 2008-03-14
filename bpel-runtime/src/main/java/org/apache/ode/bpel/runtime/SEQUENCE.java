@@ -83,7 +83,9 @@ class SEQUENCE extends ACTIVITY {
                     replication(_child.self).terminate();
 
                     // Don't do any of the remaining activiites, DPE instead.
-                    deadPathRemaining();
+                    ArrayList<OActivity> remaining = new ArrayList<OActivity>(_remaining);
+                    remaining.remove(0);
+                    deadPathRemaining(remaining);
 
                     _terminateRequested = true;
                     instance(ACTIVE.this);
@@ -100,6 +102,7 @@ class SEQUENCE extends ACTIVITY {
                     HashSet<CompensationHandler> comps = new HashSet<CompensationHandler>(_compensations);
                     comps.addAll(compensations);
                     if (faultData != null || _terminateRequested || _remaining.size() <= 1) {
+                        deadPathRemaining(_remaining);
                         _self.parent.completed(faultData, comps);
                     } else /* !fault && ! terminateRequested && !remaining.isEmpty */ {
                         ArrayList<OActivity> remaining = new ArrayList<OActivity>(_remaining);
@@ -113,8 +116,8 @@ class SEQUENCE extends ACTIVITY {
             }));
         }
 
-        private void deadPathRemaining() {
-            for (Iterator<OActivity> i = _remaining.iterator();i.hasNext();)
+        private void deadPathRemaining(List<OActivity> remaining) {
+            for (Iterator<OActivity> i = remaining.iterator();i.hasNext();)
                 dpe(i.next());
         }
 
