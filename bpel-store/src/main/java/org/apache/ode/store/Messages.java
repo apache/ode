@@ -196,8 +196,7 @@ public class Messages extends MessageBundle {
     }
 
     public String msgDeployFailDuplicateDU(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        return format("Deploy failed; Deployment Unit \"{0}\" already deployed!", name);
     }
 
     public String msgDeployFailDuplicatePID(QName processId, String name) {
