@@ -42,7 +42,7 @@ public class MexProperty {
     private Long _id;
     @Basic @Column(name="PROP_KEY")
     private String propertyKey;
-    @Basic @Column(name="PROP_VALUE")
+    @Basic @Column(name="PROP_VALUE", length=2000)
     private String propertyValue;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="MEX_ID")
