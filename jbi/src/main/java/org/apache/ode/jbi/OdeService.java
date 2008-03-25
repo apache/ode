@@ -177,7 +177,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
      * {@link MessageExchangeContextImpl#onAsyncReply(MyRoleMessageExchange)}
      * 
      * @param mex
-     *            message exchenge
+     *            message exchange
      */
     public void onResponse(MyRoleMessageExchange mex) {
         __log.debug("Consuming MEX tracker " + mex.getClientId());

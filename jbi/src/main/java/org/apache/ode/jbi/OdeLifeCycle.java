@@ -29,7 +29,6 @@ import javax.jbi.component.ComponentContext;
 import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
 import javax.management.ObjectName;
-import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -122,6 +121,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Starting JCA connector.");
             initConnector();
 
+            __log.debug("Register ProcessManagement APIs");
+            _ode.activatePMAPIs();
+
             _suManager = new OdeSUManager(_ode);
             _initSuccess = true;
             __log.info(__msgs.msgOdeInitialized());
@@ -132,10 +134,11 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void initMappers() throws JBIException {
-        Class mapperClass;
+        Class<Mapper> mapperClass;
         try {
-            mapperClass = Class.forName(_ode._config.getMessageMapper());
+            mapperClass = (Class<Mapper>) Class.forName(_ode._config.getMessageMapper());
         } catch (ClassNotFoundException e) {
             String errmsg = __msgs.msgOdeInitMapperClassNotFound(_ode._config.getMessageMapper());
             __log.error(errmsg);
@@ -222,7 +225,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 	_ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
-
     }
 
     /**
@@ -377,6 +379,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
+        _ode.deactivatePMAPIs();
+        
         if (_connector != null) {
             try {
                 _connector.shutdown();
@@ -413,30 +417,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T lookupInJndi(String objName) throws Exception {
-        ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
-            InitialContext ctx = null;
-            try {
-                ctx = new InitialContext();
-                return (T) ctx.lookup(objName);
-            } finally {
-                if (ctx != null)
-                    try {
-                        ctx.close();
-                    } catch (Exception ex1) {
-                        ; // swallow
-                        __log.error("Error closing JNDI connection.", ex1);
-                    }
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(old);
-        }
-
     }
 
 }

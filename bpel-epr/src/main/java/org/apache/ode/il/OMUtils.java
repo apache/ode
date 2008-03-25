@@ -17,14 +17,17 @@
  * under the License.
  */
 
-package org.apache.ode.axis2.util;
+package org.apache.ode.il;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.transform.Source;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMContainer;
 import org.apache.axiom.om.OMElement;
@@ -42,6 +45,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.InputSource;
 
 /**
  * Utility methods to convert from/to AxiOM and DOM.
@@ -213,5 +217,13 @@ public class OMUtils {
         return qname;
     }
 
+    /**
+     * Parse an XML document located using an {@link InputSource} using the
+     * pooled document builder.
+     */
+    public static OMElement toOM(Source inputSource) throws IOException {
+        Document doc = DOMUtils.sourceToDOM(inputSource);
+        return toOM(doc.getDocumentElement(), OMAbstractFactory.getOMFactory());
+    }
 
 }

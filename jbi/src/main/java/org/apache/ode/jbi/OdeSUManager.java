@@ -49,13 +49,10 @@ public class OdeSUManager implements ServiceUnitManager {
     _ode = odeContext;
   }
 
-  public synchronized String deploy(String serviceUnitID,
-      String serviceUnitRootPath) throws DeploymentException {
-    __log
-        .trace("deploy: id=" + serviceUnitID + ", path=" + serviceUnitRootPath);
+    public synchronized String deploy(String serviceUnitID, String serviceUnitRootPath) throws DeploymentException {
+        __log.trace("deploy: id=" + serviceUnitID + ", path=" + serviceUnitRootPath);
 
-    OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID,
-        serviceUnitRootPath);
+        OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID, serviceUnitRootPath);
     try {
       su.deploy();
     } catch (Exception ex) {
@@ -67,19 +64,16 @@ public class OdeSUManager implements ServiceUnitManager {
 
   }
 
-  public synchronized void init(String serviceUnitID, String serviceUnitRootPath)
-      throws DeploymentException {
+    public synchronized void init(String serviceUnitID, String serviceUnitRootPath) throws DeploymentException {
     __log.trace("init called for " + serviceUnitID);
 
     if (_serviceUnits.containsKey(serviceUnitID)) {
-      __log.debug("odd, init() called for su " + serviceUnitID
-          + ", but it is already init()ed");
+            __log.debug("odd, init() called for su " + serviceUnitID + ", but it is already init()ed");
       return;
     }
 
     try {
-      OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID,
-          serviceUnitRootPath);
+            OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID, serviceUnitRootPath);
       su.init();
       _serviceUnits.put(serviceUnitID, su);
     } catch (Exception ex) {
@@ -89,8 +83,7 @@ public class OdeSUManager implements ServiceUnitManager {
     }
   }
 
-  public synchronized void shutDown(String serviceUnitID)
-      throws DeploymentException {
+    public synchronized void shutDown(String serviceUnitID) throws DeploymentException {
     __log.trace("shutDown called for " + serviceUnitID);
 
     OdeServiceUnit su = _serviceUnits.remove(serviceUnitID);
@@ -106,8 +99,7 @@ public class OdeSUManager implements ServiceUnitManager {
     }
   }
 
-  public synchronized void start(String serviceUnitID)
-      throws DeploymentException {
+    public synchronized void start(String serviceUnitID) throws DeploymentException {
     __log.trace("start called for " + serviceUnitID);
 
     OdeServiceUnit su = _serviceUnits.get(serviceUnitID);
@@ -140,8 +132,7 @@ public class OdeSUManager implements ServiceUnitManager {
    * @throws DeploymentException
    *           deployment exception
    */
-  public synchronized void stop(String serviceUnitID)
-      throws DeploymentException {
+    public synchronized void stop(String serviceUnitID) throws DeploymentException {
     __log.trace("stop called for " + serviceUnitID);
 
     OdeServiceUnit su = _serviceUnits.get(serviceUnitID);
@@ -177,13 +168,10 @@ public class OdeSUManager implements ServiceUnitManager {
    * @throws DeploymentException
    *           deployment exception
    */
-  public synchronized String undeploy(String serviceUnitID,
-      String serviceUnitRootPath) throws DeploymentException {
-    __log
-        .trace("undeploy: id=" + serviceUnitID + ", path=" + serviceUnitRootPath);
+    public synchronized String undeploy(String serviceUnitID, String serviceUnitRootPath) throws DeploymentException {
+        __log.trace("undeploy: id=" + serviceUnitID + ", path=" + serviceUnitRootPath);
 
-    OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID,
-        serviceUnitRootPath);
+        OdeServiceUnit su = new OdeServiceUnit(_ode, serviceUnitID, serviceUnitRootPath);
 
     try {
       su.undeploy();
@@ -237,8 +225,7 @@ public class OdeSUManager implements ServiceUnitManager {
     doc.appendChild(elem);
     Element compNameElem = doc.createElement("component-name");
     elem.appendChild(compNameElem);
-    Element compTaskRsltDtlsElem = doc
-        .createElement("component-task-result-details");
+        Element compTaskRsltDtlsElem = doc.createElement("component-task-result-details");
     elem.appendChild(compTaskRsltDtlsElem);
     Element taskRsltDtlsElem = doc.createElement("task-result-details");
     compTaskRsltDtlsElem.appendChild(taskRsltDtlsElem);
@@ -251,8 +238,7 @@ public class OdeSUManager implements ServiceUnitManager {
 
     // Why do I have to tell this thing the component name? It /knows/ the
     // component name....
-    compNameElem.appendChild(doc.createTextNode(_ode.getContext()
-        .getComponentName()));
+        compNameElem.appendChild(doc.createTextNode(_ode.getContext().getComponentName()));
 
     // And why on earth do I have to tell my caller the method he just
     // called?
