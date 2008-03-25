@@ -85,7 +85,7 @@ public class Receiver implements Runnable {
 
     /**
      * This is called to gracefully stop the Receiver thread. After shutting down the thread pool we wait for a maximum
-     * of 10 seconds before forcefully cancelling in-flight threads.
+     * of 10 seconds before forcefully canceling in-flight threads.
      */
     public void cease() {
 
@@ -120,7 +120,7 @@ public class Receiver implements Runnable {
                 // make sure no outstanding threads are hanging around
                 if (!_executorService.awaitTermination(THREADPOOL_SHUTDOWN_TIMEOUT, TimeUnit.SECONDS)) {
                     __log.warn("Problem shutting down ExecutorService - trying harder.");
-                    List outstanding = _executorService.shutdownNow();
+                    List<Runnable> outstanding = _executorService.shutdownNow();
                     if (outstanding != null && !outstanding.isEmpty()) {
                         __log.warn("Cancelled " + outstanding.size() + " in-flight threads.");
                     }
