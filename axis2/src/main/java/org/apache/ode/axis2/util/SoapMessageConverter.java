@@ -19,21 +19,10 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.soap.*;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.namespace.Constants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.Messages;
-import org.apache.ode.axis2.OdeFault;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.stl.CollectionsX;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -48,16 +37,33 @@ import javax.wsdl.Part;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.ElementExtensible;
-import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultDetail;
+import org.apache.axiom.soap.SOAPFaultReason;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.namespace.Constants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.Messages;
+import org.apache.ode.axis2.OdeFault;
+import org.apache.ode.il.OMUtils;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.w3c.dom.Element;
 
 /**
  * SOAP/ODE Message converter. Uses WSDL binding information to convert the protocol-neutral ODE representation into a SOAP

@@ -19,6 +19,14 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -31,28 +39,26 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Fault;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
 /**
- * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used
+ * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL description of used
  * services.
  *
  * @author Matthieu Riou <mriou at apache dot org>
