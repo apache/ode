@@ -24,9 +24,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import javax.jbi.JBIException;
 import javax.jbi.component.ComponentContext;
 import javax.jbi.messaging.DeliveryChannel;
 import javax.jbi.messaging.NormalizedMessage;
+import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -38,12 +40,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.util.WSDLFlattener;
 import org.apache.ode.store.ProcessStoreImpl;
@@ -55,9 +60,14 @@ import org.w3c.dom.Document;
  * @author mszefler
  */
 final class OdeContext {
-
     private static final Log __log = LogFactory.getLog(OdeContext.class);
 
+    public static final QName PM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService");
+    public static final String PM_PORT_NAME = "ProcessManagementPort";
+
+    public static final QName IM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService");
+    public static final String IM_PORT_NAME = "InstanceManagementPort";
+    
     /** static singleton */
     private static OdeContext __self;
 
@@ -65,7 +75,7 @@ final class OdeContext {
 
     private Map<QName, Document> _descriptorCache = new ConcurrentHashMap<QName, Document>();
 
-    /** Ordered list of messsage mappers. */
+    /** Ordered list of message mappers */
     private ArrayList<Mapper> _mappers = new ArrayList<Mapper>();
 
     /** Mapper by class name. */
@@ -92,6 +102,15 @@ final class OdeContext {
     DataSource _dataSource;
 
     ProcessStoreImpl _store;
+
+    ServiceEndpoint _processManagementEndpoint;    
+    ServiceEndpoint _instanceManagementEndpoint;
+
+    JbiMessageExchangeProcessor _processManagementProcessor;    
+    JbiMessageExchangeProcessor _instanceManagementProcessor;
+
+    ProcessManagement _processManagement;
+    InstanceManagement _instanceManagement;
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
@@ -250,5 +269,32 @@ final class OdeContext {
 
     public Mapper getDefaultMapper() {
         return _mappers.get(0);
+    }
+    
+    void activatePMAPIs() throws JBIException {
+        ProcessAndInstanceManagementImpl pm = new ProcessAndInstanceManagementImpl(_server, _store);
+        _processManagement = pm;
+        _instanceManagement = pm;
+        _processManagementEndpoint = getContext().activateEndpoint(PM_SERVICE_NAME, PM_PORT_NAME);
+        _instanceManagementEndpoint = getContext().activateEndpoint(IM_SERVICE_NAME, IM_PORT_NAME);
+        _processManagementProcessor = new DynamicMessageExchangeProcessor<ProcessManagement>(pm, getChannel());
+        _instanceManagementProcessor = new DynamicMessageExchangeProcessor<InstanceManagement>(pm, getChannel());
+    }
+
+    void deactivatePMAPIs() throws JBIException {
+        if (_processManagementEndpoint != null) {
+            try {
+                getContext().deactivateEndpoint(_processManagementEndpoint);
+            } catch (Exception e) {
+                __log.error("Error deactivating ProcessManagement service", e);
+            }
+        }
+        if (_instanceManagementEndpoint != null) {
+            try {
+                getContext().deactivateEndpoint(_instanceManagementEndpoint);
+            } catch (Exception e) {
+                __log.error("Error deactivating InstanceManagement service", e);
+            }
+        }
     }
 }

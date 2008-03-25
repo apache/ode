@@ -20,6 +20,24 @@
 package org.apache.ode.axis2.service;
 
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
@@ -38,28 +56,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
-import org.apache.ode.axis2.util.OMUtils;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.fs.FileUtils;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -274,9 +275,7 @@ public class DeploymentWebService {
             OMElement responseOp = factory.createOMElement(op, _pmapi);
             responseOp.addChild(response);
             envelope.getBody().addChild(response);
-            AxisEngine engine = new AxisEngine(
-                    messageContext.getOperationContext().getServiceContext().getConfigurationContext());
-            engine.send(outMsgContext);
+            AxisEngine.send(outMsgContext);
         }
     }
 

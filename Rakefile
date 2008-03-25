@@ -138,7 +138,7 @@ define "ode" do
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
       XMLBEANS
 
-    test.with project("tools"), XERCES, WOODSTOX, AXIOM, JAVAX.javamail
+    test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
     test.exclude '*'
 
     package :jar
@@ -224,7 +224,7 @@ define "ode" do
   desc "ODE Interface Layers Common"
   define "il-common" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
-      COMMONS.logging, DERBY, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, JAVAX.connector, COMMONS.lang
+      AXIOM, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS
     package :jar
   end
 
@@ -410,7 +410,7 @@ define "ode" do
   define "jbi" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common", "bpel-obj",
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
-      COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
+      AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
     package(:jar)
     package(:jbi).tap do |jbi|
@@ -419,7 +419,7 @@ define "ode" do
         "il-common", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils"),
-        ANT, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+        ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
         JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
         XALAN, XMLBEANS, XSTREAM, WSDL4J)

@@ -28,7 +28,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 
 /**
- * This class implements javax.jbi.component.Component interface.
+ * This class implements {@link javax.jbi.component.Component} interface.
  */
 public class OdeComponent implements Component {
 	private OdeLifeCycle _lifeCycle;
@@ -47,11 +47,10 @@ public class OdeComponent implements Component {
 
 	/**
 	 * 
-	 * @param ref
-	 *          ServiceEndpoint object                       
+     * @param ref ServiceEndpoint object
 	 * 
-	 * @return Descriptor Object implementing javax.jbi.servicedesc.Descriptor
-	 *         interface.
+     * @return Descriptor Object implementing
+     *         {@link javax.jbi.servicedesc.Descriptor} interface.
 	 */
 	public Document getServiceDescription(ServiceEndpoint ref) {
 		return  _lifeCycle.getOdeContext().getServiceDescription(ref.getServiceName());
@@ -96,7 +95,7 @@ public class OdeComponent implements Component {
 	 * 
 	 * @param exchange
 	 *          the proposed message exchange to be performed
-	 * @return true if this consurer component can interact with the described
+     * @return true if this consumer component can interact with the described
 	 *         provider to perform the given exchange
 	 */
 	public boolean isExchangeWithProviderOkay(ServiceEndpoint endpoint, MessageExchange exchange) {

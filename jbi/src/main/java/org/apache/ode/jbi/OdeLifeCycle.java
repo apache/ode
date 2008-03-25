@@ -132,6 +132,10 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Starting JCA connector.");
             initConnector();
 
+            __log.debug("Register ProcessManagement APIs");
+            _ode.activatePMAPIs();
+
+
             _suManager = new OdeSUManager(_ode);
             _initSuccess = true;
             __log.info(__msgs.msgOdeInitialized());
@@ -442,6 +446,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         
         unregisterMBean();
 
+        _ode.deactivatePMAPIs();
+
         if (_connector != null) {
             try {
                 _connector.shutdown();
@@ -505,3 +511,4 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
 }
+
