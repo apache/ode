@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jbi version="1.0" xmlns="http://java.sun.com/xml/ns/jbi">
+  <service-assembly>
+    <identification>
+       <name>ProcessManagement-SA</name>
+       <description>Process Management API Service Assembly</description>
+    </identification>
+
+    <service-unit>
+       <identification>
+         <name>ProcessManagement-http</name>
+         <description>Process Management API HTTP Binding</description>
+       </identification>
+
+      <target>
+         <artifacts-zip>ProcessManagement-HTTP.zip</artifacts-zip>
+         <component-name>servicemix-http</component-name>
+      </target>
+    </service-unit>
+
+  </service-assembly>
+</jbi>
+
