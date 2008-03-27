@@ -101,12 +101,9 @@ public class ODEService {
 
             if (odeMex.getOperation() != null) {
                 // Preparing message to send to ODE
-                Element msgEl = DOMUtils.newDocument().createElementNS(null, "message");
-                msgEl.getOwnerDocument().appendChild(msgEl);
-                _converter.parseSoapRequest(msgEl, msgContext.getEnvelope(), odeMex.getOperation());
                 Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
+                _converter.parseSoapRequest(odeRequest, msgContext.getEnvelope(), odeMex.getOperation());
                 readHeader(msgContext, odeMex);
-                odeRequest.setMessage(msgEl);
 
                 if (__log.isDebugEnabled()) {
                     __log.debug("Invoking ODE using MEX " + odeMex);
@@ -226,7 +223,7 @@ public class ODEService {
                 break;
             case ASYNC:
             case RESPONSE:
-                _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
+                _converter.createSoapResponse(msgContext, mex.getResponse(), mex.getOperation());
                 if (__log.isDebugEnabled())
                     __log.debug("Response message " + msgContext.getEnvelope());
                 writeHeader(msgContext, mex);

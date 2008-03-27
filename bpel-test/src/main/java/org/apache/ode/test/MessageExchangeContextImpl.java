@@ -101,7 +101,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		if ( elm1 != null && elm2 != null ) {
 			String cat = elm2.getTextContent()+" -> "+elm1.getTextContent();
 			elm2.setTextContent(cat);
-			msg.setMessagePart("probeData", elm2);
+			msg.setPart("probeData", elm2);
             final Message response = prmx.createMessage(prmx.getOperation().getOutput().getMessage().getQName());
 
             response.setMessage(msg.getMessage());

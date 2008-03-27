@@ -90,6 +90,8 @@ import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Document;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -512,7 +514,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
                 .getMessage().getQName());
-        message.setData(msg);
+        buildInvokeMessage(message, msg);
 
         MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
         _bpelProcess.initMyRoleMex(m);
@@ -719,8 +721,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
-        message.setData(outgoingMessage);
         message.setType(operation.getInput().getMessage().getQName());
+        buildInvokeMessage(message, outgoingMessage);
 
         // Get he my-role EPR (if myrole exists) for optional use by partner
         // (for callback mechanism).
@@ -747,6 +749,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
             Message odeRequest = myRoleMex.createMessage(operation.getInput().getMessage().getQName());
             odeRequest.setMessage(outgoingMessage);
+            ((MessageImpl)odeRequest)._dao.setHeader(message.getHeader());
 
             if (BpelProcess.__log.isDebugEnabled()) {
                 __log.debug("Setting myRoleMex session ids for p2p interaction, mySession "
@@ -803,7 +806,21 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         return mexDao.getMessageExchangeId();
+    }
 
+    private void buildInvokeMessage(MessageDAO message, Element outgoingElmt) {
+        Document doc = DOMUtils.newDocument();
+        Element header = doc.createElement("header");
+        NodeList parts = outgoingElmt.getChildNodes();
+        for (int m = 0; m < parts.getLength(); m++) {
+            Element part = (Element) parts.item(m);
+            if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
+                header.appendChild(doc.importNode(part, true));
+                outgoingElmt.removeChild(part);
+            }
+        }
+        message.setData(outgoingElmt);
+        message.setHeader(header);
     }
 
     void execute() {
@@ -1089,7 +1106,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Element getPartnerResponse(String mexId) {
-        return _getPartnerResponse(mexId).getData();
+        return mergeHeaders(_getPartnerResponse(mexId));
     }
 
     public Element getMyRequest(String mexId) {
@@ -1119,9 +1136,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     __log.fatal(msg);
                     throw new BpelEngineException(msg);
                 }
-
-                return request.getData();
-
+                return mergeHeaders(request);
             default:
                 // We should not be in any other state when requesting this.
                 String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
@@ -1129,7 +1144,22 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 __log.fatal(msg);
                 throw new BpelEngineException(msg);
         }
+    }
 
+    private Element mergeHeaders(MessageDAO msg) {
+        // Merging header data, it's all stored in the same variable
+        Element data = msg.getData();
+        if (msg.getHeader() != null) {
+            NodeList headerParts = msg.getHeader().getChildNodes();
+            for (int m = 0; m < headerParts.getLength(); m++) {
+                if (headerParts.item(m).getNodeType() == Node.ELEMENT_NODE) {
+                    Element headerPart = (Element) headerParts.item(m);
+                    headerPart.setAttribute("headerPart", "true");
+                    data.appendChild(data.getOwnerDocument().importNode(headerPart, true));
+                }
+            }
+        }
+        return data;
     }
 
     public QName getPartnerFault(String mexId) {

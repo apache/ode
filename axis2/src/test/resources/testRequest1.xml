@@ -24,8 +24,8 @@
       </getObjectId>
    </parameters>
    
-   <DocumentumRequestHeader xmlns="urn:ode.apache.org/axis2-il/header">
-   		<DocumentumSecurityToken xmlns="http://documentum.com/ws/2005/services"/>
+   <DocumentumRequestHeader xmlns="http://documentum.com/ws/2005/services">
+   		<DocumentumSecurityToken/>
    </DocumentumRequestHeader>
    
 </message>

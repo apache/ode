@@ -30,7 +30,7 @@ public class HMessage extends HObject {
   private HMessageExchange _mex;
   private String _type;
   private HLargeData _data;
-  
+  private HLargeData _header;
   
   public void setMessageExchange(HMessageExchange mex) {
     _mex = mex;
@@ -57,6 +57,15 @@ public class HMessage extends HObject {
 
   public void setMessageData(HLargeData data) {
     _data = data;
+  }
+
+  /** @hibernate.many-to-one column="HEADER" */
+  public HLargeData getHeader() {
+    return _header;
+  }
+
+  public void setHeader(HLargeData header) {
+    _header = header;
   }
 
 }

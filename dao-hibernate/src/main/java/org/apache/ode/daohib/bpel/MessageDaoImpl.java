@@ -68,7 +68,25 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public void setHeader(Element value) {
+        if (value == null) return;
+        if (_hself.getHeader() != null)
+            _session.delete(_hself.getHeader());
+        HLargeData newdata = new HLargeData(DOMUtils.domToString(value));
+        _session.save(newdata);
+        _hself.setHeader(newdata);
+        update();
+    }
+
+    public Element getHeader() {
+        if (_hself.getHeader() == null) return null;
+        try {
+            return DOMUtils.stringToDOM(_hself.getHeader().getText());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MessageExchangeDAO getMessageExchange() {

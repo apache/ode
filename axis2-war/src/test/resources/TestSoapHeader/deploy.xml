@@ -17,14 +17,17 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-        xmlns:pns="urn:/HeaderTest.bpel"
-        xmlns:sns="urn:/HelloWorld2.wsdl" >
+	xmlns:pns="http://ode/bpel/unit-test" 
+	xmlns:wns="http://ode/bpel/unit-test.wsdl" xmlns:dns="http://axis2.ode.apache.org">
 
 
-	<process name="pns:HelloWorld2">
+	<process name="pns:HeaderTest">
 		<active>true</active>
 		<provide partnerLink="helloPartnerLink">
-			<service name="sns:HelloService" port="HelloPort"/>
+			<service name="wns:HeaderTestService" port="HeaderTestPort"/>
 		</provide>
-	</process>
+        <invoke partnerLink="dummyPartnerLink">
+            <service name="dns:DummyService" port="DummyServiceSOAP11port_http"/>
+        </invoke>
+    </process>
 </deploy>

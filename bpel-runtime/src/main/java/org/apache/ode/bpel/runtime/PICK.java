@@ -141,7 +141,7 @@ class PICK extends ACTIVITY {
 
     /**
      * Calculate a duration offset from right now.
-     * 
+     *
      * @param duration
      *            the offset
      * @return the resulting date.
@@ -155,13 +155,11 @@ class PICK extends ACTIVITY {
     @SuppressWarnings("unchecked")
     private void initVariable(String mexId, OPickReceive.OnMessage onMessage) {
         // This is allowed, if there is no parts in the message for example.
-        if (onMessage.variable == null)
-            return;
+        if (onMessage.variable == null) return;
 
         Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
-        Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts()
-                .keySet();
-        
+        Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
+
         // Let's do some sanity checks here so that we don't get weird errors in assignment later.
         // The engine should have checked to make sure that the messages that are  delivered conform 
         // to the correct format; but you know what they say, don't trust anyone.  
@@ -170,7 +168,7 @@ class PICK extends ACTIVITY {
             __log.fatal(errmsg);
             throw new InvalidProcessException(errmsg);
         }
-        
+
         OMessageVarType vartype = (OMessageVarType) onMessage.variable.type;
 
         // Check that each part contains what we expect. 
@@ -187,38 +185,38 @@ class PICK extends ACTIVITY {
                 String errmsg = "Message missing part: " + pName;
                 __log.fatal(errmsg);
                 throw new InvalidContextException(errmsg);
-            }           
-            
+            }
+
             if (part.type instanceof OElementVarType) {
-                OElementVarType ptype = (OElementVarType) part.type; 
+                OElementVarType ptype = (OElementVarType) part.type;
                 Element e  = DOMUtils.getFirstChildElement(msgPart);
                 if (e == null) {
                     String errmsg = "Message (element) part " + pName + " did not contain child element.";
                     __log.fatal(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
-                
+
                 QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
                 if(!qn.equals(ptype.elementType)) {
-                    String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected " 
-                    + ptype.elementType + " but got " + qn;
+                    String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
+                            + ptype.elementType + " but got " + qn;
                     __log.fatal(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
             }
-            
+
         }
 
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
-        
+
         try {
-        initializeVariable(vinst, msgEl);
+            initializeVariable(vinst, msgEl);
         } catch (ExternalVariableModuleException e) {
-        	__log.error("Exception while initializing external variable", e);
+            __log.error("Exception while initializing external variable", e);
             _self.parent.failure(e.toString(), null);
             return;
         }
-        	
+
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
         se.setNewValue(msgEl);
