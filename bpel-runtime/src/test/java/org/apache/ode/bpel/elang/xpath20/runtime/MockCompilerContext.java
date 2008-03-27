@@ -204,4 +204,7 @@ public class MockCompilerContext implements CompilerContext {
 
     public void recoveredFromError(SourceLocation location, CompilationException error) {
     }
+    public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
+        return null;
+    }
 }

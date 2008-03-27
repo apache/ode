@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 	private QName type;
 	private Element data;
+	private Element header;
 	private MessageExchangeDAO messageExchange;
 	
 	public MessageDAOImpl(MessageExchangeDAO messageExchange) {
@@ -48,10 +49,17 @@ public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 	}
 
 	public Element getData() {
-		if ( data == null ) {
-			data = DOMUtils.newDocument().getDocumentElement();
-		}
+		if (data == null) data = DOMUtils.newDocument().getDocumentElement();
 		return data;
+	}
+
+	public void setHeader(Element value) {
+		this.header = value;
+	}
+
+	public Element getHeader() {
+		if ( header == null ) header = DOMUtils.newDocument().getDocumentElement();
+		return header;
 	}
 
 	public MessageExchangeDAO getMessageExchange() {

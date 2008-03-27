@@ -39,11 +39,18 @@ public class VariableVal extends ToFrom {
 
     /**
      * Get the (optional) message part.
-     * 
      * @return name of the message part, or <code>null</code>
      */
     public String getPart() {
         return getAttribute("part", null);
+    }
+
+    /**
+     * Get the (optional) header part.
+     * @return name of the header part, or <code>null</code>
+     */
+    public String getHeader() {
+        return getAttribute("header", null);
     }
 
     public Expression getLocation() {

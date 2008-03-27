@@ -91,6 +91,9 @@ public interface CompilerContext {
     OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
             throws CompilationException;
 
+    OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname)
+            throws CompilationException;
+
     OActivity compile(Activity child)
             throws CompilationException;
 

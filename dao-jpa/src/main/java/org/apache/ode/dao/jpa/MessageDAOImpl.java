@@ -51,8 +51,12 @@ public class MessageDAOImpl implements MessageDAO {
     private String _type;
 	@Lob @Column(name="DATA")
     private String _data;
+	@Lob @Column(name="HEADER")
+    private String _header;
 	@Transient
     private Element _element;
+	@Transient
+    private Element _headerElement;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="MESSAGE_EXCHANGE_ID")
 	private MessageExchangeDAOImpl _messageExchange;
 
@@ -72,16 +76,7 @@ public class MessageDAOImpl implements MessageDAO {
 				throw new RuntimeException(e);
 			}
 		}
-		
 		return _element;
-	}
-
-	public MessageExchangeDAO getMessageExchange() {
-		return _messageExchange;
-	}
-
-	public QName getType() {
-		return _type == null ? null : QName.valueOf(_type);
 	}
 
 	public void setData(Element value) {
@@ -89,6 +84,31 @@ public class MessageDAOImpl implements MessageDAO {
         _data = DOMUtils.domToString(value);
 		_element = value;
 	}
+
+	public Element getHeader() {
+		if ( _headerElement == null && _header != null ) {
+			try {
+				_headerElement = DOMUtils.stringToDOM(_header);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return _headerElement;
+	}
+
+	public void setHeader(Element value) {
+        if (value == null) return;
+        _header = DOMUtils.domToString(value);
+		_headerElement = value;
+	}
+
+    public MessageExchangeDAO getMessageExchange() {
+        return _messageExchange;
+    }
+
+    public QName getType() {
+        return _type == null ? null : QName.valueOf(_type);
+    }
 
 	public void setType(QName type) {
 		_type = type.toString();

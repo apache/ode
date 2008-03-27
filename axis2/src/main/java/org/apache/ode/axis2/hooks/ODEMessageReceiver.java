@@ -53,9 +53,7 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
                         + msgContext.getAxisOperation().getName());
                 __log.debug("Reply message " + outMsgContext.getEnvelope());
             }
-            AxisEngine engine = new AxisEngine(msgContext.getOperationContext().getServiceContext()
-                    .getConfigurationContext());
-            engine.send(outMsgContext);
+            AxisEngine.send(outMsgContext);
         } else {
             if (__log.isDebugEnabled())
                 __log.debug("Received one-way message for " + msgContext.getAxisService().getName() + "."

@@ -174,6 +174,7 @@ public class OAssign extends OActivity {
         private static final long serialVersionUID = 1L;
         public OScope.Variable variable;
         public OMessageVarType.Part part;
+        public OMessageVarType.Part headerPart;
         public OExpression location;
 
         public VariableRef(OProcess owner) {
@@ -189,8 +190,7 @@ public class OAssign extends OActivity {
          * @return <code>true</code> if whole-message reference
          */
         public boolean isMessageRef() { 
-            return variable.type instanceof OMessageVarType && 
-            part == null && location == null;
+            return variable.type instanceof OMessageVarType && part == null && headerPart == null && location == null;
         }
         
         /**
@@ -198,10 +198,13 @@ public class OAssign extends OActivity {
          * @return <code>true</code> if reference to a message part
          */
         public boolean isPartRef() {
-            return variable.type instanceof OMessageVarType && 
-            part != null && location == null;
+            return variable.type instanceof OMessageVarType && part != null && location == null;
         }
         
+        public boolean isHeaderRef() {
+            return variable.type instanceof OMessageVarType && headerPart != null && location == null;
+        }
+
         public String toString() {
             return "{VarRef " + variable  +
                     (part==null ? "" : "." + part.name) +

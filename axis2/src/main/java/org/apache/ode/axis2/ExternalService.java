@@ -101,7 +101,7 @@ public class ExternalService implements PartnerRoleChannel {
             MessageContext mctx = new MessageContext();
             writeHeader(mctx, odeMex);
 
-            _converter.createSoapRequest(mctx, odeMex.getRequest().getMessage(), odeMex.getOperation());
+            _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
 
             SOAPEnvelope soapEnv = mctx.getEnvelope();
             EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference())
@@ -131,7 +131,6 @@ public class ExternalService implements PartnerRoleChannel {
             final OperationClient operationClient = cached._client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.setOptions(options);
-
             operationClient.addMessageContext(mctx);
 
             if (isTwoWay) {
@@ -140,11 +139,9 @@ public class ExternalService implements PartnerRoleChannel {
 
                 // Defer the invoke until the transaction commits.
                 _sched.registerSynchronizer(new Scheduler.Synchronizer() {
-
                     public void afterCompletion(boolean success) {
                         // If the TX is rolled back, then we don't send the request.
-                        if (!success)
-                            return;
+                        if (!success) return;
 
                         // The invocation must happen in a separate thread, holding on the afterCompletion
                         // blocks other operations that could have been listed there as well.
@@ -171,15 +168,12 @@ public class ExternalService implements PartnerRoleChannel {
                             }
                         });
                     }
-
                     public void beforeCompletion() {
                     }
-
                 });
                 odeMex.replyAsync();
 
-            } else /** one-way case * */
-            {
+            } else { /** one-way case * */
                 _executorService.submit(new Callable<Object>() {
                     public Object call() throws Exception {
                         operationClient.execute(false);
@@ -305,63 +299,43 @@ public class ExternalService implements PartnerRoleChannel {
     }
 
     private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean fault) {
-        final Document odeMsg = DOMUtils.newDocument();
-        final Element odeMsgEl = odeMsg.createElementNS(null, "message");
-        odeMsg.appendChild(odeMsgEl);
-
-        final QName faultType;
-        try {
-            if (fault) {
-                faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
-                if (__log.isDebugEnabled()) __log.debug("Reply is a fault, found type: " + faultType);
-            } else {
-                faultType = null;
-                _converter.parseSoapResponse(odeMsgEl, reply.getEnvelope(), operation);
-            }
-        } catch (AxisFault af) {
-            __log.warn("Message format error, failing.", af);
-            replyWithFailure(odeMexId, FailureType.FORMAT_ERROR, af.getMessage(), null);
-            return;
-        }
-
         // ODE MEX needs to be invoked in a TX.
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange)  _server.getEngine().getMessageExchange(odeMexId);
-                    // Checking for the fault
-                    QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
-                    if (faultType != null) {
-                        Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
-                        if (f != null && f.getMessage().getQName() != null)
-                            nonNullFT = f.getMessage().getQName();
-                        else __log.debug("Fault " + faultType + " isn't referenced in the service definition, unknown fault.");
-                    }
                     // Setting the response
-                    Message response = fault ? odeMex.createMessage(nonNullFT) : odeMex.createMessage(odeMex
-                            .getOperation().getOutput().getMessage().getQName());
                     try {
-                        if (__log.isDebugEnabled()) {
-                            __log.debug("Received response for MEX " + odeMex);
-                        }
-                        response.setMessage(odeMsgEl);
+                        if (__log.isDebugEnabled()) __log.debug("Received response for MEX " + odeMex);
                         if (fault) {
+                            Document odeMsg = DOMUtils.newDocument();
+                            Element odeMsgEl = odeMsg.createElementNS(null, "message");
+                            odeMsg.appendChild(odeMsgEl);
+                            QName faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
+                            if (__log.isDebugEnabled()) __log.debug("Reply is a fault, found type: " + faultType);
+
                             if (faultType != null) {
-                                if (__log.isWarnEnabled()) {
+                                if (__log.isWarnEnabled())
                                     __log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
-                                }
+                                QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
+                                Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
+                                if (f != null && f.getMessage().getQName() != null) nonNullFT = f.getMessage().getQName();
+                                else __log.debug("Fault " + faultType + " isn't referenced in the service definition, unknown fault.");
+
+                                Message response = odeMex.createMessage(nonNullFT);
+                                response.setMessage(odeMsgEl);
+
                                 odeMex.replyWithFault(faultType, response);
                             } else {
-                                if (__log.isWarnEnabled()) {
+                                if (__log.isWarnEnabled())
                                     __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());
-                                }
                                 odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
                                         .getFault().getText(), OMUtils.toDOM(reply.getEnvelope().getBody()));
                             }
                         } else {
-                            if (__log.isInfoEnabled()) {
-                                __log.info("Response:\n" + DOMUtils.domToString(odeMsgEl));
-                            }
+                            Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
+                            _converter.parseSoapResponse(response, reply.getEnvelope(), operation);
+                            if (__log.isInfoEnabled()) __log.info("Response:\n" + DOMUtils.domToString(response.getMessage()));
                             odeMex.reply(response);
                         }
                     } catch (Exception ex) {
