@@ -25,6 +25,7 @@ import java.util.Date;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.junit.Test;
 
@@ -99,8 +100,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
             "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
         inv.maximumWaitMs=2*1000L;
-        inv.expectedStatus = MessageExchange.Status.ASYNC;
-        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        inv.expectedFinalStatus = MessageExchange.AckType.RESPONSE;
 
         go();
     }
