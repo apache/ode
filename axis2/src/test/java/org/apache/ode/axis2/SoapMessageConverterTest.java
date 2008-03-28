@@ -131,7 +131,7 @@ public class SoapMessageConverterTest extends TestCase {
         MessageImpl odeMsg1 = new MessageImpl(new MessageDAOImpl(null));
         odeMsg1.setMessage(req1.getDocumentElement());
         odeMsg1.setHeaderPart("DocumentumRequestHeader", DOMUtils.findChildByName(req1.getDocumentElement(),
-                new QName("http://documentum.com/ws/2005/services", "DocumentumRequestHeader")));
+                new QName("http://documentum.com/ws/2005/services", "DocumentumSecurityToken")));
         portmapper.createSoapRequest(msgCtx, odeMsg1, op1);
         
         SOAPEnvelope env = msgCtx.getEnvelope();
@@ -145,8 +145,11 @@ public class SoapMessageConverterTest extends TestCase {
         assertNotNull(params);
         assertNotNull(odeMsg2.getHeaderPart("DocumentumRequestHeader"));
         Element hdrElmt = DOMUtils.findChildByName(odeMsg2.getHeaderPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
-                "DocumentumRequestHeader"));
+                "DocumentumSecurityToken"));
         assertNotNull(hdrElmt);
+        Element hdrBdyElmt = DOMUtils.findChildByName(odeMsg2.getPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
+                "DocumentumSecurityToken"));
+        assertNotNull(hdrBdyElmt);
     }
 
     /** Make sure hello world request parses correctly. */

@@ -24,8 +24,6 @@
       </getObjectId>
    </parameters>
    
-   <DocumentumRequestHeader xmlns="http://documentum.com/ws/2005/services">
-   		<DocumentumSecurityToken/>
-   </DocumentumRequestHeader>
-   
+    <DocumentumSecurityToken xmlns="http://documentum.com/ws/2005/services">SEKREET</DocumentumSecurityToken>
+
 </message>

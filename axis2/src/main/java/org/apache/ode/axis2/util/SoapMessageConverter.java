@@ -70,8 +70,6 @@ import org.w3c.dom.Element;
 /**
  * SOAP/ODE Message converter. Uses WSDL binding information to convert the protocol-neutral ODE representation into a SOAP
  * representation and vice versa.
- *
- * @author Maciej Szefler ( m s z e f l e r (at) g m a i l . c o m )
  */
 public class SoapMessageConverter {
 
@@ -209,18 +207,18 @@ public class SoapMessageConverter {
     }
 
     public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, Map<String,Element> headers) throws AxisFault {
-        for (SOAPHeader sh : headerDefs) validateSoapHeader(sh, msgdef, headers);
+        for (SOAPHeader sh : headerDefs) handleSoapHeaderDef(soapEnv, sh, msgdef, headers);
 
         org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
-        if (soaphdr == null)
-            soaphdr = _soapFactory.createSOAPHeader(soapEnv);
+        if (soaphdr == null) soaphdr = _soapFactory.createSOAPHeader(soapEnv);
 
-        for (Element headerElmts : headers.values())
-            soaphdr.addChild(OMUtils.toOM(headerElmts, _soapFactory));
+        for (Element headerElmt : headers.values())
+            if (soaphdr.getFirstChildWithName(new QName(headerElmt.getNamespaceURI(), headerElmt.getLocalName())) == null)
+                soaphdr.addChild(OMUtils.toOM(headerElmt, _soapFactory));
     }
 
     @SuppressWarnings("unchecked")
-    public void validateSoapHeader(SOAPHeader headerdef, Message msgdef, Map<String,Element> headers) throws AxisFault {
+    private void handleSoapHeaderDef(SOAPEnvelope soapEnv, SOAPHeader headerdef, Message msgdef, Map<String,Element> headers) throws AxisFault {
         boolean payloadMessageHeader = headerdef.getMessage() == null || headerdef.getMessage().equals(msgdef.getQName());
 
         if (headerdef.getPart() == null) return;
@@ -237,6 +235,17 @@ public class SoapMessageConverter {
         // because AXIS may be providing these headers.
         if (srcPartEl == null && payloadMessageHeader)
             throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(headerdef.getPart()));
+
+        if (srcPartEl == null) return;
+
+        org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
+        if (soaphdr == null) {
+            soaphdr = _soapFactory.createSOAPHeader(soapEnv);
+        }
+
+        OMElement omPart = OMUtils.toOM(srcPartEl, _soapFactory);
+        for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();)
+            soaphdr.addChild(i.next());
     }
 
     public SOAPFault createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
@@ -314,8 +323,7 @@ public class SoapMessageConverter {
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null)
-            extractSoapBodyParts(odeMessage, envelope.getBody(),
-                    soapBody, op.getOutput().getMessage(), op.getName() + "Response");
+            extractSoapBodyParts(odeMessage, envelope.getBody(), soapBody, op.getOutput().getMessage(), op.getName() + "Response");
 
         if (envelope.getHeader() != null)
             extractSoapHeaderParts(odeMessage, envelope.getHeader(), getSOAPHeaders(bo), op.getOutput().getMessage());
@@ -387,20 +395,19 @@ public class SoapMessageConverter {
                                        List<SOAPHeader> headerDefs, Message msg) throws AxisFault {
         // Checking that the definitions we have are at least there
         for (SOAPHeader headerDef : headerDefs)
-            checkSoapHeaderPart(soapHeader, headerDef, msg);
+            handleSoapHeaderPartDef(message, soapHeader, headerDef, msg);
 
         // Extracting whatever header elements we find in the message, binding and abstract parts
         // aren't reliable enough given what people do out there.
         Iterator headersIter = soapHeader.getChildElements();
         while (headersIter.hasNext()) {
             OMElement header = (OMElement) headersIter.next();
-            Element headerDOM = OMUtils.toDOM(header);
-            headerDOM.normalize();
-            message.setHeaderPart(findHeaderPartName(headerDefs, header.getQName()), headerDOM);
+            String partName = findHeaderPartName(headerDefs, header.getQName());
+            message.setHeaderPart(partName, OMUtils.toDOM(header));
         }
     }
 
-    private void checkSoapHeaderPart(org.apache.axiom.soap.SOAPHeader header, SOAPHeader headerdef,
+    private void handleSoapHeaderPartDef(org.apache.ode.bpel.iapi.Message odeMessage, org.apache.axiom.soap.SOAPHeader header, SOAPHeader headerdef,
             Message msgType) throws AxisFault {
         // Is this header part of the "payload" messsage?
         boolean payloadMessageHeader = headerdef.getMessage() == null || headerdef.getMessage().equals(msgType.getQName());
@@ -422,6 +429,13 @@ public class SoapMessageConverter {
         OMElement headerEl = header.getFirstChildWithName(p.getElementName());
         if (requiredHeader && headerEl == null)
             throw new OdeFault(__msgs.msgSoapHeaderMissingRequiredElement(headerdef.getElementType()));
+
+        if (headerEl == null) return;
+
+        Element msgElmt = odeMessage.getMessage();
+        Element destPart = msgElmt.getOwnerDocument().createElementNS(null, p.getName());
+        msgElmt.appendChild(destPart);
+        destPart.appendChild(msgElmt.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
     }
 
     private String findHeaderPartName(List<SOAPHeader> headerDefs, QName elmtName) {
