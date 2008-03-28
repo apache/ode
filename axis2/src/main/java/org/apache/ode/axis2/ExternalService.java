@@ -76,7 +76,6 @@ public class ExternalService implements PartnerRoleChannel {
     private QName _serviceName;
     private String _portName;
     private AxisConfiguration _axisConfig;
-    private boolean _isReplicateEmptyNS = false;
     private SoapMessageConverter _converter;
     private Scheduler _sched;
     private BpelServer _server;
@@ -89,7 +88,7 @@ public class ExternalService implements PartnerRoleChannel {
         _executorService = executorService;
         _axisConfig = axisConfig;
         _sched = sched;
-        _converter = new SoapMessageConverter(definition, serviceName, portName, _isReplicateEmptyNS);
+        _converter = new SoapMessageConverter(definition, serviceName, portName);
         _server = server;
     }
 
@@ -259,15 +258,6 @@ public class ExternalService implements PartnerRoleChannel {
 
     public void close() {
         // nothing
-    }
-
-    public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
-        _isReplicateEmptyNS = isReplicateEmptyNS;
-        try {
-            _converter = new SoapMessageConverter(_definition, _serviceName, _portName, _isReplicateEmptyNS);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     public String getPortName() {

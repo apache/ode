@@ -97,8 +97,7 @@ public class SoapMessageConverter {
 
     private SOAPBinding _soapBinding;
 
-    public SoapMessageConverter(Definition def, QName serviceName, String portName,
-            boolean replicateEmptyNS) throws AxisFault {
+    public SoapMessageConverter(Definition def, QName serviceName, String portName) throws AxisFault {
         if (def == null)
             throw new NullPointerException("Null wsdl def.");
         if (serviceName == null)
