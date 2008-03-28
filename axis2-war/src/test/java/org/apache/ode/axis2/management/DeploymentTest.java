@@ -78,7 +78,7 @@ public class DeploymentTest extends Axis2TestBase {
     public void testListDeployedPackages() throws Exception {
         OMElement root = _client.buildMessage("listDeployedPackages", new String[] {}, new String[] {});
         OMElement result = sendToDeployment(root);
-        assertEquals(_package, result.getFirstElement().getText());
+        assertEquals(_package, result.getFirstElement().getFirstElement().getText());
     }
 
     public void testListProcesses() throws Exception {
@@ -116,12 +116,12 @@ public class DeploymentTest extends Axis2TestBase {
         // Deploying a couple of "tagged" versions
         String depPack = deploy("foo");
         int ver = Integer.parseInt(depPack.substring(depPack.lastIndexOf("-") + 1, depPack.length()));
-        assertEquals(lastVer + 4, ver);
+        assertTrue(lastVer + 4 <= ver);
         deployed.add(depPack);
 
         depPack = deploy("bar");
         ver = Integer.parseInt(depPack.substring(depPack.lastIndexOf("-") + 1, depPack.length()));
-        assertEquals(lastVer + 5, ver);
+        assertTrue(lastVer + 5 <= ver);
         deployed.add(depPack);
 
         // Cleaning up
