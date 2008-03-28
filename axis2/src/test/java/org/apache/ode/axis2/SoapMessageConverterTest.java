@@ -69,7 +69,7 @@ public class SoapMessageConverterTest extends TestCase {
     }
 
     public void setUp() throws Exception {
-        portmapper = new SoapMessageConverter(wsdl1, repoService, portName, true);
+        portmapper = new SoapMessageConverter(wsdl1, repoService, portName);
     }
 
     public void tearDown() {
@@ -78,7 +78,7 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testBadPortName() {
         try {
-            new SoapMessageConverter(wsdl1, repoService, "badPort", true);
+            new SoapMessageConverter(wsdl1, repoService, "badPort");
             fail("Should have thrown axis error.");
         } catch (AxisFault af) {
             ;// expected
@@ -87,7 +87,7 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testBadServiceName() {
         try {
-            new SoapMessageConverter(wsdl1, new QName(wsdl1tns, "foobar"), portName, true);
+            new SoapMessageConverter(wsdl1, new QName(wsdl1tns, "foobar"), portName);
             fail("Should have thrown axis error.");
         } catch (AxisFault af) {
             ;// expected
@@ -152,7 +152,7 @@ public class SoapMessageConverterTest extends TestCase {
     /** Make sure hello world request parses correctly. */
     public void testHelloWorldRequest() throws Exception {
         SoapMessageConverter portmaper1 = new SoapMessageConverter(wsdlHW, new QName(wsdlHW
-                .getTargetNamespace(), "HelloService"), "HelloPort", false);
+                .getTargetNamespace(), "HelloService"), "HelloPort");
 
         XMLStreamReader sr = XMLInputFactory.newInstance().createXMLStreamReader(
                 getClass().getResourceAsStream("/HelloWorldRequest.soap"));

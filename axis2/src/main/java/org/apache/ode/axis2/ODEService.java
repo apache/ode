@@ -68,7 +68,6 @@ public class ODEService {
     private QName _serviceName;
     private String _portName;
     private WSAEndpoint _serviceRef;
-    private boolean _isReplicateEmptyNS = false;
     private SoapMessageConverter _converter;
 
     public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server,
@@ -80,7 +79,7 @@ public class ODEService {
         _serviceName = serviceName;
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
-        _converter = new SoapMessageConverter(def, serviceName, portName, _isReplicateEmptyNS);
+        _converter = new SoapMessageConverter(def, serviceName, portName);
 
     }
 
@@ -355,9 +354,5 @@ public class ODEService {
         }
 
         return EndpointFactory.createEndpoint(doc.getDocumentElement());
-    }
-
-    public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
-        _isReplicateEmptyNS = isReplicateEmptyNS;
     }
 }

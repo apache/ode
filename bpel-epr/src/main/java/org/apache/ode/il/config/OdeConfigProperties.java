@@ -72,8 +72,6 @@ public class OdeConfigProperties {
 
     public static final String PROP_WORKING_DIR = "working.dir";
 
-    public static final String PROP_REPLICATE_EMPTYNS = "message.replicate.emptyns";
-
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
     public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
@@ -226,10 +224,6 @@ public class OdeConfigProperties {
 
     public String getTxFactoryClass() {
         return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.il.EmbeddedGeronimoFactory");
-    }
-
-    public boolean isReplicateEmptyNS() {
-        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_REPLICATE_EMPTYNS, "true"));
     }
 
     public String getEventListeners() {
