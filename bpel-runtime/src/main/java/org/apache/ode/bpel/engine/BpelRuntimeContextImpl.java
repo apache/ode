@@ -514,7 +514,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput()
                 .getMessage().getQName());
-        buildInvokeMessage(message, msg);
+        buildOutgoingMessage(message, msg);
 
         MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
         _bpelProcess.initMyRoleMex(m);
@@ -722,7 +722,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
         message.setType(operation.getInput().getMessage().getQName());
-        buildInvokeMessage(message, outgoingMessage);
+        buildOutgoingMessage(message, outgoingMessage);
 
         // Get he my-role EPR (if myrole exists) for optional use by partner
         // (for callback mechanism).
@@ -808,7 +808,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return mexDao.getMessageExchangeId();
     }
 
-    private void buildInvokeMessage(MessageDAO message, Element outgoingElmt) {
+    private void buildOutgoingMessage(MessageDAO message, Element outgoingElmt) {
+        if (outgoingElmt == null) return;
+        
         Document doc = DOMUtils.newDocument();
         Element header = doc.createElement("header");
         NodeList parts = outgoingElmt.getChildNodes();
