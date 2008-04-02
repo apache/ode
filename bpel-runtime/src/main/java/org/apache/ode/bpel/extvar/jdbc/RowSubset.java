@@ -29,43 +29,45 @@ import java.util.List;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.Column;;
 
 class RowSubset extends ArrayList<Object> {
-	protected List<Column> _columns;
+    private static final long serialVersionUID = 1L;
 
-	/* Name --> Column mapping. */
-	protected HashMap<String, Column> _colmap  = new HashMap<String,Column>();
-	
-	
-	RowSubset(List<Column> columns) {
-		_columns = columns;
-		
-		for(Column c : columns) {
-			add(null);
-			_colmap.put(c.name,c);
-		}
-	}
+    protected List<Column> _columns;
 
-	/**
-	 * Return <code>true</code> if all entries are non-null.
-	 * @return
-	 */
-	boolean isComplete() {
-		for (Object o : this) 
-			if (o == null)
-				return false;
-		
-		return true;
-	}
-	
-	
-	Column getColumn(String name) {
-		return _colmap.get(name);
-	}
+    /* Name --> Column mapping. */
+    protected HashMap<String, Column> _colmap  = new HashMap<String,Column>();
+    
+    
+    RowSubset(List<Column> columns) {
+        _columns = columns;
+        
+        for(Column c : columns) {
+            add(null);
+            _colmap.put(c.name,c);
+        }
+    }
 
-	Column getColumn(int idx) {
-		return _columns.get(idx);
-	}
-	
-	Object get(String name) {
+    /**
+     * Return <code>true</code> if all entries are non-null.
+     * @return
+     */
+    boolean isComplete() {
+        for (Object o : this) 
+            if (o == null)
+                return false;
+        
+        return true;
+    }
+    
+    
+    Column getColumn(String name) {
+        return _colmap.get(name);
+    }
+
+    Column getColumn(int idx) {
+        return _columns.get(idx);
+    }
+    
+    Object get(String name) {
         Column c = _colmap.get(name);
         if (c == null)
             return null;
@@ -83,7 +85,8 @@ class RowSubset extends ArrayList<Object> {
     }
     
     public String toString() {
-        StringBuffer buf = new StringBuffer("RowSubset(");
+        StringBuffer buf = new StringBuffer(getClass().getSimpleName());
+        buf.append("(");
         for (int i=0; i<size(); i++) {
             if (i>0) buf.append(", ");
             buf.append(_columns.get(i).name);
