@@ -129,7 +129,7 @@
         </if>
 
 
-        <!-- create another row -->
+        <!-- update another row -->
 
         <assign name="createAnotherRow">
             <copy>
@@ -143,22 +143,47 @@
         <assign name="updateRow">
             <copy>
                 <from>
-                    <literal>
-                        <foo:costPerCustomer>
-                            <foo:value0>v2-1</foo:value0>
-                        </foo:costPerCustomer>
-                    </literal>
-                </from>
-                <to>$costPerCustomer</to>
-            </copy>
-            <copy>
-                <from>
                     <literal>v2-1</literal>
                 </from>
                 <to>$costPerCustomer/foo:value0</to>
             </copy>
         </assign>
 
+        
+        <!-- insert a new row -->
+
+        <assign name="insertRow">
+            <copy>
+                <from>
+                    <literal>k3</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+            <copy>
+                <from>
+                    <literal>v3</literal>
+                </from>
+                <to>$costPerCustomer/foo:value0</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:key1 = 'k3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:insertKey"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:insertValue"/>
+            </else>
+        </if>
+
+        
         <!-- go back to first row -->
 
         <assign name="goBack1">
@@ -175,6 +200,25 @@
             <empty/>
             <else>
                 <throw faultName="foo:goBack1"/>
+            </else>
+        </if>
+
+        <!-- go back to 3rd row -->
+
+        <assign name="goBack3">
+            <copy>
+                <from>
+                    <literal>k3</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:goBack3"/>
             </else>
         </if>
 
@@ -196,6 +240,7 @@
                 <throw faultName="foo:goBack2"/>
             </else>
         </if>
+
 
         <!-- send back response -->
 
