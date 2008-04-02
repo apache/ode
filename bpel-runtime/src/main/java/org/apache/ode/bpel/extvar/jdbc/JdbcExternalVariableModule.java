@@ -289,7 +289,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         Element val;
         try {
             RowVal rowval = execSelect(evar, locator);
-            val = evar.renderXmlRow(varType, rowval);
+            val = evar.renderXmlRow(locator, varType, rowval);
         } catch (SQLException se) {
             throw new ExternalVariableModuleException("SQL Error.", se);
         }
@@ -321,9 +321,9 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 Object val = values.get(c.name);
                 if (__log.isDebugEnabled()) __log.debug("Set value parameter "+idx+": "+val);
                 if (val == null)
-                	stmt.setNull(idx, c.dataType);
+                    stmt.setNull(idx, c.dataType);
                 else
-                	stmt.setObject(idx, val);
+                    stmt.setObject(idx, val);
                 idx++;
             }
 
@@ -331,9 +331,9 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 Object val = key.get(ck.name);
                 if (__log.isDebugEnabled()) __log.debug("Set key parameter "+idx+": "+val);
                 if (val == null)
-                	stmt.setNull(idx, ck.dataType);
+                    stmt.setNull(idx, ck.dataType);
                 else
-                	stmt.setObject(idx, val);
+                    stmt.setObject(idx, val);
                 idx++;
             }
             return stmt.executeUpdate();
@@ -348,7 +348,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         if (__log.isDebugEnabled()) __log.debug("execSelect: " + rowkey);
         
         if (!rowkey.isComplete()) {
-        	throw new IncompleteKeyException(rowkey.getMissing());
+            throw new IncompleteKeyException(rowkey.getMissing());
         }
         
         RowVal ret = dbev.new RowVal();
@@ -383,16 +383,20 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     }
 
     RowKey execInsert(DbExternalVariable dbev, Locator locator, RowKey keys, RowVal values) throws SQLException {
-        // RowKey keys = dbev.new RowKey();
         Connection conn = dbev.dataSource.getConnection();
         try {
+            if (__log.isDebugEnabled()) {
+                __log.debug("execInsert: keys=" + keys + " values=" + values);
+                __log.debug("Prepare statement: " + dbev.insert);
+            }
             PreparedStatement stmt = dbev.generatedKeys 
-            		? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
-            		: conn.prepareStatement(dbev.insert);
+                    ? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
+                    : conn.prepareStatement(dbev.insert);
             int idx = 1;
             for (Column c : dbev._inscolumns) {
                 Object val = c.getValue(c.name, keys, values, locator.iid);
                 values.put(c.name, val);
+                if (__log.isDebugEnabled()) __log.debug("Set parameter "+idx+": "+val);
                 stmt.setObject(idx, val);
                 idx++;
             }
@@ -403,11 +407,14 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 // With JDBC 3, we can get the values of the key columns (if the db supports it)
                 ResultSet keyRS = stmt.getResultSet();
                 keyRS.next();
-                for (Column ck : keys._columns)
+                for (Column ck : keys._columns) {
+                    if (__log.isDebugEnabled()) __log.debug("Generated key "+ck.name+": "+keyRS.getObject(ck.colname));
                     keys.put(ck.name, keyRS.getObject(ck.colname));
+                }
             } else {
                 for (Column ck : keys._columns) {
                     Object val = values.get(ck.name);
+                    if (__log.isDebugEnabled()) __log.debug("Key "+ck.name+": "+val);
                     keys.put(ck.name,val);
                 }
             }
