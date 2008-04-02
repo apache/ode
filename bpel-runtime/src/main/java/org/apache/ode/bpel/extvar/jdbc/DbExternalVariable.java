@@ -252,25 +252,36 @@ class DbExternalVariable {
 
 	}
 
-    <T extends RowSubset> Element renderXmlRow(QName varType, T value) {
+    <T extends RowSubset> Element renderXmlRow(Locator locator, QName varType, T value) throws ExternalVariableModuleException {
 		Document doc = DOMUtils.newDocument();
         Element el = doc.createElementNS(varType.getNamespaceURI(), varType.getLocalPart());
 		doc.appendChild(el);
         if (value != null) {
-		for (Column c : value._columns) {
-			Object data = value.get(c.idx);
-	            Element cel = doc.createElementNS(varType.getNamespaceURI(), c.name);
-			String strdat = c.toText(data);
-			if (strdat != null)
-				cel.appendChild(doc.createTextNode(strdat));
-			else
-				cel.setAttributeNS(XSI_NS, "xsi:nil", "true");
-
-			el.appendChild(cel);
-		}
+            for (Column c : value._columns) {
+                Object data = value.get(c.idx);
+                addElement(el, varType, c, data);
+            }
+        } else {
+            // initialize variable with default/generated values
+            RowKey keys = keyFromLocator(locator);
+            for (Column c : _columns) {
+                Object data = c.getValue(c.name, keys, new RowVal(), locator.iid);
+                addElement(el, varType, c, data);
+            }
         }
 		return el;
 	}
+
+    private void addElement(Element parent, QName varType, Column c, Object data) {
+        Document doc = parent.getOwnerDocument();
+        Element cel = doc.createElementNS(varType.getNamespaceURI(), c.name);
+        String strdat = c.toText(data);
+        if (strdat != null)
+            cel.appendChild(doc.createTextNode(strdat));
+        else
+            cel.setAttributeNS(XSI_NS, "xsi:nil", "true");
+        parent.appendChild(cel);
+    }
 
 	<T extends RowSubset> T parseXmlRow(T ret, Node rowel)
 			throws ExternalVariableModuleException {
@@ -294,7 +305,7 @@ class DbExternalVariable {
             }
 
 			String nil = ((Element) n).getAttributeNS(XSI_NS, "nil");
-            if (nil != null && "true".equalsIgnoreCase(nil)) {
+            if (nil != null && "true".equalsIgnoreCase(nil) && (val == null)) {
                 if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" is null (xsi:nil)");
 				ret.put(key, null);
             } else {
@@ -351,10 +362,10 @@ class DbExternalVariable {
 				return iid;
 			case none:
 			default:
-            	if (key && keys.get(name) != null) 
-            		return keys.get(name);
-            	else
-				return values.get(name);
+                if (key && keys.get(name) != null)
+                    return keys.get(name);
+                else
+                    return values.get(name);
 			}
 		}
 
@@ -452,6 +463,15 @@ class DbExternalVariable {
 								+ name + "\" !", ex);
 			}
 		}
+        
+        public String toString() {
+            return "Column {idx="+idx
+                +",name="+name
+                +",colname="+colname
+                +",key="+key
+                +",genType="+genType
+                +")";
+        }
 	}
 
 	/**
@@ -470,8 +490,8 @@ class DbExternalVariable {
 		/**
 		 * Write the key to a locator.
 		 */
-        void write(QName varType, Locator locator) {
-            locator.reference = renderXmlRow(varType, this);
+        void write(QName varType, Locator locator) throws ExternalVariableModuleException {
+            locator.reference = renderXmlRow(locator, varType, this);
 		}
 
 		public Set<String> getMissing() {
