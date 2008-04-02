@@ -78,7 +78,7 @@ public class DeploymentTest extends Axis2TestBase {
     public void testListDeployedPackages() throws Exception {
         OMElement root = _client.buildMessage("listDeployedPackages", new String[] {}, new String[] {});
         OMElement result = sendToDeployment(root);
-        assertEquals(_package, result.getFirstElement().getFirstElement().getText());
+        assertTrue(result.toString().indexOf(_package) > 0);
     }
 
     public void testListProcesses() throws Exception {
