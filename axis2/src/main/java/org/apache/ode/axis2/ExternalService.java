@@ -325,7 +325,8 @@ public class ExternalService implements PartnerRoleChannel {
                         } else {
                             Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
                             _converter.parseSoapResponse(response, reply.getEnvelope(), operation);
-                            if (__log.isInfoEnabled()) __log.info("Response:\n" + DOMUtils.domToString(response.getMessage()));
+                            if (__log.isInfoEnabled()) __log.info("Response:\n" + (response.getMessage() != null ?
+                                    DOMUtils.domToString(response.getMessage()) : "empty"));
                             odeMex.reply(response);
                         }
                     } catch (Exception ex) {

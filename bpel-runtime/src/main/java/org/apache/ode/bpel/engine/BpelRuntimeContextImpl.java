@@ -1152,6 +1152,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // Merging header data, it's all stored in the same variable
         Element data = msg.getData();
         if (msg.getHeader() != null) {
+            if (data == null) {
+                Document doc = DOMUtils.newDocument();
+                data = doc.createElement("message");
+                doc.appendChild(data);
+            }
             NodeList headerParts = msg.getHeader().getChildNodes();
             for (int m = 0; m < headerParts.getLength(); m++) {
                 if (headerParts.item(m).getNodeType() == Node.ELEMENT_NODE) {
