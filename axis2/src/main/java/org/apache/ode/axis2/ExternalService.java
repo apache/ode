@@ -184,7 +184,7 @@ public class ExternalService implements PartnerRoleChannel {
         } catch (AxisFault axisFault) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
             __log.error(errmsg, axisFault);
-            replyWithFailure(odeMex.getMessageExchangeId(), MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+            odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
     }
 
