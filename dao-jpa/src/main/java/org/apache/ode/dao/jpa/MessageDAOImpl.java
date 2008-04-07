@@ -69,7 +69,7 @@ public class MessageDAOImpl implements MessageDAO {
 	}
 	
 	public Element getData() {
-		if ( _element == null && _data != null ) {
+		if ( _element == null && _data != null && !"".equals(_data)) {
 			try {
 				_element = DOMUtils.stringToDOM(_data);
 			} catch (Exception e) {
@@ -86,7 +86,7 @@ public class MessageDAOImpl implements MessageDAO {
 	}
 
 	public Element getHeader() {
-		if ( _headerElement == null && _header != null ) {
+		if ( _headerElement == null && _header != null && !"".equals(_header)) {
 			try {
 				_headerElement = DOMUtils.stringToDOM(_header);
 			} catch (Exception e) {
