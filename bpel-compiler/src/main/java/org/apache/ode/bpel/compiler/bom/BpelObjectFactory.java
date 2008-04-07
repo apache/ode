@@ -69,7 +69,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_SWITCH, IfActivity.class);
         _mappings.put(Bpel20QNames.FINAL_IF, IfActivity.class);
         _mappings.put(Bpel20QNames.FINAL_WHILE, WhileActivity.class);
-        //_mappings.put(Bpel20QNames.FINAL_REPEATUNTIL,RepeatUntilActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_REPEATUNTIL,RepeatUntilActivity.class);
         _mappings.put(Bpel20QNames.FINAL_SEQUENCE, SequenceActivity.class);
         _mappings.put(Bpel20QNames.FINAL_PICK, PickActivity.class);
         _mappings.put(Bpel20QNames.FINAL_SCOPE, ScopeActivity.class);
