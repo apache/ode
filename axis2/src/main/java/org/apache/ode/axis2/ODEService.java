@@ -19,8 +19,9 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
@@ -46,6 +47,7 @@ import javax.wsdl.Definition;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.http.HTTPAddress;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 import java.util.concurrent.Future;
@@ -323,6 +325,10 @@ public class ODEService {
                         Element soapAddr = doc.createElementNS(Namespaces.SOAP_NS, "address");
                         port.appendChild(soapAddr);
                         soapAddr.setAttribute("location", ((SOAPAddress) extElmt).getLocationURI());
+                    } else if (extElmt instanceof HTTPAddress) {
+                        Element httpAddr = doc.createElementNS(Namespaces.HTTP_NS, "address");
+                        port.appendChild(httpAddr);
+                        httpAddr.setAttribute("location", ((HTTPAddress) extElmt).getLocationURI());
                     } else {
                         port.appendChild(doc.importNode(((UnknownExtensibilityElement) extElmt).getElement(), true));
                     }

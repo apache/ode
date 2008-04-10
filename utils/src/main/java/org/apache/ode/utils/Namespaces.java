@@ -43,8 +43,9 @@ public class Namespaces {
     public static final String WS_ADDRESSING_NS = "http://www.w3.org/2005/08/addressing";
     public static final String WS_ADDRESSING_WSDL_NS = "http://www.w3.org/2006/05/addressing/wsdl";
     public static final String WS_ADDRESSING_ANON_URI = "http://www.w3.org/2005/08/addressing/anonymous";
+    public static final String HTTP_NS = "http://schemas.xmlsoap.org/wsdl/http/";
     public static final String SOAP_NS = "http://schemas.xmlsoap.org/wsdl/soap/";
-    public static final String SOAP_ENV_NS = "http://schemas.xmlsoap.org/soap/envelope/";    
+    public static final String SOAP_ENV_NS = "http://schemas.xmlsoap.org/soap/envelope/";
     public static final String WSDL_11 = "http://schemas.xmlsoap.org/wsdl/";
     public static final String WSDL_20 = "http://www.w3.org/2006/01/wsdl";
     public static final String XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
