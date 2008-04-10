@@ -19,12 +19,7 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -71,7 +66,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      * Jobs scheduled with a time that is between [now, now+immediateInterval] will be assigned to the current node, and placed
      * directly on the todo queue.
      */
-    long _immediateInterval = 60000;
+    long _immediateInterval = 30000;
 
     /**
      * Jobs sccheduled with a time that is between (now+immediateInterval,now+nearFutureInterval) will be assigned to the current
@@ -330,7 +325,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      *            job to run.
      */
     protected void runJob(final Job job) {
-        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail, 0);
+        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
+                (Integer)(job.detail.get("retry") != null ? job.detail.get("retry") : 0));
 
         _exec.submit(new Callable<Void>() {
             public Void call() throws Exception {
@@ -349,6 +345,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                         // This may happen if two node try to do the same job... we try to avoid
                         // it the synchronization is a best-effort but not perfect.
                         __log.debug("job no longer in db forced rollback.");
+                    } catch (JobProcessorException jpe) {
+                        if (jpe.retry) {
+                            __log.error("Error while processing transaction, retrying.", jpe);
+                            doRetry(job);
+                        } else {
+                            __log.error("Error while processing transaction, no retry.", jpe);
+                        }
                     } catch (Exception ex) {
                         __log.error("Error while executing transaction", ex);
                     }
@@ -497,6 +500,14 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     }
 
+    private void doRetry(Job job) throws DatabaseException {
+        Calendar retryTime = Calendar.getInstance();
+        retryTime.add(Calendar.SECOND, 2);
+        job.detail.put("retry", job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 1);
+        Job jobRetry = new Job(retryTime.getTime().getTime(), true, job.detail);
+        _db.insertJob(jobRetry, _nodeId, false);
+    }
+
     private abstract class SchedulerTask extends Task implements Runnable {
         SchedulerTask(long schedDate) {
             super(schedDate);
@@ -551,7 +562,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             try {
                 success = doUpgrade();
             } finally {
-                long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .75) : 100);
+                long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 100);
                 _nextUpgrade.set(future);
                 _todo.enqueue(new UpgradeJobsTask(future));
                 __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
