@@ -39,12 +39,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Hibernate-based {@link ScopeDAO} implementation.
@@ -62,6 +57,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
     private HScope _scope;
 
+    private HashMap<String,XmlDataDAO> _variables = new HashMap<String,XmlDataDAO>();
 
     public ScopeDaoImpl(SessionManager sm, HScope scope) {
         super(sm, scope);
@@ -81,7 +77,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         if(res.size() == 0){
             // if it doesn't exist, we make it
             cs = new HCorrelationSet(_scope, corrSetName);
-            _scope.getCorrelationSets().add(cs);
+//            _scope.addCorrelationSet(cs);
             getSession().save(cs);
         } else {
             cs = (HCorrelationSet)res.get(0);
@@ -125,6 +121,9 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getVariable(java.lang.String)
      */
     public XmlDataDAO getVariable(String varName) {
+        XmlDataDAO cached = _variables.get(varName);
+        if (cached != null) return _variables.get(varName);
+
         HXmlData data;
         Query qry = getSession().createQuery(QRY_VARIABLE);
         qry.setString(0,varName);
@@ -133,19 +132,17 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
         if(res.size() > 0)
             data = (HXmlData)res.get(0);
-        else{
+        else {
             data = new HXmlData();
             data.setName(varName);
             data.setScope(_scope);
-            _scope.getVariables().add(data);
-            getSession().save(data);
         }
-        return new XmlDataDaoImpl(_sm, data);
+
+        XmlDataDaoImpl varDao = new XmlDataDaoImpl(_sm, data);
+        _variables.put(varName, varDao);
+        return varDao;
     }
 
-    /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#createPartnerLink(java.lang.String,java.lang.String)
-     */
     public PartnerLinkDAO createPartnerLink(int modelId, String pLinkName, String myRole, String partnerRole) {
         HPartnerLink epr = new HPartnerLink();
         epr.setModelId(modelId);
@@ -153,15 +150,12 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         epr.setMyRole(myRole);
         epr.setPartnerRole(partnerRole);
         epr.setScope(_scope);
-        _scope.getPartnerLinks().add(epr);
+//        _scope.addPartnerLink(epr);
         getSession().save(epr);
         PartnerLinkDAOImpl eprDao = new PartnerLinkDAOImpl(_sm, epr);
         return eprDao;
     }
 
-    /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getPartnerLink(java.lang.String,java.lang.String)
-     */
     public PartnerLinkDAO getPartnerLink(int plinkId) {
         Query qry = getSession().createQuery(QRY_SCOPE_EPR);
         qry.setInteger(0,plinkId);

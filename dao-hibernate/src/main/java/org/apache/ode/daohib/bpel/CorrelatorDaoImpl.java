@@ -146,10 +146,6 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         return null;
     }
 
-    /**
-     * @see org.apache.ode.bpel.dao.CorrelatorDAO#enqueueMessage(byte[],
-     *      CorrelationKey[])
-     */
     public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] correlationKeys) {
         String[] keys = canonifyKeys(correlationKeys);
         String hdr = "enqueueMessage(mex=" + ((MessageExchangeDaoImpl) mex)._hobj.getId() + " keys="
@@ -193,7 +189,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setInstance((HProcessInstance) ((ProcessInstanceDaoImpl) target).getHibernateObj());
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
-        _hobj.getSelectors().add(hsel);
+//        _hobj.addSelector(hsel);
         getSession().save(hsel);
 
         __log.debug(hdr + "saved " + hsel);

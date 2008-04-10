@@ -181,7 +181,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
         scope.setState(ScopeStateEnum.ACTIVE.toString());
         scope.setInstance(_instance);
         scope.setCreated(new Date());
-        _instance.getScopes().add(scope);
+        // _instance.getScopes().add(scope);
         getSession().save(scope);
 
         return new ScopeDaoImpl(_sm, scope);
@@ -265,6 +265,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     /**
+     * TODO this is never used, except by test cases - should be removed
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getVariables(java.lang.String, int)
      */
     public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
@@ -369,7 +370,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
         for (int i = 1; i < actions.length; ++i)
             list += " " + actions[i];
         recovery.setActions(list);
-        _instance.getActivityRecoveries().add(recovery);
+        //_instance.getActivityRecoveries().add(recovery);
         getSession().save(recovery);
         _instance.setActivityFailureDateTime(dateTime);
         _instance.setActivityFailureCount(_instance.getActivityFailureCount() + 1);
