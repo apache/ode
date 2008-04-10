@@ -304,6 +304,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      */
     protected void runJob(final Job job) {
         final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail, 0);
+        // TODO implement retries
 
         try {
             _jobProcessor.onScheduledJob(jobInfo);
