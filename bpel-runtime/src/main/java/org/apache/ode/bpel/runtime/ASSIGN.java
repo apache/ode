@@ -130,9 +130,10 @@ class ASSIGN extends ACTIVITY {
                     doc.appendChild(tempwrapper);
                     tempwrapper.appendChild(val);
                     val = tempwrapper;
-                } else
-                    doc.appendChild(val);
-                lval = initializeVariable(lvar, val);
+                } else doc.appendChild(val);
+                // Only external variables need to be initialized, others are new and going to be overwtitten
+                if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
+                else lval = val;
             } else
                 lval = fetchVariableData(lvar, true);
         }
