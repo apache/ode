@@ -65,7 +65,6 @@ public class ExternalVariableTest extends BPELTestAbstract {
         conn.close();
     }
 
-    /*
     @Test
     public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/ExtVar");
@@ -75,10 +74,9 @@ public class ExternalVariableTest extends BPELTestAbstract {
     public void testExtVar2() throws Throwable {
         go("/bpel/2.0/ExtVar2");
     }
-    */
 
     @Test
-    public void testExtVar2() throws Throwable {
+    public void testExtVar3() throws Throwable {
         go("/bpel/2.0/ExtVar3");
     }
 }
