@@ -31,9 +31,6 @@ import org.junit.Test;
 
 /**
  * Simple test of external variables.
- * 
- * @author Maciej Szefler <mszefler at gmail dot com>
- * 
  */
 public class ExternalVariableTest extends BPELTestAbstract {
 
@@ -62,9 +59,13 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         s.execute("CREATE TABLE costPerCustomer (value0 varchar(250), key1 varchar(250) primary key)");
         
+        s.execute("CREATE TABLE DataTypesTest (KEYSTRING VARCHAR(255), STRINGCOL VARCHAR(255), FLOATCOL FLOAT, " 
+            + "INTCOL INTEGER, NUMBERCOL NUMERIC, TIMESTAMPCOL TIMESTAMP, BOOLEANCOL TINYINT)");
+        
         conn.close();
     }
 
+    /*
     @Test
     public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/ExtVar");
@@ -74,5 +75,10 @@ public class ExternalVariableTest extends BPELTestAbstract {
     public void testExtVar2() throws Throwable {
         go("/bpel/2.0/ExtVar2");
     }
+    */
 
+    @Test
+    public void testExtVar2() throws Throwable {
+        go("/bpel/2.0/ExtVar3");
+    }
 }

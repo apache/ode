@@ -397,7 +397,10 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 Object val = c.getValue(c.name, keys, values, locator.iid);
                 values.put(c.name, val);
                 if (__log.isDebugEnabled()) __log.debug("Set parameter "+idx+": "+val);
-                stmt.setObject(idx, val);
+                if (val == null)
+                    stmt.setNull(idx, c.dataType);
+                else 
+                    stmt.setObject(idx, val);
                 idx++;
             }
 

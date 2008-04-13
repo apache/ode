@@ -1,0 +1,34 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:diag="http://example.com/process/ExtVar3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://www.example.org/TestSchema" xmlns:bamtest="http://test.com/xvar/example" xmlns:external="http://example.com/process/ExtVar3/external" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:this="http://example.com/process/ExtVar3/EmptyValues" targetNamespace="http://example.com/process/ExtVar3/EmptyValues">
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/process/ExtVar3/EmptyValues">
+            <xs:element name="EventStartMessageRequest" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="EventStartMessageRequest">
+        <wsdl:part name="body" element="this:EventStartMessageRequest"/>
+    </wsdl:message>
+    <wsdl:portType name="Forexternal">
+        <wsdl:operation name="EventStartMessage">
+            <wsdl:input message="this:EventStartMessageRequest" name="EventStartMessage"/>
+            <wsdl:output message="this:EventStartMessageRequest"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForexternal" type="this:Forexternal">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="EventStartMessage">
+            <soap:operation style="document" soapAction="http://example.com/process/ExtVar3/EmptyValues/Forexternal/EventStartMessage"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForexternal">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForexternal">
+            <soap:address location="http://localhost:8080/ode/processes/BamTestProject/process/ExtVar3/EmptyValues/external"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
