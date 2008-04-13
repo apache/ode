@@ -259,7 +259,7 @@ class DbExternalVariable {
         String strdat = c.toText(data);
         if (strdat != null)
             cel.appendChild(doc.createTextNode(strdat));
-        else
+        else if (c.nullok) 
             cel.setAttributeNS(XSI_NS, "xsi:nil", "true");
         parent.appendChild(cel);
     }
@@ -286,13 +286,13 @@ class DbExternalVariable {
             }
 
 			String nil = ((Element) n).getAttributeNS(XSI_NS, "nil");
-            if (nil != null && "true".equalsIgnoreCase(nil) && (val == null)) {
+            if (nil != null && "true".equalsIgnoreCase(nil) && (val == null || val.trim().length() == 0)) {
                 if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" is null (xsi:nil)");
 				ret.put(key, null);
             } else {
 				ret.put(key, column.fromText(val));
+            }
 		}
-        }
 		return ret;
 	}
 
@@ -349,6 +349,10 @@ class DbExternalVariable {
                     return values.get(name);
 			}
 		}
+
+        boolean supportsEmptyValue() {
+            return (dataType == Types.VARCHAR || dataType == Types.LONGVARCHAR || dataType == Types.CLOB); 
+        }
 
 		/**
 		 * Return <code>true</code> if column is a date-like type.
@@ -420,22 +424,37 @@ class DbExternalVariable {
 
 		Object fromText(String val) throws ExternalVariableModuleException {
 			try {
+                if (val == null)
+                    return null;
+                
+                if (!supportsEmptyValue() && val.trim().length() == 0) {
+                    return null;
+                }
+                
 				// TODO: use xsd:date and xsd:time conversions
 				if (isDate())
-					return new java.sql.Date(ISO8601DateParser.parse(val)
-							.getTime());
+                    return new java.sql.Date(ISO8601DateParser.parse(val).getTime());
 				else if (isTime())
-					return new java.sql.Time(ISO8601DateParser.parse(val)
-							.getTime());
+                    return new java.sql.Time(ISO8601DateParser.parse(val).getTime());
 				else if (isTimeStamp())
-					return new java.sql.Timestamp(ISO8601DateParser.parse(val)
-							.getTime());
-				else if (isInteger())
+                    return new java.sql.Timestamp(ISO8601DateParser.parse(val).getTime());
+                else if (isInteger()) {
+                    String v = val.trim().toLowerCase();
+                    if (v.equals("true"))
+                        return 1;
+                    if (v.equals("false"))
+                        return 0;
 					return Long.valueOf(val);
-				else if (isReal())
+                } else if (isReal())
 					return Double.valueOf(val);
-				else if (isBoolean())
+                else if (isBoolean()) {
+                    String v = val.trim();
+                    if (v.equals("1"))
+                        return true;
+                    if (v.equals("0"))
+                        return false;
 					return Boolean.valueOf(val);
+                }
 
 				return val;
 			} catch (Exception ex) {
