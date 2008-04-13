@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+                xmlns:diag="http://example.com/process/ExtVar3" 
+                xmlns:tns="http://www.example.org/TestSchema" 
+                xmlns:external="http://example.com/process/ExtVar3/external" 
+                xmlns:bamtest="http://test.com/xvar/example" 
+                xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                xmlns:this="http://example.com/process/ExtVar3/EmptyValues" 
+                name="this:EmptyValues" 
+                fileName="process/ExtVar3-EmptyValues.bpel">
+      <xvar:externalVariable xmlns:xvar="http://ode.apache.org/externalVariables" id="DataTypesTest-_X6kAaANuEd23JYbph3XjSA">
+        <xjdbc:jdbc xmlns:xjdbc="http://ode.apache.org/externalVariables/jdbc">
+          <xjdbc:datasource-ref>testds</xjdbc:datasource-ref>
+          <xjdbc:table>DataTypesTest</xjdbc:table>
+          <xjdbc:column name="keyString" key="yes" sql-type="VARCHAR" xsd-type="xs:string" />
+          <xjdbc:column name="StringCol" key="no" sql-type="VARCHAR" xsd-type="xs:string" />
+          <xjdbc:column name="floatCol" key="no" sql-type="FLOAT" xsd-type="xs:float" />
+          <xjdbc:column name="intCol" key="no" sql-type="INTEGER" xsd-type="xs:integer" />
+          <xjdbc:column name="numberCol" key="no" sql-type="NUMERIC" xsd-type="xs:decimal" />
+          <xjdbc:column name="timestampCol" key="no" sql-type="TIMESTAMP" xsd-type="xs:dateTime" />
+          <xjdbc:column name="booleanCol" key="no" sql-type="BOOLEAN" xsd-type="xs:boolean" />
+          <xjdbc:init mode="update-insert" />
+        </xjdbc:jdbc>
+      </xvar:externalVariable>
+      <dd:provide partnerLink="EmptyValuesAndExternalPlkVar">
+        <dd:service name="this:CanonicServiceForexternal" port="canonicPort" />
+      </dd:provide>
+    </dd:process>
+</dd:deploy>
