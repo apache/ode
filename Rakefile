@@ -24,8 +24,8 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.1.1-SNAPSHOT"
-NEXT_VERSION = "1.1.2"
+VERSION_NUMBER = "1.1.2-SNAPSHOT"
+NEXT_VERSION = "1.1.3"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -53,9 +53,9 @@ DERBY               = "org.apache.derby:derby:jar:10.1.2.1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.1.2.1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
-  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:1.2-beta",
-  :transaction      =>"org.apache.geronimo.modules:geronimo-transaction:jar:1.2-beta",
-  :connector        =>"org.apache.geronimo.modules:geronimo-connector:jar:1.2-beta"
+  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
+  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
+  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
 )
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
@@ -70,7 +70,7 @@ JAVAX               = struct(
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.0.1B_spec:jar:1.0",
+  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
@@ -418,12 +418,12 @@ define "ode" do
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
-        JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
-        XALAN, XMLBEANS, XSTREAM, WSDL4J)
+        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
+        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+        SAXON, TRANQL, XALAN, XERCES, XMLBEANS, XSTREAM, WSDL4J)
 
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
-      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :delegation=>:self, :libs=>libs
+      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :libs=>libs
       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
       jbi.merge project("dao-hibernate-db").package(:zip)
       jbi.merge project("dao-jpa-ojpa-derby").package(:zip)

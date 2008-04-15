@@ -34,6 +34,9 @@ import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTrans
 import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
 import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
 import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
+import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
+import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
+import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.LoggingDataSourceWrapper;
@@ -172,8 +175,12 @@ public class Database {
     private void initInternalDb(String url, String driverClass, String username,String password) throws DatabaseConfigException {
 
         __log.debug("Creating connection pool for " + url + " with driver " + driverClass);
+        if (!(_txm instanceof RecoverableTransactionManager)) {
+        	throw new RuntimeException("TransactionManager is not recoverable.");
+        }
 
         TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
+        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
 
         PoolingSupport poolingSupport = new SinglePool(
                 _odeConfig.getPoolMaxSize(),
@@ -187,9 +194,9 @@ public class Database {
         _connectionManager = new GenericConnectionManager(
                     transactionSupport,
                     poolingSupport,
-                    false, // no container-managed security
-                    null, // no connection tracker
-                    _txm,
+                    null,
+                    connectionTracker,
+                    (RecoverableTransactionManager) _txm,
                     getClass().getName(),
                     getClass().getClassLoader());
 
