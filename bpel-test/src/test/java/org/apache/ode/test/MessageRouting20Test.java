@@ -23,7 +23,7 @@ import org.junit.Test;
 
 public class MessageRouting20Test extends BPELTestAbstract {
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testCorrelation() throws Throwable {
+	@Test public void testCorrelation() throws Throwable {
 		go("/bpel/2.0/TestCorrelation");
 	}
 

@@ -113,6 +113,6 @@
 				<to variable="reply" part="replyText"/>
 			</copy>
 		</assign>
-		<reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="continue" variable="reply"> </reply>
+		<reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="request" variable="reply"> </reply>
 	</sequence>
 </process>

@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 
 public abstract class BPELTestAbstract {
 	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
-	
+
     protected BpelServerImpl _server;
 
     protected ProcessStore store;
@@ -162,19 +162,16 @@ public abstract class BPELTestAbstract {
                 System.err.println("Error undeploying " + d);
             }
         }
-        
 
-        if (em != null)
-            em.close();
-        if (emf != null)
-            emf.close();
-        
+        if (em != null) em.close();
+        if (emf != null) emf.close();
+
         _server.stop();
         _failures = null;
         _deployed = null;
         _deployments = null;
         _invocations = null;
-        
+
     }
 
     protected void negative(String deployDir) throws Throwable {
@@ -259,7 +256,7 @@ public abstract class BPELTestAbstract {
         _invocations.add(inv);
         return inv;
     }
-    
+
     protected void go() throws Exception {
         try {
             doDeployments();
@@ -271,23 +268,23 @@ public abstract class BPELTestAbstract {
 
     protected void checkFailure() {
         StringBuffer sb = new StringBuffer("Failure report:\n");
-    	for (Failure failure : _failures) {
+        for (Failure failure : _failures) {
             sb.append(failure);
             sb.append('\n');
         }
-    	if (_failures.size() != 0) {
-        	System.err.println(sb.toString());
+        if (_failures.size() != 0) {
+            System.err.println(sb.toString());
             Assert.fail(sb.toString());
-    	}
+        }
     }
 
-    
+
     protected Deployment deploy(String location) {
         Deployment deployment = new Deployment(makeDeployDir(location));
         doDeployment(deployment);
         return deployment;
     }
-    
+
     protected void doDeployments() {
         for (Deployment d : _deployments)
             doDeployment(d);
@@ -295,7 +292,7 @@ public abstract class BPELTestAbstract {
 
     /**
      * Do all the registered deployments.
-     * 
+     *
      * @param d
      */
     protected void doDeployment(Deployment d) {
@@ -303,7 +300,7 @@ public abstract class BPELTestAbstract {
 
         try {
             procs = store.deploy(d.deployDir);
-            
+
             _deployed.add(d);
         } catch (Exception ex) {
             if (d.expectedException == null) {
@@ -311,7 +308,7 @@ public abstract class BPELTestAbstract {
                 failure(d, "DEPLOY: Unexpected exception: " + ex, ex);
             } else if (!d.expectedException.isAssignableFrom(ex.getClass())) {
                 ex.printStackTrace();
-                failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);                
+                failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);
             }
 
 
@@ -342,7 +339,7 @@ public abstract class BPELTestAbstract {
                 failure(d, "Undeployment failed.", ex);
             }
         }
-        
+
         _deployments.clear();
     }
 
@@ -359,8 +356,10 @@ public abstract class BPELTestAbstract {
             testThreads.add(t);
         }
 
-        for (Thread testThread : testThreads)
+        for (Thread testThread : testThreads) {
             testThread.start();
+            if (testThreads.size() > 0) Thread.sleep(2000);
+        }
 
         for (Thread testThread : testThreads)
             testThread.join();
@@ -394,28 +393,28 @@ public abstract class BPELTestAbstract {
             Assert.fail("Resource not found: " + deployxml);
         }
         try {
-			return new File(deployxmlurl.toURI().getPath()).getParentFile();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-			return null;
-		}
+            return new File(deployxmlurl.toURI().getPath()).getParentFile();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+            return null;
+        }
     }
 
     /**
      * Override this to provide configuration properties for Ode extensions 
      * like BpelEventListeners.
-     * 
+     *
      * @return
      */
     protected Properties getConfigProperties() {
-    	// could also return null, returning an empty properties 
-    	// object is more fail-safe.
-    	Properties p = new Properties();
-    	p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
-    	return p;
+        // could also return null, returning an empty properties
+        // object is more fail-safe.
+        Properties p = new Properties();
+        p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+        return p;
     }
-    
+
     protected static class Failure {
         Object where;
 
@@ -442,7 +441,7 @@ public abstract class BPELTestAbstract {
         public String toString() {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
             if (ex != null) {
-            	sbuf.append("; got exception msg: " + ex.getMessage());
+                sbuf.append("; got exception msg: " + ex.getMessage());
             }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);
@@ -452,9 +451,9 @@ public abstract class BPELTestAbstract {
 
     /**
      * Represents a test deployement.
-     * 
+     *
      * @author mszefler
-     * 
+     *
      */
     public static class Deployment {
         /** The directory containing the deploy.xml and artefacts. */
@@ -474,7 +473,7 @@ public abstract class BPELTestAbstract {
 
     /**
      * Represents an test invocation of the BPEL engine.
-     * 
+     *
      * @author mszefler
      */
     public static class Invocation {
@@ -600,23 +599,23 @@ public abstract class BPELTestAbstract {
             if (isFailed())
                 return;
 
-            scheduler.begin();
-            try {
-                Status finalstat = mex.getStatus();
-                if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
-                    if (finalstat.equals(Status.FAULT)) {
-                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: " 
-                    			+ mex.getFault() + " | " + mex.getFaultExplanation());
-                    } else {
-                    	failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
-                    }
+            if (_invocation.expectedResponsePattern != null) {
+                scheduler.begin();
+                try {
+                    Status finalstat = mex.getStatus();
+                    if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
+                        if (finalstat.equals(Status.FAULT)) {
+                            failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: "
+                                    + mex.getFault() + " | " + mex.getFaultExplanation());
+                        } else {
+                            failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+                        }
 
-                if (_invocation.expectedFinalCorrelationStatus != null
-                        && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
-                    failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
-                            .getCorrelationStatus());
-                }
-                if (_invocation.expectedResponsePattern != null) {
+                    if (_invocation.expectedFinalCorrelationStatus != null
+                            && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
+                        failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
+                                .getCorrelationStatus());
+                    }
                     if (mex.getResponse() == null)
                         failure(_invocation, "Expected response, but got none.", null);
                     String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
@@ -624,9 +623,9 @@ public abstract class BPELTestAbstract {
                     Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
                     if (!matcher.matches())
                         failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
+                } finally {
+                    scheduler.commit();
                 }
-            } finally {
-                scheduler.commit();
             }
         }
     }
