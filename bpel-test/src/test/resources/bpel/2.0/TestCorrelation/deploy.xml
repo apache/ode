@@ -19,6 +19,7 @@
 
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
 	xmlns:pns="http://ode/bpel/unit-test/testCorrelation" 
+	xmlns:prns="http://ode/bpel/unit-test/ProbeService.wsdl"
 	xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl">
 
 
@@ -27,5 +28,8 @@
 		<provide partnerLink="request">
 			<service name="wns:testCorrelationService" port="wns:testCorrelationPort"/>
 		</provide>
+		<invoke partnerLink="probe">
+			<service name="prns:testCorrelationService" port="prns:testCorrelationPort"/>
+		</invoke>
 	</process>
 </deploy>

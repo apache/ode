@@ -18,24 +18,32 @@
 -->
 
 <wsdl:definitions targetNamespace="http://ode/bpel/unit-test/ProbeService.wsdl"
-   xmlns:tns="http://ode/bpel/unit-test/ProbeService.wsdl"
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-   xmlns="http://ode/bpel/unit-test/ProbeService.wsdl">
+                  xmlns:tns="http://ode/bpel/unit-test/ProbeService.wsdl"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns="http://ode/bpel/unit-test/ProbeService.wsdl">
 
+    <wsdl:message name="probeMessage">
+        <wsdl:part name="probeName" type="xsd:string"/>
+        <wsdl:part name="probeData" type="xsd:string"/>
+    </wsdl:message>
 
-  <wsdl:message name="probeMessage">
-     <wsdl:part name="probeName" type="xsd:string"/>
-     <wsdl:part name="probeData" type="xsd:string"/>
-  </wsdl:message>
+    <wsdl:portType name="probeMessagePT">
+        <wsdl:operation name="probe">
+            <wsdl:input name="ProbeInputMessage" message="tns:probeMessage"/>
+            <wsdl:output name="ProbeOutputMessage" message="tns:probeMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
 
+    <wsdl:binding name="probeBinding" type="tns:probeMessagePT">
+        <wsdl:operation name="probe">
+        </wsdl:operation>
+    </wsdl:binding>
 
-   <wsdl:portType name="probeMessagePT">
-      <wsdl:operation name="probe">
-         <wsdl:input name="ProbeInputMessage" message="tns:probeMessage"/>
-         <wsdl:output name="ProbeOutputMessage" message="tns:probeMessage"/>
-      </wsdl:operation>
-   </wsdl:portType>
+    <wsdl:service name="ProbeService">
+        <wsdl:port name="ProbePort" binding="tns:probeBinding">
+        </wsdl:port>
+    </wsdl:service>
 
 </wsdl:definitions>
 
