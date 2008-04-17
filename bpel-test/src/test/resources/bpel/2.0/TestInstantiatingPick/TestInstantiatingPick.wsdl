@@ -25,8 +25,8 @@
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
-
+   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+   xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
    <wsdl:message name="requestMessage">
       <wsdl:part name="requestID" type="xsd:string"/>
@@ -37,7 +37,6 @@
       <wsdl:part name="replyID" type="xsd:string"/>
       <wsdl:part name="replyText" type="xsd:string"/>
    </wsdl:message>
-
 
    <wsdl:portType name="testInstPick1PT">
       <wsdl:operation name="request">
@@ -82,10 +81,8 @@
    <plnk:partnerLinkType name="probeRequest">
       <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
-   
-   
-   <bpws:property name="testProbeID" type="xsd:string"/>
-   <bpws:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
-   
+
+   <prop:property name="testProbeID" type="xsd:string"/>
+   <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
 
 </wsdl:definitions>
