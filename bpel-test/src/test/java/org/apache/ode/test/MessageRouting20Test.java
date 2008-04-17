@@ -27,7 +27,7 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		go("/bpel/2.0/TestCorrelation");
 	}
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testCorrelation1() throws Throwable {
+	@Test public void testCorrelation1() throws Throwable {
 		go("/bpel/2.0/TestCorrelation1");
 	}
 
@@ -36,7 +36,7 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		go("/bpel/2.0/TestCorrelationOpaque");
 	}
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testDynamicPick() throws Throwable {
+	@Test public void testDynamicPick() throws Throwable {
 		go("/bpel/2.0/TestDynamicPick");
 	}
 
