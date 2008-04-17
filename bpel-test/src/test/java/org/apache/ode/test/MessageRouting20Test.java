@@ -40,15 +40,15 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		go("/bpel/2.0/TestDynamicPick");
 	}
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testInstPick() throws Throwable {
+	@Test public void testInstPick() throws Throwable {
 		go("/bpel/2.0/TestInstantiatingPick");
 	}
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testStaticOnMessage() throws Throwable {
+	@Test public void testStaticOnMessage() throws Throwable {
 		go("/bpel/2.0/TestStaticOnMessage");
 	}
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testStaticPick() throws Throwable {
+	@Test public void testStaticPick() throws Throwable {
 		go("/bpel/2.0/TestStaticPick");
 	}
 

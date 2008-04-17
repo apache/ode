@@ -26,7 +26,8 @@
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-   xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+   xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
 
    <wsdl:types>
@@ -90,20 +91,19 @@
       </wsdl:port>
    </wsdl:service>
 
-   <vprop:property name="testProbeID" type="xsd:string"/>
-   <vprop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
-      <vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-         testMessage/requestID
-      </vprop:query>
-   </vprop:propertyAlias>
+   <prop:property name="testProbeID" type="xsd:string"/>
+   <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
+      <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+         requestID
+      </prop:query>
+   </prop:propertyAlias>
    
-   <vprop:property name="testProbeData" type="xsd:string"/>
-   <vprop:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
-      <vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-         testMessage/requestText
-      </vprop:query>
-   </vprop:propertyAlias>
-   
+   <prop:property name="testProbeData" type="xsd:string"/>
+   <prop:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
+      <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+         requestText
+      </prop:query>
+   </prop:propertyAlias>
 
    <plnk:partnerLinkType name="TestStaticOnMessage1Request">
       <plnk:role name="TestStaticOnMessage1Service" portType="TestStaticOnMessage1PT"/>
