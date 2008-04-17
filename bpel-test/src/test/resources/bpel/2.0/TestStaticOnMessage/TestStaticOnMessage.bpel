@@ -18,7 +18,7 @@
 -->
 
 <process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+         xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
          xmlns:tns="http://ode/bpel/unit-test/TestStaticOnMessage"
          xmlns:wns="http://ode/bpel/unit-test/TestStaticOnMessage.wsdl"
          xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
