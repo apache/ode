@@ -18,169 +18,166 @@
 -->
 
 <process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
- xmlns:tns="http://ode/bpel/unit-test/TestInstantiatingPick"
-	xmlns:wns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
-	xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
- xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
- name="TestInstantiatingPick"
-	targetNamespace="http://ode/bpel/unit-test/TestInstantiatingPick"
-	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-	expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
- suppressJoinFailure="yes">
+         xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+         xmlns:tns="http://ode/bpel/unit-test/TestInstantiatingPick"
+         xmlns:wns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
+         xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         name="TestInstantiatingPick"
+         targetNamespace="http://ode/bpel/unit-test/TestInstantiatingPick"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         suppressJoinFailure="yes">
 
-<!-- Unit test process instantiating pick -->
-	<import location="TestInstantiatingPick.wsdl"
-		namespace="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
-		importType="http://schemas.xmlsoap.org/wsdl/" />
-	<import location="../ProbeService/probeService.wsdl"
-		namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
-		importType="http://schemas.xmlsoap.org/wsdl/"/>
-
-
-  <partnerLinks>
-  	<partnerLink name="request1" partnerLinkType="wns:testInstPick1Request" myRole="testInstPick1Service"/>
-  	<partnerLink name="request2" partnerLinkType="wns:testInstPick2Request" myRole="testInstPick2Service"/>
-  	<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
-  </partnerLinks>
-
-  <variables>
-    <variable name="request" 
-               messageType="wns:requestMessage"/>
-    <variable name="probeInput" 
-               messageType="prb:probeMessage"/>
-    <variable name="reply" 
-               messageType="wns:replyMessage"/>
-  </variables>
+    <!-- Unit test process instantiating pick -->
+    <import location="TestInstantiatingPick.wsdl"
+            namespace="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="../ProbeService/probeService.wsdl"
+            namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
 
 
-	    <pick name="testPick" createInstance="yes">
-			<onMessage partnerLink="request1"
-				portType="wns:testInstPick1PT" operation="request" variable="request">
-				<sequence>
-	    				<assign name="assign1">
-	      				<copy>
-	        					<from variable="request" property="wns:testProbeID"/>
-	        					<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	      				<copy>
-	        					<from variable="request" part="requestText"/>
-	        					<to variable="probeInput" part="probeData"/>
-	      				</copy>
-	    				</assign>   
+    <partnerLinks>
+        <partnerLink name="request1" partnerLinkType="wns:testInstPick1Request" myRole="testInstPick1Service"/>
+        <partnerLink name="request2" partnerLinkType="wns:testInstPick2Request" myRole="testInstPick2Service"/>
+        <partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
+    </partnerLinks>
 
-	  	  				<assign>
-	      				<copy>
-	      					<from>
-	      						<literal><![CDATA[pick branch one invoked]]></literal>
-	      					</from>
-	        				<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	  					</assign> 
+    <variables>
+        <variable name="request" messageType="wns:requestMessage"/>
+        <variable name="probeInput" messageType="prb:probeMessage"/>
+        <variable name="reply" messageType="wns:replyMessage"/>
+    </variables>
 
-       					<invoke name="probe" partnerLink="probe"
-	            			portType="prb:probeMessagePT" 
-	            			operation="probe"
-	            			inputVariable="probeInput"  
-	            			outputVariable="probeInput">
-       					</invoke>
-	    			
-	    				<assign>
-	      				<copy>
-	      					<from>
-	      						<literal><![CDATA[process complete]]></literal>
-	      					</from>
-	        				<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	  					</assign> 
 
-       					<invoke name="probe" partnerLink="probe"
-	            			portType="prb:probeMessagePT" 
-	            			operation="probe"
-	            			inputVariable="probeInput"  
-	            			outputVariable="probeInput">
-       					</invoke>
+    <pick name="testPick" createInstance="yes">
+        <onMessage partnerLink="request1"
+                   portType="wns:testInstPick1PT" operation="request" variable="request">
+            <sequence>
+                <assign name="assign1">
+                    <copy>
+                        <from variable="request" property="wns:testProbeID"/>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                    <copy>
+                        <from variable="request" part="requestText"/>
+                        <to variable="probeInput" part="probeData"/>
+                    </copy>
+                </assign>
 
-	  				<assign name="assign2">
-	      				<copy>
-	        					<from variable="probeInput" part="probeName"/>
-	        					<to variable="reply" part="replyID"/>
-	      				</copy>
-	      				<copy>
-	        					<from variable="probeInput" part="probeData"/>
-	        					<to variable="reply" part="replyText"/>
-	      				</copy>
-	  				</assign> 
-	    
-					<reply name="reply" partnerLink="request1" portType="wns:testInstPick1PT" 
-	           				operation="request" variable="reply"> 
-	  				</reply>
+                <assign>
+                    <copy>
+                        <from>
+                            <literal><![CDATA[pick branch one invoked]]></literal>
+                        </from>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                </assign>
 
-				</sequence>
-			</onMessage>
-			<onMessage partnerLink="request2"
-				portType="wns:testInstPick2PT" operation="request" variable="request">
-				<sequence>
-	    				<assign name="assign1">
-	      				<copy>
-	        					<from variable="request" property="wns:testProbeID"/>
-	        					<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	      				<copy>
-	        					<from variable="request" part="requestText"/>
-	        					<to variable="probeInput" part="probeData"/>
-	      				</copy>
-	    				</assign>   
+                <invoke name="probe" partnerLink="probe"
+                        portType="prb:probeMessagePT"
+                        operation="probe"
+                        inputVariable="probeInput"
+                        outputVariable="probeInput">
+                </invoke>
 
-	  	  				<assign>
-	      				<copy>
-	      					<from>
-	      						<literal><![CDATA[pick branch two invoked]]></literal>
-	      					</from>
-	        				<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	  					</assign> 
+                <assign>
+                    <copy>
+                        <from>
+                            <literal><![CDATA[process complete]]></literal>
+                        </from>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                </assign>
 
-       					<invoke name="probe" partnerLink="probe"
-	            			portType="prb:probeMessagePT" 
-	            			operation="probe"
-	            			inputVariable="probeInput"  
-	            			outputVariable="probeInput">
-       					</invoke>
-	    			
-	    				<assign>
-	      				<copy>
-	      					<from>
-	      						<literal><![CDATA[process complete]]></literal>
-	      					</from>
-	        				<to variable="probeInput" part="probeName"/>
-	      				</copy>
-	  					</assign> 
+                <invoke name="probe" partnerLink="probe"
+                        portType="prb:probeMessagePT"
+                        operation="probe"
+                        inputVariable="probeInput"
+                        outputVariable="probeInput">
+                </invoke>
 
-       					<invoke name="probe" partnerLink="probe"
-	            			portType="prb:probeMessagePT" 
-	            			operation="probe"
-	            			inputVariable="probeInput"  
-	            			outputVariable="probeInput">
-       					</invoke>
+                <assign name="assign2">
+                    <copy>
+                        <from variable="probeInput" part="probeName"/>
+                        <to variable="reply" part="replyID"/>
+                    </copy>
+                    <copy>
+                        <from variable="probeInput" part="probeData"/>
+                        <to variable="reply" part="replyText"/>
+                    </copy>
+                </assign>
 
-	  				<assign name="assign2">
-	      				<copy>
-	        					<from variable="probeInput" part="probeName"/>
-	        					<to variable="reply" part="replyID"/>
-	      				</copy>
-	      				<copy>
-	        					<from variable="probeInput" part="probeData"/>
-	        					<to variable="reply" part="replyText"/>
-	      				</copy>
-	  				</assign> 
-	    
-					<reply name="reply" partnerLink="request2" portType="wns:testInstPick2PT" 
-	           				operation="request" variable="reply"> 
-	  				</reply>
+                <reply name="reply" partnerLink="request1" portType="wns:testInstPick1PT"
+                       operation="request" variable="reply">
+                </reply>
 
-				</sequence>
-			</onMessage>
-		</pick>
-	
+            </sequence>
+        </onMessage>
+        <onMessage partnerLink="request2"
+                   portType="wns:testInstPick2PT" operation="request" variable="request">
+            <sequence>
+                <assign name="assign1">
+                    <copy>
+                        <from variable="request" property="wns:testProbeID"/>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                    <copy>
+                        <from variable="request" part="requestText"/>
+                        <to variable="probeInput" part="probeData"/>
+                    </copy>
+                </assign>
+
+                <assign>
+                    <copy>
+                        <from>
+                            <literal><![CDATA[pick branch two invoked]]></literal>
+                        </from>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                </assign>
+
+                <invoke name="probe" partnerLink="probe"
+                        portType="prb:probeMessagePT"
+                        operation="probe"
+                        inputVariable="probeInput"
+                        outputVariable="probeInput">
+                </invoke>
+
+                <assign>
+                    <copy>
+                        <from>
+                            <literal><![CDATA[process complete]]></literal>
+                        </from>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                </assign>
+
+                <invoke name="probe" partnerLink="probe"
+                        portType="prb:probeMessagePT"
+                        operation="probe"
+                        inputVariable="probeInput"
+                        outputVariable="probeInput">
+                </invoke>
+
+                <assign name="assign2">
+                    <copy>
+                        <from variable="probeInput" part="probeName"/>
+                        <to variable="reply" part="replyID"/>
+                    </copy>
+                    <copy>
+                        <from variable="probeInput" part="probeData"/>
+                        <to variable="reply" part="replyText"/>
+                    </copy>
+                </assign>
+
+                <reply name="reply" partnerLink="request2" portType="wns:testInstPick2PT"
+                       operation="request" variable="reply">
+                </reply>
+
+            </sequence>
+        </onMessage>
+    </pick>
+
 </process>

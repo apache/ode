@@ -19,13 +19,17 @@
 
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
 	xmlns:pns="http://ode/bpel/unit-test/TestStaticPick" 
+    xmlns:prns="http://ode/bpel/unit-test/ProbeService.wsdl"
 	xmlns:wns="http://ode/bpel/unit-test/TestStaticPick.wsdl">
-
 
 	<process name="pns:TestStaticPick">
 		<active>true</active>
 		<provide partnerLink="request1">
 			<service name="wns:TestStaticPick1Service" port="wns:TestStaticPick1Port"/>
 		</provide>
+        <invoke partnerLink="probe">
+            <service name="prns:testCorrelationService" port="prns:testCorrelationPort"/>
+        </invoke>
 	</process>
+
 </deploy>
