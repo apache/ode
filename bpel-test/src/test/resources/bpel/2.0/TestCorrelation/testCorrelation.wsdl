@@ -17,86 +17,87 @@
   ~ under the License.
 -->
 
-<wsdl:definitions 
-  targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
-  xmlns:tns="http://ode/bpel/unit-test/testCorrelation.wsdl"
-  xmlns:typens="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
-  xmlns="http://ode/bpel/unit-test/testCorrelation.wsdl"
-  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
-  xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-    
+<wsdl:definitions
+        targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
+        xmlns:tns="http://ode/bpel/unit-test/testCorrelation.wsdl"
+        xmlns:typens="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
+        xmlns="http://ode/bpel/unit-test/testCorrelation.wsdl"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+        xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
-  <!-- type defs -->
-  <wsdl:types>
-    <xsd:schema
-      targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
+
+    <!-- type defs -->
+    <wsdl:types>
+        <xsd:schema
+                targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
-      <xsd:complexType name="testMessage">
-        <xsd:sequence>
-          <xsd:element name="requestID" type="xsd:string"/>
-          <xsd:element name="requestText" type="xsd:string"/>
-	    <xsd:element name="requestEnd" type="xsd:string"/>
-        </xsd:sequence>
-      </xsd:complexType>
-   </xsd:schema>
-  </wsdl:types>
+            <xsd:complexType name="testMessage">
+                <xsd:sequence>
+                    <xsd:element name="requestID" type="xsd:string"/>
+                    <xsd:element name="requestText" type="xsd:string"/>
+                    <xsd:element name="requestEnd" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </wsdl:types>
 
 
-  <wsdl:message name="requestMessage">
-    <wsdl:part name="requestMessageData" type="typens:testMessage"/>
-  </wsdl:message>
-   
-  <wsdl:message name="replyMessage">
-    <wsdl:part name="replyID" type="xsd:string"/>
-    <wsdl:part name="replyText" type="xsd:string"/>
-  </wsdl:message>
+    <wsdl:message name="requestMessage">
+        <wsdl:part name="requestMessageData" type="typens:testMessage"/>
+    </wsdl:message>
 
- 
-  <wsdl:portType name="testCorrelationPT">
-    <wsdl:operation name="request">
-      <wsdl:input message="requestMessage"/>
-    </wsdl:operation>
-    <wsdl:operation name="continue">
-      <wsdl:input message="requestMessage"/>
-      <wsdl:output message="replyMessage"/>
-    </wsdl:operation>
-  </wsdl:portType>
-  
-  <wsdl:binding name="TestCorrelationBinding" type="tns:testCorrelationPT">
-    <wsdl:operation name="request">
-    </wsdl:operation>
-    <wsdl:operation name="continue">
-    </wsdl:operation>
-  </wsdl:binding>
-  <wsdl:service name="TestCorrelationService">
-    <wsdl:port name="TestCorrelationPort" binding="tns:TestCorrelationBinding">
-    </wsdl:port>
-  </wsdl:service>
+    <wsdl:message name="replyMessage">
+        <wsdl:part name="replyID" type="xsd:string"/>
+        <wsdl:part name="replyText" type="xsd:string"/>
+    </wsdl:message>
 
-   <plnk:partnerLinkType name="testCorrelationRequest">
-	<plnk:role name="testCorrelationService" portType="testCorrelationPT"/>
-   </plnk:partnerLinkType>
 
-   <plnk:partnerLinkType name="probeRequest">
-	<plnk:role name="probeService" portType="prb:probeMessagePT"/>
-   </plnk:partnerLinkType>
+    <wsdl:portType name="testCorrelationPT">
+        <wsdl:operation name="request">
+            <wsdl:input message="requestMessage"/>
+            <wsdl:output message="replyMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="continue">
+            <wsdl:input message="requestMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
 
-  <bpws:property name="testProbeID" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestID
-    </bpws:query>
-  </bpws:propertyAlias>
-  
-  <bpws:property name="testProbeData" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestText
-    </bpws:query>    
-  </bpws:propertyAlias>
+    <wsdl:binding name="TestCorrelationBinding" type="tns:testCorrelationPT">
+        <wsdl:operation name="request">
+        </wsdl:operation>
+        <wsdl:operation name="continue">
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="TestCorrelationService">
+        <wsdl:port name="TestCorrelationPort" binding="tns:TestCorrelationBinding">
+        </wsdl:port>
+    </wsdl:service>
+
+    <plnk:partnerLinkType name="testCorrelationRequest">
+        <plnk:role name="testCorrelationService" portType="testCorrelationPT"/>
+    </plnk:partnerLinkType>
+
+    <plnk:partnerLinkType name="probeRequest">
+        <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+    </plnk:partnerLinkType>
+
+    <prop:property name="testProbeID" type="xsd:string"/>
+    <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+            requestID
+        </prop:query>
+    </prop:propertyAlias>
+
+    <prop:property name="testProbeData" type="xsd:string"/>
+    <prop:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+            requestText
+        </prop:query>
+    </prop:propertyAlias>
 
 </wsdl:definitions>

@@ -26,7 +26,8 @@
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+  xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
         
   <wsdl:types>
@@ -91,33 +92,32 @@
 	<plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
    
-  <bpws:property name="testProbeKey1" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeKey1" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestKey1
-    </bpws:query>   
-  </bpws:propertyAlias>
+  <prop:property name="testProbeKey1" type="xsd:string"/>
+  <prop:propertyAlias propertyName="tns:testProbeKey1" messageType="tns:requestMessage" part="requestMessageData">
+    <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+      requestKey1
+    </prop:query>
+  </prop:propertyAlias>
   
-  <bpws:property name="testProbeKey2" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeKey2" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestKey2
-    </bpws:query>    
-  </bpws:propertyAlias>
+  <prop:property name="testProbeKey2" type="xsd:string"/>
+  <prop:propertyAlias propertyName="tns:testProbeKey2" messageType="tns:requestMessage" part="requestMessageData">
+    <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+      requestKey2
+    </prop:query>
+  </prop:propertyAlias>
   
-  <bpws:property name="testProbeID" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestID
-    </bpws:query> 
-  </bpws:propertyAlias>
+  <prop:property name="testProbeID" type="xsd:string"/>
+  <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
+    <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+      requestID
+    </prop:query>
+  </prop:propertyAlias>
   
-  <bpws:property name="testProbeData" type="xsd:string"/>
-  <bpws:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
-    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-      testMessage/requestText
-    </bpws:query> 
-  </bpws:propertyAlias>
-  
+  <prop:property name="testProbeData" type="xsd:string"/>
+  <prop:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
+    <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+      requestText
+    </prop:query>
+  </prop:propertyAlias>
 
 </wsdl:definitions>
