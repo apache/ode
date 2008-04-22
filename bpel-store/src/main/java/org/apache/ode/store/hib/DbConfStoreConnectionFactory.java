@@ -78,24 +78,24 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     final SessionFactory _sessionFactory;
 
-    public DbConfStoreConnectionFactory(DataSource ds, boolean auto) {
+    public DbConfStoreConnectionFactory(DataSource ds, Properties properties, boolean auto) {
         _ds = ds;
-
-        Properties properties = new Properties();
 
         __log.debug("using data source: " + ds);
         _dataSources.put(_guid, ds);
         properties.put("guid", _guid);
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
 
-        try {
-            properties.put(Environment.DIALECT, guessDialect(_ds));
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
-            __log.error(errmsg, ex);
-            throw new BpelEngineException(errmsg, ex);
+        if (properties.get(Environment.DIALECT) == null) {
+            try {
+                properties.put(Environment.DIALECT, guessDialect(_ds));
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
+                __log.error(errmsg, ex);
+                throw new BpelEngineException(errmsg, ex);
+            }
         }
-        
+
         if (auto) {
             properties.put(Environment.HBM2DDL_AUTO, "create-drop");
         }
