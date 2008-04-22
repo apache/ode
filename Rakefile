@@ -177,7 +177,7 @@ define "ode" do
       end
     end
     
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _("target/test-classes")
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")

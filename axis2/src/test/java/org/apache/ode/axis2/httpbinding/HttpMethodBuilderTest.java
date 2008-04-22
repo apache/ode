@@ -132,14 +132,14 @@ public class HttpMethodBuilderTest extends TestCase {
     public void testHello() throws Exception {
         String uri = ((HTTPAddress) dummyPort.getExtensibilityElements().get(0)).getLocationURI();
         String expectedUri = uri + "/" + "DummyService/hello";
-        Element msgEl, partEl;
+        Element msgEl, helloEl;
         {
             Document odeMsg = DOMUtils.newDocument();
             msgEl = odeMsg.createElementNS(null, "message");
-            partEl = odeMsg.createElementNS(null, "parameters");
+            Element partEl = odeMsg.createElementNS(null, "parameters");
             odeMsg.appendChild(msgEl);
             msgEl.appendChild(partEl);
-            Element helloEl = odeMsg.createElementNS(null, "hello");
+            helloEl = odeMsg.createElementNS(null, "hello");
             helloEl.setTextContent("This is a test. How is it going so far?");
             partEl.appendChild(helloEl);
         }
@@ -154,7 +154,7 @@ public class HttpMethodBuilderTest extends TestCase {
 
         byte[] content = ((ByteArrayRequestEntity) ((PostMethod) httpMethod).getRequestEntity()).getContent();
         String b = new String(content);
-        assertEquals("Invalid body in generated http query", DOMUtils.domToString(partEl), b);
+        assertEquals("Invalid body in generated http query", DOMUtils.domToString(helloEl), b);
     }
 
 

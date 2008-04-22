@@ -77,13 +77,13 @@ public abstract class Axis2TestBase extends TestCase {
             super.stop();
         }
 
-        protected void deployProcess(String bundleName) {
+        public void deployProcess(String bundleName) {
             _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
         }
-        protected void undeployProcess(String bundleName) {
+        public void undeployProcess(String bundleName) {
             _ode.getProcessStore().undeploy(new File(getBundleDir(bundleName)));
         }
-        protected boolean isDeployed(String bundleName) {
+        public boolean isDeployed(String bundleName) {
             return _ode.getProcessStore().getPackages().contains(bundleName);
         }
 
@@ -118,7 +118,7 @@ public abstract class Axis2TestBase extends TestCase {
             getConfigurationContext().getAxisConfiguration().addService(axisService);            
         }
 
-        protected String sendRequestFile(String endpoint, String bundleName, String filename) {
+        public String sendRequestFile(String endpoint, String bundleName, String filename) {
             try {
                 return HttpSoapSender.doSend(new URL(endpoint),
                         new FileInputStream(getBundleDir(bundleName)+"/" + filename), null, 0, null, null, null);

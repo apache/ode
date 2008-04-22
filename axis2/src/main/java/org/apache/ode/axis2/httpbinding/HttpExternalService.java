@@ -22,6 +22,7 @@ package org.apache.ode.axis2.httpbinding;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
@@ -124,6 +125,7 @@ public class HttpExternalService implements ExternalService {
     }
 
     public void invoke(PartnerRoleMessageExchange odeMex) {
+        if (log.isDebugEnabled()) log.debug("Preparing " + getClass().getSimpleName() + " invocation...");
         try {
             // build the http method
             final HttpMethod method = methodBuilder.buildHttpMethod(odeMex);
@@ -154,7 +156,7 @@ public class HttpExternalService implements ExternalService {
                 odeMex.replyOneWayOk();
             }
         } catch (UnsupportedEncodingException e) {
-            String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
+            String errmsg = "Error sending message to " + getClass().getSimpleName() + " for ODE mex " + odeMex;
             log.error(errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         }
@@ -180,6 +182,10 @@ public class HttpExternalService implements ExternalService {
                 if (log.isDebugEnabled())
                     log.debug("Executing http request : " + method.getName() + " " + method.getURI());
                 final int statusCode = client.executeMethod(method);
+                // invoke getResponseBody to force the loading of the body 
+                // Actually the processResponse may happen in a separate thread and
+                // as a result the connection might be closed before the body processing (see the finally clause below).
+                byte[] responseBody = method.getResponseBody();
                 // ... and process the response
                 processResponse(statusCode);
             } catch (final IOException e) {
@@ -206,6 +212,16 @@ public class HttpExternalService implements ExternalService {
 
         public void processResponse(int statusCode) {
             // a one-way message does not care about the response
+            try {
+                // log the URI since the engine may have moved on while this One Way request was executing
+                if (statusCode >= 400) {
+                    if (log.isWarnEnabled()) log.warn("OneWay http request ["+method.getURI()+"] failed with status: " + method.getStatusLine());
+                } else {
+                    if (log.isDebugEnabled()) log.debug("OneWay http request ["+method.getURI()+"] status: " + method.getStatusLine());
+                }
+            } catch (URIException e) {
+                if(log.isDebugEnabled()) log.debug(e);
+            }
         }
     }
 
@@ -287,12 +303,13 @@ public class HttpExternalService implements ExternalService {
             try {
                 final InputStream bodyAsStream = method.getResponseBodyAsStream();
                 if (bodyAsStream == null) {
-                    String errmsg = "Request body of a Two-way message may be empty! Msg Id=" + mexId;
+                    String errmsg = "Request body of a Two-way message may not be empty! Msg Id=" + mexId;
                     log.error(errmsg);
                     odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
                     return;
                 } else {
 
+                    // only text/xml is supported in the response body
                     // parse the body
                     Element bodyElement;
                     try {
@@ -307,6 +324,7 @@ public class HttpExternalService implements ExternalService {
                         org.apache.ode.bpel.iapi.Message odeResponse = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
 
                         // we expect a single part per output message
+                        // see org.apache.ode.axis2.httpbinding.HttpBindingValidator call in constructor
                         Part part = (Part) operation.getOutput().getMessage().getParts().values().iterator().next();
 
                         Element partElement = processBodyElement(part, bodyElement);
@@ -345,7 +363,7 @@ public class HttpExternalService implements ExternalService {
             Document doc = DOMUtils.newDocument();
             Element partElement = doc.createElementNS(null, part.getName());
             if (part.getElementName() != null) {
-                partElement.appendChild(bodyElement);
+                partElement.appendChild(doc.importNode(bodyElement, true));
             } else {
                 if (DOMUtils.isEmptyElement(bodyElement)) {
                     // Append an empty text node.
@@ -363,10 +381,6 @@ public class HttpExternalService implements ExternalService {
                             Node child = bodyElement.getChildNodes().item(m);
                             partElement.appendChild(doc.importNode(child, true));
                         }
-                        if (bodyElement.hasAttributes()) {
-                            if (log.isWarnEnabled())
-                                log.warn("Element received for output part " + part.getName() + " has attributes that won't be imported into ODE.");
-                        }
                     }
                 }
 
@@ -376,3 +390,4 @@ public class HttpExternalService implements ExternalService {
 
     }
 }
+
