@@ -317,7 +317,7 @@ public class ODEServer {
         return odeService;
     }
 
-    public ExternalService createExternalService(Definition def, QName serviceName, String portName) throws ContextException {
+    public ExternalService createExternalService(Definition def, QName serviceName, String portName, ProcessConf pconf) throws ContextException {
         ExternalService extService = (ExternalService) _externalServices.get(serviceName);
         if (extService != null)
             return extService;
@@ -326,7 +326,7 @@ public class ODEServer {
             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
                 extService = new HttpExternalService(def, serviceName, portName, _executorService, _scheduler, _server);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
-                extService = new SoapExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
+                extService = new SoapExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server, pconf);
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
