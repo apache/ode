@@ -43,13 +43,7 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -110,14 +104,14 @@ public class ProcessStoreImpl implements ProcessStore {
     private DataSource _inMemDs;
 
     public ProcessStoreImpl() {
-        this(null, "", true);
+        this(null, "", new Properties(), true);
     }
 
-    public ProcessStoreImpl(DataSource ds, String persistenceType, boolean auto) {
+    public ProcessStoreImpl(DataSource ds, String persistenceType, Properties props, boolean auto) {
         if (ds != null) {
             // ugly hack
             if (persistenceType.toLowerCase().indexOf("hib") != -1)
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, auto);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props, auto);
             else
                 _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, auto);
         } else {
@@ -125,7 +119,7 @@ public class ProcessStoreImpl implements ProcessStore {
             // database. Makes testing a bit simpler.
             DataSource hsqlds = createInternalDS(_guid);
             if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, auto);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props, auto);
             else
                 _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, auto);
             _inMemDs = hsqlds;

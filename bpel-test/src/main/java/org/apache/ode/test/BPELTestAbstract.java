@@ -133,7 +133,7 @@ public abstract class BPELTestAbstract {
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, "jpa", true);
+        store = new ProcessStoreImpl(null, "jpa", new Properties(), true);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process
