@@ -330,7 +330,7 @@ public class ODEServer {
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
-            throw new ContextException("Error creating external service.", ex);
+            throw new ContextException("Error creating external service! name:"+serviceName+", port:"+portName, ex);
         }
 
         // if not SOAP nor HTTP binding

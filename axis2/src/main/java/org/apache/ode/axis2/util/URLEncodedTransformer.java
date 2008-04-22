@@ -25,6 +25,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.axis2.httpbinding.Messages;
 import org.w3c.dom.Element;
 
+import javax.wsdl.Part;
 import java.util.Iterator;
 import java.util.Map;
 

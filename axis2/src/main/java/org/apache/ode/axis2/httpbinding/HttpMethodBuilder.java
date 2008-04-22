@@ -51,6 +51,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.ibm.wsdl.PartImpl;
+
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -101,7 +103,7 @@ public class HttpMethodBuilder {
     }
 
     protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, Map<String, Element> partValues, String rootUri) throws UnsupportedEncodingException {
-        if(log.isDebugEnabled())log.debug("Preparing http request...");
+        if (log.isDebugEnabled()) log.debug("Preparing http request...");
         HttpMethod method;
         BindingInput bindingInput = bindingOperation.getBindingInput();
         HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(bindingOperation);
@@ -120,7 +122,8 @@ public class HttpMethodBuilder {
                 URLEncodedTransformer transformer = new URLEncodedTransformer();
                 queryPath = transformer.transform(partValues);
             }
-            method = new GetMethod(rootUri + '/' + relativeUri);
+            String uri = rootUri + (relativeUri.startsWith("/") ? "" : "/") + relativeUri;
+            method = new GetMethod(uri);
             method.setQueryString(queryPath);
             // Let http-client manage the redirection for GET
             // see org.apache.commons.httpclient.params.HttpClientParams.MAX_REDIRECTS
@@ -135,14 +138,20 @@ public class HttpMethodBuilder {
             } else if (contentType.endsWith(CONTENT_TYPE_TEXT_XML)) {
                 // assumption is made that there is a single part
                 // validation steps in the constructor must warranty that
-                Node part = partValues.values().iterator().next();
-                String xmlString = DOMUtils.domToString(part);
+                Part part = (Part) bindingOperation.getOperation().getInput().getMessage().getParts().values().iterator().next();
+                Element partValue = partValues.get(part.getName());
+                // if the part has an element name, we must take the first element
+                if(part.getElementName()!=null){
+                    partValue = DOMUtils.getFirstChildElement(partValue);
+                }
+                String xmlString = DOMUtils.domToString(partValue);
                 requestEntity = new ByteArrayRequestEntity(xmlString.getBytes(), contentType);
             } else {
                 // should not happen because of HttpBindingValidator, but never say never
                 throw new IllegalArgumentException("Unsupported content-type!");
             }
-            PostMethod post = new PostMethod(rootUri + '/' + relativeUri);
+            String uri = rootUri + (relativeUri.startsWith("/") ? "" : "/") + relativeUri;
+            PostMethod post = new PostMethod(uri);
             post.setRequestEntity(requestEntity);
             method = post;
         } else {
