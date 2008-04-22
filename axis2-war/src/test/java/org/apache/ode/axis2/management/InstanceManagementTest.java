@@ -159,7 +159,7 @@ public class InstanceManagementTest extends Axis2TestBase {
     }
 
     protected void setUp() throws Exception {
-        start();
+        super.setUp();
 
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
@@ -214,7 +214,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement result = sendToPM(listRoot);
         assert(result.toString().indexOf("process-info") < 0);
 
-        server.stop();
+        super.tearDown();
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
