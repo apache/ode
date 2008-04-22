@@ -9,26 +9,17 @@ import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
-import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
-import org.apache.ode.bpel.compiler.DefaultResourceFinder;
-import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.axis2.hooks.ODEAxisService;
-import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 
 import javax.servlet.ServletException;
-import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
 import java.io.*;
 import java.net.URL;
 import java.net.URI;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -38,10 +29,24 @@ public abstract class Axis2TestBase extends TestCase {
 
     protected ODEAxis2Server server;
 
-    public void start() throws Exception {
+    public void startServer() throws Exception {
         String webappPath = getClass().getClassLoader().getResource("webapp").getFile();
         server = new ODEAxis2Server(webappPath);
         server.start();
+    }
+
+    public void stopServer() throws AxisFault {
+        server.stop();
+    }
+
+    protected void setUp() throws Exception {
+        super.setUp();
+        startServer();
+    }
+
+    protected void tearDown() throws Exception {
+        stopServer();
+        super.tearDown();
     }
 
     protected class ODEAxis2Server extends AxisServer {
@@ -68,8 +73,8 @@ public abstract class Axis2TestBase extends TestCase {
         }
 
         public void stop() throws AxisFault {
-            super.stop();
             _ode.shutDown();
+            super.stop();
         }
 
         protected void deployProcess(String bundleName) {
