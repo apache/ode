@@ -78,8 +78,11 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     final SessionFactory _sessionFactory;
 
-    public DbConfStoreConnectionFactory(DataSource ds, Properties properties, boolean auto) {
+    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean auto) {
         _ds = ds;
+
+        // Don't want to pollute original properties
+        Properties properties = new Properties(initialProps);
 
         __log.debug("using data source: " + ds);
         _dataSources.put(_guid, ds);
