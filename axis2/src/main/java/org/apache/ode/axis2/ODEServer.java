@@ -434,7 +434,7 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(DataSource ds) {
-        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(), _odeConfig.getProperties(), false);
+        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {
