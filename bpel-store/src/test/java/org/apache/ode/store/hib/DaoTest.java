@@ -24,7 +24,7 @@ import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
 import org.hsqldb.jdbc.jdbcDataSource;
-
+import java.util.Properties;
 import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
@@ -38,7 +38,7 @@ public class DaoTest extends TestCase {
         hsqlds.setUser("sa");
         hsqlds.setPassword("");
 
-        cf = new DbConfStoreConnectionFactory(hsqlds, true);
+        cf = new DbConfStoreConnectionFactory(hsqlds, new Properties(), true);
     }
 
     public void tearDown() throws Exception {
