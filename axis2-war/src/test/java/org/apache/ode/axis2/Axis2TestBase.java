@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
@@ -77,8 +78,8 @@ public abstract class Axis2TestBase extends TestCase {
             super.stop();
         }
 
-        public void deployProcess(String bundleName) {
-            _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
+        public Collection<QName> deployProcess(String bundleName) {
+            return _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
         }
         public void undeployProcess(String bundleName) {
             _ode.getProcessStore().undeploy(new File(getBundleDir(bundleName)));
@@ -146,6 +147,10 @@ public abstract class Axis2TestBase extends TestCase {
                 e.printStackTrace();
             }
             configContext.getAxisConfiguration().getService(serviceName).printWSDL(fos);
+        }
+
+        public ODEServer getODEServer() {
+            return _ode;
         }
     }
 

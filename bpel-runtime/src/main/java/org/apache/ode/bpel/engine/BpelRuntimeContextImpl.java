@@ -128,7 +128,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _vpu.registerExtension(BpelRuntimeContext.class, this);
 
         _soup = new ExecutionQueueImpl(null);
-        _soup.setReplacementMap(_bpelProcess.getReplacementMap());
+        _soup.setReplacementMap(_bpelProcess.getReplacementMap(dao.getProcess().getProcessId()));
         _outstandingRequests = new OutstandingRequestManager();
         _vpu.setContext(_soup);
 

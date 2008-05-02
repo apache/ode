@@ -545,11 +545,8 @@ public class ODEServer {
                 // bounce the process
                 _server.unregister(pse.pid);
                 ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
-                if (pconf != null)
-                    _server.register(pconf);
-                else {
-                    __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
-                }
+                if (pconf != null) _server.register(pconf);
+                else __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
                 break;
             case DISABLED:
             case UNDEPLOYED:

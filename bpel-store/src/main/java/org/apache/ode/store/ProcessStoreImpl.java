@@ -395,8 +395,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public void setRetiredPackage(String packageName, boolean retired) {
         DeploymentUnitDir duDir = _deploymentUnits.get(packageName);
-        if (duDir == null)
-            throw new ContextException("Could not find package " + packageName);
+        if (duDir == null) throw new ContextException("Could not find package " + packageName);
         for (QName processName : duDir.getProcessNames()) {
             setState(toPid(processName, duDir.getVersion()), retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
         }
