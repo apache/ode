@@ -177,15 +177,18 @@ define "ode" do
       end
     end
     
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     test.setup task(:prepare_webapp) do |task|
+      webapp_dir = "target/test-classes/webapp"
       cp_r _("src/main/webapp"), _("target/test-classes")
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
-      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test-classes/webapp/WEB-INF")
-      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test-classes/webapp/WEB-INF")
-      rm_rf Dir[_("target/test-classes/webapp") + "/**/.svn"]
+      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("#{webapp_dir}/WEB-INF")
+      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("#{webapp_dir}/WEB-INF")
+      rm_rf Dir[_(webapp_dir) + "/**/.svn"]
+      mkdir _"#{webapp_dir}/WEB-INF/processes" unless File.exist?(_"#{webapp_dir}/WEB-INF/processes")
     end
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
+    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
   end
 
   desc "ODE APIs"

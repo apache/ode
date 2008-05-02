@@ -11,7 +11,7 @@ public class ServiceFaultCatchTest extends Axis2TestBase {
         String bundleName = "TestStructuredFault";
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
-        if (!server.isDeployed("TestStructuredFault")) server.deployProcess("TestStructuredFault");
+        if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
 
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",

@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch;
  * These operations are set up to use the various Http binding configurations.  
  * <p/>
  * From a "business" standpoint:<br/>
- * Let N be the input number, stored in the testRequest.soap file<br/>
+ * Let N be the input number, stored in the testRequest1.soap file<br/>
  * This test will compute the Sum of the first (N + 300) positive integers.
  * <p/>
  * If N=10, the expected result is 310*(310+1)/2 = 48205

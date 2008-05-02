@@ -260,9 +260,7 @@ public class BpelEngineImpl implements BpelEngine {
     OProcess getOProcess(QName processId) {
         BpelProcess process = _activeProcesses.get(processId);
 
-        if (process == null)
-            return null;
-
+        if (process == null) return null;
         return process.getOProcess();
     }
 

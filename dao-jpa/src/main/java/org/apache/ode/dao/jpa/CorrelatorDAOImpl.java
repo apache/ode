@@ -25,23 +25,19 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 @Entity
 @Table(name="ODE_CORRELATOR")
+@NamedQueries({
+    @NamedQuery(name="RouteByCKey", query="SELECT route " +
+            "FROM MessageRouteDAOImpl as route " +
+            "WHERE route._correlationKey = :ckey and route._correlator._process._processType = :ptype")
+        })
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
     @Id @Column(name="CORRELATOR_ID")
@@ -69,8 +65,8 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
-        for (Iterator itr=_exchanges.iterator(); itr.hasNext();){
-            MessageExchangeDAOImpl mex = (MessageExchangeDAOImpl)itr.next();
+        for (Iterator<MessageExchangeDAOImpl> itr=_exchanges.iterator(); itr.hasNext();){
+            MessageExchangeDAOImpl mex = itr.next();
             if (mex.getCorrelationKeys().contains(correlationKey)) {
                 itr.remove();
                 return mex;
@@ -91,10 +87,12 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     public MessageRouteDAO findRoute(CorrelationKey correlationKey) {
-        for (MessageRouteDAOImpl mr : _routes ) {
-            if ( mr.getCorrelationKey().equals(correlationKey)) return mr;
-        }
-        return null;
+        Query qry = getEM().createNamedQuery("RouteByCKey");
+        qry.setParameter("ckey", correlationKey.toCanonicalString());
+        qry.setParameter("ptype", _process.getType().toString());
+        List<MessageRouteDAO> routes = (List<MessageRouteDAO>) qry.getResultList();
+        if (routes.size() > 0) return routes.get(0);
+        else return null;
     }
 
     public String getCorrelatorId() {
@@ -107,8 +105,8 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     void removeLocalRoutes(String routeGroupId, ProcessInstanceDAO target) {
-        for (Iterator itr=_routes.iterator(); itr.hasNext(); ) {
-            MessageRouteDAOImpl mr = (MessageRouteDAOImpl)itr.next();
+        for (Iterator<MessageRouteDAOImpl> itr=_routes.iterator(); itr.hasNext(); ) {
+            MessageRouteDAOImpl mr = itr.next();
             if ( mr.getGroupId().equals(routeGroupId) && mr.getTargetInstance().equals(target)) {
                 itr.remove();
                 getEM().remove(mr);
