@@ -80,8 +80,9 @@ public class ArithmeticsJettyWrapper {
                 String uri = request.getRequestURI();
                 if ("/HttpBindingTestService/".equals(uri)) {
                     response.getWriter().println("HttpBindingTestService ready!");
-                } else if (uri.contains("OlaElMundo-GET")) {
-                    if (!"GET".equalsIgnoreCase(method)) {
+                } else if (uri.contains("OlaElMundo-GET") || uri.contains("OlaElMundo-DELETE")) {
+//                    if (!"GET".equalsIgnoreCase(method)) {
+                    if (false) {
                         response.sendError(405, "Expecting method is GET");
                     } else {
                         if (!uri.contains("plus") && !uri.contains("minus")) {
@@ -117,8 +118,9 @@ public class ArithmeticsJettyWrapper {
                             }
                         }
                     }
-                } else if (uri.contains("OlaElMundo-POST")) {
-                    if (!"POST".equalsIgnoreCase(method)) {
+                } else if (uri.contains("OlaElMundo-POST") || uri.contains("OlaElMundo-PUT")) {
+//                    if (!"POST".equalsIgnoreCase(method)) {
+                    if (false) {
                         response.sendError(405, "Expecting method is POST");
                         return;
                     } else {

@@ -11,9 +11,9 @@ import java.util.concurrent.CountDownLatch;
  * <p/>
  * From a "business" standpoint:<br/>
  * Let N be the input number, stored in the testRequest1.soap file<br/>
- * This test will compute the Sum of the first (N + 300) positive integers.
+ * This test will compute the Sum of the first (N + 5) positive integers.
  * <p/>
- * If N=10, the expected result is 310*(310+1)/2 = 48205
+ * If N=10, the expected result is 15*(15+1)/2 = 120
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -52,8 +52,8 @@ public class HttpBindingTest extends Axis2TestBase {
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",
                     bundleName, "testRequest.soap");
-            int valueInSoapRequest = 10;
-            int n = 300 + valueInSoapRequest;
+            int valueInSoapRequest = 100;
+            int n = 5 + valueInSoapRequest;
             assertTrue(response.indexOf(String.valueOf(n * (n + 1) / 2)) >= 0);
         } finally {
             server.undeployProcess(bundleName);

@@ -25,6 +25,10 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.DeleteMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.ExpectContinueMethod;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
@@ -102,38 +106,67 @@ public class HttpMethodBuilder {
         return partValues;
     }
 
-    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, Map<String, Element> partValues, String rootUri) throws UnsupportedEncodingException {
+    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, Map<String, Element> partValues, final String rootUri) throws UnsupportedEncodingException {
         if (log.isDebugEnabled()) log.debug("Preparing http request...");
-        HttpMethod method;
+        // convenience variables...
         BindingInput bindingInput = bindingOperation.getBindingInput();
         HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(bindingOperation);
         String contentType = WsdlUtils.getMimeContentType(bindingInput.getExtensibilityElements());
         boolean useUrlEncoded = WsdlUtils.useUrlEncoded(bindingInput) || PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(contentType);
         boolean useUrlReplacement = WsdlUtils.useUrlReplacement(bindingInput);
+
+        final UrlReplacementTransformer replacementTransformer = new UrlReplacementTransformer(partValues.keySet());
+        final URLEncodedTransformer encodedTransformer = new URLEncodedTransformer();
+
+        // the http method to be built and returned
+        HttpMethod method = null;
+        // the 4 elements the http method may be made of
         String relativeUri = httpOperation.getLocationURI();
-        if ("get".equalsIgnoreCase(verb)) {
-            String queryPath = null;
-            if (useUrlReplacement) {
-                // insert part values in the url
-                UrlReplacementTransformer transformer = new UrlReplacementTransformer(partValues.keySet());
-                relativeUri = transformer.transform(relativeUri, partValues);
-            } else if (useUrlEncoded) {
-                // encode part values
-                URLEncodedTransformer transformer = new URLEncodedTransformer();
-                queryPath = transformer.transform(partValues);
+        String queryPath = null;
+        RequestEntity requestEntity = null;
+        String encodedParams = null;
+
+
+        if (useUrlReplacement) {
+            // insert part values in the url
+            relativeUri = replacementTransformer.transform(relativeUri, partValues);
+        } else if (useUrlEncoded) {
+            // encode part values
+            encodedParams = encodedTransformer.transform(partValues);
+        }
+
+        // http-client api is not really neat
+        // something similar to the following would save some if/else manipulations.
+        // But we have to deal with it as-is.
+        //
+        //  method = new Method(verb);
+        //  method.setRequestEnity(..)
+        //  etc...
+        if ("GET".equalsIgnoreCase(verb) || "DELETE".equalsIgnoreCase(verb)) {
+            if ("GET".equalsIgnoreCase(verb)) {
+                method = new GetMethod();
+            } else if ("DELETE".equalsIgnoreCase(verb)) {
+                method = new DeleteMethod();
             }
-            String uri = rootUri + (relativeUri.startsWith("/") ? "" : "/") + relativeUri;
-            method = new GetMethod(uri);
-            method.setQueryString(queryPath);
-            // Let http-client manage the redirection for GET
+
+            if (useUrlEncoded) {
+                queryPath = encodedParams;
+            }
+
+            // Let http-client manage the redirection
             // see org.apache.commons.httpclient.params.HttpClientParams.MAX_REDIRECTS
             // default is 100
             method.setFollowRedirects(true);
-        } else if ("post".equalsIgnoreCase(verb)) {
-            RequestEntity requestEntity;
+        } else if ("POST".equalsIgnoreCase(verb) || "PUT".equalsIgnoreCase(verb)) {
+
+            if ("POST".equalsIgnoreCase(verb)) {
+                method = new PostMethod();
+            } else if ("PUT".equalsIgnoreCase(verb)) {
+                method = new PutMethod();
+            }
+
+            // some body-building...
             if (useUrlEncoded) {
-                URLEncodedTransformer transformer = new URLEncodedTransformer();
-                String encodedParams = transformer.transform(partValues);
                 requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, "UTF-8");
             } else if (contentType.endsWith(CONTENT_TYPE_TEXT_XML)) {
                 // assumption is made that there is a single part
@@ -141,7 +174,7 @@ public class HttpMethodBuilder {
                 Part part = (Part) bindingOperation.getOperation().getInput().getMessage().getParts().values().iterator().next();
                 Element partValue = partValues.get(part.getName());
                 // if the part has an element name, we must take the first element
-                if(part.getElementName()!=null){
+                if (part.getElementName() != null) {
                     partValue = DOMUtils.getFirstChildElement(partValue);
                 }
                 String xmlString = DOMUtils.domToString(partValue);
@@ -150,14 +183,19 @@ public class HttpMethodBuilder {
                 // should not happen because of HttpBindingValidator, but never say never
                 throw new IllegalArgumentException("Unsupported content-type!");
             }
-            String uri = rootUri + (relativeUri.startsWith("/") ? "" : "/") + relativeUri;
-            PostMethod post = new PostMethod(uri);
-            post.setRequestEntity(requestEntity);
-            method = post;
+
+            // cast safely, PUT and POST are subclasses of EntityEnclosingMethod
+            ((EntityEnclosingMethod) method).setRequestEntity(requestEntity);
+
         } else {
             // should not happen because of HttpBindingValidator, but never say never
             throw new IllegalArgumentException("Unsupported HTTP method: " + verb);
         }
+
+        // Settings common to all methods
+        String completeUri = rootUri + (rootUri.endsWith("/") || relativeUri.startsWith("/") ? "" : "/") + relativeUri;
+        method.setPath(completeUri); // assumes that the path is properly encoded (URL safe).
+        method.setQueryString(queryPath);
         return method;
     }
 }

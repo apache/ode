@@ -22,7 +22,7 @@
   <!-- test soap message -->
   <SOAP-ENV:Body>
     <ns1:hello xmlns:ns1="http://ode/bpel/unit-test.wsdl">
-        <TestPart xmlns="">10</TestPart>
+        <TestPart xmlns="">100</TestPart>
     </ns1:hello>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

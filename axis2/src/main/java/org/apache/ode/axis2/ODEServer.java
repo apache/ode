@@ -324,8 +324,10 @@ public class ODEServer {
 
         try {
             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
+                if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
                 extService = new HttpExternalService(def, serviceName, portName, _executorService, _scheduler, _server);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
+                if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
                 extService = new SoapExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server, pconf);
             }
         } catch (Exception ex) {
