@@ -36,11 +36,29 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_delete" type="ns1:DummyServicePortType">
+    <!-- ###################################### -->
+    <!-- Supported HTTP Method tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_get" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # only GET and POST supported
+            shouldPass # GET should be supported
         </wsdl:documentation>
-        <http:binding verb="DELETE"/>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_post" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # POST should be supported
+        </wsdl:documentation>
+        <http:binding verb="POST"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
             <wsdl:input>
@@ -51,9 +69,24 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_delete" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # DELETE should be supported
+        </wsdl:documentation>
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_put" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # only GET and POST supported
+            shouldPass # PUT should be supported
         </wsdl:documentation>
         <http:binding verb="PUT"/>
         <wsdl:operation name="hello">
@@ -66,11 +99,11 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_post+text/xml" type="ns1:DummyServicePortType">
+    <wsdl:binding name="DummyServiceHttpBinding_head" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldPass # POST+text/xml should be supported
+            shouldFail # only GET, DELETE, PUT, POST supported
         </wsdl:documentation>
-        <http:binding verb="POST"/>
+        <http:binding verb="HEAD"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
             <wsdl:input>
@@ -81,15 +114,81 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_post+urlReplacement" type="ns1:DummyServicePortType">
+    <!-- ###################################### -->
+    <!-- PUT tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_put+text/xml" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # POST cannot use urlReplacement
+            shouldPass # PUT+text/xml should be supported
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_put+urlEncoded" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # PUT should be able to use urlEncoded
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_put+form-urlencoded" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # application/x-www-form-urlencoded should be supported for PUT
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="application/x-www-form-urlencoded" part="hello"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_put+whatever-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="whatever-content-type" part="hello"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <!-- ###################################### -->
+    <!-- POST tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_post+text/xml" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # POST+text/xml should be supported
         </wsdl:documentation>
         <http:binding verb="POST"/>
         <wsdl:operation name="hello">
-            <http:operation location="DummyService/hello/(part1)"/>
+            <http:operation location="DummyService/hello"/>
             <wsdl:input>
-                <http:urlReplacement/>
+                <mime:content type="text/xml" part="hello"/>
             </wsdl:input>
             <wsdl:output>
                 <mime:content type="text/xml" part="hello"/>
@@ -141,6 +240,9 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+    <!-- ###################################### -->
+    <!-- GET tests-->
+    <!-- ###################################### -->
     <wsdl:binding name="DummyServiceHttpBinding_get+whatever-content-type" type="ns1:DummyServicePortType">
         <wsdl:documentation>
             shouldFail # GET only supports urlReplacement and urlEncoded
@@ -171,6 +273,73 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+    <!-- ###################################### -->
+    <!-- DELETE tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_delete+whatever-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # DELETE only supports urlReplacement and urlEncoded
+        </wsdl:documentation>
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_delete+urlEncoded" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # DELETE should support urlEncoded
+        </wsdl:documentation>
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ###################################### -->
+    <!-- urlReplacement tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_post+urlReplacement" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # POST can use urlReplacement
+        </wsdl:documentation>
+        <http:binding verb="POST"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello/(TestPart)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_put+urlReplacement" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # PUT can use urlReplacement
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello/(TestPart)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement" type="ns1:DummyServicePortType">
         <wsdl:documentation>
             shouldPass # GET should support urlReplacement
@@ -186,9 +355,24 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_delete+urlReplacement" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # DELETE should support urlReplacement
+        </wsdl:documentation>
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello/(TestPart)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+missing_part" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # When urlReplacement used, all message parts must be in the url pattern 
+            shouldFail # When urlReplacement used, all message parts must be in the url pattern
         </wsdl:documentation>
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">

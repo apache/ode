@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.httpbinding;
 
 import junit.framework.TestCase;
 

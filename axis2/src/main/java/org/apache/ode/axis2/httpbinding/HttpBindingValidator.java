@@ -28,11 +28,11 @@ import javax.wsdl.BindingOperation;
 import javax.wsdl.BindingOutput;
 import javax.wsdl.extensions.http.HTTPBinding;
 import javax.wsdl.extensions.http.HTTPOperation;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
+import java.util.Iterator;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -59,7 +59,10 @@ public class HttpBindingValidator {
 
     protected void validatePort() {
 
-        if (!"get".equalsIgnoreCase(verb) && !"post".equalsIgnoreCase(verb)) {
+        if (!"GET".equalsIgnoreCase(verb)
+                && !"DELETE".equalsIgnoreCase(verb)
+                && !"PUT".equalsIgnoreCase(verb)
+                && !"POST".equalsIgnoreCase(verb)) {
             throw new IllegalArgumentException(httpMsgs.msgUnsupportedHttpMethod(binding, verb));
         }
 
@@ -103,27 +106,30 @@ public class HttpBindingValidator {
             }
         }
 
-        // only GET can use urlreplacement
-        if (!"get".equalsIgnoreCase(verb)) {
-            if (WsdlUtils.useUrlReplacement(input)) {
-                throw new IllegalArgumentException(httpMsgs.msgUrlReplacementWithGetOnly(binding));
-            }
+        if (WsdlUtils.useUrlReplacement(input)) {
+            validateUrlReplacement(bindingOperation);
         }
 
         // other specific validations
-        if ("get".equalsIgnoreCase(verb)) {
-            validateGet(bindingOperation);
+        if ("GET".equalsIgnoreCase(verb) || "DELETE".equalsIgnoreCase(verb)) {
+            validateGetOrDelete(bindingOperation);
         }
     }
 
-    protected void validateGet(BindingOperation bindingOperation) {
+    protected void validateGetOrDelete(BindingOperation bindingOperation) {
+        BindingInput input = bindingOperation.getBindingInput();
+
+        if (!WsdlUtils.useUrlEncoded(input) && !WsdlUtils.useUrlReplacement(input)) {
+            throw new IllegalArgumentException(httpMsgs.msgOnlySupportsUrlEncodedAndUrlreplacement(binding, bindingOperation));
+        }
+
+        // another test would be to check that all parts use a simple type
+    }
+
+    protected void validateUrlReplacement(BindingOperation bindingOperation) {
         HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(bindingOperation);
         BindingInput input = bindingOperation.getBindingInput();
         Map inputParts = bindingOperation.getOperation().getInput().getMessage().getParts();
-
-        if (!WsdlUtils.useUrlEncoded(input) && !WsdlUtils.useUrlReplacement(input)) {
-            throw new IllegalArgumentException(httpMsgs.msgGetOnlySupportsUrlEncodedAndUrlreplacement(binding, bindingOperation));
-        }
 
         // validate the url pattern
         if (WsdlUtils.useUrlReplacement(input)) {
@@ -134,7 +140,7 @@ public class HttpBindingValidator {
                 String name = (String) it.next();
                 Pattern p = Pattern.compile(".*(\\(" + name + "\\)).*");
                 Matcher m = p.matcher(locationUri);
-                // might be perfectible
+                // is there a regex to do both validations in one?
                 if (!m.matches() || locationUri.split("(\\(" + name + "\\))", -1).length != 2) {
                     throw new IllegalArgumentException(httpMsgs.msgInvalidURIPattern(binding, bindingOperation, locationUri));
                 }

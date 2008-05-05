@@ -39,6 +39,10 @@
                      partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
         <partnerLink name="olaPostPartnerLink"
                      partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+        <partnerLink name="olaPutPartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+        <partnerLink name="olaDeletePartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
     </partnerLinks>
 
     <variables>
@@ -55,21 +59,21 @@
     <!-- ###################################################### -->
     <!-- ###################################################### -->
     <!-- let N be the input number -->
-    <!-- This sequence will compute the Sum of the first (N + 300) positive integers -->
+    <!-- This sequence will compute the Sum of the first (N + 5) positive integers -->
     <!-- ###################################################### -->
     <!-- ###################################################### -->
     <sequence>
         <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
                  operation="hello" variable="inputVar" createInstance="yes"/>
 
-        <!-- Compute r = x + 100 -->
+        <!-- Compute r = x + 1 -->
         <assign>
             <copy>
                 <from>$inputVar.TestPart</from>
                 <to>$operands.left</to>
             </copy>
             <copy>
-                <from>100</from>
+                <from>1</from>
                 <to>$operands.right</to>
             </copy>
         </assign>
@@ -77,49 +81,110 @@
         <invoke partnerLink="olaGetPartnerLink" portType="dummy:OlaElMundoPortType"
                 operation="plus" inputVariable="operands" outputVariable="result"/>
 
-        <!-- Compute r = r - 200  (= x - 100)    -->
+        <!-- Compute r = r - 2  (= x - 1)    -->
         <assign>
             <copy>
                 <from>$result.result</from>
                 <to>$operands.left</to>
             </copy>
             <copy>
-                <from>200</from>
+                <from>2</from>
                 <to>$operands.right</to>
             </copy>
         </assign>
         <invoke partnerLink="olaGetPartnerLink" portType="dummy:OlaElMundoPortType"
                 operation="minus" inputVariable="operands" outputVariable="result"/>
 
-        <!-- Compute r = r + 300 (= x + 200) -->
+        <!-- Compute r = r + 3 (= x + 2) -->
         <assign>
             <copy>
                 <from>$result.result</from>
                 <to>$operands.left</to>
             </copy>
             <copy>
-                <from>300</from>
+                <from>3</from>
                 <to>$operands.right</to>
             </copy>
         </assign>
         <invoke partnerLink="olaPostPartnerLink" portType="dummy:OlaElMundoPortType"
                 operation="plus" inputVariable="operands" outputVariable="result"/>
 
-        <!-- Compute r = r - 400 (= x - 200) -->
+        <!-- Compute r = r - 4 (= x - 2) -->
         <assign>
             <copy>
                 <from>$result.result</from>
                 <to>$operands.left</to>
             </copy>
             <copy>
-                <from>400</from>
+                <from>4</from>
                 <to>$operands.right</to>
             </copy>
         </assign>
         <invoke partnerLink="olaPostPartnerLink" portType="dummy:OlaElMundoPortType"
                 operation="minus" inputVariable="operands" outputVariable="result"/>
 
-        <!-- Compute r = r + 500 (= x + 300) -->
+
+
+        <!-- Compute r = r + 5 (= x + 3) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>5</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaDeletePartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 6 (= x - 3) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>6</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaDeletePartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+
+
+        <!-- Compute r = r + 7 (= x + 4) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>7</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPutPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 9 (= x - 5) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>9</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPutPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+
+        <!-- Compute r = r + 10 (= x + 5) -->
         <assign>
             <!-- First, build the proper element -->
             <copy>
@@ -127,7 +192,7 @@
                     <literal>
                         <dummy:operandList>
                             <dummy:operand></dummy:operand>
-                            <dummy:operand>500</dummy:operand>
+                            <dummy:operand>10</dummy:operand>
                         </dummy:operandList>
                     </literal>
                 </from>

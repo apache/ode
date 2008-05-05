@@ -142,6 +142,52 @@
     </wsdl:binding>
 
 
+    <wsdl:binding name="OlaElMundoHttpBinding-PUT" type="tns:OlaElMundoPortType">
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="plus">
+            <http:operation location="plus"/>
+            <wsdl:input>
+                <mime:content type="application/x-www-form-urlencoded"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <wsdl:binding name="OlaElMundoHttpBinding-DELETE" type="tns:OlaElMundoPortType">
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="plus">
+            <http:operation location="plus/(left):(right)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
     <wsdl:binding name="SalutLaTerreHttpBinding" type="tns:SalutLaTerrePortType">
         <http:binding verb="POST"/>
         <wsdl:operation name="addition">
@@ -167,12 +213,16 @@
 
     <!--
         6 urls to handle:
-        (GET)   http://localhost:8080/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
-        (GET)   http://         ........                    /OlaElMundo-GET/minus?left=&right=
-        (POST)  http://         ........                    /OlaElMundo-POST/plus
-        (POST)  http://         ........                    /OlaElMundo-POST/minus
-        (POST)  http://         ........                    /SalutLaTerre/addition
-        (POST)  http://         ........                    /SalutLaTerre/sumOfIntegers
+        (GET)       http://localhost:8080/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
+        (GET)       http://         ........                    /OlaElMundo-GET/minus?left=&right=
+        (DELETE)    http://localhost:8080/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)
+        (DELETE)    http://         ........                    /OlaElMundo-DELETE/minus?left=&right=
+        (POST)      http://         ........                    /OlaElMundo-POST/plus
+        (POST)      http://         ........                    /OlaElMundo-POST/minus
+        (PUT)       http://         ........                    /OlaElMundo-PUT/plus
+        (PUT)       http://         ........                    /OlaElMundo-PUT/minus
+        (POST)      http://         ........                    /SalutLaTerre/addition
+        (POST)      http://         ........                    /SalutLaTerre/sumOfIntegers
     -->
     <wsdl:service name="HttpBindingTestService">
         <wsdl:port name="OlaElMundo-GET_httpport" binding="tns:OlaElMundoHttpBinding-GET">
@@ -180,6 +230,12 @@
         </wsdl:port>
         <wsdl:port name="OlaElMundo-POST_httpport" binding="tns:OlaElMundoHttpBinding-POST">
             <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-POST"/>
+        </wsdl:port>
+        <wsdl:port name="OlaElMundo-PUT_httpport" binding="tns:OlaElMundoHttpBinding-PUT">
+            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-PUT"/>
+        </wsdl:port>
+        <wsdl:port name="OlaElMundo-DELETE_httpport" binding="tns:OlaElMundoHttpBinding-DELETE">
+            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-DELETE"/>
         </wsdl:port>
         <wsdl:port name="SalutLaTerre_httpport" binding="tns:SalutLaTerreHttpBinding">
             <http:address location="http://localhost:7070/HttpBindingTestService/SalutLaTerre"/>

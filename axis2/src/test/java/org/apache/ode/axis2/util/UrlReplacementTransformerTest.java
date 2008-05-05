@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.util;
 
 import junit.framework.TestCase;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;

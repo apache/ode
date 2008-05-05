@@ -63,16 +63,12 @@ public class Messages extends MessageBundle {
         return format("Invalid content-type! binding:{0}, operation:{1}", binding.getQName(), operation.getName());
     }
 
-    public String msgUrlReplacementWithGetOnly(Binding binding){
-        return format("UrlReplacement may only be used with GET! binding:{0}", binding.getQName());        
-    }
-
     public String msgSimpleTypeExpected(String partName){
         return format("Simple type expected for {0}", partName);
     }
 
-    public String msgGetOnlySupportsUrlEncodedAndUrlreplacement(Binding binding, BindingOperation operation) {
-        return format("Get only supports urlEncoded or urlReplacement! binding:{0}, operation:{1}", binding.getQName(), operation.getName());
+    public String msgOnlySupportsUrlEncodedAndUrlreplacement(Binding binding, BindingOperation operation) {
+        return format("Only supports urlEncoded or urlReplacement! binding:{0}, operation:{1}", binding.getQName(), operation.getName());
     }
 
 }

@@ -36,5 +36,11 @@
         <invoke partnerLink="olaPostPartnerLink">
             <service name="dns:HttpBindingTestService" port="OlaElMundo-POST_httpport"/>
         </invoke>
+        <invoke partnerLink="olaPutPartnerLink">
+            <service name="dns:HttpBindingTestService" port="OlaElMundo-PUT_httpport"/>
+        </invoke>
+        <invoke partnerLink="olaDeletePartnerLink">
+            <service name="dns:HttpBindingTestService" port="OlaElMundo-DELETE_httpport"/>
+        </invoke>
     </process>
 </deploy>
