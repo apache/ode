@@ -125,17 +125,16 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             q.setLockMode("hs", LockMode.UPGRADE);
 
             HCorrelatorSelector selector;
-//            try {
+            try {
                 selector = (HCorrelatorSelector) q.uniqueResult();
-//            } catch (Exception ex) {
-//                __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
-//
-//                Iterator i = q.iterate();
-//                if (i.hasNext())
-//                    selector = (HCorrelatorSelector) i.next();
-//                else selector = null;
-//                Hibernate.close(i);
-//            }
+            } catch (Exception ex) {
+                __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
+
+                Iterator i = q.iterate();
+                if (i.hasNext()) selector = (HCorrelatorSelector) i.next();
+                else selector = null;
+                Hibernate.close(i);
+            }
     
             __log.debug(hdr + "found " + selector);
             return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
