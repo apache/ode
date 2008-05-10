@@ -67,6 +67,7 @@ import java.io.FileNotFoundException;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -285,12 +286,22 @@ public class ODEServer {
                 _txMgr = null;
             }
 
+            if (_connector != null) {
+                try {
+                    __log.debug("shutdown BpelConnector");
+                    _connector.shutdown();
+                } catch (Throwable t) {
+                    __log.error("Unable to cleanup temp files.", t);
+                }
+            }
+            
             try {
                 __log.debug("cleaning up temporary files.");
                 TempFileManager.cleanup();
             } catch (Throwable t) {
                 __log.error("Unable to cleanup temp files.", t);
             }
+
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {
@@ -450,10 +461,20 @@ public class ODEServer {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
+        ThreadFactory threadFactory = new ThreadFactory() {
+            int threadNumber = 0;
+            public Thread newThread(Runnable r) {
+                threadNumber += 1;
+                Thread t = new Thread(r, "ODEServer-"+threadNumber);
+                t.setDaemon(true);
+                return t;
+            }
+        };
+
         if (_odeConfig.getThreadPoolMaxSize() == 0)
-            _executorService = Executors.newCachedThreadPool();
+            _executorService = Executors.newCachedThreadPool(threadFactory);
         else
-            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize());
+            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
 
         _server = new BpelServerImpl();
         _scheduler = createScheduler();
