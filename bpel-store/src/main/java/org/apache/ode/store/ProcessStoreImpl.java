@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -106,7 +107,7 @@ public class ProcessStoreImpl implements ProcessStore {
      * to get confused ii) we're already serializing all the operations with a read/write lock. iii) we don't care about
      * performance, these are infrequent operations.
      */
-    private ExecutorService _executor = Executors.newSingleThreadExecutor();
+    private ExecutorService _executor = Executors.newSingleThreadExecutor(new SimpleThreadFactory());
 
     /**
      * In-memory DataSource, or <code>null</code> if we are using a real DS. We need this to shutdown the DB.
@@ -779,4 +780,16 @@ public class ProcessStoreImpl implements ProcessStore {
 	public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
 		_extensionValidators = extensionValidators;
 	}
+    
+
+    private class SimpleThreadFactory implements ThreadFactory {
+        int threadNumber = 0;
+        public Thread newThread(Runnable r) {
+            threadNumber += 1;
+            Thread t = new Thread(r, "ProcessStoreImpl-"+threadNumber);
+            t.setDaemon(true);
+            return t;
+        }
+    }
+    
 }

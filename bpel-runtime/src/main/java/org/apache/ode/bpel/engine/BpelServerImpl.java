@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -187,9 +188,19 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("BPEL SERVER starting.");
 
 
-            if (_exec == null)
-                _exec = Executors.newCachedThreadPool();
-
+            if (_exec == null) {
+                ThreadFactory threadFactory = new ThreadFactory() {
+                    int threadNumber = 0;
+                    public Thread newThread(Runnable r) {
+                        threadNumber += 1;
+                        Thread t = new Thread(r, "ODEServerImpl-"+threadNumber);
+                        t.setDaemon(true);
+                        return t;
+                    }
+                };
+                _exec = Executors.newCachedThreadPool(threadFactory);
+            }
+            
             if (_contexts.txManager == null) {
                 String errmsg = "Transaction manager not specified; call setTransactionManager(...)!";
                 __log.fatal(errmsg);
