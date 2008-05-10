@@ -274,12 +274,22 @@ public class ODEServer {
                 _txMgr = null;
             }
 
+            if (_connector != null) {
+                try {
+                    __log.debug("shutdown BpelConnector");
+                    _connector.shutdown();
+                } catch (Throwable t) {
+                    __log.error("Unable to cleanup temp files.", t);
+                }
+            }
+            
             try {
                 __log.debug("cleaning up temporary files.");
                 TempFileManager.cleanup();
             } catch (Throwable t) {
                 __log.error("Unable to cleanup temp files.", t);
             }
+
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {
