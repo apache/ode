@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<process name="MagicSessionResponder"
+         targetNamespace="http://ode/bpel/responder"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/responder"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:resp="http://ode/bpel/unit-test.wsdl">
+
+  <import location="Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="mainPartnerLink" partnerLinkType="resp:ResponderPartnerLinkType"
+                 myRole="responder" partnerRole="main" initializePartnerRole="yes"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy2" messageType="resp:InitiateMessage"/>
+    <variable name="dummy3" messageType="resp:CallbackMessage"/>
+    <variable name="dummy4" messageType="resp:DoubleCallMessage"/>
+    <variable name="dummy5" messageType="resp:DoubleCallbackMessage"/>
+    <variable name="eprmessage" messageType="resp:TripleCallMessage"/>
+    <variable name="dummy6" messageType="resp:TripleCallbackMessage"/>
+  </variables>
+
+  <sequence>
+    <!-- Starting process and first callback -->
+    <receive name="start" partnerLink="mainPartnerLink" variable="dummy2"
+             portType="resp:MSResponderPortType" operation="initiate" createInstance="yes"/>
+    <assign>
+      <copy>
+        <from>123</from>
+        <to variable="dummy3" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="callback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="callback" inputVariable="dummy3"/>
+
+    <!-- Second callback -->
+    <receive name="doubleCall" partnerLink="mainPartnerLink" variable="dummy4"
+             portType="resp:MSResponderPortType" operation="doubleCall"/>
+    <assign>
+      <copy>
+        <from>123</from>
+        <to variable="dummy5" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="doubleCallback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="doubleCallback" inputVariable="dummy5"/>
+
+    <!-- Callback on the epr explicitly provided by partner in the message
+         (demonstrating assignment) -->
+    <receive name="eprPassing" partnerLink="mainPartnerLink" variable="eprmessage"
+             portType="resp:MSResponderPortType" operation="EndpointReference"/>
+    <assign>
+      <copy>
+        <from variable="eprmessage" part="payload"/>
+        <to partnerLink="mainPartnerLink"/>
+      </copy>
+      <copy>
+        <from>123</from>
+        <to variable="dummy6" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="tripleCallback" partnerLink="mainPartnerLink"
+           portType="resp:MSMainPortType" operation="tripleCallback" inputVariable="dummy6"/>
+
+  </sequence>
+</process>
