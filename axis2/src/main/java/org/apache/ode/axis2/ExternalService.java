@@ -136,7 +136,6 @@ public class ExternalService implements PartnerRoleChannel {
             operationClient.addMessageContext(mctx);
 
             if (isTwoWay) {
-                final String mexId = odeMex.getMessageExchangeId();
                 final Operation operation = odeMex.getOperation();
 
                 try {
@@ -147,14 +146,14 @@ public class ExternalService implements PartnerRoleChannel {
                         __log.debug("Service response:\n" + response.getEnvelope().toString());
 
                     if (flt != null) {
-                        reply(mexId, operation, flt, true);
+                        reply(odeMex, operation, flt, true);
                     } else {
-                        reply(mexId, operation, response, response.isFault());
+                        reply(odeMex, operation, response, response.isFault());
                     }
                 } catch (Throwable t) {
                     String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
                     __log.error(errmsg, t);
-                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                    replyWithFailure(odeMex, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
                 }
             } else /* one-way case */{
                 operationClient.execute(false);
@@ -255,9 +254,8 @@ public class ExternalService implements PartnerRoleChannel {
         return _serviceName;
     }
 
-    private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg, final Element details) {
+    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg, final Element details) {
         try {
-            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getMessageExchange(odeMexId);
             odeMex.replyWithFailure(error, errmsg, details);
         } catch (Exception e) {
             String emsg = "Error executing replyWithFailure; reply will be lost.";
@@ -267,7 +265,7 @@ public class ExternalService implements PartnerRoleChannel {
 
     }
 
-    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean fault) {
+    private void reply(final PartnerRoleMessageExchange odeMex, final Operation operation, final MessageContext reply, final boolean fault) {
         final Document odeMsg = DOMUtils.newDocument();
         final Element odeMsgEl = odeMsg.createElementNS(null, "message");
         odeMsg.appendChild(odeMsgEl);
@@ -283,12 +281,11 @@ public class ExternalService implements PartnerRoleChannel {
             }
         } catch (AxisFault af) {
             __log.warn("Message format error, failing.", af);
-            replyWithFailure(odeMexId, FailureType.FORMAT_ERROR, af.getMessage(), null);
+            replyWithFailure(odeMex, FailureType.FORMAT_ERROR, af.getMessage(), null);
             return;
         }
 
         try {
-            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getMessageExchange(odeMexId);
             QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
             if (faultType != null) {
                 Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
