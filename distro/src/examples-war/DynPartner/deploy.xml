@@ -31,8 +31,7 @@
 		</invoke>
 	</process>
 	<process name="resp:DynPartnerResponder">
-		<in-memory>true</in-memory>
-                <type>resp:DynPartnerResponder</type>
+    <type>resp:DynPartnerResponder</type>
 		<provide partnerLink="mainPartnerLink">
 			<service name="rws:DynResponderService" port="DynResponderPort"/>
 		</provide>
