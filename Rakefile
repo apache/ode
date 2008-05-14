@@ -185,6 +185,8 @@ define "ode" do
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test-classes/webapp/WEB-INF")
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test-classes/webapp/WEB-INF")
+      mkdir_p _("target/test-classes/webapp/WEB-INF/processes")
+      rm_rf Dir[_("target/test-classes/webapp") + "/**/.svn"]
     end
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
   end

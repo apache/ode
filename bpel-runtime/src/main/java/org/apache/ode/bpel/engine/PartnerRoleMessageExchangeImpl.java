@@ -248,7 +248,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
         if (_state == State.DEAD)
             throw new IllegalStateException("Object used in inappropriate context. ");
 
-        if (getStatus() != MessageExchange.Status.REQ)
+        if (getStatus() != MessageExchange.Status.REQ && getStatus() != MessageExchange.Status.ASYNC)
             throw new IllegalStateException("Invalid message exchange state, expect REQ but got " + getStatus());
 
     }

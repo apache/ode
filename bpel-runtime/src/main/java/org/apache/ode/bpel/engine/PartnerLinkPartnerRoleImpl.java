@@ -130,10 +130,13 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
     private void invokePersisted(MessageExchangeDAO mexDao, EndpointReference partnerEpr, EndpointReference myRoleEpr,
             Operation operation, Set<InvocationStyle> supportedStyles) {
         if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
+            mexDao.setInvocationStyle(InvocationStyle.TRANSACTED);
             invokeTransacted(mexDao, partnerEpr, myRoleEpr, operation);
         } else if (supportedStyles.contains(InvocationStyle.RELIABLE)) {
+            mexDao.setInvocationStyle(InvocationStyle.RELIABLE);
             invokeReliable(mexDao, partnerEpr, myRoleEpr, operation);
         } else if (supportedStyles.contains(InvocationStyle.UNRELIABLE)) {
+            mexDao.setInvocationStyle(InvocationStyle.UNRELIABLE);
             invokeUnreliable(mexDao, partnerEpr, myRoleEpr, operation);
         } else {
             // This really should not happen, indicates IL is screwy.
@@ -362,8 +365,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
                     }
                 } );
                 return;
-            }
-            
+            }            
             
             // We proceed handling the response in a transaction. Note that if for some reason the following transaction
             // fails, the unreliable invoke will be in an "unknown" state, and will require manual intervention to either
