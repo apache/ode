@@ -5,6 +5,10 @@ public class TestSimpleScenario extends Axis2TestBase {
     protected void setUp() throws Exception {
         start();
     }
+    protected void tearDown() throws Exception {
+        server.stop();
+    }
+    
 
     public void testDynPartner() throws Exception {
         String bundleName = "TestDynPartner";
