@@ -1,10 +1,5 @@
 package org.apache.ode.axis2;
 
-import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
-
-import java.net.URL;
-import java.io.FileInputStream;
-
 /**
  * Tests that a fault thrown by a called service can be caught and is properly
  * structured so that an assign on a fault sub-element will succeed.
@@ -14,6 +9,9 @@ public class ServiceFaultCatchTest extends Axis2TestBase {
 
     protected void setUp() throws Exception {
         start();
+    }
+    protected void tearDown() throws Exception {
+        server.stop();
     }
 
     public void testSimpleFaultCatch() throws Exception {
