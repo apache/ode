@@ -31,6 +31,7 @@ public class TestSimpleScenario extends Axis2TestBase {
             String response = server.sendRequestFile("http://localhost:8080/ode/processes/MSMainExecuteService",
                     bundleName, "testRequest.soap");
 
+            System.out.println("->" + response);
             assertTrue(response.indexOf("OK") > 0);
         } finally {
             server.undeployProcess(bundleName);
