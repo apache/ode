@@ -710,7 +710,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // we need to inject a message on the response channel, so that the process continues.
         switch (mexDao.getStatus()) {
         case ACK:
-            injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+            if (mexDao.getChannel() != null) injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
             break;
         case ASYNC:
             // we'll have to wait for the response.
