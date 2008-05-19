@@ -63,7 +63,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
         ExternalService service = (ExternalService)partnerRoleMessageExchange.getPartnerRoleChannel();
         if (__log.isDebugEnabled())
-            __log.debug("The service to invoke is the external service " + service);
+            __log.debug("The service to invoke is the external service " + service.getServiceName()+":"+service.getPortName());
         service.invoke(partnerRoleMessageExchange);
         
     }

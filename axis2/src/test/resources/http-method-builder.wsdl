@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        targetNamespace="http://ode/bpel/unit-test.wsdl"
+        xmlns:tns="http://ode/bpel/unit-test.wsdl"
+        xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <wsdl:service name="DummyService">
+        <wsdl:port name="DummyServiceHttpport" binding="tns:DummyServiceHttpBinding">
+            <http:address location="http://localhost:8080/processes/DummyService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+    <wsdl:portType name="DummyServicePortType">
+       <wsdl:operation name="faultTest">
+          <wsdl:input message="tns:faultTestRequest"/>
+          <wsdl:output message="tns:faultTestResponse"/>
+          <wsdl:fault message="tns:DummyException" name="DummyException"/>
+       </wsdl:operation>
+       <wsdl:operation name="hello">
+          <wsdl:input message="tns:helloRequest"/>
+          <wsdl:output message="tns:helloResponse"/>
+       </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="DummyServiceHttpBinding" type="tns:DummyServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="faultTest">
+            <http:operation location="DummyService/faultTest"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    
+
+    <wsdl:types>
+        <xsd:schema xmlns:ns="http://axis2.ode.apache.org" attributeFormDefault="qualified"
+                    elementFormDefault="unqualified" targetNamespace="http://axis2.ode.apache.org">
+
+            <xsd:element name="DummyException">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="reason" nillable="true" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="faultTest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="in" nillable="true" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="faultTestResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="return" nillable="true" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="hello">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="in" nillable="true" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="helloResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" name="return" nillable="true" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="faultTestRequest">
+        <wsdl:part name="parameters" element="tns:faultTest"/>
+    </wsdl:message>
+    <wsdl:message name="faultTestResponse">
+        <wsdl:part name="parameters" element="tns:faultTestResponse"/>
+    </wsdl:message>
+    <wsdl:message name="DummyException">
+        <wsdl:part name="parameters" element="tns:DummyException"/>
+    </wsdl:message>
+    <wsdl:message name="helloRequest">
+        <wsdl:part name="parameters" element="tns:hello"/>
+    </wsdl:message>
+    <wsdl:message name="helloResponse">
+        <wsdl:part name="parameters" element="tns:helloResponse"/>
+    </wsdl:message>
+
+
+
+    <!--
+        ++ GET with url replacement
+            del.icio.us
+            http://del.icio.us/popular/{tag}
+            http://del.icio.us/tag/{tag}
+    -->
+    <wsdl:message name="TagRequest">
+        <wsdl:part name="TagPart" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:message name="TagResponse">
+        <wsdl:part name="TagPart" element="RDF"/>
+    </wsdl:message>
+
+    <wsdl:portType name="TagType">
+        <wsdl:operation name="getTag">
+            <wsdl:input message="tns:TagRequest"/>
+            <wsdl:output message="tns:TagResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="TagHttpBinding" type="tns:TagType">
+        <http:binding verb="GET"/>
+        <wsdl:operation name="getTag">
+            <http:operation location="tag/(TagPart)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="DeliciousService">
+        <wsdl:port name="TagHttpPort" binding="tns:TagHttpBinding">
+            <http:address location="http://feeds.delicious.com/rss"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
+

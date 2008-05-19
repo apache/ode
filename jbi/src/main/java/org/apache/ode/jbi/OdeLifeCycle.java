@@ -223,7 +223,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         sched.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
         _ode._scheduler = sched;
 
-        _ode._store = new ProcessStoreImpl(_ode._dataSource, _ode._config.getDAOConnectionFactory(), false);
+        _ode._store = new ProcessStoreImpl(_ode._dataSource,
+                _ode._config.getDAOConnectionFactory(), _ode._config, false);
         _ode._store.loadAll();
 
         _ode._server.setDaoConnectionFactory(_ode._daocf);

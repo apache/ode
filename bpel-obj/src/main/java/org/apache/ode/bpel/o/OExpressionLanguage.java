@@ -34,4 +34,13 @@ public class OExpressionLanguage extends OBase {
         if (properties != null)
             this.properties.putAll(properties);
     }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof OExpressionLanguage) return ((OExpressionLanguage)obj).expressionLanguageUri.equals(expressionLanguageUri);
+        else return super.equals(obj);
+    }
+
+    public int hashCode() {
+        return expressionLanguageUri.hashCode();
+    }
 }

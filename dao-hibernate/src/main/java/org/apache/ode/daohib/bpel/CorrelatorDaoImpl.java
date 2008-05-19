@@ -41,6 +41,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 
+import javax.xml.namespace.QName;
+
 /**
  * Hibernate-based {@link CorrelatorDAO} implementation.
  */
@@ -53,12 +55,11 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     private static final String QRY_MESSAGE = " where this.correlationKey = ?".intern();
 
     /** filter for finding a matching selector. */
-    private static final String FLTR_SELECTORS = " where this.correlationKey = ?" + " and " +
-            "(this.instance.state = " + ProcessState.STATE_ACTIVE + " or this.instance.state = " 
-            + ProcessState.STATE_READY + ")".intern();
+    private static final String FLTR_SELECTORS = ("from " + HCorrelatorSelector.class.getName()
+            + " hs where hs.correlationKey = ? and hs.processType = ? and hs.correlator.correlatorId = ?").intern();
 
-    private static final String LOCK_SELECTORS = "update " + HCorrelatorSelector.class.getName() + 
-        " set lock = lock+1 where correlationKey = :ckey and correlator= :corr".intern();
+    private static final String LOCK_SELECTORS = "update from " + HCorrelatorSelector.class.getName() +
+        " set lock = lock+1 where correlationKey = ? and processType = ?".intern();
     
     /** Query for removing routes. */
     private static final String QRY_DELSELECTORS = "delete from " + HCorrelatorSelector.class.getName()
@@ -86,9 +87,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // We really should consider the possibility of multiple messages matching a criteria.
         // When the message is handled, its not too convenient to attempt to determine if the
         // received message conflicts with one already received.
-
         Iterator mcors = qry.iterate();
-
         try {
             if (!mcors.hasNext()) {
                 __log.debug(hdr + "did not find a MESSAGE entry.");
@@ -96,11 +95,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             }
     
             HCorrelatorMessage mcor = (HCorrelatorMessage) mcors.next();
-            
-            
             __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
             removeEntries(mcor.getMessageExchange());
-    
             return new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
         } finally {
             Hibernate.close(mcors);
@@ -116,25 +112,27 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // will not necessarily work, as different DB vendors attach a different meaning to this syntax.
         // In particular it is not clear how long the lock should be held, for the lifetime of the 
         // resulting cursor, or for the lifetime of the transaction. So really, an UPDATE of the row
-        // is a much safer alternative. 
+        // is a much safer alternative.
+        String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
         Query lockQry = getSession().createQuery(LOCK_SELECTORS);
-        lockQry.setString("ckey", key == null ? null : key.toCanonicalString());
-        lockQry.setEntity("corr",_hobj);
+        lockQry.setString(0, key == null ? null : key.toCanonicalString());
+        lockQry.setString(1, processType);
         if (lockQry.executeUpdate() > 0) {
             
-            Query q = getSession().createFilter(_hobj.getSelectors(), FLTR_SELECTORS);
+            Query q = getSession().createQuery(FLTR_SELECTORS);
             q.setString(0, key == null ? null : key.toCanonicalString());
-            q.setLockMode("this", LockMode.UPGRADE);
+            q.setString(1, processType);
+            q.setString(2, _hobj.getCorrelatorId());
+            q.setLockMode("hs", LockMode.UPGRADE);
 
             HCorrelatorSelector selector;
             try {
                 selector = (HCorrelatorSelector) q.uniqueResult();
             } catch (Exception ex) {
                 __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
-                
+
                 Iterator i = q.iterate();
-                if (i.hasNext())
-                    selector = (HCorrelatorSelector) i.next();
+                if (i.hasNext()) selector = (HCorrelatorSelector) i.next();
                 else selector = null;
                 Hibernate.close(i);
             }
@@ -187,6 +185,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setLock(0);
         hsel.setCorrelationKey(correlationKey.toCanonicalString());
         hsel.setInstance((HProcessInstance) ((ProcessInstanceDaoImpl) target).getHibernateObj());
+        hsel.setProcessType(target.getProcess().getType().toString());
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
 //        _hobj.addSelector(hsel);

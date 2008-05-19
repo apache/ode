@@ -53,6 +53,7 @@ import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
@@ -122,7 +123,7 @@ public abstract class BPELTestAbstract {
         _server.setMessageExchangeContext(mexContext);
         _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, "jpa", true);
+        store = new ProcessStoreImpl(null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
         // not needed: we do eclipcitly in doDeployment
 //        store.registerListener(new ProcessStoreListener() {
 //            public void onProcessStoreEvent(ProcessStoreEvent event) {
@@ -153,17 +154,14 @@ public abstract class BPELTestAbstract {
             }
         }
 
-        if (em != null)
-            em.close();
-        if (emf != null)
-            emf.close();
+        if (em != null) em.close();
+        if (emf != null) emf.close();
 
         _server.stop();
         _failures = null;
         _deployed = null;
         _deployments = null;
         _invocations = null;
-
     }
 
     public void registerExtensionBundle(AbstractExtensionBundle bundle) {
@@ -297,7 +295,7 @@ public abstract class BPELTestAbstract {
 
     /**
      * Do all the registered deployments.
-     * 
+     *
      * @param d
      */
     protected void doDeployment(Deployment d) {
@@ -361,8 +359,10 @@ public abstract class BPELTestAbstract {
             testThreads.add(t);
         }
 
-        for (Thread testThread : testThreads)
+        for (Thread testThread : testThreads) {
             testThread.start();
+            if (testThreads.size() > 0) Thread.sleep(2000);
+        }
 
         for (Thread testThread : testThreads)
             testThread.join();
@@ -455,9 +455,9 @@ public abstract class BPELTestAbstract {
 
     /**
      * Represents a test deployement.
-     * 
+     *
      * @author mszefler
-     * 
+     *
      */
     public static class Deployment {
         /** The directory containing the deploy.xml and artefacts. */
@@ -477,7 +477,7 @@ public abstract class BPELTestAbstract {
 
     /**
      * Represents an test invocation of the BPEL engine.
-     * 
+     *
      * @author mszefler
      */
     public static class Invocation {

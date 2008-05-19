@@ -19,6 +19,7 @@
 
 package org.apache.ode.axis2.util;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -59,11 +60,12 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.namespace.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.Messages;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.wsdl.Messages;
+import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
 
@@ -115,17 +117,17 @@ public class SoapMessageConverter {
             throw new OdeFault(__msgs.msgPortDefinitionNotFound(serviceName, portName));
         _binding = _port.getBinding();
         if (_binding == null)
-            throw new OdeFault(__msgs.msgBindingNotFound(serviceName, portName));
+            throw new OdeFault(__msgs.msgBindingNotFound(portName));
 
-
-        Collection<SOAPBinding> soapBindings = CollectionsX.filter(_binding.getExtensibilityElements(), SOAPBinding.class);
-        if (soapBindings.isEmpty())
-            throw new OdeFault(__msgs.msgNoSOAPBindingForPort(_portName));
-        else if (soapBindings.size() > 1) {
-            throw new OdeFault(__msgs.msgMultipleSoapBindingsForPort(_portName));
+        try {
+            if (!WsdlUtils.useSOAPBinding(_port)) {
+                throw new OdeFault(__msgs.msgNoSOAPBindingForPort(_portName));
+            }
+            _soapBinding = (SOAPBinding) WsdlUtils.getBindingExtension(_port);
+        } catch (IllegalArgumentException iae) {
+            throw new OdeFault(iae);
         }
 
-        _soapBinding = soapBindings.iterator().next();
         String style = _soapBinding.getStyle();
         _isRPC = style != null && style.equals("rpc");
 
