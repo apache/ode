@@ -1,6 +1,5 @@
 package org.apache.ode.axis2;
 
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.context.MessageContext;
@@ -20,13 +19,6 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class SoapHeaderTest extends Axis2TestBase {
-
-    protected void setUp() throws Exception {
-        start();
-    }
-    protected void tearDown() throws Exception {
-        server.stop();
-    }
 
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",

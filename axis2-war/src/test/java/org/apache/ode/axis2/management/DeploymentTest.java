@@ -19,7 +19,6 @@
 
 package org.apache.ode.axis2.management;
 
-import junit.framework.TestCase;
 import org.apache.axiom.om.*;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
@@ -131,7 +130,7 @@ public class DeploymentTest extends Axis2TestBase {
     }
 
     protected void setUp() throws Exception {
-        start();
+        super.setUp();
         // Create a factory
         _factory = OMAbstractFactory.getOMFactory();
         _client = new ServiceClientUtil();
@@ -146,7 +145,7 @@ public class DeploymentTest extends Axis2TestBase {
 
     protected void tearDown() throws Exception {
         undeploy(_package);
-        server.stop();        
+        super.tearDown();
     }
 
     private String deploy(String packageName) throws Exception {

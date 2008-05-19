@@ -26,14 +26,11 @@ package org.apache.ode.daohib.bpel.hobj;
 public class HCorrelatorSelector extends HObject {
 
     private HProcessInstance _instance;
-
     private String _groupId;
-
     private int _idx;
-
     private HCorrelator _correlator;
-
     private String _correlationKey;
+    private String _processType;
     
     /**
      * @hibernate.many-to-one column="PIID" not-null="true"
@@ -93,6 +90,17 @@ public class HCorrelatorSelector extends HObject {
     }
 
     /**
+     * @hibernate.property column="PROC_TYPE" not-null="true"
+     */
+    public String getProcessType() {
+        return _processType;
+    }
+
+    public void setProcessType(String _processType) {
+        this._processType = _processType;
+    }
+
+    /**
      * @hibernate.many-to-one not-null="true"
      * @hibernate.column name="CORRELATOR" not-null="true" 
      *          index="IDX_SELECTOR_CORRELATOR" unique-key="UNIQ_SELECTOR"
@@ -104,5 +112,5 @@ public class HCorrelatorSelector extends HObject {
     public void setCorrelator(HCorrelator correlator) {
         _correlator = correlator;
     }
-    
+
 }

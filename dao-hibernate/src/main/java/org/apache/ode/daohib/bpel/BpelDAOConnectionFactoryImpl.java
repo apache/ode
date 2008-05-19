@@ -68,7 +68,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     /**
      * @see org.apache.ode.bpel.dao.BpelDAOConnectionFactory#init(java.util.Properties)
      */
-    public void init(Properties properties) {
+    public void init(Properties initialProps) {
         if (_ds == null) {
             String errmsg = "setDataSource() not called!";
             __log.fatal(errmsg);
@@ -81,8 +81,9 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
             throw new IllegalStateException(errmsg);
         }
 
-        if (properties == null)
-            properties = new Properties();
+        if (initialProps == null) initialProps = new Properties();
+        // Don't want to pollute original properties
+        Properties properties = new Properties(initialProps);
 
         // Note that we don't allow the following properties to be overriden by
         // the client.

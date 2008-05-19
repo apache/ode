@@ -134,7 +134,7 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
-      AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, DERBY, GERONIMO.kernel, GERONIMO.transaction,
+      AXIOM, AXIS2_ALL, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
       XMLBEANS
 
@@ -179,7 +179,7 @@ define "ode" do
       end
     end
     
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _("target/test-classes")
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
@@ -284,7 +284,7 @@ define "ode" do
 
   desc "ODE Process Store"
   define "bpel-store" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas", "il-common",
       "dao-hibernate", "utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
     compile { open_jpa_enhance }
@@ -464,7 +464,7 @@ define "ode" do
 
   desc "ODE Utils"
   define "utils" do
-    compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream
+    compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream, WSDL4J
 	test.exclude "*TestResources"
     package :jar
   end

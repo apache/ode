@@ -45,6 +45,7 @@ import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
+import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
@@ -65,6 +66,7 @@ import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
@@ -207,8 +209,7 @@ public class ODEServer {
      * Shutdown the service engine. This performs cleanup before the BPE is terminated. Once this method has been called, init()
      * must be called before the transformation engine can be started again with a call to start().
      *
-     * @throws AxisFault
-     *             if the engine is unable to shut down.
+     * @throws AxisFault if the engine is unable to shut down.
      */
     public void shutDown() throws AxisFault {
 
@@ -316,17 +317,26 @@ public class ODEServer {
         return odeService;
     }
 
-    public ExternalService createExternalService(Definition def, QName serviceName, String portName) throws ContextException {
+    public ExternalService createExternalService(Definition def, QName serviceName, String portName, ProcessConf pconf) throws ContextException {
         ExternalService extService = (ExternalService) _externalServices.get(serviceName);
         if (extService != null)
             return extService;
 
         try {
-            extService = new ExternalService(def, serviceName, portName, _axisConfig, _scheduler, _server);
+             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
+                 if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
+                 extService = new HttpExternalService(def, serviceName, portName, _server);
+             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
+                 if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
+                 extService = new SoapExternalService(def, serviceName, portName, _axisConfig, pconf);
+             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
-            throw new ContextException("Error creating external service.", ex);
+            throw new ContextException("Error creating external service! name:"+serviceName+", port:"+portName, ex);
         }
+
+         // if not SOAP nor HTTP binding
+         if (extService == null) throw new ContextException("Only SOAP and HTTP binding supported!");
 
         _externalServices.put(serviceName, portName, extService);
         __log.debug("Created external service " + serviceName);
@@ -424,7 +434,7 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(DataSource ds) {
-        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(),false);
+        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {
@@ -548,9 +558,9 @@ public class ODEServer {
         jdbcext = new JdbcExternalVariableModule();
         jdbcext.registerDataSource("ode", _db.getDataSource());
         _server.registerExternalVariableEngine(jdbcext);
-        
+
     }
-    
+
     private class ProcessStoreListenerImpl implements ProcessStoreListener {
 
         public void onProcessStoreEvent(ProcessStoreEvent event) {
@@ -567,11 +577,8 @@ public class ODEServer {
                 // bounce the process
                 _server.unregister(pse.pid);
                 ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
-                if (pconf != null)
-                    _server.register(pconf);
-                else {
-                    __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
-                }
+                if (pconf != null) _server.register(pconf);
+                else __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
                 break;
             case DISABLED:
             case UNDEPLOYED:

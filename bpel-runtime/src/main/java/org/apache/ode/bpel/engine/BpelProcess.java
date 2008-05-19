@@ -936,9 +936,22 @@ public class BpelProcess {
      * 
      * @return
      */
-    ReplacementMap getReplacementMap() {
+    ReplacementMap getReplacementMap(QName processName) {
         assert _hydrationLatch.isLatched(1);
-        return _replacementMap;
+        if (processName.equals(_pid)) return _replacementMap;
+        else
+            try {
+                // We're asked for an older version of this process, fetching it
+                OProcess oprocess = _server.getOProcess(processName);
+                // Older versions may ventually need more expression languages
+                registerExprLang(oprocess);
+
+                return new ReplacementMapImpl(oprocess);
+            } catch (Exception e) {
+                String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
+                __log.error(errmsg);
+                throw new BpelEngineException(errmsg, e);
+            }
     }
 
     public boolean isInMemory() {
@@ -1137,13 +1150,11 @@ public class BpelProcess {
                     doDehydrate();
                 }
             };
-
             _transitions[1] = new Runnable() {
                 public void run() {
                     doHydrate();
                 }
             };
-
         }
 
         private void doDehydrate() {
@@ -1169,17 +1180,8 @@ public class BpelProcess {
             _replacementMap = new ReplacementMapImpl(_oprocess);
 
             // Create an expression language registry for this process
-            ExpressionLanguageRuntimeRegistry elangRegistry = new ExpressionLanguageRuntimeRegistry();
-            for (OExpressionLanguage elang : _oprocess.expressionLanguages) {
-                try {
-                    elangRegistry.registerRuntime(elang);
-                } catch (ConfigurationException e) {
-                    String msg = __msgs.msgExpLangRegistrationError(elang.expressionLanguageUri, elang.properties);
-                    __log.error(msg, e);
-                    throw new BpelEngineException(msg, e);
-                }
-            }
-            _expLangRuntimeRegistry = elangRegistry;
+            _expLangRuntimeRegistry = new ExpressionLanguageRuntimeRegistry();
+            registerExprLang(_oprocess);
 
             // Checking for registered extension bundles, throw an exception when
             // a "mustUnderstand" extension is not available
@@ -1355,7 +1357,7 @@ public class BpelProcess {
     /**
      * Handle in-line P2P responses. Called from the child's transaction.
      * 
-     * @param myrolemex
+     * @param prolemex
      */
     private void p2pWakeup(final MessageExchangeDAO prolemex) {
 
@@ -1370,6 +1372,18 @@ public class BpelProcess {
             });
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
+        }
+    }
+
+    private void registerExprLang(OProcess oprocess) {
+        for (OExpressionLanguage elang : oprocess.expressionLanguages) {
+            try {
+                _expLangRuntimeRegistry.registerRuntime(elang);
+            } catch (ConfigurationException e) {
+                String msg = __msgs.msgExpLangRegistrationError(elang.expressionLanguageUri, elang.properties);
+                __log.error(msg, e);
+                throw new BpelEngineException(msg, e);
+            }
         }
     }
 

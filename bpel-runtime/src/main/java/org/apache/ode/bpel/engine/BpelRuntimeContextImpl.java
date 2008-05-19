@@ -149,7 +149,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if (__log.isDebugEnabled())
                 __log.debug("CACHE HIT: Using cached state #" + dao.getExecutionStateCounter() + " to resume instance " + dao.getInstanceId());
             _soup = (ExecutionQueueImpl) cachedState; 
-            _soup.setReplacementMap(_bpelProcess.getReplacementMap());
+            _soup.setReplacementMap(_bpelProcess.getReplacementMap(dao.getProcess().getProcessId()));
             _vpu.setContext(_soup);
         } else {
             if (__log.isDebugEnabled())
@@ -188,7 +188,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _vpu = new JacobVPU();
         _vpu.registerExtension(BpelRuntimeContext.class, this);
         _soup = soup;
-        _soup.setReplacementMap(_bpelProcess.getReplacementMap());
+        _soup.setReplacementMap(_bpelProcess.getReplacementMap(dao.getProcess().getProcessId()));
         _vpu.setContext(_soup);
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("BpelRuntimeContextImpl created for instance " + _iid + ". INDEXED STATE=" + _soup.getIndex());
