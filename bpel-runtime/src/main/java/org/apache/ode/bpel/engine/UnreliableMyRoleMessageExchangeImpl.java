@@ -35,30 +35,22 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
     }
 
     public Future<Status> invokeAsync() {
-        if (_future != null)
-            return _future;
+        if (_future != null) return _future;
 
-        if (_request == null)
-            throw new IllegalStateException("Must call setRequest(...)!");
+        if (_request == null) throw new IllegalStateException("Must call setRequest(...)!");
 
         _future = new ResponseFuture();
         _process.enqueueTransaction(new Callable<Void>() {
-
             public Void call() throws Exception {
                 MessageExchangeDAO dao = doInvoke();
-
                 if (dao.getStatus() == Status.ACK) {
                     // not really an async ack, same idea.
                     onAsyncAck(dao);
                 }
-
                 return null;
             }
-
         });
-
         return _future;
-
     }
 
     @Override
@@ -68,12 +60,9 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
     @Override
     public Status invokeBlocking() throws BpelEngineException, TimeoutException {
-
-        if (_done)
-            return getStatus();
+        if (_done) return getStatus();
 
         Future<Status> future = _future != null ? _future : invokeAsync();
-
         try {
             future.get(Math.max(_timeout, 1), TimeUnit.MILLISECONDS);
             _done = true;
@@ -142,7 +131,8 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         switch (mexdao.getAckType()) {
         case RESPONSE:
         case FAULT:
-            response = new MemBackedMessageImpl(mexdao.getResponse().getData(), mexdao.getResponse().getType(), false);
+            response = new MemBackedMessageImpl(mexdao.getResponse().getHeader(),
+                    mexdao.getResponse().getData(), mexdao.getResponse().getType(), false);
             break;
         default:
             response = null;

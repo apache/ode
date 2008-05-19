@@ -17,9 +17,6 @@ import org.apache.ode.bpel.o.OPartnerLink;
  * is used (see {@link InvocationStyle#UNRELIABLE}). The basic idea here is that with this style, the IL performs the operation
  * outside of a transactional context. It can either finish it right away (BLOCK) or indicate that the response will be provided
  * later (replyASYNC).
- * 
- * 
- * 
  * @author Maciej Szefler <mszefler at gmail dot com>
  * 
  */

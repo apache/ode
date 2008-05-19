@@ -77,7 +77,6 @@ public class ODEService {
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
         _converter = new SoapMessageConverter(def, serviceName, portName);
-
     }
 
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)

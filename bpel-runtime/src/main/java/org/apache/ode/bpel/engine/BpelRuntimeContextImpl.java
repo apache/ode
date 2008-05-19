@@ -307,12 +307,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (OPartnerLink partnerLink : partnerLinks) {
             PartnerLinkDAO pdao = parent.createPartnerLink(partnerLink.getId(), partnerLink.name, partnerLink.myRoleName,
                     partnerLink.partnerRoleName);
-            // If there is a myrole on the link, initialize the session id so it
-            // is always
-            // available for opaque correlations. The myrole session id should
-            // never be changed.
-            if (partnerLink.hasMyRole())
-                pdao.setMySessionId(new GUID().toString());
+            // If there is a myrole on the link, initialize the session id so it is always
+            // available for opaque correlations. The myrole session id should never be changed.
+            if (partnerLink.hasMyRole()) pdao.setMySessionId(new GUID().toString());
         }
     }
 
@@ -651,8 +648,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
             InvokeResponseChannel channel) throws FaultException {
 
-        // TODO: move a lot of this into BpelProcess
-
         // TODO: think we should move the dao creation into bpelprocess --mbs
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
@@ -667,7 +662,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         Element partnerEPR = plinkDAO.getPartnerEPR();
 
         EndpointReference partnerEpr;
-
         if (partnerEPR == null) {
             partnerEpr = partnerRoleChannel.getInitialEndpointReference();
             // In this case, the partner link has not been initialized.

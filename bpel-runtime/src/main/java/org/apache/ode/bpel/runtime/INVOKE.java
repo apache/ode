@@ -89,8 +89,7 @@ public class INVOKE extends ACTIVITY {
         try {
             if (!isTwoWay) {
                 FaultData faultData = null;
-                getBpelRuntimeContext().invoke(
-                    _scopeFrame.resolve(_oinvoke.partnerLink),
+                getBpelRuntimeContext().invoke(_scopeFrame.resolve(_oinvoke.partnerLink),
                     _oinvoke.operation, outboundMsg, null);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 

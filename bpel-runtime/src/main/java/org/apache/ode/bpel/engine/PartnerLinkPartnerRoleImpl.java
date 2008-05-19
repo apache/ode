@@ -108,8 +108,9 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
                 __log.warn("Partner EPR will not be resolved, no EPR context specified!" );
         }
 
-        
-        EndpointReference myRoleEpr = null; // TODO: fix?
+        EndpointReference myRoleEpr = null;
+        if (_plinkDef.hasMyRole()) myRoleEpr = _process.getInitialMyRoleEPR(_plinkDef);
+        _process.setStatefulEPRs(mexDao);
         Operation operation = _plinkDef.getPartnerRoleOperation(mexDao.getOperation());
         Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(_channel, partnerEpr);
 

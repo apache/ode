@@ -176,22 +176,16 @@ abstract class MessageExchangeImpl implements MessageExchange {
         dao.setTimeout(_timeout);
         dao.setFailureType(_failureType);
         dao.setAckType(_ackType);
-
        
         if (_changes.contains(Change.EPR)) {
             _changes.remove(_epr);
-            if (_epr != null)
-                dao.setEPR(_epr.toXML().getDocumentElement());
-            else
-                dao.setEPR(null);
+            if (_epr != null) dao.setEPR(_epr.toXML().getDocumentElement());
+            else dao.setEPR(null);
         }
 
-        for (String modprop : _modifiedProperties) {
-            dao.setProperty(modprop, _properties.get(modprop));
-        }
-        
+        for (String modprop : _modifiedProperties) dao.setProperty(modprop, _properties.get(modprop));
+
         _modifiedProperties.clear();
-
     }
 
     void save() {
@@ -268,31 +262,26 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public Message getRequest() {
-        if (_request != null)
-            return _request;
+        if (_request != null) return _request;
 
         return _request = doInTX(new InDbAction<MessageImpl>() {
             public MessageImpl call(MessageExchangeDAO dao) {
                 MessageDAO req = dao.getRequest();
-                if (req == null)
-                    return null;
-                return new MemBackedMessageImpl(req.getData(), req.getType(), true);
+                if (req == null) return null;
+                return new MemBackedMessageImpl(req.getHeader(), req.getData(), req.getType(), true);
             }
         });
 
     }
 
     public Message getResponse() {
-        if (_response != null)
-            return _response;
+        if (_response != null) return _response;
 
         return _response = doInTX(new InDbAction<MessageImpl>() {
             public MessageImpl call(MessageExchangeDAO dao) {
                 MessageDAO req = dao.getResponse();
-                if (req == null)
-                    return null;
-                return new MemBackedMessageImpl(req.getData(), req.getType(), true);
-
+                if (req == null) return null;
+                return new MemBackedMessageImpl(req.getHeader(), req.getData(), req.getType(), true);
             }
         });
     }
@@ -308,7 +297,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public Message createMessage(javax.xml.namespace.QName msgType) {
-        return new MemBackedMessageImpl(null, msgType, false);
+        return new MemBackedMessageImpl(null, null, msgType, false);
     }
 
     public void setEndpointReference(EndpointReference ref) {

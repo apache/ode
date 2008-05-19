@@ -25,7 +25,11 @@ public class SoapHeaderTest extends Axis2TestBase {
                 new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http", 
                 new MessageReceiver() {
             public void receive(MessageContext messageCtx) throws AxisFault {
+                System.out.println(messageCtx.getEnvelope());
                 OMElement cidElmt = messageCtx.getEnvelope().getHeader().getFirstElement();
+                // Also checking if the session is included in passing
+                assertTrue(messageCtx.getEnvelope().toString().indexOf("session") > 0);
+                
                 assertEquals("ConversationId", cidElmt.getLocalName());
                 assertEquals("ZZZXYZ", cidElmt.getText());
 
@@ -52,8 +56,7 @@ public class SoapHeaderTest extends Axis2TestBase {
 
         String response = server.sendRequestFile("http://localhost:8080/processes/headerTest",
                 "TestSoapHeader", "testRequest.soap");
-        System.out.println(response);
-
+ 
         Element rootElemt = DOMUtils.stringToDOM(response);
         Element cidElemt = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(rootElemt));
         assertEquals("ConversationId", cidElemt.getLocalName());
