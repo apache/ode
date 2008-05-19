@@ -58,6 +58,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
             _changes.remove(Change.REQUEST);
             MessageDAO requestDao = dao.createMessage(_request.getType());
             requestDao.setData(_request.getMessage());   
+            requestDao.setHeader(_request.getHeader());   
             dao.setRequest(requestDao);
         }
         
@@ -115,20 +116,13 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
   
     protected MessageExchangeDAO doInvoke() {
-
-        if (getStatus() != Status.NEW)
-            throw new IllegalStateException("Invalid state: " + getStatus());
-        
+        if (getStatus() != Status.NEW) throw new IllegalStateException("Invalid state: " + getStatus());
         request();
         
         MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         save(dao);
-        
-        if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
-        
+        if (__log.isDebugEnabled()) __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
         try {
-         
             _process.invokeProcess(dao);
         } finally {
             if (dao.getStatus() == Status.ACK) {
@@ -138,9 +132,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
                 ack(dao.getAckType());
             }
         }
-        
         return dao;
-        
     }
 
 

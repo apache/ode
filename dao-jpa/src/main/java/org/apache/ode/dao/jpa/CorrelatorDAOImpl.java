@@ -65,14 +65,15 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
+        MessageExchangeDAOImpl toRemove = null;
         for (Iterator<MessageExchangeDAOImpl> itr=_exchanges.iterator(); itr.hasNext();){
             MessageExchangeDAOImpl mex = itr.next();
             if (mex.getCorrelationKeys().contains(correlationKey)) {
-                itr.remove();
-                return mex;
+                toRemove = mex;
             }
         }
-        return null;
+        _exchanges.remove(toRemove);
+        return toRemove;
     }
 
     public void enqueueMessage(MessageExchangeDAO mex,

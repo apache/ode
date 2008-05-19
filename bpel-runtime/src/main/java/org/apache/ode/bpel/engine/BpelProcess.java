@@ -316,8 +316,7 @@ public class BpelProcess {
             _hydrationLatch.release(1);
 
             // If we did not get an ACK during this method, then mark this MEX as needing an ASYNC wake-up
-            if (mexdao.getStatus() != Status.ACK)
-                mexdao.setStatus(Status.ASYNC);
+            if (mexdao.getStatus() != Status.ACK) mexdao.setStatus(Status.ASYNC);
 
             assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
         }
@@ -745,8 +744,7 @@ public class BpelProcess {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
-            if (myRole == null)
-                throw new IllegalStateException("Unknown partner link " + link);
+            if (myRole == null) throw new IllegalStateException("Unknown partner link " + link);
             return myRole.getInitialEPR();
         } finally {
             _hydrationLatch.release(1);
@@ -922,10 +920,9 @@ public class BpelProcess {
         assert _hydrationLatch.isLatched(1);
 
         PartnerLinkMyRoleImpl target = null;
-        for (Endpoint endpoint : _endpointToMyRoleMap.keySet()) {
+        for (Endpoint endpoint : _endpointToMyRoleMap.keySet())
             if (endpoint.serviceName.equals(serviceName))
                 target = _endpointToMyRoleMap.get(endpoint);
-        }
 
         return target;
 
@@ -1083,6 +1080,7 @@ public class BpelProcess {
             } else /* one process in-mem, other persisted */{
                 MessageDAO presponse = pmex.createMessage(mexdao.getResponse().getType());
                 presponse.setData(mexdao.getResponse().getData());
+                presponse.setHeader(mexdao.getResponse().getHeader());
                 pmex.setResponse(presponse);
             }
             pmex.setStatus(mexdao.getStatus());
@@ -1327,6 +1325,18 @@ public class BpelProcess {
         partnerRoleMex.setPipedPID(target.getPID());
         partnerRoleMex.setPipedMessageExchangeId(myRoleMex.getMessageExchangeId());
 
+        setStatefulEPRs(partnerRoleMex, myRoleMex);
+
+        // A classic P2P interaction is considered reliable. The invocation should take place
+        // in the local transaction but the invoked process is not supposed to hold our thread
+        // and the reply should come in a separate transaction.
+        target.invokeProcess(myRoleMex);
+    }
+
+    void setStatefulEPRs(MessageExchangeDAO partnerRoleMex) {
+        setStatefulEPRs(partnerRoleMex, null);
+    }
+    private void setStatefulEPRs(MessageExchangeDAO partnerRoleMex, MessageExchangeDAO myRoleMex) {
         // Properties used by stateful-exchange protocol.
         String mySessionId = partnerRoleMex.getPartnerLink().getMySessionId();
         String partnerSessionId = partnerRoleMex.getPartnerLink().getPartnerSessionId();
@@ -1335,23 +1345,17 @@ public class BpelProcess {
             __log.debug("Setting myRoleMex session ids for p2p interaction, mySession " + partnerSessionId
                     + " - partnerSess " + mySessionId);
 
-        if (mySessionId != null)
+        if (mySessionId != null) {
             partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, mySessionId);
-        if (partnerSessionId != null)
+            if (myRoleMex != null) myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
+        }
+        if (partnerSessionId != null) {
             partnerRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, partnerSessionId);
-
-        if (partnerSessionId != null)
-            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
-        if (mySessionId != null)
-            myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, mySessionId);
+            if (myRoleMex != null) myRoleMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, partnerSessionId);
+        }
 
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
-
-        // A classic P2P interaction is considered reliable. The invocation should take place
-        // in the local transaction but the invoked process is not supposed to hold our thread
-        // and the reply should come in a separate transaction.
-        target.invokeProcess(myRoleMex);
     }
 
     /**

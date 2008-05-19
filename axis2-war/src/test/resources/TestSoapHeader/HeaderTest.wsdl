@@ -41,9 +41,28 @@
         </wsdl:operation>
     </wsdl:portType>
 
+    <wsdl:portType name="HeaderTestFacticePortType">
+        <wsdl:operation name="helloFacticeOther">
+            <wsdl:input message="tns:HeaderTestMessage" name="TestIn"/>
+            <wsdl:output message="tns:HeaderTestMessage" name="TestOut"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
     <wsdl:binding name="HeaderTestSoapBinding" type="tns:HeaderTestPortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="hello">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="HeaderTestFacticeSoapBinding" type="tns:HeaderTestFacticePortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="helloFacticeOther">
             <soap:operation soapAction="" style="rpc"/>
             <wsdl:input>
                 <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
@@ -58,12 +77,18 @@
             <soap:address location="http://localhost:8080/ode/processes/headerTest"/>
         </wsdl:port>
     </wsdl:service>
+    <wsdl:service name="HeaderTestFacticeService">
+        <wsdl:port name="HeaderTestFacticePort" binding="tns:HeaderTestFacticeSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/facticeHeaderTest"/>
+        </wsdl:port>
+    </wsdl:service>
 
     <plnk:partnerLinkType name="HeaderTestPartnerLinkType">
         <plnk:role name="me" portType="tns:HeaderTestPortType"/>
         <plnk:role name="you" portType="tns:HeaderTestPortType"/>
     </plnk:partnerLinkType>
     <plnk:partnerLinkType name="DummyPartnerLinkType">
+        <plnk:role name="me" portType="tns:HeaderTestFacticePortType"/>
         <plnk:role name="you" portType="dummy:DummyServicePortType"/>
     </plnk:partnerLinkType>
 </wsdl:definitions>

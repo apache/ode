@@ -659,8 +659,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         try {
             BpelProcess process = _registeredProcesses.get(processId);
 
-            if (process == null)
-                return null;
+            if (process == null) return null;
 
             return process.getOProcess();
 

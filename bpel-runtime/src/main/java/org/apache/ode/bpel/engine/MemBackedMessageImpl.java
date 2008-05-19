@@ -10,15 +10,16 @@ import org.w3c.dom.Element;
  * @author Maciej Szefler
  * 
  */
-class MemBackedMessageImpl extends MessageImpl {
+public class MemBackedMessageImpl extends MessageImpl {
 
     private Element _msg;
     private Element _header;
 
     private QName _type;
 
-    MemBackedMessageImpl(Element msg, QName type, boolean ro) {
+    public MemBackedMessageImpl(Element header, Element msg, QName type, boolean ro) {
         _msg = msg;
+        _header = header;
         _type = type;
         if (ro) makeReadOnly();
     }

@@ -39,10 +39,7 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.xmlbeans.XmlCursor.ChangeStamp;
 import org.w3c.dom.Element;
-
-import com.sun.corba.se.spi.activation._ActivatorImplBase;
 
 /**
  * Base-class implementation of the interface used to expose a partner invocation to the integration layer.
@@ -71,13 +68,10 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     enum State {
         /** state when we're in one of the MexContext.invokeXXX methods. */
         INVOKE_XXX,
-
         /** hold all actions (blocks the IL) */
         HOLD,
-
         /** the MEX is ASYNC ("in the wild"), i.e. a response can come at any momemnt from any thread. */
         ASYNC,
-
         /** the MEX is dead, it should no longer be accessed by the IL */
         DEAD
     };
@@ -107,11 +101,10 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
             if (_response != null) {
                 MessageDAO responseDao = dao.createMessage(_response.getType());
                 responseDao.setData(_response.getMessage());
+                responseDao.setHeader(_response.getHeader());
                 dao.setResponse(responseDao);
             }
         }
-
-
     }
 
     @Override
@@ -164,9 +157,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     }
 
     public void reply(Message response) throws BpelEngineException {
-        if (__log.isDebugEnabled()) {
-            __log.debug("reply mex=" + getMessageExchangeId());
-        }
+        if (__log.isDebugEnabled()) __log.debug("reply mex=" + getMessageExchangeId());
 
         _accessLock.lock();
         try {
@@ -184,9 +175,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-        if (__log.isDebugEnabled()) {
-            __log.debug("replyWithFailure mex=" + getMessageExchangeId());
-        }
+        if (__log.isDebugEnabled()) __log.debug("replyWithFailure mex=" + getMessageExchangeId());
 
         _accessLock.lock();
         try {
@@ -218,11 +207,9 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     public String toString() {
         try {
             return "{PartnerRoleMex#" + _mexId + " [PID " + getCaller() + "] calling " + _epr + "." + getOperationName() + "(...)}";
-
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";
         }
-
     }
 
     /**

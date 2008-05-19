@@ -23,12 +23,8 @@ import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.il.epr.MutableEndpoint;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -258,19 +254,11 @@ public class HttpMethodBuilderTest extends TestCase {
             return null;
         }
 
-        public PartnerRoleChannel getChannel() {
-            return null;
-        }
-
         public EndpointReference getMyRoleEndpointReference() {
             return null;
         }
 
         public void reply(Message response) throws BpelEngineException {
-
-        }
-
-        public void replyAsync() {
 
         }
 
@@ -334,16 +322,39 @@ public class HttpMethodBuilderTest extends TestCase {
             return null;
         }
 
-        public boolean isTransactionPropagated() throws BpelEngineException {
-            return false;
-        }
-
         public void release() {
 
         }
 
         public void setProperty(String key, String value) {
 
+        }
+
+        public PartnerRoleChannel getPartnerRoleChannel() {
+            return null;
+        }
+
+        public void replyAsync(String foreignKey) {
+        }
+
+        public InvocationStyle getInvocationStyle() {
+            return null;
+        }
+
+        public long getTimeout() {
+            return 0;
+        }
+
+        public AckType getAckType() {
+            return null;
+        }
+
+        public boolean isTransactional() {
+            return false;
+        }
+
+        public boolean isSafe() {
+            return false;
         }
     }
 }
