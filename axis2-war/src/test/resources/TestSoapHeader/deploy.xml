@@ -16,14 +16,18 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<message>
-   <parameters>
-      <getObjectId foo="bar" xmlns="http://documentum.com/ws/2005/services">
-      	  <someFooBar/>
-      	  <barbaz xmlns="" />
-      </getObjectId>
-   </parameters>
-   
-    <DocumentumSecurityToken xmlns="http://documentum.com/ws/2005/services">SEKREET</DocumentumSecurityToken>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+	xmlns:pns="http://ode/bpel/unit-test" 
+	xmlns:wns="http://ode/bpel/unit-test.wsdl" xmlns:dns="http://axis2.ode.apache.org">
 
-</message>
+
+	<process name="pns:HeaderTest">
+		<active>true</active>
+		<provide partnerLink="helloPartnerLink">
+			<service name="wns:HeaderTestService" port="HeaderTestPort"/>
+		</provide>
+        <invoke partnerLink="dummyPartnerLink">
+            <service name="dns:DummyService" port="DummyServiceSOAP11port_http"/>
+        </invoke>
+    </process>
+</deploy>

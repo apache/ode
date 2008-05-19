@@ -40,47 +40,68 @@ import org.w3c.dom.Element;
 @Table(name="ODE_MESSAGE")
 public class MessageDAOImpl implements MessageDAO {
 
-	@Id @Column(name="MESSAGE_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Long _id;
-	@Basic @Column(name="TYPE")
+    @Id @Column(name="MESSAGE_ID")
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long _id;
+    @Basic @Column(name="TYPE")
     private String _type;
-	@Lob @Column(name="DATA")
+    @Lob @Column(name="DATA")
     private String _data;
-	@Transient
+    @Lob @Column(name="HEADER")
+    private String _header;
+    @Transient
     private Element _element;
+    @Transient
+    private Element _headerElement;
 
-	public MessageDAOImpl() {
-		
-	}
-	public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
-		_type = type.toString();
-	}
-	
-	public Element getData() {
-		if ( _element == null && _data != null && !"".equals(_data) ) {
-			try {
-				_element = DOMUtils.stringToDOM(_data);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		return _element;
-	}
+    public MessageDAOImpl() {
 
-	public QName getType() {
-		return _type == null ? null : QName.valueOf(_type);
-	}
+    }
+    public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
+        _type = type.toString();
+    }
 
-	public void setData(Element value) {
+    public Element getData() {
+        if ( _element == null && _data != null && !"".equals(_data) ) {
+            try {
+                _element = DOMUtils.stringToDOM(_data);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return _element;
+    }
+
+    public QName getType() {
+        return _type == null ? null : QName.valueOf(_type);
+    }
+
+    public void setData(Element value) {
         if (value == null) return;
         _data = DOMUtils.domToString(value);
-		_element = value;
-	}
+        _element = value;
+    }
 
-	public void setType(QName type) {
-		_type = type.toString();
-	}
+    public void setType(QName type) {
+        _type = type.toString();
+    }
+
+    public Element getHeader() {
+        if ( _headerElement == null && _header != null ) {
+            try {
+                _headerElement = DOMUtils.stringToDOM(_header);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return _headerElement;
+    }
+
+    public void setHeader(Element value) {
+        if (value == null) return;
+        _header = DOMUtils.domToString(value);
+        _headerElement = value;
+    }
 
 }

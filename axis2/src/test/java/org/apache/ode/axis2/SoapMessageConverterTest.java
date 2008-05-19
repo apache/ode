@@ -37,29 +37,22 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.bpel.engine.MessageImpl;
+import org.apache.ode.bpel.memdao.MessageDAOImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class SoapMessageConverterTest extends TestCase {
 
     Definition wsdl1, wsdlHW;
-
     String wsdl1tns = "http://documentum.com/ws/2005/services";
-
     QName repoService = new QName(wsdl1tns, "RepoAccessorService");
-
     QName portTypeName = new QName(wsdl1tns, "RepoAccessor");
-
     String portName = "RepoAccessor";
-
     SoapMessageConverter portmapper;
-
     PortType portType, portTypeHW;
-
     Document req1bad;
-
     Document req1;
-
     private Operation op1, opHello;
 
     public SoapMessageConverterTest() throws Exception {
@@ -76,7 +69,7 @@ public class SoapMessageConverterTest extends TestCase {
     }
 
     public void setUp() throws Exception {
-        portmapper = new SoapMessageConverter(wsdl1, repoService, portName, true);
+        portmapper = new SoapMessageConverter(wsdl1, repoService, portName);
     }
 
     public void tearDown() {
@@ -85,7 +78,7 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testBadPortName() {
         try {
-            new SoapMessageConverter(wsdl1, repoService, "badPort", true);
+            new SoapMessageConverter(wsdl1, repoService, "badPort");
             fail("Should have thrown axis error.");
         } catch (AxisFault af) {
             ;// expected
@@ -94,7 +87,7 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testBadServiceName() {
         try {
-            new SoapMessageConverter(wsdl1, new QName(wsdl1tns, "foobar"), portName, true);
+            new SoapMessageConverter(wsdl1, new QName(wsdl1tns, "foobar"), portName);
             fail("Should have thrown axis error.");
         } catch (AxisFault af) {
             ;// expected
@@ -103,7 +96,9 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testCreateSOAPRequest() throws Exception {
         MessageContext msgCtx = new MessageContext();
-        portmapper.createSoapRequest(msgCtx, req1.getDocumentElement(), portType.getOperation("getObjectId", null, null));
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(req1.getDocumentElement());
+        portmapper.createSoapRequest(msgCtx, odeMsg, portType.getOperation("getObjectId", null, null));
         SOAPEnvelope env = msgCtx.getEnvelope();
         System.out.println("testCreateSOAPRequest: " + env);
         QName elPartName = new QName(wsdl1tns, "getObjectId");
@@ -116,9 +111,10 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testCreateSOAPRequestFail() throws Exception {
         MessageContext msgCtx = new MessageContext();
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(req1bad.getDocumentElement());
         try {
-            portmapper.createSoapRequest(msgCtx, req1bad.getDocumentElement(), portType.getOperation("getObjectId", null,
-                    null));
+            portmapper.createSoapRequest(msgCtx, odeMsg, portType.getOperation("getObjectId", null, null));
             fail("Should have caused an ex");
         } catch (AxisFault af) {
             ; // expected
@@ -132,23 +128,34 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testParseRequest() throws Exception {
         MessageContext msgCtx = new MessageContext();
-        portmapper.createSoapRequest(msgCtx, req1.getDocumentElement(), op1);
+        MessageImpl odeMsg1 = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg1.setMessage(req1.getDocumentElement());
+        odeMsg1.setHeaderPart("DocumentumRequestHeader", DOMUtils.findChildByName(req1.getDocumentElement(),
+                new QName("http://documentum.com/ws/2005/services", "DocumentumSecurityToken")));
+        portmapper.createSoapRequest(msgCtx, odeMsg1, op1);
+        
         SOAPEnvelope env = msgCtx.getEnvelope();
         System.out.println("testParseRequest: " + env);
-        Element odeMsg = DOMUtils.stringToDOM("<message/>");
-        portmapper.parseSoapRequest(odeMsg, env, op1);
-        System.out.println("testParseRequest: " + DOMUtils.domToString(odeMsg));
-        Element params = DOMUtils.findChildByName(odeMsg, new QName(null, "parameters"));
+        Element odeMsgElmt = DOMUtils.stringToDOM("<message/>");
+        MessageImpl odeMsg2 = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg1.setMessage(odeMsgElmt);
+        portmapper.parseSoapRequest(odeMsg2, env, op1);
+
+        Element params = DOMUtils.findChildByName(odeMsg2.getMessage(), new QName(null, "parameters"));
         assertNotNull(params);
-        Element hdr = DOMUtils.findChildByName(odeMsg, new QName("urn:ode.apache.org/axis2-il/header",
-                "DocumentumRequestHeader"));
-        assertNotNull(hdr);
+        assertNotNull(odeMsg2.getHeaderPart("DocumentumRequestHeader"));
+        Element hdrElmt = DOMUtils.findChildByName(odeMsg2.getHeaderPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
+                "DocumentumSecurityToken"));
+        assertNotNull(hdrElmt);
+        Element hdrBdyElmt = DOMUtils.findChildByName(odeMsg2.getPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
+                "DocumentumSecurityToken"));
+        assertNotNull(hdrBdyElmt);
     }
 
     /** Make sure hello world request parses correctly. */
     public void testHelloWorldRequest() throws Exception {
         SoapMessageConverter portmaper1 = new SoapMessageConverter(wsdlHW, new QName(wsdlHW
-                .getTargetNamespace(), "HelloService"), "HelloPort", false);
+                .getTargetNamespace(), "HelloService"), "HelloPort");
 
         XMLStreamReader sr = XMLInputFactory.newInstance().createXMLStreamReader(
                 getClass().getResourceAsStream("/HelloWorldRequest.soap"));
@@ -156,7 +163,9 @@ public class SoapMessageConverterTest extends TestCase {
         SOAPEnvelope se = builder.getSOAPEnvelope();
 
         Element msg = DOMUtils.stringToDOM("<message/>");
-        portmaper1.parseSoapRequest(msg, se, opHello);
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(msg);
+        portmaper1.parseSoapRequest(odeMsg, se, opHello);
         System.out.println(DOMUtils.domToString(msg));
     }
 

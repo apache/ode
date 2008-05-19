@@ -18,9 +18,9 @@
   ~ under the License.
   -->
 <process name="HelloWorld2"
-         targetNamespace="urn:/HelloWorld2.bpel"
+         targetNamespace="urn:/HeaderTest.bpel"
          xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-         xmlns:tns="urn:/HelloWorld2.bpel"
+         xmlns:tns="urn:/HeaderTest.bpel"
          xmlns:hello="urn:/HelloWorld2.wsdl"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 

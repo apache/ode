@@ -65,7 +65,6 @@ public class ODEService {
     private QName _serviceName;
     private String _portName;
     private WSAEndpoint _serviceRef;
-    private boolean _isReplicateEmptyNS = false;
     private SoapMessageConverter _converter;
 
     public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server) throws AxisFault {
@@ -75,7 +74,7 @@ public class ODEService {
         _serviceName = serviceName;
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
-        _converter = new SoapMessageConverter(def, serviceName, portName, _isReplicateEmptyNS);
+        _converter = new SoapMessageConverter(def, serviceName, portName);
 
     }
 
@@ -97,12 +96,9 @@ public class ODEService {
             }
 
             // Preparing message to send to ODE
-            Element msgEl = DOMUtils.newDocument().createElementNS(null, "message");
-            msgEl.getOwnerDocument().appendChild(msgEl);
-            _converter.parseSoapRequest(msgEl, msgContext.getEnvelope(), odeMex.getOperation());
             Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
+            _converter.parseSoapRequest(odeRequest, msgContext.getEnvelope(), odeMex.getOperation());
             readHeader(msgContext, odeMex);
-            odeRequest.setMessage(msgEl);
 
             if (__log.isDebugEnabled()) {
                 __log.debug("Invoking ODE using MEX " + odeMex);
@@ -162,7 +158,7 @@ public class ODEService {
                 break;
             case ONEWAY:
             case RESPONSE:
-                _converter.createSoapResponse(msgContext, mex.getResponse().getMessage(), mex.getOperation());
+                _converter.createSoapResponse(msgContext, mex.getResponse(), mex.getOperation());
                 if (__log.isDebugEnabled())
                     __log.debug("Response message " + msgContext.getEnvelope());
                 writeHeader(msgContext, mex);
@@ -292,9 +288,5 @@ public class ODEService {
         }
 
         return EndpointFactory.createEndpoint(doc.getDocumentElement());
-    }
-
-    public void setReplicateEmptyNS(boolean isReplicateEmptyNS) {
-        _isReplicateEmptyNS = isReplicateEmptyNS;
     }
 }

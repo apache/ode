@@ -128,8 +128,7 @@ class AssignGenerator extends DefaultActivityGenerator {
         // If direct Message->Message copy
         if (ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to).isMessageRef()
                 && ocopy.from instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.from).isMessageRef()) {
-            // Check that the LValue/RValue message types
-            // match up.
+            // Check that the LValue/RValue message types match up.
             String lvar = ((OAssign.VariableRef) ocopy.to).variable.name;
             String rvar = ((OAssign.VariableRef) ocopy.from).variable.name;
             QName tlvalue = ((OMessageVarType) ((OAssign.VariableRef) ocopy.to).variable.type).messageType;
@@ -202,6 +201,13 @@ class AssignGenerator extends DefaultActivityGenerator {
                     if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }
+                if (vv.getHeader() != null) {
+                    vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
+                    if (vref.headerPart == null)
+                        vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), vv.getHeader(), null);
+                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
+                        vref.location = _context.compileExpr(vv.getLocation());
+                }
                 return vref;
             } else if (from.isPartnerLinkVal()) {
                 PartnerLinkVal plv = from.getAsPartnerLinkVal();
@@ -259,6 +265,13 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (to.getAsVariableVal().getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
+                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
+                        vref.location = _context.compileExpr(vv.getLocation());
+                }
+                if (to.getAsVariableVal().getHeader() != null) {
+                    vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
+                    if (vref.headerPart == null)
+                        vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), to.getAsVariableVal().getHeader(), null);
                     if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
                         vref.location = _context.compileExpr(vv.getLocation());
                 }

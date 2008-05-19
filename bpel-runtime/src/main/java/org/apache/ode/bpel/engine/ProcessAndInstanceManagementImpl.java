@@ -1132,7 +1132,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         // Name filter can be implemented using only the PIDs.
         if (filter != null && filter.getNameFilter() != null) {
-            final Pattern pattern = Pattern.compile(filter.getNameFilter().replace("*",".*"));
+            final Pattern pattern = Pattern.compile(filter.getNameFilter().replace("*",".*") + "(-\\d*)?");
             CollectionsX.remove_if(pids, new MemberOfFunction<QName>() {
                 @Override
                 public boolean isMember(QName o) {

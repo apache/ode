@@ -25,7 +25,16 @@ class DbBackedMessageImpl extends MessageImpl {
 
     @Override
     public void setMessage(Element msg) {
-        
+        _dao.setData(msg);
     }
 
+    @Override
+    public Element getHeader() {
+        return _dao.getHeader();
+    }
+
+    @Override
+    public void setHeader(Element msg) {
+        _dao.setHeader(msg);
+    }
 }

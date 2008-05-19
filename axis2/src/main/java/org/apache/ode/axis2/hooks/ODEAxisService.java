@@ -94,7 +94,7 @@ public class ODEAxisService extends AxisService {
                 if (ais != null) {
                     LOG.debug("Configuring service using: "+axis2config.toURL());
                     ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
-                    ServiceBuilder builder = new ServiceBuilder(is, configCtx, axisService);
+                    ServiceBuilder builder = new ServiceBuilder(ais, configCtx, axisService);
                     builder.populateService(builder.buildOM());
                 }
             } catch (FileNotFoundException except) {

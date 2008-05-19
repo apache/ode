@@ -13,14 +13,14 @@ import org.w3c.dom.Element;
 class MemBackedMessageImpl extends MessageImpl {
 
     private Element _msg;
+    private Element _header;
 
     private QName _type;
 
     MemBackedMessageImpl(Element msg, QName type, boolean ro) {
         _msg = msg;
         _type = type;
-        if (ro)
-            makeReadOnly();
+        if (ro) makeReadOnly();
     }
 
     @Override
@@ -29,14 +29,25 @@ class MemBackedMessageImpl extends MessageImpl {
     }
 
     @Override
+    public void setMessage(Element msg) {
+        checkWrite();
+        _msg = msg;
+    }
+
+    @Override
     public QName getType() {
         return _type;
     }
 
     @Override
-    public void setMessage(Element msg) {
+    public Element getHeader() {
+        return _header;
+    }
+    
+    @Override
+    public void setHeader(Element header) {
         checkWrite();
-        _msg = msg;
+        _header = header;
     }
 
 }

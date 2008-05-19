@@ -438,6 +438,13 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
         return part;
     }
 
+    public OMessageVarType.Part resolveHeaderPart(OScope.Variable var, String partname) {
+        if (!(var.type instanceof OMessageVarType))
+            throw new CompilationException(__cmsgs.errMessageVariableRequired(var.name));
+        OMessageVarType msgVarType = (OMessageVarType) var.type;
+        return msgVarType.parts.get(partname);
+    }
+
     public PartnerLinkType resolvePartnerLinkType(QName partnerLinkType) {
 
         PartnerLinkType plinkType = _wsdlRegistry.getPartnerLinkType(partnerLinkType);

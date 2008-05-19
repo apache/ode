@@ -301,10 +301,6 @@ public class ODEServer {
         destroyService(serviceName, portName);
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server);
-        if (_odeConfig.isReplicateEmptyNS()) {
-            __log.debug("Setting service with empty namespace replication");
-            odeService.setReplicateEmptyNS(true);
-        }
 
         _services.put(serviceName, portName, odeService);
 
@@ -332,10 +328,6 @@ public class ODEServer {
             throw new ContextException("Error creating external service.", ex);
         }
 
-        if (_odeConfig.isReplicateEmptyNS()) {
-            __log.debug("Setting external service with empty namespace replication");
-            extService.setReplicateEmptyNS(true);
-        }
         _externalServices.put(serviceName, portName, extService);
         __log.debug("Created external service " + serviceName);
         return extService;
