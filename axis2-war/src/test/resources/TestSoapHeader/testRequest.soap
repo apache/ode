@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -16,14 +17,15 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<message>
-   <parameters>
-      <getObjectId foo="bar" xmlns="http://documentum.com/ws/2005/services">
-      	  <someFooBar/>
-      	  <barbaz xmlns="" />
-      </getObjectId>
-   </parameters>
-   
-    <DocumentumSecurityToken xmlns="http://documentum.com/ws/2005/services">SEKREET</DocumentumSecurityToken>
 
-</message>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header>
+        <myns:ConversationId xmlns:myns="http://my.company/super/protocol">ZZZXYZ</myns:ConversationId>
+    </SOAP-ENV:Header>
+    <!-- test soap message -->
+    <SOAP-ENV:Body>
+        <ns1:hello xmlns:ns1="http://ode/bpel/unit-test.wsdl">
+            <TestPart xmlns="">Hello</TestPart>
+        </ns1:hello>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

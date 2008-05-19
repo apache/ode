@@ -27,25 +27,35 @@ package org.apache.ode.daohib.bpel.hobj;
  */
 public class HMessage extends HObject {
 
-  private String _type;
-  private HLargeData _data;
-  
-  public void setType(String type) {
-    _type = type;
-  }
+    private String _type;
+    private HLargeData _data;
+    private HLargeData _header;
 
-  /** @hibernate.property column="TYPE" */
-  public String getType() {
-    return _type;
-  }
+    public void setType(String type) {
+        _type = type;
+    }
 
-  /** @hibernate.many-to-one column="DATA" */
-  public HLargeData getMessageData() {
-    return _data;
-  }
+    /** @hibernate.property column="TYPE" */
+    public String getType() {
+        return _type;
+    }
 
-  public void setMessageData(HLargeData data) {
-    _data = data;
-  }
+    /** @hibernate.many-to-one column="DATA" */
+    public HLargeData getMessageData() {
+        return _data;
+    }
+
+    public void setMessageData(HLargeData data) {
+        _data = data;
+    }
+
+    /** @hibernate.many-to-one column="HEADER" */
+    public HLargeData getHeader() {
+        return _header;
+    }
+
+    public void setHeader(HLargeData header) {
+        _header = header;
+    }
 
 }

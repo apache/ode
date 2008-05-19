@@ -43,4 +43,10 @@ public interface MessageDAO {
     /** Get the message data (content). */
     Element getData();
 
+    /** Set the message header (content). */
+    void setHeader(Element value);
+    
+    /** Get the message header (content). */
+    Element getHeader();
+ 
 }

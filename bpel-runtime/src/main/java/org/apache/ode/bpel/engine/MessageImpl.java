@@ -21,15 +21,19 @@ package org.apache.ode.bpel.engine;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.utils.DOMUtils;
 
 /**
  * Implementation of the {@link Message} interface. 
@@ -43,21 +47,50 @@ abstract class MessageImpl implements Message {
     public Element getPart(String partName) {
         Element message = getMessage();
         NodeList eltList = message.getElementsByTagName(partName);
-        if (eltList.getLength() == 0)
-            return null;
-        else
-            return (Element) eltList.item(0);
+        if (eltList.getLength() == 0) return null;
+        else return (Element) eltList.item(0);
     }
 
-    public void setMessagePart(String partName, Element content) {
+    public void setPart(String partName, Element content) {
         Element message = getMessage();
+        if (message == null) {
+            Document doc = DOMUtils.newDocument();
+            message = doc.createElement("message");
+            doc.appendChild(message);
+        }
         message.appendChild(message.getOwnerDocument().importNode(content, true));
         setMessage(message);
     }
 
+    public Element getHeaderPart(String partName) {
+        Element header = getHeader();
+        if (header == null) return null;
+
+        NodeList eltList = header.getElementsByTagName(partName);
+        if (eltList.getLength() == 0) return null;
+        else return (Element) eltList.item(0);
+    }
+
+    public void setHeaderPart(String name, Element content) {
+        Element header =  getHeader();
+        if (header == null) {
+            Document doc = DOMUtils.newDocument();
+            header = doc.createElement("header");
+            doc.appendChild(header);
+        }
+        Element part = header.getOwnerDocument().createElement(name);
+        header.appendChild(part);
+        part.appendChild(header.getOwnerDocument().importNode(content, true));
+        setHeader(header);
+      }
+
     public abstract void setMessage(Element msg);
 
     public abstract Element getMessage();
+
+    public abstract void setHeader(Element msg);
+
+    public abstract Element getHeader();
 
     public abstract QName getType();
 
@@ -73,6 +106,19 @@ abstract class MessageImpl implements Message {
         return parts;
     }
 
+    public Map<String, Element> getHeaderParts() {
+        HashMap<String,Element> l = new HashMap<String,Element>();
+        Element header =  getHeader();
+        if (header != null) {
+            NodeList children = header.getChildNodes();
+            for (int m = 0; m < children.getLength(); m++)
+                if (children.item(m).getNodeType() == Node.ELEMENT_NODE) {
+                    Element part = (Element) children.item(m);
+                    l.put(part.getLocalName(), DOMUtils.getFirstChildElement(part));
+                }
+        }
+        return l;
+    }
     
     protected void makeReadOnly() {
         _readOnly = true;

@@ -18,54 +18,51 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
-    targetNamespace="http://ode/bpel/unit-test.wsdl"
-    xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-    xmlns:dummy="http://axis2.ode.apache.org"
-    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+<wsdl:definitions
+        targetNamespace="http://ode/bpel/unit-test.wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:tns="http://ode/bpel/unit-test.wsdl"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:dummy="http://axis2.ode.apache.org"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
     <wsdl:import namespace="http://axis2.ode.apache.org" location="dummy-service.wsdl"/>
 
-    <wsdl:message name="HelloMessage">
+    <wsdl:message name="HeaderTestMessage">
         <wsdl:part name="TestPart" type="xsd:string"/>
     </wsdl:message>
-    
-    <wsdl:portType name="HelloPortType">
+
+    <wsdl:portType name="HeaderTestPortType">
         <wsdl:operation name="hello">
-            <wsdl:input message="tns:HelloMessage" name="TestIn"/>
-            <wsdl:output message="tns:HelloMessage" name="TestOut"/>
-        </wsdl:operation>    
+            <wsdl:input message="tns:HeaderTestMessage" name="TestIn"/>
+            <wsdl:output message="tns:HeaderTestMessage" name="TestOut"/>
+        </wsdl:operation>
     </wsdl:portType>
-    
-     <wsdl:binding name="HelloSoapBinding" type="tns:HelloPortType">
+
+    <wsdl:binding name="HeaderTestSoapBinding" type="tns:HeaderTestPortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="hello">
             <soap:operation soapAction="" style="rpc"/>
             <wsdl:input>
-                <soap:body
-                    namespace="http://ode/bpel/unit-test.wsdl"
-                    use="literal"/>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
             </wsdl:input>
             <wsdl:output>
-                <soap:body
-                    namespace="http://ode/bpel/unit-test.wsdl" 
-                    use="literal"/>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:service name="HelloService">
-		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
-		</wsdl:port>
+    <wsdl:service name="HeaderTestService">
+        <wsdl:port name="HeaderTestPort" binding="tns:HeaderTestSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/headerTest"/>
+        </wsdl:port>
     </wsdl:service>
-    
-   <plnk:partnerLinkType name="HelloPartnerLinkType">
-       <plnk:role name="me" portType="tns:HelloPortType"/>
-   </plnk:partnerLinkType>
+
+    <plnk:partnerLinkType name="HeaderTestPartnerLinkType">
+        <plnk:role name="me" portType="tns:HeaderTestPortType"/>
+        <plnk:role name="you" portType="tns:HeaderTestPortType"/>
+    </plnk:partnerLinkType>
     <plnk:partnerLinkType name="DummyPartnerLinkType">
         <plnk:role name="you" portType="dummy:DummyServicePortType"/>
     </plnk:partnerLinkType>

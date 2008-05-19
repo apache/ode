@@ -101,6 +101,8 @@ import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Document;
 
 class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -526,7 +528,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageDAO message = myrolemex.createMessage(
                 operation.getOutput().getMessage()
                 .getQName());
-        message.setData(msg);
+        buildOutgoingMessage(message, msg);
 
         myrolemex.setResponse(message);
 
@@ -686,8 +688,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
         mexDao.setTimeout(30000);
-        message.setData(outgoingMessage);
         message.setType(operation.getInput().getMessage().getQName());
+        buildOutgoingMessage(message, outgoingMessage);
 
         // prepare event
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
@@ -697,14 +699,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         evt.setMexId(mexDao.getMessageExchangeId());
         sendEvent(evt);
 
-
         if (__log.isDebugEnabled()) {
             __log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" + operation.getName() + " channel="
                     + channel + ")");
         }
-
         _bpelProcess.invokePartner(mexDao);
-       
 
         // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
         // we need to inject a message on the response channel, so that the process continues.
@@ -720,7 +719,23 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
         
         return mexDao.getMessageExchangeId();
+    }
 
+    private void buildOutgoingMessage(MessageDAO message, Element outgoingElmt) {
+        if (outgoingElmt == null) return;
+        
+        Document doc = DOMUtils.newDocument();
+        Element header = doc.createElement("header");
+        NodeList parts = outgoingElmt.getChildNodes();
+        for (int m = 0; m < parts.getLength(); m++) {
+            Element part = (Element) parts.item(m);
+            if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
+                header.appendChild(doc.importNode(part, true));
+                outgoingElmt.removeChild(part);
+            }
+        }
+        message.setData(outgoingElmt);
+        message.setHeader(header);
     }
 
     void execute() {
@@ -990,7 +1005,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public Element getPartnerResponse(String mexId) {
-        return _getPartnerResponse(mexId).getData();
+        return mergeHeaders(_getPartnerResponse(mexId));
     }
 
     public Element getMyRequest(String mexId) {
@@ -1017,8 +1032,29 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             throw new BpelEngineException(msg);
         }
 
-        return request.getData();
+        return mergeHeaders(request);
+    }
 
+    private Element mergeHeaders(MessageDAO msg) {
+        // Merging header data, it's all stored in the same variable
+        Element data = msg.getData();
+        if (msg.getHeader() != null) {
+            if (data == null) {
+                Document doc = DOMUtils.newDocument();
+                data = doc.createElement("message");
+                doc.appendChild(data);
+            }
+
+            NodeList headerParts = msg.getHeader().getChildNodes();
+            for (int m = 0; m < headerParts.getLength(); m++) {
+                if (headerParts.item(m).getNodeType() == Node.ELEMENT_NODE) {
+                    Element headerPart = (Element) headerParts.item(m);
+                    headerPart.setAttribute("headerPart", "true");
+                    data.appendChild(data.getOwnerDocument().importNode(headerPart, true));
+                }
+            }
+        }
+        return data;
     }
 
     public QName getPartnerFault(String mexId) {

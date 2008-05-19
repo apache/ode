@@ -181,53 +181,39 @@ class ASSIGN extends ACTIVITY {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(varRef.variable));
             Node data = fetchVariableData(_scopeFrame.resolve(varRef.variable), false);
-            retVal = evalQuery(data, varRef.part, varRef.location,
-                    getEvaluationContext());
+            retVal = evalQuery(data, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location, getEvaluationContext());
         } else if (from instanceof OAssign.PropertyRef) {
             OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(propRef.variable));
             Node data = fetchVariableData(_scopeFrame.resolve(propRef.variable), false);
-
             retVal = evalQuery(data, propRef.propertyAlias.part,
                     propRef.propertyAlias.location, getEvaluationContext());
-
         } else if (from instanceof OAssign.PartnerLinkRef) {
             OAssign.PartnerLinkRef pLinkRef = (OAssign.PartnerLinkRef) from;
-            PartnerLinkInstance pLink = _scopeFrame
-                    .resolve(pLinkRef.partnerLink);
+            PartnerLinkInstance pLink = _scopeFrame.resolve(pLinkRef.partnerLink);
             Node tempVal =pLinkRef.isMyEndpointReference ?
                     getBpelRuntimeContext().fetchMyRoleEndpointReferenceData(pLink)
                     : getBpelRuntimeContext().fetchPartnerRoleEndpointReferenceData(pLink);
             if (__log.isDebugEnabled())
                 __log.debug("RValue is a partner link, corresponding endpoint "
-                        + tempVal.getClass().getName() + " has value "
-                        + DOMUtils.domToString(tempVal));
+                        + tempVal.getClass().getName() + " has value " + DOMUtils.domToString(tempVal));
             retVal = tempVal;
         } else if (from instanceof OAssign.Expression) {
             List<Node> l;
             OExpression expr = ((OAssign.Expression) from).expression;
 
-            l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr,
-                    getEvaluationContext());
+            l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr, getEvaluationContext());
 
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
-                if (__log.isDebugEnabled())
-                    __log.debug(from + ": " + msg);
-                throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure,
-                        msg);
-
+                if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure,msg);
             } else if (l.size() > 1) {
-                String msg = __msgs.msgRValueMultipleNodesSelected(expr
-                        .toString());
-                if (__log.isDebugEnabled())
-                    __log.debug(from + ": " + msg);
-                throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure,
-                        msg);
+                String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
+                if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
             }
-            retVal = (Node) l.get(0);
+            retVal = l.get(0);
         } else if (from instanceof OAssign.Literal) {
             Element literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
             assert literalRoot.getLocalName().equals("literal");
@@ -372,7 +358,7 @@ class ASSIGN extends ACTIVITY {
 
             // Get a pointer within the lvalue.
             Node lvaluePtr = lvalue;
-
+            boolean headerAssign = false;
             if (ocopy.to instanceof OAssign.DirectRef) {
                 DirectRef dref = ((DirectRef) ocopy.to);
                 Element el = DOMUtils.findChildByName((Element)lvalue, dref.elName);
@@ -383,10 +369,8 @@ class ASSIGN extends ACTIVITY {
                 lvaluePtr = el;
             } else if (ocopy.to instanceof OAssign.VariableRef) {
                 VariableRef varRef = ((VariableRef) ocopy.to);
-                lvaluePtr = evalQuery(
-                        lvalue,
-                        varRef.part,
-                        varRef.location,
+                if (varRef.headerPart != null) headerAssign = true;
+                lvaluePtr = evalQuery(lvalue, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location,
                         new EvaluationContextProxy(varRef.getVariable(), lvalue));
             } else if (ocopy.to instanceof OAssign.PropertyRef) {
                 PropertyRef propRef = ((PropertyRef) ocopy.to);
@@ -417,8 +401,9 @@ class ASSIGN extends ACTIVITY {
                         rvalue = ((Document)rvalue).getDocumentElement();
                 }
 
-                if (rvalue.getNodeType() == Node.ELEMENT_NODE
-                        && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
+                if (headerAssign && lvaluePtr.getParentNode().getNodeName().equals("message")) {
+                    lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, (Element) rvalue);
+                } else if (rvalue.getNodeType() == Node.ELEMENT_NODE && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
                     lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
                             ocopy.keepSrcElementName);
                 } else {
@@ -480,6 +465,11 @@ class ASSIGN extends ACTIVITY {
         DOMUtils.copyNSContext(ptr, replacement);
         
         return (lval == ptr) ? replacement :  lval;
+    }
+
+    private Element copyInto(Element lval, Element ptr, Element src) {
+        ptr.appendChild(ptr.getOwnerDocument().importNode(src, true));
+        return lval;
     }
 
     /**
@@ -557,27 +547,37 @@ class ASSIGN extends ACTIVITY {
         return lvalue;
     }
 
-    private Node evalQuery(Node lvalue, OMessageVarType.Part part,
+    private Node evalQuery(Node data, OMessageVarType.Part part,
                            OExpression expression, EvaluationContext ec) throws FaultException {
-        assert lvalue != null;
+        assert data != null;
 
         if (part != null) {
             QName partName = new QName(null, part.name);
-            Node qualLVal = DOMUtils
-                    .findChildByName((Element) lvalue, partName);
+            Node qualLVal = DOMUtils.findChildByName((Element) data, partName);
             if (part.type instanceof OElementVarType) {
                 QName elName = ((OElementVarType) part.type).elementType;
                 qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
+            } else if (part.type == null) {
+                // Special case of header parts never referenced in the WSDL def
+                if (qualLVal != null && qualLVal.getNodeType() == Node.ELEMENT_NODE
+                        && ((Element)qualLVal).getAttribute("headerPart") != null)
+                    qualLVal = DOMUtils.getFirstChildElement((Element) qualLVal);
+                // The needed part isn't there, dynamically creating it
+                if (qualLVal == null) {
+                    qualLVal = data.getOwnerDocument().createElementNS(null, part.name);
+                    ((Element)qualLVal).setAttribute("headerPart", "true");
+                    data.appendChild(qualLVal);
+                }
             }
-            lvalue = qualLVal;
+            data = qualLVal;
         }
 
         if (expression != null) {
             // Neat little trick....
-            lvalue = ec.evaluateQuery(lvalue, expression);
+            data = ec.evaluateQuery(data, expression);
         }
 
-        return lvalue;
+        return data;
     }
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {

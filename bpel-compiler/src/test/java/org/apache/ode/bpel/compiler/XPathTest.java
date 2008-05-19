@@ -276,4 +276,8 @@ class MockCompilerContext implements CompilerContext {
 	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
 		return null;
 	}
+
+    public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
+        return null;
+    }
 }

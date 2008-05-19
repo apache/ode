@@ -84,7 +84,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 			elm2.setTextContent(cat);
             final Message response = prmx.createMessage(prmx.getOperation().getOutput().getMessage().getQName());
             response.setMessage(msg.getMessage());
-            response.setMessagePart("probeData", elm2);
+            response.setPart("probeData", elm2);
 			prmx.reply(response);
 		}
 	}
