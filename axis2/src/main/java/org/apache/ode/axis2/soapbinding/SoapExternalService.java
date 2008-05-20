@@ -17,7 +17,7 @@
      * under the License.
      */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.soapbinding;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Fault;
@@ -37,7 +37,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.SoapMessageConverter;
+import org.apache.ode.axis2.ExternalService;
+import org.apache.ode.axis2.ODEService;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.il.OMUtils;

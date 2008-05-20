@@ -35,7 +35,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.util.SoapMessageConverter;
+import org.apache.ode.axis2.soapbinding.SoapMessageConverter;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;

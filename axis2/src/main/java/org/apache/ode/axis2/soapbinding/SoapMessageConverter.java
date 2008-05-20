@@ -17,8 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2.util;
-
+package org.apache.ode.axis2.soapbinding;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,23 +75,15 @@ import org.w3c.dom.Element;
 public class SoapMessageConverter {
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
-
     private static final Log __log = LogFactory.getLog(SoapMessageConverter.class);
 
     SOAPFactory _soapFactory;
-
     Definition _def;
-
     QName _serviceName;
-
     String _portName;
-
     Service _serviceDef;
-
     Binding _binding;
-
     Port _port;
-
     boolean _isRPC;
 
     private SOAPBinding _soapBinding;
