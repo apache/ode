@@ -46,6 +46,7 @@ import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.httpbinding.HttpExternalService;
+import org.apache.ode.axis2.soapbinding.SoapExternalService;
 import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
