@@ -157,7 +157,7 @@ define "ode" do
       WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
-      web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
+      web_inf.merge project("dao-jpa-db").package(:zip)
       web_inf.merge project("dao-hibernate-db").package(:zip)
       web_inf.include project("axis2").path_to("src/main/wsdl/*")
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
@@ -188,7 +188,7 @@ define "ode" do
       mkdir_p _("target/test-classes/webapp/WEB-INF/processes")
       rm_rf Dir[_("target/test-classes/webapp") + "/**/.svn"]
     end
-    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
+    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
   end
 
   desc "ODE APIs"
@@ -371,7 +371,7 @@ define "ode" do
   end
 
   desc "ODE OpenJPA Derby Database"
-  define "dao-jpa-ojpa-derby" do
+  define "dao-jpa-db" do
     %w{ derby mysql oracle }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
@@ -430,7 +430,7 @@ define "ode" do
       jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :delegation=>:self, :libs=>libs
       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
       jbi.merge project("dao-hibernate-db").package(:zip)
-      jbi.merge project("dao-jpa-ojpa-derby").package(:zip)
+      jbi.merge project("dao-jpa-db").package(:zip)
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
@@ -441,7 +441,7 @@ define "ode" do
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM
     test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro/src/examples-jbi/") }
-    test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-ojpa-derby").package(:zip))
+    test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-db").package(:zip))
   end
 
   desc "ODE JCA Resource Archive"
@@ -532,7 +532,7 @@ define "apache-ode" do
       zip.include(project.path_to("target/LICENSE"))
 
       # Include supported database schemas
-      Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
+      Dir["#{project("ode:dao-jpa-db").path_to("target")}/*.sql"].each do |f|
         zip.include(f, :path=>"sql") unless f =~ /partial/
       end
 
