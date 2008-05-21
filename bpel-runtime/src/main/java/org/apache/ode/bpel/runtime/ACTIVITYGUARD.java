@@ -92,7 +92,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 if (_oactivity.suppressJoinFailure) {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                     if (__log.isDebugEnabled())
-                        __log.debug("Join condition false, suppress join failureon activity " + _self.aId);
+                        __log.debug("Join condition false, suppress join failure on activity " + _self.aId);
                 } else {
                     FaultData fault = null;
                     fault = createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity);
@@ -110,12 +110,11 @@ class ACTIVITYGUARD extends ACTIVITY {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.
                     _self.parent.completed(null, CompensationHandler.emptySet());
-
                     // Dead-path activity
                     dpe(_oactivity);
                 }
             });
-            for (Iterator<OLink> i = _oactivity.targetLinks.iterator();i.hasNext();) {
+            for (final OLink link : _oactivity.targetLinks) {
                 final OLink link = i.next();
                 mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).channel) {
                     private static final long serialVersionUID = 1024137371118887935L;
