@@ -29,6 +29,7 @@ import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.jaxen.Context;
 import org.jaxen.ContextSupport;
 import org.jaxen.JaxenException;
@@ -38,6 +39,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
+
+import javax.xml.transform.TransformerFactory;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -59,6 +62,8 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
     private final Map _extensionFunctions = new HashMap();
 
     public void initialize(Map properties) throws ConfigurationException {
+        TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+        XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
 
     public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException {
