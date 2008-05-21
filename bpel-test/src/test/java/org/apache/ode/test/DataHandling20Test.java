@@ -21,7 +21,15 @@ package org.apache.ode.test;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
-
+    @Test public void testComposeUrl() throws Throwable {
+        go("/bpel/2.0/TestComposeUrl");
+    }
+    @Test public void testCombineUrl() throws Throwable {
+        go("/bpel/2.0/TestCombineUrl");
+    }
+    @Test public void testExpandTemplate() throws Throwable {
+        go("/bpel/2.0/TestExpandTemplate");
+    }
     @Test public void testXPathNamespace1() throws Throwable {
         go("/bpel/2.0/TestXPathNamespace1");
     }
@@ -64,5 +72,4 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testDuration() throws Throwable {
         go("/bpel/2.0/TestDuration");
     }
-
 }
