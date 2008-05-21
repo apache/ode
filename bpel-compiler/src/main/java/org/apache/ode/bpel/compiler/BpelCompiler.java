@@ -986,6 +986,7 @@ abstract class BpelCompiler implements CompilerContext {
                 .getTransitionCondition());
 
         _structureStack.topActivity().sourceLinks.add(ol);
+        _structureStack.topActivity().outgoingLinks.add(ol);
     }
 
     private void compile(final PartnerLink plink) {
@@ -1064,23 +1065,19 @@ abstract class BpelCompiler implements CompilerContext {
 
             if (newtop != null) {
                 newtop.nested.add(popped);
-                // Transfer outgoing and incoming links, excluding the locally
-                // defined links.
+                // Transfer outgoing and incoming links, excluding the locally defined links.
                 newtop.incomingLinks.addAll(popped.incomingLinks);
-                if (newtop instanceof OFlow)
-                    newtop.incomingLinks.removeAll(((OFlow) newtop).localLinks);
+                if (newtop instanceof OFlow) newtop.incomingLinks.removeAll(((OFlow) newtop).localLinks);
                 newtop.outgoingLinks.addAll(popped.outgoingLinks);
 
-                if (newtop instanceof OFlow)
-                    newtop.outgoingLinks.removeAll(((OFlow) newtop).localLinks);
+                if (newtop instanceof OFlow) newtop.outgoingLinks.removeAll(((OFlow) newtop).localLinks);
 
                 // Transfer variables read/writen
                 newtop.variableRd.addAll(popped.variableRd);
                 newtop.variableWr.addAll(popped.variableWr);
             }
 
-            if (topScope != null && popped instanceof OScope)
-                topScope.compensatable.add((OScope) popped);
+            if (topScope != null && popped instanceof OScope) topScope.compensatable.add((OScope) popped);
         }
     }
 
@@ -1336,6 +1333,7 @@ abstract class BpelCompiler implements CompilerContext {
         if (oscope.getLocalVariable(src.getName()) != null)
             throw new CompilationException(__cmsgs.errDuplicateVariableDecl(src.getName()).setSource(src));
 
+        if (src.getTypeName() == null) throw new CompilationException(__cmsgs.errUnrecognizedVariableDeclaration(src.getName()));
         OVarType varType;
         switch (src.getKind()) {
         case ELEMENT:
