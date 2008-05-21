@@ -737,8 +737,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         else if (__log.isDebugEnabled())
             __log.debug("fillProcessInfo: No files for " + pconf.getProcessId());
 
+        TProcessProperties properties = info.addNewProperties();
         if (custom.includeProcessProperties()) {
-            TProcessProperties properties = info.addNewProperties();
             for (Map.Entry<QName, Node> propEntry : pconf.getProperties().entrySet()) {
                 TProcessProperties.Property tprocProp = properties.addNewProperty();
                 tprocProp.setName(new QName(propEntry.getKey().getNamespaceURI(), propEntry.getKey().getLocalPart()));
@@ -747,11 +747,11 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 Node node2append = processInfoDoc.importNode(propEntry.getValue(), true);
                 propNode.appendChild(node2append);
             }
-        }
+        } 
 
+        TEndpointReferences eprs = info.addNewEndpoints();
         OProcess oprocess = _server._engine.getOProcess(pconf.getProcessId());
         if (custom.includeEndpoints() && oprocess != null) {
-            TEndpointReferences eprs = info.addNewEndpoints();
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
                     // TODO: this is very uncool.
