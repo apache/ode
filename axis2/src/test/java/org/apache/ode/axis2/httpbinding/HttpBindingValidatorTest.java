@@ -44,6 +44,8 @@ public class HttpBindingValidatorTest extends TestCase {
     private static final Log log = LogFactory.getLog(HttpBindingValidatorTest.class);
 
     private Definition definition;
+    private static final String SHOULD_FAIL = "shouldFail";
+    private static final String SHOULD_PASS = "shouldPass";
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -65,14 +67,13 @@ public class HttpBindingValidatorTest extends TestCase {
                 continue;
             }
             String doc = DOMUtils.getTextContent(documentationElement);
-            boolean shouldFail = doc.startsWith("shouldFail");
-            boolean shouldPass = doc.startsWith("shouldPass");
+            boolean shouldFail = doc.startsWith(SHOULD_FAIL);
+            boolean shouldPass = doc.startsWith(SHOULD_PASS);
             if(!shouldFail && !shouldPass) {
-                log.warn("Binding skipped : "+ localName +", <wsdl:documentation> content must start with 'OK' or 'KO'. ");
-                continue;
+                fail("Binding: "+ localName +", <wsdl:documentation> content must start with '"+SHOULD_FAIL+"' or '"+SHOULD_PASS+"'. ");
             }
 
-            log.info("Testing Binding : "+localName);
+            log.debug("Testing Binding : "+localName);
             String msg = localName + " : " + doc;
             try {
                 new HttpBindingValidator(binding).validate();
