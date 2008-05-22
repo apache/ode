@@ -412,14 +412,13 @@ class DbExternalVariable {
 			if (val == null)
 				return null;
 
-			if (isDate())
+            Date date = null;
+            if (val instanceof java.util.Date) {
+                // also applies to java.sql.Time, java.sql.Timestamp
+                date = (Date) val;
 				return ISO8601DateParser.format((Date) val);
-			else if (isTime())
-				return ISO8601DateParser.format((Date) val);
-			else if (isTimeStamp())
-				return ISO8601DateParser.format((Date) val);
-			else
-				return val.toString();
+            }
+            return val.toString();
 		}
 
 		Object fromText(String val) throws ExternalVariableModuleException {
