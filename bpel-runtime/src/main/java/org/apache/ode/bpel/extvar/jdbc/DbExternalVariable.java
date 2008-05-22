@@ -171,8 +171,7 @@ class DbExternalVariable {
 		boolean first = true;
 		for (Column c : _columns) {
 			// Don't ever update keys or sequences or create time stamps
-			if (c.genType == GenType.sequence || c.key
-					|| c.genType == GenType.ctimestamp)
+            if (c.genType == GenType.sequence || c.key || c.genType == GenType.ctimestamp)
 				continue;
 
 			if (!first)
@@ -276,10 +275,11 @@ class DbExternalVariable {
         Document doc = parent.getOwnerDocument();
         Element cel = doc.createElementNS(varType.getNamespaceURI(), c.name);
         String strdat = c.toText(data);
-        if (strdat != null)
+        if (strdat != null) {
             cel.appendChild(doc.createTextNode(strdat));
-        else if (c.nullok) 
+        } else if (c.nullok || c.isGenerated()) { 
             cel.setAttributeNS(XSI_NS, "xsi:nil", "true");
+        }
         parent.appendChild(cel);
     }
 
@@ -482,6 +482,14 @@ class DbExternalVariable {
 								+ name + "\" !", ex);
 			}
 		}
+
+        public boolean isGenerated() {
+            return (genType != null && !genType.equals(GenType.none));
+        }
+        
+        public boolean isDatabaseGenerated() {
+            return isGenerated() && (genType.equals(GenType.sequence) || genType.equals(GenType.expression));
+        }
         
         public String toString() {
             return "Column {idx="+idx

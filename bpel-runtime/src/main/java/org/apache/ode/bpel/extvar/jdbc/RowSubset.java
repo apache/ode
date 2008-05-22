@@ -26,9 +26,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.Column;;
 
 class RowSubset extends ArrayList<Object> {
+    private static final Log LOG = LogFactory.getLog(RowSubset.class);
+
     private static final long serialVersionUID = 1L;
 
     protected List<Column> _columns;
@@ -47,15 +51,24 @@ class RowSubset extends ArrayList<Object> {
     }
 
     /**
-     * Return <code>true</code> if all entries are non-null.
-     * @return
+     * Return <code>true</code> if any values are missing (e.g. null value)
      */
-    boolean isComplete() {
-        for (Object o : this) 
-            if (o == null)
-                return false;
-        
-        return true;
+    boolean missingValues() {
+        for (Column c : _columns) {
+            if (get(c.idx) == null) return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Return <code>true</code> if any database-generated values are missing
+     */
+    boolean missingDatabaseGeneratedValues() {
+        for (Column c : _columns) {
+            Object value = get(c.idx);
+            if (c.isDatabaseGenerated() && value == null) return true;
+        }
+        return false;
     }
     
     
