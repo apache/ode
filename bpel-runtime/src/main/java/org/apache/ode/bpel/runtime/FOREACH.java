@@ -41,7 +41,7 @@ import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
