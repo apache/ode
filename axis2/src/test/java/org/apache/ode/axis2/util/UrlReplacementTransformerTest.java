@@ -42,9 +42,9 @@ public class UrlReplacementTransformerTest extends TestCase {
                 , new String[]{"parts are ends", "(part1)B(part2)/(part3)", "3B14/159", "part1", "3", "part2", "14", "part3", "159"}
                 , new String[]{"a single part", "(part1)", "314159", "part1", "314159"}
                 , new String[]{"parts surrounded with ()", "o1/A((part1))B((part2))/((part3))", "o1/A(3)B(14)/(159)", "part1", "3", "part2", "14", "part3", "159"}
-                , new String[]{"with numeric chars", baseUrl, "o1/A3B14/159", "part1", "3", "part2", "14", "part3", "159"}
+                , new String[]{"with numeric chars", baseUrl, "o1/A3B14/159%20and%20an%20epsilon", "part1", "3", "part2", "14", "part3", "159 and an epsilon"}
                 , new String[]{"with empty values", baseUrl, "o1/AB/", "part1", "", "part2", "", "part3", ""}
-                , new String[]{"with special chars", baseUrl, "o1/AWhatB$10,000/~!@#$%^&*()_+=-`[]{}|\\.", "part1", "What", "part2", "$10,000", "part3", "~!@#$%^&*()_+=-`[]{}|\\."}
+                , new String[]{"with special chars", baseUrl, "o1/AWhatB%2410%2C000/~!%40%23%24%25%5E%26*()_%2B%3D-%60%5B%5D%7B%7D%7C%5C.", "part1", "What", "part2", "$10,000", "part3", "~!@#$%^&*()_+=-`[]{}|\\."}
                 , new String[]{"with values containing key names", baseUrl, "o1/Avalue_of_part1_is_(part2)_and_should_not_be_replacedBsame_for_part2(part3)/foo", "part1", "value_of_part1_is_(part2)_and_should_not_be_replaced", "part2", "same_for_part2(part3)", "part3", "foo"}
         };
 
