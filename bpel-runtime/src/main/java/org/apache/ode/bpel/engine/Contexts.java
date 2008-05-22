@@ -26,7 +26,7 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apche.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
 
 import java.util.HashMap;
 import java.util.List;

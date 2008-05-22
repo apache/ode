@@ -36,7 +36,7 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.jacob.IndexedObject;
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
