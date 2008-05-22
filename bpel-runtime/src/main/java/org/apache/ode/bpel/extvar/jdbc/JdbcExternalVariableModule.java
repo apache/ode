@@ -38,9 +38,9 @@ import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowKey;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowVal;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ObjectPrinter;
-import org.apche.ode.bpel.evar.ExternalVariableModule;
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.IncompleteKeyException;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.IncompleteKeyException;
 import org.w3c.dom.Element;
 
 public class JdbcExternalVariableModule implements ExternalVariableModule {

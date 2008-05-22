@@ -1,4 +1,4 @@
-package org.apche.ode.bpel.evar;
+package org.apache.ode.bpel.evar;
 
 /**
  * Exception thrown by external variable engines.
