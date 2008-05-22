@@ -14,7 +14,7 @@ public class IncompleteKeyException extends ExternalVariableModuleException {
     private Collection<String>_missing;
 
     public IncompleteKeyException(Collection<String> missing) {
-        super("Attempt to read external variable with an incomplete compoung key. " +
+        super("Attempt to read external variable with an incomplete compound key. " +
                 "The following components were missing: " + missing);
         
         _missing = missing;
