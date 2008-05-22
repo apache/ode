@@ -98,9 +98,11 @@
 
 
     <wsdl:binding name="OlaElMundoHttpBinding-GET" type="tns:OlaElMundoPortType">
-        <http:binding verb="GET"/>
+        <!-- /!\ no http:binding element here, see operation binding -->
+        <!-- It's meant to test a wsdl extension defined for RESTful BPEL -->
         <wsdl:operation name="plus">
             <http:operation location="plus/(left):(right)"/>
+            <http:binding verb="GET"/>
             <wsdl:input>
                 <http:urlReplacement/>
             </wsdl:input>
@@ -110,6 +112,7 @@
         </wsdl:operation>
         <wsdl:operation name="minus">
             <http:operation location="minus"/>
+            <http:binding verb="GET"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
@@ -120,9 +123,12 @@
     </wsdl:binding>
 
     <wsdl:binding name="OlaElMundoHttpBinding-POST" type="tns:OlaElMundoPortType">
-        <http:binding verb="POST"/>
+        <!-- /!\ here the verb is GET and not POST -->
+        <!-- It's meant to test a verb overridding, see wsdl extensions for RESTful BPEL -->
+        <http:binding verb="GET"/>
         <wsdl:operation name="plus">
             <http:operation location="plus"/>
+            <http:binding verb="POST"/>
             <wsdl:input>
                 <mime:content type="application/x-www-form-urlencoded"/>
             </wsdl:input>
@@ -132,6 +138,7 @@
         </wsdl:operation>
         <wsdl:operation name="minus">
             <http:operation location="minus"/>
+            <http:binding verb="POST"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>

@@ -35,6 +35,15 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="bye">
+            <soap:operation soapAction="urn:hello" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <!-- ###################################### -->
     <!-- Supported HTTP Method tests-->
@@ -400,5 +409,80 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+
+    <!-- ###################################### -->
+    <!-- Verb at the operation level -->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # A verb must be defined: it could be in the port tag, or in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # A verb must be defined for each operation: it could be in the port tag, or in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <http:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="bye">
+            <http:operation location="DummyService/bye"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb_in_port" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Verb may be defined in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <http:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_verb_overridden" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Operation may override the verb defined in the port.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <http:binding verb="POST"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
     <!-- no <service> tags needed -->
 </wsdl:definitions>

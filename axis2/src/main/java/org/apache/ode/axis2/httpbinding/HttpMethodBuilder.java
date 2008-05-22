@@ -34,6 +34,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.wsdl.*;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
@@ -49,13 +51,16 @@ import javax.wsdl.BindingInput;
 import javax.wsdl.Binding;
 import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.extensions.http.HTTPBinding;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Collection;
 
 import com.ibm.wsdl.PartImpl;
+import com.ibm.wsdl.util.StringUtils;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -67,18 +72,16 @@ public class HttpMethodBuilder {
 
     protected static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
     protected Binding binding;
-    protected String verb;
 
     public HttpMethodBuilder(Binding binding) {
         this.binding = binding;
-        HTTPBinding httpBinding = (HTTPBinding) WsdlUtils.getBindingExtension(binding);
-        this.verb = httpBinding.getVerb();
     }
 
 
     public HttpMethod buildHttpMethod(PartnerRoleMessageExchange odeMex) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
+
         // message to be sent
         Element message = odeMex.getRequest().getMessage();
         Message msgDef = operation.getInput().getMessage();
@@ -89,8 +92,12 @@ public class HttpMethodBuilder {
         // extract part values into a map and check that all parts are assigned a value
         Map<String, Element> partElements = extractPartElements(msgDef, message);
 
-        // build the http method
-        HttpMethod method = prepareHttpMethod(bindingOperation, partElements, url);
+        // http method type
+        // the operation may override the verb, this is an extension for RESTful BPEL
+        String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
+
+        // build the http method itself
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url);
         return method;
     }
 
@@ -106,7 +113,7 @@ public class HttpMethodBuilder {
         return partValues;
     }
 
-    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, Map<String, Element> partValues, final String rootUri) throws UnsupportedEncodingException {
+    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, String verb, Map<String, Element> partValues, final String rootUri) throws UnsupportedEncodingException {
         if (log.isDebugEnabled()) log.debug("Preparing http request...");
         // convenience variables...
         BindingInput bindingInput = bindingOperation.getBindingInput();

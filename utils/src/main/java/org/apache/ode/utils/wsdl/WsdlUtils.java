@@ -20,6 +20,8 @@
 package org.apache.ode.utils.wsdl;
 
 import org.apache.ode.utils.stl.CollectionsX;
+import org.apache.ode.utils.Namespaces;
+import org.w3c.dom.Element;
 
 import javax.wsdl.Binding;
 import javax.wsdl.Port;
@@ -28,6 +30,7 @@ import javax.wsdl.BindingInput;
 import javax.wsdl.Service;
 import javax.wsdl.Definition;
 import javax.wsdl.extensions.ExtensibilityElement;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.mime.MIMEContent;
 import javax.wsdl.extensions.mime.MIMEMultipartRelated;
 import javax.wsdl.extensions.http.HTTPBinding;
@@ -64,7 +67,7 @@ public class WsdlUtils {
 
 
     /**
-     * Test if the given binding uses a Http binding.
+     * Test if the given binding uses HTTP binding.
      *
      * @param binding
      * @return true if {@link HTTPBinding} is assignable from the binding
@@ -72,12 +75,22 @@ public class WsdlUtils {
      */
     public static boolean useHTTPBinding(Binding binding) {
         ExtensibilityElement element = getBindingExtension(binding);
-        return HTTPBinding.class.isAssignableFrom(element.getClass());
+        // with a fully wsdl-compliant document, this element cannot be null.
+        // but ODE extends the HTTP binding and supports the HTTP verb at the operation level.
+        // A port using this extension may have no HTTPBinding at the port level.  
+        if (element == null) {
+            // in this case, we check the binding information of one operation
+            final BindingOperation anOperation = (BindingOperation) binding.getBindingOperations().get(0);
+            final ExtensibilityElement opExt = getOperationExtension(anOperation);
+            return HTTPOperation.class.isAssignableFrom(opExt.getClass());
+        } else {
+            return HTTPBinding.class.isAssignableFrom(element.getClass());
+        }
     }
 
 
     /**
-     * @see #useSOAPBinding(javax.wsdl.Binding) 
+     * @see #useSOAPBinding(javax.wsdl.Binding)
      */
     public static boolean useSOAPBinding(Port port) {
         return useSOAPBinding(port.getBinding());
@@ -118,18 +131,18 @@ public class WsdlUtils {
 
     /**
      * Look up the ExtensibilityElement defining the binding for the given Port or
-     * throw an {@link IllegalArgumentException} if no or multiple bindings found.
+     * throw an {@link IllegalArgumentException} if multiple bindings found.
      *
-     * @param port
-     * @return an instance of {@link SOAPBinding} or {@link HTTPBinding}
+     * @param binding
+     * @return an instance of {@link SOAPBinding} or {@link HTTPBinding} or null
+     * @throws IllegalArgumentException if multiple bindings found.
      */
     public static ExtensibilityElement getBindingExtension(Binding binding) {
         Collection bindings = new ArrayList();
         CollectionsX.filter(bindings, binding.getExtensibilityElements(), HTTPBinding.class);
         CollectionsX.filter(bindings, binding.getExtensibilityElements(), SOAPBinding.class);
         if (bindings.size() == 0) {
-            // exception if no bindings found
-            throw new IllegalArgumentException(msgs.msgNoBinding(binding.getQName()));
+            return null;
         } else if (bindings.size() > 1) {
             // exception if multiple bindings found
             throw new IllegalArgumentException(msgs.msgMultipleBindings(binding.getQName()));
@@ -140,15 +153,25 @@ public class WsdlUtils {
         }
     }
 
+    /**
+     * @see #getBindingExtension(javax.wsdl.Binding)
+     */
     public static ExtensibilityElement getBindingExtension(Port port) {
         Binding binding = port.getBinding();
         if (binding == null) {
             throw new IllegalArgumentException(msgs.msgBindingNotFound(port.getName()));
         }
-
         return getBindingExtension(binding);
     }
 
+    /**
+     * Extract the instance of {@link javax.wsdl.extensions.http.HTTPOperation] or {@link javax.wsdl.extensions.soap.SOAPOperation}
+     * from the list of extensibility elements of the given {@link javax.wsdl.BindingOperation}.
+     *
+     * @param bindingOperation
+     * @return an instance of {@link javax.wsdl.extensions.http.HTTPOperation} or {@link javax.wsdl.extensions.soap.SOAPOperation}
+     * @throws IllegalArgumentException if not exactly 1 element is found.
+     */
     public static ExtensibilityElement getOperationExtension(BindingOperation bindingOperation) {
         Collection operations = new ArrayList();
         CollectionsX.filter(operations, bindingOperation.getExtensibilityElements(), HTTPOperation.class);
@@ -168,21 +191,35 @@ public class WsdlUtils {
 
     }
 
+    /**
+     * @return true if the extensibility elements of the given {@link javax.wsdl.BindingInput} contains an instance of {@link javax.wsdl.extensions.http.HTTPUrlEncoded}
+     */
     public static boolean useUrlEncoded(BindingInput bindingInput) {
         Collection<HTTPUrlEncoded> coll = CollectionsX.filter(bindingInput.getExtensibilityElements(), HTTPUrlEncoded.class);
         return !coll.isEmpty();
     }
 
+    /**
+     * @return true if the extensibility elements of the given {@link javax.wsdl.BindingInput} contains an instance of {@link javax.wsdl.extensions.http.HTTPUrlReplacement}
+     */
     public static boolean useUrlReplacement(BindingInput bindingInput) {
         Collection<HTTPUrlReplacement> coll = CollectionsX.filter(bindingInput.getExtensibilityElements(), HTTPUrlReplacement.class);
         return !coll.isEmpty();
     }
 
+    /**
+     * @return true if the extensibility elements of the given {@link javax.wsdl.BindingInput} contains an instance of {@link javax.wsdl.extensions.mime.MIMEMultipartRelated}
+     */
     public static boolean useMimeMultipartRelated(BindingInput bindingInput) {
         Collection<MIMEMultipartRelated> coll = CollectionsX.filter(bindingInput.getExtensibilityElements(), MIMEMultipartRelated.class);
         return !coll.isEmpty();
     }
 
+    /**
+     * @return the {@linkplain javax.wsdl.extensions.mime.MIMEContent#getType() type} of the instance of {@link javax.wsdl.extensions.mime.MIMEContent}
+     * contained in the extensibility element list. Or null if none.
+     * @throws IllegalArgumentException if more than 1 MIMEContent is found.
+     */
     public static String getMimeContentType(List extensibilityElements) {
         Collection<MIMEContent> coll = CollectionsX.filter(extensibilityElements, MIMEContent.class);
         if (coll.size() == 0) {
@@ -197,6 +234,14 @@ public class WsdlUtils {
         }
     }
 
+    /**
+     * Extract the instance of {@link javax.wsdl.extensions.http.HTTPAddress] or {@link javax.wsdl.extensions.soap.SOAPAddress}
+     * from the list of extensibility elements of the given {@link javax.wsdl.Port}.
+     *
+     * @param port
+     * @return an instance of {@link javax.wsdl.extensions.http.HTTPAddress} or {@link javax.wsdl.extensions.soap.SOAPAddress}
+     * @throws IllegalArgumentException if not exactly 1 element is found.
+     */
     public static ExtensibilityElement getAddressExtension(Port port) {
         Collection operations = new ArrayList();
         CollectionsX.filter(operations, port.getExtensibilityElements(), HTTPAddress.class);
@@ -215,5 +260,42 @@ public class WsdlUtils {
         }
     }
 
+    /**
+     * ODE extends the wsdl spec by allowing definition of the HTTP verb at the operation level.
+     * <br/> If you do so, an {@link UnknownExtensibilityElement} will be added to the list of extensibility elements of the {@link javax.wsdl.BindingOperation}.
+     * <br/> This method looks up for such an element and return the value of the verb attribute if the underlying {@link org.w3c.dom.Element} is {@literal <binding xmlns="http://schemas.xmlsoap.org/wsdl/http/"/>}
+     * or null.
+     * @param bindingOperation
+     */
+    public static String getOperationVerb(BindingOperation bindingOperation) {
+        final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(bindingOperation.getExtensibilityElements(), UnknownExtensibilityElement.class);
+        for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
+            final Element e = extensibilityElement.getElement();
+            if (Namespaces.HTTP_NS.equalsIgnoreCase(e.getNamespaceURI())
+                    && "binding".equals(extensibilityElement.getElement().getLocalName())
+                    && e.hasAttribute("verb")) {
+                return e.getAttribute("verb");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * ODE extends the wsdl spec by allowing definition of the HTTP verb at the operation level.
+     * <br/>The current implementation implementations allows you to have a {@literal <binding xmlns="http://schemas.xmlsoap.org/wsdl/http/"/>} element
+     * at the port level <strong>and</strong> at the operation level. In such a case the operation's verb overrides the port's verb.
+     * <br/> This method applies the later rule.
+     * <br/> If defined the operation's verb is returned, else the port's verb.  
+     * @param binding
+     * @param bindingOperation
+     * @return If defined the operation's verb is returned, else the port's verb.
+     * @see #getOperationVerb(javax.wsdl.BindingOperation) 
+     */
+    public static String resolveVerb(Binding binding, BindingOperation bindingOperation) {
+        final HTTPBinding httpBinding = (HTTPBinding) WsdlUtils.getBindingExtension(binding);
+        String portVerb = httpBinding != null ? httpBinding.getVerb() : null;
+        String operationVerb = WsdlUtils.getOperationVerb(bindingOperation);
+        return operationVerb != null ? operationVerb : portVerb;
+    }
 
 }

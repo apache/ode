@@ -43,14 +43,11 @@ public class HttpBindingValidator {
     private static final org.apache.ode.utils.wsdl.Messages wsdlMsgs = Messages.getMessages(org.apache.ode.utils.wsdl.Messages.class);
 
     protected Binding binding;
-    private String verb;
 
     public HttpBindingValidator(Binding binding) {
         this.binding = binding;
         if (!WsdlUtils.useHTTPBinding(binding))
             throw new IllegalArgumentException(httpMsgs.msgHttpBindingNotUsed(binding));
-        HTTPBinding httpBinding = (HTTPBinding) WsdlUtils.getBindingExtension(binding);
-        verb = httpBinding.getVerb();
     }
 
     public void validate() throws IllegalArgumentException {
@@ -58,14 +55,6 @@ public class HttpBindingValidator {
     }
 
     protected void validatePort() {
-
-        if (!"GET".equalsIgnoreCase(verb)
-                && !"DELETE".equalsIgnoreCase(verb)
-                && !"PUT".equalsIgnoreCase(verb)
-                && !"POST".equalsIgnoreCase(verb)) {
-            throw new IllegalArgumentException(httpMsgs.msgUnsupportedHttpMethod(binding, verb));
-        }
-
         // Validate the given HttpBinding
         for (int i = 0; i < binding.getBindingOperations().size(); i++) {
             BindingOperation bindingOperation = (BindingOperation) binding.getBindingOperations().get(i);
@@ -74,6 +63,18 @@ public class HttpBindingValidator {
     }
 
     protected void validateOperation(BindingOperation bindingOperation) {
+        String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
+        if(verb==null){
+            throw new IllegalArgumentException(httpMsgs.msgMissingVerb(binding, bindingOperation));
+        }
+        if (!"GET".equalsIgnoreCase(verb)
+                && !"DELETE".equalsIgnoreCase(verb)
+                && !"PUT".equalsIgnoreCase(verb)
+                && !"POST".equalsIgnoreCase(verb)) {
+            throw new IllegalArgumentException(httpMsgs.msgUnsupportedHttpMethod(binding, verb));
+        }
+
+
         BindingOutput output = bindingOperation.getBindingOutput();
         String outputContentType = WsdlUtils.getMimeContentType(output.getExtensibilityElements());
         if (!outputContentType.endsWith("text/xml")) {
