@@ -19,13 +19,6 @@
 
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
-import java.util.List;
-
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionException;
-import javax.xml.xpath.XPathFunctionResolver;
-
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
@@ -38,6 +31,12 @@ import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
+
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathFunction;
+import javax.xml.xpath.XPathFunctionException;
+import javax.xml.xpath.XPathFunctionResolver;
+import java.util.List;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -76,6 +75,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             String localName = functionName.getLocalPart();
             if (Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS.equals(localName)) {
                 return new SplitToElements();
+            } else if (Constants.NON_STDRD_FUNCTION_COMBINE_URL.equals(localName)) {
+                return new CombineUrl();
+            } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName)
+                    || Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName)) {
+                return new ComposeUrl();
             }
         }
 
@@ -139,6 +143,25 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (params.size() < 3 || params.size() > 4) {
                 throw new CompilationException(
                         __msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS));
+            }
+            return "";
+        }
+    }
+
+    public static class CombineUrl implements XPathFunction {
+        public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 2) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_COMBINE_URL));
+            }
+            return "";
+        }
+    }
+
+    public static class ComposeUrl implements XPathFunction {
+        public Object evaluate(List args) throws XPathFunctionException {
+            boolean separareParameteters;
+            if (args.size() != 2 && (args.size() <= 2 || args.size() % 2 != 1)) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_COMPOSE_URL));
             }
             return "";
         }

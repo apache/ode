@@ -251,7 +251,7 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils"),
-      BACKPORT, COMMONS.logging, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
+      BACKPORT, COMMONS.logging, COMMONS.httpclient, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
       JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "il-common"),
@@ -299,7 +299,8 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "il-common", "dao-jpa", "bpel-obj"),
-      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, COMMONS.lang
+      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, 
+      COMMONS.lang, COMMONS.httpclient, COMMONS.codec
 
     test.with projects("jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
@@ -464,7 +465,7 @@ define "ode" do
 
   desc "ODE Utils"
   define "utils" do
-    compile.with COMMONS.logging, COMMONS.pool, LOG4J, XERCES, JAVAX.stream, WSDL4J
+    compile.with COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J
 	test.exclude "*TestResources"
     package :jar
   end
