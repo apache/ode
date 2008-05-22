@@ -31,6 +31,10 @@ import java.io.File;
  */
 public class Messages extends MessageBundle {
 
+    public String msgMissingVerb(Binding binding, BindingOperation operation) {
+        return format("No verb defined for binding: {0} operation: {1}", binding.getQName(), operation.getName());
+    }
+
     public String msgUnsupportedHttpMethod(Binding binding, String verb) {
         return format("Unsupported HTTP method! binding: {0} method: {1}", binding.getQName(), verb);
     }
