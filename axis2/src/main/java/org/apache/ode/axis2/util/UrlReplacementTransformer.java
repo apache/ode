@@ -20,6 +20,10 @@
 package org.apache.ode.axis2.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.wsdl.Messages;
 import org.w3c.dom.Element;
@@ -33,11 +37,19 @@ import java.util.Set;
 
 /**
  * This encoder applies urlReplacement as defined by the <a href='http://www.w3.org/TR/wsdl#_http:urlReplacement'>WSDL specification</a>.
- * <br/>
+ * <p/><strong>Escaping Considerations</strong>
+ * <br/>Replacement and default values are escaped. All characters except unreserved (as defined by <a href="http://tools.ietf.org/html/rfc2396#appendix-A">rfc2396</a>) are escaped.
+ * <br/> unreserved    = alphanum | mark
+ * <br/> mark          = "-" | "_" | "." | "!" | "~" | "*" | "'" |  "(" | ")"
+ * <p/>
+ * <a href="http://tools.ietf.org/html/rfc2396">Rfc2396</a> is used to be compliant with {@linkplain java.net.URI java.net.URI}.
+ * <p/>
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class UrlReplacementTransformer {
+
+    private static final Log log = LogFactory.getLog(UrlReplacementTransformer.class);
 
     private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
     private static final org.apache.ode.axis2.httpbinding.Messages httpMsgs = org.apache.ode.axis2.httpbinding.Messages.getMessages(org.apache.ode.axis2.httpbinding.Messages.class);
@@ -81,10 +93,17 @@ public class UrlReplacementTransformer {
                 String partName = e.getKey();
                 partPattern = "\\(" + partName + "\\)";
                 Element value = e.getValue();
-                replacementValue = DOMUtils.isEmptyElement(value) ? "" : DOMUtils.getTextContent(value);
-                if (replacementValue == null) {
+                if (value == null) {
                     throw new IllegalArgumentException(httpMsgs.msgSimpleTypeExpected(partName));
                 }
+                replacementValue = DOMUtils.isEmptyElement(value) ? "" : DOMUtils.getTextContent(value);
+            }
+
+            try {
+                replacementValue = URIUtil.encodeWithinQuery(replacementValue);
+            } catch (URIException urie) {
+                // this exception is never thrown by the code of httpclient
+                if (log.isWarnEnabled()) log.warn(urie.getMessage(), urie);
             }
             replace(result, partPattern, replacementValue);
         }
@@ -127,5 +146,4 @@ public class UrlReplacementTransformer {
             }
         }
     }
-
 }
