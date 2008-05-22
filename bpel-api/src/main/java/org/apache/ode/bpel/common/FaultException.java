@@ -48,6 +48,10 @@ public class FaultException extends Exception {
     this(qname, null, null);
   }
 
+     public FaultException(QName qname, Throwable cause) {
+         this(qname, null, cause);
+     }
+
   /**
    * Get the (official) <code>QName</code> of this fault.
    * @return the <code>QName</code> of the fault

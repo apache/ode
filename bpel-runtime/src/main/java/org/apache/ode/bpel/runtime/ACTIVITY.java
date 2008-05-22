@@ -21,7 +21,6 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,7 +114,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         // Dead path all of the outgoing links (nothing has been activated yet!)
          for (OLink link : links) {
              if (__log.isDebugEnabled()) __log.debug("DPE on link " + link.name);
-             _linkFrame.resolve(link).pub.linkStatus(false);
+             _linkFrame.resolve(link).channel.linkStatus(false);
          }
     }
     

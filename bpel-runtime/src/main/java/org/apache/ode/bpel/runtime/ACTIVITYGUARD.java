@@ -115,12 +115,11 @@ class ACTIVITYGUARD extends ACTIVITY {
                 }
             });
             for (final OLink link : _oactivity.targetLinks) {
-                final OLink link = i.next();
                 mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).channel) {
                     private static final long serialVersionUID = 1024137371118887935L;
 
                     public void linkStatus(boolean value) {
-                        _linkVals.put(link, Boolean.valueOf(value));
+                        _linkVals.put(link, value);
                         instance(ACTIVITYGUARD.this);
                     }
                 });
