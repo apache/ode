@@ -37,6 +37,7 @@ import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.Column;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowKey;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowVal;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.ObjectPrinter;
 import org.apche.ode.bpel.evar.ExternalVariableModule;
 import org.apche.ode.bpel.evar.ExternalVariableModuleException;
 import org.apche.ode.bpel.evar.IncompleteKeyException;
@@ -245,7 +246,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         if (__log.isDebugEnabled())
             __log.debug("JdbcExternalVariable.writeValue() RowKey: " + key + " RowVal: " + val);
 
-        if (key.isComplete() && evar._initType == InitType.delete_insert) {
+        if (!key.missingValues() && evar._initType == InitType.delete_insert) {
             // do delete...
             throw new ExternalVariableModuleException("Delete not implemented. "); // todo
         }
@@ -253,7 +254,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         // should we try an update first? to do this we need to have all the required keys
         // and there should be some keys
         boolean tryupdatefirst = (evar._initType == InitType.update || evar._initType == InitType.update_insert)
-                && !evar._keycolumns.isEmpty() && key.isComplete();
+                && !evar._keycolumns.isEmpty() && !key.missingDatabaseGeneratedValues();
 
         boolean insert = evar._initType != InitType.update;
 
@@ -262,7 +263,8 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                         + " insert: " + insert
                         + " initType: " + evar._initType
                         + " key.isEmpty: " + evar._keycolumns.isEmpty()
-                        + " key.isComplete: " + key.isComplete());
+                        + " key.missingValues: " + key.missingValues()
+                        + " key.missingDBValues: " + key.missingDatabaseGeneratedValues());
         
         try {
             if (tryupdatefirst)
@@ -277,7 +279,6 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         }
 
         return newval;
-
     }
 
     public Value readValue(QName varType, Locator locator) throws ExternalVariableModuleException {
@@ -295,7 +296,6 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         }
 
         return new Value(locator, val, null);
-
     }
 
     /**
@@ -340,14 +340,17 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         } finally {
             conn.close();
         }
-
     }
 
     RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
         RowKey rowkey = dbev.keyFromLocator(locator);
         if (__log.isDebugEnabled()) __log.debug("execSelect: " + rowkey);
         
-        if (!rowkey.isComplete()) {
+        if (rowkey.missingDatabaseGeneratedValues()) {
+            return null;
+        }
+        
+        if (rowkey.missingValues()) {
             throw new IncompleteKeyException(rowkey.getMissing());
         }
         
@@ -388,10 +391,14 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             if (__log.isDebugEnabled()) {
                 __log.debug("execInsert: keys=" + keys + " values=" + values);
                 __log.debug("Prepare statement: " + dbev.insert);
+                __log.debug("missingDatabaseGeneratedValues: " + keys.missingDatabaseGeneratedValues());
+                __log.debug("_autoColNames: " + ObjectPrinter.stringifyNvList(dbev._autoColNames));
             }
-            PreparedStatement stmt = dbev.generatedKeys 
-                    ? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
-                    : conn.prepareStatement(dbev.insert);
+
+            PreparedStatement stmt = keys.missingDatabaseGeneratedValues() 
+                ? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
+                : conn.prepareStatement(dbev.insert);
+
             int idx = 1;
             for (Column c : dbev._inscolumns) {
                 Object val = c.getValue(c.name, keys, values, locator.iid);
@@ -406,21 +413,24 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
             stmt.execute();
 
-            if (dbev.generatedKeys) {
+            for (Column ck : keys._columns) {
+                Object val = values.get(ck.name);
+                if (__log.isDebugEnabled()) __log.debug("Key "+ck.name+": "+val);
+                keys.put(ck.name,val);
+            }
+
+            if (keys.missingDatabaseGeneratedValues() ) {
                 // With JDBC 3, we can get the values of the key columns (if the db supports it)
-                ResultSet keyRS = stmt.getResultSet();
+                ResultSet keyRS = stmt.getGeneratedKeys();
+                if (keyRS == null) 
+                    throw new SQLException("Database did not return generated keys");
                 keyRS.next();
                 for (Column ck : keys._columns) {
-                    if (__log.isDebugEnabled()) __log.debug("Generated key "+ck.name+": "+keyRS.getObject(ck.colname));
-                    keys.put(ck.name, keyRS.getObject(ck.colname));
+                    Object value = keyRS.getObject(ck.idx+1);
+                    if (__log.isDebugEnabled()) __log.debug("Generated key "+ck.name+": "+value);
+                    keys.put(ck.name, value);
                 }
-            } else {
-                for (Column ck : keys._columns) {
-                    Object val = values.get(ck.name);
-                    if (__log.isDebugEnabled()) __log.debug("Key "+ck.name+": "+val);
-                    keys.put(ck.name,val);
-                }
-            }
+            } 
             return keys;
         } finally {
             conn.close();
