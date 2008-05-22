@@ -29,7 +29,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.mozilla.javascript.Context;

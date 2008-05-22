@@ -32,10 +32,10 @@ import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
-import org.apche.ode.bpel.evar.ExternalVariableModule;
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.ExternalVariableModule.Locator;
-import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
+import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

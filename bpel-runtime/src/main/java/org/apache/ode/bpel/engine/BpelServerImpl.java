@@ -66,7 +66,7 @@ import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apche.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
 
 /**
  * <p>

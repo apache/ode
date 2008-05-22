@@ -95,8 +95,8 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 
-import org.apche.ode.bpel.evar.ExternalVariableModuleException;
-import org.apche.ode.bpel.evar.ExternalVariableModule.Value;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
