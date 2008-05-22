@@ -1,0 +1,51 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                  xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+                  xmlns:this="http://example.com/process/ExtVar/GenKey" 
+                  targetNamespace="http://example.com/process/ExtVar/GenKey">
+
+    <pnlk:partnerLinkType name="TestPLT">
+        <pnlk:role name="process" portType="this:Test"/>
+    </pnlk:partnerLinkType>
+
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/process/ExtVar/GenKey">
+            <xs:element name="StartRequest" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+
+    <wsdl:message name="StartRequest">
+        <wsdl:part name="body" element="this:StartRequest"/>
+    </wsdl:message>
+
+    <wsdl:portType name="Test">
+        <wsdl:operation name="Start">
+            <wsdl:input message="this:StartRequest" name="StartRequest"/>
+            <wsdl:output message="this:StartRequest"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="TestBinding" type="this:Test">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Start">
+            <soap:operation style="document" soapAction="http://example.com/process/ExtVar/GenKey"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="TestService">
+        <wsdl:port name="TestPort" binding="this:TestBinding">
+            <soap:address location="http://localhost:8080/ode/processes/ExtVar/GenKey"/>
+        </wsdl:port>
+    </wsdl:service>
+    
+</wsdl:definitions>

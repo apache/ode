@@ -20,13 +20,14 @@
 package org.apache.ode.test;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Test;
 
 /**
@@ -36,13 +37,15 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
     private JdbcExternalVariableModule _jdbcext;
 
-    private jdbcDataSource _ds;
+    private DataSource _ds;
 
     public void setUp() throws Exception {
         super.setUp();
-        _ds = new org.hsqldb.jdbc.jdbcDataSource();
-        _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        _ds.setUser("sa");
+        
+        EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
+        ds.setCreateDatabase("create");
+        ds.setDatabaseName("ExternalVariableTest");
+        _ds = ds;
 
         _jdbcext = new JdbcExternalVariableModule();
         _jdbcext.registerDataSource("testds", _ds);
@@ -50,21 +53,36 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();
-        s.execute("create table extvartable1 (" + "id1 VARCHAR PRIMARY KEY," + "_id2_ VARCHAR," + "pid VARCHAR, " + "iid INT,"
-                + "cts DATETIME," + "uts DATETIME," + "foo VARCHAR," + "bar VARCHAR );");
+        
+        dropTable(s, "extvartable1");
+        s.execute("create table extvartable1 (" + "id1 VARCHAR(200) PRIMARY KEY," +  " \"_id2_\" VARCHAR(200)," +  "pid VARCHAR(250), " + "iid INT,"
+                + "cts TIMESTAMP," + "uts TIMESTAMP," + "foo VARCHAR(250)," + "bar VARCHAR(250))");
 
         s.execute("insert into extvartable1(id1,pid,foo) values ('123','"
                 + new QName("http://ode/bpel/unit-test","HelloWorld2-1").toString()
-                + "','thefoo');");
+                + "','thefoo')");
 
+        dropTable(s, "costPerCustomer");
         s.execute("CREATE TABLE costPerCustomer (value0 varchar(250), key1 varchar(250) primary key)");
         
+        dropTable(s, "DataTypesTest");
         s.execute("CREATE TABLE DataTypesTest (KEYSTRING VARCHAR(255), STRINGCOL VARCHAR(255), FLOATCOL FLOAT, " 
-            + "INTCOL INTEGER, NUMBERCOL NUMERIC, TIMESTAMPCOL TIMESTAMP, BOOLEANCOL TINYINT)");
-        
+                + "INTCOL INTEGER, NUMBERCOL NUMERIC, TIMESTAMPCOL TIMESTAMP, BOOLEANCOL SMALLINT)");
+
+        dropTable(s, "GenKey");
+        s.execute("CREATE TABLE GenKey (KEYSTRING INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, STRINGCOL VARCHAR(255))");
+
         conn.close();
     }
-
+    
+    private static void dropTable(Statement s, String name) {
+        try {
+            s.execute("drop table "+name);
+        } catch (SQLException e) {
+            // ignore
+        }
+    }
+    
     @Test
     public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/ExtVar");
@@ -78,5 +96,10 @@ public class ExternalVariableTest extends BPELTestAbstract {
     @Test
     public void testExtVar3() throws Throwable {
         go("/bpel/2.0/ExtVar3");
+    }
+
+    @Test
+    public void testExtVarKeyGen() throws Throwable {
+        go("/bpel/2.0/ExtVar-GenKey");
     }
 }
