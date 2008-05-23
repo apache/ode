@@ -548,6 +548,6 @@ define "apache-ode" do
     end
   end
 
-  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target)
+  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target) unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 end
 
