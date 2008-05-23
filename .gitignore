@@ -4,3 +4,7 @@ derby.log
 *.cbp
 .classpath
 .project
+*.iml
+*.ipr
+*.iwl
+*.swp
