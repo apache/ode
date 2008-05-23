@@ -19,7 +19,23 @@
 
 package org.apache.ode.dao.jpa;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -28,19 +44,16 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
-
-import javax.persistence.EntityManager;
-import javax.xml.namespace.QName;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import org.apache.ode.utils.ISO8601DateParser;
+import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.apache.openjpa.persistence.OpenJPAQuery;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
+	
+	static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
 	
 	EntityManager _em;
 
@@ -108,18 +121,69 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         eventDao.setEvent(event);
         _em.persist(eventDao);
 	}
+    
+    private static String dateFilter(String filter) {
+        String date = Filter.getDateWithoutOp(filter);
+        String op = filter.substring(0,filter.indexOf(date));
+        Date dt = null;
+        try {
+            dt = ISO8601DateParser.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Timestamp ts = new Timestamp(dt.getTime());
+        return op + " '" + ts.toString() + "'";
+    }
 
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
         StringBuffer query = new StringBuffer();
         query.append("select pi from ProcessInstanceDAOImpl as pi");
 
-        // TODO Continue implementing me
         if (criteria != null) {
             // Building each clause
             ArrayList<String> clauses = new ArrayList<String>();
+            
+            // pid filter
             if (criteria.getPidFilter() != null)
                 clauses.add(" pi._process._processId = '" + criteria.getPidFilter() + "'");
+            
+            // name filter
+            if (criteria.getNameFilter() != null) {
+                String val = criteria.getNameFilter();
+                if (val.endsWith("*")) {
+                    val = val.substring(0, val.length()-1) + "%";
+                }
+                //process type string begins with name space
+                //this could possibly match more than you want
+                //because the name space and name are stored together 
+                clauses.add(" pi._process._processType like '%" + val + "'");
+            }
+            
+            // name space filter
+            if (criteria.getNamespaceFilter() != null) {
+                //process type string begins with name space
+                //this could possibly match more than you want
+                //because the name space and name are stored together
+                clauses.add(" pi._process._processType like '{" + 
+                        criteria.getNamespaceFilter() + "%'");
+            }
+            
+            // started filter
+            if (criteria.getStartedDateFilter() != null) {
+                for ( String ds : criteria.getStartedDateFilter() ) {
+                    clauses.add(" pi._dateCreated " + dateFilter(ds));
+                }
+            }
+            
+            // last-active filter
+            if (criteria.getLastActiveDateFilter() != null) {
+                for ( String ds : criteria.getLastActiveDateFilter() ) {
+                    clauses.add(" pi._lastActive " + dateFilter(ds));
+                }
+            }
+            
+            // status filter
             if (criteria.getStatusFilter() != null) {
                 StringBuffer filters = new StringBuffer();
                 List<Short> states = criteria.convertFilterState();
@@ -128,6 +192,57 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                     if (m < states.size() - 1) filters.append(" or");
                 }
                 clauses.add(" (" + filters.toString() + ")");
+            }
+            
+            // $property filter
+            if (criteria.getPropertyValuesFilter() != null) {
+                Map<String,String> props = criteria.getPropertyValuesFilter();
+                // join to correlation sets
+                query.append(" inner join pi._rootScope._correlationSets as cs");            
+                int i = 0;
+                for (String propKey : props.keySet()) {
+                    i++;
+                    // join to props for each prop
+                    query.append(" inner join cs._props as csp"+i);
+                    // add clause for prop key and value
+                    clauses.add(" csp"+i+".propertyKey = '"+propKey+
+                            "' and csp"+i+".propertyValue = '"+
+                            // spaces have to be escaped, might be better handled in InstanceFilter
+                            props.get(propKey).replaceAll("&#32;", " ")+"'");
+                }
+            }
+            
+            // order by
+            StringBuffer orderby = new StringBuffer("");
+            if (criteria.getOrders() != null) {
+                orderby.append(" order by");
+                List<String> orders = criteria.getOrders();
+                for (int m = 0; m < orders.size(); m++) {
+                    String field = orders.get(m);
+                    String ord = " asc";
+                    if (field.startsWith("-")) {
+                        ord = " desc";
+                    }
+                    String fieldName = " pi._instanceId";
+                    if ( field.endsWith("name") || field.endsWith("namespace")) {
+                        fieldName = " pi._process._processType";
+                    }
+                    if ( field.endsWith("version")) {
+                        fieldName = " pi._process._version";
+                    }
+                    if ( field.endsWith("status")) {
+                        fieldName = " pi._state";
+                    }
+                    if ( field.endsWith("started")) {
+                        fieldName = " pi._dateCreated";
+                    }
+                    if ( field.endsWith("last-active")) {
+                        fieldName = " pi._lastActive";
+                    }
+                    orderby.append(fieldName + ord);
+                    if (m < orders.size() - 1) orderby.append(", ");
+                }
+
             }
 
             // Preparing the statement
@@ -138,8 +253,30 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                     if (m < clauses.size() - 1) query.append(" and");
                 }
             }
+            
+            query.append(orderby);
         }
-        return _em.createQuery(query.toString()).getResultList();
+        
+        if (__log.isDebugEnabled()) {
+        	__log.debug(query.toString());
+        }
+        
+        // criteria limit
+        Query pq = _em.createQuery(query.toString());
+        OpenJPAQuery kq = OpenJPAPersistence.cast(pq);
+        kq.getFetchPlan().setFetchBatchSize(criteria.getLimit());       
+        List<ProcessInstanceDAO> ql = pq.getResultList();
+       
+        Collection<ProcessInstanceDAO> list = new ArrayList<ProcessInstanceDAO>();
+        int num = 0;       
+        for (Iterator iterator = ql.iterator(); iterator.hasNext();) {
+            if(num++ > criteria.getLimit()) break;
+            ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) iterator
+                    .next();
+            list.add(processInstanceDAO);            
+        }     
+        
+        return list;
 	}
 
    
