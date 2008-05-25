@@ -84,7 +84,7 @@ public class ManagementService {
             wsdlReader.setFeature("javax.wsdl.verbose", false);
 
             File wsdlFile = new File(rootpath + "/pmapi.wsdl");
-            def = wsdlReader.readWSDL(wsdlFile.toURI().getPath());
+            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
             AxisService processService = ODEAxisService.createService(axisConfig, PM_SERVICE_NAME, PM_PORT_NAME,
                     PM_AXIS2_NAME, def, new DynamicMessageReceiver<ProcessManagement>(_processMgmt));
             AxisService instanceService = ODEAxisService.createService(axisConfig, IM_SERVICE_NAME, IM_PORT_NAME,
