@@ -53,7 +53,7 @@ public class ListInstanceTest extends BaseTestDAO {
         filter.append(entry.getKey());
         filter.append(entry.getValue().get((index < entry.getValue().size()) ? index : index % entry.getValue().size()));
         InstanceFilter ifilter = new InstanceFilter(filter.toString(),
-                order.get((index < order.size()) ? index : index % order.size()), 20);
+                order.get((index < order.size()) ? index : index % order.size()), 0);
         daoConn.instanceQuery(ifilter);
       }
     }
