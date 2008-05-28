@@ -134,12 +134,13 @@ public class OMUtils {
     }
 
     public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) {
-        OMNamespace elns = null;
+        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(), null) :
+                omf.createOMElement(src.getLocalName(), null, parent);
         if (src.getNamespaceURI() != null) {
-            elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
+            if (src.getPrefix() != null)
+                omElement.setNamespace(omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix()));
+            else omElement.declareDefaultNamespace(src.getNamespaceURI());
         }
-        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(),elns) :
-        omf.createOMElement(src.getLocalName(),elns,parent);
         
         if (parent == null) {
             NSContext nscontext = DOMUtils.getMyNSContext(src);
