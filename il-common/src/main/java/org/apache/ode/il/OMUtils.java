@@ -134,12 +134,13 @@ public class OMUtils {
     }
 
     public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) {
-        OMNamespace elns = null;
+        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(), null) :
+            omf.createOMElement(src.getLocalName(), null, parent);
         if (src.getNamespaceURI() != null) {
-            elns = omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix());
+            if (src.getPrefix() != null)
+                omElement.setNamespace(omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix()));
+            else omElement.declareDefaultNamespace(src.getNamespaceURI());
         }
-        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(),elns) :
-        omf.createOMElement(src.getLocalName(),elns,parent);
         
         if (parent == null) {
             NSContext nscontext = DOMUtils.getMyNSContext(src);
@@ -226,4 +227,12 @@ public class OMUtils {
         return toOM(doc.getDocumentElement(), OMAbstractFactory.getOMFactory());
     }
 
+    public static void main(String[] args) {
+        OMFactory fact = OMAbstractFactory.getOMFactory();
+        OMNamespace ns = fact.createOMNamespace("ns:foo:bar", null);
+        OMElement elmt = fact.createOMElement("baz", null);
+        elmt.declareDefaultNamespace("ns:foo:bar");
+        System.out.println(elmt);
+        
+    }
 }

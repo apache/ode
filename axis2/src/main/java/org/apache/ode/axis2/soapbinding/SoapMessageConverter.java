@@ -326,7 +326,8 @@ public class SoapMessageConverter {
 
     public void createSoapBody(org.apache.axiom.soap.SOAPBody sb, SOAPBody soapBody, Message msgDef,
                                Element message, String rpcWrapper) throws AxisFault {
-        OMElement partHolder = _isRPC ? _soapFactory.createOMElement(new QName(soapBody.getNamespaceURI(),rpcWrapper), sb) : sb;
+        OMElement partHolder = _isRPC ? _soapFactory
+                .createOMElement(new QName(soapBody.getNamespaceURI(), rpcWrapper, "odens"), sb) : sb;
         List<Part> parts = msgDef.getOrderedParts(soapBody.getParts());
 
         for (Part part : parts) {
