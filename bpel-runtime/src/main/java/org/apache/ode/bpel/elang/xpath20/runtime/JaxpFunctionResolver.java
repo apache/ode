@@ -89,7 +89,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(localName)) {
                 return new GetLinkStatus();
             } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(localName)) {
-                return new DoXslTransform(_ectx);
+                return new DoXslTransform();
             } else {
                 throw new WrappedResolverException("Unknown BPEL function: " + functionName);
             }
@@ -181,10 +181,6 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     }
 
     public class DoXslTransform implements XPathFunction {
-    	private EvaluationContext _ectx;    	
-        public DoXslTransform(EvaluationContext ectx) {
-        	this._ectx= ectx;
-		}
 
 		public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || (args.size() % 2) != 0)
