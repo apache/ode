@@ -20,6 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -447,6 +448,11 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 	}
 
 	public Node writeVariable(VariableInstance var, Node changes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public URI getBaseResourceURI() {
 		// TODO Auto-generated method stub
 		return null;
 	}

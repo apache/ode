@@ -21,6 +21,7 @@ package org.apache.ode.bpel.runtime;
 import java.util.List;
 
 import javax.xml.namespace.QName;
+import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -674,6 +675,10 @@ class ASSIGN extends ACTIVITY {
         public boolean narrowTypes() {
             return false;
         }
+
+		public URI getBaseResourceURI() {
+			return _ctx.getBaseResourceURI();
+		}
     }
 
 }

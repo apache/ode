@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -177,6 +178,15 @@ public class BpelProcess {
         _invocationStyles = Collections.unmodifiableSet(istyles);
     }
 
+    /**
+     * Retrives the base URI to use for local resource resolution.
+     * 
+     * @return URI - instance representing the absolute file path to the physical location of the process definition folder.
+     */
+    public URI getBaseResourceURI() {
+    	return this._pconf.getBaseURI();
+    }
+    
     /**
      * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it 
      * is possible to change the external variable configuration at runtime.

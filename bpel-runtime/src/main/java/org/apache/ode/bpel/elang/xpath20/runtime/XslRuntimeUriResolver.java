@@ -19,14 +19,24 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.StreamUtils;
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 
 /**
@@ -36,15 +46,67 @@ import java.io.StringReader;
  */
 public class XslRuntimeUriResolver implements URIResolver {
 
-  private OXPath10Expression _expr;
+    private static final Log __log = LogFactory.getLog(XslRuntimeUriResolver.class);
 
-  public XslRuntimeUriResolver(OXPath10Expression expr) {
-    _expr = expr;
-  }
+    private OXPath10Expression _expr;
+    private final URI _baseResourceURI;
 
-  public Source resolve(String href, String base) throws TransformerException {
-    URI uri = URI.create(href);
-    OXslSheet sheet = _expr.xslSheets.get(uri);
-    return new StreamSource(new StringReader(sheet.sheetBody));
-  }
+    public XslRuntimeUriResolver(OXPath10Expression expr, URI baseResourceURI) {
+        _expr = expr;
+        _baseResourceURI= baseResourceURI;
+    }
+
+    public Source resolve(String href, String base) throws TransformerException {
+        String result;
+        URI uri;
+        try {
+            uri = new URI(FileUtils.encodePath(href));
+        } catch (URISyntaxException e) {
+            return null;
+        }
+
+        OXslSheet sheet = _expr.xslSheets.get(uri);
+        if( sheet != null) {
+            result = sheet.sheetBody;
+        } else {
+            result = getResourceAsString(uri);
+        }
+
+        if( result != null ) {
+            return new StreamSource(new StringReader(result));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Given a URI this function will attempt to retrieve the resource declared at that URI location
+     * as a string.  (Hopefully everything's character encodings are all ok...)  This URI can be
+     * defined as being relative to the executing process instance's physical file location.
+     *
+     * @param docUri - the URI to resolve
+     * @return String - the resource contents, or null if none found.
+     */
+    private String getResourceAsString(URI docUri) {
+        URI resolvedURI= _baseResourceURI.resolve(docUri);
+        InputStream is = null;
+        try {
+            File f = new File(resolvedURI);
+            if (!f.exists()) return null;
+            is = new FileInputStream(f);
+            return new String(StreamUtils.read(is));
+        } catch (IOException e) {
+            __log.info("Couldn't load XSL resource " + docUri);
+        } finally {
+            try {
+                if (is != null) is.close();
+            } catch (Exception ex) {
+                // No worries.
+            }
+        }
+        return null;
+    }
+
+
+
 }
