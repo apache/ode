@@ -36,6 +36,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -151,5 +153,9 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         e.appendChild(doc.createTextNode(xpath));
         Expression exp = new Expression(e);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
+    }
+    @Override
+    public URI getBaseResourceURI() {
+    	return null;
     }
 }
