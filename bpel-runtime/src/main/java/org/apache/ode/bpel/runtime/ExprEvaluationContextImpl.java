@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -123,6 +124,10 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 	private void sendEvent(ScopeEvent se) {
 		_scopeInstance.fillEventInfo(se);
 		_native.sendEvent(se);
+	}
+
+	public URI getBaseResourceURI() {
+		return _native.getBaseResourceURI();
 	}
 
 }

@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1221,6 +1222,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 		vrp.value = val.value;
 		
 		return vrp;
+	}
+
+	public URI getBaseResourceURI() {
+		return _bpelProcess.getBaseResourceURI();
 	}
 
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.explang;
 
+import java.net.URI;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
@@ -100,4 +102,11 @@ public interface EvaluationContext {
      * using this evaluation context.
      */
     boolean narrowTypes();
+    
+	/**
+	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 */
+	URI getBaseResourceURI();    
 }
