@@ -53,6 +53,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import javax.xml.namespace.QName;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -650,6 +651,10 @@ class ASSIGN extends ACTIVITY {
         public boolean narrowTypes() {
             return false;
         }
+
+		public URI getBaseResourceURI() {
+			return _ctx.getBaseResourceURI();
+		}
     }
 
 }

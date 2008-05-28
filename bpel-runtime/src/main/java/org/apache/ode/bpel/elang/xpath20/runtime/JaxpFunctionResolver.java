@@ -89,7 +89,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(localName)) {
                 return new GetLinkStatus();
             } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(localName)) {
-                return new DoXslTransform();
+                return new DoXslTransform(_ectx);
             } else {
                 throw new WrappedResolverException("Unknown BPEL function: " + functionName);
             }
@@ -181,7 +181,12 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     }
 
     public class DoXslTransform implements XPathFunction {
-        public Object evaluate(List args) throws XPathFunctionException {
+    	private EvaluationContext _ectx;    	
+        public DoXslTransform(EvaluationContext ectx) {
+        	this._ectx= ectx;
+		}
+
+		public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || (args.size() % 2) != 0)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "doXslTransformInvalidSource"), "Invalid arguments"));
 
@@ -264,7 +269,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             // of the transformation is just a string.
             StringWriter writerResult = new StringWriter();
             StreamResult result = new StreamResult(writerResult);
-            XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath);
+            XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _ectx.getBaseResourceURI());
             XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
             try {
                 XslTransformHandler.getInstance().transform(xslUri, source, result, parametersMap, resolver);

@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.net.URI;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -86,6 +88,10 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
 
     public boolean narrowTypes() {
         return true;
+    }
+    
+    public URI getBaseResourceURI() {
+    	return null;
     }
 
 }
