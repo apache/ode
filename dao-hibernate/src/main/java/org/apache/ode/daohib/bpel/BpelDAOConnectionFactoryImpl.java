@@ -83,7 +83,10 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
         if (initialProps == null) initialProps = new Properties();
         // Don't want to pollute original properties
-        Properties properties = new Properties(initialProps);
+        Properties properties = new Properties();
+        for (Object prop : initialProps.keySet()) {
+            properties.put(prop, initialProps.get(prop));
+        }
 
         // Note that we don't allow the following properties to be overriden by
         // the client.

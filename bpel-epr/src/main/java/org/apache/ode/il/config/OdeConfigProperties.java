@@ -152,7 +152,7 @@ public class OdeConfigProperties {
             throw new FileNotFoundException("" + _cfgFile);
         }
         for (Object key : _props.keySet()) {
-        	String value = (String) _props.get(key);
+            String value = (String) _props.get(key);
         	value = SystemUtils.replaceSystemProperties(value);
         	_props.put(key, value);
         }
