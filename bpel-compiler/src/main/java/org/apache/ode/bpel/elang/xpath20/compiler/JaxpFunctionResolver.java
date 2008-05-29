@@ -80,6 +80,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName)
                     || Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName)) {
                 return new ComposeUrl();
+            } else if ( Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName)) {
+            	return new DomToString();
             }
         }
 
@@ -152,6 +154,15 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_COMBINE_URL));
+            }
+            return "";
+        }
+    }    
+
+    public static class DomToString implements XPathFunction {
+        public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DOM_TO_STRING));
             }
             return "";
         }

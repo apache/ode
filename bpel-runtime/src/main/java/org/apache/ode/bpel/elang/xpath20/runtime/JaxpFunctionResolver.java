@@ -103,6 +103,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 return new ComposeUrl();
             } else if (Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName)) {
                 return new ComposeUrl(true, "expandTemplateInvalidSource");
+            } else if ( Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName)) {
+            	return new DomToString();
             }
         }
 
@@ -298,6 +300,40 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 return output;
             }
         }
+    }
+    
+    public class DomToString implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1)
+                throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "domToStringInvalidSource"), "Invalid arguments"));
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("domToString call(context=" + _ectx + " args=" + args + ")");
+            }
+            
+            Element varElmt;
+            try {
+                if (args.get(0) instanceof List) {
+                    List elmts = (List) args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                                    "The bpws:domToString function MUST be passed a single " +
+                                            "element node."));
+                    varElmt = (Element) elmts.get(0);
+                } else {
+                    if (args.get(1) instanceof NodeWrapper)
+                        varElmt = (Element) ((NodeWrapper) args.get(1)).getUnderlyingNode();
+                    else varElmt = (Element) args.get(1);
+                }
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                                "The bpws:domToString function MUST be passed a single " +
+                                        "element node."));
+            }    
+            String result= DOMUtils.domToString(varElmt); 
+            return result;
+    	}
     }
 
     /**
