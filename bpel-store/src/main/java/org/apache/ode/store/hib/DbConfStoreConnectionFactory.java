@@ -82,7 +82,10 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         _ds = ds;
 
         // Don't want to pollute original properties
-        Properties properties = new Properties(initialProps);
+        Properties properties = new Properties();
+        for (Object prop : initialProps.keySet()) {
+            properties.put(prop, initialProps.get(prop));
+        }
 
         __log.debug("using data source: " + ds);
         _dataSources.put(_guid, ds);
