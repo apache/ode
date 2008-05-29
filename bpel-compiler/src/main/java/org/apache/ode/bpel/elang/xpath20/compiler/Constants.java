@@ -53,6 +53,7 @@ public class Constants {
     public static final String NON_STDRD_FUNCTION_COMBINE_URL = "combineUrl";
     public static final String NON_STDRD_FUNCTION_COMPOSE_URL = "composeUrl";
     public static final String NON_STDRD_FUNCTION_EXPAND_TEMPLATE = "expandTemplate";
+    public static final String NON_STDRD_FUNCTION_DOM_TO_STRING= "domToString";
 
     public static boolean isBpelNamespace(String uri){
         return Namespaces.WS_BPEL_20_NS.equals(uri) || Namespaces.WSBPEL2_0_FINAL_EXEC.equals(uri)
