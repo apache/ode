@@ -456,7 +456,8 @@ class ASSIGN extends ACTIVITY {
             replacement.appendChild(doc.importNode(nl.item(i), true));
         NamedNodeMap attrs = src.getAttributes();
         for (int i = 0; i < attrs.getLength(); ++i)
-            replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
+            if (!((Attr)attrs.item(i)).getName().startsWith("xmlns"))
+                replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
         
