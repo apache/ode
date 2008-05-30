@@ -41,7 +41,7 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -125,7 +125,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
             __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys="
-                    + ArrayUtils.makeCollection(HashSet.class, keys) + " mySessionId=" + mySessionId
+                    + CollectionUtils.makeCollection(HashSet.class, keys) + " mySessionId=" + mySessionId
                     + " partnerSessionId=" + partnerSessionId);
         }
 

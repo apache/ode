@@ -312,7 +312,7 @@ public class ODEServer {
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         destroyService(serviceName, portName);
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, pconf.getDefinitionForService(serviceName), serviceName, portName, _server, _txMgr);
+        ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server, _txMgr);
 
         _services.put(serviceName, portName, odeService);
 
@@ -328,18 +328,19 @@ public class ODEServer {
         return odeService;
     }
 
-    public ExternalService createExternalService(Definition def, QName serviceName, String portName, ProcessConf pconf) throws ContextException {
+    public ExternalService createExternalService(ProcessConf pconf, QName serviceName, String portName) throws ContextException {
         ExternalService extService = (ExternalService) _externalServices.get(serviceName);
         if (extService != null)
             return extService;
 
+        Definition def = pconf.getDefinitionForService(serviceName);
         try {
             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
                 if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
-                extService = new HttpExternalService(def, serviceName, portName, _executorService, _scheduler, _server);
+                extService = new HttpExternalService(pconf, serviceName, portName, _executorService, _scheduler, _server);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
                 if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
-                extService = new SoapExternalService(def, serviceName, portName, _executorService, _axisConfig, _scheduler, _server, pconf);
+                extService = new SoapExternalService(pconf, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);

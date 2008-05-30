@@ -19,66 +19,76 @@
 
 package org.apache.ode.axis2.httpbinding;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.methods.ExpectContinueMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.stl.CollectionsX;
-import org.apache.ode.utils.wsdl.*;
-import org.apache.ode.utils.wsdl.Messages;
-import org.apache.ode.axis2.util.UrlReplacementTransformer;
+import org.apache.ode.axis2.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
+import org.apache.ode.axis2.util.UrlReplacementTransformer;
+import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.wsdl.Messages;
+import org.apache.ode.utils.wsdl.WsdlUtils;
+import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
-import javax.wsdl.Operation;
+import javax.wsdl.Binding;
+import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
 import javax.wsdl.Message;
+import javax.wsdl.Operation;
 import javax.wsdl.Part;
-import javax.wsdl.BindingInput;
-import javax.wsdl.Binding;
 import javax.wsdl.extensions.http.HTTPOperation;
-import javax.wsdl.extensions.http.HTTPBinding;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Collection;
 
-import com.ibm.wsdl.PartImpl;
-import com.ibm.wsdl.util.StringUtils;
-
-/**
- * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
- */
-public class HttpMethodBuilder {
+public class HttpClientHelper {
 
     private static final String CONTENT_TYPE_TEXT_XML = "text/xml";
-    private static final Log log = LogFactory.getLog(HttpMethodBuilder.class);
+    private static final Log log = LogFactory.getLog(HttpClientHelper.class);
 
     protected static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
     protected Binding binding;
 
-    public HttpMethodBuilder(Binding binding) {
+    public HttpClientHelper(Binding binding) {
         this.binding = binding;
     }
 
+    public void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
+        if (log.isDebugEnabled()) log.debug("Configuring http client...");
+        // proxy configuration
+        if (ProxyConf.isProxyEnabled(params, targetURI.getHost())) {
+            if (log.isDebugEnabled()) log.debug("ProxyConf");
+            ProxyConf.configure(hostConfig, state, (HttpTransportProperties.ProxyProperties) params.getParameter(Properties.PROP_HTTP_PROXY_PREFIX));
+        }
 
-    public HttpMethod buildHttpMethod(PartnerRoleMessageExchange odeMex) throws UnsupportedEncodingException {
+        // security
+        // ...
+
+    }
+
+    public HttpMethod buildHttpMethod(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
 
@@ -97,7 +107,7 @@ public class HttpMethodBuilder {
         String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
 
         // build the http method itself
-        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url);
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url, params);
         return method;
     }
 
@@ -113,7 +123,15 @@ public class HttpMethodBuilder {
         return partValues;
     }
 
-    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, String verb, Map<String, Element> partValues, final String rootUri) throws UnsupportedEncodingException {
+    /**
+     * create and initialize the http method.
+     * Http Headers that may been passed in the params are not set in this method.
+     * Headers will be automatically set by HttpClient.
+     * See usages of HostParams.DEFAULT_HEADERS
+     * See org.apache.commons.httpclient.HttpMethodDirector#executeMethod(org.apache.commons.httpclient.HttpMethod)
+     */
+    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, String verb, Map<String, Element> partValues,
+                                           final String rootUri, HttpParams params) throws UnsupportedEncodingException {
         if (log.isDebugEnabled()) log.debug("Preparing http request...");
         // convenience variables...
         BindingInput bindingInput = bindingOperation.getBindingInput();
@@ -155,7 +173,6 @@ public class HttpMethodBuilder {
             } else if ("DELETE".equalsIgnoreCase(verb)) {
                 method = new DeleteMethod();
             }
-
             if (useUrlEncoded) {
                 queryPath = encodedParams;
             }
@@ -174,7 +191,7 @@ public class HttpMethodBuilder {
 
             // some body-building...
             if (useUrlEncoded) {
-                requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, "UTF-8");
+                requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, method.getParams().getContentCharset());
             } else if (contentType.endsWith(CONTENT_TYPE_TEXT_XML)) {
                 // assumption is made that there is a single part
                 // validation steps in the constructor must warranty that
@@ -192,14 +209,18 @@ public class HttpMethodBuilder {
             }
 
             // cast safely, PUT and POST are subclasses of EntityEnclosingMethod
-            ((EntityEnclosingMethod) method).setRequestEntity(requestEntity);
+            final EntityEnclosingMethod enclosingMethod = (EntityEnclosingMethod) method;
+            enclosingMethod.setRequestEntity(requestEntity);
+            enclosingMethod.setContentChunked(params.getBooleanParameter(Properties.PROP_HTTP_REQUEST_CHUNK, false));
 
         } else {
             // should not happen because of HttpBindingValidator, but never say never
             throw new IllegalArgumentException("Unsupported HTTP method: " + verb);
         }
 
-        // Settings common to all methods
+        // link params together
+        method.getParams().setDefaults(params);
+
         String completeUri = rootUri + (rootUri.endsWith("/") || relativeUri.startsWith("/") ? "" : "/") + relativeUri;
         method.setPath(completeUri); // assumes that the path is properly encoded (URL safe).
         method.setQueryString(queryPath);
