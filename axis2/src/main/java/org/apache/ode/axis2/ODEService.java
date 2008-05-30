@@ -36,6 +36,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
@@ -56,32 +57,34 @@ import java.util.concurrent.TimeUnit;
 /**
  * A running service, encapsulates the Axis service, its receivers and our
  * receivers as well.
+ *
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEService {
 
     private static final Log __log = LogFactory.getLog(ODEService.class);
-    public static final int TIMEOUT = 2 * 60 * 1000;
 
     private AxisService _axisService;
     private BpelServer _server;
     private TransactionManager _txManager;
+    private ProcessConf _pconf;
     private Definition _wsdlDef;
     private QName _serviceName;
     private String _portName;
     private WSAEndpoint _serviceRef;
     private SoapMessageConverter _converter;
 
-    public ODEService(AxisService axisService, Definition def, QName serviceName, String portName, BpelServer server,
+    public ODEService(AxisService axisService, ProcessConf pconf, QName serviceName, String portName, BpelServer server,
                       TransactionManager txManager) throws AxisFault {
         _axisService = axisService;
         _server = server;
         _txManager = txManager;
-        _wsdlDef = def;
+        _pconf = pconf;
+        _wsdlDef = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
-        _converter = new SoapMessageConverter(def, serviceName, portName);
+        _converter = new SoapMessageConverter(_wsdlDef, serviceName, portName);
 
     }
 
@@ -143,7 +146,7 @@ public class ODEService {
         if (odeMex.getOperation().getOutput() != null) {
             // Waits for the response to arrive
             try {
-                responseFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+                responseFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 String errorMsg = "Timeout or execution error when waiting for response to MEX "
                         + odeMex + " " + e.toString();
@@ -211,6 +214,21 @@ public class ODEService {
         return result;
     }
 
+    /**
+     * do not store the value so it can be dynamically updated
+     */
+    private long getTimeout() {
+        String timeout = (String) _pconf.getProperties(_serviceName.getLocalPart(), _portName).get(Properties.PROP_MEX_TIMEOUT);
+        if (timeout != null) {
+            try {
+                return Long.parseLong(timeout);
+            } catch (NumberFormatException e) {
+                if(__log.isWarnEnabled()) __log.warn("Mal-formatted Property: ["+ Properties.PROP_MEX_TIMEOUT+"="+timeout+"] Default value ("+Properties.DEFAULT_MEX_TIMEOUT+") will be used");
+            }
+        }
+        return Properties.DEFAULT_MEX_TIMEOUT;
+    }
+
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
         switch (mex.getStatus()) {
             case FAULT:
@@ -276,7 +294,7 @@ public class ODEService {
         // The callback endpoint is going to be the same as the target
         // endpoint in this case, except that it is updated with session
         // information (if available).
-        if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID)!= null) {
+        if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
             _serviceRef.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
             msgContext.setProperty("callbackSessionEndpoint", _serviceRef);
         }
@@ -290,6 +308,7 @@ public class ODEService {
     /**
      * Return the service-ref element that will be used to represent this
      * endpoint.
+     *
      * @return my service endpoint
      */
     public EndpointReference getMyServiceRef() {
@@ -299,10 +318,8 @@ public class ODEService {
     /**
      * Get the EPR of this service from the WSDL.
      *
-     * @param name
-     *            service name
-     * @param portName
-     *            port name
+     * @param name     service name
+     * @param portName port name
      * @return XML representation of the EPR
      */
     public static Element genEPRfromWSDL(Definition wsdlDef, QName name, String portName) {

@@ -21,6 +21,7 @@ package org.apache.ode.axis2;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.Map;
 import java.io.File;
 import java.io.InputStream;
 
@@ -56,6 +57,8 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.WatchDog;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.uuid.UUID;
@@ -77,6 +80,7 @@ public class SoapExternalService implements ExternalService {
 
     private static final int EXPIRE_SERVICE_CLIENT = 30000;
 
+    private static ThreadLocal<CachedOptions> _cachedOptions = new ThreadLocal<CachedOptions>();
     private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
 
     private ExecutorService _executorService;
@@ -89,18 +93,17 @@ public class SoapExternalService implements ExternalService {
     private BpelServer _server;
     private ProcessConf _pconf;
 
-    public SoapExternalService(Definition definition, QName serviceName, String portName, ExecutorService executorService,
-                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server, ProcessConf pconf) throws AxisFault {
-        _definition = definition;
+    public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
+                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server) throws AxisFault {
+        _definition = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
         _portName = portName;
         _executorService = executorService;
         _axisConfig = axisConfig;
         _sched = sched;
-        _converter = new SoapMessageConverter(definition, serviceName, portName);
+        _converter = new SoapMessageConverter(_definition, serviceName, portName);
         _server = server;
         _pconf = pconf;
-
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -121,20 +124,16 @@ public class SoapExternalService implements ExternalService {
                 __log.debug("Message: " + soapEnv);
             }
 
-            Options options = new Options();
-            options.setAction(mctx.getSoapAction());
-            options.setTo(axisEPR);
-            options.setTimeOutInMilliSeconds(60000);
-            options.setExceptionToBeThrownOnSOAPFault(false);
 
-            AuthenticationHelper.setHttpAuthentication(odeMex, options);
-
-            CachedServiceClient cached = getCachedServiceClient();
-
-            final OperationClient operationClient = cached._client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
+            ServiceClient client = getCachedServiceClient().client;
+            final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
-            operationClient.setOptions(options);
             operationClient.addMessageContext(mctx);
+            // this Options can be alter without impacting the ServiceClient options (which is a requirement)
+            Options operationOptions = operationClient.getOptions();
+            operationOptions.setAction(mctx.getSoapAction());
+            operationOptions.setTo(axisEPR);
+
 
             if (isTwoWay) {
                 final String mexId = odeMex.getMessageExchangeId();
@@ -194,19 +193,29 @@ public class SoapExternalService implements ExternalService {
     }
 
     private CachedServiceClient getCachedServiceClient() throws AxisFault {
-        CachedServiceClient cached = _cachedClients.get();
-        if (cached == null) {
-            cached = new CachedServiceClient(new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2")), EXPIRE_SERVICE_CLIENT);
-            _cachedClients.set(cached);
+        CachedServiceClient cachedServiceClient = _cachedClients.get();
+        if (cachedServiceClient == null) {
+            cachedServiceClient = new CachedServiceClient(new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2")), EXPIRE_SERVICE_CLIENT);
+            _cachedClients.set(cachedServiceClient);
         }
         try {
             // call manually the check procedure
             // we dont want a dedicated thread for that
-            cached.checkAndConfigure();
-        } catch (Exception e) {
-            throw AxisFault.makeFault(e);
+            cachedServiceClient.check();
+        } catch (RuntimeException e) {
+            throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
-        return cached;
+
+        SoapExternalService.CachedOptions cachedOptions = _cachedOptions.get();
+        if (cachedOptions == null) {
+            cachedOptions = new CachedOptions();
+            _cachedOptions.set(cachedOptions);
+        }
+        cachedOptions.check();
+
+        // apply the options to the service client
+        cachedServiceClient.client.setOptions(cachedOptions.options);
+        return cachedServiceClient;
     }
 
     /**
@@ -369,40 +378,90 @@ public class SoapExternalService implements ExternalService {
 
     /**
      * This class wraps a {@link org.apache.axis2.client.ServiceClient} and watches changes (deletions,creations,updates)
-     *  on a  Axis2 service config file named {service-name}.axis2.<p/>
+     * on a  Axis2 service config file named {service-name}.axis2.<p/>
      * The {@link org.apache.axis2.client.ServiceClient} instance is created from the main Axis2 config instance and
-     * this service-specific config file. 
+     * this service-specific config file.
      */
-    class CachedServiceClient extends FileWatchDog {
-        ServiceClient _client;
+    private class CachedServiceClient extends FileWatchDog {
+        ServiceClient client;
 
         protected CachedServiceClient(File file, long delay) {
             super(file, delay);
         }
 
-        protected boolean isInitialized() throws Exception {
-            return _client != null;
+        protected boolean isInitialized() {
+            return client != null;
         }
 
-        protected void init() throws Exception {
-            _client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
+        protected void init() {
+            try {
+                client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
+            } catch (AxisFault axisFault) {
+                throw new RuntimeException(axisFault);
+            }
         }
 
-        protected void doOnUpdate() throws Exception {
+        protected void doOnUpdate() {
             // axis2 service configuration
             // if the config file has been modified (i.e added or updated), re-create a ServiceClient
             // and load the new config.
-            init(); //reset the ServiceClient instance
+            init(); // create a new ServiceClient instance
             try {
                 InputStream ais = file.toURI().toURL().openStream();
                 if (ais != null) {
                     if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, new ConfigurationContext(_client.getAxisConfiguration()), _client.getAxisService());
+                    ServiceBuilder builder = new ServiceBuilder(ais, new ConfigurationContext(client.getAxisConfiguration()), client.getAxisService());
                     builder.populateService(builder.buildOM());
                 }
             } catch (Exception e) {
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
             }
+        }
+    }
+
+    private class CachedOptions extends WatchDog<Map> {
+
+        Options options;
+
+        private CachedOptions() {
+            super(new WatchDog.Mutable<Map>() {
+                // ProcessConf#getProperties(String...) cannot return ull (by contract)
+                public boolean exists() {
+                    return true;
+                }
+
+                public boolean hasChangedSince(Map since) {
+                    Map latest = lastModified();  // cannot be null but better be prepared
+                    // check if mappings are equal
+                    return !CollectionUtils.equals(latest, since);
+                }
+
+                public Map lastModified() {
+                    return _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+                }
+            });
+        }
+
+        protected boolean isInitialized() {
+            return options != null;
+        }
+
+        protected void init() {
+            options = new Options();
+        }
+
+        protected void doOnUpdate() {
+            init();
+            Map properties = _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+            Properties.Axis2.translate(properties, options);
+
+            // set defaults values
+            options.setExceptionToBeThrownOnSOAPFault(false);
+
+            // this value does NOT override Properties.PROP_HTTP_CONNECTION_TIMEOUT
+            // nor Properties.PROP_HTTP_SOCKET_TIMEOUT.
+            // it will be applied only if the laters are not set.
+            options.setTimeOutInMilliSeconds(60000);
         }
     }
 

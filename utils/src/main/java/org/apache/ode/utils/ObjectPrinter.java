@@ -69,7 +69,7 @@ public class ObjectPrinter {
 // 		NOTE: this causes blowups since array may be array of primitive type
 // 				  which cannot be cast to 'Object[]'
 //      else if (objects[i].getClass().isArray()){
-//        buf.append(ArrayUtils.makeCollection(ArrayList.class, (Object[]) objects[i]));
+//        buf.append(CollectionUtils.makeCollection(ArrayList.class, (Object[]) objects[i]));
       else
         buf.append(objects[i]);
 

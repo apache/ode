@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -110,7 +111,7 @@ public interface ProcessConf {
      * Get the deployment properties. 
      * @return
      */
-    Map<QName, Node> getProperties();
+    Map<QName, Node> getDeploymentProperties();
 
     /**
      * Gets the name of the package into which the process is deployed.
@@ -155,5 +156,11 @@ public interface ProcessConf {
     List<Element> getExtensionElement(QName qname);
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
-    
+
+    /**
+     * Must not return null values.
+     * @param path
+     * @return
+     */
+    public Map<String, String> getProperties(String... path);
 }

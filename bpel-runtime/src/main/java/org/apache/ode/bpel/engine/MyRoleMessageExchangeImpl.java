@@ -42,8 +42,8 @@ import java.util.concurrent.TimeoutException;
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
+
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
-    public static final int TIMEOUT = 2 * 60 * 1000;
 
     private static Map<String, ResponseCallback> _waitingCallbacks =
             new ConcurrentHashMap<String, ResponseCallback>();

@@ -256,7 +256,7 @@ public class ProcessStoreImpl implements ProcessStore {
                     try {
                         ProcessConfDAO newDao = dudao.createProcess(pc.getProcessId(), pc.getType(), pc.getVersion());
                         newDao.setState(pc.getState());
-                        for (Map.Entry<QName, Node> prop : pc.getProperties().entrySet()) {
+                        for (Map.Entry<QName, Node> prop : pc.getDeploymentProperties().entrySet()) {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());

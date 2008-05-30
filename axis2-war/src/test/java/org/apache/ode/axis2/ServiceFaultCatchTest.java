@@ -3,6 +3,7 @@ package org.apache.ode.axis2;
 /**
  * Tests that a fault thrown by a called service can be caught and is properly
  * structured so that an assign on a fault sub-element will succeed.
+ *
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class ServiceFaultCatchTest extends Axis2TestBase {

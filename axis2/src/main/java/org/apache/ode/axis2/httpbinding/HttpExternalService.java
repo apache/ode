@@ -19,20 +19,24 @@
 
 package org.apache.ode.axis2.httpbinding;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
+import org.apache.ode.axis2.Properties;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -52,6 +56,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -64,24 +69,26 @@ public class HttpExternalService implements ExternalService {
     private static final Log log = LogFactory.getLog(HttpExternalService.class);
     private static final Messages msgs = Messages.getMessages(Messages.class);
 
-    private MultiThreadedHttpConnectionManager connections = new MultiThreadedHttpConnectionManager();
+    private MultiThreadedHttpConnectionManager connections;
 
     protected ExecutorService executorService;
     protected Scheduler scheduler;
     protected BpelServer server;
+    protected ProcessConf pconf;
     protected QName serviceName;
     protected String portName;
 
-    protected HttpMethodBuilder methodBuilder;
+    protected HttpClientHelper clientHelper;
     protected WSAEndpoint endpointReference;
 
-    public HttpExternalService(Definition definition, QName serviceName, String portName, ExecutorService executorService, Scheduler scheduler, BpelServer server) {
+    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService, Scheduler scheduler, BpelServer server) {
         this.portName = portName;
         this.serviceName = serviceName;
         this.executorService = executorService;
         this.scheduler = scheduler;
         this.server = server;
-
+        this.pconf = pconf;
+        Definition definition = pconf.getDefinitionForService(serviceName);
         Service serviceDef = definition.getService(serviceName);
         if (serviceDef == null)
             throw new IllegalArgumentException(msgs.msgServiceDefinitionNotFound(serviceName));
@@ -105,7 +112,8 @@ public class HttpExternalService implements ExternalService {
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
 
-        methodBuilder = new HttpMethodBuilder(binding);
+        clientHelper = new HttpClientHelper(binding);
+        connections = new MultiThreadedHttpConnectionManager();
     }
 
     public String getPortName() {
@@ -127,16 +135,28 @@ public class HttpExternalService implements ExternalService {
     public void invoke(PartnerRoleMessageExchange odeMex) {
         if (log.isDebugEnabled()) log.debug("Preparing " + getClass().getSimpleName() + " invocation...");
         try {
+            // don't make this map a class attribute, so we always get the latest version
+            final Map<String, String> properties = pconf.getProperties(serviceName.getLocalPart(), portName);
+            final HttpParams params = Properties.HttpClient.translate(properties);
+
             // build the http method
-            final HttpMethod method = methodBuilder.buildHttpMethod(odeMex);
-            // this callable encapsulate the http method execution and the process of the response
+            final HttpMethod method = clientHelper.buildHttpMethod(odeMex, params);
+
+            // create a client
+            HttpClient client = new HttpClient(connections);
+            // don't forget to wire params so that IL properties are passed around
+            client.getParams().setDefaults(params);
+
+            clientHelper.configure(client.getHostConfiguration(), client.getState(), method.getURI(), params);
+
+            // this callable encapsulates the http method execution and the process of the response
             final Callable executionCallable;
 
             // execute it
             boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
             if (isTwoWay) {
                 // two way
-                executionCallable = new HttpExternalService.TwoWayCallable(method, odeMex.getMessageExchangeId(), odeMex.getOperation());
+                executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
                 scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         // If the TX is rolled back, then we don't send the request.
@@ -151,36 +171,44 @@ public class HttpExternalService implements ExternalService {
                 odeMex.replyAsync();
             } else {
                 // one way, just execute and forget
-                executionCallable = new HttpExternalService.OneWayCallable(method, odeMex.getMessageExchangeId(), odeMex.getOperation());
+                executionCallable = new HttpExternalService.OneWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
                 executorService.submit(executionCallable);
                 odeMex.replyOneWayOk();
             }
         } catch (UnsupportedEncodingException e) {
+            String errmsg = "The HTTP encoding returned isn't supported " + odeMex;
+            log.error(errmsg, e);
+            odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
+        } catch (URIException e) {
             String errmsg = "Error sending message to " + getClass().getSimpleName() + " for ODE mex " + odeMex;
             log.error(errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
+        } catch (Exception e) {
+            String errmsg = "Unknown HTTP call error for ODE mex " + odeMex;
+            log.error(errmsg, e);
+            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
         }
-
     }
-
 
     private class OneWayCallable implements Callable<Void> {
         HttpMethod method;
         String mexId;
         Operation operation;
+        HttpClient client;
 
-        public OneWayCallable(HttpMethod method, String mexId, Operation operation) {
+        public OneWayCallable(org.apache.commons.httpclient.HttpClient client, HttpMethod method, String mexId, Operation operation) {
             this.method = method;
             this.mexId = mexId;
             this.operation = operation;
+            this.client = client;
         }
 
         public Void call() throws Exception {
             try {
                 // simply execute the http method
-                HttpClient client = new HttpClient(connections);
                 if (log.isDebugEnabled())
                     log.debug("Executing http request : " + method.getName() + " " + method.getURI());
+
                 final int statusCode = client.executeMethod(method);
                 // invoke getResponseBody to force the loading of the body 
                 // Actually the processResponse may happen in a separate thread and
@@ -215,19 +243,21 @@ public class HttpExternalService implements ExternalService {
             try {
                 // log the URI since the engine may have moved on while this One Way request was executing
                 if (statusCode >= 400) {
-                    if (log.isWarnEnabled()) log.warn("OneWay http request ["+method.getURI()+"] failed with status: " + method.getStatusLine());
+                    if (log.isWarnEnabled())
+                        log.warn("OneWay http request [" + method.getURI() + "] failed with status: " + method.getStatusLine());
                 } else {
-                    if (log.isDebugEnabled()) log.debug("OneWay http request ["+method.getURI()+"] status: " + method.getStatusLine());
+                    if (log.isDebugEnabled())
+                        log.debug("OneWay http request [" + method.getURI() + "] status: " + method.getStatusLine());
                 }
             } catch (URIException e) {
-                if(log.isDebugEnabled()) log.debug(e);
+                if (log.isDebugEnabled()) log.debug(e);
             }
         }
     }
 
     private class TwoWayCallable extends OneWayCallable {
-        public TwoWayCallable(HttpMethod method, String mexId, Operation operation) {
-            super(method, mexId, operation);
+        public TwoWayCallable(org.apache.commons.httpclient.HttpClient client, HttpMethod method, String mexId, Operation operation) {
+            super(client, method, mexId, operation);
         }
 
         public void processResponse(final int statusCode) {

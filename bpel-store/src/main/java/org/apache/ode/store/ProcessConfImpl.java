@@ -32,6 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -52,6 +54,8 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.HierarchiedProperties;
+import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,7 +73,8 @@ public class ProcessConfImpl implements ProcessConf {
 
     private final Date _deployDate;
     private final Map<QName, Node> _props;
-    private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();;
+    private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
+
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
     private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
     private final ArrayList<String> _mexi = new ArrayList<String>();
@@ -83,6 +88,13 @@ public class ProcessConfImpl implements ProcessConf {
     // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
     private volatile boolean _inMemory = false;
 
+    // provide the IL properties
+    private HierarchiedProperties _ilProperties;
+    // monitor the IL property file and reload it if necessary
+    private ILWatchDog _ilWatchDog;
+    private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
+
+
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate) {
         _pid = pid;
@@ -94,7 +106,8 @@ public class ProcessConfImpl implements ProcessConf {
         _state = pstate;
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
-
+        _ilWatchDog = new ILWatchDog();
+        
         initLinks();
         initMexInterceptors();
         initEventList();
@@ -163,7 +176,7 @@ public class ProcessConfImpl implements ProcessConf {
         return _du.getName();
     }
 
-    public Map<QName, Node> getProperties() {
+    public Map<QName, Node> getDeploymentProperties() {
         return _props;
     }
 
@@ -188,7 +201,8 @@ public class ProcessConfImpl implements ProcessConf {
             throw new ContextException("CBP record not found for type " + getType());
         try {
             String relative = getRelativePath(_du.getDeployDir(), cbpInfo.cbp).replaceAll("\\\\", "/");
-            if (!relative.endsWith(".cbp")) throw new ContextException("CBP file must end with .cbp suffix: " + cbpInfo.cbp);
+            if (!relative.endsWith(".cbp"))
+                throw new ContextException("CBP file must end with .cbp suffix: " + cbpInfo.cbp);
             relative = relative.replace(".cbp", ".bpel");
             File bpelFile = new File(_du.getDeployDir(), relative);
             if (!bpelFile.exists()) __log.warn("BPEL file does not exist: " + bpelFile);
@@ -197,9 +211,9 @@ public class ProcessConfImpl implements ProcessConf {
             throw new ContextException("IOException in getBpelRelativePath: " + cbpInfo.cbp, e);
         }
     }
-    
+
     public URI getBaseURI() {
-    	return _du.getDeployDir().toURI();
+        return _du.getDeployDir().toURI();
     }
 
     public ProcessState getState() {
@@ -272,6 +286,7 @@ public class ProcessConfImpl implements ProcessConf {
     public boolean isTransient() {
         return _inMemory;
     }
+
     public void setTransient(boolean t) {
         _pinfo.setInMemory(t);
         _inMemory = t;
@@ -279,12 +294,12 @@ public class ProcessConfImpl implements ProcessConf {
 
     public boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type) {
         if (scopeNames != null) {
-        for (String scopeName : scopeNames) {
-            Set<BpelEvent.TYPE> evtSet = _events.get(scopeName);
-            if (evtSet != null) {
-                if (evtSet.contains(type)) return true;
+            for (String scopeName : scopeNames) {
+                Set<BpelEvent.TYPE> evtSet = _events.get(scopeName);
+                if (evtSet != null) {
+                    if (evtSet.contains(type)) return true;
+                }
             }
-        }
         }
         Set<BpelEvent.TYPE> evtSet = _events.get(null);
         if (evtSet != null) {
@@ -302,7 +317,7 @@ public class ProcessConfImpl implements ProcessConf {
             for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
                 if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
             }
-            _events.put(null,all);
+            _events.put(null, all);
             return;
         }
 
@@ -311,7 +326,7 @@ public class ProcessConfImpl implements ProcessConf {
             HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
             for (BpelEvent.TYPE t : BpelEvent.TYPE.values())
                 all.add(t);
-            _events.put(null,all);
+            _events.put(null, all);
             return;
         }
 
@@ -340,7 +355,8 @@ public class ProcessConfImpl implements ProcessConf {
     private String getRelativePath(File base, File path) throws IOException {
         String basePath = base.getCanonicalPath();
         String cbpPath = path.getCanonicalPath();
-        if (!cbpPath.startsWith(basePath)) throw new IOException("Invalid relative path: base="+base+" path="+path);
+        if (!cbpPath.startsWith(basePath))
+            throw new IOException("Invalid relative path: base=" + base + " path=" + path);
         String relative = cbpPath.substring(basePath.length());
         if (relative.startsWith(File.separator)) relative = relative.substring(1);
         return relative;
@@ -353,5 +369,78 @@ public class ProcessConfImpl implements ProcessConf {
             return Collections.emptyList();
         }
     }
+
+    /**
+     *
+     * @param path only the 2 first elements would be interpreted as the service local name and port name. all others would be ignored.
+     * @return a map of properties.
+     */
+    public Map<String, String> getProperties(String... path) {
+        String service=null, port=null;
+        if(path.length>=1) service = path[0];
+        if(path.length>=2) port = path[1];
+        if(path.length>2) if(__log.isWarnEnabled()) __log.debug("Arguments with index>2 ignored!");
+
+        // update properties if necessary
+        // do it manually to save resources (instead of using a thread)
+        _ilWatchDog.check();
+        if (_ilProperties == null) {
+            return Collections.EMPTY_MAP;
+        } else {
+            // take a lock so we can have a consistent snapshot of the properties
+            ilPropertiesLock.readLock().lock();
+            try {
+                return _ilProperties.getProperties(service, port);
+            } finally {
+                ilPropertiesLock.readLock().unlock();
+            }
+        }
+    }
+
+    /**
+     * Manage the reloading of the propery file every {@link org.apache.ode.utils.fs.FileWatchDog#DEFAULT_DELAY}.
+     * The check is done manually, meaning that {@link #check()} must be invoked each time _ilProperties is accessed.
+     */
+    private class ILWatchDog extends FileWatchDog {
+        public ILWatchDog() {
+            super(_du.getILPropertyFile());
+        }
+
+        protected void init() {
+            ilPropertiesLock.writeLock().lock();
+            try {
+                if (_ilProperties == null) {
+                    try {
+                        _ilProperties = new HierarchiedProperties(super.file);
+                    } catch (IOException e) {
+                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                    }
+                } else {
+                    _ilProperties.clear();
+                }
+            } finally {
+                ilPropertiesLock.writeLock().unlock();
+            }
+        }
+
+        protected boolean isInitialized() {
+            return _ilProperties != null;
+        }
+
+        protected void doOnUpdate() {
+            ilPropertiesLock.writeLock().lock();
+            try {
+                init();
+                try {
+                    _ilProperties.loadFile();
+                } catch (IOException e) {
+                    throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                }
+            } finally {
+                ilPropertiesLock.writeLock().unlock();
+            }
+        }
+    }
+
 
 }
