@@ -95,7 +95,7 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	private FaultDAOImpl _fault;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="INSTANTIATING_CORRELATOR_ID")
+	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANTIATING_CORRELATOR_ID")
 	private CorrelatorDAOImpl _instantiatingCorrelator;
 	
 	public ProcessInstanceDAOImpl() {}

@@ -417,7 +417,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public Collection<Long> delete(String filter) {
         final InstanceFilter instanceFilter = new InstanceFilter(filter);
 
-        List<Long> ret = new LinkedList<Long>();
+        final List<Long> ret = new LinkedList<Long>();
         try {
 
             _db.exec(new BpelDatabase.Callable<Object>() {
@@ -425,6 +425,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
                     for (ProcessInstanceDAO instance : instances) {
                         instance.delete();
+                        ret.add(instance.getInstanceId());
                     }
                     return null;
                 }
