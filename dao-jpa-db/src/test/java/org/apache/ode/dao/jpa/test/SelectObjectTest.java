@@ -161,19 +161,22 @@ public class SelectObjectTest extends TestCase {
 			// Assert the ActivityRecoveryDAO
 			assertNotNull(inst.getActivityRecoveries());
 			ActivityRecoveryDAO rec1 = null;
-			for (ActivityRecoveryDAO recItr : inst.getActivityRecoveries()) {
-				rec1 = recItr;
-				break;
-			}
-			assertNotNull(rec1);
+      for (ActivityRecoveryDAO recItr : inst.getActivityRecoveries()) {
+        if(recItr.getActivityId()==3){
+          rec1 = recItr;
+          break;
+        }
+      }
+
+      assertNotNull(rec1);
 			String tmpAct = rec1.getActions();
 //			assertEquals(rec1.getActionsList(),actions);
-//			assertEquals(rec1.getActivityId(),4);
-//			assertEquals(rec1.getChannel(),"testChannel1");
-//			assertNotNull(rec1.getDateTime());
+			assertEquals(rec1.getActivityId(),3);
+			assertEquals(rec1.getChannel(),"testChannel1");
+			assertNotNull(rec1.getDateTime());
 //			assertNotNull(rec1.getDetails());
-//			assertEquals(rec1.getReason(),"testReason1");
-//			assertEquals(rec1.getRetries(),2);
+			assertEquals(rec1.getReason(),"testReason1");
+			assertEquals(rec1.getRetries(),2);
 			
 			// Assert the CorrelationSetDAO
 			//assertNotNull(inst.getCorrelationSets());
