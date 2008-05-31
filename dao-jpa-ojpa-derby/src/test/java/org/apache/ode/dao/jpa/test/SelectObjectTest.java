@@ -160,9 +160,10 @@ public class SelectObjectTest extends TestCase {
 			assertNotNull(inst.getActivityRecoveries());
 			ActivityRecoveryDAO rec1 = null;
 			for (ActivityRecoveryDAO recItr : inst.getActivityRecoveries()) {
-				rec1 = recItr;
-				break;
-			}
+       if (recItr.getActivityId() == 3) {
+         rec1 = recItr;break;
+       }
+      }
 			assertNotNull(rec1);
 			String tmpAct = rec1.getActions();
 //			assertEquals(rec1.getActionsList(),actions);
