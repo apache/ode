@@ -55,7 +55,7 @@ import org.apache.ode.utils.stl.UnaryFunction;
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
-    public static long TIME_TO_LIVE = 10*60*1000;
+    public static long TIME_TO_LIVE = 2*60*1000;
 
     private TransactionManager _txm;
 
@@ -220,7 +220,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     private void cleanupDeadWood() {
         long now = System.currentTimeMillis();
         
-        if (now  > _lastRemoval + (TIME_TO_LIVE/10)) {
+        if (now  > _lastRemoval + (TIME_TO_LIVE/4)) {
             _lastRemoval = now;
             
             synchronized (_mexStore) {
