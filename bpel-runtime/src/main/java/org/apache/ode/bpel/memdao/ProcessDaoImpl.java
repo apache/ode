@@ -42,6 +42,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
  */
 class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     private static final Log __log = LogFactory.getLog(ProcessDaoImpl.class);
+    public static long TIME_TO_LIVE = 2*60*1000;
 
     private QName _processId;
     private QName _type;
@@ -51,17 +52,17 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     protected final Map<Long, Long> _instancesAge = new ConcurrentHashMap<Long, Long>();
     protected final Map<Integer, PartnerLinkDAO> _plinks = new ConcurrentHashMap<Integer, PartnerLinkDAO>();
     private Map<QName, ProcessDaoImpl> _store;
-    private final BpelDAOConnectionImpl _conn;
+    private BpelDAOConnectionImpl _conn;
+    private int _executionCount = 0;
     private Collection<Long> _instancesToRemove = new ConcurrentLinkedQueue<Long>();
     private static volatile long _lastRemoval = 0;
-
 
     private String _guid;
 
     public ProcessDaoImpl(BpelDAOConnectionImpl conn, Map<QName, ProcessDaoImpl> store,
                           QName processId, QName type, String guid, long version) {
         if (__log.isDebugEnabled()) {
-            __log.debug("Creating ProcessDao object for process \"" + processId + "\". (conn=" + conn + ")");
+            __log.debug("Creating ProcessDao object for process \"" + processId + "\".");
         }
 
         _guid = guid;
@@ -108,25 +109,12 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _conn.defer(new Runnable() {
             public void run() {
                 _instances.put(newInstance.getInstanceId(), newInstance);
+                _instancesAge.put(newInstance.getInstanceId(), System.currentTimeMillis());
             }
         });
-        long now = System.currentTimeMillis();
 
-        // Checking for old instances that could still be around because of a failure
-        // or completion problem
-        if (now > _lastRemoval + (BpelDAOConnectionImpl.TIME_TO_LIVE/10)) {
-            _lastRemoval = now;
-            Object[] oldInstances = _instancesAge.keySet().toArray();
-            for (int i=oldInstances.length-1; i>0; i--) {
-                Long old = (Long) oldInstances[i];
-                Long age = _instancesAge.get(old);
-                if (age != null && now-age > BpelDAOConnectionImpl.TIME_TO_LIVE) {
-                    _instances.remove(old);
-                    _instancesAge.remove(old);
-                }
-            }
-        }
-
+        discardOldInstances();
+        
         // Removing right away on rollback
         final Long iid = newInstance.getInstanceId();
         _conn.onRollback(new Runnable() {
@@ -136,6 +124,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
             }
         });
 
+        _executionCount++;
         return newInstance;
     }
 
@@ -156,7 +145,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public void instanceCompleted(ProcessInstanceDAO instance) {
         // Cleaning up
         if (__log.isDebugEnabled())
-        __log.debug("Removing completed process instance " + instance.getInstanceId() + " from in-memory store.");
+          __log.debug("Removing completed process instance " + instance.getInstanceId() + " from in-memory store.");
         _instancesAge.remove(instance.getInstanceId());
         ProcessInstanceDAO removed = _instances.remove(instance.getInstanceId());
         if (removed == null) {
@@ -203,7 +192,8 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public int getNumInstances() {
-        return _instances.size();
+        // Instances are removed after execution, using a counter instead
+        return _executionCount;
     }
 
     public ProcessInstanceDAO getInstanceWithLock(Long iid) {
@@ -224,5 +214,25 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     
     public void setGuid(String guid) {
         _guid = guid;
+    }
+
+    /**
+     * Discard in-memory instances that exceeded their time-to-live to prevent memory leaks
+     */
+    void discardOldInstances() {
+        long now = System.currentTimeMillis();
+        if (now > _lastRemoval + (TIME_TO_LIVE / 4)) {
+            _lastRemoval = now;
+            Object[] oldInstances = _instancesAge.keySet().toArray();
+            for (int i=oldInstances.length-1; i>=0; i--) {
+                Long id = (Long) oldInstances[i];
+                Long age = _instancesAge.get(id);
+                if (age != null && now-age > TIME_TO_LIVE) {
+                    __log.warn("Discarding in-memory instance "+id+" because it exceeded its time-to-live: "+_instances.get(id));
+                    _instances.remove(id);
+                    _instancesAge.remove(id);
+                }
+            }
+        }
     }
 }
