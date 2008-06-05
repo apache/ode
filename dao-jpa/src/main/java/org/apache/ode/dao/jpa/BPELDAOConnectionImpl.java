@@ -144,6 +144,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         if (criteria != null) {
             // Building each clause
             ArrayList<String> clauses = new ArrayList<String>();
+
+            // iid filter
+            if ( criteria.getIidFilter() != null ) {
+            	// Looks to me like the string has been offseted so the operator can be ignored,
+            	clauses.add(" pi._instanceId = " + criteria.getIidFilter() );
+            }
             
             // pid filter
             if (criteria.getPidFilter() != null)
