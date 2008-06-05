@@ -143,7 +143,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         if (criteria != null) {
             // Building each clause
             ArrayList<String> clauses = new ArrayList<String>();
-            
+ 
+            // iid filter
+            if ( criteria.getIidFilter() != null ) {
+               	clauses.add(" pi._instanceId = " + criteria.getIidFilter() );
+            }
+           
             // pid filter
             if (criteria.getPidFilter() != null)
                 clauses.add(" pi._process._processId = '" + criteria.getPidFilter() + "'");
