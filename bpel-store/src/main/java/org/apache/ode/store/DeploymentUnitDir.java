@@ -60,6 +60,8 @@ import java.util.Set;
  */
 class DeploymentUnitDir  {
 
+    static final String IL_PROPERTIES_FILE = "integration-layer.properties";
+
     private static Log __log = LogFactory.getLog(DeploymentUnitDir.class);
 
     private String _name;
@@ -201,6 +203,10 @@ class DeploymentUnitDir  {
 
     public File getDeployDir() {
         return _duDirectory;
+    }
+
+    public File getILPropertyFile(){
+        return new File(getDeployDir(), IL_PROPERTIES_FILE);
     }
 
     public DeployDocument getDeploymentDescriptor() {

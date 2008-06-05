@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 
 /**
  * Base class for process abstractions. An abstraction is a parameterized
@@ -71,7 +71,7 @@ public abstract class JacobRunnable extends JacobObject {
     
     static {
         try {
-            Method m = JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY);
+            Method m = JacobRunnable.class.getMethod("run", CollectionUtils.EMPTY_CLASS_ARRAY);
             IMPLEMENTED_METHODS = Collections.singleton(m);
         } catch (NoSuchMethodException e) {
             throw new AssertionError(e);

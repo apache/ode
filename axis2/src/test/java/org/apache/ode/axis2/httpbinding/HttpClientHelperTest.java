@@ -21,6 +21,7 @@ package org.apache.ode.axis2.httpbinding;
 
 import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.ode.il.epr.MutableEndpoint;
@@ -48,15 +49,15 @@ import java.util.Set;
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
-public class HttpMethodBuilderTest extends TestCase {
+public class HttpClientHelperTest extends TestCase {
 
     protected Definition definition;
 
-    protected HttpMethodBuilder deliciousBuilder;
+    protected HttpClientHelper deliciousBuilder;
     protected Binding deliciousBinding;
     protected Port deliciousPort;
 
-    protected HttpMethodBuilder dummyBuilder;
+    protected HttpClientHelper dummyBuilder;
     protected Port dummyPort;
     protected Binding dummyBinding;
 
@@ -71,12 +72,12 @@ public class HttpMethodBuilderTest extends TestCase {
         Service deliciousService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DeliciousService"));
         deliciousPort = deliciousService.getPort("TagHttpPort");
         deliciousBinding = deliciousPort.getBinding();
-        deliciousBuilder = new HttpMethodBuilder(deliciousBinding);
+        deliciousBuilder = new HttpClientHelper(deliciousBinding);
 
         Service dummyService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DummyService"));
         dummyPort = dummyService.getPort("DummyServiceHttpport");
         dummyBinding = dummyPort.getBinding();
-        dummyBuilder = new HttpMethodBuilder(dummyBinding);
+        dummyBuilder = new HttpClientHelper(dummyBinding);
 
     }
 
@@ -97,7 +98,7 @@ public class HttpMethodBuilderTest extends TestCase {
         odeMex.op = deliciousBinding.getBindingOperation("getTag", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex);
+        HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
 
 
         assertTrue("GET".equalsIgnoreCase(httpMethod.getName()));
@@ -118,7 +119,7 @@ public class HttpMethodBuilderTest extends TestCase {
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
         try {
-            HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex);
+            HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
             fail("IllegalArgumentException expected because message element is empty.");
         } catch (IllegalArgumentException e) {
             // expected behavior
@@ -144,7 +145,7 @@ public class HttpMethodBuilderTest extends TestCase {
         odeMex.op = dummyBinding.getBindingOperation("hello", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = dummyBuilder.buildHttpMethod(odeMex);
+        HttpMethod httpMethod = dummyBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
         assertTrue("POST".equalsIgnoreCase(httpMethod.getName()));
         assertEquals("Generated URI does not match", expectedUri, httpMethod.getURI().toString());
 
@@ -343,6 +344,10 @@ public class HttpMethodBuilderTest extends TestCase {
 
         public long getTimeout() {
             return 0;
+        }
+
+        public void setTimeout(long timeout) {
+
         }
 
         public AckType getAckType() {

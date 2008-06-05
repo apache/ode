@@ -42,7 +42,7 @@ import java.util.Map;
 public class WsdlUtilsTest extends TestCase {
     private Definition definition;
     private Service dummyService;
-    
+
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -178,8 +178,8 @@ public class WsdlUtilsTest extends TestCase {
             Map.Entry e = (Map.Entry) it.next();
             Port port = (Port) e.getValue();
 
-            if("DummyService_port_with_empty_binding".equals(port.getName())
-                    || "DummyService_port_with_no_binding".equals(port.getName())){
+            if ("DummyService_port_with_empty_binding".equals(port.getName())
+                    || "DummyService_port_with_no_binding".equals(port.getName())) {
                 continue;
             }
 

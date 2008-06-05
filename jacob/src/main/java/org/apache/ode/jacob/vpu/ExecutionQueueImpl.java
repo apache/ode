@@ -33,7 +33,7 @@ import org.apache.ode.jacob.soup.Continuation;
 import org.apache.ode.jacob.soup.ExecutionQueue;
 import org.apache.ode.jacob.soup.ExecutionQueueObject;
 import org.apache.ode.jacob.soup.ReplacementMap;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Externalizable;
@@ -142,7 +142,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public Continuation dequeueReaction() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", ArrayUtils.EMPTY_OBJECT_ARRAY));
+            __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", CollectionUtils.EMPTY_OBJECT_ARRAY));
         }
 
         Continuation continuation = null;
@@ -209,7 +209,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public int cycle() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("cycle", ArrayUtils.EMPTY_OBJECT_ARRAY));
+            __log.trace(ObjectPrinter.stringifyMethodEnter("cycle", CollectionUtils.EMPTY_OBJECT_ARRAY));
         }
 
         return ++_currentCycle;
@@ -243,7 +243,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public void flush() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", ArrayUtils.EMPTY_OBJECT_ARRAY));
+            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", CollectionUtils.EMPTY_OBJECT_ARRAY));
         }
     }
 
@@ -622,7 +622,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         public MessageFrame(CommGroupFrame commFrame, ChannelFrame channelFrame, String method, Object[] args) {
             super(commFrame, channelFrame);
             this.method = method;
-            this.args = args == null ? ArrayUtils.EMPTY_CLASS_ARRAY : args;
+            this.args = args == null ? CollectionUtils.EMPTY_CLASS_ARRAY : args;
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {

@@ -118,6 +118,12 @@ public interface MessageExchange {
      * @return
      */
     long getTimeout();
+
+    /**
+     * Set the time-out in ms
+     * @param timeout
+     */
+    void setTimeout(long timeout);
     
     /**
      * Get the name of the operation (WSDL 1.1) / message exchange (WSDL 1.2?).

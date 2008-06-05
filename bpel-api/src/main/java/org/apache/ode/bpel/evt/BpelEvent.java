@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.evt;
 
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -66,7 +66,7 @@ public abstract class BpelEvent implements Serializable {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 try {
                     String field = method.getName().substring(3);
-                    Object value = method.invoke(this, ArrayUtils.EMPTY_OBJECT_ARRAY);
+                    Object value = method.invoke(this, CollectionUtils.EMPTY_OBJECT_ARRAY);
                     if (value == null) {
                         continue;
                     }

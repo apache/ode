@@ -78,7 +78,7 @@ public class BindingContextImpl implements BindingContext {
             throw new ContextException("Cannot find definition for service " + initialPartnerEndpoint.serviceName
                                        + " in the context of process "+processId);
         }
-        return _server.createExternalService(wsdl, initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName, pconf);
+        return _server.createExternalService(pconf, initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 
 }

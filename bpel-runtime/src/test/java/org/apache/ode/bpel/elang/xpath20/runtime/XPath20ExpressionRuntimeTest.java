@@ -154,7 +154,6 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         Expression exp = new Expression(e);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
-    
     public URI getBaseResourceURI() {
     	return null;
     }
