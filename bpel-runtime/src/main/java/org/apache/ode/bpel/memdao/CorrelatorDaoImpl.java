@@ -25,7 +25,7 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,7 +58,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         }
         for (Iterator i = _messages.iterator(); i.hasNext();) {
             MsgQueueEntry mqe = (MsgQueueEntry)i.next();
-            Set<CorrelationKey> keyset = (Set<CorrelationKey>)ArrayUtils.makeCollection(HashSet.class, mqe.keys);
+            Set<CorrelationKey> keyset = (Set<CorrelationKey>) CollectionUtils.makeCollection(HashSet.class, mqe.keys);
             if ((key == null) || keyset.contains(key)) {
                 i.remove();
                 return mqe.message;
@@ -93,7 +93,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
     public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] keys) {
         if (__log.isDebugEnabled()) {
             __log.debug("enqueueProcessInvocation: data=" + mex + " keys="
-                    + ArrayUtils.makeCollection(ArrayList.class, keys));
+                    + CollectionUtils.makeCollection(ArrayList.class, keys));
         }
 
         MsgQueueEntry mqe = new MsgQueueEntry(mex, keys);

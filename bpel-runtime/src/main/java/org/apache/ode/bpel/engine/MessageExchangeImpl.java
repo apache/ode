@@ -356,6 +356,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _timeout;
     }
 
+    public void setTimeout(long timeout) {
+        _timeout = timeout;
+    }
+
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         _changes.add(Change.RELEASE);

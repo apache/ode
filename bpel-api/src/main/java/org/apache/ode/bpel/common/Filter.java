@@ -19,7 +19,7 @@
 
 package org.apache.ode.bpel.common;
 
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
@@ -133,7 +133,7 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
 
   private Collection<String> getFilterKeysStr() {
     return CollectionsX.transform(new ArrayList<String>(),
-        ArrayUtils.makeCollection(ArrayList.class , getFilterKeys()),
+        CollectionUtils.makeCollection(ArrayList.class , getFilterKeys()),
         new UnaryFunction<FKEY,String>() {
           public String apply(FKEY x) {
             return x.name();

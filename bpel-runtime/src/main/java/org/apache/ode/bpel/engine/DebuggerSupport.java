@@ -37,7 +37,7 @@ import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.ManagementException;
 import org.apache.ode.bpel.pmapi.ProcessingException;
 import org.apache.ode.bpel.runtime.breaks.BreakpointImpl;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
@@ -102,7 +102,7 @@ class DebuggerSupport {
     }
 
     void addGlobalBreakpoint(Breakpoint breakpoint) {
-        Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, _globalBreakPoints);
+        Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.add(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
@@ -112,7 +112,7 @@ class DebuggerSupport {
         if (bpArr == null) {
             bpArr = new Breakpoint[] { breakpoint };
         } else {
-            Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, bpArr);
+            Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, bpArr);
             c.add(breakpoint);
             bpArr = c.toArray(new Breakpoint[c.size()]);
         }
@@ -120,7 +120,7 @@ class DebuggerSupport {
     }
 
     void removeGlobalBreakpoint(Breakpoint breakpoint) {
-        Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, _globalBreakPoints);
+        Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.remove(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
@@ -128,7 +128,7 @@ class DebuggerSupport {
     void removeBreakpoint(Long pid, Breakpoint breakpoint) {
         Breakpoint[] bpArr = _instanceBreakPoints.get(pid);
         if (bpArr != null) {
-            Collection<Breakpoint> c = ArrayUtils.makeCollection(ArrayList.class, bpArr);
+            Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, bpArr);
             c.remove(breakpoint);
             bpArr = c.toArray(new Breakpoint[c.size()]);
             if (bpArr.length == 0) {

@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.jacob.*;
 import org.apache.ode.jacob.soup.*;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 
@@ -57,7 +57,7 @@ public final class JacobVPU {
      */
     static {
         try {
-            REDUCE_METHOD = JacobRunnable.class.getMethod("run", ArrayUtils.EMPTY_CLASS_ARRAY);
+            REDUCE_METHOD = JacobRunnable.class.getMethod("run", CollectionUtils.EMPTY_CLASS_ARRAY);
         } catch (Exception e) {
             throw new Error("Cannot resolve 'run' method", e);
         }
@@ -118,7 +118,7 @@ public final class JacobVPU {
      */
     public boolean execute() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("execute", ArrayUtils.EMPTY_OBJECT_ARRAY));
+            __log.trace(ObjectPrinter.stringifyMethodEnter("execute", CollectionUtils.EMPTY_OBJECT_ARRAY));
         }
         if (_executionQueue == null) {
             throw new IllegalStateException("No state object for VPU!");
@@ -151,7 +151,7 @@ public final class JacobVPU {
 
     public void flush() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", ArrayUtils.EMPTY_OBJECT_ARRAY));
+            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", CollectionUtils.EMPTY_OBJECT_ARRAY));
         }
         _executionQueue.flush();
     }
@@ -214,7 +214,7 @@ public final class JacobVPU {
         if (__log.isDebugEnabled()) {
             __log.debug("injecting " + concretion);
         }
-        addReaction(concretion, REDUCE_METHOD, ArrayUtils.EMPTY_OBJECT_ARRAY,
+        addReaction(concretion, REDUCE_METHOD, CollectionUtils.EMPTY_OBJECT_ARRAY,
                 (__log.isInfoEnabled() ? concretion.toString() : null));
     }
 
@@ -313,7 +313,7 @@ public final class JacobVPU {
                 desc = template.toString();
             }
             _statistics.numReductionsStruct++;
-            addReaction(template, REDUCE_METHOD, ArrayUtils.EMPTY_OBJECT_ARRAY, desc);
+            addReaction(template, REDUCE_METHOD, CollectionUtils.EMPTY_OBJECT_ARRAY, desc);
         }
 
         public Channel message(Channel channel, Method method, Object[] args) {

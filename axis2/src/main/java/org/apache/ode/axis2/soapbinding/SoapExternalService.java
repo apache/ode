@@ -19,41 +19,48 @@
 
 package org.apache.ode.axis2.soapbinding;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Fault;
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.axis2.Properties;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.WatchDog;
 import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL decription of used services.
@@ -64,7 +71,10 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
     private static final Log __log = LogFactory.getLog(ExternalService.class);
     private static final int EXPIRE_SERVICE_CLIENT = 30000;
+
+    private static ThreadLocal<CachedOptions> _cachedOptions = new ThreadLocal<CachedOptions>();
     private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
+   
 
     private Definition _definition;
     private QName _serviceName;
@@ -108,7 +118,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
             CachedServiceClient cached = getCachedServiceClient();
 
-            final OperationClient operationClient = cached._client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
+            final OperationClient operationClient = cached.client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.setOptions(options);
             operationClient.addMessageContext(mctx);
@@ -142,19 +152,29 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     }
 
     private CachedServiceClient getCachedServiceClient() throws AxisFault {
-        CachedServiceClient cached = _cachedClients.get();
-        if (cached == null) {
-            cached = new CachedServiceClient(new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2")), EXPIRE_SERVICE_CLIENT);
-            _cachedClients.set(cached);
+        CachedServiceClient cachedServiceClient = _cachedClients.get();
+        if (cachedServiceClient == null) {
+            cachedServiceClient = new CachedServiceClient(new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2")), EXPIRE_SERVICE_CLIENT);
+            _cachedClients.set(cachedServiceClient);
         }
         try {
             // call manually the check procedure
             // we dont want a dedicated thread for that
-            cached.checkAndConfigure();
-        } catch (Exception e) {
-            throw AxisFault.makeFault(e);
+            cachedServiceClient.check();
+        } catch (RuntimeException e) {
+            throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
-        return cached;
+
+        SoapExternalService.CachedOptions cachedOptions = _cachedOptions.get();
+        if (cachedOptions == null) {
+            cachedOptions = new CachedOptions();
+            _cachedOptions.set(cachedOptions);
+        }
+        cachedOptions.check();
+
+        // apply the options to the service client
+        cachedServiceClient.client.setOptions(cachedOptions.options);
+        return cachedServiceClient;
     }
 
     /**
@@ -289,35 +309,39 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
     /**
      * This class wraps a {@link org.apache.axis2.client.ServiceClient} and watches changes (deletions,creations,updates)
-     *  on a  Axis2 service config file named {service-name}.axis2.<p/>
+     * on a  Axis2 service config file named {service-name}.axis2.<p/>
      * The {@link org.apache.axis2.client.ServiceClient} instance is created from the main Axis2 config instance and
      * this service-specific config file.
      */
-    class CachedServiceClient extends FileWatchDog {
-        ServiceClient _client;
+    private class CachedServiceClient extends FileWatchDog {
+        ServiceClient client;
 
         protected CachedServiceClient(File file, long delay) {
             super(file, delay);
         }
 
-        protected boolean isInitialized() throws Exception {
-            return _client != null;
+        protected boolean isInitialized() {
+            return client != null;
         }
 
-        protected void init() throws Exception {
-            _client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
+        protected void init() {
+            try {
+                client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
+            } catch (AxisFault axisFault) {
+                throw new RuntimeException(axisFault);
+            }
         }
 
-        protected void doOnUpdate() throws Exception {
+        protected void doOnUpdate() {
             // axis2 service configuration
             // if the config file has been modified (i.e added or updated), re-create a ServiceClient
             // and load the new config.
-            init(); //reset the ServiceClient instance
+            init(); // create a new ServiceClient instance
             try {
                 InputStream ais = file.toURI().toURL().openStream();
                 if (ais != null) {
                     if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, new ConfigurationContext(_client.getAxisConfiguration()), _client.getAxisService());
+                    ServiceBuilder builder = new ServiceBuilder(ais, new ConfigurationContext(client.getAxisConfiguration()), client.getAxisService());
                     builder.populateService(builder.buildOM());
                 }
             } catch (Exception e) {
@@ -325,5 +349,52 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             }
         }
     }
+
+    private class CachedOptions extends WatchDog<Map> {
+
+        Options options;
+
+        private CachedOptions() {
+            super(new WatchDog.Mutable<Map>() {
+                // ProcessConf#getProperties(String...) cannot return ull (by contract)
+                public boolean exists() {
+                    return true;
+                }
+
+                public boolean hasChangedSince(Map since) {
+                    Map latest = lastModified();  // cannot be null but better be prepared
+                    // check if mappings are equal
+                    return !CollectionUtils.equals(latest, since);
+                }
+
+                public Map lastModified() {
+                    return _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+                }
+            });
+        }
+
+        protected boolean isInitialized() {
+            return options != null;
+        }
+
+        protected void init() {
+            options = new Options();
+        }
+
+        protected void doOnUpdate() {
+            init();
+            Map properties = _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+            Properties.Axis2.translate(properties, options);
+
+            // set defaults values
+            options.setExceptionToBeThrownOnSOAPFault(false);
+
+            // this value does NOT override Properties.PROP_HTTP_CONNECTION_TIMEOUT
+            // nor Properties.PROP_HTTP_SOCKET_TIMEOUT.
+            // it will be applied only if the laters are not set.
+            options.setTimeOutInMilliSeconds(60000);
+        }
+    }
+
 
 }

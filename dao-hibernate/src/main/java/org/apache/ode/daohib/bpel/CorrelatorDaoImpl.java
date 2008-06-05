@@ -25,7 +25,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
@@ -36,7 +35,7 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
@@ -147,7 +146,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] correlationKeys) {
         String[] keys = canonifyKeys(correlationKeys);
         String hdr = "enqueueMessage(mex=" + ((MessageExchangeDaoImpl) mex)._hobj.getId() + " keys="
-                + ArrayUtils.makeCollection(ArrayList.class, keys) + "): ";
+                + CollectionUtils.makeCollection(ArrayList.class, keys) + "): ";
 
         if (__log.isDebugEnabled())
             __log.debug(hdr);

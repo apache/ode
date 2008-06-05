@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.ode.utils.ArrayUtils;
+import org.apache.ode.utils.CollectionUtils;
 
 /**
  * <p>
@@ -173,7 +173,7 @@ public class CorrelationKey implements Serializable {
         buf.append("setId=");
         buf.append(_csetId);
         buf.append(", values=");
-        buf.append(ArrayUtils.makeCollection(ArrayList.class, _keyValues));
+        buf.append(CollectionUtils.makeCollection(ArrayList.class, _keyValues));
         buf.append('}');
 
         return buf.toString();
