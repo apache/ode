@@ -99,8 +99,7 @@ class JaxenBpelHandler extends JaxenHandler {
 
   /**
    */
-  public void endFunction()
-                   throws JaxenException {
+  public void endFunction() {
     super.endFunction();
 
     FunctionCallExpr c = (FunctionCallExpr)peekFrame()
@@ -133,7 +132,7 @@ class JaxenBpelHandler extends JaxenHandler {
           throw new CompilationException(__msgs.errUnknownBpelFunction(c.getFunctionName()));
         }
       } catch (CompilationException ce) {
-        throw new CompilationExceptionWrapper(ce);
+        throw new RuntimeException(ce);
       }
     }
   }
