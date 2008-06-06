@@ -26,17 +26,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.Map;
+
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReferenceContext}
- * interface used by the BPEL engine to convert XML descriptions of endpoint 
+ * interface used by the BPEL engine to convert XML descriptions of endpoint
  * references (EPRs) into Java object representations. In the JBI context all
- * endpoint references are considered to be JBI 
+ * endpoint references are considered to be JBI
  * {@link javax.jbi.servicedesc.ServiceEndpoint}s are resolved by using the
  * {@link javax.jbi.component.ComponentContext#resolveEndpointReference(org.w3c.dom.DocumentFragment)}
  * method. Note that is is possible to resolve both "internal" and "external"
@@ -50,21 +53,21 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   private final OdeContext _ode;
 
   static final QName JBI_EPR = new QName("http://java.sun.com/jbi/end-point-reference", "end-point-reference");
-  
+
   public EndpointReferenceContextImpl(OdeContext ode) {
     _ode = ode;
   }
 
   public EndpointReference resolveEndpointReference(Element epr) {
     QName elname = new QName(epr.getNamespaceURI(),epr.getLocalName());
-    
+
     if (__log.isDebugEnabled()) {
       __log.debug( "resolveEndpointReference:\n" + prettyPrint( epr ) );
     }
     if (!elname.equals(EndpointReference.SERVICE_REF_QNAME))
       throw new IllegalArgumentException("EPR root element "
           + elname + " should be " + EndpointReference.SERVICE_REF_QNAME);
-    
+
     Document doc = DOMUtils.newDocument();
     DocumentFragment fragment = doc.createDocumentFragment();
     NodeList children = epr.getChildNodes();
@@ -75,7 +78,7 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
       return null;
     return new JbiEndpointReference(se);
   }
-  
+
 
   public EndpointReference convertEndpoint(QName eprType, Element epr) {
       Document doc = DOMUtils.newDocument();
@@ -86,11 +89,11 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
       ServiceEndpoint se = _ode.getContext().resolveEndpointReference(fragment);
       if (se == null)
           return null;
-      
+
       return new JbiEndpointReference(se, eprType);
- 
+
   }
-  
+
   public static QName convertClarkQName(String name) {
     int pos = name.indexOf('}');
     if ( name.startsWith("{") && pos > 0 ) {
@@ -100,7 +103,7 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     }
     return new QName( name );
   }
- 
+
   private String prettyPrint( Element el ) {
       try {
           return DOMUtils.prettyPrint( el );
@@ -108,4 +111,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
           return ioe.getMessage();
       }
   }
+
+    public Map getConfigLookup(EndpointReference epr) {
+        return ((MutableEndpoint)epr).toMap();
+    }
 }

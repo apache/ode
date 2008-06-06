@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,7 +90,7 @@ class MockBpelServer {
             _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
-            _store = new ProcessStoreImpl(_dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
+            _store = new ProcessStoreImpl(_eprContext, _dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
             _server.setMessageExchangeContext(createMessageExchangeContext());
@@ -209,6 +210,10 @@ class MockBpelServer {
                 return (EndpointReference)_endpoints.get(service);
             }
             public EndpointReference convertEndpoint(QName qName, Element element) { return null; }
+
+            public Map getConfigLookup(EndpointReference epr) {
+                return Collections.EMPTY_MAP;
+            }
         };
         return _eprContext;
     }

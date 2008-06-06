@@ -24,7 +24,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
@@ -32,6 +31,8 @@ import org.apache.ode.axis2.ODEService;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.epr.WSDL11Endpoint;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -77,9 +79,9 @@ public class HttpExternalService implements ExternalService {
     protected ProcessConf pconf;
     protected QName serviceName;
     protected String portName;
-
-    protected HttpClientHelper clientHelper;
     protected WSAEndpoint endpointReference;
+    
+    protected HttpClientHelper clientHelper;
 
     public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService, Scheduler scheduler, BpelServer server) {
         this.portName = portName;
@@ -135,8 +137,8 @@ public class HttpExternalService implements ExternalService {
     public void invoke(PartnerRoleMessageExchange odeMex) {
         if (log.isDebugEnabled()) log.debug("Preparing " + getClass().getSimpleName() + " invocation...");
         try {
-            // don't make this map a class attribute, so we always get the latest version
-            final Map<String, String> properties = pconf.getProperties(serviceName.getLocalPart(), portName);
+            // note: don't make this map an instance attribute, so we always get the latest version
+            final Map<String, String> properties = pconf.getEndpointProperties(endpointReference);
             final HttpParams params = Properties.HttpClient.translate(properties);
 
             // build the http method

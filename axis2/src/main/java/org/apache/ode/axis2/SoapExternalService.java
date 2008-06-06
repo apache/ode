@@ -22,6 +22,7 @@ package org.apache.ode.axis2;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.Map;
+import java.util.HashMap;
 import java.io.File;
 import java.io.InputStream;
 
@@ -47,6 +48,7 @@ import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.epr.WSDL11Endpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -87,6 +89,7 @@ public class SoapExternalService implements ExternalService {
     private Definition _definition;
     private QName _serviceName;
     private String _portName;
+    protected WSAEndpoint endpointReference;
     private AxisConfiguration _axisConfig;
     private SoapMessageConverter _converter;
     private Scheduler _sched;
@@ -104,6 +107,12 @@ public class SoapExternalService implements ExternalService {
         _converter = new SoapMessageConverter(_definition, serviceName, portName);
         _server = server;
         _pconf = pconf;
+
+        // initial endpoint reference
+        Element eprElmt = ODEService.genEPRfromWSDL(_definition, serviceName, portName);
+        if (eprElmt == null)
+            throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
+        endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -278,10 +287,7 @@ public class SoapExternalService implements ExternalService {
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
-        Element eprElmt = ODEService.genEPRfromWSDL(_definition, _serviceName, _portName);
-        if (eprElmt == null)
-            throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(_serviceName, _portName));
-        return EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
+return endpointReference;
     }
 
     public void close() {
@@ -437,7 +443,7 @@ public class SoapExternalService implements ExternalService {
                 }
 
                 public Map lastModified() {
-                    return _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+                    return _pconf.getEndpointProperties(endpointReference);
                 }
             });
         }
@@ -452,7 +458,9 @@ public class SoapExternalService implements ExternalService {
 
         protected void doOnUpdate() {
             init();
-            Map properties = _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+
+            // note: don't make this map an instance attribute, so we always get the latest version
+            final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
             Properties.Axis2.translate(properties, options);
 
             // set defaults values
