@@ -52,9 +52,11 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.HierarchiedProperties;
+import org.apache.ode.utils.HierarchicalProperties;
 import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -89,14 +91,15 @@ public class ProcessConfImpl implements ProcessConf {
     private volatile boolean _inMemory = false;
 
     // provide the IL properties
-    private HierarchiedProperties _ilProperties;
+    private HierarchicalProperties ilProperties;
     // monitor the IL property file and reload it if necessary
-    private ILWatchDog _ilWatchDog;
+    private ILWatchDog ilWatchDog;
     private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
 
+    private EndpointReferenceContext eprContext;
 
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
-                    Map<QName, Node> props, ProcessState pstate) {
+                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext) {
         _pid = pid;
         _version = version;
         _du = du;
@@ -106,8 +109,9 @@ public class ProcessConfImpl implements ProcessConf {
         _state = pstate;
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
-        _ilWatchDog = new ILWatchDog();
-        
+        this.eprContext = eprContext;
+        ilWatchDog = new ILWatchDog();
+
         initLinks();
         initMexInterceptors();
         initEventList();
@@ -176,7 +180,7 @@ public class ProcessConfImpl implements ProcessConf {
         return _du.getName();
     }
 
-    public Map<QName, Node> getDeploymentProperties() {
+    public Map<QName, Node> getProcessProperties() {
         return _props;
     }
 
@@ -370,27 +374,21 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
-    /**
-     *
-     * @param path only the 2 first elements would be interpreted as the service local name and port name. all others would be ignored.
-     * @return a map of properties.
-     */
-    public Map<String, String> getProperties(String... path) {
-        String service=null, port=null;
-        if(path.length>=1) service = path[0];
-        if(path.length>=2) port = path[1];
-        if(path.length>2) if(__log.isWarnEnabled()) __log.debug("Arguments with index>2 ignored!");
+    public Map<String, String> getEndpointProperties(EndpointReference epr) {
+        final Map map = eprContext.getConfigLookup(epr);
+        final QName service = (QName) map.get("service");
+        final String port = (String) map.get("port");
 
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
-        _ilWatchDog.check();
-        if (_ilProperties == null) {
+        ilWatchDog.check();
+        if (ilProperties == null) {
             return Collections.EMPTY_MAP;
         } else {
             // take a lock so we can have a consistent snapshot of the properties
             ilPropertiesLock.readLock().lock();
             try {
-                return _ilProperties.getProperties(service, port);
+                return ilProperties.getProperties(service, port);
             } finally {
                 ilPropertiesLock.readLock().unlock();
             }
@@ -403,20 +401,20 @@ public class ProcessConfImpl implements ProcessConf {
      */
     private class ILWatchDog extends FileWatchDog {
         public ILWatchDog() {
-            super(_du.getILPropertyFile());
+            super(_du.getEPRConfigFile());
         }
 
         protected void init() {
             ilPropertiesLock.writeLock().lock();
             try {
-                if (_ilProperties == null) {
+                if (ilProperties == null) {
                     try {
-                        _ilProperties = new HierarchiedProperties(super.file);
+                        ilProperties = new HierarchicalProperties(super.file);
                     } catch (IOException e) {
                         throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
                     }
                 } else {
-                    _ilProperties.clear();
+                    ilProperties.clear();
                 }
             } finally {
                 ilPropertiesLock.writeLock().unlock();
@@ -424,7 +422,7 @@ public class ProcessConfImpl implements ProcessConf {
         }
 
         protected boolean isInitialized() {
-            return _ilProperties != null;
+            return ilProperties != null;
         }
 
         protected void doOnUpdate() {
@@ -432,7 +430,7 @@ public class ProcessConfImpl implements ProcessConf {
             try {
                 init();
                 try {
-                    _ilProperties.loadFile();
+                    ilProperties.loadFile();
                 } catch (IOException e) {
                     throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
                 }

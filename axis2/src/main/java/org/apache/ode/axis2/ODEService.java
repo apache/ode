@@ -218,7 +218,7 @@ public class ODEService {
      * do not store the value so it can be dynamically updated
      */
     private long getTimeout() {
-        String timeout = (String) _pconf.getProperties(_serviceName.getLocalPart(), _portName).get(Properties.PROP_MEX_TIMEOUT);
+        String timeout = _pconf.getEndpointProperties(_serviceRef).get(Properties.PROP_MEX_TIMEOUT);
         if (timeout != null) {
             try {
                 return Long.parseLong(timeout);

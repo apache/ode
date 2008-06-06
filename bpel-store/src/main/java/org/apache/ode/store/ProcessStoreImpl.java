@@ -29,6 +29,7 @@ import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
@@ -90,6 +91,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private ConfStoreConnectionFactory _cf;
 
+    private EndpointReferenceContext eprContext;
+
     protected File _deployDir;
 
     /**
@@ -106,10 +109,11 @@ public class ProcessStoreImpl implements ProcessStore {
     private DataSource _inMemDs;
 
     public ProcessStoreImpl() {
-        this(null, "", new OdeConfigProperties(new Properties(), ""), true);
+        this(null, null, "", new OdeConfigProperties(new Properties(), ""), true);
     }
 
-    public ProcessStoreImpl(DataSource ds, String persistenceType, OdeConfigProperties props, boolean auto) {
+    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean auto) {
+        this.eprContext = eprContext;
         if (ds != null) {
             // ugly hack
             if (persistenceType.toLowerCase().indexOf("hib") != -1)
@@ -212,7 +216,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
                 // final OProcess oprocess = loadCBP(cbpInfo.cbp);
                 ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
-                        calcInitialProperties(processDD), calcInitialState(processDD));
+                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext);
                 processes.add(pconf);
             }
 
@@ -256,7 +260,7 @@ public class ProcessStoreImpl implements ProcessStore {
                     try {
                         ProcessConfDAO newDao = dudao.createProcess(pc.getProcessId(), pc.getType(), pc.getVersion());
                         newDao.setState(pc.getState());
-                        for (Map.Entry<QName, Node> prop : pc.getDeploymentProperties().entrySet()) {
+                        for (Map.Entry<QName, Node> prop : pc.getProcessProperties().entrySet()) {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());
@@ -621,7 +625,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 // TODO: update the props based on the values in the DB.
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao
-                        .getDeployDate(), props, p.getState());
+                        .getDeployDate(), props, p.getState(), eprContext);
                 version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);

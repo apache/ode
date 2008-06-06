@@ -108,10 +108,10 @@ public interface ProcessConf {
     List<File> getFiles();
 
     /**
-     * Get the deployment properties. 
+     * Get the process properties. 
      * @return
      */
-    Map<QName, Node> getDeploymentProperties();
+    Map<QName, Node> getProcessProperties();
 
     /**
      * Gets the name of the package into which the process is deployed.
@@ -157,10 +157,6 @@ public interface ProcessConf {
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
 
-    /**
-     * Must not return null values.
-     * @param path
-     * @return
-     */
-    public Map<String, String> getProperties(String... path);
+    public Map<String, String> getEndpointProperties(EndpointReference epr);
+
 }
