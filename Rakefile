@@ -24,8 +24,8 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.2-SNAPSHOT"
-NEXT_VERSION = "1.2"
+VERSION_NUMBER = "1.2RC1-SNAPSHOT"
+NEXT_VERSION = "1.2RC1"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -73,7 +73,7 @@ JAVAX               = struct(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
-JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
+JAXEN               = "jaxen:jaxen:jar:1.1.1"
 JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
