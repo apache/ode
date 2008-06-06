@@ -23,8 +23,8 @@ require "buildr/jetty"
 require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.2-SNAPSHOT"
-NEXT_VERSION = "1.2"
+VERSION_NUMBER = "1.3-SNAPSHOT"
+NEXT_VERSION = "1.3"
 
 ACTIVEMQ            = "org.apache.activemq:apache-activemq:jar:4.1.1"
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
