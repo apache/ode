@@ -38,7 +38,7 @@ import java.util.List;
             "FROM MessageRouteDAOImpl as route " +
             "WHERE route._correlationKey = :ckey " +
                    "and route._correlator._process._processType = :ptype " +
-                   "and route._correlator._correlatorId = :corrid")
+                   "and route._correlator._correlatorId = :corrkey")
         })
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
@@ -93,7 +93,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         Query qry = getEM().createNamedQuery("RouteByCKey");
         qry.setParameter("ckey", correlationKey.toCanonicalString());
         qry.setParameter("ptype", _process.getType().toString());
-        qry.setParameter("corrid", _correlatorId);
+        qry.setParameter("corrkey", _correlatorKey);
         List<MessageRouteDAO> routes = (List<MessageRouteDAO>) qry.getResultList();
         if (routes.size() > 0) return routes.get(0);
         else return null;
