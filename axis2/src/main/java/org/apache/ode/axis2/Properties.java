@@ -50,7 +50,7 @@ public class Properties {
      */
     public static final String PROP_MEX_TIMEOUT = "mex.timeout";
     // its default value
-    public static final int DEFAULT_MEX_TIMEOUT = 2 * 60 * 1000;
+    public static final int DEFAULT_MEX_TIMEOUT = 30 * 1000;
 
 
     public static final String PROP_HTTP_CONNECTION_TIMEOUT = HttpConnectionParams.CONNECTION_TIMEOUT;
