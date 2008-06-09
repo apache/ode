@@ -739,7 +739,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         TProcessProperties properties = info.addNewProperties();
         if (custom.includeProcessProperties()) {
-            for (Map.Entry<QName, Node> propEntry : pconf.getDeploymentProperties().entrySet()) {
+            for (Map.Entry<QName, Node> propEntry : pconf.getProcessProperties().entrySet()) {
                 TProcessProperties.Property tprocProp = properties.addNewProperty();
                 tprocProp.setName(new QName(propEntry.getKey().getNamespaceURI(), propEntry.getKey().getLocalPart()));
                 Node propNode = tprocProp.getDomNode();

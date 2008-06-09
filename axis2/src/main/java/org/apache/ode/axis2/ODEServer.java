@@ -60,6 +60,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
@@ -140,10 +141,11 @@ public class ODEServer {
             initDataSource();
             __log.debug("Starting DAO.");
             initDAO();
+            EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
             __log.debug("Initializing BPEL process store.");
-            initProcessStore();
+            initProcessStore(eprContext);
             __log.debug("Initializing BPEL server.");
-            initBpelServer();
+            initBpelServer(eprContext);
 
             // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
@@ -429,14 +431,14 @@ public class ODEServer {
         }
     }
 
-    protected void initProcessStore() {
-        _store = createProcessStore(_db.getDataSource());
+    protected void initProcessStore(EndpointReferenceContext eprContext) {
+        _store = createProcessStore(eprContext, _db.getDataSource());
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(new File(_workRoot, "processes"));
     }
 
-    protected ProcessStoreImpl createProcessStore(DataSource ds) {
-        return new ProcessStoreImpl(ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
+    protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
+        return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {
@@ -446,7 +448,7 @@ public class ODEServer {
         return scheduler;
     }
 
-    private void initBpelServer() {
+    private void initBpelServer(EndpointReferenceContextImpl eprContext) {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
@@ -456,7 +458,7 @@ public class ODEServer {
         _scheduler.setJobProcessor(_server);
 
         _server.setDaoConnectionFactory(_daoCF);
-        _server.setEndpointReferenceContext(new EndpointReferenceContextImpl(this));
+        _server.setEndpointReferenceContext(eprContext);
         _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _server.setBindingContext(new BindingContextImpl(this, _store));
         _server.setScheduler(_scheduler);

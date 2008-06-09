@@ -60,7 +60,6 @@ import java.util.Set;
  */
 class DeploymentUnitDir  {
 
-    static final String IL_PROPERTIES_FILE = "integration-layer.properties";
 
     private static Log __log = LogFactory.getLog(DeploymentUnitDir.class);
 
@@ -205,8 +204,8 @@ class DeploymentUnitDir  {
         return _duDirectory;
     }
 
-    public File getILPropertyFile(){
-        return new File(getDeployDir(), IL_PROPERTIES_FILE);
+    public File getEPRConfigFile(){
+        return new File(getDeployDir(), "endpoint-configuration.properties");
     }
 
     public DeployDocument getDeploymentDescriptor() {

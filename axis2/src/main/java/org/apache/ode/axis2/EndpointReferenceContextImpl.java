@@ -24,10 +24,13 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.il.epr.EndpointFactory;
+import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
+
+import java.util.Map;
 
 public class EndpointReferenceContextImpl implements EndpointReferenceContext {
 
@@ -46,4 +49,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     EndpointReference endpoint = EndpointFactory.convert(qName, element);
     return endpoint;
   }
+
+    public Map getConfigLookup(EndpointReference epr) {
+        return ((MutableEndpoint)epr).toMap();
+    }
 }

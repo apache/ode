@@ -23,6 +23,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,15 +33,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * This class load a regular property file in {@link java.util.Properties} instance. The main feature is that property can
- * be hierarchied/chained in three levels. Then when querying for a property, if it's not found in the deepest level,
+ * be chained in three levels. Then when querying for a property, if it's not found in the deepest level,
  * the parent will be queryed and so on.
  * <p/>
  * A prefix must be defined to discriminate the property name and the level-1, level-2 names. The default prefix is {@link #ODE_PREFFIX}.
  * <p/>
- * Properties must respect the following pattern: [level1[.level2].prefix.]property
+ * Properties must respect the following pattern: [level1.[level2.]prefix.]property
  * <p/>
  * A concrete use case could be the definition of properties for wsdl services and ports.
  * <br/>Level 0 would be: values common to all services and ports.
@@ -73,19 +75,20 @@ import java.util.Collections;
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
-public class HierarchiedProperties {
+public class HierarchicalProperties {
 
-    private static final Log log = LogFactory.getLog(HierarchiedProperties.class);
+    private static final Log log = LogFactory.getLog(HierarchicalProperties.class);
 
-    // Prefix used by all properties
-    public static final String ODE_PREFFIX = "ode.";
+    public static final String ODE_PREFFIX = "ode";
 
     // the raw properties as of loaded from the filesystem
     private Properties props = new Properties();
+    private Map<String, String> aliases = new HashMap<String, String>();
     private File file;
     private String prefix;
+    private String dotted_prefix;
     /*
-        This map contains ChainedMap instances hierarchied according to the service and/or port they are associated with.
+        This map contains ChainedMap instances chained according to the service and/or port they are associated with.
         All ChainedMap instances has a common parent.
         The ChainedMap instances are chained to each others so that if a property is not found for [service, port],
         the ChainedMap associated to [service] will be queried, and if still not found, then the common parent.
@@ -96,7 +99,7 @@ public class HierarchiedProperties {
 
         The ChainedMap instances contain string values as loaded from the filesystem.
      */
-    private MultiKeyMap hierarchiedMap = new MultiKeyMap();
+    private MultiKeyMap hierarchicalMap = new MultiKeyMap();
 
     // map used to cache immutable versions of the maps
     private transient MultiKeyMap cacheOfImmutableMaps = new MultiKeyMap();
@@ -107,13 +110,14 @@ public class HierarchiedProperties {
      * @param prefix the property prefix
      * @throws IOException
      */
-    public HierarchiedProperties(File file, String prefix) throws IOException {
+    public HierarchicalProperties(File file, String prefix) throws IOException {
         this.file = file;
         this.prefix = prefix;
+        this.dotted_prefix = "." + prefix + ".";
         loadFile();
     }
 
-    public HierarchiedProperties(File file) throws IOException {
+    public HierarchicalProperties(File file) throws IOException {
         this(file, ODE_PREFFIX);
     }
 
@@ -140,43 +144,54 @@ public class HierarchiedProperties {
         }
 
         // #3. put the root map
-        hierarchiedMap.put(null, null, new ChainedMap());
+        hierarchicalMap.put(null, null, new ChainedMap());
 
         // #4. process each property
-        for (Object key : props.keySet()) {
-            String value = (String) props.get(key);
+
+        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry e = (Map.Entry) it.next();
+            String key = (String) e.getKey();
+            String value = (String) e.getValue();
 
             // replace any env variables by its value
             value = SystemUtils.replaceSystemProperties(value);
             props.put(key, value);
 
-            // parse the property name
-            String[] info = parseProperty((String) key);
-            String service = info[0];
-            String port = info[1];
-            String targetedProperty = info[2];
+            if (key.startsWith("alias.")) {
+                final String alias = key.substring("alias.".length(), key.length());
+                if(log.isDebugEnabled()) log.debug("Alias found: "+alias+" -> "+value);
+                aliases.put(value, alias);
+            } else {
+                // parse the property name
+                String[] info = parseProperty((String) key);
+                String nsalias = info[0];
+                String service = info[1];
+                String port = info[2];
+                String targetedProperty = info[3];
 
-            // get the map associated to this port
-            ChainedMap p = (ChainedMap) hierarchiedMap.get(service, port);
-            if (p == null) {
-                // create it if necessary
-                // get the associated service map
-                ChainedMap s = (ChainedMap) hierarchiedMap.get(service, null);
-                if (s == null) {
-                    // create the service map if necessary, the parent is the root map.
-                    s = new ChainedMap(getRootMap());
+                QName qname = nsalias != null ? new QName(nsalias, service) : null;
+                // get the map associated to this port
+                ChainedMap p = (ChainedMap) hierarchicalMap.get(qname, port);
+                if (p == null) {
+                    // create it if necessary
+                    // get the associated service map
+                    ChainedMap s = (ChainedMap) hierarchicalMap.get(qname, null);
+                    if (s == null) {
+                        // create the service map if necessary, the parent is the root map.
+                        s = new ChainedMap(getRootMap());
+                        // put it in the multi-map
+                        hierarchicalMap.put(qname, null, s);
+                    }
+
+                    // create the map itself and link it to theservice map
+                    p = new ChainedMap(s);
                     // put it in the multi-map
-                    hierarchiedMap.put(service, null, s);
+                    hierarchicalMap.put(qname, port, p);
                 }
 
-                // create the map itself and link it to theservice map
-                p = new ChainedMap(s);
-                // put it in the multi-map
-                hierarchiedMap.put(service, port, p);
+                // save the key/value in its chained map
+                p.put(targetedProperty, value);
             }
-
-            // save the key/value in its chained map
-            p.put(targetedProperty, value);
         }
     }
 
@@ -185,17 +200,22 @@ public class HierarchiedProperties {
      */
     public void clear() {
         props.clear();
-        hierarchiedMap.clear();
+        aliases.clear();
+        hierarchicalMap.clear();
         cacheOfImmutableMaps.clear();
     }
 
     protected ChainedMap getRootMap() {
-        Object o = hierarchiedMap.get(null, null);
+        Object o = hierarchicalMap.get(null, null);
         if (o == null) {
             o = new ChainedMap();
-            hierarchiedMap.put(null, null, o);
+            hierarchicalMap.put(null, null, o);
         }
         return (ChainedMap) o;
+    }
+
+    public Map getProperties(String serviceNamespaceURI, String serviceLocalPart) {
+        return getProperties(new QName(serviceNamespaceURI, serviceLocalPart));
     }
 
     /**
@@ -203,8 +223,12 @@ public class HierarchiedProperties {
      * @return a map containing all the properties for the given service.
      * @see #getProperties(String, String)
      */
-    public Map getProperties(String service) {
+    public Map getProperties(QName service) {
         return getProperties(service, null);
+    }
+
+    public Map getProperties(String serviceNamespaceURI, String serviceLocalPart, String port) {
+        return getProperties(new QName(serviceNamespaceURI, serviceLocalPart), port);
     }
 
     /**
@@ -215,10 +239,11 @@ public class HierarchiedProperties {
      * @param port
      * @return a map containing all the properties for the given port
      */
-    public Map getProperties(String service, String port) {
+    public Map getProperties(QName service, String port) {
         // no need to go further if no properties
-        if (hierarchiedMap.isEmpty()) return Collections.EMPTY_MAP;
+        if (hierarchicalMap.isEmpty()) return Collections.EMPTY_MAP;
 
+        service = resolveAlias(service);
         // else check the cache of ChainedMap already converted into immutable maps
         Map cachedMap = (Map) this.cacheOfImmutableMaps.get(service, port);
         if (cachedMap != null) {
@@ -226,13 +251,13 @@ public class HierarchiedProperties {
         }
 
         // else get the corresponding ChainedMap and convert it into a Map
-        ChainedMap cm = (ChainedMap) hierarchiedMap.get(service, port);
+        ChainedMap cm = (ChainedMap) hierarchicalMap.get(service, port);
         // if this port is not explicitly mentioned in the multimap, get the default values.
         if (cm == null) {
-            cm = (ChainedMap) hierarchiedMap.get(service, null);
+            cm = (ChainedMap) hierarchicalMap.get(service, null);
             if (cm == null) {
                 // return the cached version of the root map
-                return getProperties(null, null);
+                return getProperties((QName) null, null);
             }
         }
         Map snapshotMap = new HashMap(cm.size() * 15 / 10);
@@ -249,12 +274,20 @@ public class HierarchiedProperties {
         return (String) getRootMap().get(property);
     }
 
-    public String getProperty(String service, String property) {
+    public String getProperty(String serviceNamespaceURI, String serviceLocalPart, String property) {
+        return getProperty(new QName(serviceNamespaceURI, serviceLocalPart), property);
+    }
+
+    public String getProperty(QName service, String property) {
         return getProperty(service, null, property);
     }
 
-    public String getProperty(String service, String port, String property) {
-        ChainedMap cm = (ChainedMap) hierarchiedMap.get(service, port);
+    public String getProperty(String serviceNamespaceURI, String serviceLocalPart, String port, String property) {
+        return getProperty(new QName(serviceNamespaceURI, serviceLocalPart), port, property);
+    }
+
+    public String getProperty(QName service, String port, String property) {
+        ChainedMap cm = (ChainedMap) hierarchicalMap.get(resolveAlias(service), port);
         // if this port is not explicitly mentioned in the multimap, get the default values.
         if (cm == null) cm = getRootMap();
         return (String) cm.get(property);
@@ -264,30 +297,34 @@ public class HierarchiedProperties {
         return prefix;
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
+    private QName resolveAlias(QName service) {
+        if (service != null && aliases.containsKey(service.getNamespaceURI())) {
+            return new QName(aliases.get(service.getNamespaceURI()), service.getLocalPart());
+        }
+        return service;
     }
-
+    
     private String[] parseProperty(String property) {
-        // service, port, targeted property
-        String[] res = new String[3];
+        // aliaas ns, service, port, targeted property
+        String[] res = new String[4];
 
-        int index = property.indexOf(prefix);
+        int index = property.indexOf(dotted_prefix);
         if (index <= 0) {
             // assume there is no service/port prefixed, no need to go further
-            res[2] = property;
+            res[3] = property;
         } else {
-            res[2] = property.substring(index + prefix.length()); // targeted property
+            res[3] = property.substring(index + dotted_prefix.length()); // targeted property
             String prefix = property.substring(0, index);
             String[] t = prefix.split("\\.");
+            if (t.length != 2 && t.length != 3) {
+                throw new IllegalArgumentException("Invalid property name:" + property + " Expected pattern: [nsalias.service.[port.]" + prefix + ".]property");
+            }
+            if (t.length >= 2) {
+                res[0] = t[0]; // ns alias
+                res[1] = t[1]; // service name
+            }
             if (t.length > 2) {
-                throw new IllegalArgumentException("'.' cannot be mentioned more than twice in the before the property prefix");
-            }
-            if (t.length >= 1) {
-                res[0] = t[0]; // service name
-            }
-            if (t.length > 1) {
-                res[1] = t[1]; // port name
+                res[2] = t[2]; // port name
             }
         }
         return res;

@@ -123,7 +123,7 @@ public abstract class BPELTestAbstract {
         _server.setMessageExchangeContext(mexContext);
         _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
+        store = new ProcessStoreImpl(null, null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
         // not needed: we do eclipcitly in doDeployment
 //        store.registerListener(new ProcessStoreListener() {
 //            public void onProcessStoreEvent(ProcessStoreEvent event) {

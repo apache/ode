@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
@@ -96,7 +97,7 @@ class MockBpelServer {
             _server.setDaoConnectionFactory(_daoCF);
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
-            _store = new ProcessStoreImpl(_dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
+            _store = new ProcessStoreImpl(_eprContext, _dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
             _server.setTransactionManager(_txManager);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(createEndpointReferenceContext());
@@ -202,6 +203,10 @@ class MockBpelServer {
 
             public EndpointReference convertEndpoint(QName qName, Element element) {
                 return null;
+            }
+
+            public Map getConfigLookup(EndpointReference epr) {
+                return Collections.EMPTY_MAP;
             }
         };
         return _eprContext;

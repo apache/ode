@@ -23,33 +23,42 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 
+import java.util.Map;
+
 /**
- * Endpoint reference context: facililates the creation of 
+ * Endpoint reference context: facililates the creation of
  * {@link EndpointReference} objects.
- *
  */
 public interface EndpointReferenceContext {
-  
-  /**
-   * Resolve an end-point reference from its XML representation. The
-   * nature of the representation is determined by the integration 
-   * layer. The BPEL engine uses this method to reconstruct 
-   * {@link EndpointReference}  objects that have been persisted in the
-   * database via {@link EndpointReference#toXML(javax.xml.transform.Result)}
-   * method.
-   * 
-   * @param XML representation of the EPR
-   * @return reconsistituted {@link EndpointReference}
-   */
-  EndpointReference resolveEndpointReference(Element epr);
-  
 
-  /**
-   * Converts an endpoint reference from its XML representation to another
-   * type of endpoint reference.
-   * @param targetType
-   * @param sourceEndpoint
-   * @return converted EndpointReference, being of targetType
-   */
-  EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint);
+    /**
+     * Resolve an end-point reference from its XML representation. The
+     * nature of the representation is determined by the integration
+     * layer. The BPEL engine uses this method to reconstruct
+     * {@link EndpointReference}  objects that have been persisted in the
+     * database via {@link EndpointReference#toXML(javax.xml.transform.Result)}
+     * method.
+     *
+     * @param XML representation of the EPR
+     * @return reconsistituted {@link EndpointReference}
+     */
+    EndpointReference resolveEndpointReference(Element epr);
+
+
+    /**
+     * Converts an endpoint reference from its XML representation to another
+     * type of endpoint reference.
+     *
+     * @param targetType
+     * @param sourceEndpoint
+     * @return converted EndpointReference, being of targetType
+     */
+    EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint);
+
+    /**
+     * 
+     * @param epr
+     * @return
+     */
+    Map getConfigLookup(EndpointReference epr);
 }
