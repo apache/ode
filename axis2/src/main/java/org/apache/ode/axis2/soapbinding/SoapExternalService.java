@@ -49,6 +49,7 @@ import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.WatchDog;
+import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.uuid.UUID;
 import org.w3c.dom.Document;
@@ -75,10 +76,12 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     private static ThreadLocal<CachedOptions> _cachedOptions = new ThreadLocal<CachedOptions>();
     private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
    
+    private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
 
     private Definition _definition;
     private QName _serviceName;
     private String _portName;
+    protected WSAEndpoint endpointReference;
     private AxisConfiguration _axisConfig;
     private SoapMessageConverter _converter;
     private ProcessConf _pconf;
@@ -91,6 +94,12 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         _axisConfig = axisConfig;
         _converter = new SoapMessageConverter(definition, serviceName, portName);
         _pconf = pconf;
+
+        // initial endpoint reference
+        Element eprElmt = ODEService.genEPRfromWSDL(_definition, serviceName, portName);
+        if (eprElmt == null)
+            throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
+        endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -233,11 +242,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
-        Element eprElmt = ODEService.genEPRfromWSDL(_definition, _serviceName, _portName);
-        if (eprElmt == null)
-            throw new IllegalArgumentException("Service " + _serviceName + " and port " + _portName
-                    + "couldn't be found in provided WSDL document!");
-        return EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
+        return endpointReference;
     }
 
     public void close() {
@@ -368,7 +373,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 }
 
                 public Map lastModified() {
-                    return _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+                    return _pconf.getEndpointProperties(endpointReference);
                 }
             });
         }
@@ -383,7 +388,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
         protected void doOnUpdate() {
             init();
-            Map properties = _pconf.getProperties(_serviceName.getLocalPart(), _portName);
+
+            // note: don't make this map an instance attribute, so we always get the latest version
+            final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
             Properties.Axis2.translate(properties, options);
 
             // set defaults values

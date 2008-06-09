@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -131,12 +132,12 @@ public class HttpExternalService implements ExternalService {
     public void invoke(PartnerRoleMessageExchange odeMex) {
         if (log.isDebugEnabled()) log.debug("Preparing " + getClass().getSimpleName() + " invocation...");
         try {
-            // don't make this map a class attribute, so we always get the latest version
-            final Map<String, String> properties = pconf.getProperties(serviceName.getLocalPart(), portName);
+            // note: don't make this map an instance attribute, so we always get the latest version
+            final Map<String, String> properties = pconf.getEndpointProperties(endpointReference);
             final HttpParams params = Properties.HttpClient.translate(properties);
 
             // build the http method
-final HttpMethod method = clientHelper.buildHttpMethod(odeMex, params);
+            final HttpMethod method = clientHelper.buildHttpMethod(odeMex, params);
 
             // create a client
             HttpClient client = new HttpClient(connections);
