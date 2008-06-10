@@ -101,10 +101,10 @@ public class SchemaModelImpl implements SchemaModel {
 
     private static class SchemaErrorHandler implements DOMErrorHandler {
         public boolean handleError(DOMError error) {
-            __log.error("Schema error", ((Exception)error.getRelatedException()));
-            __log.error(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
-            __log.error(error.getRelatedData());
-            __log.error(error.getRelatedException());
+            __log.warn("Schema error", ((Exception)error.getRelatedException()));
+            __log.warn(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
+            __log.warn(error.getRelatedData());
+            __log.warn(error.getRelatedException());
             return false;
         }
     }
