@@ -113,7 +113,7 @@ public class SchemaModelImpl implements SchemaModel {
                 __log.error(error.getRelatedData());
                 __log.error(error.getRelatedException());
             }
-            return false;
+            return isWarning;
         }
     }
 
