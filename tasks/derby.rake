@@ -29,7 +29,7 @@ module Derby
     # For example:
     #   Derby.create "mydb"=>derby.sql
     def create(args)
-      db, prereqs = Rake.application.resolve_args(args)
+      db, prereqs = args.keys.first, args.values.first 
       file(File.expand_path(db)=>prereqs) do |task|
         rm_rf task.name if File.exist?(task.name)
         Buildr.ant("derby") do |ant|

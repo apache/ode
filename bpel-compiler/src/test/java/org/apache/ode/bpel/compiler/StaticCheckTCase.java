@@ -33,13 +33,14 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-
+import org.junit.*;
 
 /**
  * JUnit {@link TestCase} of static-analysis checking in the ODE BPEL compiler.
  * These test cases are intended to be run as part of a suite. Each test case
  * instance is used to test a particular detectable error condition.
  */
+@Ignore
 class StaticCheckTCase extends TestCase implements CompileListener {
 
   private int idx = 0;

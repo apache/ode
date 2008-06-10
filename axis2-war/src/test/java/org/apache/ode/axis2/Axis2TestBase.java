@@ -22,10 +22,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Collection;
+import org.junit.*;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
  */
+@Ignore
 public abstract class Axis2TestBase extends TestCase {
 
     protected ODEAxis2Server server;
