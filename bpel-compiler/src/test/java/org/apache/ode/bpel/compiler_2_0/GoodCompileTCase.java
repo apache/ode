@@ -30,13 +30,14 @@ import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.utils.StreamUtils;
-
+import org.junit.*;
 
 /**
  * JUnit {@link TestCase} of the ODE BPEL compiler. This test case provides
  * is not very complex, it simply ensures that the given BPEL input compiles
  * succesfully. These test cases are intended to be run as part of a suite. 
  */
+@Ignore
 class GoodCompileTCase extends TestCase implements CompileListener {
 
     protected final Log __log = LogFactory.getLog(getClass());
