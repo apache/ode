@@ -119,18 +119,14 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 __log.debug("Message: " + soapEnv);
             }
 
-            Options options = new Options();
-            options.setAction(mctx.getSoapAction());
-            options.setTo(axisEPR);
-            options.setTimeOutInMilliSeconds(60000);
-            options.setExceptionToBeThrownOnSOAPFault(false);
-
-            CachedServiceClient cached = getCachedServiceClient();
-
-            final OperationClient operationClient = cached.client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
+            ServiceClient client = getCachedServiceClient().client;
+            final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
-            operationClient.setOptions(options);
             operationClient.addMessageContext(mctx);
+            // this Options can be alter without impacting the ServiceClient options (which is a requirement)
+            Options operationOptions = operationClient.getOptions();
+            operationOptions.setAction(mctx.getSoapAction());
+            operationOptions.setTo(axisEPR);
 
             if (isTwoWay) {
                 final Operation operation = odeMex.getOperation();
