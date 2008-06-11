@@ -152,6 +152,18 @@ class PICK extends ACTIVITY {
         // This is allowed, if there is no parts in the message for example.
         if (onMessage.variable == null) return;
 
+        Element msgEl;
+        try {
+            // At this point, not being able to get the request is most probably
+            // a mex that hasn't properly replied to (process issue).
+            msgEl = getBpelRuntimeContext().getMyRequest(mexId);
+        } catch (ExternalVariableModuleException e) {
+            __log.error("The message exchange seems to be in an unconsistent state, you're " +
+                "probably missing a reply on a request/response interaction.");
+            _self.parent.failure(e.toString(), null);
+            return;
+        }
+
         Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
         Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
 
