@@ -50,10 +50,7 @@ public class SchemaModelImpl implements SchemaModel {
     private XSModel _model;
 
     private SchemaModelImpl(XSModel model) {
-        if (model == null) {
-            throw new NullPointerException("Null model.");
-        }
-
+        if (model == null) throw new IllegalArgumentException("Null model.");
         _model = model;
     }
 
