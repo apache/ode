@@ -90,11 +90,11 @@ public class ProcessConfImpl implements ProcessConf {
     // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
     private volatile boolean _inMemory = false;
 
-    // provide the IL properties
-    private HierarchicalProperties ilProperties;
-    // monitor the IL property file and reload it if necessary
-    private ILWatchDog ilWatchDog;
-    private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
+    // provide the EPR properties
+    private HierarchicalProperties eprProperties;
+    // monitor the EPR property file and reload it if necessary
+    private EPRPropertiesWatchDog eprPropertiesWatchDog;
+    private final ReadWriteLock eprPropertiesLock = new ReentrantReadWriteLock();
 
     private EndpointReferenceContext eprContext;
 
@@ -110,7 +110,7 @@ public class ProcessConfImpl implements ProcessConf {
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
         this.eprContext = eprContext;
-        ilWatchDog = new ILWatchDog();
+        eprPropertiesWatchDog = new EPRPropertiesWatchDog();
 
         initLinks();
         initMexInterceptors();
@@ -373,61 +373,61 @@ public class ProcessConfImpl implements ProcessConf {
 
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
-        ilWatchDog.check();
-        if (ilProperties == null) {
+        eprPropertiesWatchDog.check();
+        if (eprProperties == null) {
             return Collections.EMPTY_MAP;
         } else {
             // take a lock so we can have a consistent snapshot of the properties
-            ilPropertiesLock.readLock().lock();
+            eprPropertiesLock.readLock().lock();
             try {
-                return ilProperties.getProperties(service, port);
+                return eprProperties.getProperties(service, port);
             } finally {
-                ilPropertiesLock.readLock().unlock();
+                eprPropertiesLock.readLock().unlock();
             }
         }
     }
 
     /**
      * Manage the reloading of the propery file every {@link org.apache.ode.utils.fs.FileWatchDog#DEFAULT_DELAY}.
-     * The check is done manually, meaning that {@link #check()} must be invoked each time _ilProperties is accessed.
+     * The check is done manually, meaning that {@link #check()} must be invoked each time eprProperties is accessed.
      */
-    private class ILWatchDog extends FileWatchDog {
-        public ILWatchDog() {
+    private class EPRPropertiesWatchDog extends FileWatchDog {
+        public EPRPropertiesWatchDog() {
             super(_du.getEPRConfigFile());
         }
 
         protected void init() {
-            ilPropertiesLock.writeLock().lock();
+            eprPropertiesLock.writeLock().lock();
             try {
-                if (ilProperties == null) {
+                if (eprProperties == null) {
                     try {
-                        ilProperties = new HierarchicalProperties(super.file);
+                        eprProperties = new HierarchicalProperties(super.file);
                     } catch (IOException e) {
-                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                        throw new ContextException("EPR Config Properties cannot be loaded!", e);
                     }
                 } else {
-                    ilProperties.clear();
+                    eprProperties.clear();
                 }
             } finally {
-                ilPropertiesLock.writeLock().unlock();
+                eprPropertiesLock.writeLock().unlock();
             }
         }
 
         protected boolean isInitialized() {
-            return ilProperties != null;
+            return eprProperties != null;
         }
 
         protected void doOnUpdate() {
-            ilPropertiesLock.writeLock().lock();
+            eprPropertiesLock.writeLock().lock();
             try {
                 init();
                 try {
-                    ilProperties.loadFile();
+                    eprProperties.loadFile();
                 } catch (IOException e) {
-                    throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                    throw new ContextException("EPR Config Properties cannot be loaded!", e);
                 }
             } finally {
-                ilPropertiesLock.writeLock().unlock();
+                eprPropertiesLock.writeLock().unlock();
             }
         }
     }
