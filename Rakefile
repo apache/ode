@@ -16,7 +16,6 @@
 #
 
 require "buildr"
-require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
