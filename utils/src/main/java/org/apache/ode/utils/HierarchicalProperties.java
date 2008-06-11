@@ -36,40 +36,53 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * This class load a regular property file in {@link java.util.Properties} instance. The main feature is that property can
- * be chained in three levels. Then when querying for a property, if it's not found in the deepest level,
- * the parent will be queryed and so on.
+ * <h3>3-level Property File</h3>
+ * This class loads a regular property file. The main feature is that property can
+ * be chained in three levels. Which are, from highest to deepest:
+ * <ol>
+ * <li>{@code property}: defines the default value for the given property</li>
+ * <li>{@code service-ns.service-localname.ode.property}: defines the value for all ports of the given service</li>
+ * <li>{@code service-ns.service-localname.port.ode.property}: defines the value for the given port</li>
+ * </ol>
+ * Then, properties might be queried with a service and/or port. The corresponding level will be queried for the associated value,
+ * if not found the level n-1 is queried, and so on until the default value.
  * <p/>
- * A prefix must be defined to discriminate the property name and the level-1, level-2 names. The default prefix is {@link #ODE_PREFFIX}.
+ * Properties must respect the following pattern: {@code [service-ns.service-localname.[port.]prefix.]property}
  * <p/>
- * Properties must respect the following pattern: [level1.[level2.]prefix.]property
+ * Values may contain some environment variables. For instance, {@code message=You're using ${java.version}}.
  * <p/>
- * A concrete use case could be the definition of properties for wsdl services and ports.
- * <br/>Level 0 would be: values common to all services and ports.
- * <br/>Level 1: values common to a given service.
- * <br/>Level 2: values common to a given port.
+ * <h3>Namespaces Alias</h3>
+ * To save some typing and make sure the property is valid, namespaces might be aliased.<br/>
+ * To do so, add a property similar to: {@code alias.my-ns-nickname=http://mynamespace.org}.
+ * <br/>Then instead of typing {@code http://mynamespace.org.mylocalname.myproperty=my_value} (which is not a valid a property btw}, write: {@code my-ns-nickname.mylocalname.myproperty=my_value} 
+ *
  * <p/>
+  * <h3>Examples</h3>
  * For instance, if the property file looks like this:
  * <pre>
- * timeout=40000
- * film-service.port-of-cannes.ode.timeout=50000
- * <p/>
+ * alias.ex_ns=http://examples.org
+ * 
  * max-redirects=30
- * brel-service.ode.max-redirects=40
- * brel-service.port-of-amsterdam.ode.max-redirects=60
+ * timeout=40000
+ *
+ * ex_ns.film-service.port-of-cannes.ode.timeout=50000
+ *
+ * ex_ns.brel-service.ode.max-redirects=40
+ * ex_ns.brel-service.port-of-amsterdam.ode.max-redirects=60
  * </pre>
  * The following values may be expected:
  * <pre>
- * getProperty("max-redirects")                                       => 30
- * getProperty("brel-service", "max-redirects")                       => 40
- * getProperty("brel-service", "port-of-amsterdam", "max-redirects")  => 60
- * <p/>
- * getProperty("film-service", "timeout")                       => 40000
- * getProperty("film-service", "port-of-cannes", "timeout")     => 50000
- * getProperty("brel-service", "port-of-amsterdam", "timeout")  => 40000
+ * getProperty("max-redirects")                                                              => 30
+ * getProperty("http://examples.org", "brel-service", "max-redirects")                       => 40
+ * getProperty("http://examples.org", "brel-service", "port-of-amsterdam", "max-redirects")  => 60
+ * 
+ * getProperty("http://examples.org", "film-service", "timeout")                       => 40000
+ * getProperty("http://examples.org", "film-service", "port-of-cannes", "timeout")     => 50000
+ * getProperty("http://examples.org", "brel-service", "port-of-amsterdam", "timeout")  => 40000
+ *
+ * getProperties("http://examples.org", "film-service")                     => Map{"timeout"=>"40000", "max-redirect"=>"30"}
+ * getProperties("http://examples.org", "film-service", "port-of-cannes")   => Map{"timeout"=>"50000", "max-redirect"=>"30"}
  * </pre>
- * <p/>
- * Values may contain some environment variables. For instance, message=You're using ${java.version}.
  * <p/>
  * This class is not thread-safe.
  *
@@ -83,6 +96,7 @@ public class HierarchicalProperties {
 
     // the raw properties as of loaded from the filesystem
     private Properties props = new Properties();
+    // map <URI, alias>
     private Map<String, String> aliases = new HashMap<String, String>();
     private File file;
     private String prefix;
@@ -105,10 +119,9 @@ public class HierarchicalProperties {
     private transient MultiKeyMap cacheOfImmutableMaps = new MultiKeyMap();
 
     /**
-     * @param file   the property file to be loaded. The file may not exist.
-     *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown.
+     * @param file   the property file to be loaded. If the file does not exist, NO exception is thrown. Property map will be empty
      * @param prefix the property prefix
-     * @throws IOException
+     * @throws IOException if the file exists but is a directory
      */
     public HierarchicalProperties(File file, String prefix) throws IOException {
         this.file = file;
@@ -117,22 +130,28 @@ public class HierarchicalProperties {
         loadFile();
     }
 
+    /**
+     * Use {@link #ODE_PREFFIX} as the prefix
+     *@see #HierarchicalProperties(java.io.File, String)
+     */
     public HierarchicalProperties(File file) throws IOException {
         this(file, ODE_PREFFIX);
     }
 
     /**
-     * Clear all existing content, read the file and parse each property. Simply logs a message and returns if the file does not exist.
-     *
+     * Clear all existing content, re-read the file and parse each property. If the file does not exist, content is cleared and method returns (no exception will be thrown).
+     * <br/>Keep in mind that this class is not thread-safe. It's the caller's responsability to make sure that one thread is not querying some properties
+     * while another is re-loading the file, for instance.
      * @throws IOException if the file is a Directory
      */
     public void loadFile() throws IOException {
+        // #1. clear all existing content
+        clear();
+
         if (!file.exists()) {
             if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "] Properties will be empty.");
             return;
         }
-        // #1. clear all existing content
-        clear();
 
         // #2. read the file
         FileInputStream fis = new FileInputStream(file);
@@ -196,7 +215,7 @@ public class HierarchicalProperties {
     }
 
     /**
-     * Clear all content. If {@link #loadFile()} is not invoked later, all returned values will be null.
+     * Clear all content.
      */
     public void clear() {
         props.clear();
@@ -214,6 +233,9 @@ public class HierarchicalProperties {
         return (ChainedMap) o;
     }
 
+    /**
+     * @see #getProperties(javax.xml.namespace.QName)
+     */
     public Map getProperties(String serviceNamespaceURI, String serviceLocalPart) {
         return getProperties(new QName(serviceNamespaceURI, serviceLocalPart));
     }
@@ -221,38 +243,40 @@ public class HierarchicalProperties {
     /**
      * @param service
      * @return a map containing all the properties for the given service.
-     * @see #getProperties(String, String)
+     * @see #getProperties(javax.xml.namespace.QName, String)
      */
     public Map getProperties(QName service) {
         return getProperties(service, null);
     }
 
+    /**
+     * @see #getProperties(javax.xml.namespace.QName, String)
+     */
     public Map getProperties(String serviceNamespaceURI, String serviceLocalPart, String port) {
         return getProperties(new QName(serviceNamespaceURI, serviceLocalPart), port);
     }
 
     /**
-     * Return a map containing all the properties for the given port. The map is an immutable snapshot of the properties.
-     * Meaning that futur changes to the properties will NOT be reflected in the returned map.
-     *
+     * Return a map containing all the properties for the given service/port. The map is an immutable snapshot of the properties.
+     * <br/>These immutable maps are cached to avoid too many map instances.
+     * <br/>If {@code port} is null then properties defined at the service level are returned.
      * @param service
      * @param port
-     * @return a map containing all the properties for the given port
+     * @return an immutable map containing all the properties for the given port
      */
     public Map getProperties(QName service, String port) {
         // no need to go further if no properties
         if (hierarchicalMap.isEmpty()) return Collections.EMPTY_MAP;
 
-        service = resolveAlias(service);
-        // else check the cache of ChainedMap already converted into immutable maps
+        service = resolveNamespace(service);
+        // check if the cache of immutable maps contains this key
         Map cachedMap = (Map) this.cacheOfImmutableMaps.get(service, port);
         if (cachedMap != null) {
             return cachedMap;
         }
 
-        // else get the corresponding ChainedMap and convert it into a Map
+        // if not, get the corresponding ChainedMap and convert it into a Map
         ChainedMap cm = (ChainedMap) hierarchicalMap.get(service, port);
-        // if this port is not explicitly mentioned in the multimap, get the default values.
         if (cm == null) {
             cm = (ChainedMap) hierarchicalMap.get(service, null);
             if (cm == null) {
@@ -260,52 +284,75 @@ public class HierarchicalProperties {
                 return getProperties((QName) null, null);
             }
         }
+
+        // convert the ChainedMap into a Map and cache it
         Map snapshotMap = new HashMap(cm.size() * 15 / 10);
         for (Object key : cm.keySet()) {
             snapshotMap.put(key, cm.get(key));
         }
         snapshotMap = Collections.unmodifiableMap(snapshotMap);
-        // put it in cache to avoid creating one map at each invocation
+        // put it in cache to avoid creating one map on each invocation
         this.cacheOfImmutableMaps.put(service, port, snapshotMap);
         return snapshotMap;
     }
 
+    /**
+     *
+     * @param property the property to be queried
+     * @return the default value for this property
+     */
     public String getProperty(String property) {
         return (String) getRootMap().get(property);
     }
 
+    /**
+     * @see #getProperty(javax.xml.namespace.QName, String) 
+     */
     public String getProperty(String serviceNamespaceURI, String serviceLocalPart, String property) {
         return getProperty(new QName(serviceNamespaceURI, serviceLocalPart), property);
     }
 
+    /**
+     * @return the value associated to this property for the given service
+     */
     public String getProperty(QName service, String property) {
         return getProperty(service, null, property);
     }
 
+    /**
+     * @see #getProperty(javax.xml.namespace.QName, String, String) 
+     */
     public String getProperty(String serviceNamespaceURI, String serviceLocalPart, String port, String property) {
         return getProperty(new QName(serviceNamespaceURI, serviceLocalPart), port, property);
     }
 
+    /**
+     * Equivalent {@code getProperties(service,port).get(property)}
+     * @return the value associated to this property for the given service/port
+     */
     public String getProperty(QName service, String port, String property) {
-        ChainedMap cm = (ChainedMap) hierarchicalMap.get(resolveAlias(service), port);
-        // if this port is not explicitly mentioned in the multimap, get the default values.
-        if (cm == null) cm = getRootMap();
-        return (String) cm.get(property);
+        return (String) getProperties(service,port).get(property);
     }
 
-    public String getPrefix() {
-        return prefix;
-    }
-
-    private QName resolveAlias(QName service) {
-        if (service != null && aliases.containsKey(service.getNamespaceURI())) {
-            return new QName(aliases.get(service.getNamespaceURI()), service.getLocalPart());
+    /**
+     * Resolved the service qname associated to the given aliased service name.
+     * <p/>For instance, {@code resolveAlias(new QName("my-ns", "a-name"))} will return
+     * {@code new QName("http://examples.com", "a-name")} if the alias {@code my-ns => http://examples.com} exists.
+     * @param aliasedServiceName a service name using an alias
+     * @return the qname of the service associated to this alias if defined in the alias map, or aliasedServiceName itself.
+     */
+    private QName resolveNamespace(QName aliasedServiceName) {
+        if (aliasedServiceName != null && aliases.containsKey(aliasedServiceName.getNamespaceURI())) {
+            return new QName(aliases.get(aliasedServiceName.getNamespaceURI()), aliasedServiceName.getLocalPart());
         }
-        return service;
+        return aliasedServiceName;
     }
-    
+
+    /**
+     * @return an array of strings containing: namespace alias, service, port, targeted property
+     */
     private String[] parseProperty(String property) {
-        // aliaas ns, service, port, targeted property
+        // namespace alias, service, port, targeted property
         String[] res = new String[4];
 
         int index = property.indexOf(dotted_prefix);

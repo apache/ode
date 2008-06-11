@@ -46,7 +46,6 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertEquals(msg, hp.getProperty("bar", "brel-service", "port-of-amsterdam", "timeout"), "40000");
         assertEquals(msg, hp.getProperty("foo", "film-service", "timeout"), "40000");
         assertEquals(msg, hp.getProperty("foo", "film-service", "port-of-cannes", "timeout"), "50000");
-        assertEquals(msg, hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"), "so green or red?");
     }
 
     public void testGetPropertyUsingURI() {
@@ -57,7 +56,10 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertEquals(msg, hp.getProperty("http://bar.com", "brel-service", "port-of-amsterdam", "timeout"), "40000");
         assertEquals(msg, hp.getProperty("http://foo.com", "film-service", "timeout"), "40000");
         assertEquals(msg, hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "timeout"), "50000");
-        assertEquals(msg, hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"), "so green or red?");
+
+
+        assertEquals("Default value expected!", hp.getProperty("http://xyz", "unknown-service", "unknown-port", "timeout"), "40000");
+        assertNull("Should return null when the property has no value", hp.getProperty("http://xyz", "unknown-service", "unknown-port", "unknown-property"));
     }
 
     public void testGetProperties() {
@@ -71,9 +73,9 @@ public class HierarchicalPropertiesTest extends TestCase {
 
 
     public void testCachedGetProperties() {
-        assertSame("Snapshot maps should be cached!", hp.getProperties("foo", "film-service"), hp.getProperties("foo", "film-service"));
-        assertSame("Snapshot maps should be cached!", hp.getProperties("foo", "film-service", "port-of-cannes"), hp.getProperties("foo", "film-service", "port-of-cannes"));
-        assertSame("Snapshot maps should be cached!", hp.getProperties("bla", "unknown-service"), hp.getProperties("bla", "unknown-service"));
+        assertSame("Snapshot maps should be cached! References must be the same.", hp.getProperties("foo", "film-service"), hp.getProperties("foo", "film-service"));
+        assertSame("Snapshot maps should be cached! References must be the same.", hp.getProperties("foo", "film-service", "port-of-cannes"), hp.getProperties("foo", "film-service", "port-of-cannes"));
+        assertSame("Snapshot maps should be cached! References must be the same.", hp.getProperties("bla", "unknown-service"), hp.getProperties("bla", "unknown-service"));
     }
 
     public void testWithNoFile() throws IOException {

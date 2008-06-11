@@ -143,6 +143,11 @@ public interface ProcessConf {
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
 
+    /**
+     * Returns a list of properties associtated to this endpoint.
+     * @param epr
+     * @return map of property/value pairs
+     */
     public Map<String, String> getEndpointProperties(EndpointReference epr);
 
 }

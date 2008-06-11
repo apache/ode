@@ -56,9 +56,11 @@ public interface EndpointReferenceContext {
     EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint);
 
     /**
-     * 
+     * Convert an endpoint reference into a set of key/value pairs that may be necessary to look up config information.
+     * This implies a contract between the implementation and the caller.
+     * <p/>For instance a WSDL endpoint reference may be converted into {service => foo, port => bar}. 
      * @param epr
-     * @return
+     * @return a map containing the relevant information for config lookup
      */
     Map getConfigLookup(EndpointReference epr);
 }
