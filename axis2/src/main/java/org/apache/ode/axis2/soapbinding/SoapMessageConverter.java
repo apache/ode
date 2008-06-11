@@ -90,11 +90,8 @@ public class SoapMessageConverter {
 
     public SoapMessageConverter(Definition def, QName serviceName, String portName) throws AxisFault {
         if (def == null)
-            throw new NullPointerException("Null wsdl def.");
-        if (serviceName == null)
-            throw new NullPointerException("Null serviceName");
-        if (portName == null)
-            throw new NullPointerException("Null portName");
+            throw new NullPointerException("No WSDL definition was found for service "
+                                            + serviceName + " and port " + portName);
 
         _def = def;
         _serviceName = serviceName;
