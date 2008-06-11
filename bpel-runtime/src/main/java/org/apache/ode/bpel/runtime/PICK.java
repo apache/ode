@@ -42,6 +42,7 @@ import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -162,7 +163,7 @@ class PICK extends ACTIVITY {
             // At this point, not being able to get the request is most probably
             // a mex that hasn't properly replied to (process issue).
             msgEl = getBpelRuntimeContext().getMyRequest(mexId);
-        } catch (ExternalVariableModuleException e) {
+        } catch (BpelEngineException e) {
             __log.error("The message exchange seems to be in an unconsistent state, you're " +
                 "probably missing a reply on a request/response interaction.");
             _self.parent.failure(e.toString(), null);
