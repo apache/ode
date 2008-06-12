@@ -271,7 +271,7 @@ public class WsdlUtils {
         final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(bindingOperation.getExtensibilityElements(), UnknownExtensibilityElement.class);
         for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
             final Element e = extensibilityElement.getElement();
-            if (Namespaces.HTTP_NS.equalsIgnoreCase(e.getNamespaceURI())
+            if (Namespaces.ODE_EXTENSION_NS.equalsIgnoreCase(e.getNamespaceURI())
                     && "binding".equals(extensibilityElement.getElement().getLocalName())
                     && e.hasAttribute("verb")) {
                 return e.getAttribute("verb");
