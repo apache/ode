@@ -219,7 +219,7 @@
 
 
     <!--
-        6 urls to handle:
+        8 urls to handle:
         (GET)       http://localhost:8080/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
         (GET)       http://         ........                    /OlaElMundo-GET/minus?left=&right=
         (DELETE)    http://localhost:8080/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)

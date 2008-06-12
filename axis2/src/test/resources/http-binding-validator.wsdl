@@ -8,6 +8,7 @@
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:ode="http://www.apache.org/ode/type/extension"
                   targetNamespace="http://axis2.ode.apache.org">
     <wsdl:message name="helloRequest">
         <wsdl:part name="TestPart" type="xs:string"/>
@@ -433,7 +434,7 @@
         </wsdl:documentation>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
-            <http:binding verb="GET"/>
+            <ode:binding verb="GET"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
@@ -457,7 +458,7 @@
         </wsdl:documentation>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
-            <http:binding verb="GET"/>
+            <ode:binding verb="GET"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
@@ -473,7 +474,7 @@
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
-            <http:binding verb="POST"/>
+            <ode:binding verb="POST"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
