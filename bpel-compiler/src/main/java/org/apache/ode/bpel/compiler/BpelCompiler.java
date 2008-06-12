@@ -120,6 +120,7 @@ import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
+import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.w3c.dom.Node;
 
@@ -415,8 +416,13 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
     public OXsdTypeVarType resolveXsdType(QName typeName) throws CompilationException {
         OXsdTypeVarType type = _oprocess.xsdTypes.get(typeName);
         if (type == null) {
-            if (!_wsdlRegistry.getSchemaModel().knowsSchemaType(typeName))
+            SchemaModel model = null;
+            try {
+                model = _wsdlRegistry.getSchemaModel();
+            } catch (IllegalArgumentException iaa) { }
+            if (model == null || !model.knowsSchemaType(typeName))
                 throw new CompilationException(__cmsgs.errUndeclaredXsdType(typeName));
+
             type = new OXsdTypeVarType(_oprocess);
             type.debugInfo = createDebugInfo(_processDef, "XSD Type: " + typeName);
             type.xsdType = typeName;
