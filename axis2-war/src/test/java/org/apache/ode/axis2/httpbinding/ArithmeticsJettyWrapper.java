@@ -81,89 +81,76 @@ public class ArithmeticsJettyWrapper {
                 if ("/HttpBindingTestService/".equals(uri)) {
                     response.getWriter().println("HttpBindingTestService ready!");
                 } else if (uri.contains("OlaElMundo-GET") || uri.contains("OlaElMundo-DELETE")) {
-//                    if (!"GET".equalsIgnoreCase(method)) {
-                    if (false) {
-                        response.sendError(405, "Expecting method is GET");
+                    if (!uri.contains("plus") && !uri.contains("minus")) {
+                        response.sendError(404);
                     } else {
-                        if (!uri.contains("plus") && !uri.contains("minus")) {
-                            response.sendError(404);
-                        } else {
-                            boolean ok = true;
-                            int left = 0, right = 0;
-                            try {
-                                if (uri.contains("plus")) {
-                                    int index = uri.lastIndexOf("/");
-                                    String[] op = uri.substring(index + 1).split(":");
-                                    left = Integer.parseInt(op[0]);
-                                    right = Integer.parseInt(op[1]);
-                                } else if (uri.contains("minus")) {
-                                    left = Integer.parseInt(request.getParameter("left"));
-                                    right = -1 * Integer.parseInt(request.getParameter("right"));
-                                } else {
-                                    ok = false;
-                                }
-                            } catch (NumberFormatException e) {
+                        boolean ok = true;
+                        int left = 0, right = 0;
+                        try {
+                            if (uri.contains("plus")) {
+                                int index = uri.lastIndexOf("/");
+                                String[] op = uri.substring(index + 1).split(":");
+                                left = Integer.parseInt(op[0]);
+                                right = Integer.parseInt(op[1]);
+                            } else if (uri.contains("minus")) {
+                                left = Integer.parseInt(request.getParameter("left"));
+                                right = -1 * Integer.parseInt(request.getParameter("right"));
+                            } else {
                                 ok = false;
                             }
+                        } catch (NumberFormatException e) {
+                            ok = false;
+                        }
 
-                            if (!ok) {
-                                response.sendError(400);
-                            } else {
-                                Document doc = DOMUtils.newDocument();
-                                Element resElt = doc.createElement("theresult");
-                                resElt.setTextContent(String.valueOf(left + right));
-                                response.getOutputStream().print(DOMUtils.domToString(resElt));
-                                response.getOutputStream().close();
-                                response.setStatus(200);
-                            }
+                        if (!ok) {
+                            response.sendError(400);
+                        } else {
+                            Document doc = DOMUtils.newDocument();
+                            Element resElt = doc.createElement("theresult");
+                            resElt.setTextContent(String.valueOf(left + right));
+                            response.getOutputStream().print(DOMUtils.domToString(resElt));
+                            response.getOutputStream().close();
+                            response.setStatus(200);
                         }
                     }
                 } else if (uri.contains("OlaElMundo-POST") || uri.contains("OlaElMundo-PUT")) {
-//                    if (!"POST".equalsIgnoreCase(method)) {
-                    if (false) {
-                        response.sendError(405, "Expecting method is POST");
-                        return;
+                    if (!uri.contains("plus") && !uri.contains("minus")) {
+                        response.sendError(404);
                     } else {
-                        String operation;
-                        if (!uri.contains("plus") && !uri.contains("minus")) {
-                            response.sendError(404);
+                        // parse body, form-urlencoded
+                        int res = Integer.MIN_VALUE;
+                        boolean ok = true;
+                        String body = new String(StreamUtils.read(request.getInputStream()));
+                        if (!body.matches("[^=]*=[+-]?\\d*&[^=]*=[+-]?\\d*")) {
+                            ok = false;
                         } else {
-                            // parse body, form-urlencoded
-                            int res = Integer.MIN_VALUE;
-                            boolean ok = true;
-                            StringBuffer sb = null;
-                            String body = new String(StreamUtils.read(request.getInputStream()));
-                            if (!body.matches("[^=]*=[+-]?\\d*&[^=]*=[+-]?\\d*")) {
-                                ok = false;
-                            } else {
-                                String[] sp = body.split("&");
-                                String[] op0 = sp[0].split("=");
-                                String[] op1 = sp[1].split("=");
-                                try {
-                                    int left, right;
-                                    if (op0[0].equals("left")) {
-                                        left = Integer.valueOf(op0[1]);
-                                        right = Integer.valueOf(op1[1]);
-                                    } else {
-                                        left = Integer.valueOf(op1[1]);
-                                        right = Integer.valueOf(op0[1]);
-                                    }
-                                    if (uri.contains("minus")) {
-                                        right = -1 * right;
-                                    }
-                                    res = left + right;
-                                } catch (NumberFormatException e) {
-                                    ok = false;
+                            String[] sp = body.split("&");
+                            String[] op0 = sp[0].split("=");
+                            String[] op1 = sp[1].split("=");
+                            try {
+                                int left, right;
+                                if (op0[0].equals("left")) {
+                                    left = Integer.valueOf(op0[1]);
+                                    right = Integer.valueOf(op1[1]);
+                                } else {
+                                    left = Integer.valueOf(op1[1]);
+                                    right = Integer.valueOf(op0[1]);
                                 }
+                                if (uri.contains("minus")) {
+                                    right = -1 * right;
+                                }
+                                res = left + right;
+                            } catch (NumberFormatException e) {
+                                ok = false;
                             }
-                            if (!ok) {
-                                response.sendError(400);
-                            } else {
-                                Element resElt = DOMUtils.newDocument().createElement("theresult");
-                                resElt.setTextContent(String.valueOf(res));
-                                response.getOutputStream().print(DOMUtils.domToString(resElt));
-                                response.setStatus(200);
-                            }
+                        }
+                        if (!ok) {
+                            response.sendError(400);
+                        } else {
+                            Element resElt = DOMUtils.newDocument().createElement("theresult");
+                            resElt.setTextContent(String.valueOf(res));
+                            response.getOutputStream().print(DOMUtils.domToString(resElt));
+                            response.setStatus(200);
                         }
                     }
                 } else if (uri.contains("SalutLaTerre")) {
