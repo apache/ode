@@ -597,6 +597,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
     private ProcessInfoDocument genProcessInfoDocument(final QName procid, final ProcessInfoCustomizer custom)
             throws ManagementException {
+        if (procid == null) {
+            throw new InvalidRequestException("Valid QName as process id expected.");
+        }
         ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
         final TProcessInfo pi = ret.addNewProcessInfo();
         try {
