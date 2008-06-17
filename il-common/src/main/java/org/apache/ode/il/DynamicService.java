@@ -81,7 +81,7 @@ public class DynamicService<T> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Couldn't invoke method named " + methodName + " in management interface!", e);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException("Invocation of method " + methodName + " in management interface failed!", e.getTargetException());
+            throw new RuntimeException("Invocation of method " + methodName + " in management interface failed: " + e.getTargetException().getMessage(), e.getTargetException());
         }
     }
 

@@ -208,7 +208,7 @@ public class OMUtils {
     public static QName getTextAsQName(OMElement elmt) {
         QName qname = elmt.getTextAsQName();
         // The getTextAsQName is buggy, it sometimes return the full text without extracting namespace
-        if (qname.getNamespaceURI().length() == 0) {
+        if (qname == null || qname.getNamespaceURI().length() == 0) {
             int colonIdx = elmt.getText().indexOf(":");
             String localpart = elmt.getText().substring(colonIdx + 1, elmt.getText().length());
             String prefix = elmt.getText().substring(0, colonIdx);
