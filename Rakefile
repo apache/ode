@@ -16,11 +16,12 @@
 #
 
 require "buildr"
-require "buildr/xmlbeans"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
+require "tasks/xmlbeans"
+
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.3-SNAPSHOT"
@@ -114,7 +115,8 @@ class Release
     def tag_with_apache_ode(version)
       tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
     end
-    alias_method_chain :tag, :apache_ode
+    alias :tag_without_apache_ode :tag
+    alias :tag :tag_with_apache_ode 
   end
 end
 
@@ -178,16 +180,16 @@ define "ode" do
       end
     end
     
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))
     test.setup task(:prepare_webapp) do |task|
-      cp_r _("src/main/webapp"), _("target/test-classes")
-      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
-      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test-classes/webapp/WEB-INF")
-      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test-classes/webapp/WEB-INF")
-      mkdir_p _("target/test-classes/webapp/WEB-INF/processes")
-      rm_rf Dir[_("target/test-classes/webapp") + "/**/.svn"]
+      cp_r _("src/main/webapp"), _("target/test")
+      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test")
+      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test/webapp/WEB-INF")
+      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test/webapp/WEB-INF")
+      mkdir_p _("target/test/webapp/WEB-INF/processes")
+      rm_rf Dir[_("target/test/webapp") + "/**/.svn"]
     end
-    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
+    test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
   end
 
   desc "ODE APIs"
@@ -241,7 +243,6 @@ define "ode" do
     jjtree = jjtree(_("src/main/jjtree"), :in_package=>pkg_name)
     compile.from javacc(jjtree, :in_package=>pkg_name), jjtree
     compile.with projects("bpel-api", "bpel-compiler", "bpel-obj", "jacob", "utils")
-
     package :jar
   end
 
@@ -404,7 +405,6 @@ define "ode" do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
-    compile.with Java.tools_jar
     package :jar
   end
 
@@ -422,12 +422,12 @@ define "ode" do
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
-        SAXON, TRANQL, XALAN, XERCES, XMLBEANS, XSTREAM, WSDL4J)
+        COMMONS.primitives, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
+        JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
+        XALAN, XMLBEANS, XSTREAM, WSDL4J)
 
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
-      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :libs=>libs
+      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :delegation=>:self, :libs=>libs
       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
       jbi.merge project("dao-hibernate-db").package(:zip)
       jbi.merge project("dao-jpa-db").package(:zip)
