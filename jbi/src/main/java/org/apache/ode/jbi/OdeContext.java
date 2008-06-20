@@ -72,6 +72,8 @@ final class OdeContext {
     private static OdeContext __self;
 
     private ComponentContext _context;
+    
+    private TransactionManager _txm;
 
     private Map<QName, Document> _descriptorCache = new ConcurrentHashMap<QName, Document>();
 
@@ -166,7 +168,15 @@ final class OdeContext {
     }
 
     public TransactionManager getTransactionManager() {
-        return (TransactionManager) getContext().getTransactionManager();
+        if (_txm == null) {
+            return (TransactionManager) getContext().getTransactionManager();
+        } else {
+            return _txm;
+        }
+    }
+
+    public void setTransactionManager(TransactionManager txm) {
+        _txm = txm;
     }
 
     public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
