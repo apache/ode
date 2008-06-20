@@ -816,10 +816,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         Element header = doc.createElement("header");
         NodeList parts = outgoingElmt.getChildNodes();
         for (int m = 0; m < parts.getLength(); m++) {
-            Element part = (Element) parts.item(m);
-            if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
-                header.appendChild(doc.importNode(part, true));
-                outgoingElmt.removeChild(part);
+            if (parts.item(m).getNodeType() == Node.ELEMENT_NODE) {
+                Element part = (Element) parts.item(m);
+                if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
+                    header.appendChild(doc.importNode(part, true));
+                    outgoingElmt.removeChild(part);
+                }
             }
         }
         message.setData(outgoingElmt);
