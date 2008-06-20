@@ -35,6 +35,7 @@ import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -105,6 +106,20 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
             __log.debug("Loading properties.");
             initProperties();
+
+            switch (_ode._config.getDbMode()) {
+            case EMBEDDED:
+            case INTERNAL:
+                try {
+                    TransactionManager txm = new GeronimoTransactionManager();
+                    _ode.setTransactionManager(txm);
+                } catch (Exception e) {
+                    throw new RuntimeException("Unable to create Geronimo Transaction Manager", e);
+                }
+                break;
+            default:
+                break;
+            }
 
             __log.debug("Initializing message mappers.");
             initMappers();
