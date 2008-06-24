@@ -31,6 +31,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
+import javax.wsdl.OperationType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,7 +49,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
 
     public void compile(OActivity output, Activity srcx) {
         InvokeActivity src = (InvokeActivity) srcx;
-        OInvoke oinvoke = (OInvoke) output;
+        final OInvoke oinvoke = (OInvoke) output;
 
         oinvoke.partnerLink = _context.resolvePartnerLink(src.getPartnerLink());
         oinvoke.operation = _context.resolvePartnerRoleOperation(oinvoke.partnerLink, src.getOperation());
@@ -89,7 +90,8 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 new MemberOfFunction<Correlation>() {
                     @Override
                     public boolean isMember(Correlation o) {
-                        return o.getPattern() == Correlation.CorrelationPattern.OUT;
+                        return (o.getPattern() == Correlation.CorrelationPattern.OUT)
+                                 || (o.getPattern()== Correlation.CorrelationPattern.UNSET && oinvoke.operation.getStyle()== OperationType.ONE_WAY );
                     }
                 });
 
@@ -114,13 +116,6 @@ class InvokeGenerator extends DefaultActivityGenerator {
                     oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
         }
         
-
-//        Partner link could be initialized with magic session in a previous receive.
-//        if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
-//            if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {
-//                throw new CompilationException(__cmsgs.errUninitializedPartnerLinkInInvoke(oinvoke.partnerLink.getName()));
-//            }
-//        }
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var,
