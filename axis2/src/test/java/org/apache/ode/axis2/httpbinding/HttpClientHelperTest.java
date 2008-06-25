@@ -49,15 +49,15 @@ import java.util.Set;
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
-public class HttpMethodConverterTest extends TestCase {
+public class HttpClientHelperTest extends TestCase {
 
     protected Definition definition;
 
-    protected HttpMethodConverter deliciousBuilder;
+    protected HttpClientHelper deliciousBuilder;
     protected Binding deliciousBinding;
     protected Port deliciousPort;
 
-    protected HttpMethodConverter dummyBuilder;
+    protected HttpClientHelper dummyBuilder;
     protected Port dummyPort;
     protected Binding dummyBinding;
 
@@ -72,12 +72,12 @@ public class HttpMethodConverterTest extends TestCase {
         Service deliciousService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DeliciousService"));
         deliciousPort = deliciousService.getPort("TagHttpPort");
         deliciousBinding = deliciousPort.getBinding();
-        deliciousBuilder = new HttpMethodConverter(deliciousBinding);
+        deliciousBuilder = new HttpClientHelper(deliciousBinding);
 
         Service dummyService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DummyService"));
         dummyPort = dummyService.getPort("DummyServiceHttpport");
         dummyBinding = dummyPort.getBinding();
-        dummyBuilder = new HttpMethodConverter(dummyBinding);
+        dummyBuilder = new HttpClientHelper(dummyBinding);
 
     }
 
@@ -98,7 +98,7 @@ public class HttpMethodConverterTest extends TestCase {
         odeMex.op = deliciousBinding.getBindingOperation("getTag", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = deliciousBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
+        HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
 
 
         assertTrue("GET".equalsIgnoreCase(httpMethod.getName()));
@@ -119,7 +119,7 @@ public class HttpMethodConverterTest extends TestCase {
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
         try {
-            HttpMethod httpMethod = deliciousBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
+            HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
             fail("IllegalArgumentException expected because message element is empty.");
         } catch (IllegalArgumentException e) {
             // expected behavior
@@ -145,7 +145,7 @@ public class HttpMethodConverterTest extends TestCase {
         odeMex.op = dummyBinding.getBindingOperation("hello", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = dummyBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
+        HttpMethod httpMethod = dummyBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
         assertTrue("POST".equalsIgnoreCase(httpMethod.getName()));
         assertEquals("Generated URI does not match", expectedUri, httpMethod.getURI().toString());
 
@@ -221,10 +221,6 @@ public class HttpMethodConverterTest extends TestCase {
         }
 
         public void setHeaderPart(String name, Element content) {
-
-        }
-
-        public void setHeaderPart(String name, String content) {
 
         }
 

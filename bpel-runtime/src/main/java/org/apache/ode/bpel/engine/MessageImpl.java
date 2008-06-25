@@ -72,7 +72,7 @@ abstract class MessageImpl implements Message {
     }
 
     public void setHeaderPart(String name, Element content) {
-        Element header = getHeader();
+        Element header =  getHeader();
         if (header == null) {
             Document doc = DOMUtils.newDocument();
             header = doc.createElement("header");
@@ -82,20 +82,7 @@ abstract class MessageImpl implements Message {
         header.appendChild(part);
         part.appendChild(header.getOwnerDocument().importNode(content, true));
         setHeader(header);
-    }
-
-    public void setHeaderPart(String name, String content) {
-        Element header = getHeader();
-        if (header == null) {
-            Document doc = DOMUtils.newDocument();
-            header = doc.createElement("header");
-            doc.appendChild(header);
-        }
-        Element part = header.getOwnerDocument().createElement(name);
-        header.appendChild(part);
-        part.setTextContent(content);
-        setHeader(header);
-    }
+      }
 
     public abstract void setMessage(Element msg);
 

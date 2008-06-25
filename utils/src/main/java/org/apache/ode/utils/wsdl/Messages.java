@@ -191,6 +191,17 @@ public class Messages extends MessageBundle {
         return format("Binding not found: port {0}.", portName);
     }
 
+    public String msgMissingReplacementValuesFor(Collection<String> partNames) {
+        StringBuilder sb = new StringBuilder();
+        for (Iterator it = partNames.iterator(); it.hasNext();) {
+            sb.append(it.next());
+            if (it.hasNext()) sb.append(", ");
+        }
+        return format("Missing Replacement value for {0}", sb.toString());
+    }
+
+
+
     public String msgMultipleMimeContent() {
         return format("Multiple MIME Contents found!");
     }

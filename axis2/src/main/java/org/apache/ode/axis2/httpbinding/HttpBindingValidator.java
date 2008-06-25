@@ -26,8 +26,8 @@ import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
 import javax.wsdl.BindingOutput;
+import javax.wsdl.extensions.http.HTTPBinding;
 import javax.wsdl.extensions.http.HTTPOperation;
-import javax.wsdl.extensions.mime.MIMEContent;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
@@ -76,8 +76,8 @@ public class HttpBindingValidator {
 
 
         BindingOutput output = bindingOperation.getBindingOutput();
-        MIMEContent outputContent = WsdlUtils.getMimeContent(output.getExtensibilityElements());
-        if (outputContent!=null && !outputContent.getType().endsWith("text/xml")) {
+        String outputContentType = WsdlUtils.getMimeContentType(output.getExtensibilityElements());
+        if (!outputContentType.endsWith("text/xml")) {
             throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
         }
 
@@ -87,6 +87,7 @@ public class HttpBindingValidator {
         }
 
         BindingInput input = bindingOperation.getBindingInput();
+        String inputContentType = WsdlUtils.getMimeContentType(input.getExtensibilityElements());
 
         // multipartRelated not supported
         if (WsdlUtils.useMimeMultipartRelated(input)) {
@@ -94,9 +95,7 @@ public class HttpBindingValidator {
         }
 
         // only 2 content-types supported
-        MIMEContent inputContent= WsdlUtils.getMimeContent(input.getExtensibilityElements());
-        if (inputContent != null) {
-            String inputContentType = inputContent.getType();
+        if (inputContentType != null) {
             if (!inputContentType.endsWith("text/xml") && !PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(inputContentType)) {
                 throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
             }

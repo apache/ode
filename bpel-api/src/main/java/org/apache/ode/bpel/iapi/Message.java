@@ -69,13 +69,6 @@ public interface Message {
     void setHeaderPart(String name, Element content);
 
     /**
-     * Set a header part value
-     * @param name header part name
-     * @param content header part text content
-     */
-    void setHeaderPart(String name, String content);
-
-    /**
      * Gets all header parts in the message.
      * @return
      */

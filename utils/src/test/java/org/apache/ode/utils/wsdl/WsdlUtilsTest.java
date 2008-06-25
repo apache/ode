@@ -200,12 +200,12 @@ public class WsdlUtilsTest extends TestCase {
     public void testGetMimeContentType() {
         Binding binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceHttpBinding"));
         BindingOperation operation = binding.getBindingOperation("hello", null, null);
-        String mimeContentType = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements()).getType();
+        String mimeContentType = WsdlUtils.getMimeContentType(operation.getBindingInput().getExtensibilityElements());
         assertEquals("text/xml", mimeContentType);
 
         binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceSOAP11Binding"));
         operation = binding.getBindingOperation("hello", null, null);
-        mimeContentType = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements()).getType();
+        mimeContentType = WsdlUtils.getMimeContentType(operation.getBindingInput().getExtensibilityElements());
         assertNull(mimeContentType);
 
 
