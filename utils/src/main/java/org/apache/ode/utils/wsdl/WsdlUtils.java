@@ -19,28 +19,32 @@
 
 package org.apache.ode.utils.wsdl;
 
-import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Binding;
-import javax.wsdl.Port;
-import javax.wsdl.BindingOperation;
+import javax.wsdl.BindingFault;
 import javax.wsdl.BindingInput;
-import javax.wsdl.Service;
+import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.UnknownExtensibilityElement;
-import javax.wsdl.extensions.mime.MIMEContent;
-import javax.wsdl.extensions.mime.MIMEMultipartRelated;
+import javax.wsdl.extensions.http.HTTPAddress;
 import javax.wsdl.extensions.http.HTTPBinding;
 import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.extensions.http.HTTPUrlEncoded;
 import javax.wsdl.extensions.http.HTTPUrlReplacement;
-import javax.wsdl.extensions.http.HTTPAddress;
+import javax.wsdl.extensions.mime.MIMEContent;
+import javax.wsdl.extensions.mime.MIMEMultipartRelated;
+import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPOperation;
-import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -217,10 +221,10 @@ public class WsdlUtils {
 
     /**
      * @return the {@linkplain javax.wsdl.extensions.mime.MIMEContent#getType() type} of the instance of {@link javax.wsdl.extensions.mime.MIMEContent}
-     * contained in the extensibility element list. Or null if none.
+     *         contained in the extensibility element list. Or null if none.
      * @throws IllegalArgumentException if more than 1 MIMEContent is found.
      */
-    public static String getMimeContentType(List extensibilityElements) {
+    public static MIMEContent getMimeContent(List extensibilityElements) {
         Collection<MIMEContent> coll = CollectionsX.filter(extensibilityElements, MIMEContent.class);
         if (coll.size() == 0) {
             return null;
@@ -229,8 +233,7 @@ public class WsdlUtils {
             throw new IllegalArgumentException(msgs.msgMultipleMimeContent());
         } else {
             // retrieve the single element
-            MIMEContent mimeContent = coll.iterator().next();
-            return mimeContent.getType();
+            return coll.iterator().next();
         }
     }
 
@@ -265,6 +268,7 @@ public class WsdlUtils {
      * <br/> If you do so, an {@link UnknownExtensibilityElement} will be added to the list of extensibility elements of the {@link javax.wsdl.BindingOperation}.
      * <br/> This method looks up for such an element and return the value of the verb attribute if the underlying {@link org.w3c.dom.Element} is {@literal <binding xmlns="http://schemas.xmlsoap.org/wsdl/http/"/>}
      * or null.
+     *
      * @param bindingOperation
      */
     public static String getOperationVerb(BindingOperation bindingOperation) {
@@ -281,15 +285,71 @@ public class WsdlUtils {
     }
 
     /**
+     * @param fault
+     * @return true if the given fault is bound with the {@link org.apache.ode.utils.Namespaces.ODE_HTTP_EXTENSION_NS}:fault element.
+     */
+    public static boolean isOdeFault(BindingFault fault) {
+        final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(fault.getExtensibilityElements(), UnknownExtensibilityElement.class);
+        for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
+            final Element e = extensibilityElement.getElement();
+            if (Namespaces.ODE_HTTP_EXTENSION_NS.equalsIgnoreCase(e.getNamespaceURI())
+                    && "fault".equals(extensibilityElement.getElement().getLocalName())) {
+                // name attribute is optional, but if any it must match the fault name
+                if (e.hasAttribute("name")) {
+                    return fault.getName().equals(e.getAttribute("name"));
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Collection<UnknownExtensibilityElement> getHttpHeaders(List extensibilityElements) {
+        final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(extensibilityElements, UnknownExtensibilityElement.class);
+        for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
+            final Element e = extensibilityElement.getElement();
+            // keep only the header elements
+            if (!Namespaces.ODE_HTTP_EXTENSION_NS.equalsIgnoreCase(e.getNamespaceURI())
+                    || !"header".equals(extensibilityElement.getElement().getLocalName())) {
+                unknownExtElements.remove(extensibilityElement);
+            }
+        }
+        return unknownExtElements;
+    }
+
+    /**
+     * Return the {@link  javax.wsdl.Fault} that has the given element as message part.
+     *
+     * @param operation the operation
+     * @param elName    the qname to look for
+     * @return the first fault for which the element of message part matches the given qname
+     */
+    @SuppressWarnings("unchecked")
+    public static Fault inferFault(Operation operation, QName elName) {
+        for (Fault f : (Collection<Fault>) operation.getFaults().values()) {
+            if (f.getMessage() == null) continue;
+            Collection<Part> parts = f.getMessage().getParts().values();
+            if (parts.isEmpty()) continue;
+            Part p = parts.iterator().next();
+            if (p.getElementName() == null) continue;
+            if (p.getElementName().equals(elName)) return f;
+        }
+        return null;
+    }
+
+
+    /**
      * ODE extends the wsdl spec by allowing definition of the HTTP verb at the operation level.
      * <br/>The current implementation implementations allows you to have a {@literal <binding xmlns="http://schemas.xmlsoap.org/wsdl/http/"/>} element
      * at the port level <strong>and</strong> at the operation level. In such a case the operation's verb overrides the port's verb.
      * <br/> This method applies the later rule.
-     * <br/> If defined the operation's verb is returned, else the port's verb.  
+     * <br/> If defined the operation's verb is returned, else the port's verb.
+     *
      * @param binding
      * @param bindingOperation
      * @return If defined the operation's verb is returned, else the port's verb.
-     * @see #getOperationVerb(javax.wsdl.BindingOperation) 
+     * @see #getOperationVerb(javax.wsdl.BindingOperation)
      */
     public static String resolveVerb(Binding binding, BindingOperation bindingOperation) {
         final HTTPBinding httpBinding = (HTTPBinding) WsdlUtils.getBindingExtension(binding);

@@ -277,12 +277,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 if (faultType != null) {
                     if (__log.isWarnEnabled())
                         __log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
-                    QName nonNullFT = new QName(Namespaces.ODE_EXTENSION_NS, "unknownFault");
-                    Fault f = odeMex.getOperation().getFault(faultType.getLocalPart());
-                    if (f != null && f.getMessage().getQName() != null) nonNullFT = f.getMessage().getQName();
-                    else __log.debug("Fault " + faultType + " isn't referenced in the service definition, unknown fault.");
-
-                    Message response = odeMex.createMessage(nonNullFT);
+                    
+                    Message response = odeMex.createMessage(faultType);
                     response.setMessage(odeMsgEl);
 
                     odeMex.replyWithFault(faultType, response);

@@ -21,6 +21,8 @@ package org.apache.ode.axis2.util;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.util.EncodingUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.axis2.httpbinding.Messages;
 import org.w3c.dom.Element;
@@ -28,28 +30,37 @@ import org.w3c.dom.Element;
 import javax.wsdl.Part;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class URLEncodedTransformer {
 
-    private static final Messages msgs = Messages.getMessages(Messages.class);
 
+    private static final Log log = LogFactory.getLog(URLEncodedTransformer.class);
+
+    /**
+     * @param values - a map<String, Element>, the key is a part name (without curly braces), the value the replacement value for the part name. If the value is not a simple type, it will be skipped.
+     * @return the encoded params
+     */
     public String transform(Map<String, Element> values) {
         if (values.isEmpty()) return null;
-        NameValuePair[] pairs = new NameValuePair[values.size()];
-        int i = 0;
+        List<NameValuePair> l = new ArrayList<NameValuePair>(values.size());
         for (Map.Entry<String, Element> e : values.entrySet()) {
+            String partName = e.getKey();
             Element node = e.getValue();
             String nodeContent = DOMUtils.isEmptyElement(node) ? "" : DOMUtils.getTextContent(node);
             if (nodeContent == null) {
-                throw new IllegalArgumentException(msgs.msgSimpleTypeExpected(e.getKey()));
+                // if it is not a simple type, skip it
+                if (log.isDebugEnabled())
+                    log.debug("Part " + partName + " skipped because associated element is not of a simple type.");
+                continue;
             }
-            NameValuePair p = new NameValuePair(e.getKey(), nodeContent);
-            pairs[i++] = p;
+            l.add(new NameValuePair(e.getKey(), nodeContent));
         }
-        return EncodingUtil.formUrlEncode(pairs, "UTF-8");
+        return EncodingUtil.formUrlEncode(l.toArray(new NameValuePair[0]), "UTF-8");
     }
 
 }
