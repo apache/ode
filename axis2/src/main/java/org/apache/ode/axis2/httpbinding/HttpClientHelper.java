@@ -25,8 +25,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.StatusLine;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
@@ -38,7 +36,6 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
@@ -48,7 +45,6 @@ import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -57,18 +53,23 @@ import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.wsdl.extensions.http.HTTPOperation;
-import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class HttpClientHelper {
 
+    private static final String CONTENT_TYPE_TEXT_XML = "text/xml";
     private static final Log log = LogFactory.getLog(HttpClientHelper.class);
+
+    protected static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
+    protected Binding binding;
+
+    public HttpClientHelper(Binding binding) {
+        this.binding = binding;
+    }
 
     public void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
         if (log.isDebugEnabled()) log.debug("Configuring http client...");
@@ -83,101 +84,142 @@ public class HttpClientHelper {
 
     }
 
-    /**
-     * Parse and convert a HTTP status line into an aml element.
-     *
-     * @param statusLine
-     * @return
-     * @throws HttpException
-     * @see #statusLineToElement(org.w3c.dom.Document, org.apache.commons.httpclient.StatusLine)
-     */
-    public Element statusLineToElement(String statusLine) throws HttpException {
-        return statusLineToElement(new StatusLine(statusLine));
+    public HttpMethod buildHttpMethod(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
+        Operation operation = odeMex.getOperation();
+        BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
+
+        // message to be sent
+        Element message = odeMex.getRequest().getMessage();
+        Message msgDef = operation.getInput().getMessage();
+
+        // base url
+        String url = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
+
+        // extract part values into a map and check that all parts are assigned a value
+        Map<String, Element> partElements = extractPartElements(msgDef, message);
+
+        // http method type
+        // the operation may override the verb, this is an extension for RESTful BPEL
+        String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
+
+        // build the http method itself
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url, params);
+        return method;
     }
 
-    public Element statusLineToElement(StatusLine statusLine) {
-        return statusLineToElement(DOMUtils.newDocument(), statusLine);
-    }
-
-    /**
-     * Convert a <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6.1">HTTP status line</a> into an xml element like this:
-     * <p/>
-     * < Status-line>
-     * < HTTP-Version>HTTP/1.1< /HTTP-Version>
-     * < Status-Code>200< /Status-Code>
-     * < Reason-Phrase>Success - The action was successfully received, understood, and accepted< /Reason-Phrase>
-     * < /Status-line></br>
-     *
-     * @param statusLine - the {@link org.apache.commons.httpclient.StatusLine} instance to be converted
-     * @param doc        - the document to use to create new nodes
-     * @return an Element
-     */
-    public Element statusLineToElement(Document doc, StatusLine statusLine) {
-        Element statusLineEl = doc.createElementNS(null, "Status-Line");
-        Element versionEl = doc.createElementNS(null, "HTTP-Version");
-        Element codeEl = doc.createElementNS(null, "Status-Code");
-        Element reasonEl = doc.createElementNS(null, "Reason-Phrase");
-
-        // wiring
-        doc.appendChild(statusLineEl);
-        statusLineEl.appendChild(versionEl);
-        statusLineEl.appendChild(codeEl);
-        statusLineEl.appendChild(reasonEl);
-
-        // values
-        versionEl.setTextContent(statusLine.getHttpVersion());
-        codeEl.setTextContent(String.valueOf(statusLine.getStatusCode()));
-        reasonEl.setTextContent(statusLine.getReasonPhrase());
-
-        return statusLineEl;
-    }
-
-    /**
-     * Build a "details" element that looks like this:
-     *
-     * @param method
-     * @return
-     * @throws IOException
-     */
-    public Element prepareDetailsElement(HttpMethod method) throws IOException {
-        return prepareDetailsElement(method, true);
-    }
-
-    /**
-     *
-     * @param method
-     * @param bodyIsXml if true the body will be parsed as xml else the body will be inserted as string
-     * @return
-     * @throws IOException
-     */
-    public Element prepareDetailsElement(HttpMethod method, boolean bodyIsXml) throws IOException {
-        Document doc = DOMUtils.newDocument();
-        Element detailsEl = doc.createElementNS(null, "details");
-        Element statusLineEl = statusLineToElement(doc, method.getStatusLine());
-        detailsEl.appendChild(statusLineEl);
-
-        // set the body if any
-        final InputStream bodyAsStream = method.getResponseBodyAsStream();
-        if (bodyAsStream != null) {
-            Element bodyEl = doc.createElementNS(null, "responseBody");
-            detailsEl.appendChild(bodyEl);
-            // first, try to parse the body as xml
-            // if it fails, put it as string in the body element
-            boolean exceptionDuringParsing = false;
-            if (bodyIsXml) {
-                try {
-                    Element parsedBodyEl = DOMUtils.parse(bodyAsStream).getDocumentElement();
-                    bodyEl.appendChild(parsedBodyEl);
-                } catch (Exception e) {
-                    String errmsg = "Unable to parse the response body as xml. Body will be inserted as string.";
-                    if (log.isDebugEnabled()) log.debug(errmsg, e);
-                    exceptionDuringParsing = true;
-                }
-            }
-            if (!bodyIsXml || exceptionDuringParsing) {
-                bodyEl.setTextContent(method.getResponseBodyAsString());
-            }
+    protected Map<String, Element> extractPartElements(Message msgDef, Element message) {
+        Map<String, Element> partValues = new HashMap<String, Element>();
+        for (Iterator iterator = msgDef.getParts().values().iterator(); iterator.hasNext();) {
+            Part part = (Part) iterator.next();
+            Element partEl = DOMUtils.findChildByName(message, new QName(null, part.getName()));
+            if (partEl == null)
+                throw new IllegalArgumentException(msgs.msgOdeMessageMissingRequiredPart(part.getName()));
+            partValues.put(part.getName(), partEl);
         }
-        return detailsEl;
+        return partValues;
+    }
+
+    /**
+     * create and initialize the http method.
+     * Http Headers that may been passed in the params are not set in this method.
+     * Headers will be automatically set by HttpClient.
+     * See usages of HostParams.DEFAULT_HEADERS
+     * See org.apache.commons.httpclient.HttpMethodDirector#executeMethod(org.apache.commons.httpclient.HttpMethod)
+     */
+    protected HttpMethod prepareHttpMethod(BindingOperation bindingOperation, String verb, Map<String, Element> partValues,
+                                           final String rootUri, HttpParams params) throws UnsupportedEncodingException {
+        if (log.isDebugEnabled()) log.debug("Preparing http request...");
+        // convenience variables...
+        BindingInput bindingInput = bindingOperation.getBindingInput();
+        HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(bindingOperation);
+        String contentType = WsdlUtils.getMimeContentType(bindingInput.getExtensibilityElements());
+        boolean useUrlEncoded = WsdlUtils.useUrlEncoded(bindingInput) || PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(contentType);
+        boolean useUrlReplacement = WsdlUtils.useUrlReplacement(bindingInput);
+
+        final UrlReplacementTransformer replacementTransformer = new UrlReplacementTransformer(partValues.keySet());
+        final URLEncodedTransformer encodedTransformer = new URLEncodedTransformer();
+
+        // the http method to be built and returned
+        HttpMethod method = null;
+        // the 4 elements the http method may be made of
+        String relativeUri = httpOperation.getLocationURI();
+        String queryPath = null;
+        RequestEntity requestEntity = null;
+        String encodedParams = null;
+
+
+        if (useUrlReplacement) {
+            // insert part values in the url
+            relativeUri = replacementTransformer.transform(relativeUri, partValues);
+        } else if (useUrlEncoded) {
+            // encode part values
+            encodedParams = encodedTransformer.transform(partValues);
+        }
+
+        // http-client api is not really neat
+        // something similar to the following would save some if/else manipulations.
+        // But we have to deal with it as-is.
+        //
+        //  method = new Method(verb);
+        //  method.setRequestEnity(..)
+        //  etc...
+        if ("GET".equalsIgnoreCase(verb) || "DELETE".equalsIgnoreCase(verb)) {
+            if ("GET".equalsIgnoreCase(verb)) {
+                method = new GetMethod();
+            } else if ("DELETE".equalsIgnoreCase(verb)) {
+                method = new DeleteMethod();
+            }
+            if (useUrlEncoded) {
+                queryPath = encodedParams;
+            }
+
+            // Let http-client manage the redirection
+            // see org.apache.commons.httpclient.params.HttpClientParams.MAX_REDIRECTS
+            // default is 100
+            method.setFollowRedirects(true);
+        } else if ("POST".equalsIgnoreCase(verb) || "PUT".equalsIgnoreCase(verb)) {
+
+            if ("POST".equalsIgnoreCase(verb)) {
+                method = new PostMethod();
+            } else if ("PUT".equalsIgnoreCase(verb)) {
+                method = new PutMethod();
+            }
+
+            // some body-building...
+            if (useUrlEncoded) {
+                requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, method.getParams().getContentCharset());
+            } else if (contentType.endsWith(CONTENT_TYPE_TEXT_XML)) {
+                // assumption is made that there is a single part
+                // validation steps in the constructor must warranty that
+                Part part = (Part) bindingOperation.getOperation().getInput().getMessage().getParts().values().iterator().next();
+                Element partValue = partValues.get(part.getName());
+                // if the part has an element name, we must take the first element
+                if (part.getElementName() != null) {
+                    partValue = DOMUtils.getFirstChildElement(partValue);
+                }
+                String xmlString = DOMUtils.domToString(partValue);
+                requestEntity = new ByteArrayRequestEntity(xmlString.getBytes(), contentType);
+            } else {
+                // should not happen because of HttpBindingValidator, but never say never
+                throw new IllegalArgumentException("Unsupported content-type!");
+            }
+
+            // cast safely, PUT and POST are subclasses of EntityEnclosingMethod
+            final EntityEnclosingMethod enclosingMethod = (EntityEnclosingMethod) method;
+            enclosingMethod.setRequestEntity(requestEntity);
+            enclosingMethod.setContentChunked(params.getBooleanParameter(Properties.PROP_HTTP_REQUEST_CHUNK, false));
+
+        } else {
+            // should not happen because of HttpBindingValidator, but never say never
+            throw new IllegalArgumentException("Unsupported HTTP method: " + verb);
+        }
+
+        // link params together
+        method.getParams().setDefaults(params);
+
+        String completeUri = rootUri + (rootUri.endsWith("/") || relativeUri.startsWith("/") ? "" : "/") + relativeUri;
+        method.setPath(completeUri); // assumes that the path is properly encoded (URL safe).
+        method.setQueryString(queryPath);
+        return method;
     }
 }

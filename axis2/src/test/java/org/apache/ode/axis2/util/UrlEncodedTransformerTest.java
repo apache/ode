@@ -31,10 +31,10 @@ import java.util.HashMap;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class UrlEncodedTransformerTest extends TestCase {
-    protected URLEncodedTransformer transformer = new URLEncodedTransformer();
+    protected URLEncodedTransformer transformer= new URLEncodedTransformer();
 
 
-    public void testSimple() {
+    public void testSimple(){
         Document doc = DOMUtils.newDocument();
         Map<String, Element> m = new HashMap<String, Element>();
         Element element = doc.createElement("part1");
@@ -52,7 +52,7 @@ public class UrlEncodedTransformerTest extends TestCase {
         assertTrue(res.contains("part1=42+3.14159"));
         assertTrue(res.contains("part2=hello+word+%40%23%24%25+%26*"));
         assertTrue(res.contains("emptyPart="));
-        assertTrue(res.split("&").length == m.size());
+        assertTrue(res.split("&").length==m.size());
     }
 
 
@@ -63,6 +63,12 @@ public class UrlEncodedTransformerTest extends TestCase {
         Map<String, Element> m = new HashMap<String, Element>();
         m.put("part1", element);
 
-        assertEquals("Result should empty because the only part is associated to a complex type", "", transformer.transform(m));
+        try {
+            transformer.transform(m);
+            fail("IllegalArgumentException expected because a complex type is passed.");
+        } catch (IllegalArgumentException e) {
+            // expected behavior
+        }
+
     }
 }

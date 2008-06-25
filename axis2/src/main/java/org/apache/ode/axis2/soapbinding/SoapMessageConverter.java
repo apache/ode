@@ -425,7 +425,10 @@ public class SoapMessageConverter {
 
         if (headerEl == null) return;
 
-        odeMessage.setHeaderPart(p.getName(), OMUtils.toDOM(headerEl));
+        Element msgElmt = odeMessage.getMessage();
+        Element destPart = msgElmt.getOwnerDocument().createElementNS(null, p.getName());
+        msgElmt.appendChild(destPart);
+        destPart.appendChild(msgElmt.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
     }
 
     private String findHeaderPartName(List<SOAPHeader> headerDefs, QName elmtName) {
@@ -515,13 +518,29 @@ public class SoapMessageConverter {
         return new QName(_def.getTargetNamespace(), fdef.getName());
     }
 
+    @SuppressWarnings("unchecked")
     private Fault inferFault(Operation operation, SOAPFault flt) {
         if (flt.getDetail() == null)
             return null;
 
         // The detail is a dummy <detail> node containing the interesting fault element
         QName elName = flt.getDetail().getFirstElement().getQName();
-        return WsdlUtils.inferFault(operation, elName);
+        for (Fault f : (Collection<Fault>)operation.getFaults().values()) {
+            if (f.getMessage() == null)
+                continue;  // should have checked in ctor
+
+            Collection<Part> parts = f.getMessage().getParts().values();
+            if (parts.isEmpty())
+                continue;  // should check this in ctor
+            Part p = parts.iterator().next();
+            if (p.getElementName() == null)
+                continue;  // should check this is ctor
+
+            if (p.getElementName().equals(elName))
+                return f;
+        }
+
+        return null;
     }
 
 }
