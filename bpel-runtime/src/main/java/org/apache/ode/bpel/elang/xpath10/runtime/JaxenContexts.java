@@ -357,7 +357,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
             // of the transformation is just a string.
             StringWriter writerResult = new StringWriter();
             StreamResult result = new StreamResult(writerResult);
-            XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath);
+            XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
             XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
             try {
                 XslTransformHandler.getInstance().transform(xslUri, source, result, parametersMap, resolver);
