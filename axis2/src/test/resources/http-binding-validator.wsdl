@@ -382,7 +382,7 @@
     </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+missing_part" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # When urlReplacement used, all message parts must be in the url pattern
+            shouldPass # WSLD spec requires that all message parts must be in the url pattern when urlReplacement is used. However ODE relaxes this.
         </wsdl:documentation>
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">
@@ -397,7 +397,7 @@
     </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+twice_the_same_part" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # When urlReplacement used, all message parts must be exactly ONCE in the url pattern
+            shouldFail # When urlReplacement used, message parts must not be more than ONCE in the url pattern
         </wsdl:documentation>
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">
