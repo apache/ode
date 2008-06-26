@@ -120,12 +120,8 @@ public class UrlReplacementTransformerTest extends TestCase {
         m.put("part1", element);
 
         UrlReplacementTransformer encoder = new UrlReplacementTransformer();
-        try {
-            encoder.transform("(part1)", m);
-            fail("IllegalArgumentException expected because a complex type is passed.");
-        } catch (IllegalArgumentException e) {
-            // expected behavior
-        }
+        assertEquals("Result should be equal to template because the only part is associated to a complex type", "(part1)", encoder.transform("(part1)", m));
+
     }
 
 }
