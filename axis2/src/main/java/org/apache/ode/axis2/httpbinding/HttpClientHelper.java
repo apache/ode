@@ -136,7 +136,7 @@ public class HttpClientHelper {
         boolean useUrlEncoded = WsdlUtils.useUrlEncoded(bindingInput) || PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(contentType);
         boolean useUrlReplacement = WsdlUtils.useUrlReplacement(bindingInput);
 
-        final UrlReplacementTransformer replacementTransformer = new UrlReplacementTransformer(partValues.keySet());
+        final UrlReplacementTransformer replacementTransformer = new UrlReplacementTransformer();
         final URLEncodedTransformer encodedTransformer = new URLEncodedTransformer();
 
         // the http method to be built and returned
