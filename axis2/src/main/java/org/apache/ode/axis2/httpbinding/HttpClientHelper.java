@@ -65,12 +65,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpClientHelper {
 
     private static final Log log = LogFactory.getLog(HttpClientHelper.class);
 
-    public void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
+    public static void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
         if (log.isDebugEnabled()) log.debug("Configuring http client...");
         // proxy configuration
         if (ProxyConf.isProxyEnabled(params, targetURI.getHost())) {
@@ -91,11 +93,11 @@ public class HttpClientHelper {
      * @throws HttpException
      * @see #statusLineToElement(org.w3c.dom.Document, org.apache.commons.httpclient.StatusLine)
      */
-    public Element statusLineToElement(String statusLine) throws HttpException {
+    public static Element statusLineToElement(String statusLine) throws HttpException {
         return statusLineToElement(new StatusLine(statusLine));
     }
 
-    public Element statusLineToElement(StatusLine statusLine) {
+    public static Element statusLineToElement(StatusLine statusLine) {
         return statusLineToElement(DOMUtils.newDocument(), statusLine);
     }
 
@@ -112,7 +114,7 @@ public class HttpClientHelper {
      * @param doc        - the document to use to create new nodes
      * @return an Element
      */
-    public Element statusLineToElement(Document doc, StatusLine statusLine) {
+    public static Element statusLineToElement(Document doc, StatusLine statusLine) {
         Element statusLineEl = doc.createElementNS(null, "Status-Line");
         Element versionEl = doc.createElementNS(null, "HTTP-Version");
         Element codeEl = doc.createElementNS(null, "Status-Code");
@@ -139,18 +141,17 @@ public class HttpClientHelper {
      * @return
      * @throws IOException
      */
-    public Element prepareDetailsElement(HttpMethod method) throws IOException {
+    public static Element prepareDetailsElement(HttpMethod method) throws IOException {
         return prepareDetailsElement(method, true);
     }
 
     /**
-     *
      * @param method
      * @param bodyIsXml if true the body will be parsed as xml else the body will be inserted as string
      * @return
      * @throws IOException
      */
-    public Element prepareDetailsElement(HttpMethod method, boolean bodyIsXml) throws IOException {
+    public static Element prepareDetailsElement(HttpMethod method, boolean bodyIsXml) throws IOException {
         Document doc = DOMUtils.newDocument();
         Element detailsEl = doc.createElementNS(null, "details");
         Element statusLineEl = statusLineToElement(doc, method.getStatusLine());
@@ -179,5 +180,43 @@ public class HttpClientHelper {
             }
         }
         return detailsEl;
+    }
+
+    private static final Pattern NON_LWS_PATTERN = Pattern.compile("\r\n([^\\s])");
+
+    /**
+     *
+     * This method ensures that a header value containing CRLF does not mess up the HTTP request.
+     * Actually CRLF is the end-of-line marker for headers.
+     * <p/>
+     * To do so, all CRLF followed by a non-whitespace character are replaced by CRLF HT.
+     * <p/>
+     * This is possible because the
+     *  <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec2.html#sec2.2">Section 2.2</a> of HTTP standard (RFC2626) states that:
+     * <p/>
+     * <quote>
+     * HTTP/1.1 header field values can be folded onto multiple lines if the
+     * continuation line begins with a space or horizontal tab. All linear
+     * white space, including folding, has the same semantics as SP. A
+     * recipient MAY replace any linear white space with a single SP before
+     * interpreting the field value or forwarding the message downstream.
+     * <p/>
+     * LWS            = [CRLF] 1*( SP | HT )
+     * <p/>
+     * </quote>
+     *<p/>
+     * FYI, HttpClient 3.x.x does not check this.
+     * @param header
+     * @return the string properly ready to be used as an HTTP header field-content
+     */
+    public static String replaceCRLFwithLWS(String header) {
+        Matcher m = NON_LWS_PATTERN.matcher(header);
+        StringBuffer sb = new StringBuffer(header.length());
+        while (m.find()) {
+            m.appendReplacement(sb, "\r\n\t");
+            sb.append(m.group(1));
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 }
