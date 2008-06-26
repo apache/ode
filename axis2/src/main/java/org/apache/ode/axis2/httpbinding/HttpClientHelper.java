@@ -53,6 +53,7 @@ import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.wsdl.extensions.http.HTTPOperation;
+import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -132,7 +133,8 @@ public class HttpClientHelper {
         // convenience variables...
         BindingInput bindingInput = bindingOperation.getBindingInput();
         HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(bindingOperation);
-        String contentType = WsdlUtils.getMimeContentType(bindingInput.getExtensibilityElements());
+        MIMEContent content = WsdlUtils.getMimeContent(bindingInput.getExtensibilityElements());
+        String contentType = content == null ? "" : content.getType();
         boolean useUrlEncoded = WsdlUtils.useUrlEncoded(bindingInput) || PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(contentType);
         boolean useUrlReplacement = WsdlUtils.useUrlReplacement(bindingInput);
 

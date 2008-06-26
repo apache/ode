@@ -220,7 +220,7 @@ public class WsdlUtils {
      * contained in the extensibility element list. Or null if none.
      * @throws IllegalArgumentException if more than 1 MIMEContent is found.
      */
-    public static String getMimeContentType(List extensibilityElements) {
+    public static MIMEContent getMimeContent(List extensibilityElements) {
         Collection<MIMEContent> coll = CollectionsX.filter(extensibilityElements, MIMEContent.class);
         if (coll.size() == 0) {
             return null;
@@ -229,8 +229,7 @@ public class WsdlUtils {
             throw new IllegalArgumentException(msgs.msgMultipleMimeContent());
         } else {
             // retrieve the single element
-            MIMEContent mimeContent = coll.iterator().next();
-            return mimeContent.getType();
+            return coll.iterator().next();
         }
     }
 
