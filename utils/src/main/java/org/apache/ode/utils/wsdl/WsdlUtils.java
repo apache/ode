@@ -285,7 +285,6 @@ public class WsdlUtils {
     }
 
     /**
-     *
      * @param fault
      * @return true if the given fault is bound with the {@link org.apache.ode.utils.Namespaces.ODE_HTTP_EXTENSION_NS}:fault element.
      */
@@ -306,10 +305,24 @@ public class WsdlUtils {
         return false;
     }
 
+    public static Collection<UnknownExtensibilityElement> getHttpHeaders(List extensibilityElements) {
+        final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(extensibilityElements, UnknownExtensibilityElement.class);
+        for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
+            final Element e = extensibilityElement.getElement();
+            // keep only the header elements
+            if (!Namespaces.ODE_HTTP_EXTENSION_NS.equalsIgnoreCase(e.getNamespaceURI())
+                    || !"header".equals(extensibilityElement.getElement().getLocalName())) {
+                unknownExtElements.remove(extensibilityElement);
+            }
+        }
+        return unknownExtElements;
+    }
+
     /**
      * Return the {@link  javax.wsdl.Fault} that has the given element as message part.
+     *
      * @param operation the operation
-     * @param elName the qname to look for
+     * @param elName    the qname to look for
      * @return the first fault for which the element of message part matches the given qname
      */
     @SuppressWarnings("unchecked")
