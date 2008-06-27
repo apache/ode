@@ -138,7 +138,7 @@
 
     <wsdl:service name="service">
         <wsdl:port name="port" binding="ns1:binding">
-            <http:address location="http://localhost/blog/article/(articleId)"/>
+            <http:address location="http://localhost/blog/article/{articleId}"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
