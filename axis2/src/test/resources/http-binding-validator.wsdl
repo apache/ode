@@ -381,7 +381,8 @@
     </wsdl:binding>
     <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+missing_part" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldPass # WSLD spec requires that all message parts must be in the url pattern when urlReplacement is used. However ODE relaxes this.
+            shouldPass # WSLD spec requires that all message parts must be in the url pattern when urlReplacement is used.
+            However ODE relaxes this.
         </wsdl:documentation>
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">
@@ -401,6 +402,21 @@
         <http:binding verb="GET"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello/(TestPart)/(TestPart)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="hello"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+empty_pattern" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Operation-location may be empty. REST connector will not fill it for instance.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
             <wsdl:input>
                 <http:urlReplacement/>
             </wsdl:input>
