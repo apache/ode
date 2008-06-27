@@ -316,9 +316,9 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
+    test.exclude "org.apache.ode.daohib.bpel.BaseTestDAO"
     test.with project("il-common"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
-
     package :jar
   end
 
