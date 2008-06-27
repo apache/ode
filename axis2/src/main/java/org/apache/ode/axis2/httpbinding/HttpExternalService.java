@@ -44,7 +44,6 @@ import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingOperation;
@@ -336,7 +335,7 @@ public class HttpExternalService implements ExternalService {
                         if (log.isDebugEnabled()) log.debug(errmsg);
                         odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
                     } else {
-                        Part partDef = (Part) opBinding.getOperation().getFault(faultDef.getName()).getMessage().getParts().values().iterator().next();
+                        Part partDef = (Part) faultDef.getMessage().getParts().values().iterator().next();
 
                         // build the element to be sent back
                         Document odeMsg = DOMUtils.newDocument();
@@ -349,6 +348,10 @@ public class HttpExternalService implements ExternalService {
                         QName faultType = new QName(targetNamespace, faultDef.getName());
                         Message response = odeMex.createMessage(faultType);
                         response.setMessage(odeMsgEl);
+
+                        // extract and set headers
+                         httpMethodConverter.extractHttpResponseHeaders(response, method, faultDef.getMessage(), opBinding.getBindingOutput());
+
                         // finally send the fault. We did it!
                         odeMex.replyWithFault(faultType, response);
                     }
@@ -392,7 +395,8 @@ public class HttpExternalService implements ExternalService {
                     log.error(errmsg);
                     odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
                 } else {
-                    Message odeResponse = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
+                    javax.wsdl.Message outputMessage = odeMex.getOperation().getOutput().getMessage();
+                    Message odeResponse = odeMex.createMessage(outputMessage.getQName());
 
                     // handle the body if any
                     if (bodyAsStream != null) {
@@ -401,8 +405,8 @@ public class HttpExternalService implements ExternalService {
                             Element bodyElement = DOMUtils.parse(bodyAsStream).getDocumentElement();
                             // we expect a single part per output message
                             // see org.apache.ode.axis2.httpbinding.HttpBindingValidator call in constructor
-                            Part part = (Part) odeMex.getOperation().getOutput().getMessage().getParts().values().iterator().next();
-                            Element partElement = processBodyElement(part, bodyElement);
+                            Part part = (Part) outputMessage.getParts().values().iterator().next();
+                            Element partElement = httpMethodConverter.createPartElement(part, bodyElement);
                             odeResponse.setPart(part.getName(), partElement);
                         } catch (Exception e) {
                             String errmsg = "Unable to parse the response body: " + e.getMessage();
@@ -411,6 +415,10 @@ public class HttpExternalService implements ExternalService {
                             return;
                         }
                     }
+
+                    // handle headers
+                    httpMethodConverter.extractHttpResponseHeaders(odeResponse, method, outputMessage, opBinding.getBindingOutput());
+                    
                     try {
 
                         if (log.isInfoEnabled())
@@ -429,48 +437,6 @@ public class HttpExternalService implements ExternalService {
                 return;
             }
         }
-
-        /**
-         * Create the element to be inserted into {@link Message}.
-         * If the part has a non-null element name, the bodyElement is simply appended.
-         * Else if the bodyElement has a text content, the value is set to the message.
-         * Else append all nodes of bodyElement to the returned element. Attributes are ignored.
-         * <p/>
-         * The name of the returned element is the part name.
-         *
-         * @param part
-         * @param bodyElement
-         * @return the element to insert "as is" to ODE message
-         */
-        private Element processBodyElement(Part part, Element bodyElement) {
-            Document doc = DOMUtils.newDocument();
-            Element partElement = doc.createElementNS(null, part.getName());
-            if (part.getElementName() != null) {
-                partElement.appendChild(doc.importNode(bodyElement, true));
-            } else {
-                if (DOMUtils.isEmptyElement(bodyElement)) {
-                    // Append an empty text node.
-                    // Warning! setting an empty string with setTextContent has not effect. See javadoc.
-                    partElement.appendChild(doc.createTextNode(""));
-                } else {
-                    String textContent = DOMUtils.getTextContent(bodyElement);
-                    if (textContent != null) {
-                        // this is a simple type
-                        partElement.setTextContent(textContent);
-                    } else {
-                        // this is a complex type, import every child
-                        // !!! Attributes are ignored
-                        for (int m = 0; m < bodyElement.getChildNodes().getLength(); m++) {
-                            Node child = bodyElement.getChildNodes().item(m);
-                            partElement.appendChild(doc.importNode(child, true));
-                        }
-                    }
-                }
-
-            }
-            return partElement;
-        }
-
     }
 }
 

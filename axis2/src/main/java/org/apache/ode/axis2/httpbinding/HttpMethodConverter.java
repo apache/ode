@@ -19,12 +19,8 @@
 
 package org.apache.ode.axis2.httpbinding;
 
-import org.apache.axis2.transport.http.HttpTransportProperties;
-import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
@@ -34,36 +30,38 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFault;
 import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
+import javax.wsdl.BindingOutput;
 import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
-import javax.wsdl.Fault;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collection;
 
 public class HttpMethodConverter {
 
@@ -98,10 +96,6 @@ public class HttpMethodConverter {
         // build the http method itself
         HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url, params);
         return method;
-    }
-
-    public void parseHttpResponse(org.apache.ode.bpel.iapi.Message odeMessage, HttpMethod response, Operation op) {
-
     }
 
 
@@ -225,4 +219,111 @@ public class HttpMethodConverter {
     }
 
 
+    /**
+     * Create the element to be associated with this part into the {@link org.apache.ode.bpel.iapi.Message}.
+     * <br/>An element named with the part name will be returned. the content of this element depends on the part.
+     * <p/>If the part has a non-null element name, a new element will be created and named accordingly then the text value is inserted in this new element.
+     * <br/>else the given text content is simply set on the part element.
+     *
+     * @param part
+     * @param textContent
+     * @return an element named with the part name will be returned
+     */
+    public Element createPartElement(Part part, String textContent) {
+        Document doc = DOMUtils.newDocument();
+        Element partElement = doc.createElementNS(null, part.getName());
+        if (part.getElementName() != null) {
+            Element element = doc.createElementNS(part.getElementName().getNamespaceURI(), part.getElementName().getLocalPart());
+            element.setTextContent(textContent);
+            partElement.appendChild(element);
+        }else{
+            partElement.setTextContent(textContent);
+        }
+        return partElement;
+    }
+
+
+    /**
+     * Create the element to be associated with this part into the {@link org.apache.ode.bpel.iapi.Message}.
+     * <p/>If the part has a non-null element name, the bodyElement is simply appended.
+     * Else if the bodyElement has a text content, the value is set to the message.
+     * Else append all nodes of bodyElement to the returned element. Attributes are ignored.
+     * <p/>
+     * The name of the returned element is the part name.
+     *
+     * @param part
+     * @param receivedElement
+     * @return the element to insert "as is" to ODE message
+     */
+    public Element createPartElement(Part part, Element receivedElement) {
+        Document doc = DOMUtils.newDocument();
+        Element partElement = doc.createElementNS(null, part.getName());
+        if (part.getElementName() != null) {
+            partElement.appendChild(doc.importNode(receivedElement, true));
+        } else {
+            if (DOMUtils.isEmptyElement(receivedElement)) {
+                // Append an empty text node.
+                // Warning! setting an empty string with setTextContent has not effect. See javadoc.
+                partElement.appendChild(doc.createTextNode(""));
+            } else {
+                String textContent = DOMUtils.getTextContent(receivedElement);
+                if (textContent != null) {
+                    // this is a simple type
+                    partElement.setTextContent(textContent);
+                } else {
+                    // this is a complex type, import every child
+                    // !!! Attributes are ignored
+                    for (int m = 0; m < receivedElement.getChildNodes().getLength(); m++) {
+                        Node child = receivedElement.getChildNodes().item(m);
+                        partElement.appendChild(doc.importNode(child, true));
+                    }
+                }
+            }
+
+        }
+        return partElement;
+    }
+
+    /**
+     * Process the HTTP Response Headers.
+     * <p/>
+     * First go through the list of Namespaces.ODE_HTTP_EXTENSION_NS:header elements included in the output binding. For each of them, set the header value as the value of the message part.
+     * <b/>Then add all HTTP headers as header part in the message. The name of the header would be the part name.
+     * @param odeMessage
+     * @param method
+     * @param messageDef
+     * @param bindingOutput
+     */
+    public void extractHttpResponseHeaders(org.apache.ode.bpel.iapi.Message odeMessage, HttpMethod method, Message messageDef, BindingOutput bindingOutput) {
+        Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(bindingOutput.getExtensibilityElements());
+
+        // iterate through the list of header bindings
+        // and set the message parts accordingly
+        for (Iterator<UnknownExtensibilityElement> iterator = headerBindings.iterator(); iterator.hasNext();) {
+            Element binding = iterator.next().getElement();
+            String partName = binding.getAttribute("part");
+            String headerName = binding.getAttribute("name");
+
+            Part part = messageDef.getPart(partName);
+            if (StringUtils.isNotEmpty(partName)) {
+                odeMessage.setPart(partName, createPartElement(part, method.getRequestHeader(headerName).getValue()));
+            } else {
+                if(log.isErrorEnabled()) {
+                    String errMsg = "Invalid binding: missing required attribute! Part name: "+new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part");
+                    log.error(errMsg);
+                    throw new RuntimeException(errMsg);
+                }
+            }
+        }
+
+        // also add all HTTP headers into the messade as header parts
+        Header[] reqHeaders = method.getResponseHeaders();
+        for (int i = 0; i < reqHeaders.length; i++) {
+            Header h = reqHeaders[i];
+            odeMessage.setHeaderPart(h.getName(), h.getValue());
+        }
+    }
+
+
 }
+
