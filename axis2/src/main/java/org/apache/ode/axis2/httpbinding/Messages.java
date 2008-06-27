@@ -56,7 +56,7 @@ public class Messages extends MessageBundle {
     }
 
     public String msgInvalidURIPattern(Binding binding, BindingOperation operation, String locationUri) {
-        return format("Invalid URI Pattern : all parts must be mentioned exactly once! binding:{0}, operation:{1}, locationUri:{2}", binding.getQName(), operation.getName(), locationUri);
+        return format("Invalid URI Pattern : parts must not be mentioned more than once! binding:{0}, operation:{1}, locationUri:{2}", binding.getQName(), operation.getName(), locationUri);
     }
     
     public String msgMimeMultipartRelatedUnsupported(Binding binding, BindingOperation operation) {
