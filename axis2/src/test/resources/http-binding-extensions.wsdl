@@ -120,10 +120,14 @@
             <wsdl:input>
                 <http:urlReplacement/>
                 <mime:content type="text/xml" part="article"/>
-                <!-- fault binding -->
-                <odex:fault name="UpdateFailed"/>
             </wsdl:input>
             <wsdl:output/>
+            <!-- fault binding -->
+            <wsdl:fault name="UpdateFailed">
+                <!-- name attribute is optional -->
+                <!--<odex:fault name="UpdateFailed"/>-->
+                <odex:fault/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="doPOST">
             <http:operation location=""/>
