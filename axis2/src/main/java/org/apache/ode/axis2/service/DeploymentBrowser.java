@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.*;
 import java.util.List;
-import java.util.Arrays;
 
 /**
  * handles a set of URLs all starting with /deployment to publish all files in
@@ -21,10 +20,12 @@ public class DeploymentBrowser {
 
     private ProcessStoreImpl _store;
     private AxisConfiguration _config;
+    private File _appRoot;
 
-    public DeploymentBrowser(ProcessStoreImpl _store, AxisConfiguration _config) {
-        this._store = _store;
-        this._config = _config;
+    public DeploymentBrowser(ProcessStoreImpl store, AxisConfiguration config, File appRoot) {
+        _store = store;
+        _config = config;
+        _appRoot = appRoot;
     }
 
     // A fake filter, directly called from the ODEAxisServlet
@@ -55,10 +56,15 @@ public class DeploymentBrowser {
                     } else {
                         final String serviceName = requestURI.substring(deplUri + 12 + 9);
                         final AxisService axisService = _config.getService(serviceName);
-                        if (axisService != null && axisService.getFileName() != null) {
+                        if (axisService != null) {
                             renderXml(response, new DocBody() {
                                 public void render(Writer out) throws IOException {
-                                    write(out, axisService.getFileName().getFile());
+                                    if ("InstanceManagement".equals(serviceName) || "ProcessManagement".equals(serviceName))
+                                        write(out, new File(_appRoot, "pmapi.wsdl").getPath());
+                                    else if ("DeploymentService".equals(serviceName))
+                                        write(out, new File(_appRoot, "deploy.wsdl").getPath());
+                                    else
+                                        write(out, axisService.getFileName().getFile());
                                 }
                             });
                         } else {

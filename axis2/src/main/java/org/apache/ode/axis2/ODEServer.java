@@ -515,6 +515,10 @@ public class ODEServer {
         return _mgtService.getProcessMgmt();
     }
 
+    public File getAppRoot() {
+        return _appRoot;
+    }
+
     private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
