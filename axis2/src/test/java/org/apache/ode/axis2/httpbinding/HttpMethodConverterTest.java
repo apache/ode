@@ -24,13 +24,8 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.ode.bpel.epr.MutableEndpoint;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.il.epr.MutableEndpoint;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,15 +49,15 @@ import java.util.Set;
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
-public class HttpClientHelperTest extends TestCase {
+public class HttpMethodConverterTest extends TestCase {
 
     protected Definition definition;
 
-    protected HttpClientHelper deliciousBuilder;
+    protected HttpMethodConverter deliciousBuilder;
     protected Binding deliciousBinding;
     protected Port deliciousPort;
 
-    protected HttpClientHelper dummyBuilder;
+    protected HttpMethodConverter dummyBuilder;
     protected Port dummyPort;
     protected Binding dummyBinding;
 
@@ -77,12 +72,12 @@ public class HttpClientHelperTest extends TestCase {
         Service deliciousService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DeliciousService"));
         deliciousPort = deliciousService.getPort("TagHttpPort");
         deliciousBinding = deliciousPort.getBinding();
-        deliciousBuilder = new HttpClientHelper(deliciousBinding);
+        deliciousBuilder = new HttpMethodConverter(deliciousBinding);
 
         Service dummyService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DummyService"));
         dummyPort = dummyService.getPort("DummyServiceHttpport");
         dummyBinding = dummyPort.getBinding();
-        dummyBuilder = new HttpClientHelper(dummyBinding);
+        dummyBuilder = new HttpMethodConverter(dummyBinding);
 
     }
 
@@ -103,7 +98,7 @@ public class HttpClientHelperTest extends TestCase {
         odeMex.op = deliciousBinding.getBindingOperation("getTag", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
+        HttpMethod httpMethod = deliciousBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
 
 
         assertTrue("GET".equalsIgnoreCase(httpMethod.getName()));
@@ -124,7 +119,7 @@ public class HttpClientHelperTest extends TestCase {
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
         try {
-            HttpMethod httpMethod = deliciousBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
+            HttpMethod httpMethod = deliciousBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
             fail("IllegalArgumentException expected because message element is empty.");
         } catch (IllegalArgumentException e) {
             // expected behavior
@@ -150,7 +145,7 @@ public class HttpClientHelperTest extends TestCase {
         odeMex.op = dummyBinding.getBindingOperation("hello", null, null).getOperation();
         odeMex.req = new MockMessage(msgEl);
         odeMex.epr = new MockEPR(uri);
-        HttpMethod httpMethod = dummyBuilder.buildHttpMethod(odeMex, new DefaultHttpParams());
+        HttpMethod httpMethod = dummyBuilder.createHttpRequest(odeMex, new DefaultHttpParams());
         assertTrue("POST".equalsIgnoreCase(httpMethod.getName()));
         assertEquals("Generated URI does not match", expectedUri, httpMethod.getURI().toString());
 
@@ -260,19 +255,11 @@ public class HttpClientHelperTest extends TestCase {
             return null;
         }
 
-        public PartnerRoleChannel getChannel() {
-            return null;
-        }
-
         public EndpointReference getMyRoleEndpointReference() {
             return null;
         }
 
         public void reply(Message response) throws BpelEngineException {
-
-        }
-
-        public void replyAsync() {
 
         }
 
@@ -336,16 +323,43 @@ public class HttpClientHelperTest extends TestCase {
             return null;
         }
 
-        public boolean isTransactionPropagated() throws BpelEngineException {
-            return false;
-        }
-
         public void release() {
 
         }
 
         public void setProperty(String key, String value) {
 
+        }
+
+        public PartnerRoleChannel getPartnerRoleChannel() {
+            return null;
+        }
+
+        public void replyAsync(String foreignKey) {
+        }
+
+        public InvocationStyle getInvocationStyle() {
+            return null;
+        }
+
+        public long getTimeout() {
+            return 0;
+        }
+
+        public void setTimeout(long timeout) {
+
+        }
+
+        public AckType getAckType() {
+            return null;
+        }
+
+        public boolean isTransactional() {
+            return false;
+        }
+
+        public boolean isSafe() {
+            return false;
         }
     }
 }
