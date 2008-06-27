@@ -163,7 +163,7 @@ public class HttpExternalService implements ExternalService {
             boolean isTwoWay = odeMex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
             if (isTwoWay) {
                 // two way
-                executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex);
+                executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
                 scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         // If the TX is rolled back, then we don't send the request.
@@ -178,7 +178,7 @@ public class HttpExternalService implements ExternalService {
                 odeMex.replyAsync();
             } else {
                 // one way, just execute and forget
-                executionCallable = new HttpExternalService.OneWayCallable(client, method, odeMex);
+                executionCallable = new HttpExternalService.OneWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
                 executorService.submit(executionCallable);
                 odeMex.replyOneWayOk();
             }
@@ -199,12 +199,14 @@ public class HttpExternalService implements ExternalService {
 
     private class OneWayCallable implements Callable<Void> {
         HttpMethod method;
-        PartnerRoleMessageExchange odeMex;
+        String mexId;
+        Operation operation;
         HttpClient client;
 
-        public OneWayCallable(HttpClient client, HttpMethod method, PartnerRoleMessageExchange odeMex) {
+        public OneWayCallable(HttpClient client, HttpMethod method, String mexId, Operation operation) {
             this.method = method;
-            this.odeMex = odeMex;
+            this.mexId = mexId;
+            this.operation = operation;
             this.client = client;
         }
 
@@ -226,6 +228,7 @@ public class HttpExternalService implements ExternalService {
                 try {
                     scheduler.execIsolatedTransaction(new Callable<Void>() {
                         public Void call() throws Exception {
+                            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);                            
                             String errmsg = "Unable to execute http request : " + e.getMessage();
                             log.error(errmsg, e);
                             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
@@ -260,8 +263,8 @@ public class HttpExternalService implements ExternalService {
     }
 
     private class TwoWayCallable extends OneWayCallable {
-        public TwoWayCallable(org.apache.commons.httpclient.HttpClient client, HttpMethod method, PartnerRoleMessageExchange odeMex) {
-            super(client, method, odeMex);
+        public TwoWayCallable(org.apache.commons.httpclient.HttpClient client, HttpMethod method, String mexId, Operation operation) {
+            super(client, method, mexId, operation);
         }
 
         public void processResponse(final int statusCode) {
@@ -292,6 +295,7 @@ public class HttpExternalService implements ExternalService {
         }
 
         private void unmanagedStatus() throws IOException {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             String errmsg = "Unmanaged Status Code! " + method.getStatusLine();
             log.error(errmsg);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
@@ -305,7 +309,7 @@ public class HttpExternalService implements ExternalService {
         private void _5xx_serverError() throws IOException {
             String errmsg = "Internal Server Error! " + method.getStatusLine();
             log.error(errmsg);
-
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             Operation opDef = odeMex.getOperation();
             BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
             if (opDef.getFaults().isEmpty()) {
@@ -363,18 +367,21 @@ public class HttpExternalService implements ExternalService {
         }
 
         private void _4xx_badRequest() throws IOException {
+           PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             String errmsg = "Bad Request! " + method.getStatusLine();
             log.error(errmsg);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
         }
 
         private void _3xx_redirection() throws IOException {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             String errmsg = "Redirections are not supported! " + method.getStatusLine();
             log.error(errmsg);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
         }
 
         private void _2xx_success() {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             if (log.isDebugEnabled()) log.debug("Http Status Line=" + method.getStatusLine());
             if (log.isDebugEnabled()) log.debug("Received response for MEX " + odeMex);
 
