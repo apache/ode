@@ -38,9 +38,9 @@ public class DeploymentBrowser {
             if (segments.length == 0 || segments[0].length() == 0) {
                 renderHtml(response, "ODE Deployment Browser", new DocBody() {
                     public void render(Writer out) throws IOException {
+                        out.write("<p><a href=\"bundles/\">Deployed Bundles</a></p>");
                         out.write("<p><a href=\"services/\">Process Services</a></p>");
                         out.write("<p><a href=\"processes/\">Deployed Processes</a></p>");
-                        out.write("<p><a href=\"bundles/\">Deployed Bundles</a></p>");
                     }
                 });
             } else if (segments.length > 0) {
