@@ -141,8 +141,10 @@ public class HttpBindingValidator {
                 String name = (String) it.next();
                 Pattern p = Pattern.compile(".*(\\(" + name + "\\)).*");
                 Matcher m = p.matcher(locationUri);
-                // is there a regex to do both validations in one?
-                if (!m.matches() || locationUri.split("(\\(" + name + "\\))", -1).length != 2) {
+                // WSLD spec requires that all message parts must be exactly once in the url pattern.
+                // However ODE relaxes this.
+                // The only test is to make sure a part is not mentionned more than once
+                if (m.matches() && locationUri.split("(\\(" + name + "\\))", -1).length != 2) {
                     throw new IllegalArgumentException(httpMsgs.msgInvalidURIPattern(binding, bindingOperation, locationUri));
                 }
             }
