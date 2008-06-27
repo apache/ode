@@ -432,10 +432,7 @@ public class SoapMessageConverter {
 
         if (headerEl == null) return;
 
-        Element msgElmt = odeMessage.getMessage();
-        Element destPart = msgElmt.getOwnerDocument().createElementNS(null, p.getName());
-        msgElmt.appendChild(destPart);
-        destPart.appendChild(msgElmt.getOwnerDocument().importNode(OMUtils.toDOM(headerEl), true));
+        odeMessage.setHeaderPart(p.getName(), OMUtils.toDOM(headerEl));
     }
 
     private String findHeaderPartName(List<SOAPHeader> headerDefs, QName elmtName) {
