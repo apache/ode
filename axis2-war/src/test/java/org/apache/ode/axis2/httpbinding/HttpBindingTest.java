@@ -1,6 +1,8 @@
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -18,6 +20,9 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class HttpBindingTest extends Axis2TestBase {
+
+    private static final Log log = LogFactory.getLog(HttpBindingTest.class);
+
     protected ArithmeticsJettyWrapper jettyWrapper;
 
     CountDownLatch latch;
@@ -52,9 +57,11 @@ public class HttpBindingTest extends Axis2TestBase {
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",
                     bundleName, "testRequest.soap");
+            if(log.isDebugEnabled()) log.debug(response);
             int valueInSoapRequest = 100;
             int n = 5 + valueInSoapRequest;
-            assertTrue(response.indexOf(String.valueOf(n * (n + 1) / 2)) >= 0);
+            String expectedResult = String.valueOf(n * (n + 1) / 2);
+            assertTrue("Expected Result: "+expectedResult+". Answer was "+response, response.indexOf(expectedResult) >= 0);
         } finally {
             server.undeployProcess(bundleName);
         }
