@@ -54,7 +54,7 @@ public class UrlReplacementTransformer {
 
     /**
      * @param baseUri - the base uri template containing part names enclosed within single curly braces
-     * @param values  - a map<String, Object>, the key is a part name (without curly braces), the value the replacement value for the part name.
+     * @param values  - a map<String, Element>, the key is a part name (without curly braces), the value the replacement value for the part name. If the value is not a simple type, it will be skipped.
      * @return the encoded uri
      * @throws java.lang.IllegalArgumentException if a replacement value is null in the map or if a part pattern is found more than once
      */
@@ -72,10 +72,12 @@ public class UrlReplacementTransformer {
             String replacementValue;
             {
                 Element value = e.getValue();
-                if (value == null) {
-                    throw new IllegalArgumentException(httpMsgs.msgSimpleTypeExpected(partName));
-                }
                 replacementValue = DOMUtils.isEmptyElement(value) ? "" : DOMUtils.getTextContent(value);
+                if (replacementValue == null) {
+                    // if it is not a simple type, skip it
+                    if(log.isDebugEnabled()) log.debug("Part "+partName+" skipped because associated element is not of a simple type.");
+                    continue;
+                }
             }
 
             try {
