@@ -19,24 +19,20 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.wsdl.Messages;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This encoder applies urlReplacement as defined by the <a href='http://www.w3.org/TR/wsdl#_http:urlReplacement'>WSDL specification</a>.
+ * <br/>Surrounding characters for parts may be parentheses '()' or braces '{}'. Pattern with parentheses is look up first, if found then it's replaced with the part value, else the pattern with braces is look up.
  * <p/><strong>Escaping Considerations</strong>
  * <br/>Replacement and default values are escaped. All characters except unreserved (as defined by <a href="http://tools.ietf.org/html/rfc2396#appendix-A">rfc2396</a>) are escaped.
  * <br/> unreserved    = alphanum | mark
@@ -51,33 +47,18 @@ public class UrlReplacementTransformer {
 
     private static final Log log = LogFactory.getLog(UrlReplacementTransformer.class);
 
-    private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
     private static final org.apache.ode.axis2.httpbinding.Messages httpMsgs = org.apache.ode.axis2.httpbinding.Messages.getMessages(org.apache.ode.axis2.httpbinding.Messages.class);
 
-    protected Set<String> partNames;
-
     public UrlReplacementTransformer() {
-        partNames = new HashSet<String>();
-    }
-
-    public UrlReplacementTransformer(Set<String> partNames) {
-        this.partNames = partNames;
     }
 
     /**
      * @param baseUri - the base uri template containing part names enclosed within single curly braces
      * @param values  - a map<String, Object>, the key is a part name (without curly braces), the value the replacement value for the part name.
      * @return the encoded uri
-     * @throws java.lang.IllegalArgumentException
-     *          if a part (key) is missing in the map, if a replacement value is null in the map, if a part pattern is not found in the uri template, if a part pattern is found more than once
+     * @throws java.lang.IllegalArgumentException if a replacement value is null in the map or if a part pattern is found more than once
      */
     public String transform(String baseUri, Map<String, Element> values) {
-        // each part must be given a replacement value
-        if (values.keySet().size() != partNames.size() || !values.keySet().containsAll(partNames)) {
-            Collection<String> disjunction = CollectionUtils.disjunction(partNames, values.keySet());
-            throw new IllegalArgumentException(msgs.msgMissingReplacementValuesFor(disjunction));
-        }
-
         // the list containing the final split result
         List<String> result = new ArrayList<String>();
 
@@ -87,11 +68,9 @@ public class UrlReplacementTransformer {
         // replace each part exactly once
         for (Map.Entry<String, Element> e : values.entrySet()) {
 
-            String partPattern;
+            String partName = e.getKey();
             String replacementValue;
             {
-                String partName = e.getKey();
-                partPattern = "\\(" + partName + "\\)";
                 Element value = e.getValue();
                 if (value == null) {
                     throw new IllegalArgumentException(httpMsgs.msgSimpleTypeExpected(partName));
@@ -105,7 +84,14 @@ public class UrlReplacementTransformer {
                 // this exception is never thrown by the code of httpclient
                 if (log.isWarnEnabled()) log.warn(urie.getMessage(), urie);
             }
-            replace(result, partPattern, replacementValue);
+
+            // first, search for parentheses
+            String partPattern = "\\(" + partName + "\\)";
+            if(!replace(result, partPattern, replacementValue)){
+                // if parentheses not found, try braces
+                partPattern = "\\{" + partName + "\\}";
+                replace(result, partPattern, replacementValue);
+            }
         }
 
         // join all the array elements to form the final url
@@ -114,23 +100,14 @@ public class UrlReplacementTransformer {
         return sb.toString();
     }
 
-    private void replace(List<String> result, String partPattern, String replacementValue) {
+    private boolean replace(List<String> result, String partPattern, String replacementValue) {
         // !!!  i=i+2      replacement values will be skipped,
         // so replaced values do not trigger additional matches
         for (int i = 0; i < result.size(); i = i + 2) {
             String segment = result.get(i);
             // use a negative limit, so empty strings are not discarded
             String[] matches = segment.split(partPattern, -1);
-            if (matches.length == 1) {
-                if (i == result.size() - 1) {
-                    // last segment, no more string to test
-                    throw new IllegalArgumentException(httpMsgs.msgInvalidURIPattern());
-                } else {
-                    continue;
-                }
-            } else if (matches.length > 2) {
-                throw new IllegalArgumentException(httpMsgs.msgInvalidURIPattern());
-            } else {
+            if (matches.length == 2) {
                 // if exactly one match...
 
                 // remove the matching segment
@@ -142,8 +119,9 @@ public class UrlReplacementTransformer {
 
                 // pattern found and replaced, we're done for this pattern
                 // move on to the next part
-                break;
+                return true;
             }
         }
+        return false;
     }
 }
