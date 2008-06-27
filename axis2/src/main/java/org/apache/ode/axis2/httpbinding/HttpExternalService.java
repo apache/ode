@@ -383,7 +383,7 @@ public class HttpExternalService implements ExternalService {
 
             // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
             MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
-            boolean isBodyMandatory = outputContent != null && !outputContent.getType().endsWith("text/xml");
+            boolean isBodyMandatory = outputContent != null && outputContent.getType().endsWith("text/xml");
 
 
             try {
