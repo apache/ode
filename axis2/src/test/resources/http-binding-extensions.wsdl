@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:ns0="http://axis2.ode.apache.org/xsd"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:ns1="http://axis2.ode.apache.org"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:odex="http://www.apache.org/ode/type/extension/http"
+                  targetNamespace="http://axis2.ode.apache.org">
+
+    <!-- ## USE CASE ## -->
+    <!--
+        Describe a REST service to access a blog article.
+        The article is a resource available at http://ex.org/blog/article/42 (for instance)
+
+        For demonstration purpose, some requests/responses will have a custom header: TimestampHeader.
+        This header will be mapped to a part of the message.
+
+        Also for demonstration, the User-agent header will be set in some requests.
+    -->
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://axis2.ode.apache.org">
+            <xsd:element name="article" type="ns1:ArticleType"/>
+            <xsd:element name="comment" type="ns1:CommentType"/>
+            <xsd:element name="fault" type="ns1:FaultType"/>
+            <xsd:complexType name="ArticleType">
+                <xsd:sequence>
+                     <xsd:element name="title" type="xsd:string"/>
+                     <xsd:element name="author" type="xsd:string"/>
+                     <xsd:element name="content" type="xsd:string"/>
+                 </xsd:sequence>
+            </xsd:complexType>
+             <xsd:complexType name="CommentType">
+                 <xsd:sequence>
+                     <xsd:element name="author" type="xsd:string"/>
+                     <xsd:element name="content" type="xsd:string"/>
+                 </xsd:sequence>
+             </xsd:complexType>
+            <xsd:complexType name="FaultType">
+                 <xsd:sequence>
+                     <xsd:element name="timestamp" type="xsd:string"/>
+                     <xsd:element name="detail" type="xsd:string"/>
+                 </xsd:sequence>
+             </xsd:complexType>
+         </xsd:schema>
+     </wsdl:types>
+
+    <wsdl:message name="IdMessage">
+        <wsdl:part name="timestamp" type="xsd:string"/>
+        <wsdl:part name="articleId" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:message name="ArticleMessage">
+        <wsdl:part name="timestamp" type="xsd:string"/>
+        <wsdl:part name="article" element="ns1:article"/>
+    </wsdl:message>
+    <wsdl:message name="PUTRequest">
+        <wsdl:part name="articleId" type="xsd:string"/>
+        <wsdl:part name="article" element="ns1:article"/>
+    </wsdl:message>
+    <wsdl:message name="CommentRequest">
+        <wsdl:part name="articleId" type="xsd:string"/>
+        <wsdl:part name="comment" element="ns1:comment"/>
+    </wsdl:message>
+    <wsdl:message name="UpdateFault">
+        <wsdl:part name="comment" element="fault"/>
+    </wsdl:message>
+    <wsdl:message name="NoPartMessage"/>
+
+
+    <wsdl:portType name="ArticlePortType">
+        <wsdl:operation name="doGET">
+            <wsdl:input message="ns1:IdMessage"/>
+            <wsdl:output message="ns1:ArticleMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="doDELETE">
+            <wsdl:input message="ns1:IdMessage"/>
+            <wsdl:output message="ns1:NoPartMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="doPUT">
+            <wsdl:input message="ns1:PUTRequest"/>
+            <wsdl:output message="ns1:NoPartMessage"/>
+            <wsdl:fault name="UpdateFailed" message="UpdateFault"/>
+        </wsdl:operation>
+        <wsdl:operation name="doPOST">
+            <wsdl:input message="ns1:CommentRequest"/>
+            <wsdl:output message="ns1:NoPartMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="binding" type="ns1:ArticlePortType">
+        <wsdl:operation name="doGET">
+            <http:operation location=""/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+                <!-- a part mapped to a non-standard header -->
+                <odex:header name="TimestampHeader" part="timestamp"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="article"/>
+                <!-- a part mapped to a non-standard header -->
+                <odex:header name="TimestampHeader" part="timestamp"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="doDELETE">
+            <http:operation location=""/>
+            <odex:binding verb="DELETE"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+                <odex:header name="TimestampHeader" part="timestamp"/>
+                <!-- a static value mapped to a standard header -->
+                <odex:header name="User-agent" value="MyKillerApp"/>
+            </wsdl:input>
+            <wsdl:output/>
+        </wsdl:operation>
+        <wsdl:operation name="doPUT">
+            <http:operation location=""/>
+            <odex:binding verb="PUT"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+                <mime:content type="text/xml" part="article"/>
+                <!-- fault binding -->
+                <odex:fault name="UpdateFailed"/>
+            </wsdl:input>
+            <wsdl:output/>
+        </wsdl:operation>
+        <wsdl:operation name="doPOST">
+            <http:operation location=""/>
+            <odex:binding verb="POST"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+                <mime:content type="text/xml" part="comment"/>
+            </wsdl:input>
+            <wsdl:output/>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="service">
+        <wsdl:port name="port" binding="ns1:binding">
+            <http:address location="http://localhost/blog/article/(articleId)"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
