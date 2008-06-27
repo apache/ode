@@ -110,7 +110,8 @@ public class HttpExternalService implements ExternalService {
             throw new IllegalArgumentException(msgs.msgNoHTTPBindingForPort(portName));
         }
         // throws an IllegalArgumentException if not valid
-        new HttpBindingValidator(this.portBinding).validate();
+        // TODO re-enable this validation step
+//        new HttpBindingValidator(this.portBinding).validate();
 
         // initial endpoint reference
         Element eprElmt = ODEService.genEPRfromWSDL(definition, serviceName, portName);
