@@ -84,6 +84,19 @@ public class MessageImpl implements Message {
         _dao.setHeader(header);
     }
 
+    public void setHeaderPart(String name, String content) {
+        Element header =  _dao.getHeader();
+        if (header == null) {
+            Document doc = DOMUtils.newDocument();
+            header = doc.createElement("header");
+            doc.appendChild(header);
+        }
+        Element part = header.getOwnerDocument().createElement(name);
+        header.appendChild(part);
+        part.setTextContent(content);
+        _dao.setHeader(header);
+    }
+
     public void setMessage(Element msg) {
         _dao.setData(msg);
     }

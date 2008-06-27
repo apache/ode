@@ -224,6 +224,10 @@ public class HttpMethodConverterTest extends TestCase {
 
         }
 
+        public void setHeaderPart(String name, String content) {
+
+        }
+
         public void setMessage(Element msg) {
 
         }
