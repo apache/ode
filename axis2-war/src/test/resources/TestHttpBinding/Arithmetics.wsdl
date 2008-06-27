@@ -25,6 +25,7 @@
         xmlns:tns="http://ode/bpel/arithmetics"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:odex="http://www.apache.org/ode/type/extension/http"
         targetNamespace="http://ode/bpel/arithmetics">
 
 
@@ -102,7 +103,7 @@
         <!-- It's meant to test a wsdl extension defined for RESTful BPEL -->
         <wsdl:operation name="plus">
             <http:operation location="plus/(left):(right)"/>
-            <http:binding verb="GET"/>
+            <odex:binding verb="GET"/>
             <wsdl:input>
                 <http:urlReplacement/>
             </wsdl:input>
@@ -112,7 +113,7 @@
         </wsdl:operation>
         <wsdl:operation name="minus">
             <http:operation location="minus"/>
-            <http:binding verb="GET"/>
+            <odex:binding verb="GET"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
@@ -128,7 +129,7 @@
         <http:binding verb="GET"/>
         <wsdl:operation name="plus">
             <http:operation location="plus"/>
-            <http:binding verb="POST"/>
+            <odex:binding verb="POST"/>
             <wsdl:input>
                 <mime:content type="application/x-www-form-urlencoded"/>
             </wsdl:input>
@@ -138,7 +139,7 @@
         </wsdl:operation>
         <wsdl:operation name="minus">
             <http:operation location="minus"/>
-            <http:binding verb="POST"/>
+            <odex:binding verb="POST"/>
             <wsdl:input>
                 <http:urlEncoded/>
             </wsdl:input>
@@ -219,7 +220,7 @@
 
 
     <!--
-        6 urls to handle:
+        8 urls to handle:
         (GET)       http://localhost:8080/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
         (GET)       http://         ........                    /OlaElMundo-GET/minus?left=&right=
         (DELETE)    http://localhost:8080/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)
