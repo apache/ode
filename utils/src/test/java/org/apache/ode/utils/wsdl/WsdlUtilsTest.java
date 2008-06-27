@@ -29,6 +29,7 @@ import javax.wsdl.Service;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.extensions.http.HTTPAddress;
 import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.wsdl.extensions.mime.MIMEContent;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
@@ -200,14 +201,15 @@ public class WsdlUtilsTest extends TestCase {
     public void testGetMimeContentType() {
         Binding binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceHttpBinding"));
         BindingOperation operation = binding.getBindingOperation("hello", null, null);
-        String mimeContentType = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements()).getType();
-        assertEquals("text/xml", mimeContentType);
+
+         MIMEContent mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
+        assertNotNull("A MIME Content is expected!", mimeContent);
+        assertEquals("text/xml", mimeContent.getType());
 
         binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceSOAP11Binding"));
         operation = binding.getBindingOperation("hello", null, null);
-        mimeContentType = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements()).getType();
-        assertNull(mimeContentType);
-
+        mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
+        assertNull("No content-type expected here!", mimeContent);
 
     }
 }
