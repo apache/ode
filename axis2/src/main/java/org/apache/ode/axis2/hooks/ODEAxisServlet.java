@@ -23,18 +23,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.ode.axis2.ODEServer;
 import org.apache.ode.axis2.service.DeploymentBrowser;
-import org.apache.ode.bpel.iapi.ProcessConf;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Overrides standard AxisServlet to handle our service configurations and
@@ -56,7 +51,7 @@ public class ODEAxisServlet extends AxisServlet {
         super.init(config);
         _odeServer = createODEServer();
         _odeServer.init(config, axisConfiguration);
-        _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration);
+        _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration, _odeServer.getAppRoot());
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
