@@ -82,7 +82,6 @@ public class HttpExternalService implements ExternalService {
     protected String portName;
     protected WSAEndpoint endpointReference;
     
-    protected HttpClientHelper helper;
     protected HttpMethodConverter httpMethodConverter;
 
     protected Binding portBinding;
@@ -120,7 +119,6 @@ public class HttpExternalService implements ExternalService {
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
 
         httpMethodConverter = new HttpMethodConverter(this.portBinding);
-        helper = new HttpClientHelper();
         connections = new MultiThreadedHttpConnectionManager();
     }
 
@@ -156,7 +154,7 @@ public class HttpExternalService implements ExternalService {
             client.getParams().setDefaults(params);
 
             // configure the client (proxy, security, etc)
-            helper.configure(client.getHostConfiguration(), client.getState(), method.getURI(), params);
+            HttpClientHelper.configure(client.getHostConfiguration(), client.getState(), method.getURI(), params);
 
             // this callable encapsulates the http method execution and the process of the response
             final Callable executionCallable;
@@ -296,7 +294,7 @@ public class HttpExternalService implements ExternalService {
         private void unmanagedStatus() throws IOException {
             String errmsg = "Unmanaged Status Code! " + method.getStatusLine();
             log.error(errmsg);
-            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
         }
 
         /**
@@ -313,15 +311,15 @@ public class HttpExternalService implements ExternalService {
             if (opDef.getFaults().isEmpty()) {
                 errmsg = "Operation has no fault. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
-                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
             } else if (opBinding.getBindingFaults().isEmpty()) {
                 errmsg = "No fault binding. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
-                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
             } else if (method.getResponseBodyAsStream() == null) {
                 errmsg = "No body in the response. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
-                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+                odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
             } else {
                 final InputStream bodyAsStream = method.getResponseBodyAsStream();
                 try {
@@ -333,7 +331,7 @@ public class HttpExternalService implements ExternalService {
                     if (!WsdlUtils.isOdeFault(opBinding.getBindingFault(faultDef.getName()))) {
                         errmsg = "Fault " + bodyName + " is not bound with " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "fault") + ". This 500 error will be considered as a failure.";
                         if (log.isDebugEnabled()) log.debug(errmsg);
-                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
                     } else {
                         Part partDef = (Part) faultDef.getMessage().getParts().values().iterator().next();
 
@@ -358,7 +356,7 @@ public class HttpExternalService implements ExternalService {
                 } catch (Exception e) {
                     errmsg = "Unable to parse the response body as xml. This 500 error will be considered as a failure.";
                     if (log.isDebugEnabled()) log.debug(errmsg, e);
-                    odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method, false));
+                    odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method, false));
                 }
             }
 
@@ -367,13 +365,13 @@ public class HttpExternalService implements ExternalService {
         private void _4xx_badRequest() throws IOException {
             String errmsg = "Bad Request! " + method.getStatusLine();
             log.error(errmsg);
-            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
         }
 
         private void _3xx_redirection() throws IOException {
             String errmsg = "Redirections are not supported! " + method.getStatusLine();
             log.error(errmsg);
-            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+            odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
         }
 
         private void _2xx_success() {
@@ -427,7 +425,7 @@ public class HttpExternalService implements ExternalService {
                     } catch (Exception ex) {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         log.error(errmsg, ex);
-                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
+                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
                     }
                 }
             } catch (IOException e) {
