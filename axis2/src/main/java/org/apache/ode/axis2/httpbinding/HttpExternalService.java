@@ -19,10 +19,10 @@
 
 package org.apache.ode.axis2.httpbinding;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +33,11 @@ import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.wsdl.Messages;
@@ -47,13 +47,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.wsdl.Binding;
+import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
+import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
-import javax.wsdl.BindingOperation;
-import javax.wsdl.Fault;
+import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
@@ -162,7 +163,7 @@ public class HttpExternalService implements ExternalService {
             final Callable executionCallable;
 
             // execute it
-            boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+            boolean isTwoWay = odeMex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
             if (isTwoWay) {
                 // two way
                 executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex);
@@ -375,35 +376,42 @@ public class HttpExternalService implements ExternalService {
         private void _2xx_success() {
             if (log.isDebugEnabled()) log.debug("Http Status Line=" + method.getStatusLine());
             if (log.isDebugEnabled()) log.debug("Received response for MEX " + odeMex);
+
+            Operation opDef = odeMex.getOperation();
+            BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
+
+            // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
+            MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
+            boolean isBodyMandatory = outputContent != null && !outputContent.getType().endsWith("text/xml");
+
+
             try {
                 final InputStream bodyAsStream = method.getResponseBodyAsStream();
-                if (bodyAsStream == null) {
-                    String errmsg = "Request body of a Two-way message may not be empty! Msg Id=" + odeMex.getMessageExchangeId();
+                if (isBodyMandatory && bodyAsStream == null) {
+                    String errmsg = "Response body is mandatory but missing! Msg Id=" + odeMex.getMessageExchangeId();
                     log.error(errmsg);
                     odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
-                    return;
                 } else {
+                    Message odeResponse = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
 
-                    // only text/xml is supported in the response body
-                    // parse the body
-                    Element bodyElement;
-                    try {
-                        bodyElement = DOMUtils.parse(bodyAsStream).getDocumentElement();
-                    } catch (Exception e) {
-                        String errmsg = "Unable to parse the response body: " + e.getMessage();
-                        log.error(errmsg, e);
-                        odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
-                        return;
+                    // handle the body if any
+                    if (bodyAsStream != null) {
+                        // only text/xml is supported in the response body
+                        try {
+                            Element bodyElement = DOMUtils.parse(bodyAsStream).getDocumentElement();
+                            // we expect a single part per output message
+                            // see org.apache.ode.axis2.httpbinding.HttpBindingValidator call in constructor
+                            Part part = (Part) odeMex.getOperation().getOutput().getMessage().getParts().values().iterator().next();
+                            Element partElement = processBodyElement(part, bodyElement);
+                            odeResponse.setPart(part.getName(), partElement);
+                        } catch (Exception e) {
+                            String errmsg = "Unable to parse the response body: " + e.getMessage();
+                            log.error(errmsg, e);
+                            odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
+                            return;
+                        }
                     }
                     try {
-                        org.apache.ode.bpel.iapi.Message odeResponse = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
-
-                        // we expect a single part per output message
-                        // see org.apache.ode.axis2.httpbinding.HttpBindingValidator call in constructor
-                        Part part = (Part) odeMex.getOperation().getOutput().getMessage().getParts().values().iterator().next();
-
-                        Element partElement = processBodyElement(part, bodyElement);
-                        odeResponse.setPart(part.getName(), partElement);
 
                         if (log.isInfoEnabled())
                             log.info("Response:\n" + DOMUtils.domToString(odeResponse.getMessage()));
@@ -411,7 +419,7 @@ public class HttpExternalService implements ExternalService {
                     } catch (Exception ex) {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         log.error(errmsg, ex);
-                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, bodyElement);
+                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, helper.prepareDetailsElement(method));
                     }
                 }
             } catch (IOException e) {
@@ -423,7 +431,7 @@ public class HttpExternalService implements ExternalService {
         }
 
         /**
-         * Create the element to be inserted into org.apache.ode.bpel.iapi.Message.
+         * Create the element to be inserted into {@link Message}.
          * If the part has a non-null element name, the bodyElement is simply appended.
          * Else if the bodyElement has a text content, the value is set to the message.
          * Else append all nodes of bodyElement to the returned element. Attributes are ignored.
