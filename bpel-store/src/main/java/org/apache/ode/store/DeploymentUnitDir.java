@@ -31,6 +31,7 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.utils.fs.FileUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 
@@ -119,7 +120,7 @@ class DeploymentUnitDir  {
      * starts compilation. 
      */
     void compile() {
-        ArrayList<File> bpels = listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
+        ArrayList<File> bpels = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
@@ -129,7 +130,7 @@ class DeploymentUnitDir  {
 
     void scan() {
         HashMap<QName, CBPInfo> processes = new HashMap<QName, CBPInfo>();
-        ArrayList<File> cbps = listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
+        ArrayList<File> cbps = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
         for (File file : cbps) {
             CBPInfo cbpinfo = loadCBPInfo(file);
             processes.put(cbpinfo.processName, cbpinfo);
@@ -233,7 +234,7 @@ class DeploymentUnitDir  {
             WSDLReader r = wsdlFactory.newWSDLReader();
             DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory, _duDirectory);
             URI basedir = _duDirectory.toURI();
-            ArrayList<File> wsdls = listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
+            ArrayList<File> wsdls = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
             for (File file : wsdls) {
                 URI uri = basedir.relativize(file.toURI());
                 try {
@@ -294,23 +295,6 @@ class DeploymentUnitDir  {
         }
         return result;
     }
-
-    private ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
-        ArrayList<File> result = new ArrayList<File>();
-        // Filtering the files we're interested in in the current directory
-        File[] select = root.listFiles(filter);
-        for (File file : select) {
-            result.add(file);
-        }
-        // Then we can check the directories
-        File[] all = root.listFiles();
-        for (File file : all) {
-            if (file.isDirectory())
-                result.addAll(listFilesRecursively(file, filter));
-        }
-        return result;
-    }
-
 
     public final class CBPInfo {
         final QName processName;

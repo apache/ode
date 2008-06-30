@@ -2,8 +2,11 @@ package org.apache.ode.axis2.service;
 
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.utils.fs.FileUtils;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.commons.lang.StringUtils;
 
 import javax.xml.namespace.QName;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * handles a set of URLs all starting with /deployment to publish all files in
@@ -29,9 +34,10 @@ public class DeploymentBrowser {
     }
 
     // A fake filter, directly called from the ODEAxisServlet
-    public boolean doFilter(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-        int deplUri = requestURI.indexOf("/deployment");
+    public boolean doFilter(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        final String requestURI = request.getRequestURI();
+        final int deplUri = requestURI.indexOf("/deployment");
+        final String root = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + requestURI.substring(0, deplUri);
         if (deplUri > 0) {
             int offset = requestURI.length() > (deplUri + 11) ? 1 : 0;
             final String[] segments = requestURI.substring(deplUri + 11 + offset).split("/");
@@ -40,7 +46,7 @@ public class DeploymentBrowser {
                     public void render(Writer out) throws IOException {
                         out.write("<p><a href=\"bundles/\">Deployed Bundles</a></p>");
                         out.write("<p><a href=\"services/\">Process Services</a></p>");
-                        out.write("<p><a href=\"processes/\">Deployed Processes</a></p>");
+                        out.write("<p><a href=\"processes/\">Process Definitions</a></p>");
                     }
                 });
             } else if (segments.length > 0) {
@@ -49,8 +55,19 @@ public class DeploymentBrowser {
                         renderHtml(response, "Services Implemented by Your Processes", new DocBody() {
                             public void render(Writer out) throws IOException {
                                 for (Object serviceName : _config.getServices().keySet())
-                                    if (!"Version".equals(serviceName))
-                                        out.write("<p><a href=\"" + serviceName + "\">" + serviceName + "</a></p>");
+                                    if (!"Version".equals(serviceName)) {
+                                        AxisService service = _config.getService(serviceName.toString());
+
+                                        String url = service.getName();
+                                        if (service.getFileName() != null) url = root + bundleUrlFor(service.getFileName().getFile());
+                                        out.write("<p><a href=\"" + url + "\">" + serviceName + "</a></p>");
+
+                                        out.write("<ul><li>Endpoint: " + (root + "/processes/" + serviceName) + "</li>");
+                                        Iterator iter = service.getOperations();
+                                        ArrayList<String> ops = new ArrayList<String>();
+                                        while (iter.hasNext()) ops.add(((AxisOperation)iter.next()).getName().getLocalPart());
+                                        out.write("<li>Operations: " + StringUtils.join(ops, ", ") + "</li></ul>");
+                                    }
                             }
                         });
                     } else {
@@ -61,6 +78,8 @@ public class DeploymentBrowser {
                                 public void render(Writer out) throws IOException {
                                     if ("InstanceManagement".equals(serviceName) || "ProcessManagement".equals(serviceName))
                                         write(out, new File(_appRoot, "pmapi.wsdl").getPath());
+                                    else if (requestURI.indexOf("pmapi.xsd") > 0)
+                                        write(out, new File(_appRoot, "pmapi.xsd").getPath());
                                     else if ("DeploymentService".equals(serviceName))
                                         write(out, new File(_appRoot, "deploy.wsdl").getPath());
                                     else
@@ -79,27 +98,14 @@ public class DeploymentBrowser {
                     if (segments.length == 1) {
                         renderHtml(response, "Deployed Processes", new DocBody() {
                             public void render(Writer out) throws IOException {
-                                for (QName process :_store.getProcesses())
-                                    out.write("<p><a href=\"" + process.getLocalPart() + "?ns=" + process.getNamespaceURI() + "\">" + process + "</a></p>");
+                                for (QName process :_store.getProcesses()) {
+                                    String url = root + bundleUrlFor(_store.getProcessConfiguration(process).getBpelDocument());
+                                    String[] nameVer = process.getLocalPart().split("-");
+                                    out.write("<p><a href=\"" + url + "\">" + nameVer[0] + "</a> (v" + nameVer[1] + ")");
+                                    out.write(" - " + process.getNamespaceURI() + "</p>");
+                                }
                             }
                         });
-                    } else {
-                        final String processName = requestURI.substring(deplUri + 12 + 10);
-                        final String processNs = request.getParameter("ns");
-                        final ProcessConf pconf = _store.getProcessConfiguration(new QName(processNs, processName));
-                        if (pconf != null) {
-                            renderXml(response, new DocBody() {
-                                public void render(Writer out) throws IOException {
-                                    write(out, new File(pconf.getBaseURI().toURL().getFile(), pconf.getBpelDocument()).getPath());
-                                }
-                            });
-                        } else {
-                            renderHtml(response, "Process Not Found", new DocBody() {
-                                public void render(Writer out) throws IOException {
-                                    out.write("<p>Couldn't find process " + new QName(processNs, processName) + "</p>");
-                                }
-                            });
-                        }
                     }
                 } else if ("bundles".equals(segments[0])) {
                     if (segments.length == 1) {
@@ -130,7 +136,7 @@ public class DeploymentBrowser {
                             List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                             for (final File file : files) {
                                 String relativePath = requestURI.substring(deplUri + 12 + 9 + segments[1].length());
-                                if (file.getPath().indexOf(relativePath) >= 0) {
+                                if (file.getPath().endsWith(relativePath)) {
                                     renderXml(response, new DocBody() {
                                         public void render(Writer out) throws IOException {
                                             write(out, file.getPath());
@@ -179,6 +185,15 @@ public class DeploymentBrowser {
         String line;
         while((line = wsdlReader.readLine()) != null) out.write(line + "\n");
         wsdlReader.close();
+    }
+
+    private String bundleUrlFor(String docFile) {
+        List<File> files = FileUtils.listFilesRecursively(_store.getDeployDir(), null);
+        for (final File bundleFile : files) {
+            if (bundleFile.getPath().endsWith(docFile))
+                return "/deployment/bundles/" + bundleFile.getPath().substring(_store.getDeployDir().getPath().length() + 1);
+        }
+        return null;
     }
 
     private static final String CSS =
