@@ -44,7 +44,7 @@ COMMONS             = struct(
   :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.1",
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
-  :lang             =>"commons-lang:commons-lang:jar:2.1",
+  :lang             =>"commons-lang:commons-lang:jar:2.3",
   :logging          =>"commons-logging:commons-logging:jar:1.1",
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
@@ -132,9 +132,9 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
-      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, DERBY, GERONIMO.kernel, GERONIMO.transaction,
-      JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
-      XMLBEANS
+      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, 
+      DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream, 
+      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema, XMLBEANS
 
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
     test.exclude '*'
@@ -161,7 +161,7 @@ define "ode" do
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*").exclude("axis2-web/index.jsp")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
