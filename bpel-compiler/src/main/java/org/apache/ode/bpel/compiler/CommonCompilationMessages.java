@@ -363,7 +363,13 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
     /** Invalid alarm handler (check for/until/repeatEvery). */
     public CompilationMessage errInvalidAlarm() {
         return this
-            .formatCompilationMessage("Invalid alarm handler (check for/until/repeatEvery).");
+            .formatCompilationMessage("Invalid alarm handler (check for/until/repeatEvery or child activity).");
+    }
+
+    /** Invalid alarm handler (check for/until/repeatEvery). */
+    public CompilationMessage errInvalidEvent() {
+        return this
+            .formatCompilationMessage("Invalid event handler (no child activity?).");
     }
 
     /** Process WSDL URI is ignored for WS-BPEL 2.0 processes. */
