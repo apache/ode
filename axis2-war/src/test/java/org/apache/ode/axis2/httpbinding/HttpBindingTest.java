@@ -18,14 +18,14 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class HttpBindingTest extends Axis2TestBase {
-    protected ArithmeticsJettyWrapper jettyWrapper;
+    protected JettyWrapper jettyWrapper;
 
     CountDownLatch latch;
 
     protected void setUp() throws Exception {
         super.setUp();
         latch = new CountDownLatch(1);
-        jettyWrapper = new ArithmeticsJettyWrapper(7070);
+        jettyWrapper = new JettyWrapper(7070);
         new Thread("HttpBindingJetty") {
             public void run() {
                 try {

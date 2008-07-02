@@ -35,32 +35,47 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.xml.namespace.QName;
 import java.io.IOException;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
-public class ArithmeticsJettyWrapper {
+public class JettyWrapper {
 
     protected Server server;
     private ContextHandlerCollection handlerColl;
 
-    public ArithmeticsJettyWrapper() throws Exception {
+    public JettyWrapper() throws Exception {
         this(7070);
     }
 
-    public ArithmeticsJettyWrapper(int port) throws Exception {
+    public JettyWrapper(int port) throws Exception {
         server = new Server(port);
-        // Adding the buildr handler to control our server lifecycle
-        ContextHandler context = new ContextHandler();
-        context.setContextPath("/HttpBindingTest/ArithmeticsService");
-        Handler handler = new ArithmeticsServiceHandler();
-        context.setHandler(handler);
+
+        // Arithmetics Service
+        ContextHandler arithmeticsContext = new ContextHandler();
+        arithmeticsContext.setContextPath("/HttpBindingTest/ArithmeticsService");
+        arithmeticsContext.setHandler(new ArithmeticsServiceHandler());
 
         handlerColl = new ContextHandlerCollection();
-        handlerColl.setHandlers(new Handler[]{context});
+        handlerColl.setHandlers(new Handler[]{arithmeticsContext});
 
         server.addHandler(handlerColl);
+    }
+
+
+    private Document parseBody(ServletInputStream bodyStream, HttpServletResponse response) throws IOException {
+        if (bodyStream == null) {
+            response.sendError(400, "Missing body!");
+        } else {
+            try {
+                return DOMUtils.parse(bodyStream);
+            } catch (SAXException e) {
+                response.sendError(400, "Failed to parse body! " + e.getMessage());
+            }
+        }
+        return null;
     }
 
     private class ArithmeticsServiceHandler extends AbstractHandler {
@@ -173,7 +188,7 @@ public class ArithmeticsJettyWrapper {
                                     Element secondElement = DOMUtils.getNextSiblingElement(firstOperand);
                                     String left = DOMUtils.getTextContent(firstOperand);
                                     String right = DOMUtils.getTextContent(secondElement);
-                                    Element res = bodyDoc.createElementNS("http://ode/bpel/arithmetics", "theresult");
+                                    Element res = bodyDoc.createElementNS("http://ode/bpel/test/arithmetics", "theresult");
                                     res.setTextContent(String.valueOf(Integer.valueOf(left) + Integer.valueOf(right)));
                                     response.getOutputStream().print(DOMUtils.domToString(res));
                                     response.setStatus(200);
@@ -188,14 +203,14 @@ public class ArithmeticsJettyWrapper {
                                 int left = Integer.valueOf(DOMUtils.getTextContent(firstOperand));
                                 int right = Integer.valueOf(DOMUtils.getTextContent(secondElement));
 
-                                int min = Math.min(left,right);
-                                int max = Math.max(left,right);
+                                int min = Math.min(left, right);
+                                int max = Math.max(left, right);
 //                                Element arrayElt = bodyDoc.createElement("sumOfInteger");
-                                Element anElt = bodyDoc.createElementNS("http://ode/bpel/arithmetics", "sumOfInteger");
+                                Element anElt = bodyDoc.createElementNS("http://ode/bpel/test/arithmetics", "sumOfInteger");
                                 Element msg = bodyDoc.createElement("msg");
                                 Element resultIs = bodyDoc.createElement("resultIs");
                                 msg.setTextContent("A dummy message we don't care about. Only purpose is to have a complex type");
-                                resultIs.setTextContent(String.valueOf((max*(max+1)-min*(min+1))/2));
+                                resultIs.setTextContent(String.valueOf((max * (max + 1) - min * (min + 1)) / 2));
 
                                 anElt.appendChild(msg);
                                 anElt.appendChild(resultIs);
@@ -214,23 +229,12 @@ public class ArithmeticsJettyWrapper {
             }
         }
 
-        private Document parseBody(ServletInputStream bodyStream, HttpServletResponse response) throws IOException {
-            if (bodyStream == null) {
-                response.sendError(400, "Missing body!");
-            } else {
-                try {
-                    return DOMUtils.parse(bodyStream);
-                } catch (SAXException e) {
-                    response.sendError(400, "Failed to parse body! " + e.getMessage());
-                }
-            }
-            return null;
-        }
     }
+
 
     public static void main(String[] args) {
         try {
-            new ArithmeticsJettyWrapper();
+            new JettyWrapper().server.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
