@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:ns0="http://axis2.ode.apache.org/xsd"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:ns1="http://axis2.ode.apache.org"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:odex="http://www.apache.org/ode/type/extension/http"
+                  targetNamespace="http://axis2.ode.apache.org">
+    <wsdl:message name="helloRequest">
+        <wsdl:part name="part_0" type="xs:string"/>
+    </wsdl:message>
+    <wsdl:message name="helloResponse">
+        <wsdl:part name="part_0" type="xs:string"/>
+        <wsdl:part name="part_1" type="xs:string"/>
+    </wsdl:message>
+    <wsdl:portType name="DummyServicePortType">
+        <wsdl:operation name="hello">
+            <wsdl:input message="ns1:helloRequest" wsaw:Action="urn:hello"/>
+            <wsdl:output message="ns1:helloResponse" wsaw:Action="urn:helloResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+missing_part" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # WSLD spec requires that all message parts must be in the url pattern when urlReplacement is used.
+            However ODE relaxes this.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+urlReplacement+empty_pattern" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Operation-location may be empty. For instance, REST connector will not fill it.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+output with multiple parts" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Operation ouptut binding may multiple parts.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+                <odex:header name="Age" part="part_1"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+output with 2 parts" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # Operation ouptut binding may have multiple parts, but only one may be mapped to 'text/xml'.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+                <mime:content type="text/xml" part="part_1"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ###################################### -->
+    <!-- Verb at the operation level -->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # A verb must be defined: it could be in the port tag, or in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # A verb must be defined for each operation: it could be in the port tag, or in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="bye">
+            <http:operation location="DummyService/bye"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_no_verb_in_port" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Verb may be defined in the operation
+        </wsdl:documentation>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <!-- no <service> tags needed -->
+</wsdl:definitions>

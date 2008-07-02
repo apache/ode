@@ -314,7 +314,7 @@ public class HttpExternalService implements ExternalService {
             Operation opDef = odeMex.getOperation();
             BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
             if (opDef.getFaults().isEmpty()) {
-                errmsg = "Operation has no fault. This 500 error will be considered as a failure.";
+                errmsg = "Operation " + opDef.getName() + " has no fault. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
                 odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
             } else if (opBinding.getBindingFaults().isEmpty()) {
@@ -332,8 +332,12 @@ public class HttpExternalService implements ExternalService {
                     QName bodyName = new QName(bodyEl.getNamespaceURI(), bodyEl.getNodeName());
                     Fault faultDef = WsdlUtils.inferFault(opDef, bodyName);
 
-                    // is this fault bound with ODE extension?
-                    if (!WsdlUtils.isOdeFault(opBinding.getBindingFault(faultDef.getName()))) {
+                    if (faultDef == null) {
+                        errmsg = "Unknown Fault " + bodyName + " This 500 error will be considered as a failure.";
+                        if (log.isDebugEnabled()) log.debug(errmsg);
+                        odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
+                    } else if (!WsdlUtils.isOdeFault(opBinding.getBindingFault(faultDef.getName()))) {
+                        // is this fault bound with ODE extension?
                         errmsg = "Fault " + bodyName + " is not bound with " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "fault") + ". This 500 error will be considered as a failure.";
                         if (log.isDebugEnabled()) log.debug(errmsg);
                         odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
@@ -424,7 +428,7 @@ public class HttpExternalService implements ExternalService {
 
                     // handle headers
                     httpMethodConverter.extractHttpResponseHeaders(odeResponse, method, outputMessage, opBinding.getBindingOutput());
-                    
+
                     try {
 
                         if (log.isInfoEnabled())

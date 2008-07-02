@@ -22,15 +22,15 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/"
         xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
         xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-        xmlns:tns="http://ode/bpel/arithmetics"
+        xmlns:tns="http://ode/bpel/test/arithmetics"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:odex="http://www.apache.org/ode/type/extension/http"
-        targetNamespace="http://ode/bpel/arithmetics">
+        targetNamespace="http://ode/bpel/test/arithmetics">
 
 
     <wsdl:types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/arithmetics">
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/test/arithmetics">
             <xsd:complexType name="operandListType">
                 <xsd:sequence>
                     <xsd:element name="operand" type="xsd:string" maxOccurs="unbounded" minOccurs="2"/>
@@ -232,21 +232,21 @@
         (POST)      http://         ........                    /SalutLaTerre/addition
         (POST)      http://         ........                    /SalutLaTerre/sumOfIntegers
     -->
-    <wsdl:service name="HttpBindingTestService">
+    <wsdl:service name="ArithmeticsService">
         <wsdl:port name="OlaElMundo-GET_httpport" binding="tns:OlaElMundoHttpBinding-GET">
-            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-GET"/>
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-GET"/>
         </wsdl:port>
         <wsdl:port name="OlaElMundo-POST_httpport" binding="tns:OlaElMundoHttpBinding-POST">
-            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-POST"/>
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-POST"/>
         </wsdl:port>
         <wsdl:port name="OlaElMundo-PUT_httpport" binding="tns:OlaElMundoHttpBinding-PUT">
-            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-PUT"/>
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-PUT"/>
         </wsdl:port>
         <wsdl:port name="OlaElMundo-DELETE_httpport" binding="tns:OlaElMundoHttpBinding-DELETE">
-            <http:address location="http://localhost:7070/HttpBindingTestService/OlaElMundo-DELETE"/>
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-DELETE"/>
         </wsdl:port>
         <wsdl:port name="SalutLaTerre_httpport" binding="tns:SalutLaTerreHttpBinding">
-            <http:address location="http://localhost:7070/HttpBindingTestService/SalutLaTerre"/>
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/SalutLaTerre"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

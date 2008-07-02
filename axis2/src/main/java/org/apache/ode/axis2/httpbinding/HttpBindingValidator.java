@@ -81,11 +81,6 @@ public class HttpBindingValidator {
             throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
         }
 
-        Map outputParts = bindingOperation.getOperation().getOutput().getMessage().getParts();
-        if (outputParts.size() > 1) {
-            throw new IllegalArgumentException(httpMsgs.msgOnePartOnlyForOutput(binding, bindingOperation));
-        }
-
         BindingInput input = bindingOperation.getBindingInput();
 
         // multipartRelated not supported

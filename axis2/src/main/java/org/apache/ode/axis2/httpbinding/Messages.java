@@ -47,10 +47,6 @@ public class Messages extends MessageBundle {
         return format("Unsupported content-type!binding: {0} operation: {1}", binding.getQName(), operation.getName());
     }
 
-    public String msgOnePartOnlyForOutput(Binding binding, BindingOperation operation) {
-        return format("Output messages may not have more than 1 part! binding: {0} operation: {1}", binding.getQName(), operation.getName());
-    }
-
     public String msgInvalidURIPattern() {
         return format("Invalid URI Pattern!");
     }
