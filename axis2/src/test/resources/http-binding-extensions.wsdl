@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-                  xmlns:ns0="http://axis2.ode.apache.org/xsd"
-                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-                  xmlns:ns1="http://axis2.ode.apache.org"
-                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
-                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                  xmlns:odex="http://www.apache.org/ode/type/extension/http"
-                  targetNamespace="http://axis2.ode.apache.org">
+<wsdl:definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+        xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+        xmlns:tns="http://ode/bpel/test/blog"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:odex="http://www.apache.org/ode/type/extension/http"
+        targetNamespace="http://ode/bpel/test/blog">
+
 
     <!-- ## USE CASE ## -->
     <!--
@@ -20,31 +21,30 @@
         Also for demonstration, the User-agent header will be set in some requests.
     -->
     <wsdl:types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://axis2.ode.apache.org">
-            <xsd:element name="article" type="ns1:ArticleType"/>
-            <xsd:element name="comment" type="ns1:CommentType"/>
-            <xsd:element name="fault" type="ns1:FaultType"/>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/test/blog">
+            <xsd:element name="article" type="tns:ArticleType"/>
+            <xsd:element name="comment" type="tns:CommentType"/>
+            <xsd:element name="fault" type="tns:FaultType"/>
             <xsd:complexType name="ArticleType">
                 <xsd:sequence>
-                     <xsd:element name="title" type="xsd:string"/>
-                     <xsd:element name="author" type="xsd:string"/>
-                     <xsd:element name="content" type="xsd:string"/>
-                 </xsd:sequence>
+                    <xsd:element name="id" type="xsd:string"/>
+                    <xsd:element name="title" type="xsd:string"/>
+                </xsd:sequence>
             </xsd:complexType>
-             <xsd:complexType name="CommentType">
-                 <xsd:sequence>
-                     <xsd:element name="author" type="xsd:string"/>
-                     <xsd:element name="content" type="xsd:string"/>
-                 </xsd:sequence>
-             </xsd:complexType>
+            <xsd:complexType name="CommentType">
+                <xsd:sequence>
+                    <xsd:element name="author" type="xsd:string"/>
+                    <xsd:element name="content" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
             <xsd:complexType name="FaultType">
-                 <xsd:sequence>
-                     <xsd:element name="timestamp" type="xsd:string"/>
-                     <xsd:element name="detail" type="xsd:string"/>
-                 </xsd:sequence>
-             </xsd:complexType>
-         </xsd:schema>
-     </wsdl:types>
+                <xsd:sequence>
+                    <xsd:element name="timestamp" type="xsd:string"/>
+                    <xsd:element name="details" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </wsdl:types>
 
     <wsdl:message name="IdMessage">
         <wsdl:part name="timestamp" type="xsd:string"/>
@@ -52,43 +52,43 @@
     </wsdl:message>
     <wsdl:message name="ArticleMessage">
         <wsdl:part name="timestamp" type="xsd:string"/>
-        <wsdl:part name="article" element="ns1:article"/>
+        <wsdl:part name="article" element="tns:article"/>
     </wsdl:message>
     <wsdl:message name="PUTRequest">
         <wsdl:part name="articleId" type="xsd:string"/>
-        <wsdl:part name="article" element="ns1:article"/>
+        <wsdl:part name="article" element="tns:article"/>
     </wsdl:message>
     <wsdl:message name="CommentRequest">
         <wsdl:part name="articleId" type="xsd:string"/>
-        <wsdl:part name="comment" element="ns1:comment"/>
+        <wsdl:part name="comment" element="tns:comment"/>
     </wsdl:message>
     <wsdl:message name="UpdateFault">
-        <wsdl:part name="comment" element="fault"/>
+        <wsdl:part name="faultDetails" element="fault"/>
     </wsdl:message>
     <wsdl:message name="NoPartMessage"/>
 
 
     <wsdl:portType name="ArticlePortType">
         <wsdl:operation name="doGET">
-            <wsdl:input message="ns1:IdMessage"/>
-            <wsdl:output message="ns1:ArticleMessage"/>
+            <wsdl:input message="tns:IdMessage"/>
+            <wsdl:output message="tns:ArticleMessage"/>
         </wsdl:operation>
         <wsdl:operation name="doDELETE">
-            <wsdl:input message="ns1:IdMessage"/>
-            <wsdl:output message="ns1:NoPartMessage"/>
+            <wsdl:input message="tns:IdMessage"/>
+            <wsdl:output message="tns:NoPartMessage"/>
         </wsdl:operation>
         <wsdl:operation name="doPUT">
-            <wsdl:input message="ns1:PUTRequest"/>
-            <wsdl:output message="ns1:NoPartMessage"/>
+            <wsdl:input message="tns:PUTRequest"/>
+            <wsdl:output message="tns:NoPartMessage"/>
             <wsdl:fault name="UpdateFailed" message="UpdateFault"/>
         </wsdl:operation>
         <wsdl:operation name="doPOST">
-            <wsdl:input message="ns1:CommentRequest"/>
-            <wsdl:output message="ns1:NoPartMessage"/>
+            <wsdl:input message="tns:CommentRequest"/>
+            <wsdl:output message="tns:NoPartMessage"/>
         </wsdl:operation>
     </wsdl:portType>
 
-    <wsdl:binding name="binding" type="ns1:ArticlePortType">
+    <wsdl:binding name="binding" type="tns:ArticlePortType">
         <wsdl:operation name="doGET">
             <http:operation location=""/>
             <odex:binding verb="GET"/>
@@ -98,7 +98,7 @@
                 <odex:header name="TimestampHeader" part="timestamp"/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="article"/>                
+                <mime:content type="text/xml" part="article"/>
                 <!-- a part mapped to a non-standard header -->
                 <odex:header name="TimestampHeader" part="timestamp"/>
             </wsdl:output>
@@ -110,7 +110,7 @@
                 <http:urlReplacement/>
                 <odex:header name="TimestampHeader" part="timestamp"/>
                 <!-- a static value mapped to a standard header -->
-                <odex:header name="User-agent" value="MyKillerApp"/>
+                <odex:header name="User-Agent" value="MyKillerApp"/>
             </wsdl:input>
             <wsdl:output/>
         </wsdl:operation>
@@ -141,8 +141,8 @@
     </wsdl:binding>
 
     <wsdl:service name="service">
-        <wsdl:port name="port" binding="ns1:binding">
-            <http:address location="http://localhost/blog/article/{articleId}"/>
+        <wsdl:port name="port" binding="tns:binding">
+            <http:address location="http://localhost:7070/HttpBindingTest/BlogService/article/{articleId}"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
