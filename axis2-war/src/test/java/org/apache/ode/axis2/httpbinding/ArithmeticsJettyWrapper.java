@@ -53,7 +53,7 @@ public class ArithmeticsJettyWrapper {
         server = new Server(port);
         // Adding the buildr handler to control our server lifecycle
         ContextHandler context = new ContextHandler();
-        context.setContextPath("/HttpBindingTestService");
+        context.setContextPath("/HttpBindingTest/ArithmeticsService");
         Handler handler = new ArithmeticsServiceHandler();
         context.setHandler(handler);
 
