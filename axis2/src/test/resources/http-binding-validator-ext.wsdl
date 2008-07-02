@@ -36,7 +36,7 @@
                 <http:urlReplacement/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
@@ -51,7 +51,7 @@
                 <http:urlReplacement/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
@@ -69,7 +69,7 @@
                 <http:urlEncoded/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
@@ -84,7 +84,7 @@
                 <http:urlEncoded/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="bye">
@@ -93,7 +93,7 @@
                 <http:urlEncoded/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
@@ -108,23 +108,7 @@
                 <http:urlEncoded/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
-            </wsdl:output>
-        </wsdl:operation>
-    </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_verb_overridden" type="ns1:DummyServicePortType">
-        <wsdl:documentation>
-            shouldPass # Operation may override the verb defined in the port.
-        </wsdl:documentation>
-        <http:binding verb="GET"/>
-        <wsdl:operation name="hello">
-            <http:operation location="DummyService/hello"/>
-            <odex:binding verb="POST"/>
-            <wsdl:input>
-                <http:urlEncoded/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="hello"/>
+                <mime:content type="text/xml" part="part_0"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
