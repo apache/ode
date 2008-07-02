@@ -1203,6 +1203,7 @@ abstract class BpelCompiler implements CompilerContext {
         if (onAlarm.getRepeatEvery() != null)
             oalarm.repeatExpr = compileExpr(onAlarm.getRepeatEvery());
 
+        if (onAlarm.getActivity() == null) throw new CompilationException(__cmsgs.errInvalidAlarm().setSource(onAlarm));
         oalarm.activity = compile(onAlarm.getActivity());
 
         // Check links crossing restrictions.
@@ -1299,6 +1300,7 @@ abstract class BpelCompiler implements CompilerContext {
 
                 }
 
+                if (onEvent.getActivity() == null) throw new CompilationException(__cmsgs.errInvalidAlarm().setSource(onEvent));
                 oevent.activity = compile(onEvent.getActivity());
             }
         });
