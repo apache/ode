@@ -19,7 +19,7 @@
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
 	xmlns:pns="http://ode/bpel/unit-test" 
 	xmlns:wns="http://ode/bpel/unit-test.wsdl"
-    xmlns:dns="http://ode/bpel/arithmetics">
+    xmlns:dns="http://ode/bpel/test/arithmetics">
 
 
 	<process name="pns:HttpBindingTest">
@@ -28,19 +28,19 @@
 			<service name="wns:HelloService" port="HelloPort"/>
 		</provide>
         <invoke partnerLink="salutPartnerLink">
-            <service name="dns:HttpBindingTestService" port="SalutLaTerre_httpport"/>
+            <service name="dns:ArithmeticsService" port="SalutLaTerre_httpport"/>
         </invoke>
         <invoke partnerLink="olaGetPartnerLink">
-            <service name="dns:HttpBindingTestService" port="OlaElMundo-GET_httpport"/>
+            <service name="dns:ArithmeticsService" port="OlaElMundo-GET_httpport"/>
         </invoke>
         <invoke partnerLink="olaPostPartnerLink">
-            <service name="dns:HttpBindingTestService" port="OlaElMundo-POST_httpport"/>
+            <service name="dns:ArithmeticsService" port="OlaElMundo-POST_httpport"/>
         </invoke>
         <invoke partnerLink="olaPutPartnerLink">
-            <service name="dns:HttpBindingTestService" port="OlaElMundo-PUT_httpport"/>
+            <service name="dns:ArithmeticsService" port="OlaElMundo-PUT_httpport"/>
         </invoke>
         <invoke partnerLink="olaDeletePartnerLink">
-            <service name="dns:HttpBindingTestService" port="OlaElMundo-DELETE_httpport"/>
+            <service name="dns:ArithmeticsService" port="OlaElMundo-DELETE_httpport"/>
         </invoke>
     </process>
 </deploy>

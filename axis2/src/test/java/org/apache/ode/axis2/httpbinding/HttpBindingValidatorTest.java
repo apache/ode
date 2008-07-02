@@ -43,45 +43,54 @@ public class HttpBindingValidatorTest extends TestCase {
 
     private static final Log log = LogFactory.getLog(HttpBindingValidatorTest.class);
 
-    private Definition definition;
+    private String[] resources = new String[]{"/http-binding-validator.wsdl", "/http-binding-validator-ext.wsdl"};
+    private Definition[] definitions;
     private static final String SHOULD_FAIL = "shouldFail";
     private static final String SHOULD_PASS = "shouldPass";
 
     protected void setUp() throws Exception {
         super.setUp();
-        URL wsdlURL = getClass().getResource("/http-binding-validator.wsdl");
+
         WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
         wsdlReader.setFeature("javax.wsdl.verbose", false);
-        definition = wsdlReader.readWSDL(wsdlURL.toURI().toString());
+        definitions = new Definition[resources.length];
+        for (int i = 0; i < resources.length; i++) {
+            URL wsdlURL = getClass().getResource(resources[i]);
+            definitions[i] = wsdlReader.readWSDL(wsdlURL.toURI().toString());
+        }
     }
 
-    public void testAll(){
-        for (Iterator it = definition.getBindings().entrySet().iterator(); it.hasNext();) {
-            Map.Entry e = (Map.Entry) it.next();
-            QName name = (QName) e.getKey();
-            String localName = name.getLocalPart();
-            Binding binding = (Binding) e.getValue();
-            Element documentationElement = binding.getDocumentationElement();
-            if(documentationElement==null){
-                log.warn("Binding skipped : "+ localName +", <wsdl:documentation> missing ");
-                continue;
-            }
-            String doc = DOMUtils.getTextContent(documentationElement);
-            boolean shouldFail = doc.startsWith(SHOULD_FAIL);
-            boolean shouldPass = doc.startsWith(SHOULD_PASS);
-            if(!shouldFail && !shouldPass) {
-                fail("Binding: "+ localName +", <wsdl:documentation> content must start with '"+SHOULD_FAIL+"' or '"+SHOULD_PASS+"'. ");
-            }
+    public void testAll() {
+        for (int i = 0; i < definitions.length; i++) {
+            Definition def = definitions[i];
+            for (Iterator it = def.getBindings().entrySet().iterator(); it.hasNext();) {
+                Map.Entry e = (Map.Entry) it.next();
+                QName name = (QName) e.getKey();
+                String localName = name.getLocalPart();
+                Binding binding = (Binding) e.getValue();
+                Element documentationElement = binding.getDocumentationElement();
+                if (documentationElement == null) {
+                    log.warn("Binding skipped : " + localName + ", <wsdl:documentation> missing ");
+                    continue;
+                }
+                String doc = DOMUtils.getTextContent(documentationElement);
+                boolean shouldFail = doc.startsWith(SHOULD_FAIL);
+                boolean shouldPass = doc.startsWith(SHOULD_PASS);
+                if (!shouldFail && !shouldPass) {
+                    fail("Binding: " + localName + ", <wsdl:documentation> content must start with '" + SHOULD_FAIL + "' or '" + SHOULD_PASS + "'. ");
+                }
 
-            log.debug("Testing Binding : "+localName);
-            String msg = localName + " : " + doc;
-            try {
-                new HttpBindingValidator(binding).validate();
-                assertTrue(msg, shouldPass);
-            } catch (IllegalArgumentException e1) {
-                msg += " / Exception Msg is : "+e1.getMessage();
-                assertTrue(msg, shouldFail);
+                log.debug("Testing Binding : " + localName);
+                String msg = localName + " : " + doc;
+                try {
+                    new HttpBindingValidator(binding).validate();
+                    assertTrue(msg, shouldPass);
+                } catch (IllegalArgumentException e1) {
+                    msg += " / Exception Msg is : " + e1.getMessage();
+                    assertTrue(msg, shouldFail);
+                }
             }
         }
+
     }
 }

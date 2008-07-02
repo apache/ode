@@ -23,14 +23,14 @@ public class HttpBindingTest extends Axis2TestBase {
 
     private static final Log log = LogFactory.getLog(HttpBindingTest.class);
 
-    protected ArithmeticsJettyWrapper jettyWrapper;
+    protected JettyWrapper jettyWrapper;
 
     CountDownLatch latch;
 
     protected void setUp() throws Exception {
         super.setUp();
         latch = new CountDownLatch(1);
-        jettyWrapper = new ArithmeticsJettyWrapper(7070);
+        jettyWrapper = new JettyWrapper(7070);
         new Thread("HttpBindingJetty") {
             public void run() {
                 try {

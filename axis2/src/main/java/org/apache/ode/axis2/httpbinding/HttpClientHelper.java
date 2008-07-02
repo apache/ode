@@ -140,7 +140,7 @@ public class HttpClientHelper {
             if (bodyIsXml) {
                 try {
                     Element parsedBodyEl = DOMUtils.parse(bodyAsStream).getDocumentElement();
-                    bodyEl.appendChild(parsedBodyEl);
+                    bodyEl.appendChild(doc.importNode(parsedBodyEl, true));
                 } catch (Exception e) {
                     String errmsg = "Unable to parse the response body as xml. Body will be inserted as string.";
                     if (log.isDebugEnabled()) log.debug(errmsg, e);
