@@ -118,7 +118,7 @@ public class Properties {
         }
 
         public static Options translate(Map<String, String> properties, Options options) {
-            if (log.isDebugEnabled()) log.debug("Translating IL Properties for Axis2");
+            if (log.isDebugEnabled()) log.debug("Translating Properties for Axis2");
             if (properties.isEmpty()) return options;
             if (properties.containsKey(PROP_HTTP_CONNECTION_TIMEOUT)) {
                 final String value = properties.get(PROP_HTTP_CONNECTION_TIMEOUT);
@@ -175,7 +175,7 @@ public class Properties {
         }
 
         public static HttpParams translate(Map<String, String> properties, HttpParams p) {
-            if (log.isDebugEnabled()) log.debug("Translating IL Properties for HttpClient. Properties size="+properties.size());
+            if (log.isDebugEnabled()) log.debug("Translating Properties for HttpClient. Properties size="+properties.size());
             if (properties.isEmpty()) return p;
 
             // initialize the collection of headers
