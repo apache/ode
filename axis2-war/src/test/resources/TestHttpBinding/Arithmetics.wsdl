@@ -22,15 +22,15 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/"
         xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
         xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-        xmlns:tns="http://ode/bpel/arithmetics"
+        xmlns:tns="http://ode/bpel/test/arithmetics"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:odex="http://www.apache.org/ode/type/extension/http"
-        targetNamespace="http://ode/bpel/arithmetics">
+        targetNamespace="http://ode/bpel/test/arithmetics">
 
 
     <wsdl:types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/arithmetics">
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/test/arithmetics">
             <xsd:complexType name="operandListType">
                 <xsd:sequence>
                     <xsd:element name="operand" type="xsd:string" maxOccurs="unbounded" minOccurs="2"/>

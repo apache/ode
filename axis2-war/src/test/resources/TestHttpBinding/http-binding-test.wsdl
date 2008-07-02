@@ -25,7 +25,7 @@
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-    xmlns:dummy="http://ode/bpel/arithmetics"
+    xmlns:dummy="http://ode/bpel/test/arithmetics"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
     <wsdl:import namespace="http://axis2.ode.apache.org"
