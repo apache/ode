@@ -55,6 +55,38 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+output with multiple parts" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Operation ouptut binding may multiple parts.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+                <odex:header name="Age" part="part_1"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_get+output with 2 parts" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # Operation ouptut binding may have multiple parts, but only one may be mapped to 'text/xml'.
+        </wsdl:documentation>
+        <http:binding verb="GET"/>
+        <wsdl:operation name="hello">
+            <http:operation location=""/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="part_0"/>
+                <mime:content type="text/xml" part="part_1"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
 
     <!-- ###################################### -->
     <!-- Verb at the operation level -->
