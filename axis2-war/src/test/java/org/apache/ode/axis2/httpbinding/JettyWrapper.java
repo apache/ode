@@ -58,8 +58,13 @@ public class JettyWrapper {
         arithmeticsContext.setContextPath("/HttpBindingTest/ArithmeticsService");
         arithmeticsContext.setHandler(new ArithmeticsServiceHandler());
 
+        ContextHandler blogContext = new ContextHandler();
+        blogContext.setContextPath("/HttpBindingTest/BlogService");
+        blogContext.setHandler(new BlogServiceHandler());
+
         handlerColl = new ContextHandlerCollection();
-        handlerColl.setHandlers(new Handler[]{arithmeticsContext});
+        Handler[] handlers = {arithmeticsContext, blogContext};
+        handlerColl.setHandlers(handlers);
 
         server.addHandler(handlerColl);
     }
@@ -229,6 +234,92 @@ public class JettyWrapper {
             }
         }
 
+    }
+
+
+    private class BlogServiceHandler extends AbstractHandler {
+
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
+            String method = request.getMethod();
+            // actually we don't really care about this is.
+            String articleId = s.substring(s.lastIndexOf("/") + 1);
+
+            if ("GET".equalsIgnoreCase(method)) {
+                doGet(request, response, articleId);
+            } else if ("PUT".equalsIgnoreCase(method)) {
+                doPut(request, response, articleId);
+            } else if ("POST".equalsIgnoreCase(method)) {
+                doPost(request, response, articleId);
+            } else if ("DELETE".equalsIgnoreCase(method)) {
+                doDelete(request, response, articleId);
+            }
+            ((Request) request).setHandled(true);
+        }
+
+        private void doGet(HttpServletRequest request, HttpServletResponse response, String articleId) throws IOException {
+            // doGET must receive a custom header, just send it back and let the caller check the received value
+            response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+
+            response.setContentType("text/xml");
+            Document doc = DOMUtils.newDocument();
+            Element articleEl = doc.createElementNS("http://ode/bpel/test/blog", "article");
+            Element idEl = doc.createElementNS("http://ode/bpel/test/blog", "id");
+            Element titleEl = doc.createElementNS("http://ode/bpel/test/blog", "title");
+
+            articleEl.appendChild(idEl);
+            articleEl.appendChild(titleEl);
+
+            idEl.setTextContent(articleId);
+            titleEl.setTextContent("A title with a random number " + System.currentTimeMillis());
+
+            response.getOutputStream().print(DOMUtils.domToString(articleEl));
+            response.setStatus(200);
+        }
+
+        private void doPost(HttpServletRequest request, HttpServletResponse response, String articleId) {
+            response.setHeader("Location", "http://examples.org/a_new_comment_on_article_" + articleId);
+            response.setStatus(201); // Created
+        }
+
+
+        private void doPut(HttpServletRequest request, HttpServletResponse response, String articleId) throws IOException {
+            String faultType = request.getHeader("Fault-Type");
+            if (faultType.startsWith("500_no_body")) {
+                response.setStatus(500);
+            } else if (faultType.startsWith("500_text_body")) {
+                response.setContentType("text");
+                response.getOutputStream().print("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
+                response.setStatus(500);
+            } else if (faultType.startsWith("500_unknown_xml_body")) {
+                response.setContentType("text/xml");
+                response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract></book>");
+                response.setStatus(500);
+            } else if (faultType.startsWith("500_expected_xml_body")) {
+                response.setContentType("text/xml");
+
+                Document doc = DOMUtils.newDocument();
+                Element faultEl = doc.createElementNS("http://ode/bpel/test/blog", "fault");
+                Element timestamptEl = doc.createElementNS("http://ode/bpel/test/blog", "timestamp");
+                Element detailsEl = doc.createElementNS("http://ode/bpel/test/blog", "details");
+
+                faultEl.appendChild(timestamptEl);
+                faultEl.appendChild(detailsEl);
+
+                timestamptEl.setTextContent("" + System.currentTimeMillis());
+                detailsEl.setTextContent("Fake fault with the expected xml body.");
+
+                response.getOutputStream().print(DOMUtils.domToString(faultEl));
+                response.setStatus(500);
+            } else {
+                response.setStatus(200);
+            }
+        }
+
+        private void doDelete(HttpServletRequest request, HttpServletResponse response, String articleId) {
+            response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+            response.setHeader("User-Agent", request.getHeader("User-Agent"));
+            response.setStatus(204); // No content
+        }
     }
 
 
