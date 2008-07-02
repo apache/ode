@@ -22,7 +22,7 @@
          xmlns:tns="http://ode/bpel/unit-test"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:test="http://ode/bpel/unit-test.wsdl"
-         xmlns:dummy="http://ode/bpel/arithmetics"
+         xmlns:dummy="http://ode/bpel/test/arithmetics"
          queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
          expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
