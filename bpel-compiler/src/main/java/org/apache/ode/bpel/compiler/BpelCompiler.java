@@ -1473,6 +1473,8 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
                                 ctch.faultVariable = faultVar;
                             }
 
+                            if (catchSrc.getActivity() == null)
+                                throw new CompilationException(__cmsgs.errEmptyCatch().setSource(catchSrc));
                             _structureStack.topScope().activity = compile(catchSrc.getActivity());
                         }
                     });
