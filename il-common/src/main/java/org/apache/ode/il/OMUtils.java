@@ -159,10 +159,10 @@ public class OMUtils {
             OMNamespace attrOmNs = null;
             String attrNs = attr.getNamespaceURI();
             String attrPrefix = attr.getPrefix();
-            if (attrNs != null)
-                attrOmNs = omElement.findNamespace(attrNs,null);
-            if (attrOmNs == null && attrPrefix != null)
-                attrOmNs = omElement.findNamespace(null, attrPrefix);
+            if (attrNs != null) attrOmNs = omElement.findNamespace(attrNs,null);
+            if (attrOmNs == null && attrPrefix != null) attrOmNs = omElement.findNamespace(null, attrPrefix);
+            if (attrOmNs == null && attrNs != null) attrOmNs = omf.createOMNamespace(attrNs, null);
+
             omElement.addAttribute(attr.getLocalName(), attr.getValue(), attrOmNs);
         }
 
