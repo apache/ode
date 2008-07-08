@@ -557,7 +557,8 @@ class ASSIGN extends ACTIVITY {
             } else if (part.type == null) {
                 // Special case of header parts never referenced in the WSDL def
                 if (qualLVal != null && qualLVal.getNodeType() == Node.ELEMENT_NODE
-                        && ((Element)qualLVal).getAttribute("headerPart") != null)
+                        && ((Element)qualLVal).getAttribute("headerPart") != null
+                        && DOMUtils.getTextContent(qualLVal) == null)
                     qualLVal = DOMUtils.getFirstChildElement((Element) qualLVal);
                 // The needed part isn't there, dynamically creating it
                 if (qualLVal == null) {
