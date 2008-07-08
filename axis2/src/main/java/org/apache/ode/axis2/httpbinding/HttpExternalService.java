@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.axis2.Properties;
@@ -58,6 +59,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -313,6 +315,7 @@ public class HttpExternalService implements ExternalService {
             PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             Operation opDef = odeMex.getOperation();
             BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
+            String body = method.getResponseBodyAsString();
             if (opDef.getFaults().isEmpty()) {
                 errmsg = "Operation " + opDef.getName() + " has no fault. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
@@ -321,14 +324,13 @@ public class HttpExternalService implements ExternalService {
                 errmsg = "No fault binding. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
                 odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
-            } else if (method.getResponseBodyAsStream() == null) {
+            } else if (StringUtils.isEmpty(body)) {
                 errmsg = "No body in the response. This 500 error will be considered as a failure.";
                 if (log.isDebugEnabled()) log.debug(errmsg);
                 odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
             } else {
-                final InputStream bodyAsStream = method.getResponseBodyAsStream();
                 try {
-                    Element bodyEl = DOMUtils.parse(bodyAsStream).getDocumentElement();
+                    Element bodyEl = DOMUtils.stringToDOM(body);
                     QName bodyName = new QName(bodyEl.getNamespaceURI(), bodyEl.getNodeName());
                     Fault faultDef = WsdlUtils.inferFault(opDef, bodyName);
 
@@ -400,8 +402,8 @@ public class HttpExternalService implements ExternalService {
 
 
             try {
-                final InputStream bodyAsStream = method.getResponseBodyAsStream();
-                if (isBodyMandatory && bodyAsStream == null) {
+                final String body = method.getResponseBodyAsString();
+                if (isBodyMandatory && StringUtils.isEmpty(body)) {
                     String errmsg = "Response body is mandatory but missing! Msg Id=" + odeMex.getMessageExchangeId();
                     log.error(errmsg);
                     odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
@@ -410,10 +412,10 @@ public class HttpExternalService implements ExternalService {
                     Message odeResponse = odeMex.createMessage(outputMessage.getQName());
 
                     // handle the body if any
-                    if (bodyAsStream != null) {
+                    if (StringUtils.isNotEmpty(body)) {
                         // only text/xml is supported in the response body
                         try {
-                            Element bodyElement = DOMUtils.parse(bodyAsStream).getDocumentElement();
+                            Element bodyElement = DOMUtils.stringToDOM(body);
                             Part part = outputMessage.getPart(outputContent.getPart());
                             Element partElement = httpMethodConverter.createPartElement(part, bodyElement);
                             odeResponse.setPart(part.getName(), partElement);

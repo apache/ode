@@ -134,8 +134,8 @@ public class HttpClientHelper {
         detailsEl.appendChild(statusLineEl);
 
         // set the body if any
-        final InputStream bodyAsStream = method.getResponseBodyAsStream();
-        if (bodyAsStream != null) {
+        final String body = method.getResponseBodyAsString();
+        if (StringUtils.isNotEmpty(body)) {
             Element bodyEl = doc.createElementNS(null, "responseBody");
             detailsEl.appendChild(bodyEl);
             // first, try to parse the body as xml
@@ -143,7 +143,7 @@ public class HttpClientHelper {
             boolean exceptionDuringParsing = false;
             if (bodyIsXml) {
                 try {
-                    Element parsedBodyEl = DOMUtils.parse(bodyAsStream).getDocumentElement();
+                    Element parsedBodyEl = DOMUtils.stringToDOM(body);
                     bodyEl.appendChild(doc.importNode(parsedBodyEl, true));
                 } catch (Exception e) {
                     String errmsg = "Unable to parse the response body as xml. Body will be inserted as string.";
