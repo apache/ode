@@ -342,6 +342,7 @@ public class HttpExternalService implements ExternalService {
                         if (log.isDebugEnabled()) log.debug(errmsg);
                         odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpClientHelper.prepareDetailsElement(method));
                     } else {
+                        // a fault must have only one part
                         Part partDef = (Part) faultDef.getMessage().getParts().values().iterator().next();
 
                         // build the element to be sent back
@@ -413,9 +414,7 @@ public class HttpExternalService implements ExternalService {
                         // only text/xml is supported in the response body
                         try {
                             Element bodyElement = DOMUtils.parse(bodyAsStream).getDocumentElement();
-                            // we expect a single part per output message
-                            // see org.apache.ode.axis2.httpbinding.HttpBindingValidator call in constructor
-                            Part part = (Part) outputMessage.getParts().values().iterator().next();
+                            Part part = outputMessage.getPart(outputContent.getPart());
                             Element partElement = httpMethodConverter.createPartElement(part, bodyElement);
                             odeResponse.setPart(part.getName(), partElement);
                         } catch (Exception e) {
@@ -432,7 +431,7 @@ public class HttpExternalService implements ExternalService {
                     try {
 
                         if (log.isInfoEnabled())
-                            log.info("Response:\n" + DOMUtils.domToString(odeResponse.getMessage()));
+                            log.info("Response:\n" + (odeResponse.getMessage() != null ? DOMUtils.domToString(odeResponse.getMessage()) : "empty"));
                         odeMex.reply(odeResponse);
                     } catch (Exception ex) {
                         String errmsg = "Unable to process response: " + ex.getMessage();
