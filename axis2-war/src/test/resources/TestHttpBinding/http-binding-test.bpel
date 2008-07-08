@@ -214,10 +214,10 @@
             <copy>
                 <from>
                     <literal>
-                        <dummy:myList>
+                        <dummy:operandList>
                             <dummy:operand>0</dummy:operand>
                             <dummy:operand></dummy:operand>
-                        </dummy:myList>
+                        </dummy:operandList>
                     </literal>
                 </from>
                 <to>$sumOfIntegersInput.range</to>
