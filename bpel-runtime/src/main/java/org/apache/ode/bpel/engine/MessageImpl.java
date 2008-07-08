@@ -121,15 +121,17 @@ public class MessageImpl implements Message {
         return parts;
     }
 
-    public Map<String, Element> getHeaderParts() {
-        HashMap<String,Element> l = new HashMap<String,Element>();
+    public Map<String, Node> getHeaderParts() {
+        HashMap<String,Node> l = new HashMap<String,Node>();
         Element header =  _dao.getHeader();
         if (header != null) {
             NodeList children = header.getChildNodes();
             for (int m = 0; m < children.getLength(); m++)
                 if (children.item(m).getNodeType() == Node.ELEMENT_NODE) {
                     Element part = (Element) children.item(m);
-                    l.put(part.getLocalName(), DOMUtils.getFirstChildElement(part));
+                    Node node = DOMUtils.findChildByType(part, Node.ELEMENT_NODE);
+                    if (node == null) node = DOMUtils.findChildByType(part, Node.TEXT_NODE);
+                    l.put(part.getLocalName(), node);
                 }
         }
         return l;

@@ -204,7 +204,7 @@ public class HttpMethodConverterTest extends TestCase {
             return null;
         }
 
-        public Map<String, Element> getHeaderParts() {
+        public Map<String, Node> getHeaderParts() {
             return null;
         }
 

@@ -398,7 +398,7 @@ class ASSIGN extends ACTIVITY {
                 }
 
                 if (headerAssign && lvaluePtr.getParentNode().getNodeName().equals("message")) {
-                    lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, (Element) rvalue);
+                    lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, rvalue);
                 } else if (rvalue.getNodeType() == Node.ELEMENT_NODE && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
                     lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
                             ocopy.keepSrcElementName);
@@ -464,7 +464,7 @@ class ASSIGN extends ACTIVITY {
         return (lval == ptr) ? replacement :  lval;
     }
 
-    private Element copyInto(Element lval, Element ptr, Element src) {
+    private Element copyInto(Element lval, Element ptr, Node src) {
         ptr.appendChild(ptr.getOwnerDocument().importNode(src, true));
         return lval;
     }
