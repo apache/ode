@@ -170,19 +170,7 @@ class ScopeFrame implements Serializable {
     // 
     
     Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting) 
-        throws FaultException
-    {
-    	// Special case of messageType variables with no part
-        if (variable.declaration.type instanceof OMessageVarType) {
-            OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
-            if (msgType.parts.size() == 0) {
-                Document doc = DOMUtils.newDocument();
-                Element root = doc.createElement("message");
-                doc.appendChild(root);
-                return root;
-            }
-        }
-
+            throws FaultException {
         if (variable.declaration.extVar != null) {
             // Note, that when using external variables, the database will not contain the value of the
         	// variable, instead we need to go the external variable subsystems. 
@@ -207,6 +195,16 @@ class ScopeFrame implements Serializable {
         } else /* not external */ {
             Node data = brc.readVariable(variable.scopeInstance,variable.declaration.name, forWriting);
             if (data == null) {
+                // Special case of messageType variables with no part
+                if (variable.declaration.type instanceof OMessageVarType) {
+                    OMessageVarType msgType = (OMessageVarType) variable.declaration.type;
+                    if (msgType.parts.size() == 0) {
+                        Document doc = DOMUtils.newDocument();
+                        Element root = doc.createElement("message");
+                        doc.appendChild(root);
+                        return root;
+                    }
+                }
                 throw new FaultException(oscope.getOwner().constants.qnUninitializedVariable,
                         "The variable " + variable.declaration.name + " isn't properly initialized.");
             }
