@@ -65,7 +65,7 @@
         <wsdl:part name="result" element="tns:theresult"/>
     </wsdl:message>
     <wsdl:message name="sumOfIntegersRequest">
-        <wsdl:part name="range" type="tns:operandListType"/>
+        <wsdl:part name="range" element="tns:operandList"/>
     </wsdl:message>
     <wsdl:message name="sumOfIntegersResponse">
         <wsdl:part name="result" type="tns:resultType"/>
