@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 /**
@@ -79,7 +80,7 @@ public interface Message {
      * Gets all header parts in the message.
      * @return
      */
-    Map<String, Element> getHeaderParts();
+    Map<String, Node> getHeaderParts();
 
     /**
      * Set the message as an element. The name of the element is irrelevant,

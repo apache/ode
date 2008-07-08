@@ -67,6 +67,7 @@ import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * SOAP/ODE Message converter. Uses WSDL binding information to convert the protocol-neutral ODE representation into a SOAP
@@ -196,19 +197,23 @@ public class SoapMessageConverter {
         }
     }
 
-    public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, Map<String,Element> headers) throws AxisFault {
+    public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, Map<String,Node> headers) throws AxisFault {
         for (SOAPHeader sh : headerDefs) handleSoapHeaderDef(soapEnv, sh, msgdef, headers);
 
         org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
         if (soaphdr == null) soaphdr = _soapFactory.createSOAPHeader(soapEnv);
 
-        for (Element headerElmt : headers.values())
-            if (soaphdr.getFirstChildWithName(new QName(headerElmt.getNamespaceURI(), headerElmt.getLocalName())) == null)
-                soaphdr.addChild(OMUtils.toOM(headerElmt, _soapFactory));
+        for (Node headerNode : headers.values())
+            if (headerNode.getNodeType() == Node.ELEMENT_NODE) {
+                if (soaphdr.getFirstChildWithName(new QName(headerNode.getNamespaceURI(), headerNode.getLocalName())) == null)
+                    soaphdr.addChild(OMUtils.toOM((Element) headerNode, _soapFactory));
+            } else {
+                throw new OdeFault(__msgs.msgSoapHeaderMustBeAnElement(headerNode));
+            }
     }
 
     @SuppressWarnings("unchecked")
-    private void handleSoapHeaderDef(SOAPEnvelope soapEnv, SOAPHeader headerdef, Message msgdef, Map<String,Element> headers) throws AxisFault {
+    private void handleSoapHeaderDef(SOAPEnvelope soapEnv, SOAPHeader headerdef, Message msgdef, Map<String, Node> headers) throws AxisFault {
         boolean payloadMessageHeader = headerdef.getMessage() == null || headerdef.getMessage().equals(msgdef.getQName());
 
         if (headerdef.getPart() == null) return;
@@ -217,9 +222,13 @@ public class SoapMessageConverter {
             throw new OdeFault(__msgs.msgSoapHeaderReferencesUnkownPart(headerdef.getPart()));
 
         Element srcPartEl = null;
-        if (headers.size() > 0)
-            if (payloadMessageHeader)
-                srcPartEl = headers.get(headerdef.getPart());
+        if (headers.size() > 0 && payloadMessageHeader){
+            try {
+                srcPartEl = (Element) headers.get(headerdef.getPart());
+            } catch (ClassCastException e) {
+                throw new OdeFault(__msgs.msgSoapHeaderMustBeAnElement(headers.get(headerdef.getPart())));
+            }
+        }
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.

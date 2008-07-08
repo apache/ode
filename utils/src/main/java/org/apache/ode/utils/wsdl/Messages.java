@@ -19,6 +19,7 @@
 package org.apache.ode.utils.wsdl;
 
 import org.apache.ode.utils.msg.MessageBundle;
+import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -104,6 +105,11 @@ public class Messages extends MessageBundle {
 
     public Throwable msgSOAPBodyDoesNotContainAllRequiredParts() {
         String s = format("SOAP body does not contain all required parts");
+        return new IllegalArgumentException(s);
+    }
+
+    public Throwable msgSoapHeaderMustBeAnElement(Node headerNode) {
+        String s = format("SOAP header must be an element: {0}.", headerNode);
         return new IllegalArgumentException(s);
     }
 
