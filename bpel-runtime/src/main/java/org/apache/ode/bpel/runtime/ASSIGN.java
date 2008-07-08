@@ -402,14 +402,13 @@ class ASSIGN extends ACTIVITY {
                         rvalue = ((Document)rvalue).getDocumentElement();
                 }
 
-                if (headerAssign && lvaluePtr.getParentNode().getNodeName().equals("message")) {
-                    lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, rvalue);
+                if (headerAssign && lvaluePtr.getParentNode().getNodeName().equals("message") && rvalue.getNodeType()==Node.ELEMENT_NODE) {
+                    lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, (Element) rvalue);
                 } else if (rvalue.getNodeType() == Node.ELEMENT_NODE && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
                     lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
                             ocopy.keepSrcElementName);
                 } else {
-                    lvalue = replaceContent(lvalue, lvaluePtr, rvalue
-                            .getTextContent());
+                    lvalue = replaceContent(lvalue, lvaluePtr, rvalue.getTextContent());
                 }
                 final VariableInstance lval = _scopeFrame.resolve(ocopy.to.getVariable());
                 if (__log.isDebugEnabled())
@@ -469,7 +468,7 @@ class ASSIGN extends ACTIVITY {
         return (lval == ptr) ? replacement :  lval;
     }
 
-    private Element copyInto(Element lval, Element ptr, Node src) {
+    private Element copyInto(Element lval, Element ptr, Element src) {
         ptr.appendChild(ptr.getOwnerDocument().importNode(src, true));
         return lval;
     }
