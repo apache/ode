@@ -202,15 +202,15 @@ public class JettyWrapper {
                             Document bodyDoc = parseBody(request.getInputStream(), response);
                             if (bodyDoc != null) {
                                 Element firstOperand = DOMUtils.getFirstChildElement(bodyDoc.getDocumentElement());
-                                Element secondElement = DOMUtils.getNextSiblingElement(firstOperand);
+                                Element secondOperand = DOMUtils.getNextSiblingElement(firstOperand);
                                 int left = Integer.valueOf(DOMUtils.getTextContent(firstOperand));
-                                int right = Integer.valueOf(DOMUtils.getTextContent(secondElement));
+                                int right = Integer.valueOf(DOMUtils.getTextContent(secondOperand));
 
                                 int min = Math.min(left,right);
                                 int max = Math.max(left,right);
 //                                Element arrayElt = bodyDoc.createElement("sumOfInteger");
                                 Element anElt = bodyDoc.createElementNS("http://ode/bpel/test/arithmetics", "sumOfInteger");
-                                Element msg = bodyDoc.createElement("msg");
+                                Element msg = bodyDoc.createElement("theresult");
                                 Element resultIs = bodyDoc.createElement("resultIs");
                                 msg.setTextContent("A dummy message we don't care about. Only purpose is to have a complex type");
                                 resultIs.setTextContent(String.valueOf((max*(max+1)-min*(min+1))/2));
@@ -292,7 +292,7 @@ public class JettyWrapper {
 
 
         private void doPut(HttpServletRequest request, HttpServletResponse response, String articleId) throws IOException {
-            String faultType = request.getHeader("Fault-Type");
+            String faultType = request.getHeader("Fault-Type")!=null?request.getHeader("Fault-Type"):"";
             if (faultType.startsWith("500_no_body")) {
                 response.setStatus(500);
             } else if (faultType.startsWith("500_text_body")) {
