@@ -96,7 +96,8 @@ public class HttpMethodConverter {
         String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
 
         // build the http method itself
-        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, url, params);
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, odeMex.getRequest().getHeaderParts(), url, params);
+
         return method;
     }
 
@@ -108,7 +109,7 @@ public class HttpMethodConverter {
      * See usages of HostParams.DEFAULT_HEADERS
      * See org.apache.commons.httpclient.HttpMethodDirector#executeMethod(org.apache.commons.httpclient.HttpMethod)
      */
-    protected HttpMethod prepareHttpMethod(BindingOperation opBinding, String verb, Map<String, Element> partValues,
+    protected HttpMethod prepareHttpMethod(BindingOperation opBinding, String verb, Map<String, Element> partValues, Map<String, Node> headers,
                                            final String rootUri, HttpParams params) throws UnsupportedEncodingException {
         if (log.isDebugEnabled()) log.debug("Preparing http request...");
         // convenience variables...
@@ -209,7 +210,7 @@ public class HttpMethodConverter {
         method.setQueryString(queryPath);
 
         // headers
-        setHttpRequestHeaders(method, partValues, opBinding.getOperation().getInput().getMessage(), opBinding.getBindingInput());
+        setHttpRequestHeaders(method, partValues, headers, opBinding.getOperation().getInput().getMessage(), opBinding.getBindingInput());
         return method;
     }
 
@@ -217,7 +218,9 @@ public class HttpMethodConverter {
      * Go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding. For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
      * or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
      */
-    public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Message inputMessage, BindingInput bindingInput) {
+    public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Map<String, Node> headers, Message inputMessage, BindingInput bindingInput) {
+
+        // process parts that are bound to message parts
         Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(bindingInput.getExtensibilityElements());
         for (Iterator<UnknownExtensibilityElement> iterator = headerBindings.iterator(); iterator.hasNext();) {
             Element binding = iterator.next().getElement();
@@ -227,21 +230,23 @@ public class HttpMethodConverter {
 
             String headerValue;
             if (StringUtils.isNotEmpty(partName)) {
+                // 'part' attribute is used
                 // get the part to be put in the header
                 Part part = inputMessage.getPart(partName);
-                Element partValue = partValues.get(part.getName());
+                Element partWrapper = partValues.get(part.getName());
                 // if the part has an element name, we must take the first element
                 if (part.getElementName() != null) {
-                    headerValue = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
+                    headerValue = DOMUtils.domToString(DOMUtils.getFirstChildElement(partWrapper));
                 } else {
-                    if (DOMUtils.getFirstChildElement(partValue) != null) {
+                    if (DOMUtils.getFirstChildElement(partWrapper) != null) {
                         String errMsg = "Complex types are not supported. Header Parts must use elements or simple types.";
                         if (log.isErrorEnabled()) log.error(errMsg);
                         throw new RuntimeException(errMsg);
                     }
-                    headerValue = DOMUtils.getTextContent(partValue);
+                    headerValue = DOMUtils.getTextContent(partWrapper);
                 }
             } else if (StringUtils.isNotEmpty(value)) {
+                // 'value' attribute is used, this header is a static value
                 headerValue = value;
             } else {
                 String errMsg = "Invalid binding: missing attribute! Expecting " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part") + " or " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "value");
@@ -250,6 +255,19 @@ public class HttpMethodConverter {
             }
             method.setRequestHeader(headerName, HttpClientHelper.replaceCRLFwithLWS(headerValue));
         }
+
+        // process message headers
+        for (Iterator<Map.Entry<String, Node>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
+            Map.Entry<String, Node> e = iterator.next();
+            String headerName = e.getKey();
+            Node headerNode = e.getValue();
+            // set the request header but do not override any part value
+            if (method.getRequestHeader(headerName) == null) {
+                String headerValue = DOMUtils.domToString(headerNode);
+                method.setRequestHeader(headerName, HttpClientHelper.replaceCRLFwithLWS(headerValue));
+            }
+        }
+
     }
 
 
