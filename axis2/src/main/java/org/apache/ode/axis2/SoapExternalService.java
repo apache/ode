@@ -73,7 +73,7 @@ import org.w3c.dom.Element;
  *
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class SoapExternalService implements ExternalService {
+public class    SoapExternalService implements ExternalService {
 
     private static final Log __log = LogFactory.getLog(SoapExternalService.class);
 
@@ -336,7 +336,6 @@ return endpointReference;
                             Element odeMsgEl = odeMsg.createElementNS(null, "message");
                             odeMsg.appendChild(odeMsgEl);
                             QName faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
-                            if (__log.isDebugEnabled()) __log.debug("Reply is a fault, found type: " + faultType);
 
                             if (faultType != null) {
                                 if (__log.isWarnEnabled())
