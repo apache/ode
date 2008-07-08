@@ -485,7 +485,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	public Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException {
 		ScopeDAO scopedao = _dao.getScope(scopeInstanceId);
 		XmlDataDAO var = scopedao.getVariable(varname);
-		return var.isNull() ? null : var.get();
+		return (var == null || var.isNull()) ? null : var.get();
 	}
 	
     public Node writeVariable(VariableInstance variable, Node changes) {
