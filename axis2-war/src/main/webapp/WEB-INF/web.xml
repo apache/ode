@@ -67,6 +67,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+	    <servlet-name>AxisServlet</servlet-name>
+	    <url-pattern>/deployment/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>AxisAdminServlet</servlet-name>
         <url-pattern>/axis2-admin/*</url-pattern>
     </servlet-mapping>
