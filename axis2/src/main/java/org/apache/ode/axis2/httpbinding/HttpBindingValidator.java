@@ -95,12 +95,6 @@ public class HttpBindingValidator {
             if (!inputContentType.endsWith("text/xml") && !PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(inputContentType)) {
                 throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
             }
-            Map inputParts = bindingOperation.getOperation().getInput().getMessage().getParts();
-            if (inputParts.size() > 1) {
-                if (!PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(inputContentType)) {
-                    throw new IllegalArgumentException(httpMsgs.msgInvalidContentType(binding, bindingOperation));
-                }
-            }
         }
 
         if (WsdlUtils.useUrlReplacement(input)) {
