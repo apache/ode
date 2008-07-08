@@ -140,7 +140,7 @@
         </wsdl:operation>
     </wsdl:binding>
 
-    <wsdl:service name="service">
+    <wsdl:service name="BlogService">
         <wsdl:port name="port" binding="tns:binding">
             <http:address location="http://localhost:7070/HttpBindingTest/BlogService/article/{articleId}"/>
         </wsdl:port>
