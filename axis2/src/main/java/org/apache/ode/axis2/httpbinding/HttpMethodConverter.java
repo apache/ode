@@ -179,10 +179,13 @@ public class HttpMethodConverter {
                 Element partValue = partValues.get(part.getName());
                 // if the part has an element name, we must take the first element
                 if (part.getElementName() != null) {
-                    partValue = DOMUtils.getFirstChildElement(partValue);
+                    String xmlString = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
+                    requestEntity = new ByteArrayRequestEntity(xmlString.getBytes(), contentType);
+                } else {
+                    String errMsg = "Types are not supported with 'text/xml'. Parts must use elements.";
+                    if (log.isErrorEnabled()) log.error(errMsg);
+                    throw new RuntimeException(errMsg);
                 }
-                String xmlString = DOMUtils.domToString(partValue);
-                requestEntity = new ByteArrayRequestEntity(xmlString.getBytes(), contentType);
             } else {
                 // should not happen because of HttpBindingValidator, but never say never
                 throw new IllegalArgumentException("Unsupported content-type!");
@@ -210,7 +213,7 @@ public class HttpMethodConverter {
 
     /**
      * Go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding. For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
-     *  or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
+     * or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
      */
     public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Message inputMessage, BindingInput bindingInput) {
         Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(bindingInput.getExtensibilityElements());
@@ -222,19 +225,25 @@ public class HttpMethodConverter {
 
             String headerValue;
             if (StringUtils.isNotEmpty(partName)) {
-                // get the part to be put in the body
+                // get the part to be put in the header
                 Part part = inputMessage.getPart(partName);
                 Element partValue = partValues.get(part.getName());
                 // if the part has an element name, we must take the first element
-                if (part.getElementName() != null) partValue = DOMUtils.getFirstChildElement(partValue);
-                headerValue = DOMUtils.domToString(partValue);
+                if (part.getElementName() != null) {
+                    headerValue = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
+                } else {
+                    if (DOMUtils.getFirstChildElement(partValue) != null) {
+                        String errMsg = "Complex types are not supported. Header Parts must use elements or simple types.";
+                        if (log.isErrorEnabled()) log.error(errMsg);
+                        throw new RuntimeException(errMsg);
+                    }
+                    headerValue = DOMUtils.getTextContent(partValue);
+                }
             } else if (StringUtils.isNotEmpty(value)) {
                 headerValue = value;
             } else {
                 String errMsg = "Invalid binding: missing attribute! Expecting " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part") + " or " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "value");
-                if (log.isErrorEnabled()) {
-                    log.error(errMsg);
-                }
+                if (log.isErrorEnabled()) log.error(errMsg);
                 throw new RuntimeException(errMsg);
             }
             method.setRequestHeader(headerName, HttpClientHelper.replaceCRLFwithLWS(headerValue));
@@ -336,7 +345,7 @@ public class HttpMethodConverter {
 
             Part part = messageDef.getPart(partName);
             if (StringUtils.isNotEmpty(partName)) {
-                odeMessage.setPart(partName, createPartElement(part, method.getRequestHeader(headerName).getValue()));
+                odeMessage.setPart(partName, createPartElement(part, method.getResponseHeader(headerName).getValue()));
             } else {
                 String errMsg = "Invalid binding: missing required attribute! Part name: " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part");
                 if (log.isErrorEnabled()) log.error(errMsg);
