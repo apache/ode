@@ -272,7 +272,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 Element odeMsgEl = odeMsg.createElementNS(null, "message");
                 odeMsg.appendChild(odeMsgEl);
                 QName faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
-                if (__log.isDebugEnabled()) __log.debug("Reply is a fault, found type: " + faultType);
 
                 if (faultType != null) {
                     if (__log.isWarnEnabled())
