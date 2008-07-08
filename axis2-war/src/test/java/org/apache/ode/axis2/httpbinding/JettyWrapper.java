@@ -283,18 +283,18 @@ public class JettyWrapper {
 
 
         private void doPut(HttpServletRequest request, HttpServletResponse response, String articleId) throws IOException {
-            String faultType = request.getHeader("Fault-Type")!=null?request.getHeader("Fault-Type"):"";
-            if (faultType.startsWith("500_no_body")) {
+            String faultType = request.getHeader("Fault-Type");
+            if ("500_no_body".equals(faultType)) {
                 response.setStatus(500);
-            } else if (faultType.startsWith("500_text_body")) {
+            } else if ("500_text_body".equals(faultType)) {
                 response.setContentType("text");
                 response.getOutputStream().print("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
                 response.setStatus(500);
-            } else if (faultType.startsWith("500_unknown_xml_body")) {
+            } else if ("500_unknown_xml_body".equals(faultType)) {
                 response.setContentType("text/xml");
                 response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract></book>");
                 response.setStatus(500);
-            } else if (faultType.startsWith("500_expected_xml_body")) {
+            } else if ("500_expected_xml_body".equals(faultType)) {
                 response.setContentType("text/xml");
 
                 Document doc = DOMUtils.newDocument();
