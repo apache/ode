@@ -208,13 +208,7 @@ public class DOMUtils {
      * @return the first child element.
      */
     public static Element getFirstChildElement(Element elem) {
-        if (elem == null)
-            throw new NullPointerException("elem parameter must not be null!");
-
-        for (Node n = elem.getFirstChild(); n != null; n = n.getNextSibling()) {
-            if (n.getNodeType() == Node.ELEMENT_NODE) { return (Element) n; }
-        }
-        return null;
+        return (Element) findChildByType(elem, Node.ELEMENT_NODE);
     }
 
     /**
@@ -767,6 +761,19 @@ public class DOMUtils {
                 Element result = findChildByName((Element)c, name, recurse);
                 if(result != null)
                     return result;
+            }
+        }
+        return null;
+    }
+
+
+    public static Node findChildByType(Element elem, int type) {
+        if (elem == null)
+            throw new NullPointerException("elem parameter must not be null!");
+
+        for (Node n = elem.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n.getNodeType() == type) {
+                return n;
             }
         }
         return null;
