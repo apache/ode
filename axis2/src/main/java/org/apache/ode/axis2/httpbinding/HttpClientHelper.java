@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
