@@ -353,12 +353,15 @@ public class HttpMethodConverter {
             }
         }
 
-        // also add all HTTP headers into the messade as header parts
+        // add all HTTP headers into the messade as header parts
         Header[] reqHeaders = method.getResponseHeaders();
         for (int i = 0; i < reqHeaders.length; i++) {
             Header h = reqHeaders[i];
             odeMessage.setHeaderPart(h.getName(), h.getValue());
         }
+
+        // make the status line information available as a single element
+        odeMessage.setHeaderPart("StatusLine", HttpClientHelper.statusLineToElement(method.getStatusLine()));
     }
 
 
