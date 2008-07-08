@@ -1,13 +1,15 @@
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.concurrent.CountDownLatch;
 
 /**
  * <p/>
  * This unit test passes an integer to a BPEL. Then the BPEL invokes the 6 operations of Arithmetics.wsdl.
- * These operations are set up to use the various Http binding configurations.  
+ * These operations are set up to use the various Http binding configurations.
  * <p/>
  * From a "business" standpoint:<br/>
  * Let N be the input number, stored in the testRequest1.soap file<br/>
@@ -18,13 +20,14 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class HttpBindingTest extends Axis2TestBase {
+    private static final Log log = LogFactory.getLog(HttpBindingTest.class);
+
     protected JettyWrapper jettyWrapper;
 
-    CountDownLatch latch;
 
     protected void setUp() throws Exception {
         super.setUp();
-        latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
         jettyWrapper = new JettyWrapper(7070);
         new Thread("HttpBindingJetty") {
             public void run() {
@@ -36,6 +39,8 @@ public class HttpBindingTest extends Axis2TestBase {
                 }
             }
         }.start();
+        // wait for jetty to be ready
+        latch.await();
     }
 
     protected void tearDown() throws Exception {
@@ -44,17 +49,55 @@ public class HttpBindingTest extends Axis2TestBase {
     }
 
     public void testHttpBinding() throws Exception {
-        // wait for jetty to be ready
-        latch.await();
         String bundleName = "TestHttpBinding";
         // deploy the required service
         if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",
                     bundleName, "testRequest.soap");
+            if (log.isDebugEnabled()) log.debug(response);
             int valueInSoapRequest = 100;
             int n = 5 + valueInSoapRequest;
-            assertTrue(response.indexOf(String.valueOf(n * (n + 1) / 2)) >= 0);
+            String expectedResult = String.valueOf(n * (n + 1) / 2);
+            assertTrue("Expected Result: " + expectedResult + ". Answer was " + response, response.indexOf(expectedResult) >= 0);
+        } finally {
+            server.undeployProcess(bundleName);
+        }
+    }
+
+    public void testHttpBindingExt_GET() throws Exception {
+        String bundleName = "TestHttpBindingExt_GET";
+        executeBundle(bundleName);
+
+    }
+
+    public void testHttpBindingExt_DELETE() throws Exception {
+        String bundleName = "TestHttpBindingExt_DELETE";
+        executeBundle(bundleName);
+    }
+
+    public void testHttpBindingExt_POST() throws Exception {
+        String bundleName = "TestHttpBindingExt_POST";
+        executeBundle(bundleName);
+    }
+
+    public void testHttpBindingExt_PUT() throws Exception {
+        String bundleName = "TestHttpBindingExt_PUT";
+        executeBundle(bundleName);
+    }
+
+    private void executeBundle(String bundleName) throws InterruptedException {
+        // wait for jetty to be ready
+        // clean up everything first
+        if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
+
+        // then deploy the required service
+        server.deployProcess(bundleName);
+        try {
+            String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld", bundleName, "testRequest.soap");
+            System.out.println(response);
+            if (log.isDebugEnabled()) log.debug(response);
+            assertTrue("Test failed. See xml response for details", response.indexOf("What a success!") >= 0);
         } finally {
             server.undeployProcess(bundleName);
         }
