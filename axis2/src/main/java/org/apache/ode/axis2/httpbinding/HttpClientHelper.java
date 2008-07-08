@@ -91,17 +91,21 @@ public class HttpClientHelper {
         Element versionEl = doc.createElementNS(null, "HTTP-Version");
         Element codeEl = doc.createElementNS(null, "Status-Code");
         Element reasonEl = doc.createElementNS(null, "Reason-Phrase");
+        Element originalEl = doc.createElementNS(null, "original");
 
         // wiring
         doc.appendChild(statusLineEl);
         statusLineEl.appendChild(versionEl);
         statusLineEl.appendChild(codeEl);
         statusLineEl.appendChild(reasonEl);
+        statusLineEl.appendChild(originalEl);
 
         // values
         versionEl.setTextContent(statusLine.getHttpVersion());
         codeEl.setTextContent(String.valueOf(statusLine.getStatusCode()));
         reasonEl.setTextContent(statusLine.getReasonPhrase());
+        // the line as received, not parsed
+        originalEl.setTextContent(statusLine.toString());
 
         return statusLineEl;
     }
