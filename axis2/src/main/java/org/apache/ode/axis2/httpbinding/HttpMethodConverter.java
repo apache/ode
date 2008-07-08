@@ -363,7 +363,7 @@ public class HttpMethodConverter {
         }
 
         // make the status line information available as a single element
-        odeMessage.setHeaderPart("StatusLine", HttpClientHelper.statusLineToElement(method.getStatusLine()));
+        odeMessage.setHeaderPart("Status-Line", HttpClientHelper.statusLineToElement(method.getStatusLine()));
     }
 
 
