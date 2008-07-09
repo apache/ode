@@ -124,8 +124,6 @@ public class DeploymentBrowser {
                                 if (processes != null) {
                                     List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     for (File file : files) {
-                                        System.out.println("1: " + file.getPath());
-                                        System.out.println("2: " + _store.getDeployDir().getCanonicalPath());
                                         String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
                                         out.write("<p><a href=\"" + relativePath + "\">" + relativePath + "</a></p>");
                                     }
@@ -193,7 +191,6 @@ public class DeploymentBrowser {
 
     private String bundleUrlFor(String docFile) {
         if (docFile.indexOf("processes") >= 0) docFile = docFile.substring(docFile.indexOf("processes")+10);
-        System.out.println("d " + docFile);
         List<File> files = FileUtils.listFilesRecursively(_store.getDeployDir(), null);
         for (final File bundleFile : files) {
             if (bundleFile.getPath().endsWith(docFile))
