@@ -37,8 +37,9 @@ public class DeploymentBrowser {
     public boolean doFilter(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         final String requestURI = request.getRequestURI();
         final int deplUri = requestURI.indexOf("/deployment");
-        final String root = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + requestURI.substring(0, deplUri);
         if (deplUri > 0) {
+            final String root = request.getScheme() + "://" + request.getServerName() + 
+                    ":" + request.getServerPort() + requestURI.substring(0, deplUri);
             int offset = requestURI.length() > (deplUri + 11) ? 1 : 0;
             final String[] segments = requestURI.substring(deplUri + 11 + offset).split("/");
             if (segments.length == 0 || segments[0].length() == 0) {
@@ -59,7 +60,8 @@ public class DeploymentBrowser {
                                         AxisService service = _config.getService(serviceName.toString());
 
                                         String url = service.getName();
-                                        if (service.getFileName() != null) url = root + bundleUrlFor(service.getFileName().getFile());
+                                        if (service.getFileName() != null)
+                                          url = root + bundleUrlFor(service.getFileName().getFile());
                                         out.write("<p><a href=\"" + url + "\">" + serviceName + "</a></p>");
 
                                         out.write("<ul><li>Endpoint: " + (root + "/processes/" + serviceName) + "</li>");
@@ -122,7 +124,9 @@ public class DeploymentBrowser {
                                 if (processes != null) {
                                     List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     for (File file : files) {
-                                        String relativePath = file.getPath().substring(_store.getDeployDir().getPath().length() + 1);
+                                        System.out.println("1: " + file.getPath());
+                                        System.out.println("2: " + _store.getDeployDir().getCanonicalPath());
+                                        String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
                                         out.write("<p><a href=\"" + relativePath + "\">" + relativePath + "</a></p>");
                                     }
                                 } else {
@@ -188,6 +192,8 @@ public class DeploymentBrowser {
     }
 
     private String bundleUrlFor(String docFile) {
+        if (docFile.indexOf("processes") >= 0) docFile = docFile.substring(docFile.indexOf("processes")+10);
+        System.out.println("d " + docFile);
         List<File> files = FileUtils.listFilesRecursively(_store.getDeployDir(), null);
         for (final File bundleFile : files) {
             if (bundleFile.getPath().endsWith(docFile))
