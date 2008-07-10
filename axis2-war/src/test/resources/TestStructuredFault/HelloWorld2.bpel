@@ -41,6 +41,7 @@
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="faultInput" messageType="dummy:faultTestRequest"/>
      <variable name="faultOutput" messageType="dummy:faultTestResponse"/>
+     <variable name="faultVar" messageType="dummy:DummyException"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
 
