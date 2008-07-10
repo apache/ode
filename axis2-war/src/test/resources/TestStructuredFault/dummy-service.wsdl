@@ -56,7 +56,7 @@
    <wsdl:message name="faultTestResponse">
       <wsdl:part name="parameters" element="ns1:faultTestResponse"/>
    </wsdl:message>
-   <wsdl:message name="DummyException">
+   <wsdl:message name="DummyExceptionType">
       <wsdl:part name="parameters" element="ns1:DummyException"/>
    </wsdl:message>
    <wsdl:message name="helloRequest">
@@ -69,7 +69,7 @@
       <wsdl:operation name="faultTest">
          <wsdl:input message="ns1:faultTestRequest" wsaw:Action="urn:faultTest"/>
          <wsdl:output message="ns1:faultTestResponse" wsaw:Action="urn:faultTestResponse"/>
-         <wsdl:fault message="ns1:DummyException" name="DummyException"
+         <wsdl:fault message="ns1:DummyExceptionType" name="DummyException"
                      wsaw:Action="urn:faultTestDummyException"/>
       </wsdl:operation>
       <wsdl:operation name="hello">
