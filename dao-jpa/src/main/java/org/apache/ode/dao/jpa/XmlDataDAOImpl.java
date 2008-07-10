@@ -126,7 +126,7 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 		if ( val instanceof Element ) {
 			_isSimpleType = false;
 			_data = DOMUtils.domToString(val);
-		} else {
+		} else if (_node != null) {
 			_isSimpleType = true;
 			_data = _node.getNodeValue();
 		}
