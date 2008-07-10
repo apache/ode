@@ -27,8 +27,8 @@ import java.io.File;
 import java.io.InputStream;
 
 import javax.wsdl.Definition;
-import javax.wsdl.Fault;
 import javax.wsdl.Operation;
+import javax.wsdl.Fault;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -73,7 +73,7 @@ import org.w3c.dom.Element;
  *
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class    SoapExternalService implements ExternalService {
+public class SoapExternalService implements ExternalService {
 
     private static final Log __log = LogFactory.getLog(SoapExternalService.class);
 
@@ -322,7 +322,7 @@ return endpointReference;
 
     }
 
-    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean fault) {
+    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean isFault) {
         // ODE MEX needs to be invoked in a TX.
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
@@ -331,19 +331,22 @@ return endpointReference;
                     // Setting the response
                     try {
                         if (__log.isDebugEnabled()) __log.debug("Received response for MEX " + odeMex);
-                        if (fault) {
+                        if (isFault) {
                             Document odeMsg = DOMUtils.newDocument();
                             Element odeMsgEl = odeMsg.createElementNS(null, "message");
                             odeMsg.appendChild(odeMsgEl);
-                            QName faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
+                            Fault fault = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
 
-                            if (faultType != null) {
+                            if (fault != null) {
                                 if (__log.isWarnEnabled())
-                                    __log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
+                                    __log.warn("Fault response: faultName=" + fault.getName() + " faultType="+fault.getMessage().getQName()+ "\n" + DOMUtils.domToString(odeMsgEl));
+                                
+                                QName faultType = fault.getMessage().getQName();
+                                QName faultName = new QName(_definition.getTargetNamespace(), fault.getName());
                                 Message response = odeMex.createMessage(faultType);
                                 response.setMessage(odeMsgEl);
 
-                                odeMex.replyWithFault(faultType, response);
+                                odeMex.replyWithFault(faultName, response);
                             } else {
                                 if (__log.isWarnEnabled())
                                     __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());

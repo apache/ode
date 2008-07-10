@@ -41,7 +41,7 @@
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="faultInput" messageType="dummy:faultTestRequest"/>
      <variable name="faultOutput" messageType="dummy:faultTestResponse"/>
-     <variable name="faultVar" messageType="dummy:DummyException"/>
+     <variable name="faultVar" messageType="dummy:DummyExceptionType"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
 
@@ -58,7 +58,7 @@
 
        <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
                operation="faultTest" inputVariable="faultInput" outputVariable="faultOutput">
-           <catch faultMessageType="dummy:DummyException" faultName="dummy:DummyException" faultVariable="faultVar">
+           <catch faultMessageType="dummy:DummyExceptionType" faultName="dummy:DummyException" faultVariable="faultVar">
                <sequence>
                    <assign>
                        <copy>
