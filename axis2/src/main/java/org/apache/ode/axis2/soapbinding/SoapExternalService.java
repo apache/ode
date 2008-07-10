@@ -275,7 +275,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
                 if (fault != null) {
                     if (__log.isWarnEnabled())
-                        __log.warn("Fault response: faultName=" + fault + "\n" + DOMUtils.domToString(odeMsgEl));
+                        __log.warn("Fault response: faultName=" + fault.getName() + " faultType="+fault.getMessage().getQName()+ "\n" + DOMUtils.domToString(odeMsgEl));
 
                     QName faultType = fault.getMessage().getQName();
                     QName faultName = new QName(_definition.getTargetNamespace(), fault.getName());
