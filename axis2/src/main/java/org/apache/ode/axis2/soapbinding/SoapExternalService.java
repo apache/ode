@@ -56,8 +56,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
-import javax.wsdl.Fault;
 import javax.wsdl.Operation;
+import javax.wsdl.Fault;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.InputStream;
@@ -264,23 +264,25 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
     }
 
-    private void reply(final PartnerRoleMessageExchange odeMex, final Operation operation, final MessageContext reply, final boolean fault) {
+    private void reply(final PartnerRoleMessageExchange odeMex, final Operation operation, final MessageContext reply, final boolean isFault) {
         try {
             if (__log.isDebugEnabled()) __log.debug("Received response for MEX " + odeMex);
-            if (fault) {
+            if (isFault) {
                 Document odeMsg = DOMUtils.newDocument();
                 Element odeMsgEl = odeMsg.createElementNS(null, "message");
                 odeMsg.appendChild(odeMsgEl);
-                QName faultType = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
+                Fault fault = _converter.parseSoapFault(odeMsgEl, reply.getEnvelope(), operation);
 
-                if (faultType != null) {
+                if (fault != null) {
                     if (__log.isWarnEnabled())
-                        __log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
+                        __log.warn("Fault response: faultName=" + fault + "\n" + DOMUtils.domToString(odeMsgEl));
 
+                    QName faultType = fault.getMessage().getQName();
+                    QName faultName = new QName(_definition.getTargetNamespace(), fault.getName());
                     Message response = odeMex.createMessage(faultType);
                     response.setMessage(odeMsgEl);
 
-                    odeMex.replyWithFault(faultType, response);
+                    odeMex.replyWithFault(faultName, response);
                 } else {
                     if (__log.isWarnEnabled())
                         __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());

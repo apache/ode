@@ -56,9 +56,7 @@ import javax.wsdl.Service;
 import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -324,15 +322,16 @@ public class HttpExternalService implements ExternalService {
                         // import the response body
                         partEl.appendChild(odeMsgEl.getOwnerDocument().importNode(bodyEl, true));
 
-                        QName faultType = new QName(targetNamespace, faultDef.getName());
+                        QName faultName = new QName(targetNamespace, faultDef.getName());
+                        QName faultType = faultDef.getMessage().getQName();
                         Message response = odeMex.createMessage(faultType);
                         response.setMessage(odeMsgEl);
 
                         // extract and set headers
                         httpMethodConverter.extractHttpResponseHeaders(response, method, faultDef.getMessage(), opBinding.getBindingOutput());
                         // finally send the fault. We did it!
-                        if(log.isWarnEnabled()) log.warn("Fault response: faultType=" + faultType + "\n" + DOMUtils.domToString(odeMsgEl));
-                        odeMex.replyWithFault(faultType, response);
+                        if(log.isWarnEnabled()) log.warn("Fault response: faultType=" + faultName + "\n" + DOMUtils.domToString(odeMsgEl));
+                        odeMex.replyWithFault(faultName, response);
                     }
                 } catch (Exception e) {
                     errmsg = "Unable to parse the response body as xml. This 500 error will be considered as a failure.";

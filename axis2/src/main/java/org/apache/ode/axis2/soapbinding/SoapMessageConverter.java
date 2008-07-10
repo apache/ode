@@ -503,7 +503,7 @@ public class SoapMessageConverter {
         return "";
     }
     
-    public QName parseSoapFault(Element odeMsgEl, SOAPEnvelope envelope, Operation operation) throws AxisFault {
+    public Fault parseSoapFault(Element odeMsgEl, SOAPEnvelope envelope, Operation operation) throws AxisFault {
         SOAPFault flt = envelope.getBody().getFault();
         SOAPFaultDetail detail = flt.getDetail();
         Fault fdef = inferFault(operation, flt);
@@ -521,7 +521,7 @@ public class SoapMessageConverter {
             partel.appendChild(odeMsgEl.getOwnerDocument().importNode(OMUtils.toDOM(detail),true));
         }
 
-        return new QName(_def.getTargetNamespace(), fdef.getName());
+        return fdef;
     }
 
     private Fault inferFault(Operation operation, SOAPFault flt) {

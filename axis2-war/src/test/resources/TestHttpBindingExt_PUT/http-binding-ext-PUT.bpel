@@ -44,9 +44,6 @@
         <variable name="faultVar" messageType="dummy:UpdateFault"/>
         <variable name="putMsg" messageType="dummy:PUTRequest"/>
         <variable name="noPartMsg" messageType="dummy:NoPartMessage"/>
-        <!--<variable name="generatedTimestamp" type="xsd:string"/>-->
-        <!--<variable name="receivedTimestamp" type="xsd:string"/>-->
-        <!--<variable name="receivedUserAgent" type="xsd:string"/>-->
     </variables>
 
     <sequence>
@@ -54,6 +51,7 @@
                  operation="hello" variable="inputVar" createInstance="yes"/>
 
         <!-- Initialize output var -->
+        <!-- Change this value to make the test fail. -->
         <assign>
             <copy>
                 <from>'What a success!'</from>
@@ -86,37 +84,6 @@
 
 
         <!-- ############################################### -->
-        <!-- 500_expected_xml_body - Fault expected  -->
-        <!-- ############################################### -->
-<!--
-        <scope>
-            <sequence>
-                <assign>
-                    <copy>
-                        <from>'500_expected_xml_body'</from>
-                        <to variable="putMsg" header="Fault-Type"/>
-                    </copy>
-                </assign>
-                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
-                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
-                    <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
-                        <empty/>
-                    </catch>
-                </invoke>
-                <assign>
-                    <copy>
-                        <from>'500_expected_xml_body: A fault should have been thrown'</from>
-                        <to>$outputVar.TestPart</to>
-                    </copy>
-                </assign>
-                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
-                       operation="hello" variable="outputVar"/>
-            </sequence>
-        </scope>
-
--->
-
-        <!-- ############################################### -->
         <!-- regular PUT -->
         <!-- ############################################### -->
         <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
@@ -135,7 +102,7 @@
                 <catch faultName="ext:activityFailure">
                     <!-- expected result-->
                     <!--
-                    Warning!! At this point what we know for sure is that a failure occured
+                    Warning #1!! At this point what we know for sure is that a failure occured
                     but we don't know which failure exactly.
                     We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
                     -->
@@ -174,7 +141,7 @@
                 <catch faultName="ext:activityFailure">
                     <!-- expected result-->
                     <!--
-                    Warning!! At this point what we know for sure is that a failure occured
+                    Warning #1!! At this point what we know for sure is that a failure occured
                     but we don't know which failure exactly.
                     We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
                     -->
@@ -189,8 +156,7 @@
                     </copy>
                 </assign>
                 <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
-                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
-                </invoke>
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
                 <assign>
                     <copy>
                         <from>'500_text_body: A failure should have been thrown'</from>
@@ -213,7 +179,7 @@
                 <catch faultName="ext:activityFailure">
                     <!-- expected result-->
                     <!--
-                    Warning!! At this point what we know for sure is that a failure occured
+                    Warning #1!! At this point what we know for sure is that a failure occured
                     but we don't know which failure exactly.
                     We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
                     -->
@@ -233,6 +199,35 @@
                 <assign>
                     <copy>
                         <from>'500_unknown_xml_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_expected_xml_body - Fault expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <faultHandlers>
+                <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body: A fault should have been thrown'</from>
                         <to>$outputVar.TestPart</to>
                     </copy>
                 </assign>
