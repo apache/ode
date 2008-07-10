@@ -215,12 +215,15 @@ public class Properties {
                 p.setBooleanParameter(PROP_HTTP_REQUEST_CHUNK, Boolean.parseBoolean(properties.get(PROP_HTTP_REQUEST_CHUNK)));
             }
             if (properties.containsKey(PROP_HTTP_REQUEST_GZIP)) {
-                if (log.isWarnEnabled()) log.warn("Property Not Supported: " + PROP_HTTP_REQUEST_GZIP);
+                if (log.isWarnEnabled()) log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_REQUEST_GZIP);
             }
 
             if (Boolean.parseBoolean(properties.get(PROP_HTTP_ACCEPT_GZIP))) {
                 // append gzip to the list of accepted encoding
-                ((Collection) p.getParameter(HostParams.DEFAULT_HEADERS)).add(new Header("Accept-Encoding", "gzip"));
+                // HttpClient does not support compression natively
+                // Additional code would be necessary to handle it.
+//                ((Collection) p.getParameter(HostParams.DEFAULT_HEADERS)).add(new Header("Accept-Encoding", "gzip"));
+                if (log.isWarnEnabled()) log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_ACCEPT_GZIP);
             }
 
             if (properties.containsKey(PROP_HTTP_MAX_REDIRECTS)) {
