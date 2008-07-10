@@ -86,10 +86,22 @@
 
 
         <!-- ############################################### -->
+        <!-- regular PUT -->
+        <!-- ############################################### -->
+        <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+        <!-- no real test to make here -->
+
+
+        <!-- ############################################### -->
         <!-- 500_expected_xml_body - Fault expected  -->
         <!-- ############################################### -->
-<!--
         <scope>
+            <faultHandlers>
+                <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateFault" faultVariable="faultVar">
+                    <empty/>
+                </catch>
+            </faultHandlers>
             <sequence>
                 <assign>
                     <copy>
@@ -98,11 +110,7 @@
                     </copy>
                 </assign>
                 <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
-                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
-                    <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
-                        <empty/>
-                    </catch>
-                </invoke>
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
                 <assign>
                     <copy>
                         <from>'500_expected_xml_body: A fault should have been thrown'</from>
@@ -113,15 +121,6 @@
                        operation="hello" variable="outputVar"/>
             </sequence>
         </scope>
-
--->
-
-        <!-- ############################################### -->
-        <!-- regular PUT -->
-        <!-- ############################################### -->
-        <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
-                operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
-        <!-- no real test to make here -->
 
 
         <!-- ############################################### -->

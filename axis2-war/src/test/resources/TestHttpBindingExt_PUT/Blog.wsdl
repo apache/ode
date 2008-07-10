@@ -80,7 +80,7 @@
         <wsdl:operation name="doPUT">
             <wsdl:input message="tns:PUTRequest"/>
             <wsdl:output message="tns:NoPartMessage"/>
-            <wsdl:fault name="UpdateException" message="tns:UpdateFault"/>
+            <wsdl:fault name="UpdateFault" message="tns:UpdateFault"/>
         </wsdl:operation>
         <wsdl:operation name="doPOST">
             <wsdl:input message="tns:CommentRequest"/>
@@ -123,7 +123,7 @@
             </wsdl:input>
             <wsdl:output/>
             <!-- fault binding -->
-            <wsdl:fault name="UpdateException">
+            <wsdl:fault name="UpdateFault">
                 <!-- name attribute is optional -->
                 <!--<odex:fault name="UpdateException"/>-->
                 <odex:fault/>
