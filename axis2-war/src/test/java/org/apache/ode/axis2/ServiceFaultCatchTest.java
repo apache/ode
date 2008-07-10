@@ -12,13 +12,12 @@ public class ServiceFaultCatchTest extends Axis2TestBase {
         String bundleName = "TestStructuredFault";
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
-        if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
-
+        if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
+        server.deployProcess(bundleName);
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",
                     bundleName, "testRequest.soap");
-
-            assertTrue(response.indexOf("Something went wrong. Fortunately, it was meant to be.") >= 0);
+            assertTrue(response.contains("helloResponse") && response.contains("Something went wrong. Fortunately, it was meant to be."));
         } finally {
             server.undeployProcess(bundleName);
         }
