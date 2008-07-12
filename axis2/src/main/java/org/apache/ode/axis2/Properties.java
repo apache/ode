@@ -63,12 +63,12 @@ public class Properties {
     public static final String PROP_HTTP_PROXY_DOMAIN = PROP_HTTP_PROXY_PREFIX + "domain";
     public static final String PROP_HTTP_PROXY_USER = PROP_HTTP_PROXY_PREFIX + "user";
     public static final String PROP_HTTP_PROXY_PASSWORD = PROP_HTTP_PROXY_PREFIX + "password";
+    public static final String PROP_HTTP_PROTOCOL_ENCODING = "http.protocol.encoding";
 
     // Httpclient specific
     public static final String PROP_HTTP_MAX_REDIRECTS = HttpClientParams.MAX_REDIRECTS;
 
     // Axis2-specific
-    public static final String PROP_HTTP_PROTOCOL_ENCODING = "http.protocol.encoding";
     public static final String PROP_HTTP_REQUEST_CHUNK = "http.request.chunk";
     public static final String PROP_HTTP_REQUEST_GZIP = "http.request.gzip";
     public static final String PROP_HTTP_ACCEPT_GZIP = "http.accept.gzip";
@@ -199,6 +199,9 @@ public class Properties {
                         log.warn("Mal-formatted Property: [" + Properties.PROP_HTTP_SOCKET_TIMEOUT + "=" + value + "] Property will be skipped.");
                 }
             }
+
+            // set the default encoding for HttpClient (HttpClient uses ISO-8859-1 by default)
+            p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
                 p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, properties.get(PROP_HTTP_PROTOCOL_ENCODING));
             }
