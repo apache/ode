@@ -27,50 +27,22 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.StatusLine;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
-import org.apache.ode.axis2.util.URLEncodedTransformer;
-import org.apache.ode.axis2.util.UrlReplacementTransformer;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.wsdl.Messages;
-import org.apache.ode.utils.wsdl.WsdlUtils;
-import org.apache.ode.il.epr.MutableEndpoint;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
-import javax.wsdl.Binding;
-import javax.wsdl.BindingInput;
-import javax.wsdl.BindingOperation;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Part;
-import javax.wsdl.extensions.http.HTTPOperation;
-import javax.wsdl.extensions.mime.MIMEContent;
-import javax.xml.namespace.QName;
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HttpClientHelper {
+public class HttpHelper {
 
-    private static final Log log = LogFactory.getLog(HttpClientHelper.class);
+    private static final Log log = LogFactory.getLog(HttpHelper.class);
 
     public static void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
         if (log.isDebugEnabled()) log.debug("Configuring http client...");

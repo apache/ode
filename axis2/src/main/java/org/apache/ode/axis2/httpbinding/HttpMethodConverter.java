@@ -62,8 +62,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Collection;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 public class HttpMethodConverter {
 
@@ -253,7 +251,7 @@ public class HttpMethodConverter {
                 if (log.isErrorEnabled()) log.error(errMsg);
                 throw new RuntimeException(errMsg);
             }
-            method.setRequestHeader(headerName, HttpClientHelper.replaceCRLFwithLWS(headerValue));
+            method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
         }
 
         // process message headers
@@ -264,7 +262,7 @@ public class HttpMethodConverter {
             // set the request header but do not override any part value
             if (method.getRequestHeader(headerName) == null) {
                 String headerValue = DOMUtils.domToString(headerNode);
-                method.setRequestHeader(headerName, HttpClientHelper.replaceCRLFwithLWS(headerValue));
+                method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
             }
         }
 
@@ -381,7 +379,7 @@ public class HttpMethodConverter {
         }
 
         // make the status line information available as a single element
-        odeMessage.setHeaderPart("Status-Line", HttpClientHelper.statusLineToElement(method.getStatusLine()));
+        odeMessage.setHeaderPart("Status-Line", HttpHelper.statusLineToElement(method.getStatusLine()));
     }
 
 
