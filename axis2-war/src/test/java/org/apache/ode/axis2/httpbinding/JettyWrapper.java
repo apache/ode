@@ -257,10 +257,43 @@ public class JettyWrapper {
         }
 
         private void doGet(HttpServletRequest request, HttpServletResponse response, String articleId) throws IOException {
-            // doGET must receive a custom header, just send it back and let the caller check the received value
-            response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+            String faultType = request.getHeader("Fault-Type");
+            if ("400_not_found".equals(faultType)) {
+                response.setStatus(400);
+            } else if ("500_operation_with_no_fault_failed".equals(faultType)) {
+                response.setStatus(500);                
+            } else if ("200_missing_part_in_header".equals(faultType)) {
+                // a part is bound to a custom header
+                // this test does not set it on purpose
 
-            response.setContentType("text/xml");
+                response.setContentType("text/xml");
+                Element articleEl = createArticleDoc(articleId);
+
+                response.getOutputStream().print(DOMUtils.domToString(articleEl));
+                response.setStatus(200);
+            } else if ("200_malformed_body".equals(faultType)) {
+                // parts to http headers, just send them back and let the caller check the received values
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setContentType("text/xml");
+                response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract>");
+                response.setStatus(200);
+            } else {
+                // some parts are bound to http headers
+                //  just send them back and let the caller check the received values
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setContentType("text/xml");
+                Element articleEl = createArticleDoc(articleId);
+
+                response.getOutputStream().print(DOMUtils.domToString(articleEl));
+                response.setStatus(200);
+            }
+        }
+
+        private Element createArticleDoc(String articleId) {
             Document doc = DOMUtils.newDocument();
             Element articleEl = doc.createElementNS("http://ode/bpel/test/blog", "article");
             Element idEl = doc.createElementNS("http://ode/bpel/test/blog", "id");
@@ -271,9 +304,7 @@ public class JettyWrapper {
 
             idEl.setTextContent(articleId);
             titleEl.setTextContent("A title with a random number " + System.currentTimeMillis());
-
-            response.getOutputStream().print(DOMUtils.domToString(articleEl));
-            response.setStatus(200);
+            return articleEl;
         }
 
         private void doPost(HttpServletRequest request, HttpServletResponse response, String articleId) {
@@ -289,6 +320,10 @@ public class JettyWrapper {
             } else if ("500_text_body".equals(faultType)) {
                 response.setContentType("text");
                 response.getOutputStream().print("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
+                response.setStatus(500);
+            } else if ("500_malformed_xml_body".equals(faultType)) {
+                response.setContentType("text/xml");
+                response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract>");
                 response.setStatus(500);
             } else if ("500_unknown_xml_body".equals(faultType)) {
                 response.setContentType("text/xml");
