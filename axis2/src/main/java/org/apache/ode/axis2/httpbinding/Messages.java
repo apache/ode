@@ -43,8 +43,12 @@ public class Messages extends MessageBundle {
         return format("This binding does not use http:binding: {0}" + binding.getQName());
     }
 
+    public String msgEmptyContentType(Binding binding, BindingOperation operation) {
+        return format("MIME Content Type is empty! binding: {0} operation: {1}", binding.getQName(), operation.getName());
+    }
+
     public String msgUnsupportedContentType(Binding binding, BindingOperation operation) {
-        return format("Unsupported content-type!binding: {0} operation: {1}", binding.getQName(), operation.getName());
+        return format("Unsupported content-type! binding: {0} operation: {1}", binding.getQName(), operation.getName());
     }
 
     public String msgInvalidURIPattern() {
