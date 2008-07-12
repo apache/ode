@@ -25,6 +25,7 @@
             <xsd:element name="article" type="tns:ArticleType"/>
             <xsd:element name="comment" type="tns:CommentType"/>
             <xsd:element name="fault" type="tns:FaultType"/>
+            <xsd:element name="from" type="xsd:string"/>
             <xsd:complexType name="ArticleType">
                 <xsd:sequence>
                     <xsd:element name="id" type="xsd:string"/>
@@ -48,6 +49,7 @@
 
     <wsdl:message name="IdMessage">
         <wsdl:part name="timestamp" type="xsd:string"/>
+        <wsdl:part name="from" element="tns:from"/>
         <wsdl:part name="articleId" type="xsd:string"/>
     </wsdl:message>
     <wsdl:message name="ArticleMessage">
@@ -96,6 +98,7 @@
                 <http:urlReplacement/>
                 <!-- a part mapped to a non-standard header -->
                 <odex:header name="TimestampHeader" part="timestamp"/>
+                <odex:header name="From" part="from"/>
             </wsdl:input>
             <wsdl:output>
                 <mime:content type="text/xml" part="article"/>
