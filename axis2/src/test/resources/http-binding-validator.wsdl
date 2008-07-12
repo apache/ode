@@ -370,33 +370,78 @@
     <!-- ###################################### -->
     <!-- Content-Type tests-->
     <!-- ###################################### -->
-    <wsdl:binding name="DummyServiceHttpBinding_put+whatever-content-type" type="ns1:DummyServicePortType">
+    <wsdl:binding name="DummyServiceHttpBinding_application/atom+xml-content-type" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
+            shouldPass # Supported Content-Types are: application/x-www-form-urlencoded, text/*, application/xml, *+xml
         </wsdl:documentation>
         <http:binding verb="PUT"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
             <wsdl:input>
-                <mime:content type="whatever-content-type" part="TestPart"/>
+                <mime:content type="application/atom+xml" part="TestPart"/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="TestPart"/>
+                <mime:content type="application/atom+xml" part="TestPart"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_post+whatever-content-type" type="ns1:DummyServicePortType">
+    <wsdl:binding name="DummyServiceHttpBinding_application/.*+xml-content-type" type="ns1:DummyServicePortType">
         <wsdl:documentation>
-            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
+            shouldPass # Supported Content-Types are: application/x-www-form-urlencoded, text/*, application/xml, *+xml
         </wsdl:documentation>
-        <http:binding verb="POST"/>
+        <http:binding verb="PUT"/>
         <wsdl:operation name="hello">
             <http:operation location="DummyService/hello"/>
             <wsdl:input>
-                <mime:content type="whatever-content-type" part="TestPart"/>
+                <mime:content type="application/atom+xml" part="TestPart"/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="TestPart"/>
+                <mime:content type="application/atom+xml" part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_application/xml-*-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Supported Content-Types are: application/x-www-form-urlencoded, text/*, application/xml, *+xml
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="application/xml-dtd" part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/atom+xml" part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_application/xml-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Supported Content-Types are: application/x-www-form-urlencoded, text/*, application/xml, *+xml
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_text/plain-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldPass # Supported Content-Types are: application/x-www-form-urlencoded, text/*, application/xml, *+xml
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="text/plain" part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/plain" part="TestPart"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
