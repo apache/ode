@@ -913,7 +913,13 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
         oproperty.name = property.getName();
         oproperty.debugInfo = createDebugInfo(_processDef, "Property " + property.getName());
 
-        if (!_wsdlRegistry.getSchemaModel().isSimpleType(property.getPropertyType()))
+        boolean simpleType = false;
+        try {
+            simpleType = _wsdlRegistry.getSchemaModel().isSimpleType(property.getPropertyType());
+        } catch (NullPointerException npe) {
+            // Relying on the following check
+        }
+        if (!simpleType)
             throw new CompilationException(__cmsgs.errPropertyDeclaredWithComplexType(property.getName(),
                     property.getPropertyType()).setSource(property));
 
