@@ -238,6 +238,45 @@
         </scope>
 
         <!-- ############################################### -->
+        <!-- 500_malformed_xml_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_malformed_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
+                </invoke>
+                <assign>
+                    <copy>
+                        <from>'500_not-well-formed_xml_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
         <!-- 500_expected_xml_body - Fault expected  -->
         <!-- ############################################### -->
         <scope>
