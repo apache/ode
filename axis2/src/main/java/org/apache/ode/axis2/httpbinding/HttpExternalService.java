@@ -226,10 +226,21 @@ public class HttpExternalService implements ExternalService {
                 if (log.isDebugEnabled()) log.debug("Received response for MEX " + mexId);
                 processResponse(statusCode);
             } catch (final IOException e) {
-                PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
-                String errmsg = "Unable to execute HTTP request : " + e.getMessage();
-                log.error(errmsg, e);
-                odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                // ODE MEX needs to be invoked in a TX.
+                try {
+                    scheduler.execIsolatedTransaction(new Callable<Void>() {
+                        public Void call() throws Exception {
+                            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
+                            String errmsg = "Unable to execute http request : " + e.getMessage();
+                            log.error(errmsg, e);
+                            odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                            return null;
+                        }
+                    });
+                } catch (Exception e1) {
+                    String errmsg = "Error executing reply transaction; reply will be lost.";
+                    log.error(errmsg, e);
+                }
             } finally {
                 method.releaseConnection();
             }
@@ -246,7 +257,7 @@ public class HttpExternalService implements ExternalService {
                     if (log.isDebugEnabled())
                         log.debug("OneWay HTTP Request, Status-Line: " + method.getStatusLine() + " for " + method.getURI());
                 }
-            } catch (URIException e) {
+            } catch (Exception e) {
                 String errmsg = "Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
                 log.error(errmsg, e);
             }
@@ -259,31 +270,34 @@ public class HttpExternalService implements ExternalService {
         }
 
         public void processResponse(final int statusCode) {
+            // ODE MEX needs to be invoked in a TX.
             try {
-                // ODE MEX needs to be invoked in a TX.
                 scheduler.execIsolatedTransaction(new Callable<Void>() {
                     public Void call() throws Exception {
-
-                        if (statusCode >= 200 && statusCode < 300) {
-                            _2xx_success();
-                        } else if (statusCode >= 300 && statusCode < 400) {
-                            _3xx_redirection();
-                        } else if (statusCode >= 400 && statusCode < 500) {
-                            _4xx_badRequest();
-                        } else if (statusCode >= 500 && statusCode < 600) {
-                            _5xx_serverError();
-                        } else {
-                            unmanagedStatus();
+                        try {
+                            if (statusCode >= 200 && statusCode < 300) {
+                                _2xx_success();
+                            } else if (statusCode >= 300 && statusCode < 400) {
+                                _3xx_redirection();
+                            } else if (statusCode >= 400 && statusCode < 500) {
+                                _4xx_badRequest();
+                            } else if (statusCode >= 500 && statusCode < 600) {
+                                _5xx_serverError();
+                            } else {
+                                unmanagedStatus();
+                            }
+                        } catch (Exception e) {
+                            String errmsg = "Exception occured while processing the HTTP response of a two-way request: " + e.getMessage();
+                            log.error(errmsg, e);
+                            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
+                            odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
                         }
-
                         return null;
                     }
                 });
-            } catch (Exception e) {
-                String errmsg = "Exception occured while processing the HTTP response of a two-way request: " + e.getMessage();
-                log.error(errmsg, e);
-                PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
-                odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
+            } catch (Exception transactionException) {
+                String errmsg = "Error executing reply transaction; reply will be lost.";
+                log.error(errmsg, transactionException);
             }
         }
 
