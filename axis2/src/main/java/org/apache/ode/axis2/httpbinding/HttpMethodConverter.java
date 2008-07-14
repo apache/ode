@@ -65,7 +65,6 @@ import java.util.Map;
 
 public class HttpMethodConverter {
 
-    private static final String CONTENT_TYPE_TEXT_XML = "text/xml";
     private static final Log log = LogFactory.getLog(HttpMethodConverter.class);
 
     protected static final Messages msgs = Messages.getMessages(Messages.class);
@@ -114,7 +113,7 @@ public class HttpMethodConverter {
         BindingInput bindingInput = opBinding.getBindingInput();
         HTTPOperation httpOperation = (HTTPOperation) WsdlUtils.getOperationExtension(opBinding);
         MIMEContent content = WsdlUtils.getMimeContent(bindingInput.getExtensibilityElements());
-        String contentType = content == null ? "" : content.getType();
+        String contentType = content == null ? null : content.getType();
         boolean useUrlEncoded = WsdlUtils.useUrlEncoded(bindingInput) || PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(contentType);
         boolean useUrlReplacement = WsdlUtils.useUrlReplacement(bindingInput);
 
@@ -172,24 +171,30 @@ public class HttpMethodConverter {
             }
 
             // some body-building...
+            final String contentCharset = method.getParams().getContentCharset();
+            if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] Charset [" + contentCharset + "]");
             if (useUrlEncoded) {
-                requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, method.getParams().getContentCharset());
-            } else if (contentType.endsWith(CONTENT_TYPE_TEXT_XML)) {
+                requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, contentCharset);
+            } else {
                 // get the part to be put in the body
                 Part part = opBinding.getOperation().getInput().getMessage().getPart(content.getPart());
                 Element partValue = partValues.get(part.getName());
-                // if the part has an element name, we must take the first element
-                if (part.getElementName() != null) {
-                    String xmlString = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
-                    requestEntity = new ByteArrayRequestEntity(xmlString.getBytes(), contentType);
-                } else {
-                    String errMsg = "Types are not supported with 'text/xml'. Parts must use elements.";
+
+                if (part.getElementName() == null) {
+                    String errMsg = "XML Types are not supported. Parts must use elements.";
                     if (log.isErrorEnabled()) log.error(errMsg);
                     throw new RuntimeException(errMsg);
+                } else if (HttpHelper.isXml(contentType)) {
+                    if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] equivalent to 'text/xml'");
+                    // stringify the first element
+                    String xmlString = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
+                    requestEntity = new StringRequestEntity(xmlString, contentType, contentCharset);
+                } else {
+                    if (log.isDebugEnabled())
+                        log.debug("Content-Type [" + contentType + "] NOT equivalent to 'text/xml'. The text content of part value will be sent as text");
+                    // encoding conversion is managed by StringRequestEntity if necessary
+                    requestEntity = new StringRequestEntity(DOMUtils.getTextContent(partValue), contentType, contentCharset);
                 }
-            } else {
-                // should not happen because of HttpBindingValidator, but never say never
-                throw new IllegalArgumentException("Unsupported content-type!");
             }
 
             // cast safely, PUT and POST are subclasses of EntityEnclosingMethod
@@ -207,19 +212,37 @@ public class HttpMethodConverter {
         method.setPath(completeUri); // assumes that the path is properly encoded (URL safe).
         method.setQueryString(queryPath);
 
-        // headers
-        setHttpRequestHeaders(method, partValues, headers, opBinding.getOperation().getInput().getMessage(), opBinding.getBindingInput());
+        // set headers
+        setHttpRequestHeaders(method, partValues, headers, opBinding);
         return method;
     }
 
     /**
-     * Go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding. For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
+     * Go through the list of message headers and set them if empty.
+     * <p/>
+     * Then go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding.
+     * For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
      * or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
+     * <p/>
+     * Finally, set the 'Accept' header if the output content type of the operation exists.
+     * <p/>
+     * Notice that the last header value overrides any values set previoulsy. Meaning that message headers might get overriden by parts bound to headers.
      */
-    public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Map<String, Node> headers, Message inputMessage, BindingInput bindingInput) {
+    public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Map<String, Node> headers, BindingOperation opBinding) {
+        BindingInput inputBinding = opBinding.getBindingInput();
+        Message inputMessage = opBinding.getOperation().getInput().getMessage();
+
+        // process message headers
+        for (Iterator<Map.Entry<String, Node>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
+            Map.Entry<String, Node> e = iterator.next();
+            String headerName = e.getKey();
+            Node headerNode = e.getValue();
+            String headerValue = DOMUtils.domToString(headerNode);
+            method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
+        }
 
         // process parts that are bound to message parts
-        Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(bindingInput.getExtensibilityElements());
+        Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(inputBinding.getExtensibilityElements());
         for (Iterator<UnknownExtensibilityElement> iterator = headerBindings.iterator(); iterator.hasNext();) {
             Element binding = iterator.next().getElement();
             String headerName = binding.getAttribute("name");
@@ -254,16 +277,10 @@ public class HttpMethodConverter {
             method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
         }
 
-        // process message headers
-        for (Iterator<Map.Entry<String, Node>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
-            Map.Entry<String, Node> e = iterator.next();
-            String headerName = e.getKey();
-            Node headerNode = e.getValue();
-            // set the request header but do not override any part value
-            if (method.getRequestHeader(headerName) == null) {
-                String headerValue = DOMUtils.domToString(headerNode);
-                method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
-            }
+        MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
+        // set Accept header if output content type is set
+        if (outputContent != null) {
+            method.setRequestHeader("Accept", outputContent.getType());
         }
 
     }
@@ -343,8 +360,10 @@ public class HttpMethodConverter {
     /**
      * Process the HTTP Response Headers.
      * <p/>
-     * First go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the output binding. For each of them, set the header value as the value of the message part.
-     * <br/>Then add all HTTP headers as header part in the message. The name of the header would be the part name.
+     * First go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the output binding.
+     * For each of them, set the header value as the value of the message part.
+     * <p/>
+     * Then add all HTTP headers as header part in the message. The name of the header would be the part name.
      *
      * @param odeMessage
      * @param method
@@ -363,7 +382,14 @@ public class HttpMethodConverter {
 
             Part part = messageDef.getPart(partName);
             if (StringUtils.isNotEmpty(partName)) {
-                odeMessage.setPart(partName, createPartElement(part, method.getResponseHeader(headerName).getValue()));
+                Header responseHeader = method.getResponseHeader(headerName);
+                if (responseHeader != null) {
+                    odeMessage.setPart(partName, createPartElement(part, responseHeader.getValue()));
+                } else {
+                    String errMsg = "Part [" + partName + "] is bound to header [" + headerName + "], but this header is not set in the HTTP response.";
+                    if (log.isErrorEnabled()) log.error(errMsg);
+                    throw new RuntimeException(errMsg);
+                }
             } else {
                 String errMsg = "Invalid binding: missing required attribute! Part name: " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part");
                 if (log.isErrorEnabled()) log.error(errMsg);

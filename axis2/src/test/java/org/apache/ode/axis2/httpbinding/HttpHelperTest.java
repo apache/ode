@@ -20,6 +20,8 @@
 package org.apache.ode.axis2.httpbinding;
 
 import junit.framework.TestCase;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -49,26 +51,26 @@ public class HttpHelperTest extends TestCase {
     public void testIsXml() {
 
         for (String s : IS_XML) {
-            assertTrue(HttpHelper.isXml(s));
+            assertTrue(s+" is an xml type", HttpHelper.isXml(s));
         }
         for (String s : IS_TEXT) {
-            assertFalse(HttpHelper.isXml(s));
+            assertFalse(s+" is not an xml type", HttpHelper.isXml(s));
         }
         for (String s : IS_IMAGE) {
-            assertFalse(HttpHelper.isXml(s));
+            assertFalse(s+" is not an xml type", HttpHelper.isXml(s));
         }
 
     }
 
     public void testIsText() {
         for (String s : IS_TEXT) {
-            assertTrue("", HttpHelper.isText(s));
+            assertTrue(s+" is a text type", HttpHelper.isText(s));
         }
         for (String s : IS_XML) {
-            assertFalse(HttpHelper.isText(s));
+            assertFalse(s+" is not a text type", HttpHelper.isText(s));
         }
         for (String s : IS_IMAGE) {
-            assertFalse(HttpHelper.isXml(s));
+            assertFalse(s+" is not a text type", HttpHelper.isXml(s));
         }
     }
 }

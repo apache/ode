@@ -27,6 +27,7 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.StatusLine;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,43 +118,42 @@ public class HttpHelper {
      * @return
      * @throws IOException
      */
-    public static Element prepareDetailsElement(HttpMethod method) throws IOException {
-        return prepareDetailsElement(method, true);
-    }
+    public static Element prepareDetailsElement(HttpMethod method) {
+        Header h = method.getResponseHeader("Content-Type");
+        String receivedType = h != null ? h.getValue() : null;
+        boolean bodyIsXml = receivedType != null && HttpHelper.isXml(receivedType);
 
-    /**
-     * @param method
-     * @param bodyIsXml if true the body will be parsed as xml else the body will be inserted as string
-     * @return
-     * @throws IOException
-     */
-    public static Element prepareDetailsElement(HttpMethod method, boolean bodyIsXml) throws IOException {
+
         Document doc = DOMUtils.newDocument();
         Element detailsEl = doc.createElementNS(null, "details");
         Element statusLineEl = statusLineToElement(doc, method.getStatusLine());
         detailsEl.appendChild(statusLineEl);
 
         // set the body if any
-        final String body = method.getResponseBodyAsString();
-        if (StringUtils.isNotEmpty(body)) {
-            Element bodyEl = doc.createElementNS(null, "responseBody");
-            detailsEl.appendChild(bodyEl);
-            // first, try to parse the body as xml
-            // if it fails, put it as string in the body element
-            boolean exceptionDuringParsing = false;
-            if (bodyIsXml) {
-                try {
-                    Element parsedBodyEl = DOMUtils.stringToDOM(body);
-                    bodyEl.appendChild(doc.importNode(parsedBodyEl, true));
-                } catch (Exception e) {
-                    String errmsg = "Unable to parse the response body as xml. Body will be inserted as string.";
-                    if (log.isDebugEnabled()) log.debug(errmsg, e);
-                    exceptionDuringParsing = true;
+        try {
+            final String body = method.getResponseBodyAsString();
+            if (StringUtils.isNotEmpty(body)) {
+                Element bodyEl = doc.createElementNS(null, "responseBody");
+                detailsEl.appendChild(bodyEl);
+                // first, try to parse the body as xml
+                // if it fails, put it as string in the body element
+                boolean exceptionDuringParsing = false;
+                if (bodyIsXml) {
+                    try {
+                        Element parsedBodyEl = DOMUtils.stringToDOM(body);
+                        bodyEl.appendChild(doc.importNode(parsedBodyEl, true));
+                    } catch (Exception e) {
+                        String errmsg = "Unable to parse the response body as xml. Body will be inserted as string.";
+                        if (log.isDebugEnabled()) log.debug(errmsg, e);
+                        exceptionDuringParsing = true;
+                    }
+                }
+                if (!bodyIsXml || exceptionDuringParsing) {
+                    bodyEl.setTextContent(body);
                 }
             }
-            if (!bodyIsXml || exceptionDuringParsing) {
-                bodyEl.setTextContent(method.getResponseBodyAsString());
-            }
+        } catch (IOException e) {
+            if (log.isWarnEnabled()) log.warn("Exception while loading response body", e);
         }
         return detailsEl;
     }
@@ -161,14 +161,13 @@ public class HttpHelper {
     private static final Pattern NON_LWS_PATTERN = Pattern.compile("\r\n([^\\s])");
 
     /**
-     *
      * This method ensures that a header value containing CRLF does not mess up the HTTP request.
      * Actually CRLF is the end-of-line marker for headers.
      * <p/>
      * To do so, all CRLF followed by a non-whitespace character are replaced by CRLF HT.
      * <p/>
      * This is possible because the
-     *  <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec2.html#sec2.2">Section 2.2</a> of HTTP standard (RFC2626) states that:
+     * <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec2.html#sec2.2">Section 2.2</a> of HTTP standard (RFC2626) states that:
      * <p/>
      * <quote>
      * HTTP/1.1 header field values can be folded onto multiple lines if the
@@ -180,8 +179,9 @@ public class HttpHelper {
      * LWS            = [CRLF] 1*( SP | HT )
      * <p/>
      * </quote>
-     *<p/>
+     * <p/>
      * FYI, HttpClient 3.x.x does not check this.
+     *
      * @param header
      * @return the string properly ready to be used as an HTTP header field-content
      */
@@ -194,5 +194,18 @@ public class HttpHelper {
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    public static final String XML_MIME_TYPE_REGEX = "(text/xml)|(application/xml)|((.*)\\+xml)";
+    private static final String TEXT_MIME_TYPE_REGEX = "text/(?!xml$).*";
+    private static final Pattern XML_MIME_TYPE_PATTERN = Pattern.compile(XML_MIME_TYPE_REGEX);
+    private static final Pattern TEXT_MIME_TYPE_PATTERN = Pattern.compile(TEXT_MIME_TYPE_REGEX);
+
+    public static boolean isXml(String contentType) {
+        return XML_MIME_TYPE_PATTERN.matcher(contentType).matches();
+    }
+
+    public static boolean isText(String contentType) {
+        return TEXT_MIME_TYPE_PATTERN.matcher(contentType).matches();
     }
 }
