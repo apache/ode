@@ -20,6 +20,9 @@
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 
 import javax.wsdl.Binding;
@@ -64,7 +67,7 @@ public class HttpBindingValidator {
 
     protected void validateOperation(BindingOperation bindingOperation) {
         String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
-        if(verb==null){
+        if (verb == null) {
             throw new IllegalArgumentException(httpMsgs.msgMissingVerb(binding, bindingOperation));
         }
         if (!"GET".equalsIgnoreCase(verb)
@@ -77,8 +80,13 @@ public class HttpBindingValidator {
 
         BindingOutput output = bindingOperation.getBindingOutput();
         MIMEContent outputContent = WsdlUtils.getMimeContent(output.getExtensibilityElements());
-        if (outputContent!=null && !outputContent.getType().endsWith("text/xml")) {
-            throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
+        if (outputContent != null) {
+            if (StringUtils.isEmpty(outputContent.getType())) {
+                throw new IllegalArgumentException(httpMsgs.msgEmptyContentType(binding, bindingOperation));
+            }
+            if (!outputContent.getType().endsWith("text/xml")) {
+                throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
+            }
         }
 
         BindingInput input = bindingOperation.getBindingInput();
@@ -89,9 +97,12 @@ public class HttpBindingValidator {
         }
 
         // only 2 content-types supported
-        MIMEContent inputContent= WsdlUtils.getMimeContent(input.getExtensibilityElements());
+        MIMEContent inputContent = WsdlUtils.getMimeContent(input.getExtensibilityElements());
         if (inputContent != null) {
             String inputContentType = inputContent.getType();
+            if (StringUtils.isEmpty(inputContentType)) {
+                throw new IllegalArgumentException(httpMsgs.msgEmptyContentType(binding, bindingOperation));
+            }
             if (!inputContentType.endsWith("text/xml") && !PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(inputContentType)) {
                 throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
             }

@@ -172,21 +172,6 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_put+whatever-content-type" type="ns1:DummyServicePortType">
-        <wsdl:documentation>
-            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
-        </wsdl:documentation>
-        <http:binding verb="PUT"/>
-        <wsdl:operation name="hello">
-            <http:operation location="DummyService/hello"/>
-            <wsdl:input>
-                <mime:content type="whatever-content-type" part="TestPart"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="TestPart"/>
-            </wsdl:output>
-        </wsdl:operation>
-    </wsdl:binding>
     <!-- ###################################### -->
     <!-- POST tests-->
     <!-- ###################################### -->
@@ -229,21 +214,6 @@
             <http:operation location="DummyService/hello"/>
             <wsdl:input>
                 <mime:content type="application/x-www-form-urlencoded" part="TestPart"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="TestPart"/>
-            </wsdl:output>
-        </wsdl:operation>
-    </wsdl:binding>
-    <wsdl:binding name="DummyServiceHttpBinding_post+whatever-content-type" type="ns1:DummyServicePortType">
-        <wsdl:documentation>
-            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
-        </wsdl:documentation>
-        <http:binding verb="POST"/>
-        <wsdl:operation name="hello">
-            <http:operation location="DummyService/hello"/>
-            <wsdl:input>
-                <mime:content type="whatever-content-type" part="TestPart"/>
             </wsdl:input>
             <wsdl:output>
                 <mime:content type="text/xml" part="TestPart"/>
@@ -396,5 +366,71 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+
+    <!-- ###################################### -->
+    <!-- Content-Type tests-->
+    <!-- ###################################### -->
+    <wsdl:binding name="DummyServiceHttpBinding_put+whatever-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
+        </wsdl:documentation>
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="whatever-content-type" part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_post+whatever-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # Only application/x-www-form-urlencoded and text/xml should be supported
+        </wsdl:documentation>
+        <http:binding verb="POST"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content type="whatever-content-type" part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_missing-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # mime:content, type attribute is mandatory
+        </wsdl:documentation>
+        <http:binding verb="POST"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content part="TestPart"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content part="TestPart"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DummyServiceHttpBinding_empty-content-type" type="ns1:DummyServicePortType">
+        <wsdl:documentation>
+            shouldFail # mime:content, type attribute cannot be empty
+        </wsdl:documentation>
+        <http:binding verb="POST"/>
+        <wsdl:operation name="hello">
+            <http:operation location="DummyService/hello"/>
+            <wsdl:input>
+                <mime:content part="TestPart" type=""/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content part="TestPart" type=""/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
     <!-- no <service> tags needed -->
 </wsdl:definitions>
