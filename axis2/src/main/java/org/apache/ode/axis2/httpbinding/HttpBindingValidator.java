@@ -84,9 +84,6 @@ public class HttpBindingValidator {
             if (StringUtils.isEmpty(outputContent.getType())) {
                 throw new IllegalArgumentException(httpMsgs.msgEmptyContentType(binding, bindingOperation));
             }
-            if (!outputContent.getType().endsWith("text/xml")) {
-                throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
-            }
         }
 
         BindingInput input = bindingOperation.getBindingInput();
@@ -102,9 +99,6 @@ public class HttpBindingValidator {
             String inputContentType = inputContent.getType();
             if (StringUtils.isEmpty(inputContentType)) {
                 throw new IllegalArgumentException(httpMsgs.msgEmptyContentType(binding, bindingOperation));
-            }
-            if (!inputContentType.endsWith("text/xml") && !PostMethod.FORM_URL_ENCODED_CONTENT_TYPE.equalsIgnoreCase(inputContentType)) {
-                throw new IllegalArgumentException(httpMsgs.msgUnsupportedContentType(binding, bindingOperation));
             }
         }
 
