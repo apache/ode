@@ -23,6 +23,8 @@
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
          xmlns:test="http://ode/bpel/unit-test.wsdl"
          xmlns:dummy="http://ode/bpel/test/blog"
+         xmlns:fn="http://www.w3.org/2005/02/xpath-functions"
+         xmlns:ext="http://ode.apache.org/activityRecovery"
          queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
          expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
@@ -71,6 +73,10 @@
                 <to>$idMsg.timestamp</to>
             </copy>
             <copy>
+                <from>'alexis@test.com'</from>
+                <to>$idMsg.from</to>
+            </copy>
+            <copy>
                 <!-- generate a random number -->
                 <from>string(round(seconds-from-dateTime(current-dateTime()))+100)</from>
                 <to>$articleId</to>
@@ -97,6 +103,19 @@
                 </assign>
             </else>
         </if>
+
+<!--        <if>
+            <condition>fn:contains($articleMsg.from,'alexis@test.com')</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Wrong From Header received. Check if the request header was properly set.'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>-->
         <if>
             <condition>$articleMsg.article/dummy:id = $articleId</condition>
             <empty/>
@@ -110,7 +129,9 @@
             </else>
         </if>
 
+        <!-- ##################################################### -->
         <!-- Check HTTP StatusLine information -->
+        <!-- ##################################################### -->
         <!-- Every message must have a Status-Line element in headers -->
         <assign>
             <copy>
@@ -167,6 +188,158 @@
             </else>
         </if>
 
+
+        <!-- ############################################### -->
+        <!-- 200_malformed_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_malformed_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'200_malformed_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 200_missing_part_in_header - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_missing_part_in_header'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'200_missing_part_in_header: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 400_not_found - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'400_not_found'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'400_not_found: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_operation_with_no_fault_failed - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_operation_with_no_fault_failed'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_operation_with_no_fault_failed: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
         <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
                operation="hello" variable="outputVar"/>
     </sequence>
