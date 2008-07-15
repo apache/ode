@@ -28,6 +28,9 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.StatusLine;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +41,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.io.PipedOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -207,5 +214,68 @@ public class HttpHelper {
 
     public static boolean isText(String contentType) {
         return TEXT_MIME_TYPE_PATTERN.matcher(contentType).matches();
+    }
+
+
+    public static String requestToString(HttpMethod m) {
+        StringBuilder sb = new StringBuilder(256);
+        try {
+            sb.append("HTTP Request Details: \n").append(m.getName()).append(" ").append(m.getURI());
+        } catch (URIException e) {
+            // not that important
+            if (log.isDebugEnabled()) log.debug(e);
+        }
+        sb.append("\nRequest Headers:");
+        Header[] headers = m.getRequestHeaders();
+        if (headers.length == 0) sb.append(" n/a");
+        for (int i = 0; i < headers.length; i++) {
+            Header h = headers[i];
+            sb.append("\n\t").append(h.getName()).append(": ").append(h.getValue());
+        }
+        if (m instanceof EntityEnclosingMethod) {
+            EntityEnclosingMethod eem = (EntityEnclosingMethod) m;
+            if (eem.getRequestEntity() != null) {
+                sb.append("\nRequest Entity:");
+                sb.append("\n\tContent-Type:").append(eem.getRequestEntity().getContentType());
+                sb.append("\n\tContent-Length:").append(eem.getRequestEntity().getContentLength());
+                if (eem.getRequestEntity() instanceof StringRequestEntity) {
+                    StringRequestEntity sre = (StringRequestEntity) eem.getRequestEntity();
+                    sb.append("\n\tContent-Charset:").append(sre.getCharset());
+                    sb.append("\n\tRequest Entity:\n").append(sre.getContent());
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String responseToString(HttpMethod m) {
+        StringBuilder sb = new StringBuilder(256);
+        try {
+            sb.append("HTTP Response Details: \n").append(m.getName()).append(" ").append(m.getURI());
+        } catch (URIException e) {
+            // not that important
+            if (log.isDebugEnabled()) log.debug(e);
+        }
+        sb.append("\nStatus-Line: ").append(m.getStatusLine());
+        Header[] headers = m.getResponseHeaders();
+        if (headers.length != 0) sb.append("\nResponse Headers: ");
+        for (int i = 0; i < headers.length; i++) {
+            Header h = headers[i];
+            sb.append("\n\t").append(h.getName()).append(": ").append(h.getValue());
+        }
+        try {
+            if (StringUtils.isNotEmpty(m.getResponseBodyAsString())) {
+                sb.append("\nResponse Entity:\n").append(m.getResponseBodyAsString());
+            }
+        } catch (IOException e) {
+            log.error(e);
+        }
+        Header[] footers = m.getResponseFooters();
+        if (footers.length != 0) sb.append("\nResponse Footers: ");
+        for (int i = 0; i < footers.length; i++) {
+            Header h = footers[i];
+            sb.append("\n\t").append(h.getName()).append(": ").append(h.getValue());
+        }
+        return sb.toString();
     }
 }
