@@ -364,6 +364,8 @@ public class HttpMethodConverter {
      * For each of them, set the header value as the value of the message part.
      * <p/>
      * Then add all HTTP headers as header part in the message. The name of the header would be the part name.
+     * <p/>
+     * Finally, insert a header names 'Status-Line'. This header contains an element as returned by {@link HttpHelper#statusLineToElement(String)} .
      *
      * @param odeMessage
      * @param method

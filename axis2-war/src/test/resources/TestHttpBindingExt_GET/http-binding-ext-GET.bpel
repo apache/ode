@@ -228,6 +228,80 @@
         </scope>
 
         <!-- ############################################### -->
+        <!-- 200_missing_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_missing_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'200_missing_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 202_empty_body - Should pass -->
+        <!-- ############################################### -->
+        <!-- 202/Accepted status code explicitly states that there is no body,
+                so we should not fail even if a part is bound to the body response -->
+        <scope>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'202_empty_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 204_empty_body - Should pass -->
+        <!-- ############################################### -->
+        <!-- 204/No Content status code explicitly states that there is no body, 
+                so we should not fail even if a part is bound to the body response -->
+        <scope>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'204_empty_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
         <!-- 200_missing_part_in_header - failure expected  -->
         <!-- ############################################### -->
         <scope>
