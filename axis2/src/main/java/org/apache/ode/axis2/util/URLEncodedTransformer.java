@@ -52,13 +52,10 @@ public class URLEncodedTransformer {
             String partName = e.getKey();
             Element node = e.getValue();
             String nodeContent = DOMUtils.isEmptyElement(node) ? "" : DOMUtils.getTextContent(node);
-            if (nodeContent == null) {
-                // if it is not a simple type, skip it
-                if (log.isDebugEnabled())
-                    log.debug("Part " + partName + " skipped because associated element is not of a simple type.");
-                continue;
+            // if it is not a simple type, skip it
+            if (nodeContent != null) {
+                l.add(new NameValuePair(e.getKey(), nodeContent));
             }
-            l.add(new NameValuePair(e.getKey(), nodeContent));
         }
         return EncodingUtil.formUrlEncode(l.toArray(new NameValuePair[0]), "UTF-8");
     }
