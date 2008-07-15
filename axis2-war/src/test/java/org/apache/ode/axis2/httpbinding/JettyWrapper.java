@@ -271,6 +271,11 @@ public class JettyWrapper {
 
                 response.getOutputStream().print(DOMUtils.domToString(articleEl));
                 response.setStatus(200);
+            } else if ("200_missing_body".equals(faultType)) {
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setStatus(200);
             } else if ("200_malformed_body".equals(faultType)) {
                 // parts to http headers, just send them back and let the caller check the received values
                 response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
@@ -279,6 +284,11 @@ public class JettyWrapper {
                 response.setContentType("text/xml");
                 response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract>");
                 response.setStatus(200);
+            } else if ("202_empty_body".equals(faultType) || "204_empty_body".equals(faultType)) {
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setStatus(Integer.parseInt(faultType.substring(0, 3)));
             } else {
                 // some parts are bound to http headers
                 //  just send them back and let the caller check the received values
