@@ -185,15 +185,15 @@ public class HttpExternalService implements ExternalService {
             }
         } catch (UnsupportedEncodingException e) {
             String errmsg = "The returned HTTP encoding isn't supported " + odeMex;
-            log.error(errmsg, e);
+            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (URIException e) {
             String errmsg = "Error sending message to " + getClass().getSimpleName() + " for ODE mex " + odeMex;
-            log.error(errmsg, e);
+            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (Exception e) {
             String errmsg = "Unknown HTTP call error for ODE mex " + odeMex;
-            log.error(errmsg, e);
+            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
         }
     }
@@ -237,13 +237,13 @@ public class HttpExternalService implements ExternalService {
                         public Void call() throws Exception {
                             PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
                             String errmsg = "Unable to execute http request : " + e.getMessage();
-                            log.error(errmsg, e);
+                            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+operation.getName()+"] "+errmsg, e);
                             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
                             return null;
                         }
                     });
                 } catch (Exception e1) {
-                    String errmsg = "Error executing reply transaction; reply will be lost.";
+                    String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+operation.getName()+"] Error executing reply transaction; reply will be lost.";
                     log.error(errmsg, e);
                 }
             } finally {
@@ -263,7 +263,7 @@ public class HttpExternalService implements ExternalService {
                         log.debug("OneWay HTTP Request, Status-Line: " + method.getStatusLine() + " for " + method.getURI());
                 }
             } catch (Exception e) {
-                String errmsg = "Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
+                String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+operation.getName()+"] Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
                 log.error(errmsg, e);
             }
         }
