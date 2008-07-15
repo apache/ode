@@ -73,26 +73,24 @@ public class UrlReplacementTransformer {
             {
                 Element value = e.getValue();
                 replacementValue = DOMUtils.isEmptyElement(value) ? "" : DOMUtils.getTextContent(value);
-                if (replacementValue == null) {
-                    // if it is not a simple type, skip it
-                    if(log.isDebugEnabled()) log.debug("Part "+partName+" skipped because associated element is not of a simple type.");
-                    continue;
+            }
+
+            // if it is not a simple type, skip it
+            if (replacementValue!=null) {
+                try {
+                    replacementValue = URIUtil.encodeWithinQuery(replacementValue);
+                } catch (URIException urie) {
+                    // this exception is never thrown by the code of httpclient
+                    if (log.isWarnEnabled()) log.warn(urie.getMessage(), urie);
                 }
-            }
 
-            try {
-                replacementValue = URIUtil.encodeWithinQuery(replacementValue);
-            } catch (URIException urie) {
-                // this exception is never thrown by the code of httpclient
-                if (log.isWarnEnabled()) log.warn(urie.getMessage(), urie);
-            }
-
-            // first, search for parentheses
-            String partPattern = "\\(" + partName + "\\)";
-            if(!replace(result, partPattern, replacementValue)){
-                // if parentheses not found, try braces
-                partPattern = "\\{" + partName + "\\}";
-                replace(result, partPattern, replacementValue);
+                // first, search for parentheses
+                String partPattern = "\\(" + partName + "\\)";
+                if(!replace(result, partPattern, replacementValue)){
+                    // if parentheses not found, try braces
+                    partPattern = "\\{" + partName + "\\}";
+                    replace(result, partPattern, replacementValue);
+                }
             }
         }
 
