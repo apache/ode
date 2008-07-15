@@ -64,7 +64,7 @@ public class JettyWrapper {
         handlerColl = new ContextHandlerCollection();
         Handler[] handlers = {arithmeticsContext, blogContext};
         handlerColl.setHandlers(handlers);
-        
+
         server.addHandler(handlerColl);
     }
 
@@ -206,14 +206,14 @@ public class JettyWrapper {
                                 int left = Integer.valueOf(DOMUtils.getTextContent(firstOperand));
                                 int right = Integer.valueOf(DOMUtils.getTextContent(secondOperand));
 
-                                int min = Math.min(left,right);
-                                int max = Math.max(left,right);
+                                int min = Math.min(left, right);
+                                int max = Math.max(left, right);
 //                                Element arrayElt = bodyDoc.createElement("sumOfInteger");
                                 Element anElt = bodyDoc.createElementNS("http://ode/bpel/test/arithmetics", "sumOfInteger");
                                 Element msg = bodyDoc.createElement("theresult");
                                 Element resultIs = bodyDoc.createElement("resultIs");
                                 msg.setTextContent("A dummy message we don't care about. Only purpose is to have a complex type");
-                                resultIs.setTextContent(String.valueOf((max*(max+1)-min*(min+1))/2));
+                                resultIs.setTextContent(String.valueOf((max * (max + 1) - min * (min + 1)) / 2));
 
                                 anElt.appendChild(msg);
                                 anElt.appendChild(resultIs);
@@ -280,6 +280,11 @@ public class JettyWrapper {
 
                 response.getOutputStream().print(DOMUtils.domToString(articleEl));
                 response.setStatus(200);
+            } else if ("200_missing_body".equals(faultType)) {
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setStatus(200);
             } else if ("200_malformed_body".equals(faultType)) {
                 // parts to http headers, just send them back and let the caller check the received values
                 response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
@@ -288,6 +293,11 @@ public class JettyWrapper {
                 response.setContentType("text/xml");
                 response.getOutputStream().print("<book><abstract>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</abstract>");
                 response.setStatus(200);
+            } else if ("202_empty_body".equals(faultType) || "204_empty_body".equals(faultType)) {
+                response.setHeader("TimestampHeader", request.getHeader("TimestampHeader"));
+                response.setHeader("From", request.getHeader("From"));
+
+                response.setStatus(Integer.parseInt(faultType.substring(0, 3)));
             } else {
                 // some parts are bound to http headers
                 //  just send them back and let the caller check the received values

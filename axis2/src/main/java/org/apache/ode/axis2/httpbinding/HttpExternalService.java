@@ -395,6 +395,7 @@ public class HttpExternalService implements ExternalService {
         }
 
         private void _3xx_redirection() throws IOException {
+            // redirections should be handled transparently by http-client
             replyWithFailure("Redirections disabled! HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
@@ -419,9 +420,12 @@ public class HttpExternalService implements ExternalService {
 
             // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
             MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
+            int statusCode = method.getStatusCode();
+
             boolean xmlExpected = outputContent != null && HttpHelper.isXml(outputContent.getType());
+            // '202/Accepted' and '204/No Content' status codes explicitly state that there is no body, so we should not fail even if a part is bound to the body response 
             boolean isBodyExpected = outputContent != null;
-            boolean isBodyMandatory = isBodyExpected && xmlExpected;
+            boolean isBodyMandatory = isBodyExpected && statusCode!=204 && statusCode!=202;
             final String body;
             try {
                 body = method.getResponseBodyAsString();
