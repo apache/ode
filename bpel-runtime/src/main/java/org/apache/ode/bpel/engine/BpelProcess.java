@@ -365,14 +365,6 @@ public class BpelProcess {
                 }
                 MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
                 invokeProcess(mex);
-            } else if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
-                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
-
-                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) _engine.getMessageExchange(we.getMexId());
-                if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {
-                    mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR,
-                            "Dangling invocation (mexId=" + we.getMexId() + "), forcing it into a failed state.", null);
-                }
             } else {
                 // Instance level events
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
