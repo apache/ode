@@ -270,7 +270,7 @@ class MockBpelServer {
     private class SchedulerWrapper implements Scheduler {
 
         MockScheduler _scheduler;
-        long                _nextSchedule;
+        long _nextSchedule;
 
         SchedulerWrapper(BpelServerImpl server, TransactionManager txManager, DataSource dataSource) {
             ExecutorService executorService = Executors.newCachedThreadPool();
@@ -281,7 +281,9 @@ class MockBpelServer {
 
         public String schedulePersistedJob(Map<String,Object>jobDetail,Date when) throws ContextException {
             String jobId = _scheduler.schedulePersistedJob(jobDetail, when);
-            _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
+            // Invocation checks get scheduled much later, we don't want (or need) to wait for them
+            if (!"INVOKE_CHECK".equals(jobDetail.get("type")))
+                _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
             return jobId;
         }
 
