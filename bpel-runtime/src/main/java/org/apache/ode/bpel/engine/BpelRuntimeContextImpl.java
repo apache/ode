@@ -21,10 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -772,6 +769,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if (partnerEpr != null) {
                 mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
                 mex.setStatus(MessageExchange.Status.REQUEST);
+                // Assuming an unreliable protocol, we schedule a task to check if recovery mode will be needed
+                scheduleInvokeCheck(mex);
                 _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
             } else {
                 __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
@@ -807,6 +806,20 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         return mexDao.getMessageExchangeId();
+    }
+
+    private void scheduleInvokeCheck(PartnerRoleMessageExchangeImpl mex) {
+        boolean isTwoWay = mex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+        if (!_bpelProcess.isInMemory() && isTwoWay) {
+            WorkEvent event = new WorkEvent();
+            event.setMexId(mex.getMessageExchangeId());
+            event.setProcessId(_bpelProcess.getPID());
+            event.setInMem(false);
+            event.setType(WorkEvent.Type.INVOKE_CHECK);
+            Calendar timer = Calendar.getInstance();
+            timer.add(Calendar.SECOND, 65);
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), timer.getTime());
+        }
     }
 
     private void buildOutgoingMessage(MessageDAO message, Element outgoingElmt) {

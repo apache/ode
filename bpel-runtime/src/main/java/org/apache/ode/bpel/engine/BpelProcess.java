@@ -41,12 +41,7 @@ import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -370,6 +365,14 @@ public class BpelProcess {
                 }
                 MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
                 invokeProcess(mex);
+            } else if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
+                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
+
+                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) _engine.getMessageExchange(we.getMexId());
+                if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {
+                    mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR,
+                            "Dangling invocation (mexId=" + we.getMexId() + "), forcing it into a failed state.", null);
+                }
             } else {
                 // Instance level events
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
