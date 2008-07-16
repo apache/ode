@@ -809,16 +809,17 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private void scheduleInvokeCheck(PartnerRoleMessageExchangeImpl mex) {
-        boolean isTwoWay = mex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+        boolean isTwoWay = mex.getMessageExchangePattern() ==
+                org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         if (!_bpelProcess.isInMemory() && isTwoWay) {
+            if (__log.isDebugEnabled()) __log.debug("Creating invocation check event for mexid " + mex.getMessageExchangeId());
             WorkEvent event = new WorkEvent();
             event.setMexId(mex.getMessageExchangeId());
             event.setProcessId(_bpelProcess.getPID());
             event.setInMem(false);
             event.setType(WorkEvent.Type.INVOKE_CHECK);
-            Calendar timer = Calendar.getInstance();
-            timer.add(Calendar.SECOND, 65);
-            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), timer.getTime());
+            Date future = new Date(System.currentTimeMillis() + (180 * 1000));
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), future);
         }
     }
 

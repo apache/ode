@@ -124,6 +124,15 @@
             <soap:body use="literal"/>
          </wsdl:output>
       </wsdl:operation>
+      <wsdl:operation name="longOperation">
+         <soap:operation soapAction="urn:longOperation" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:binding name="DummyServiceSOAP12Binding" type="ns1:DummyServicePortType">
       <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -148,6 +157,15 @@
             <soap12:body use="literal"/>
          </wsdl:output>
       </wsdl:operation>
+      <wsdl:operation name="longOperation">
+         <soap12:operation soapAction="urn:hello" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:binding name="DummyServiceHttpBinding" type="ns1:DummyServicePortType">
       <http:binding verb="POST"/>
@@ -161,6 +179,15 @@
          </wsdl:output>
       </wsdl:operation>
       <wsdl:operation name="hello">
+         <http:operation location="DummyService/hello"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="hello"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="hello"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="longOperation">
          <http:operation location="DummyService/hello"/>
          <wsdl:input>
             <mime:content type="text/xml" part="hello"/>

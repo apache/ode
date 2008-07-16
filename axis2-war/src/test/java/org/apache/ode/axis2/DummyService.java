@@ -12,7 +12,18 @@ import javax.xml.namespace.QName;
  */
 public class DummyService {
     public String hello(String in) {
+        System.out.println("#### IN HELLO ####");
         return in + " world";
+    }
+
+    public String longOperation(String in) {
+        System.out.println("#### IN LONG OP ####");
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "Went through " + in;
     }
 
     public String faultTest(String in) throws DummyException, AxisFault {
