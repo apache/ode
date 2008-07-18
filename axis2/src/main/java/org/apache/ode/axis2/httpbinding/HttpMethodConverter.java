@@ -19,8 +19,8 @@
 
 package org.apache.ode.axis2.httpbinding;
 
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -29,50 +29,60 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
-import org.apache.ode.il.epr.MutableEndpoint;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
+import javax.wsdl.BindingOutput;
 import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
-import javax.wsdl.BindingOutput;
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.extensions.mime.MIMEContent;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.xml.namespace.QName;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collection;
 
 public class HttpMethodConverter {
 
-    private static final String CONTENT_TYPE_TEXT_XML = "text/xml";
     private static final Log log = LogFactory.getLog(HttpMethodConverter.class);
 
     protected static final Messages msgs = Messages.getMessages(Messages.class);
+    protected Definition definition;
     protected Binding binding;
+    protected QName serviceName;
+    protected String portName;
 
-    public HttpMethodConverter(Binding binding) {
-        this.binding = binding;
+    public HttpMethodConverter(Definition definition, QName serviceName, String portName) {
+        this.definition = definition;
+        this.binding = definition.getService(serviceName).getPort(portName).getBinding();
+        this.serviceName = serviceName;
+        this.portName = portName;
     }
+
 
     public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
@@ -369,11 +379,13 @@ public class HttpMethodConverter {
      *
      * @param odeMessage
      * @param method
-     * @param messageDef
-     * @param bindingOutput
+     * @param operationDef
      */
-    public void extractHttpResponseHeaders(org.apache.ode.bpel.iapi.Message odeMessage, HttpMethod method, Message messageDef, BindingOutput bindingOutput) {
-        Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(bindingOutput.getExtensibilityElements());
+    public void extractHttpResponseHeaders(org.apache.ode.bpel.iapi.Message odeMessage, HttpMethod method, Operation operationDef) {
+        Message messageDef = operationDef.getOutput().getMessage();
+
+        BindingOutput outputBinding = binding.getBindingOperation(operationDef.getName(), operationDef.getInput().getName(), operationDef.getOutput().getName()).getBindingOutput();
+        Collection<UnknownExtensibilityElement> headerBindings = WsdlUtils.getHttpHeaders(outputBinding.getExtensibilityElements());
 
         // iterate through the list of header bindings
         // and set the message parts accordingly
@@ -410,6 +422,136 @@ public class HttpMethodConverter {
         odeMessage.setHeaderPart("Status-Line", HttpHelper.statusLineToElement(method.getStatusLine()));
     }
 
+    public void parseHttpResponse(org.apache.ode.bpel.iapi.Message odeResponse, HttpMethod method, Operation opDef) throws Exception {
+        BindingOperation opBinding = binding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
+        /* process headers */
+        extractHttpResponseHeaders(odeResponse, method, opDef);
+
+        /* process the body if any */
+
+        // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
+        MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
+        int statusCode = method.getStatusCode();
+
+        boolean xmlExpected = outputContent != null && HttpHelper.isXml(outputContent.getType());
+        // '202/Accepted' and '204/No Content' status codes explicitly state that there is no body, so we should not fail even if a part is bound to the body response
+        boolean isBodyExpected = outputContent != null;
+        boolean isBodyMandatory = isBodyExpected && statusCode != 204 && statusCode != 202;
+        final String body;
+        try {
+            body = method.getResponseBodyAsString();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to get the request body : " + e.getMessage());
+        }
+
+        final boolean emptyBody = StringUtils.isEmpty(body);
+        if (emptyBody) {
+            if (isBodyMandatory) {
+                throw new RuntimeException("Response body is mandatory but missing!");
+            }
+        } else {
+            if (isBodyExpected) {
+                Part partDef = opDef.getOutput().getMessage().getPart(outputContent.getPart());
+                Element partElement;
+
+                if (xmlExpected) {
+
+                    Header h = method.getResponseHeader("Content-Type");
+                    String receivedType = h != null ? h.getValue() : null;
+                    boolean contentTypeSet = receivedType != null;
+                    boolean xmlReceived = contentTypeSet && HttpHelper.isXml(receivedType);
+
+                    // a few checks
+                    if (!contentTypeSet) {
+                        if (log.isDebugEnabled())
+                            log.debug("Received Response with a body but no 'Content-Type' header!");
+                    } else if (!xmlReceived) {
+                        if (log.isDebugEnabled())
+                            log.debug("Xml type was expected but non-xml type received! Expected Content-Type=" + outputContent.getType() + " Received Content-Type=" + receivedType);
+                    }
+
+                    // parse the body and create the message part
+                    Element bodyElement = DOMUtils.stringToDOM(body);
+                    partElement = createPartElement(partDef, bodyElement);
+                } else {
+                    // if not xml, process it as text
+                    partElement = createPartElement(partDef, body);
+                }
+
+                // set the part
+                odeResponse.setPart(partDef.getName(), partElement);
+
+            } else {
+                // the body was not expected but we don't know how to deal with it
+                if (log.isDebugEnabled()) log.debug("Body received but not mapped to any part! Body=\n" + body);
+            }
+        }
+    }
+
+    public Object[] parseFault(PartnerRoleMessageExchange odeMex, HttpMethod method) {
+        Operation opDef = odeMex.getOperation();
+        BindingOperation opBinding = binding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
+
+        final String body;
+        try {
+            body = method.getResponseBodyAsString();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to get the request body : " + e.getMessage(), e);
+        }
+        Header h = method.getResponseHeader("Content-Type");
+        String receivedType = h != null ? h.getValue() : null;
+        if (opDef.getFaults().isEmpty()) {
+            throw new RuntimeException("Operation [" + opDef.getName() + "] has no fault. This " + method.getStatusCode() + " error will be considered as a failure.");
+        } else if (opBinding.getBindingFaults().isEmpty()) {
+            throw new RuntimeException("No fault binding. This " + method.getStatusCode() + " error will be considered as a failure.");
+        } else if (StringUtils.isEmpty(body)) {
+            throw new RuntimeException("No body in the response. This " + method.getStatusCode() + " error will be considered as a failure.");
+        } else if (receivedType != null && !HttpHelper.isXml(receivedType)) {
+            throw new RuntimeException("Response Content-Type [" + receivedType + "] does not describe XML entities. Faults must be XML. This " + method.getStatusCode() + " error will be considered as a failure.");
+        } else {
+
+            if (receivedType == null) {
+                if (log.isWarnEnabled())
+                    log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + opDef.getName() + "] Received Response with a body but no 'Content-Type' header! Will try to parse nevertheless.");
+            }
+
+            // try to parse body
+            final Element bodyElement;
+            try {
+                bodyElement = DOMUtils.stringToDOM(body);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to parse the response body as xml. This " + method.getStatusCode() + " error will be considered as a failure.", e);
+            }
+
+            // Guess which fault it is
+            QName bodyName = new QName(bodyElement.getNamespaceURI(), bodyElement.getNodeName());
+            Fault faultDef = WsdlUtils.inferFault(opDef, bodyName);
+
+            if (faultDef == null) {
+                throw new RuntimeException("Unknown Fault Type [" + bodyName + "] This " + method.getStatusCode() + " error will be considered as a failure.");
+            } else if (!WsdlUtils.isOdeFault(opBinding.getBindingFault(faultDef.getName()))) {
+                // is this fault bound with ODE extension?
+                throw new RuntimeException("Fault [" + bodyName + "] is not bound with " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "fault") + ". This " + method.getStatusCode() + " error will be considered as a failure.");
+            } else {
+                // a fault has only one part
+                Part partDef = (Part) faultDef.getMessage().getParts().values().iterator().next();
+
+                QName faultName = new QName(definition.getTargetNamespace(), faultDef.getName());
+                QName faultType = faultDef.getMessage().getQName();
+
+                // create the ODE Message now that we know the fault
+                org.apache.ode.bpel.iapi.Message response = odeMex.createMessage(faultType);
+
+                // build the element to be sent back
+                Element partElement = createPartElement(partDef, bodyElement);
+                response.setPart(partDef.getName(), partElement);
+
+                // extract and set headers
+                extractHttpResponseHeaders(response, method, opDef);
+                return new Object[]{faultName, response};
+            }
+        }
+    }
 
 }
 

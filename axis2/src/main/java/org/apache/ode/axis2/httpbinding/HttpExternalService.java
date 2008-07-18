@@ -19,13 +19,11 @@
 
 package org.apache.ode.axis2.httpbinding;
 
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
@@ -40,20 +38,15 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.WSAEndpoint;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Binding;
-import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
-import javax.wsdl.Fault;
 import javax.wsdl.Operation;
-import javax.wsdl.Part;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
-import javax.wsdl.extensions.mime.MIMEContent;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -73,7 +66,6 @@ public class HttpExternalService implements ExternalService {
 
     protected BpelServer server;
     protected ProcessConf pconf;
-    private String targetNamespace;
     protected QName serviceName;
     protected String portName;
 
@@ -83,14 +75,14 @@ public class HttpExternalService implements ExternalService {
     protected Binding portBinding;
 
     public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, BpelServer server) {
-        if(log.isDebugEnabled()) log.debug("new HTTP External service, service name=["+serviceName+"]; port name=["+portName+"]");
+        if (log.isDebugEnabled())
+            log.debug("new HTTP External service, service name=[" + serviceName + "]; port name=[" + portName + "]");
         this.portName = portName;
         this.serviceName = serviceName;
         this.server = server;
         this.pconf = pconf;
 
         Definition definition = pconf.getDefinitionForService(serviceName);
-        targetNamespace = definition.getTargetNamespace();
         Service serviceDef = definition.getService(serviceName);
         if (serviceDef == null)
             throw new IllegalArgumentException(msgs.msgServiceDefinitionNotFound(serviceName));
@@ -114,7 +106,7 @@ public class HttpExternalService implements ExternalService {
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
 
-        httpMethodConverter = new HttpMethodConverter(portBinding);
+        httpMethodConverter = new HttpMethodConverter(definition, serviceName, portName);
         connections = new MultiThreadedHttpConnectionManager();
     }
 
@@ -169,15 +161,15 @@ public class HttpExternalService implements ExternalService {
             }
         } catch (UnsupportedEncodingException e) {
             String errmsg = "The returned HTTP encoding isn't supported " + odeMex;
-            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
+            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (URIException e) {
             String errmsg = "Invalid URI " + odeMex;
-            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
+            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (Exception e) {
             String errmsg = "Unknown HTTP call error for ODE mex " + odeMex;
-            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
+            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
         }
 
@@ -199,7 +191,7 @@ public class HttpExternalService implements ExternalService {
             try {
                 // simply execute the http method
                 HttpClient client = new HttpClient(connections);
-                if (log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Executing http request : " + method.getName() + " " + method.getURI());
                     log.debug(HttpHelper.requestToString(method));
                 }
@@ -218,10 +210,10 @@ public class HttpExternalService implements ExternalService {
                 // Something happened, recording the failure
                 try {
                     String errmsg = "Unable to execute HTTP request : " + e.getMessage();
-                    log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
+                    log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
                     odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
                 } catch (Exception e1) {
-                    String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Error executing reply transaction; reply will be lost.";
+                    String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Error executing reply transaction; reply will be lost.";
                     log.error(errmsg, e);
                 }
             } finally {
@@ -241,7 +233,7 @@ public class HttpExternalService implements ExternalService {
                         log.debug("OneWay HTTP Request, Status-Line: " + method.getStatusLine() + " for " + method.getURI());
                 }
             } catch (URIException e) {
-                String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
+                String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
                 log.error(errmsg, e);
             }
         }
@@ -267,13 +259,11 @@ public class HttpExternalService implements ExternalService {
                     unmanagedStatus();
                 }
             } catch (Exception e) {
-                String errmsg = "Exception occured while processing the HTTP response of a two-way request: " + e.getMessage();
-                log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg, e);
-                odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
+                replyWithFailure("Exception occured while processing the HTTP response of a two-way request. mexId= " + odeMex.getMessageExchangeId(), e);
             }
         }
 
-        private void unmanagedStatus() throws IOException {
+        private void unmanagedStatus() throws Exception {
             replyWithFailure("Unmanaged Status Code! Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
@@ -282,183 +272,43 @@ public class HttpExternalService implements ExternalService {
          *
          * @throws IOException
          */
-        private void _5xx_serverError() throws IOException {
+        private void _5xx_serverError() throws Exception {
             String errmsg;
             if (log.isWarnEnabled()) {
-                errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Status-Line: " + method.getStatusLine() + " for " + method.getURI();
+                errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Status-Line: " + method.getStatusLine() + " for " + method.getURI();
                 log.warn(errmsg);
             }
+            Object[] fault = httpMethodConverter.parseFault(odeMex, method);
+            Message response = (Message) fault[1];
+            QName faultName = (QName) fault[0];
 
-            Operation opDef = odeMex.getOperation();
-            BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
+            // finally send the fault. We did it!
+            if (log.isWarnEnabled())
+                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
 
-            final String body;
-            try {
-                body = method.getResponseBodyAsString();
-            } catch (IOException e) {
-                errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Unable to get the request body : " + e.getMessage();
-                log.error(errmsg, e);
-                odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, HttpHelper.prepareDetailsElement(method));
-                return;
-            }
-            Header h = method.getResponseHeader("Content-Type");
-            String receivedType = h != null ? h.getValue() : null;
-
-            if (opDef.getFaults().isEmpty()) {
-                replyWithFailure("Operation [" + opDef.getName() + "] has no fault. This 500 error will be considered as a failure.");
-            } else if (opBinding.getBindingFaults().isEmpty()) {
-                replyWithFailure("No fault binding. This 500 error will be considered as a failure.");
-            } else if (StringUtils.isEmpty(body)) {
-                replyWithFailure("No body in the response. This 500 error will be considered as a failure.");
-            } else if (receivedType != null && !HttpHelper.isXml(receivedType)) {
-                replyWithFailure("Response Content-Type [" + receivedType + "] does not describe XML entities. Faults must be XML. This 500 error will be considered as a failure.");
-            } else {
-
-                if (receivedType == null) {
-                    if (log.isWarnEnabled())
-                        log.warn("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Received Response with a body but no 'Content-Type' header! Will try to parse nevertheless.");
-                }
-
-                // try to parse body
-                final Element bodyElement;
-                try {
-                    bodyElement = DOMUtils.stringToDOM(body);
-                } catch (Exception e) {
-                    replyWithFailure("Unable to parse the response body as xml. This 500 error will be considered as a failure.");
-                    return;
-                }
-
-                // Guess which fault it is
-                QName bodyName = new QName(bodyElement.getNamespaceURI(), bodyElement.getNodeName());
-                Fault faultDef = WsdlUtils.inferFault(opDef, bodyName);
-
-                if (faultDef == null) {
-                    replyWithFailure("Unknown Fault Type [" + bodyName + "] This 500 error will be considered as a failure.");
-                } else if (!WsdlUtils.isOdeFault(opBinding.getBindingFault(faultDef.getName()))) {
-                    // is this fault bound with ODE extension?
-                    replyWithFailure("Fault [" + bodyName + "] is not bound with " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "fault") + ". This 500 error will be considered as a failure.");
-                } else {
-                    // a fault has only one part
-                    Part partDef = (Part) faultDef.getMessage().getParts().values().iterator().next();
-
-                    QName faultName = new QName(targetNamespace, faultDef.getName());
-                    QName faultType = faultDef.getMessage().getQName();
-
-                    // create the ODE Message now that we know the fault
-                    Message response = odeMex.createMessage(faultType);
-
-                    // build the element to be sent back
-                    Element partElement = httpMethodConverter.createPartElement(partDef, bodyElement);
-                    response.setPart(partDef.getName(), partElement);
-
-                    // extract and set headers
-                    httpMethodConverter.extractHttpResponseHeaders(response, method, faultDef.getMessage(), opBinding.getBindingOutput());
-
-                    // finally send the fault. We did it!
-                    if (log.isWarnEnabled())
-                        log.warn("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Fault response: faultName=" + faultName + " faultType=" + faultType + "\n" + DOMUtils.domToString(response.getMessage()));
-                    odeMex.replyWithFault(faultName, response);
-                }
-
-            }
+            odeMex.replyWithFault(faultName, response);
         }
 
-        private void _4xx_badRequest() throws IOException {
+        private void _4xx_badRequest() throws Exception {
             replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
-        private void _3xx_redirection() throws IOException {
+        private void _3xx_redirection() throws Exception {
             // redirections should be handled transparently by http-client
             replyWithFailure("Redirections disabled! HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
-        private void _2xx_success() throws IOException {
+        private void _2xx_success() throws Exception {
             if (log.isDebugEnabled())
-                log.debug("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
+                log.debug("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
             if (log.isDebugEnabled()) log.debug("Received response for MEX " + odeMex);
 
             Operation opDef = odeMex.getOperation();
-            BindingOperation opBinding = portBinding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
-            javax.wsdl.Message outputMessage = odeMex.getOperation().getOutput().getMessage();
-
             // this is the message to populate and send to ODE
-            Message odeResponse = odeMex.createMessage(outputMessage.getQName());
+            QName outputMsgName = odeMex.getOperation().getOutput().getMessage().getQName();
+            Message odeResponse = odeMex.createMessage(outputMsgName);
 
-            /* process headers */
-            httpMethodConverter.extractHttpResponseHeaders(odeResponse, method, outputMessage, opBinding.getBindingOutput());
-
-            /* process the body if any */
-
-            // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
-            MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
-            int statusCode = method.getStatusCode();
-
-            boolean xmlExpected = outputContent != null && HttpHelper.isXml(outputContent.getType());
-            // '202/Accepted' and '204/No Content' status codes explicitly state that there is no body, so we should not fail even if a part is bound to the body response
-            boolean isBodyExpected = outputContent != null;
-            boolean isBodyMandatory = isBodyExpected && statusCode!=204 && statusCode!=202;
-
-
-            final String body;
-            try {
-                body = method.getResponseBodyAsString();
-            } catch (IOException e) {
-                String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Unable to get the request body : " + e.getMessage();
-                log.error(errmsg, e);
-                odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, HttpHelper.prepareDetailsElement(method));
-                return;
-            }
-
-            final boolean emptyBody = StringUtils.isEmpty(body);
-            if (emptyBody) {
-                if (isBodyMandatory) {
-                    replyWithFailure("Response body is mandatory but missing! Msg Id=" + odeMex.getMessageExchangeId());
-                    return;
-                }
-            } else {
-                if (isBodyExpected) {
-                    Part partDef = outputMessage.getPart(outputContent.getPart());
-                    Element partElement;
-
-                    if (xmlExpected) {
-
-                        Header h = method.getResponseHeader("Content-Type");
-                        String receivedType = h != null ? h.getValue() : null;
-                        boolean contentTypeSet = receivedType != null;
-                        boolean xmlReceived = contentTypeSet && HttpHelper.isXml(receivedType);
-
-                        // a few checks
-                        if (!contentTypeSet) {
-                            if (log.isDebugEnabled())
-                                log.debug("Received Response with a body but no 'Content-Type' header!");
-                        } else if (!xmlReceived) {
-                            if (log.isDebugEnabled())
-                                log.debug("Xml type was expected but non-xml type received! Expected Content-Type=" + outputContent.getType() + " Received Content-Type=" + receivedType);
-                        }
-
-                        // parse the body and create the message part
-                        try {
-                            Element bodyElement = DOMUtils.stringToDOM(body);
-                            partElement = httpMethodConverter.createPartElement(partDef, bodyElement);
-                        } catch (Exception e) {
-                            String errmsg = "[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] Unable to parse the response body: " + e.getMessage();
-                            log.error(errmsg, e);
-                            odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, HttpHelper.prepareDetailsElement(method));
-                            return;
-                        }
-                    } else {
-                        // if not xml, process it as text
-                        partElement = httpMethodConverter.createPartElement(partDef, body);
-                    }
-
-                    // set the part
-                    odeResponse.setPart(partDef.getName(), partElement);
-
-                } else {
-                    // the body was not expected but we don't know how to deal with it
-                    if (log.isDebugEnabled()) log.debug("Body received but not mapped to any part! Body=\n" + body);
-                }
-            }
+            httpMethodConverter.parseHttpResponse(odeResponse, method, opDef);
 
             // finally send the message
             try {
@@ -466,12 +316,16 @@ public class HttpExternalService implements ExternalService {
                     log.info("Response: " + (odeResponse.getMessage() != null ? DOMUtils.domToString(odeResponse.getMessage()) : "empty"));
                 odeMex.reply(odeResponse);
             } catch (Exception ex) {
-                replyWithFailure("Unable to process response: " + ex.getMessage());
-            }
+                replyWithFailure("Unable to process response: " + ex.getMessage(), ex);
+            }            
         }
 
         void replyWithFailure(String errmsg) {
-            log.error("[Service: "+serviceName+", Port: "+portName+", Operation: "+odeMex.getOperationName()+"] "+errmsg);
+            replyWithFailure(errmsg, null);
+        }
+
+        void replyWithFailure(String errmsg, Throwable t) {
+            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, t);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpHelper.prepareDetailsElement(method));
         }
     }
