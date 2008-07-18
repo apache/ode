@@ -72,12 +72,12 @@ public class HttpMethodConverterTest extends TestCase {
         Service deliciousService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DeliciousService"));
         deliciousPort = deliciousService.getPort("TagHttpPort");
         deliciousBinding = deliciousPort.getBinding();
-        deliciousBuilder = new HttpMethodConverter(deliciousBinding);
+        deliciousBuilder = new HttpMethodConverter(definition, deliciousService.getQName(), deliciousPort.getName());
 
         Service dummyService = definition.getService(new QName("http://ode/bpel/unit-test.wsdl", "DummyService"));
         dummyPort = dummyService.getPort("DummyServiceHttpport");
         dummyBinding = dummyPort.getBinding();
-        dummyBuilder = new HttpMethodConverter(dummyBinding);
+        dummyBuilder = new HttpMethodConverter(definition, dummyService.getQName(), dummyPort.getName());
 
     }
 
