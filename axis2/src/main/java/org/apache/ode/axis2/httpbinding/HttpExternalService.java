@@ -298,28 +298,6 @@ public class HttpExternalService implements ExternalService {
             replyWithFailure("Unmanaged Status Code! Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
-        /**
-         * For 500s if a fault is defined in the WSDL and the response body contains the corresponding xml doc, then reply with a fault ; else reply with failure.
-         *
-         * @throws IOException
-         */
-        private void _5xx_serverError() throws Exception {
-            String errmsg;
-            if (log.isWarnEnabled()) {
-                errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Status-Line: " + method.getStatusLine() + " for " + method.getURI();
-                log.warn(errmsg);
-            }
-            int status = method.getStatusCode();
-            if (status == _503_SERVICE_UNAVAILABLE
-                    || status == _504_GATEWAY_TIMEOUT) {
-                // reply with a failure, meaning the request might be repeated
-                replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
-            } else {
-                // reply with a fault, meaning the request should not be repeated later
-                replyWithFault();
-            }
-        }
-
         private void _4xx_5xx_error() throws Exception {
             int status = method.getStatusCode();
             if(HttpHelper.isFaultOrFailure(status)>0){
