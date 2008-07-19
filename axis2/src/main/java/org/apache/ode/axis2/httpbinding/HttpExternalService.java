@@ -38,6 +38,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.WSAEndpoint;
 import org.apache.ode.utils.DOMUtils;
+import static org.apache.ode.utils.http.StatusCode.*;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Element;
@@ -251,10 +252,8 @@ public class HttpExternalService implements ExternalService {
                     _2xx_success();
                 } else if (statusCode >= 300 && statusCode < 400) {
                     _3xx_redirection();
-                } else if (statusCode >= 400 && statusCode < 500) {
-                    _4xx_badRequest();
-                } else if (statusCode >= 500 && statusCode < 600) {
-                    _5xx_serverError();
+                } else if (statusCode >= 400 && statusCode < 600) {
+                    _4xx_5xx_error();
                 } else {
                     unmanagedStatus();
                 }
@@ -267,30 +266,15 @@ public class HttpExternalService implements ExternalService {
             replyWithFailure("Unmanaged Status Code! Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
-        /**
-         * For 500s if a fault is defined in the WSDL and the response body contains the corresponding xml doc, then reply with a fault ; else reply with failure.
-         *
-         * @throws IOException
-         */
-        private void _5xx_serverError() throws Exception {
-            String errmsg;
-            if (log.isWarnEnabled()) {
-                errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Status-Line: " + method.getStatusLine() + " for " + method.getURI();
-                log.warn(errmsg);
+        private void _4xx_5xx_error() throws Exception {
+            int status = method.getStatusCode();
+            if(HttpHelper.isFaultOrFailure(status)>0){
+                // reply with a fault, meaning the request should not be repeated
+                replyWithFault();
+            } else {
+                // reply with a failure, meaning the request might be repeated later
+                replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
             }
-            Object[] fault = httpMethodConverter.parseFault(odeMex, method);
-            Message response = (Message) fault[1];
-            QName faultName = (QName) fault[0];
-
-            // finally send the fault. We did it!
-            if (log.isWarnEnabled())
-                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
-
-            odeMex.replyWithFault(faultName, response);
-        }
-
-        private void _4xx_badRequest() throws Exception {
-            replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
         }
 
         private void _3xx_redirection() throws Exception {
@@ -317,8 +301,21 @@ public class HttpExternalService implements ExternalService {
                 odeMex.reply(odeResponse);
             } catch (Exception ex) {
                 replyWithFailure("Unable to process response: " + ex.getMessage(), ex);
-            }            
+            }
         }
+
+        void replyWithFault() {
+            Object[] fault = httpMethodConverter.parseFault(odeMex, method);
+            Message response = (Message) fault[1];
+            QName faultName = (QName) fault[0];
+
+            // finally send the fault. We did it!
+            if (log.isWarnEnabled())
+                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
+
+            odeMex.replyWithFault(faultName, response);
+        }
+
 
         void replyWithFailure(String errmsg) {
             replyWithFailure(errmsg, null);
