@@ -20,8 +20,7 @@
 package org.apache.ode.axis2.httpbinding;
 
 import junit.framework.TestCase;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Document;
+import org.apache.ode.utils.http.HttpUtils;
 
 /**
  *
@@ -51,26 +50,26 @@ public class HttpHelperTest extends TestCase {
     public void testIsXml() {
 
         for (String s : IS_XML) {
-            assertTrue(s+" is an xml type", HttpHelper.isXml(s));
+            assertTrue(s+" is an xml type", HttpUtils.isXml(s));
         }
         for (String s : IS_TEXT) {
-            assertFalse(s+" is not an xml type", HttpHelper.isXml(s));
+            assertFalse(s+" is not an xml type", HttpUtils.isXml(s));
         }
         for (String s : IS_IMAGE) {
-            assertFalse(s+" is not an xml type", HttpHelper.isXml(s));
+            assertFalse(s+" is not an xml type", HttpUtils.isXml(s));
         }
 
     }
 
     public void testIsText() {
         for (String s : IS_TEXT) {
-            assertTrue(s+" is a text type", HttpHelper.isText(s));
+            assertTrue(s+" is a text type", HttpUtils.isText(s));
         }
         for (String s : IS_XML) {
-            assertFalse(s+" is not a text type", HttpHelper.isText(s));
+            assertFalse(s+" is not a text type", HttpUtils.isText(s));
         }
         for (String s : IS_IMAGE) {
-            assertFalse(s+" is not a text type", HttpHelper.isXml(s));
+            assertFalse(s+" is not a text type", HttpUtils.isXml(s));
         }
     }
 }

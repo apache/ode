@@ -39,6 +39,9 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.http.HttpUtils;
+import static org.apache.ode.utils.http.HttpUtils.bodyAllowed;
+import static org.apache.ode.utils.http.StatusCode.*;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Document;
@@ -194,7 +197,7 @@ public class HttpMethodConverter {
                     String errMsg = "XML Types are not supported. Parts must use elements.";
                     if (log.isErrorEnabled()) log.error(errMsg);
                     throw new RuntimeException(errMsg);
-                } else if (HttpHelper.isXml(contentType)) {
+                } else if (HttpUtils.isXml(contentType)) {
                     if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] equivalent to 'text/xml'");
                     // stringify the first element
                     String xmlString = DOMUtils.domToString(DOMUtils.getFirstChildElement(partValue));
@@ -431,12 +434,12 @@ public class HttpMethodConverter {
 
         // assumption is made that a response may have at most one body. HttpBindingValidator checks this.
         MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
-        int statusCode = method.getStatusCode();
+        int status = method.getStatusCode();
 
-        boolean xmlExpected = outputContent != null && HttpHelper.isXml(outputContent.getType());
+        boolean xmlExpected = outputContent != null && HttpUtils.isXml(outputContent.getType());
         // '202/Accepted' and '204/No Content' status codes explicitly state that there is no body, so we should not fail even if a part is bound to the body response
         boolean isBodyExpected = outputContent != null;
-        boolean isBodyMandatory = isBodyExpected && statusCode != 204 && statusCode != 202;
+        boolean isBodyMandatory = isBodyExpected && bodyAllowed(status) && status != _202_ACCEPTED;
         final String body;
         try {
             body = method.getResponseBodyAsString();
@@ -459,7 +462,7 @@ public class HttpMethodConverter {
                     Header h = method.getResponseHeader("Content-Type");
                     String receivedType = h != null ? h.getValue() : null;
                     boolean contentTypeSet = receivedType != null;
-                    boolean xmlReceived = contentTypeSet && HttpHelper.isXml(receivedType);
+                    boolean xmlReceived = contentTypeSet && HttpUtils.isXml(receivedType);
 
                     // a few checks
                     if (!contentTypeSet) {
@@ -506,7 +509,7 @@ public class HttpMethodConverter {
             throw new RuntimeException("No fault binding. This " + method.getStatusCode() + " error will be considered as a failure.");
         } else if (StringUtils.isEmpty(body)) {
             throw new RuntimeException("No body in the response. This " + method.getStatusCode() + " error will be considered as a failure.");
-        } else if (receivedType != null && !HttpHelper.isXml(receivedType)) {
+        } else if (receivedType != null && !HttpUtils.isXml(receivedType)) {
             throw new RuntimeException("Response Content-Type [" + receivedType + "] does not describe XML entities. Faults must be XML. This " + method.getStatusCode() + " error will be considered as a failure.");
         } else {
 
