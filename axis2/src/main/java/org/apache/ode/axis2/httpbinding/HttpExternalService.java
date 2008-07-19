@@ -39,6 +39,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
+import static org.apache.ode.utils.http.StatusCode.*;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Element;
@@ -276,10 +277,8 @@ public class HttpExternalService implements ExternalService {
                                 _2xx_success();
                             } else if (statusCode >= 300 && statusCode < 400) {
                                 _3xx_redirection();
-                            } else if (statusCode >= 400 && statusCode < 500) {
-                                _4xx_badRequest();
-                            } else if (statusCode >= 500 && statusCode < 600) {
-                                _5xx_serverError();
+                            } else if (statusCode >= 400 && statusCode < 600) {
+                                _4xx_5xx_error();
                             } else {
                                 unmanagedStatus();
                             }
@@ -310,20 +309,26 @@ public class HttpExternalService implements ExternalService {
                 errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Status-Line: " + method.getStatusLine() + " for " + method.getURI();
                 log.warn(errmsg);
             }
-            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
-            Object[] fault = httpMethodConverter.parseFault(odeMex, method);
-            Message response = (Message) fault[1];
-            QName faultName = (QName) fault[0];
-
-            // finally send the fault. We did it!
-            if (log.isWarnEnabled())
-                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
-
-            odeMex.replyWithFault(faultName, response);
+            int status = method.getStatusCode();
+            if (status == _503_SERVICE_UNAVAILABLE
+                    || status == _504_GATEWAY_TIMEOUT) {
+                // reply with a failure, meaning the request might be repeated
+                replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
+            } else {
+                // reply with a fault, meaning the request should not be repeated later
+                replyWithFault();
+            }
         }
 
-        private void _4xx_badRequest() throws Exception {
-            replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
+        private void _4xx_5xx_error() throws Exception {
+            int status = method.getStatusCode();
+            if(HttpHelper.isFaultOrFailure(status)>0){
+                // reply with a fault, meaning the request should not be repeated
+                replyWithFault();
+            } else {
+                // reply with a failure, meaning the request might be repeated later
+                replyWithFailure("HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
+            }
         }
 
         private void _3xx_redirection() throws Exception {
@@ -354,6 +359,20 @@ public class HttpExternalService implements ExternalService {
                 replyWithFailure("Unable to process response: " + ex.getMessage(), ex);
             }
         }
+
+        void replyWithFault() {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
+            Object[] fault = httpMethodConverter.parseFault(odeMex, method);
+            Message response = (Message) fault[1];
+            QName faultName = (QName) fault[0];
+
+            // finally send the fault. We did it!
+            if (log.isWarnEnabled())
+                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
+
+            odeMex.replyWithFault(faultName, response);
+        }
+
 
         void replyWithFailure(String errmsg) {
             replyWithFailure(errmsg, null);

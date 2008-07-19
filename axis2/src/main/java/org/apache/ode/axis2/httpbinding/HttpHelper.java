@@ -30,21 +30,18 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.Properties;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.http.HttpUtils;
+import static org.apache.ode.utils.http.StatusCode.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.PipedOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -128,7 +125,7 @@ public class HttpHelper {
     public static Element prepareDetailsElement(HttpMethod method) {
         Header h = method.getResponseHeader("Content-Type");
         String receivedType = h != null ? h.getValue() : null;
-        boolean bodyIsXml = receivedType != null && HttpHelper.isXml(receivedType);
+        boolean bodyIsXml = receivedType != null && HttpUtils.isXml(receivedType);
 
 
         Document doc = DOMUtils.newDocument();
@@ -203,20 +200,6 @@ public class HttpHelper {
         return sb.toString();
     }
 
-    public static final String XML_MIME_TYPE_REGEX = "(text/xml)|(application/xml)|((.*)\\+xml)";
-    private static final String TEXT_MIME_TYPE_REGEX = "text/(?!xml$).*";
-    private static final Pattern XML_MIME_TYPE_PATTERN = Pattern.compile(XML_MIME_TYPE_REGEX);
-    private static final Pattern TEXT_MIME_TYPE_PATTERN = Pattern.compile(TEXT_MIME_TYPE_REGEX);
-
-    public static boolean isXml(String contentType) {
-        return XML_MIME_TYPE_PATTERN.matcher(contentType).matches();
-    }
-
-    public static boolean isText(String contentType) {
-        return TEXT_MIME_TYPE_PATTERN.matcher(contentType).matches();
-    }
-
-
     public static String requestToString(HttpMethod m) {
         StringBuilder sb = new StringBuilder(256);
         try {
@@ -277,5 +260,45 @@ public class HttpHelper {
             sb.append("\n\t").append(h.getName()).append(": ").append(h.getValue());
         }
         return sb.toString();
+    }
+
+    /**
+     *
+     * @param s, the status code to test, must be in [400, 600[
+     * @return 1 if fault, -1 if failure, 0 if undetermined
+     */
+    public static int isFaultOrFailure(int s) {
+        if (s < 400 || s >= 600) {
+            throw new IllegalArgumentException("Status-Code must be in interval [400;600[");
+        }
+        if (s == _500_INTERNAL_SERVER_ERROR
+                || s == _501_NOT_IMPLEMENTED
+                || s == _502_BAD_GATEWAY
+                || s == _505_HTTP_VERSION_NOT_SUPPORTED
+                || s == _400_BAD_REQUEST
+                || s == _402_PAYMENT_REQUIRED
+                || s == _403_FORBIDDEN
+                || s == _404_NOT_FOUND
+                || s == _405_METHOD_NOT_ALLOWED
+                || s == _406_NOT_ACCEPTABLE
+                || s == _407_PROXY_AUTHENTICATION_REQUIRED
+                || s == _409_CONFLICT
+                || s == _410_GONE
+                || s == _412_PRECONDITION_FAILED
+                || s == _413_REQUEST_TOO_LONG
+                || s == _414_REQUEST_URI_TOO_LONG
+                || s == _415_UNSUPPORTED_MEDIA_TYPE
+                || s == _411_LENGTH_REQUIRED
+                || s == _416_REQUESTED_RANGE_NOT_SATISFIABLE
+                || s == _417_EXPECTATION_FAILED) {
+            return 1;
+        } else if (s == _503_SERVICE_UNAVAILABLE
+                || s == _504_GATEWAY_TIMEOUT
+                || s == _401_UNAUTHORIZED
+                || s == _408_REQUEST_TIMEOUT) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 }
