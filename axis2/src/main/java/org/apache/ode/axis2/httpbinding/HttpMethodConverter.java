@@ -262,22 +262,34 @@ public class HttpMethodConverter {
             String partName = binding.getAttribute("part");
             String value = binding.getAttribute("value");
 
+            /* Header binding may use a part or a static value */
             String headerValue;
             if (StringUtils.isNotEmpty(partName)) {
                 // 'part' attribute is used
                 // get the part to be put in the header
                 Part part = inputMessage.getPart(partName);
                 Element partWrapper = partValues.get(part.getName());
-                // if the part has an element name, we must take the first element
-                if (part.getElementName() != null) {
-                    headerValue = DOMUtils.domToString(DOMUtils.getFirstChildElement(partWrapper));
+                if (DOMUtils.isEmptyElement(partWrapper)) {
+                    headerValue = "";
                 } else {
-                    if (DOMUtils.getFirstChildElement(partWrapper) != null) {
-                        String errMsg = "Complex types are not supported. Header Parts must use elements or simple types.";
-                        if (log.isErrorEnabled()) log.error(errMsg);
-                        throw new RuntimeException(errMsg);
+                    /*
+                    The expected part value could be a simple type
+                    or an element of a simple type.
+                    So if a element is there, take its text content
+                    else take the text content of the part element itself
+                    */
+                    Element childElement = DOMUtils.getFirstChildElement(partWrapper);
+                    if (childElement != null) {
+                        if (DOMUtils.getFirstChildElement(childElement) != null) {
+                            String errMsg = "Complex types are not supported. Header Parts must be simple types or elements of a simple type.";
+                            if (log.isErrorEnabled()) log.error(errMsg);
+                            throw new RuntimeException(errMsg);
+                        } else {
+                            headerValue = DOMUtils.getTextContent(childElement);
+                        }
+                    } else {
+                        headerValue = DOMUtils.getTextContent(partWrapper);
                     }
-                    headerValue = DOMUtils.getTextContent(partWrapper);
                 }
             } else if (StringUtils.isNotEmpty(value)) {
                 // 'value' attribute is used, this header is a static value
