@@ -56,7 +56,8 @@ public class UrlReplacementTransformer {
      * @param baseUri - the base uri template containing part names enclosed within single curly braces
      * @param values  - a map<String, Element>, the key is a part name (without curly braces), the value the replacement value for the part name. If the value is not a simple type, it will be skipped.
      * @return the encoded uri
-     * @throws java.lang.IllegalArgumentException if a replacement value is null in the map or if a part pattern is found more than once
+     * @throws java.lang.IllegalArgumentException
+     *          if a replacement value is null in the map or if a part pattern is found more than once
      */
     public String transform(String baseUri, Map<String, Element> values) {
         // the list containing the final split result
@@ -72,11 +73,26 @@ public class UrlReplacementTransformer {
             String replacementValue;
             {
                 Element value = e.getValue();
-                replacementValue = DOMUtils.isEmptyElement(value) ? "" : DOMUtils.getTextContent(value);
+                if (DOMUtils.isEmptyElement(value)) {
+                    replacementValue = "";
+                } else {
+                    /*
+                    The expected part value could be a simple type
+                    or an element of a simple type.
+                    So if a element is there, take its text content
+                    else take the text content of the part element itself
+                    */
+                    Element childElement = DOMUtils.getFirstChildElement(value);
+                    if (childElement != null) {
+                        replacementValue = DOMUtils.getTextContent(childElement);
+                    } else {
+                        replacementValue = DOMUtils.getTextContent(value);
+                    }
+                }
             }
 
             // if it is not a simple type, skip it
-            if (replacementValue!=null) {
+            if (replacementValue != null) {
                 try {
                     replacementValue = URIUtil.encodeWithinQuery(replacementValue);
                 } catch (URIException urie) {
@@ -86,7 +102,7 @@ public class UrlReplacementTransformer {
 
                 // first, search for parentheses
                 String partPattern = "\\(" + partName + "\\)";
-                if(!replace(result, partPattern, replacementValue)){
+                if (!replace(result, partPattern, replacementValue)) {
                     // if parentheses not found, try braces
                     partPattern = "\\{" + partName + "\\}";
                     replace(result, partPattern, replacementValue);
