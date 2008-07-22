@@ -50,11 +50,27 @@ public class URLEncodedTransformer {
         List<NameValuePair> l = new ArrayList<NameValuePair>(values.size());
         for (Map.Entry<String, Element> e : values.entrySet()) {
             String partName = e.getKey();
-            Element node = e.getValue();
-            String nodeContent = DOMUtils.isEmptyElement(node) ? "" : DOMUtils.getTextContent(node);
+            Element value = e.getValue();
+            String textValue;
+            if (DOMUtils.isEmptyElement(value)) {
+                textValue = "";
+            } else {
+                /*
+                The expected part value could be a simple type
+                or an element of a simple type.
+                So if a element is there, take its text content
+                else take the text content of the part element itself
+                */
+                Element childElement = DOMUtils.getFirstChildElement(value);
+                if (childElement != null) {
+                    textValue = DOMUtils.getTextContent(childElement);
+                } else {
+                    textValue = DOMUtils.getTextContent(value);
+                }
+            }
             // if it is not a simple type, skip it
-            if (nodeContent != null) {
-                l.add(new NameValuePair(e.getKey(), nodeContent));
+            if (textValue != null) {
+                l.add(new NameValuePair(e.getKey(), textValue));
             }
         }
         return EncodingUtil.formUrlEncode(l.toArray(new NameValuePair[0]), "UTF-8");
