@@ -46,6 +46,7 @@
         <variable name="articleMsg" messageType="dummy:ArticleMessage"/>
         <variable name="generatedTimestamp" type="xsd:string"/>
         <variable name="articleId" type="xsd:string"/>
+        <variable name="tmpVar" type="xsd:string"/>
         <variable name="statusLine" type="xsd:anyType"/>
     </variables>
 
@@ -104,18 +105,25 @@
             </else>
         </if>
 
-<!--        <if>
-            <condition>fn:contains($articleMsg.from,'alexis@test.com')</condition>
+        <assign>
+            <copy>
+                <from variable="articleMsg" header="From"/>
+                <to variable="tmpVar"/>
+            </copy>
+        </assign>
+        <if>
+            <condition>compare($tmpVar, 'alexis@test.com') = 0</condition>
             <empty/>
             <else>
                 <assign>
                     <copy>
-                        <from>'Wrong From Header received. Check if the request header was properly set.'</from>
+                        <from>concat('Wrong From Header received. Check if the request header was properly set. Received value is: ', $tmpVar)
+                        </from>
                         <to>$outputVar.TestPart</to>
                     </copy>
                 </assign>
             </else>
-        </if>-->
+        </if>
         <if>
             <condition>$articleMsg.article/dummy:id = $articleId</condition>
             <empty/>
@@ -375,7 +383,7 @@
                 <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
                        operation="hello" variable="outputVar"/>
             </sequence>
-        </scope>        
+        </scope>
 
         <!-- ############################################### -->
         <!-- 500_operation_with_no_fault_failed - failure expected  -->
