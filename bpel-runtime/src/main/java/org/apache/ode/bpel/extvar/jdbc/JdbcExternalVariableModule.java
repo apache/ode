@@ -368,10 +368,18 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             ResultSet rs = stmt.executeQuery();
             try {
                 if (rs.next()) {
-                    for (Column cr : dbev._columns)  {
-                        Object val = rs.getObject(cr.idx+1);
-                        if (__log.isDebugEnabled()) __log.debug("Result column index "+cr.idx+": "+val);
-                        ret.set(cr.idx,val);
+                    for (Column c : dbev._columns)  {
+                        Object val;
+                        int i = c.idx+1;
+                        if (c.isDate()) val = rs.getDate(i);
+                        else if (c.isTimeStamp()) val = rs.getTimestamp(i);
+                        else if (c.isTime()) val = rs.getTime(i);
+                        else if (c.isInteger()) val = new Long(rs.getLong(i));
+                        else if (c.isReal()) val = new Double(rs.getDouble(i));
+                        else if (c.isBoolean()) val = new Boolean(rs.getBoolean(i));
+                        else val = rs.getObject(i);
+                        if (__log.isDebugEnabled()) __log.debug("Result column index "+c.idx+": "+val);
+                        ret.set(c.idx,val);
                     }
                 } else
                     return null;
