@@ -59,7 +59,15 @@ import org.apache.ode.utils.fs.TempFileManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
-import javax.transaction.*;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -313,15 +321,24 @@ public class ODEServer {
     }
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        destroyService(serviceName, portName);
-        AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
+        Definition wsdlDefinition = pconf.getDefinitionForService(serviceName);
+
+        // Since multiple processes may provide services at the same (JMS) endpoint, qualify
+        // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
+        QName uniqueServiceName = new QName(serviceName.getNamespaceURI(),
+                ODEAxisService.extractServiceName(wsdlDefinition, serviceName, portName,
+                        ODEAxisService.deriveBaseServiceUri(pconf)));
+
+        destroyService(uniqueServiceName, portName);
+
+        AxisService axisService = ODEAxisService.createService(
+                _axisConfig, pconf, serviceName, portName, uniqueServiceName.getLocalPart());
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server, _txMgr);
 
-        _services.put(serviceName, portName, odeService);
+        _services.put(uniqueServiceName, portName, odeService);
 
         // Setting our new service on the receiver, the same receiver handles
-        // all
-        // operations so the first one should fit them all
+        // all operations so the first one should fit them all
         AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
         ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
 
