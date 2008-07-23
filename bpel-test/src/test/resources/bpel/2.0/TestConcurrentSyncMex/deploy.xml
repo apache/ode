@@ -1,0 +1,29 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+                xmlns:tns="http://www.example.org/NewWSDLFile/"
+                xmlns:NewWSDLFilePartner="http://www.example.org/NewWSDLFilePartner/"
+                xmlns:Pool="http://example.com/Process/Pool" xmlns:diag="http://example.com/Process"
+                xmlns:Partner="http://example.com/Process/Partner" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:this="http://example.com/Process/Main" name="this:Main" fileName="Process-Main.bpel">
+  <dd:property name="PATH">Process</dd:property>
+  <dd:property name="SVG">Process.svg</dd:property>
+  <dd:provide partnerLink="mainAndPoolForPortTypeNewWSDLFilePlkVar">
+    <dd:service name="this:MainAndPoolForPortTypeNewWSDLFilePlkService" port="Main_for_PoolPort" />
+  </dd:provide>
+  <dd:invoke partnerLink="partnerAndMainForPortTypeNewWSDLFilePartnerPlkVar">
+    <dd:service name="Partner:PartnerAndMainForPortTypeNewWSDLFilePartnerPlkService" port="Partner_for_MainPort" />
+  </dd:invoke>
+  <dd:provide partnerLink="partnerAndMainForPortTypeNewWSDLFilePlkVar">
+    <dd:service name="this:PartnerAndMainForPortTypeNewWSDLFilePlkService" port="Main_for_PartnerPort" />
+  </dd:provide>
+</dd:process><dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:tns="http://www.example.org/NewWSDLFilePartner/" xmlns:diag="http://example.com/Process" xmlns:Main="http://example.com/Process/Main" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:NewWSDLFile="http://www.example.org/NewWSDLFile/" xmlns:this="http://example.com/Process/Partner" name="this:Partner" fileName="Process-Partner.bpel">
+  <dd:property name="PATH">Process</dd:property>
+  <dd:property name="SVG">Process.svg</dd:property>
+  <dd:provide partnerLink="partnerAndMainForPortTypeNewWSDLFilePartnerPlkVar">
+    <dd:service name="this:PartnerAndMainForPortTypeNewWSDLFilePartnerPlkService" port="Partner_for_MainPort" />
+  </dd:provide>
+  <dd:invoke partnerLink="partnerAndMainForPortTypeNewWSDLFilePlkVar">
+    <dd:service name="Main:PartnerAndMainForPortTypeNewWSDLFilePlkService" port="Main_for_PartnerPort" />
+  </dd:invoke>
+</dd:process></dd:deploy>
