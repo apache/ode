@@ -454,9 +454,19 @@ class ASSIGN extends ACTIVITY {
         for (int i = 0; i < nl.getLength(); ++i)
             replacement.appendChild(doc.importNode(nl.item(i), true));
         NamedNodeMap attrs = src.getAttributes();
-        for (int i = 0; i < attrs.getLength(); ++i)
-            if (!((Attr)attrs.item(i)).getName().startsWith("xmlns"))
+        for (int i = 0; i < attrs.getLength(); ++i) {
+            Attr attr = (Attr)attrs.item(i);
+            if (!attr.getName().startsWith("xmlns")) {
                 replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
+                // Case of qualified attribute values, we're forced to add corresponding namespace declaration manually
+                int colonIdx = attr.getValue().indexOf(":");
+                if (colonIdx > 0) {
+                    String prefix = attr.getValue().substring(0, colonIdx);
+                    String attrValNs = src.lookupPrefix(prefix);
+                    replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
+                }
+            }
+        }
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
         

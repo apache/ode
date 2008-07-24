@@ -83,11 +83,19 @@ public class OMUtils {
             
         for (Iterator i = element.getAllAttributes(); i.hasNext();) {
             final OMAttribute attr = (OMAttribute) i.next();
-            if (attr.getNamespace() != null)
-                domElement.setAttributeNS(attr.getNamespace().getNamespaceURI(), attr.getLocalName(), attr.getAttributeValue());
-            else
-                domElement.setAttributeNS(null,attr.getLocalName(), attr.getAttributeValue());
-                
+            Attr newAttr;
+            if (attr.getNamespace() != null) newAttr = doc.createAttributeNS(attr.getNamespace().getNamespaceURI(), attr.getLocalName());
+            else newAttr = doc.createAttributeNS(null,attr.getLocalName());
+
+            newAttr.appendChild(doc.createTextNode(attr.getAttributeValue()));
+            domElement.setAttributeNode(newAttr);
+
+            // Case of qualified attribute values, we're forced to add corresponding namespace declaration manually...
+            int colonIdx = attr.getAttributeValue().indexOf(":");
+            if (colonIdx > 0) {
+                OMNamespace attrValNs = element.findNamespaceURI(attr.getAttributeValue().substring(0, colonIdx));
+                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ attrValNs.getPrefix(), attrValNs.getNamespaceURI());
+            }                
         }
 
         for (Iterator<OMNode> i = element.getChildren(); i.hasNext();) {
