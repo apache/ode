@@ -489,4 +489,7 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
 		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
 	}
 
+  public CompilationMessage errEmptyCatch() {
+    return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
+  }
 }
