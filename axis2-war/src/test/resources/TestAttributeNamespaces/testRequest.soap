@@ -17,7 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<!--soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:myns="myns">
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:myns="myns">
    <soapenv:Header/>
    <soapenv:Body>
       <myns:hello>
@@ -27,16 +27,4 @@
          </myns:in>
       </myns:hello>
    </soapenv:Body>
-</soapenv:Envelope-->
-
-<?xml version='1.0' encoding='UTF-8'?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-    <soapenv:Body>
-        <helloResponse xmlns="myns">
-            <out xmlns:foo="xsn:foo" xmlns:myns="myns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="myns:DustyMagicPixie">
-                <value>Test message</value>
-                <dust>fooo</dust>
-            </out>
-        </helloResponse>
-    </soapenv:Body>
 </soapenv:Envelope>
