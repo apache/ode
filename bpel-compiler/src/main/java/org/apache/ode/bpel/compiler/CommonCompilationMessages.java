@@ -481,10 +481,6 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
 		return this.formatCompilationMessage("Empty sequences are forbidden.");
 	}
 
-	public CompilationMessage errEmptyCatch() {
-		return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
-	}
-
 	public CompilationMessage errMustSpecifyRelatedVariable(String name) {
 		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify a related variable.", name);
 	}
