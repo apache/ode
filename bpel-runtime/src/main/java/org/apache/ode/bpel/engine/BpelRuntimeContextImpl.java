@@ -1117,10 +1117,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         String[] mexRefs = _outstandingRequests.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
-            _bpelProcess.initMyRoleMex(mex);
-            mex.setFailure(FailureType.OTHER, "No response.", null);
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+            if (mexDao != null) {
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                _bpelProcess.initMyRoleMex(mex);
+                mex.setFailure(FailureType.OTHER, "No response.", null);
+                _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
+            }
         }
     }
 
