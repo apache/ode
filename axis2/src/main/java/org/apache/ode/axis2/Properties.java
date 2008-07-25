@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -103,8 +104,8 @@ public class Properties {
             String host = proxy.getProxyHostName();
             if (host == null || host.length() == 0) {
                 // disable proxy if the host is not null
-                proxy=null;
-                if(log.isDebugEnabled()) log.debug("Proxy host is null. Proxy will not be taken into account.");
+                proxy = null;
+                if (log.isDebugEnabled()) log.debug("Proxy host is null. Proxy will not be taken into account.");
             }
         }
 
@@ -120,6 +121,12 @@ public class Properties {
         public static Options translate(Map<String, String> properties, Options options) {
             if (log.isDebugEnabled()) log.debug("Translating Properties for Axis2");
             if (properties.isEmpty()) return options;
+
+            /*first add all property pairs so that new properties (with string value)
+                are automatically handled (i.e no translation needed) */
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                options.setProperty(e.getKey(), e.getValue());
+            }
             if (properties.containsKey(PROP_HTTP_CONNECTION_TIMEOUT)) {
                 final String value = properties.get(PROP_HTTP_CONNECTION_TIMEOUT);
                 try {
@@ -175,8 +182,14 @@ public class Properties {
         }
 
         public static HttpParams translate(Map<String, String> properties, HttpParams p) {
-            if (log.isDebugEnabled()) log.debug("Translating Properties for HttpClient. Properties size="+properties.size());
+            if (log.isDebugEnabled()) log.debug("Translating Properties for HttpClient. Properties size=" + properties.size());
             if (properties.isEmpty()) return p;
+
+            /*first add all property pairs so that new properties (with string value)
+             are automatically handled (i.e no translation needed) */
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                p.setParameter(e.getKey(), e.getValue());
+            }
 
             // initialize the collection of headers
             p.setParameter(HostParams.DEFAULT_HEADERS, new ArrayList());
