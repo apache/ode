@@ -94,7 +94,8 @@ public class OMUtils {
             int colonIdx = attr.getAttributeValue().indexOf(":");
             if (colonIdx > 0) {
                 OMNamespace attrValNs = element.findNamespaceURI(attr.getAttributeValue().substring(0, colonIdx));
-                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ attrValNs.getPrefix(), attrValNs.getNamespaceURI());
+                if (attrValNs != null)
+                    domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ attrValNs.getPrefix(), attrValNs.getNamespaceURI());
             }                
         }
 
