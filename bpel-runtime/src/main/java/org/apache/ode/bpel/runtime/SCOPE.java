@@ -178,13 +178,13 @@ class SCOPE extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void completed(FaultData flt, Set<CompensationHandler> compenstations) {
+                        public void completed(FaultData flt, Set<CompensationHandler> compensations) {
                               // Set the fault to the activity's choice, if and only if no previous fault
                               // has been detected (first fault wins).
                               if (flt != null && _fault == null)
                                   _fault = flt;
                               _child = null;
-                              _compensations.addAll(compenstations);
+                              _compensations.addAll(compensations);
 
                               if (flt == null)
                                   stopEventHandlers();
@@ -303,15 +303,12 @@ class SCOPE extends ACTIVITY {
                         // We have to create a scope for the catch block.
                         BpelRuntimeContext ntive = getBpelRuntimeContext();
 
-                        ActivityInfo faultHandlerActivity = new ActivityInfo(genMonotonic(),
-                                catchBlock,
+                        ActivityInfo faultHandlerActivity = new ActivityInfo(genMonotonic(), catchBlock,
                                 newChannel(TerminationChannel.class,"FH"), newChannel(ParentScopeChannel.class,"FH"));
 
                         ScopeFrame faultHandlerScopeFrame = new ScopeFrame(catchBlock,
                                 ntive.createScopeInstance(_scopeFrame.scopeInstanceId, catchBlock),
-                                _scopeFrame,
-                                _compensations,
-                                _fault);
+                                _scopeFrame, _compensations, _fault);
                         if (catchBlock.faultVariable != null) {
                             try {
                                 VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
@@ -329,7 +326,6 @@ class SCOPE extends ACTIVITY {
                             }
                         }
 
-
                         // Create the fault handler scope.
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
@@ -344,8 +340,8 @@ class SCOPE extends ACTIVITY {
                             public void completed(FaultData fault, Set<CompensationHandler> compensations) {
                                 // The compensations that have been registered here, will never be activated,
                                 // so we'll forget them as soon as possible.
-                                for(Iterator<CompensationHandler> i = compensations.iterator();i.hasNext();)
-                                    i.next().compChannel.forget();
+                                for (CompensationHandler compensation : compensations)
+                                    compensation.compChannel.forget();
 
                                 _self.parent.completed(fault, CompensationHandler.emptySet());
                             }
@@ -398,9 +394,7 @@ class SCOPE extends ACTIVITY {
 
     private static OCatch findCatch(OFaultHandler fh, QName faultName, OVarType faultType) {
         OCatch bestMatch = null;
-        for (Iterator<OCatch> i = fh.catchBlocks.iterator(); i.hasNext();) {
-            OCatch c = i.next();
-
+        for (OCatch c : fh.catchBlocks) {
             // First we try to eliminate this catch block based on fault-name mismatches:
             if (c.faultName != null) {
                 if (faultName == null)
@@ -415,27 +409,23 @@ class SCOPE extends ACTIVITY {
                     continue;
                 else if (c.faultVariable.type instanceof OMessageVarType) {
                     if (faultType instanceof OMessageVarType
-                        && ((OMessageVarType)faultType).equals(c.faultVariable.type)) {
+                            && ((OMessageVarType) faultType).equals(c.faultVariable.type)) {
                         // Don't eliminate.
-                    }
-                    else if (faultType instanceof OElementVarType
-                            && ((OMessageVarType)c.faultVariable.type).docLitType !=null
-                            && !((OMessageVarType)c.faultVariable.type).docLitType.equals(faultType)) {
+                    } else if (faultType instanceof OElementVarType
+                            && ((OMessageVarType) c.faultVariable.type).docLitType != null
+                            && !((OMessageVarType) c.faultVariable.type).docLitType.equals(faultType)) {
                         // Don't eliminate.
-                    }
-                    else {
+                    } else {
                         continue;  // Eliminate.
                     }
                 } else if (c.faultVariable.type instanceof OElementVarType) {
                     if (faultType instanceof OElementVarType && faultType.equals(c.faultVariable.type)) {
                         // Don't eliminate
-                    }
-                    else if (faultType instanceof OMessageVarType
-                            && ((OMessageVarType)faultType).docLitType != null
-                            && ((OMessageVarType)faultType).docLitType.equals(c.faultVariable.type)) {
+                    } else if (faultType instanceof OMessageVarType
+                            && ((OMessageVarType) faultType).docLitType != null
+                            && ((OMessageVarType) faultType).docLitType.equals(c.faultVariable.type)) {
                         // Don't eliminate
-                    }
-                    else {
+                    } else {
                         continue; // eliminate
                     }
                 } else {
