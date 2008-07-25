@@ -120,6 +120,13 @@ public class Properties {
         public static Options translate(Map<String, String> properties, Options options) {
             if (log.isDebugEnabled()) log.debug("Translating Properties for Axis2");
             if (properties.isEmpty()) return options;
+
+            /*first add all property pairs so that new properties (with string value)
+             *              are automatically handled (i.e no translation needed) */
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                 options.setProperty(e.getKey(), e.getValue());
+            }
+            
             if (properties.containsKey(PROP_HTTP_CONNECTION_TIMEOUT)) {
                 final String value = properties.get(PROP_HTTP_CONNECTION_TIMEOUT);
                 try {
@@ -177,6 +184,12 @@ public class Properties {
         public static HttpParams translate(Map<String, String> properties, HttpParams p) {
             if (log.isDebugEnabled()) log.debug("Translating Properties for HttpClient. Properties size="+properties.size());
             if (properties.isEmpty()) return p;
+
+            /*first add all property pairs so that new properties (with string value)
+*              are automatically handled (i.e no translation needed) */
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                p.setParameter(e.getKey(), e.getValue());
+            }
 
             // initialize the collection of headers
             p.setParameter(HostParams.DEFAULT_HEADERS, new ArrayList());
