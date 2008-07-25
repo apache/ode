@@ -30,4 +30,7 @@ public class FaultHandling20Test extends BPELTestAbstract {
 	@Test public void testCatchFaultInFaultHandler() throws Throwable {
         go("/bpel/2.0/TestCatchFaultInFaultHandler");
     }
+    @Test public void testOnEventThrow() throws Throwable {
+        go("/bpel/2.0/TestOnEventThrow");
+    }
 }

@@ -202,9 +202,9 @@ class EH_EVENT extends BpelJacobRunnable {
                             if (faultData != null && _fault == null) {
                                 _fault = faultData;
                                 terminateActive();
-                            }
-
-                            instance(WAITING.this);
+                                _psc.completed(_fault, _comps);
+                            } else
+                                instance(WAITING.this);
                         }
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
