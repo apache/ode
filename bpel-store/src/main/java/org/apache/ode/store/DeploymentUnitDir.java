@@ -165,6 +165,7 @@ class DeploymentUnitDir  {
             bpelc.compile(bpelFile);
         } catch (IOException e) {
             __log.error("Compile error in " + bpelFile, e);
+            throw new RuntimeException(e);
         }
     }
 
