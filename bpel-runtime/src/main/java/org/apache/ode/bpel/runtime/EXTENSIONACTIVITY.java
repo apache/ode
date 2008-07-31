@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.o.OExtensionActivity;
+import org.apache.ode.bpel.o.OProcess.OExtension;
 import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
@@ -53,14 +54,15 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
     	try {
     		ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
     		if (ea == null) {
-    			if (_oext.getOwner().mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
-    				__log.warn("Lookup of extension activity " + extensionId + " failed.");
-    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
-    			} else {
-    				// act like <empty> - do nothing
-    				context.complete();
-    				return;
+    			for (OExtension oe : _oext.getOwner().mustUnderstandExtensions) {
+    				if (extensionId.getNamespaceURI().equals(oe.namespaceURI)) {
+        				__log.warn("Lookup of extension activity " + extensionId + " failed.");
+        				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+    				}
     			}
+				// act like <empty> - do nothing
+				context.complete();
+				return;
     		}
 
     		ea.run(context, _oext.nestedElement.getElement());
