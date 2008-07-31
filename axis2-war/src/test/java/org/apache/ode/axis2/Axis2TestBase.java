@@ -60,7 +60,7 @@ public abstract class Axis2TestBase extends TestCase {
             super(false);
             this.webappPath = webappPath;
             String confLocation = webappPath + "/WEB-INF/conf/axis2.xml";
-            String repoLocation = webappPath + "/WEB-INF/processes";
+            String repoLocation = webappPath + "/WEB-INF";
             configContext = ConfigurationContextFactory
                     .createConfigurationContextFromFileSystem(repoLocation, confLocation);
         }
