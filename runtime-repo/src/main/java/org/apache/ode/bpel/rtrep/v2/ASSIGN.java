@@ -19,10 +19,9 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.List;
+import java.net.URI;
 
 import javax.xml.namespace.QName;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +31,8 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -574,39 +575,30 @@ class ASSIGN extends ACTIVITY {
         return data;
     }
 
-    private void invokeExtensionAssignOperation(
-            OAssign.ExtensionAssignOperation eao) throws FaultException {
+    private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
+        final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntime());
+        final QName extensionId = DOMUtils.getElementQName(eao.nestedElement.getElement());
         try {
-            final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntime());
-            final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
-
-            getBpelRuntime().executeExtension(
-                    DOMUtils.getElementQName(eao.nestedElement.getElement()),
-                    helper, eao.nestedElement.getElement(), responseChannel);
-
-            object(new ExtensionResponseChannelListener(responseChannel) {
-                private static final long serialVersionUID = 1L;
-
-                public void onCompleted() {
-                    _self.parent.completed(null, CompensationHandler.emptySet());
+            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(extensionId);
+            if (ea == null) {
+                for (OProcess.OExtension oe : eao.getOwner().mustUnderstandExtensions) {
+                    if (extensionId.getNamespaceURI().equals(oe.namespaceURI)) {
+                        __log.warn("Lookup of extension activity " + extensionId + " failed.");
+                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+                    }
                 }
+                // act like <empty> - do nothing
+                context.complete();
+                return;
+            }
 
-                public void onFailure(Throwable t) {
-                    StringWriter sw = new StringWriter();
-                    t.printStackTrace(new PrintWriter(sw));
-                    FaultData fault = createFault(new QName(Namespaces.WSBPEL2_0_FINAL_EXEC,
-                            "subLanguageExecutionFault"), _self.o, sw.getBuffer().toString());
-                    _self.parent.completed(fault, CompensationHandler.emptySet());
-                };
-            });
-
+            ea.run(context, eao.nestedElement.getElement());
         } catch (FaultException fault) {
             __log.error(fault);
-            FaultData faultData = createFault(fault.getQName(), _self.o, fault
-                    .getMessage());
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            context.completeWithFault(fault);
         }
     }
+
 
     private class EvaluationContextProxy implements EvaluationContext {
 
@@ -664,6 +656,10 @@ class ASSIGN extends ACTIVITY {
 
         public boolean narrowTypes() {
             return false;
+        }
+
+        public URI getBaseResourceURI() {
+            return _ctx.getBaseResourceURI();
         }
     }
 

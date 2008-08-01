@@ -97,5 +97,6 @@ public interface EvaluationContext {
      * using this evaluation context.
      */
     boolean narrowTypes();
-    
+
+    URI getBaseResourceURI();
 }

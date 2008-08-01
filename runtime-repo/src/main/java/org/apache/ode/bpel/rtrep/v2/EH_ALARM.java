@@ -16,21 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.*;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Date;
 
 import org.w3c.dom.Element;
 
@@ -83,7 +71,7 @@ class EH_ALARM extends BpelJacobRunnable {
 
         if (_oalarm.forExpr != null)
             try {
-                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(alarm);
+                getBpelRuntime().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(alarm);
             } catch (FaultException e) {
                 __log.error(e);
                 _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
@@ -91,7 +79,7 @@ class EH_ALARM extends BpelJacobRunnable {
             }
         else if (_oalarm.untilExpr != null)
             try {
-                alarm.setTime(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(_oalarm.untilExpr, getEvaluationContext()).getTime());
+                alarm.setTime(getBpelRuntime().getExpLangRuntime().evaluateAsDate(_oalarm.untilExpr, getEvaluationContext()).getTime());
             } catch (FaultException e) {
                 __log.error(e);
                 _psc.completed(createFault(e.getQName(),_oalarm.untilExpr), _comps);
@@ -103,7 +91,7 @@ class EH_ALARM extends BpelJacobRunnable {
     }
 
     protected EvaluationContext getEvaluationContext() {
-        return new ExprEvaluationContextImpl(_scopeFrame,getBpelRuntimeContext());
+        return new ExprEvaluationContextImpl(_scopeFrame,getBpelRuntime());
     }
 
     /**
@@ -128,7 +116,7 @@ class EH_ALARM extends BpelJacobRunnable {
 
             if (now.before(_alarm)) {
                 TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
-                getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
+                getBpelRuntime().registerTimer(trc,_alarm.getTime());
                 object(false,new TimerResponseChannelListener(trc){
                     private static final long serialVersionUID = 1110683632756756017L;
 
@@ -207,7 +195,7 @@ class EH_ALARM extends BpelJacobRunnable {
                     if (!_stopped && _oalarm.repeatExpr != null) {
                         Calendar next = Calendar.getInstance();
                         try {
-                            getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(next);
+                            getBpelRuntime().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(next);
                         } catch (FaultException e) {
                             __log.error(e);
                             _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);

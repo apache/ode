@@ -23,12 +23,9 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
-import org.apache.ode.bpel.o.OExtensionActivity;
-import org.apache.ode.bpel.rtrep.v2.extension.ExtensionContext;
-import org.apache.ode.bpel.rtrep.v2.extension.ExtensionOperation;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.utils.DOMUtils;
 
 /**

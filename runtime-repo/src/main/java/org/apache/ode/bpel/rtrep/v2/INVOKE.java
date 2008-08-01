@@ -86,7 +86,7 @@ public class INVOKE extends ACTIVITY {
         try {
             if (!isTwoWay) {
                 FaultData faultData = null;
-                getBpelRuntime().invoke(_scopeFrame.resolve(_oinvoke.partnerLink),
+                getBpelRuntime().invoke(null, _scopeFrame.resolve(_oinvoke.partnerLink),
                     _oinvoke.operation, outboundMsg, null);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 
@@ -94,7 +94,7 @@ public class INVOKE extends ACTIVITY {
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
                 InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
 
-                final String mexId = getBpelRuntime().invoke(
+                final String mexId = getBpelRuntime().invoke(invokeResponseChannel.export(),
                     _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                     outboundMsg, invokeResponseChannel);
 

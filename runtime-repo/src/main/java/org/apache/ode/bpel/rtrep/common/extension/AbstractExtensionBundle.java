@@ -27,7 +27,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+//import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 
 /**
 * Abstract class that bundles and registers <code>&lt;extensionActivity&gt;</code> and
@@ -75,18 +75,19 @@ public abstract class AbstractExtensionBundle {
 		return getExtensionOperationClass(localName).newInstance();
 	}
 
-	public final Map<QName, ExtensionValidator> getExtensionValidators() {
-		Map<QName, ExtensionValidator> result = new HashMap<QName, ExtensionValidator>();
-		String ns = getNamespaceURI();
-		for (String localName : extensionsByName.keySet()) {
-			if (ExtensionValidator.class.isAssignableFrom(extensionsByName.get(localName))) {
-				try {
-					result.put(new QName(ns, localName), (ExtensionValidator)getExtensionOperationInstance(localName));
-				} catch (Exception e) {
-					__log.warn("Could not instantiate extension validator for '{" + ns + "}" + localName);
-				}
-			}
-		}
-		return result;
-	}
+    // TODO See what to do with the validation part
+//	public final Map<QName, ExtensionValidator> getExtensionValidators() {
+//		Map<QName, ExtensionValidator> result = new HashMap<QName, ExtensionValidator>();
+//		String ns = getNamespaceURI();
+//		for (String localName : extensionsByName.keySet()) {
+//			if (ExtensionValidator.class.isAssignableFrom(extensionsByName.get(localName))) {
+//				try {
+//					result.put(new QName(ns, localName), (ExtensionValidator)getExtensionOperationInstance(localName));
+//				} catch (Exception e) {
+//					__log.warn("Could not instantiate extension validator for '{" + ns + "}" + localName);
+//				}
+//			}
+//		}
+//		return result;
+//	}
 }

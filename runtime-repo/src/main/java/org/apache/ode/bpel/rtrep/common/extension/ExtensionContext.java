@@ -118,4 +118,9 @@ public interface ExtensionContext {
      */
     OActivity getOActivity();
     
+    //ScopeFrame getScopeFrame();
+    void complete();
+    
+    void completeWithFault(Throwable t);
+    void completeWithFault(FaultException fault);
 }

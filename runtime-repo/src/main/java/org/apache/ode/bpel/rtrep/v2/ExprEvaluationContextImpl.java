@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.Map;
+import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,4 +118,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 		_native.sendEvent(se);
 	}
 
+    public URI getBaseResourceURI() {
+        return _native.getBaseResourceURI();
+    }
 }

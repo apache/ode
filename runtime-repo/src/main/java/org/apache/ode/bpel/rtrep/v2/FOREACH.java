@@ -32,6 +32,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.DOMUtils;
@@ -206,8 +207,14 @@ public class FOREACH extends ACTIVITY {
                 _oforEach.innerScope), _scopeFrame, null);
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
 
-        getBpelRuntime().initializeVariable(vinst, counterNode);
-
+        try {
+            getBpelRuntime().initializeVariable(vinst, counterNode);
+        } catch (ExternalVariableModuleException e) {
+          __log.error("Exception while initializing external variable", e);
+            _self.parent.failure(e.toString(), null);
+            return;
+        }
+        
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
         se.setNewValue(counterNode);

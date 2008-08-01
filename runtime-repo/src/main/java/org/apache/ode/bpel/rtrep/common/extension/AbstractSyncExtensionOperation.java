@@ -19,10 +19,6 @@
 package org.apache.ode.bpel.rtrep.common.extension;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
-import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.w3c.dom.Element;
 
 /**
@@ -30,12 +26,13 @@ import org.w3c.dom.Element;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public abstract class AbstractSyncExtensionOperation implements ExtensionValidator,
+public abstract class AbstractSyncExtensionOperation implements //ExtensionValidator,
 															ExtensionOperation {
 
-	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
-		// default behavior: pass
-	}
+    // TODO check what to do with compiler context
+//	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
+//		// default behavior: pass
+//	}
 
 	protected abstract void runSync(ExtensionContext context, Element element) throws FaultException;
 	

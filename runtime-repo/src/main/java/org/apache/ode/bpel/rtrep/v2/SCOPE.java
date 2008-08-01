@@ -73,24 +73,22 @@ class SCOPE extends ACTIVITY {
         instance(createChild(_child, _scopeFrame, _linkFrame));
 
         if (_oscope.eventHandler != null) {
-            for (Iterator<OEventHandler.OAlarm> i = _oscope.eventHandler.onAlarms.iterator(); i.hasNext(); ) {
-                OEventHandler.OAlarm alarm = i.next();
+            for (OEventHandler.OAlarm alarm : _oscope.eventHandler.onAlarms) {
                 EventHandlerInfo ehi = new EventHandlerInfo(alarm,
                         newChannel(EventHandlerControlChannel.class),
                         newChannel(ParentScopeChannel.class),
                         newChannel(TerminationChannel.class));
                 _eventHandlers.add(ehi);
-                instance(new EH_ALARM(ehi.psc,ehi.tc, ehi.cc, alarm, _scopeFrame));
+                instance(new EH_ALARM(ehi.psc, ehi.tc, ehi.cc, alarm, _scopeFrame));
             }
-            
-            for (Iterator<OEventHandler.OEvent> i = _oscope.eventHandler.onMessages.iterator(); i.hasNext(); ) {
-                OEventHandler.OEvent event = i.next();
+
+            for (OEventHandler.OEvent event : _oscope.eventHandler.onMessages) {
                 EventHandlerInfo ehi = new EventHandlerInfo(event,
                         newChannel(EventHandlerControlChannel.class),
                         newChannel(ParentScopeChannel.class),
                         newChannel(TerminationChannel.class));
                 _eventHandlers.add(ehi);
-                instance(new EH_EVENT(ehi.psc,ehi.tc, ehi.cc, event, _scopeFrame));
+                instance(new EH_EVENT(ehi.psc, ehi.tc, ehi.cc, event, _scopeFrame));
             }
         }
 

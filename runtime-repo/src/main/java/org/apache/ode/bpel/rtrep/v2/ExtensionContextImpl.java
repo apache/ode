@@ -18,14 +18,22 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import java.util.Map;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Node;
 
 
@@ -39,6 +47,8 @@ public class ExtensionContextImpl implements ExtensionContext {
 	private ScopeFrame _scopeFrame;
 	private ActivityInfo _activityInfo;
 	
+	private boolean hasCompleted = false;
+
 	public ExtensionContextImpl(ActivityInfo activityInfo, ScopeFrame scopeFrame, RuntimeInstanceImpl context) {
 		_activityInfo = activityInfo;
 		_context = context;
@@ -92,8 +102,11 @@ public class ExtensionContextImpl implements ExtensionContext {
 
 	public void writeVariable(OScope.Variable variable, Node value)
 			throws FaultException, ExternalVariableModuleException {
-        VariableInstance vi = _scopeFrame.resolve(variable);
-        _context.commitChanges(vi, value);
+		VariableInstance vi = _scopeFrame.resolve(variable);
+		_context.commitChanges(vi, value);
+        VariableModificationEvent vme = new VariableModificationEvent(variable.name);
+        vme.setNewValue(value);
+        sendEvent(vme);
 	}
 
 	private OScope.Variable getVisibleVariable(String varName) {
@@ -108,4 +121,50 @@ public class ExtensionContextImpl implements ExtensionContext {
 		return _activityInfo.o;
 	}
 
+	public void sendEvent(ScopeEvent event) {
+        if (event.getLineNo() == -1 && _activityInfo.o.debugInfo != null) {
+        	event.setLineNo(_activityInfo.o.debugInfo.startLine);
+        }
+        _scopeFrame.fillEventInfo(event);
+        _context.sendEvent(event);
+	}
+	
+	public void complete() {
+		if (!hasCompleted) {
+			_activityInfo.parent.completed(null, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+	}
+	
+	public void completeWithFault(Throwable t) {
+		if (!hasCompleted) {
+			StringWriter sw = new StringWriter();
+			t.printStackTrace(new PrintWriter(sw));
+			FaultData fault = new FaultData(new QName(Namespaces.WSBPEL2_0_FINAL_EXEC, "subLanguageExecutionFault"),
+                    _activityInfo.o, sw.getBuffer().toString());
+	        _activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+	}
+	
+	public void completeWithFault(FaultException ex) {
+		if (!hasCompleted) {
+			FaultData fault = new FaultData(ex.getQName(), _activityInfo.o, ex.getMessage());
+			_activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			hasCompleted = true;
+		} else {
+			if (__log.isWarnEnabled()) {
+				__log.warn("Activity '" + _activityInfo.o.name + "' has already been completed.");
+			}
+		}
+
+	}
 }

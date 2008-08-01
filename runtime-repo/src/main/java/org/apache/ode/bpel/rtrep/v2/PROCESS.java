@@ -19,11 +19,6 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;

@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.compiler.bom;
+package org.apache.ode.bpel.rtrep.common.extension;
 
 import javax.xml.namespace.QName;
-
 
 public abstract class ExtensibilityQNames {
     /*
@@ -37,8 +36,7 @@ public abstract class ExtensibilityQNames {
 
     //
     // External variables 
-    //
-    
+    //    
     /** Namespace for external variables. */
     private static final String EXTVAR_NS = "http://ode.apache.org/externalVariables";
     
