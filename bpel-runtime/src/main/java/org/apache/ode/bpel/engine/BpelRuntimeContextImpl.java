@@ -938,31 +938,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     /**
-     * We record all values of properties of a 'MessageType' variable for efficient lookup.
-     */
-    private void writeProperties(VariableInstance variable, Node value, XmlDataDAO dao) {
-        if (variable.declaration.type instanceof OMessageVarType) {
-            for (OProcess.OProperty property : variable.declaration.getOwner().properties) {
-                OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
-                if (alias != null) {
-                    try {
-                        String val = _bpelProcess.extractProperty((Element) value, alias, variable.declaration.getDescription());
-                        if (val != null) {
-                            dao.setProperty(property.name.toString(), val);
-                        }
-                    } catch (FaultException e) {
-                        // This will fail as we're basically trying to extract properties on all
-                        // received messages for optimization purposes.
-                        if (__log.isDebugEnabled())
-                            __log.debug("Couldn't extract property '" + property.toString() + "' in property pre-extraction: "
-                                    + e.toString());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Called when the process completes to clean up any outstanding message exchanges.
      * 
      */

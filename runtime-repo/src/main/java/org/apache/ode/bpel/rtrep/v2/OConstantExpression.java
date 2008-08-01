@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 public class OConstantExpression extends OExpression {
     static final long serialVersionUID = -1L  ;
@@ -34,7 +34,7 @@ public class OConstantExpression extends OExpression {
 
     public void setVal(Object val) {
         if (val == null)
-          throw new IllegalArgumentException("OConstatExpression cannot be null.");
+            throw new IllegalArgumentException("OConstatExpression cannot be null.");
 
         this._val = val;
     }

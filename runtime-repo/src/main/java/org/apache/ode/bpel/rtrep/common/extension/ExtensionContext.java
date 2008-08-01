@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.extension;
+package org.apache.ode.bpel.rtrep.common.extension;
 
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
 import org.w3c.dom.Node;
 
 
@@ -120,12 +118,4 @@ public interface ExtensionContext {
      */
     OActivity getOActivity();
     
-    BpelRuntimeContext getBpelRuntimeContext();
-    
-   
-    //ScopeFrame getScopeFrame();
-    void complete();
-    
-    void completeWithFault(Throwable t);
-    void completeWithFault(FaultException fault);
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.engine;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.utils.msg.MessageBundle;
 

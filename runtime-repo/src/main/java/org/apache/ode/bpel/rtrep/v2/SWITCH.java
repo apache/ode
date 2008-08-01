@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OSwitch;
-import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 
 import java.util.Iterator;
 
@@ -46,31 +44,29 @@ class SWITCH extends ACTIVITY {
     FaultData faultData = null;
     
     EvaluationContext evalCtx = getEvaluationContext();
-    for (Iterator i = oswitch.getCases().iterator(); i.hasNext();) {
-      OSwitch.OCase ocase = (OSwitch.OCase) i.next();
-      try{
-      	if(getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(ocase.expression, evalCtx)){
-          matchedOCase = ocase;
-          break;
-        }
-      }catch(FaultException e){
-      	__log.error(e.getMessage(),e);
-        faultData = createFault(e.getQName(), ocase);
-        _self.parent.completed(faultData, CompensationHandler.emptySet());
+      for (OSwitch.OCase oCase1 : oswitch.getCases()) {
+          OSwitch.OCase ocase = oCase1;
+          try {
+              if (getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(ocase.expression, evalCtx)) {
+                  matchedOCase = ocase;
+                  break;
+              }
+          } catch (FaultException e) {
+              __log.error(e.getMessage(), e);
+              faultData = createFault(e.getQName(), ocase);
+              _self.parent.completed(faultData, CompensationHandler.emptySet());
 
-        // Dead path all the child activiites:
-        for (Iterator<OSwitch.OCase> j = oswitch.getCases().iterator(); j.hasNext(); )
-          dpe(j.next().activity);
-        return;
+              // Dead path all the child activiites:
+              for (OSwitch.OCase oCase : oswitch.getCases()) dpe(oCase.activity);
+              return;
+          }
       }
-    }
 
-    // Dead path cases not chosen
-    for (Iterator<OSwitch.OCase> i = oswitch.getCases().iterator(); i.hasNext(); ) {
-      OSwitch.OCase cs = i.next();
-      if (cs != matchedOCase)
-        dpe(cs.activity);
-    }
+      // Dead path cases not chosen
+      for (OSwitch.OCase cs : oswitch.getCases()) {
+          if (cs != matchedOCase)
+              dpe(cs.activity);
+      }
 
     // no conditions satisfied, we're done.
     if (matchedOCase == null) {

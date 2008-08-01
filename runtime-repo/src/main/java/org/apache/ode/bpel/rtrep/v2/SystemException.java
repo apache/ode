@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 /**
  * Run-time exception indicating an infrastructure problem.
  */
 class SystemException extends RuntimeException {
-  private static final long serialVersionUID = 3194250610255026706L;
+    private static final long serialVersionUID = 3194250610255026706L;
 
-  SystemException(Throwable cause) {
-    super(cause);
-  }
+    SystemException(Throwable cause) {
+        super(cause);
+    }
 
 }

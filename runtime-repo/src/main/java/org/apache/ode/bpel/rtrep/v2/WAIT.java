@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OWait;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
 import org.apache.ode.utils.xsd.Duration;
 
 import java.util.Calendar;
@@ -58,7 +56,7 @@ class WAIT extends ACTIVITY {
 
         if(dueDate.getTime() > System.currentTimeMillis()){
             final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
-            getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
+            getBpelRuntime().registerTimer(timerChannel, dueDate);
 
             object(false, new TimerResponseChannelListener(timerChannel){
                 private static final long serialVersionUID = 3120518305645437327L;
@@ -81,7 +79,6 @@ class WAIT extends ACTIVITY {
                         public void onTimeout() {
                             //ignore
                         }
-
                         public void onCancel() {
                             //ingore
                         }
@@ -103,14 +100,14 @@ class WAIT extends ACTIVITY {
 
         EvaluationContext evalCtx = getEvaluationContext();
 
-        Date dueDate = null;
+        Date dueDate;
         if (wait.hasFor()) {
             Calendar cal = Calendar.getInstance();
-            Duration duration = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(wait.forExpression, evalCtx);
+            Duration duration = getBpelRuntime().getExpLangRuntime().evaluateAsDuration(wait.forExpression, evalCtx);
             duration.addTo(cal);
             dueDate = cal.getTime();
         } else if (wait.hasUntil()) {
-            Calendar cal = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(wait.untilExpression, evalCtx);
+            Calendar cal = getBpelRuntime().getExpLangRuntime().evaluateAsDate(wait.untilExpression, evalCtx);
             dueDate = cal.getTime();
         } else {
             throw new AssertionError("Static checks failed to find bad WaitActivity!");

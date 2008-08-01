@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 /**
  * Base model class for forEach activity.

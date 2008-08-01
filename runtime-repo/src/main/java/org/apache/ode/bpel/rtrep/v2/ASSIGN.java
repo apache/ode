@@ -16,37 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import java.net.URI;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OAssign.DirectRef;
-import org.apache.ode.bpel.o.OAssign.LValueExpression;
-import org.apache.ode.bpel.o.OAssign.PropertyRef;
-import org.apache.ode.bpel.o.OAssign.VariableRef;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
-import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -61,7 +46,7 @@ import org.w3c.dom.Text;
 
 /**
  * Assign activity run-time template.
- * 
+ *
  * @author Ode team
  * @author Tammo van Lessen (University of Stuttgart) - extensionAssignOperation
  */
@@ -85,16 +70,16 @@ class ASSIGN extends ACTIVITY {
         for (OAssign.OAssignOperation operation : oassign.operations) {
             try {
                 if (operation instanceof OAssign.Copy) {
-                	copy((OAssign.Copy)operation);
+                    copy((OAssign.Copy)operation);
                 } else if (operation instanceof OAssign.ExtensionAssignOperation) {
-                	invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation)operation);
+                    invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation)operation);
                 }
             } catch (FaultException fault) {
                 faultData = createFault(fault.getQName(), operation, fault
                         .getMessage());
                 break;
             } catch (ExternalVariableModuleException e) {
-            	__log.error("Exception while initializing external variable", e);
+                __log.error("Exception while initializing external variable", e);
                 _self.parent.failure(e.toString(), null);
                 return;
             }
@@ -119,7 +104,7 @@ class ASSIGN extends ACTIVITY {
     }
 
     private Node evalLValue(OAssign.LValue to) throws FaultException, ExternalVariableModuleException {
-        final BpelRuntimeContext napi = getBpelRuntimeContext();
+        final RuntimeInstanceImpl napi = getBpelRuntime();
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
             VariableInstance lvar = _scopeFrame.resolve(to.getVariable());
@@ -133,7 +118,7 @@ class ASSIGN extends ACTIVITY {
                     val = tempwrapper;
                 } else doc.appendChild(val);
                 // Only external variables need to be initialized, others are new and going to be overwtitten
-                if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
+                if (lvar.declaration.extVar != null) lval = getBpelRuntime().initializeVariable(lvar, val);
                 else lval = val;
             } else
                 lval = fetchVariableData(lvar, true);
@@ -141,7 +126,7 @@ class ASSIGN extends ACTIVITY {
         return lval;
     }
 
-	/**
+    /**
      * Get the r-value. There are several possibilities:
      * <ul>
      * <li>a message is selected - an element representing the whole message is
@@ -172,11 +157,10 @@ class ASSIGN extends ACTIVITY {
             __log.debug("Evaluating FROM expression \"" + from + "\".");
 
         Node retVal;
-        if (from instanceof DirectRef) {
+        if (from instanceof OAssign.DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
-            Node data = fetchVariableData(
-                    _scopeFrame.resolve(dref.variable), false);
+            Node data = fetchVariableData(_scopeFrame.resolve(dref.variable), false);
             retVal = DOMUtils.findChildByName((Element)data, dref.elName);
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
@@ -193,8 +177,8 @@ class ASSIGN extends ACTIVITY {
             OAssign.PartnerLinkRef pLinkRef = (OAssign.PartnerLinkRef) from;
             PartnerLinkInstance pLink = _scopeFrame.resolve(pLinkRef.partnerLink);
             Node tempVal =pLinkRef.isMyEndpointReference ?
-                    getBpelRuntimeContext().fetchMyRoleEndpointReferenceData(pLink)
-                    : getBpelRuntimeContext().fetchPartnerRoleEndpointReferenceData(pLink);
+                    getBpelRuntime().fetchMyRoleEndpointReferenceData(pLink)
+                    : getBpelRuntime().fetchPartnerRoleEndpointReferenceData(pLink);
             if (__log.isDebugEnabled())
                 __log.debug("RValue is a partner link, corresponding endpoint "
                         + tempVal.getClass().getName() + " has value " + DOMUtils.domToString(tempVal));
@@ -202,8 +186,7 @@ class ASSIGN extends ACTIVITY {
         } else if (from instanceof OAssign.Expression) {
             List<Node> l;
             OExpression expr = ((OAssign.Expression) from).expression;
-
-            l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr, getEvaluationContext());
+            l = getBpelRuntime().getExpLangRuntime().evaluate(expr, getEvaluationContext());
 
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
@@ -312,7 +295,7 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-	private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
+    private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
@@ -321,22 +304,22 @@ class ASSIGN extends ACTIVITY {
 
         // Check for message to message - copy, we can do this efficiently in
         // the database.
-        if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
+        if ((ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to)
                 .isMessageRef())
-                || (ocopy.from instanceof VariableRef && ((VariableRef) ocopy.from)
+                || (ocopy.from instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.from)
                 .isMessageRef())) {
 
-            if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
+            if ((ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to)
                     .isMessageRef())
-                    && ocopy.from instanceof VariableRef
-                    && ((VariableRef) ocopy.from).isMessageRef()) {
+                    && ocopy.from instanceof OAssign.VariableRef
+                    && ((OAssign.VariableRef) ocopy.from).isMessageRef()) {
 
                 final VariableInstance lval = _scopeFrame.resolve(ocopy.to
                         .getVariable());
                 final VariableInstance rval = _scopeFrame
-                        .resolve(((VariableRef) ocopy.from).getVariable());
+                        .resolve(((OAssign.VariableRef) ocopy.from).getVariable());
                 Element lvalue = (Element) fetchVariableData(rval, false);
-                initializeVariable(lval, lvalue);
+                getBpelRuntime().initializeVariable(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
@@ -361,7 +344,7 @@ class ASSIGN extends ACTIVITY {
             Node lvaluePtr = lvalue;
             boolean headerAssign = false;
             if (ocopy.to instanceof OAssign.DirectRef) {
-                DirectRef dref = ((DirectRef) ocopy.to);
+                OAssign.DirectRef dref = ((OAssign.DirectRef) ocopy.to);
                 Element el = DOMUtils.findChildByName((Element)lvalue, dref.elName);
                 if (el == null) {
                     el = (Element) ((Element)lvalue).appendChild(lvalue.getOwnerDocument()
@@ -369,18 +352,17 @@ class ASSIGN extends ACTIVITY {
                 }
                 lvaluePtr = el;
             } else if (ocopy.to instanceof OAssign.VariableRef) {
-                VariableRef varRef = ((VariableRef) ocopy.to);
+                OAssign.VariableRef varRef = ((OAssign.VariableRef) ocopy.to);
                 if (varRef.headerPart != null) headerAssign = true;
                 lvaluePtr = evalQuery(lvalue, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location,
                         new EvaluationContextProxy(varRef.getVariable(), lvalue));
             } else if (ocopy.to instanceof OAssign.PropertyRef) {
-                PropertyRef propRef = ((PropertyRef) ocopy.to);
+                OAssign.PropertyRef propRef = ((OAssign.PropertyRef) ocopy.to);
                 lvaluePtr = evalQuery(lvalue, propRef.propertyAlias.part,
                         propRef.propertyAlias.location,
-                        new EvaluationContextProxy(propRef.getVariable(),
-                                lvalue));
+                        new EvaluationContextProxy(propRef.getVariable(), lvalue));
             } else if (ocopy.to instanceof OAssign.LValueExpression) {
-                LValueExpression lexpr = (LValueExpression) ocopy.to;
+                OAssign.LValueExpression lexpr = (OAssign.LValueExpression) ocopy.to;
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
@@ -397,7 +379,7 @@ class ASSIGN extends ACTIVITY {
             } else {
                 // Sneakily converting the EPR if it's not the format expected by the lvalue
                 if (ocopy.from instanceof OAssign.PartnerLinkRef) {
-                    rvalue = getBpelRuntimeContext().convertEndpointReference((Element)rvalue, lvaluePtr);
+                    rvalue = getBpelRuntime().convertEndpointReference((Element)rvalue, lvaluePtr);
                     if (rvalue.getNodeType() == Node.DOCUMENT_NODE)
                         rvalue = ((Document)rvalue).getDocumentElement();
                 }
@@ -413,8 +395,8 @@ class ASSIGN extends ACTIVITY {
                 final VariableInstance lval = _scopeFrame.resolve(ocopy.to.getVariable());
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
-                                "' value '" + DOMUtils.domToString(lvalue) +"'");
-                commitChanges(lval, lvalue);
+                            "' value '" + DOMUtils.domToString(lvalue) +"'");
+                getBpelRuntime().commitChanges(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             }
@@ -425,7 +407,7 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
-	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+    private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
         if (rvalue.getNodeType() == Node.TEXT_NODE ||
@@ -441,11 +423,11 @@ class ASSIGN extends ACTIVITY {
             rvalue = serviceRef;
         }
 
-        getBpelRuntimeContext().writeEndpointReference(plval, (Element)rvalue);
+        getBpelRuntime().writeEndpointReference(plval, (Element)rvalue);
     }
 
     private Element replaceElement(Element lval, Element ptr, Element src,
-                                boolean keepSrcElement) {
+                                   boolean keepSrcElement) {
         Document doc = ptr.getOwnerDocument();
         Node parent = ptr.getParentNode();
         if (keepSrcElement) {
@@ -474,7 +456,7 @@ class ASSIGN extends ACTIVITY {
         }
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
-        
+
         return (lval == ptr) ? replacement :  lval;
     }
 
@@ -592,32 +574,43 @@ class ASSIGN extends ACTIVITY {
         return data;
     }
 
-    private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-    	final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntimeContext());
-    	final QName extensionId = DOMUtils.getElementQName(eao.nestedElement.getElement());
-    	try {
-    		ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
-    		if (ea == null) {
-    			if (eao.getOwner().mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
-    				__log.warn("Lookup of extension activity " + extensionId + " failed.");
-    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
-    			} else {
-    				// act like <empty> - do nothing
-    				context.complete();
-    				return;
-    			}
-    		}
+    private void invokeExtensionAssignOperation(
+            OAssign.ExtensionAssignOperation eao) throws FaultException {
+        try {
+            final ExtensionContext helper = new ExtensionContextImpl(_self.o, _scopeFrame, getBpelRuntime());
+            final ExtensionResponseChannel responseChannel = newChannel(ExtensionResponseChannel.class);
 
-    		ea.run(context, eao.nestedElement.getElement());
-    	} catch (FaultException fault) {
+            getBpelRuntime().executeExtension(
+                    DOMUtils.getElementQName(eao.nestedElement.getElement()),
+                    helper, eao.nestedElement.getElement(), responseChannel);
+
+            object(new ExtensionResponseChannelListener(responseChannel) {
+                private static final long serialVersionUID = 1L;
+
+                public void onCompleted() {
+                    _self.parent.completed(null, CompensationHandler.emptySet());
+                }
+
+                public void onFailure(Throwable t) {
+                    StringWriter sw = new StringWriter();
+                    t.printStackTrace(new PrintWriter(sw));
+                    FaultData fault = createFault(new QName(Namespaces.WSBPEL2_0_FINAL_EXEC,
+                            "subLanguageExecutionFault"), _self.o, sw.getBuffer().toString());
+                    _self.parent.completed(fault, CompensationHandler.emptySet());
+                };
+            });
+
+        } catch (FaultException fault) {
             __log.error(fault);
-            context.completeWithFault(fault);
-		}
+            FaultData faultData = createFault(fault.getQName(), _self.o, fault
+                    .getMessage());
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
+        }
     }
-    
+
     private class EvaluationContextProxy implements EvaluationContext {
 
-        private Variable _var;
+        private OScope.Variable _var;
 
         private Node _varNode;
 
@@ -625,7 +618,7 @@ class ASSIGN extends ACTIVITY {
 
         private EvaluationContext _ctx;
 
-        private EvaluationContextProxy(Variable var, Node varNode) {
+        private EvaluationContextProxy(OScope.Variable var, Node varNode) {
             _var = var;
             _varNode = varNode;
             _ctx = getEvaluationContext();
@@ -640,42 +633,28 @@ class ASSIGN extends ACTIVITY {
             } else
                 return _ctx.readVariable(variable, part);
 
-        }		/**
-     * @see org.apache.ode.bpel.explang.EvaluationContext#readMessageProperty(org.apache.ode.bpel.o.OScope.Variable,
-     *      org.apache.ode.bpel.o.OProcess.OProperty)
-     */
-    public String readMessageProperty(Variable variable, OProperty property)
-            throws FaultException {
-        return _ctx.readMessageProperty(variable, property);
-    }
+        }
 
-        /**
-         * @see org.apache.ode.bpel.explang.EvaluationContext#isLinkActive(org.apache.ode.bpel.o.OLink)
-         */
+        public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property)
+                throws FaultException {
+            return _ctx.readMessageProperty(variable, property);
+        }
+
         public boolean isLinkActive(OLink olink) throws FaultException {
             return _ctx.isLinkActive(olink);
         }
 
-        /**
-         * @see org.apache.ode.bpel.explang.EvaluationContext#getRootNode()
-         */
         public Node getRootNode() {
             return _rootNode;
         }
 
-        /**
-         * @see org.apache.ode.bpel.explang.EvaluationContext#evaluateQuery(org.w3c.dom.Node,
-         *      org.apache.ode.bpel.o.OExpression)
-         */
         public Node evaluateQuery(Node root, OExpression expr)
                 throws FaultException {
             _rootNode = root;
-            return getBpelRuntimeContext().getExpLangRuntime()
-                    .evaluateNode(expr, this);
-
+            return getBpelRuntime().getExpLangRuntime().evaluateNode(expr, this);
         }
 
-        public Node getPartData(Element message, Part part) throws FaultException {
+        public Node getPartData(Element message, OMessageVarType.Part part) throws FaultException {
             return _ctx.getPartData(message,part);
         }
 
@@ -686,10 +665,6 @@ class ASSIGN extends ACTIVITY {
         public boolean narrowTypes() {
             return false;
         }
-
-		public URI getBaseResourceURI() {
-			return _ctx.getBaseResourceURI();
-		}
     }
 
 }

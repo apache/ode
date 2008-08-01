@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.evt.CompensationHandlerRegistered;
 import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.CompensationChannelListener;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.CompensationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Iterator;
@@ -67,7 +66,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
                 ScopeFrame compHandlerScopeFrame = new ScopeFrame(
                     _self.compensated.oscope.compensationHandler,
-                    getBpelRuntimeContext().createScopeInstance(_self.compensated.scopeInstanceId, _self.compensated.oscope.compensationHandler),
+                    getBpelRuntime().createScopeInstance(_self.compensated.scopeInstanceId, _self.compensated.oscope.compensationHandler),
                     _self.compensated,
                     _completedChildren);
 
@@ -102,7 +101,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
     private void sendEvent(ScopeEvent event) {
         _self.compensated.fillEventInfo(event);
-        getBpelRuntimeContext().sendEvent(event);
+        getBpelRuntime().sendEvent(event);
     }
 
     public String toString() {

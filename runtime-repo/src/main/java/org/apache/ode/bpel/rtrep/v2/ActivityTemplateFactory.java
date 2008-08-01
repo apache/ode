@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
-
-import org.apache.ode.bpel.o.*;
+package org.apache.ode.bpel.rtrep.v2;
 
 /**
  * Factory for creating activity template objects.

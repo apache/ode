@@ -17,23 +17,17 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath20;
 
 import net.sf.saxon.dom.NodeWrapper;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.URIException;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
-import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.rtrep.common.Constants;
+import org.apache.ode.bpel.rtrep.v2.*;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.URITemplate;
@@ -78,7 +72,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     public XPathFunction resolveFunction(QName functionName, int arity) {
         __log.debug("Resolving function " + functionName);
         if (functionName.getNamespaceURI() == null) {
-            throw new WrappedResolverException("Undeclared namespace for " + functionName);
+            throw new WrappedFaultException("Undeclared namespace for " + functionName);
         } else if (functionName.getNamespaceURI().equals(Namespaces.WS_BPEL_20_NS) ||
                 functionName.getNamespaceURI().equals(Namespaces.WSBPEL2_0_FINAL_EXEC)) {
             String localName = functionName.getLocalPart();
@@ -91,7 +85,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(localName)) {
                 return new DoXslTransform();
             } else {
-                throw new WrappedResolverException("Unknown BPEL function: " + functionName);
+                throw new WrappedFaultException("Unknown BPEL function: " + functionName);
             }
         } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
             String localName = functionName.getLocalPart();

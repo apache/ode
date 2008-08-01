@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Document;
@@ -48,7 +47,7 @@ public class OAssign extends OActivity {
      * Base class for assign operations.
      */
     public static abstract class OAssignOperation extends OBase {
-    	public enum Type {Copy, ExtensionOperation};
+    	public enum Type { Copy, ExtensionOperation }
 
     	public OAssignOperation(OProcess owner) {
     		super(owner);
@@ -129,7 +128,7 @@ public class OAssign extends OActivity {
         private void readObject(java.io.ObjectInputStream in)
                 throws IOException
         {
-            String domStr = null;
+            String domStr;
             try {
                 domStr = (String) in.readObject();
             } catch (ClassNotFoundException e) {
@@ -163,10 +162,8 @@ public class OAssign extends OActivity {
         public String toString() {
             return expression.toString();
         }
-        /**
-         * @see org.apache.ode.bpel.o.OAssign.LValue#getVariable()
-         */
-        public Variable getVariable() {
+
+        public OScope.Variable getVariable() {
             return expression.getVariable();
         }
       
@@ -203,7 +200,7 @@ public class OAssign extends OActivity {
         /** Name of the element referenced. */
         public QName elName;
 
-        public Variable getVariable() {
+        public OScope.Variable getVariable() {
             return variable;
         }
     }
@@ -274,7 +271,7 @@ public class OAssign extends OActivity {
           public PartnerLinkRef(OProcess owner) { super(owner); }
 
           // Must fit in a LValue even if it's not variable based
-          public Variable getVariable() {
+          public OScope.Variable getVariable() {
               return null;
           }
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath20;
 
 import net.sf.saxon.trans.DynamicError;
 import net.sf.saxon.value.DurationValue;
@@ -24,13 +24,11 @@ import net.sf.saxon.xpath.XPathEvaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.rtrep.v2.OExpression;
+import org.apache.ode.bpel.rtrep.v2.EvaluationContext;
+import org.apache.ode.bpel.rtrep.v2.ExpressionLanguageRuntime;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
+import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
@@ -67,16 +65,10 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
 
-    /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-     */
     public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException{
         return (String)evaluate(cexp, ctx, XPathConstants.STRING);
     }
 
-    /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-     */
     public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException{
         return (Boolean) evaluate(cexp, ctx, XPathConstants.BOOLEAN);
     }
@@ -85,9 +77,6 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         return (Number) evaluate(cexp, ctx, XPathConstants.NUMBER);
     }
 
-    /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
-     */
     public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException {
         List result;
         Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
@@ -207,7 +196,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                 }
             }
             throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, cause.getMessage(), cause);
-        } catch (WrappedResolverException wre) {
+        } catch (WrappedFaultException wre) {
             wre.printStackTrace();
             throw (FaultException)wre.getCause();
         } catch (Throwable t) {

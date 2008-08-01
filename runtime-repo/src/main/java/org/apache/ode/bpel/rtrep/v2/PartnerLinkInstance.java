@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rtrep.rapi.PartnerLink;
+import org.apache.ode.bpel.rtrep.rapi.PartnerLinkModel;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
@@ -28,7 +29,7 @@ import java.io.Serializable;
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */
-public class PartnerLinkInstance implements Serializable {
+public class PartnerLinkInstance implements Serializable, PartnerLink {
     private static final long serialVersionUID = 1L;
 
     public OPartnerLink partnerLink;
@@ -38,6 +39,18 @@ public class PartnerLinkInstance implements Serializable {
     public PartnerLinkInstance(Long scopeInstanceId, OPartnerLink partnerLink) {
         this.partnerLink = partnerLink;
         this.scopeInstanceId = scopeInstanceId;
+    }
+
+    public String getName() {
+        return partnerLink.name;
+    }
+
+    public PartnerLinkModel getModel() {
+        return partnerLink;
+    }
+
+    public long getScopeId() {
+        return scopeInstanceId;
     }
 
     public boolean equals(Object obj) {

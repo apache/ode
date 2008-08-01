@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.channels;
+package org.apache.ode.bpel.rtrep.v2.channels;
 
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.ap.ChannelType;

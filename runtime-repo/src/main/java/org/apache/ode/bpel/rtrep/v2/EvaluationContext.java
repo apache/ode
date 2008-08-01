@@ -16,16 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.explang;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.net.URI;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -103,10 +98,4 @@ public interface EvaluationContext {
      */
     boolean narrowTypes();
     
-	/**
-	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
-	 * 
-	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
-	 */
-	URI getBaseResourceURI();    
 }

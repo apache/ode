@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
+
+import org.apache.ode.bpel.rtrep.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rtrep.rapi.CorrelationSetModel;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
@@ -30,7 +33,7 @@ import java.util.Set;
 /**
  * Compiled representation of a BPEL partnerLink.
  */
-public class OPartnerLink extends OBase {
+public class OPartnerLink extends OBase implements PartnerLinkModel {
     static final long serialVersionUID = -1L  ;
     /** partnerLink name. */
     public String name;
@@ -52,7 +55,7 @@ public class OPartnerLink extends OBase {
     public boolean initializePartnerRole;
 
     /** The set of CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
-    private final HashMap<String,Set<OScope.CorrelationSet>> _nonIntitiatingCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
+    private final HashMap<String,Set<CorrelationSetModel>> _nonIntitiatingCorrelationSets = new HashMap<String,Set<CorrelationSetModel>>();
 
     /** The set of {@link Operation}s that can be used to create a process instance. */
     private final HashSet<String> _createInstanceOperations = new HashSet<String>();
@@ -63,6 +66,26 @@ public class OPartnerLink extends OBase {
 
     public String getName() {
         return name;
+    }
+
+    public String getMyRoleName() {
+        return myRoleName;
+    }
+
+    public String getPartnerRoleName() {
+        return partnerRoleName;
+    }
+
+    public boolean isInitializePartnerRoleSet() {
+        return initializePartnerRole;
+    }
+
+    public PortType getMyRolePortType() {
+        return myRolePortType;
+    }
+
+    public PortType getPartnerRolePortType() {
+        return partnerRolePortType;
     }
 
     public boolean hasMyRole() {
@@ -90,10 +113,10 @@ public class OPartnerLink extends OBase {
      * @param operation WSDL {@link Operation}
      * @param cset non-initiating correlation used in this operation
      */
-    public void addCorrelationSetForOperation(Operation operation, OScope.CorrelationSet cset) {
-        Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
+    public void addCorrelationSetForOperation(Operation operation, CorrelationSetModel cset) {
+        Set<CorrelationSetModel> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
         if (ret == null) {
-            ret = new HashSet<OScope.CorrelationSet>();
+            ret = new HashSet<CorrelationSetModel>();
             _nonIntitiatingCorrelationSets.put(operation.getName(), ret);
         }
         ret.add(cset);
@@ -107,8 +130,8 @@ public class OPartnerLink extends OBase {
      * @return all non-initiating correlation sets used in the given operation
      */
     @SuppressWarnings("unchecked")
-    public Set<OScope.CorrelationSet> getCorrelationSetsForOperation(Operation operation) {
-        Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
+    public Set<CorrelationSetModel> getCorrelationSetsForOperation(Operation operation) {
+        Set<CorrelationSetModel> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
         if (ret == null) {
             return Collections.EMPTY_SET;
         }

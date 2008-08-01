@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.channels;
+package org.apache.ode.bpel.rtrep.v2.channels;
 
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.CompensationHandler;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.CompensationHandler;
 
 import org.w3c.dom.Element;
 import java.util.Set;

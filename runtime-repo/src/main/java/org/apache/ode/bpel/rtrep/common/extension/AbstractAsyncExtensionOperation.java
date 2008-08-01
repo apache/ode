@@ -16,25 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.extension;
+package org.apache.ode.bpel.rtrep.common.extension;
 
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 import org.w3c.dom.Element;
 
 /**
- * This is the basis interface for implementations of  
- * <code>&lt;extensionAssignOperation&gt;</code> and <code>&lt;extensionActivity&gt;</code>
- * nodes.
- * 
- * Implementations of this interface must provide a default constructor as they are created
- * using reflection.
- * 
- * @see AbstractExtensionBundle
+ * Base class for creating new asynchronous extension implementations.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public interface ExtensionOperation {
+public abstract class AbstractAsyncExtensionOperation implements ExtensionValidator,
+															ExtensionOperation {
 
-	void run(ExtensionContext context, Element element) throws FaultException;
+	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
+		// default behavior: pass
+	}
+
+	public abstract void run(ExtensionContext context, Element element)
+			throws FaultException;
 	
 }

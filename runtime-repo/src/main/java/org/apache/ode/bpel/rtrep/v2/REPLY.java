@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OReply;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 
 import java.util.Iterator;
 
@@ -40,32 +38,26 @@ class REPLY extends ACTIVITY {
 
     public void run() {
         final OReply oreply = (OReply)_self.o;
-
         if (__log.isDebugEnabled()) {
             __log.debug("<reply>  partnerLink=" + oreply.partnerLink + ", operation=" + oreply.operation);
         }
+
         FaultData fault = null;
-
-
         try {
             if (oreply.variable != null)
-               sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
+                sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
 
-            Node msg = oreply.variable == null ? null : fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
+            Node msg = oreply.variable == null ? null :
+                    fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
             assert msg == null || msg instanceof Element; // note msg can be null for faults 
 
-            for (Iterator<OScope.CorrelationSet> i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
-                OScope.CorrelationSet cset = i.next();
-                initializeCorrelation(_scopeFrame.resolve(cset),
-                        _scopeFrame.resolve(oreply.variable));
-            }
+            for (OScope.CorrelationSet cset : oreply.initCorrelations)
+                initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(oreply.variable));
 
             //		send reply
-            getBpelRuntimeContext()
-                    .reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                            oreply.messageExchangeId, (Element)msg,
-                            oreply.fault);
+            getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
+                    oreply.messageExchangeId, (Element)msg, oreply.fault);
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);

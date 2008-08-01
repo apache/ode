@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 /**
  * Compiled representation of the BPEL <code>&lt;compensate&gt;</code> activity.

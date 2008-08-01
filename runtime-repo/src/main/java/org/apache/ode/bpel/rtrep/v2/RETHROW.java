@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
 
 
 /**
@@ -40,7 +41,7 @@ class RETHROW extends ACTIVITY {
     if(fault == null){
       String msg = "Attempting to execute 'rethrow' activity with no visible fault in scope.";
       __log.error(msg);
-      throw new InvalidProcessException(msg); 
+      throw new InvalidProcessException(msg);
     }
 
     _self.parent.completed(fault,CompensationHandler.emptySet());

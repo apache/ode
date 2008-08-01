@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.rtrep.rapi.CorrelationSet;
 
-public class CorrelationSetInstance {
-  public OScope.CorrelationSet declaration;
-  public Long scopeInstance;
+public class CorrelationSetInstance implements CorrelationSet {
+    public OScope.CorrelationSet declaration;
+    public Long scopeInstance;
 
-  public CorrelationSetInstance(Long scopeInstanceId, OScope.CorrelationSet cset) {
-    this.scopeInstance = scopeInstanceId;
-    this.declaration = cset;
-  }
+    public CorrelationSetInstance(Long scopeInstanceId, OScope.CorrelationSet cset) {
+        this.scopeInstance = scopeInstanceId;
+        this.declaration = cset;
+    }
 
+    public String getName() {
+        return declaration.name;
+    }
+
+    public long getScopeId() {
+        return scopeInstance;
+    }
 }

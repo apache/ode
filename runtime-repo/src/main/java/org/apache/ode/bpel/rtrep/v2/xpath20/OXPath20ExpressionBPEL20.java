@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20.o;
+package org.apache.ode.bpel.rtrep.v2.xpath20;
 
 import net.sf.saxon.expr.Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
 
 import javax.xml.namespace.QName;
 

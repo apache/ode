@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.channels;
+package org.apache.ode.bpel.rtrep.v2.channels;
 
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.utils.SerializableElement;
+import org.apache.ode.bpel.rtrep.v2.OBase;
+import org.apache.ode.bpel.rtrep.v2.OVarType;
+import org.apache.ode.bpel.rtrep.v2.OElementVarType;
+import org.apache.ode.bpel.rtrep.v2.OMessageVarType;
+import org.apache.ode.bpel.rtrep.rapi.FaultInfo;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -32,7 +33,7 @@ import java.io.Serializable;
 /**
  * Information about a BPEL fault.
  */
-public class FaultData implements Serializable {
+public class FaultData implements Serializable, FaultInfo {
 	private static final long serialVersionUID = 1L;
 
 	/** Name of the fault. */

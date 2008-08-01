@@ -17,19 +17,14 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath20;
 
 import net.sf.saxon.value.DateTimeValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.rtrep.v2.*;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Node;
@@ -75,7 +70,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             try {
                 return _ectx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
             } catch (FaultException e) {
-                throw new WrappedResolverException(e);
+                throw new WrappedFaultException(e);
             }
         }else{
             String varName;
@@ -108,7 +103,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 return new SingletonNodeList(variableNode);
                 
             }catch(FaultException e){
-                throw new WrappedResolverException(e);
+                throw new WrappedFaultException(e);
             }
         }
     }

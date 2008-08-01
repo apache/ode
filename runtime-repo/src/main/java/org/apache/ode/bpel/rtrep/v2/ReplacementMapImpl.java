@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.engine;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.jacob.soup.ReplacementMap;
 
 import java.io.Externalizable;

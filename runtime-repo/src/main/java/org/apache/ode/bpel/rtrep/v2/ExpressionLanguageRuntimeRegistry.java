@@ -16,14 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Node;
 

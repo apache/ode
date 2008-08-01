@@ -16,18 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.o;
+package org.apache.ode.bpel.rtrep.v2.xpath10;
 
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.NSContext;
+import org.apache.ode.bpel.rtrep.v2.*;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
@@ -48,9 +40,9 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   public final HashMap<String, OProcess.OProperty> properties =
     new HashMap<String, OProcess.OProperty>();
 
-  public final HashMap<String, OLink> links = new HashMap<String,OLink>();
+  public final HashMap<String, OLink> links = new HashMap<String, OLink>();
 
-  public final HashMap<URI,OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
+  public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
 
   /** Map getVariableData invocation signature to compiled objects. */
   private final HashMap<SigGetVariableData,OSigGetVariableData> _getVariableDataSigs =
@@ -129,10 +121,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
         return false;
       if (partname != null && (other.partname == null || !partname.equals(other.partname)))
         return false;
-      if (location != null && (other.location == null || !location.equals(other.location)))
-        return false;
-
-      return true;
+      return !(location != null && (other.location == null || !location.equals(other.location)));
     }
 
     public int hashCode() {
@@ -165,7 +154,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 	/**
 	 * @see org.apache.ode.bpel.o.OLValueExpression#getVariable()
 	 */
-	public Variable getVariable() {
+	public OScope.Variable getVariable() {
 		if(vars.size() == 0)
 			throw new IllegalStateException("LValue must have one variable reference.");
         // We're interested in the first variable referenced by the LValue

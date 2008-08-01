@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
 
@@ -42,7 +42,6 @@ public class OBase implements Serializable {
             _id = ++_owner._childIdCounter;
             _owner._children.add(this);
         }
-        assert _id == 0 || _owner != null;
     }
 
     public OProcess getOwner() {

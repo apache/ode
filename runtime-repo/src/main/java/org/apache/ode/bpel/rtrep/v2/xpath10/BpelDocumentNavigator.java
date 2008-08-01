@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath10;
 
 import org.jaxen.dom.DocumentNavigator;
 import org.w3c.dom.Node;

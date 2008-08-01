@@ -16,18 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.stl.FilterIterator;
@@ -49,23 +45,19 @@ class FLOW extends ACTIVITY {
         super(self,frame, linkFrame);
         _oflow = (OFlow) self.o;
     }
-    
+
     public void run() {
         LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
-        for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
-            OLink link = i.next();
+        for (OLink link : _oflow.localLinks) {
             LinkStatusChannel lsc = newChannel(LinkStatusChannel.class);
-            myLinkFrame.links.put(link,new LinkInfo(link,lsc));
+            myLinkFrame.links.put(link, new LinkInfo(link, lsc));
         }
 
-        for (Iterator<OActivity> i = _oflow.parallelActivities.iterator(); i.hasNext();) {
-            OActivity ochild = i.next();
-            ChildInfo childInfo = new ChildInfo(
-                new ActivityInfo(genMonotonic(), ochild,
-                                 newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class)));
+        for (OActivity ochild : _oflow.parallelActivities) {
+            ChildInfo childInfo = new ChildInfo(new ActivityInfo(genMonotonic(), ochild,
+                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class)));
             _children.add(childInfo);
-
-            instance(createChild(childInfo.activity,_scopeFrame, myLinkFrame));
+            instance(createChild(childInfo.activity, _scopeFrame, myLinkFrame));
         }
         instance(new ACTIVE());
     }

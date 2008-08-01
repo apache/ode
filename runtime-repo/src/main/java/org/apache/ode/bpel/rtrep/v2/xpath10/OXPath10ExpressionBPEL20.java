@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.o;
+package org.apache.ode.bpel.rtrep.v2.xpath10;
 
-import org.apache.ode.bpel.o.OProcess;
-
+import org.apache.ode.bpel.rtrep.v2.OProcess;
 import java.io.Serializable;
-
 import javax.xml.namespace.QName;
 
 

@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.o.OCompensate;
-import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.SynchChannelListener;
 
@@ -28,24 +26,24 @@ import org.apache.ode.jacob.SynchChannelListener;
  * Runtime implementation of the <code>&lt;compensate&gt;</code> activity.
  */
 class COMPENSATE extends ACTIVITY {
-  private static final long serialVersionUID = -467758076635337675L;
-  private OCompensate _ocompact;
+    private static final long serialVersionUID = -467758076635337675L;
+    private OCompensate _ocompact;
 
-  public COMPENSATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
-    super(self, scopeFrame, linkFrame);
-    _ocompact = (OCompensate) self.o;
-  }
+    public COMPENSATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
+        super(self, scopeFrame, linkFrame);
+        _ocompact = (OCompensate) self.o;
+    }
 
-  public final void run() {
-    OScope scopeToCompensate = _ocompact.compensatedScope;
-    SynchChannel sc = newChannel(SynchChannel.class);
-    _self.parent.compensate(scopeToCompensate,sc);
-    object(new SynchChannelListener(sc) {
-    private static final long serialVersionUID = 3763991229748926216L;
+    public final void run() {
+        OScope scopeToCompensate = _ocompact.compensatedScope;
+        SynchChannel sc = newChannel(SynchChannel.class);
+        _self.parent.compensate(scopeToCompensate,sc);
+        object(new SynchChannelListener(sc) {
+            private static final long serialVersionUID = 3763991229748926216L;
 
-    public void ret() {
-        _self.parent.completed(null, CompensationHandler.emptySet());
-      }
-    });
-  }
+            public void ret() {
+                _self.parent.completed(null, CompensationHandler.emptySet());
+            }
+        });
+    }
 }

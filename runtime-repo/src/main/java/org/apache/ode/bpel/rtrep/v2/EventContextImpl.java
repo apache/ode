@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.evt.EventContext;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Node;
 
@@ -43,7 +41,7 @@ public class EventContextImpl implements EventContext
     /**
      * BPEL Runtime Context
      */
-    private BpelRuntimeContext __runtimeContext;
+    private RuntimeInstanceImpl __runtimeContext;
 
     /**
      * Constructor
@@ -51,7 +49,7 @@ public class EventContextImpl implements EventContext
      * @param __scopeInstanceId Scope Instance ID
      * @param __runtimeContext BPEL Runtime Context
      */
-    public EventContextImpl(OScope __scope, Long __scopeInstanceId, BpelRuntimeContext __runtimeContext)
+    public EventContextImpl(OScope __scope, Long __scopeInstanceId, RuntimeInstanceImpl __runtimeContext)
     {
         this.__scope = __scope;
         this.__scopeInstanceId = __scopeInstanceId;
@@ -68,9 +66,9 @@ public class EventContextImpl implements EventContext
         String value = null;
         try
         {
-            Variable var = __scope.getVisibleVariable(varName);
+            OScope.Variable var = __scope.getVisibleVariable(varName);
             VariableInstance varInstance = new VariableInstance(__scopeInstanceId, var);
-            Node varNode = __runtimeContext.readVariable(varInstance.scopeInstance, varInstance.declaration.name, false);
+            Node varNode = __runtimeContext.fetchVariableData(varInstance, false);
             value = DOMUtils.domToString(varNode);
         }
         catch(Throwable e)

@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -26,25 +25,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OConstantVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * The context in which BPEL expressions are evaluated. This class is handed of the {@link org.apache.ode.bpel.o.OExpression}
+ * The context in which BPEL expressions are evaluated. This class is handed of the OExpression
  * instances to provide access to variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
     private static final Log __log = LogFactory.getLog(ExprEvaluationContextImpl.class);
 
-	private BpelRuntimeContext _native;
+	private RuntimeInstanceImpl _native;
 
 	private ScopeFrame _scopeInstance;
 
@@ -52,17 +43,17 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
 	private Node _root;
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, BpelRuntimeContext ntv) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, RuntimeInstanceImpl ntv) {
         _native = ntv;
         _scopeInstance = scopeInstace;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, BpelRuntimeContext ntv, Node root) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, RuntimeInstanceImpl ntv, Node root) {
         this(scopeInstace, ntv);
         _root = root;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce, BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce, RuntimeInstanceImpl ntv, Map<OLink, Boolean> linkVals) {
         this(scopeInstnce, ntv);
         _linkVals = linkVals;
     }
@@ -83,7 +74,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
             VariableReadEvent vre = new VariableReadEvent();
             vre.setVarName(varInstance.declaration.name);
             sendEvent(vre);
-            ret = _scopeInstance.fetchVariableData(_native, varInstance, part, false);
+            ret = _native.fetchVariableData(varInstance, part, false);
         }
         return ret;
     }
@@ -109,8 +100,8 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 		return _root;
 	}
 
-	public Node getPartData(Element message, Part part) throws FaultException {
-		return _scopeInstance.getPartData(message, part);
+	public Node getPartData(Element message, OMessageVarType.Part part) throws FaultException {
+		return _native.getPartData(message, part);
 	}
 
 	public Long getProcessId() {
@@ -124,10 +115,6 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 	private void sendEvent(ScopeEvent se) {
 		_scopeInstance.fillEventInfo(se);
 		_native.sendEvent(se);
-	}
-
-	public URI getBaseResourceURI() {
-		return _native.getBaseResourceURI();
 	}
 
 }

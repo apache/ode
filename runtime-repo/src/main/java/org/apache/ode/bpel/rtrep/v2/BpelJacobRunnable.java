@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.rapi.OdeRTInstanceContext;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
@@ -43,8 +41,8 @@ import javax.xml.namespace.QName;
 public abstract class BpelJacobRunnable extends JacobRunnable {
     private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
 
-    protected BpelRuntimeContext getBpelRuntimeContext() {
-        BpelRuntimeContext nativeApi = (BpelRuntimeContext) JacobVPU.activeJacobThread().getExtension(BpelRuntimeContext.class);
+    protected RuntimeInstanceImpl getBpelRuntime() {
+        RuntimeInstanceImpl nativeApi = (RuntimeInstanceImpl) JacobVPU.activeJacobThread().getExtension(OdeRTInstanceContext.class);
         assert nativeApi != null;
         return nativeApi;
     }
@@ -77,7 +75,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         }
         // if correlation set is already initialized,
         // then skip
-        if (getBpelRuntimeContext().isCorrelationInitialized(cset)) {
+        if (getBpelRuntime().isCorrelationInitialized(cset)) {
           // if already set, we ignore
             if (__log.isDebugEnabled()) {
                 __log.debug("OCorrelation set " + cset + " is already set: ignoring");
@@ -91,18 +89,18 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
 
         for (int i = 0; i < cset.declaration.properties.size(); ++i) {
             OProcess.OProperty property = cset.declaration.properties.get(i);
-            propValues[i] = getBpelRuntimeContext().readProperty(variable, property);
+            propValues[i] = getBpelRuntime().readProperty(variable, property);
             propNames[i] = property.name.toString();
             if (__log.isDebugEnabled())
               __log.debug("Setting correlation property " + propNames[i] + "=" + propValues[i]);
         }
 
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
-        getBpelRuntimeContext().writeCorrelation(cset,ckeyVal);
+        getBpelRuntime().writeCorrelation(cset,ckeyVal);
     }
     
     protected long genMonotonic() {
-        return getBpelRuntimeContext().genId();
+        return getBpelRuntime().genId();
     }
 
 }

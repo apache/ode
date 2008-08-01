@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 /**
  * JacobRunnable that performs the work of the <code>empty</code> activity.
  */
 class TERMINATE extends ACTIVITY {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public TERMINATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
-    super(self, scopeFrame, linkFrame);
-  }
+    public TERMINATE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
+        super(self, scopeFrame, linkFrame);
+    }
 
-  public final void run() {
-    getBpelRuntimeContext().terminate();
-    _self.parent.completed(null, CompensationHandler.emptySet());
-  }
+    public final void run() {
+        getBpelRuntime().terminate();
+        _self.parent.completed(null, CompensationHandler.emptySet());
+    }
 
 }

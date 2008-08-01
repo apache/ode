@@ -16,19 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.net.URI;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -81,7 +74,7 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
         throw new InvalidProcessException("Process execution information not available in this context.");
     }
 
-    public Node getPartData(Element message, Part part) throws FaultException {
+    public Node getPartData(Element message, OMessageVarType.Part part) throws FaultException {
         // TODO Auto-generated method stub
         return null;
     }

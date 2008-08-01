@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath10;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.explang.ConfigurationException;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.rtrep.v2.EvaluationContext;
+import org.apache.ode.bpel.rtrep.v2.ExpressionLanguageRuntime;
+import org.apache.ode.bpel.rtrep.v2.OExpression;
+import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
@@ -24,7 +24,7 @@ import java.io.Serializable;
 /**
  * Holds information about the failure handling of this activity.
  */
-public class FailureHandling implements Serializable {
+public class OFailureHandling implements Serializable {
     private static final long serialVersionUID = 5637366976949702880L;
     
     public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";

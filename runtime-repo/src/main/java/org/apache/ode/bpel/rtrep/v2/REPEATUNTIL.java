@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,13 +24,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.ORepeatUntil;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 
@@ -75,7 +73,7 @@ public class REPEATUNTIL extends ACTIVITY {
      * @throws FaultException in case of standard expression fault (e.g. selection failure)
      */
     private boolean checkCondition() throws FaultException {
-        return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().untilCondition,getEvaluationContext());
+        return getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().untilCondition,getEvaluationContext());
     }
 
     private class WAITER extends BpelJacobRunnable {
@@ -110,8 +108,7 @@ public class REPEATUNTIL extends ACTIVITY {
                         _self.parent.completed(faultData, _compHandlers);
                     else {
 
-                        boolean condResult = false;
-
+                        boolean condResult;
                         try {
                             condResult = checkCondition();
                         } catch (FaultException fe) {

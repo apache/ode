@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
 
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 
 class ActivityInfo implements Serializable {
 

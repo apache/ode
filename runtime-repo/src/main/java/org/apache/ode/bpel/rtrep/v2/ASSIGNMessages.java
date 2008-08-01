@@ -18,7 +18,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.utils.msg.MessageBundle;
 

@@ -1,11 +1,11 @@
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ReadWriteLockChannelListener;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.SynchChannel;
 

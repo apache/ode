@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -44,10 +44,8 @@ public class OMessageVarType extends OVarType {
     public OMessageVarType(OProcess owner, QName messageType, Collection<Part> parts) {
         super(owner);
         this.messageType = messageType;
-        for (Iterator<Part> i = parts.iterator(); i.hasNext();) {
-            Part part = i.next();
-            this.parts.put(part.name,part);
-        }
+        for (Part part : parts)
+            this.parts.put(part.name, part);
 
         if ((parts.size() == 1 && parts.iterator().next().type instanceof OElementVarType))
             docLitType = (OElementVarType) parts.iterator().next().type;

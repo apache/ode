@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
+
+import org.apache.ode.bpel.rtrep.rapi.ProcessModel;
+import org.apache.ode.bpel.rtrep.rapi.PartnerLinkModel;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -28,7 +31,7 @@ import java.util.*;
 /**
  * Compiled BPEL process representation.
  */
-public class OProcess extends OBase {
+public class OProcess extends OBase implements ProcessModel {
 
     public static int instanceCount = 0;
     static final long serialVersionUID = -1L  ;
@@ -54,7 +57,7 @@ public class OProcess extends OBase {
     public OScope procesScope;
 
     /** All partner links in the process. */
-    public final Set<OPartnerLink> allPartnerLinks = new HashSet<OPartnerLink>();
+    public final Set<PartnerLinkModel> allPartnerLinks = new HashSet<PartnerLinkModel>();
 
     public final List<OProperty> properties = new ArrayList<OProperty>();
     
@@ -87,6 +90,10 @@ public class OProcess extends OBase {
         instanceCount++;
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
     public OBase getChild(final int id) {
         for (int i=_children.size()-1; i>=0; i--) {
             OBase child = _children.get(i);
@@ -104,15 +111,19 @@ public class OProcess extends OBase {
     }
 
 
-    public Set<OPartnerLink> getAllPartnerLinks() {
+    public Set<PartnerLinkModel> getAllPartnerLinks() {
         return Collections.unmodifiableSet(allPartnerLinks);
     }
 
-    public OPartnerLink getPartnerLink(String name) {
-        for (OPartnerLink partnerLink : allPartnerLinks) {
+    public PartnerLinkModel getPartnerLink(String name) {
+        for (PartnerLinkModel partnerLink : allPartnerLinks) {
             if (partnerLink.getName().equals(name)) return partnerLink;
         }
         return null;
+    }
+
+    public PartnerLinkModel getPartnerLink(int partnerLinkModelId) {
+        return (PartnerLinkModel) getChild(partnerLinkModelId);
     }
 
     public String getName() {
@@ -127,9 +138,9 @@ public class OProcess extends OBase {
         // MOVED from ProcessSchemaGenerator
         List<String> correlators = new ArrayList<String>();
 
-        for (OPartnerLink plink : getAllPartnerLinks()) {
+        for (PartnerLinkModel plink : getAllPartnerLinks()) {
             if (plink.hasMyRole()) {
-                for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
+                for (Iterator opI = plink.getMyRolePortType().getOperations().iterator(); opI.hasNext();) {
                     Operation op = (Operation)opI.next();
                     correlators.add(plink.getId() + "." + op.getName());
                 }

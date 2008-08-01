@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.o.OBase;
@@ -24,11 +24,11 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.jacob.SynchChannel;
 
 import java.util.Set;
@@ -44,7 +44,7 @@ public class PROCESS extends BpelJacobRunnable {
     }
 
     public void run() {
-        BpelRuntimeContext ntive = getBpelRuntimeContext();
+        RuntimeInstanceImpl ntive = getBpelRuntime();
         Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
 
         createGlobals();
@@ -67,7 +67,7 @@ public class PROCESS extends BpelJacobRunnable {
             }
 
             public void completed(FaultData fault, Set<CompensationHandler> compensations) {
-                BpelRuntimeContext nativeAPI = (BpelRuntimeContext)getExtension(BpelRuntimeContext.class);
+                RuntimeInstanceImpl nativeAPI = (RuntimeInstanceImpl) getExtension(RuntimeInstanceImpl.class);
                 if (fault == null) {
                     nativeAPI.completedOk();
                 } else {
@@ -92,7 +92,7 @@ public class PROCESS extends BpelJacobRunnable {
         // For each variable, we create a lock.
         for (OBase child : _oprocess.getChildren()) 
             if (child instanceof OScope.Variable) {
-                OScope.Variable var = (Variable) child;
+                OScope.Variable var = (OScope.Variable) child;
                 ReadWriteLockChannel vlock = newChannel(ReadWriteLockChannel.class);
                 instance(new READWRITELOCK(vlock));
                 _globals._varLocks.put(var, vlock);

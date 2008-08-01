@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import javax.xml.namespace.QName;
 
@@ -35,8 +35,6 @@ public class OElementVarType extends OVarType {
     }
 
     public Node newInstance(Document doc) {
-      Element el = doc.createElementNS(elementType.getNamespaceURI(),
-          elementType.getLocalPart());
-          return el;
+        return doc.createElementNS(elementType.getNamespaceURI(), elementType.getLocalPart());
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 public class OTerminationHandler extends OScope {
     private static final long serialVersionUID = -4632187173061412134L;

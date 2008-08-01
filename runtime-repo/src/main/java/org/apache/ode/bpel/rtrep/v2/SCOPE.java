@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -33,23 +33,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.CompensationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
@@ -103,7 +94,7 @@ class SCOPE extends ACTIVITY {
             }
         }
 
-        getBpelRuntimeContext().initializePartnerLinks(_scopeFrame.scopeInstanceId, 
+        getBpelRuntime().initializePartnerLinks(_scopeFrame.scopeInstanceId,
             _oscope.partnerLinks.values());
 
         sendEvent(new ScopeStartEvent());
@@ -112,8 +103,7 @@ class SCOPE extends ACTIVITY {
 
     private List<CompensationHandler> findCompensationData(OScope scope) {
         List<CompensationHandler> out = new ArrayList<CompensationHandler>();
-        for (Iterator<CompensationHandler> i = _scopeFrame.availableCompensations.iterator(); i.hasNext(); ) {
-            CompensationHandler  ch = i.next();
+        for (CompensationHandler ch : _scopeFrame.availableCompensations) {
             if (null == scope || ch.compensated.oscope.equals(scope))
                 out.add(ch);
         }
@@ -213,9 +203,7 @@ class SCOPE extends ACTIVITY {
 
                 // Similarly, handle messages from the event handler, if one exists
                 // and if it has not completed.
-                for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
-                    final EventHandlerInfo ehi = i.next();
-
+                for (final EventHandlerInfo ehi : _eventHandlers) {
                     mlSet.add(new ParentScopeChannelListener(ehi.psc) {
                         private static final long serialVersionUID = -4694721357537858221L;
 
@@ -246,8 +234,13 @@ class SCOPE extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void cancelled() { completed(null, CompensationHandler.emptySet()); }
-                        public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                        public void cancelled() {
+                            completed(null, CompensationHandler.emptySet());
+                        }
+
+                        public void failure(String reason, Element data) {
+                            completed(null, CompensationHandler.emptySet());
+                        }
                     });
                 }
                 object(false, mlSet);
@@ -255,8 +248,7 @@ class SCOPE extends ACTIVITY {
                 // Any compensation handlers that were available but not activated will be forgotten.
                 Set<CompensationHandler> unreachableCompensationHandlers = _scopeFrame.availableCompensations;
                 if (unreachableCompensationHandlers != null)
-                    for (Iterator<CompensationHandler> i = unreachableCompensationHandlers.iterator(); i.hasNext(); ) {
-                        CompensationHandler ch = i.next();
+                    for (CompensationHandler ch : unreachableCompensationHandlers) {
                         ch.compChannel.forget();
                     }
                 _scopeFrame.availableCompensations = null;
@@ -301,7 +293,7 @@ class SCOPE extends ACTIVITY {
                         linksNeedingDPE.removeAll(catchBlock.outgoingLinks);
 
                         // We have to create a scope for the catch block.
-                        BpelRuntimeContext ntive = getBpelRuntimeContext();
+                        RuntimeInstanceImpl ntive = getBpelRuntime();
 
                         ActivityInfo faultHandlerActivity = new ActivityInfo(genMonotonic(), catchBlock,
                                 newChannel(TerminationChannel.class,"FH"), newChannel(ParentScopeChannel.class,"FH"));
@@ -312,7 +304,7 @@ class SCOPE extends ACTIVITY {
                         if (catchBlock.faultVariable != null) {
                             try {
                                 VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
-                                initializeVariable(vinst, _fault.getFaultMessage());
+                                getBpelRuntime().initializeVariable(vinst, _fault.getFaultMessage());
 
                                 // Generating event
                                 VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
@@ -370,8 +362,7 @@ class SCOPE extends ACTIVITY {
         }
 
         private void terminateEventHandlers() {
-            for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext(); ) {
-                EventHandlerInfo ehi = i.next();
+            for (EventHandlerInfo ehi : _eventHandlers) {
                 if (!ehi.terminateRequested && !ehi.stopRequested) {
                     replication(ehi.tc).terminate();
                     ehi.terminateRequested = true;
@@ -380,17 +371,14 @@ class SCOPE extends ACTIVITY {
         }
 
         private void stopEventHandlers() {
-            for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
-                EventHandlerInfo ehi = i.next();
+            for (EventHandlerInfo ehi : _eventHandlers) {
                 if (!ehi.stopRequested && !ehi.terminateRequested) {
                     ehi.cc.stop();
                     ehi.stopRequested = true;
                 }
             }
         }
-
     }
-
 
     private static OCatch findCatch(OFaultHandler fh, QName faultName, OVarType faultType) {
         OCatch bestMatch = null;
@@ -408,8 +396,7 @@ class SCOPE extends ACTIVITY {
                 if (faultType == null)
                     continue;
                 else if (c.faultVariable.type instanceof OMessageVarType) {
-                    if (faultType instanceof OMessageVarType
-                            && ((OMessageVarType) faultType).equals(c.faultVariable.type)) {
+                    if (faultType instanceof OMessageVarType && faultType.equals(c.faultVariable.type)) {
                         // Don't eliminate.
                     } else if (faultType instanceof OElementVarType
                             && ((OMessageVarType) c.faultVariable.type).docLitType != null

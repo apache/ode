@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.extension;
+package org.apache.ode.bpel.rtrep.common.extension;
 
 import java.util.Collections;
 import java.util.HashMap;

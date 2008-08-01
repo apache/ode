@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.Collection;
 import java.util.Date;
@@ -29,17 +29,14 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OInvoke;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.InvokeResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.InvokeResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -89,7 +86,7 @@ public class INVOKE extends ACTIVITY {
         try {
             if (!isTwoWay) {
                 FaultData faultData = null;
-                getBpelRuntimeContext().invoke(_scopeFrame.resolve(_oinvoke.partnerLink),
+                getBpelRuntime().invoke(_scopeFrame.resolve(_oinvoke.partnerLink),
                     _oinvoke.operation, outboundMsg, null);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 
@@ -97,7 +94,7 @@ public class INVOKE extends ACTIVITY {
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
                 InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
 
-                final String mexId = getBpelRuntimeContext().invoke(
+                final String mexId = getBpelRuntime().invoke(
                     _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                     outboundMsg, invokeResponseChannel);
 
@@ -111,7 +108,7 @@ public class INVOKE extends ACTIVITY {
 
                         Element response;
                         try {
-                            response = getBpelRuntimeContext().getPartnerResponse(mexId);
+                            response = getBpelRuntime().getPartnerResponse(mexId);
                         } catch (Exception e) {
                             __log.error(e);
                             // TODO: Better error handling
@@ -119,7 +116,7 @@ public class INVOKE extends ACTIVITY {
                         }
 
                         try {
-                        initializeVariable(outputVar, response);
+                            getBpelRuntime().initializeVariable(outputVar, response);
                         } catch (ExternalVariableModuleException e) {
                         	__log.error("Exception while initializing external variable", e);
                             _self.parent.failure(e.toString(), null);
@@ -139,19 +136,19 @@ public class INVOKE extends ACTIVITY {
                             }
                             if (_oinvoke.partnerLink.hasPartnerRole()) {
                                 // Trying to initialize partner epr based on a message-provided epr/session.
-                                if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
+                                if (!getBpelRuntime().isPartnerRoleEndpointInitialized(_scopeFrame
                                         .resolve(_oinvoke.partnerLink)) || !_oinvoke.partnerLink.initializePartnerRole) {
                     
-                                    Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
+                                    Node fromEpr = getBpelRuntime().getSourceEPR(mexId);
                                     if (fromEpr != null) {
-                                        getBpelRuntimeContext().writeEndpointReference(
+                                        getBpelRuntime().writeEndpointReference(
                                             _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
                                     }
                                 }                    
                                 
-                                String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
+                                String partnersSessionId = getBpelRuntime().getSourceSessionId(mexId);
                                 if (partnersSessionId != null)
-                                    getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.partnerLink),
+                                    getBpelRuntime().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.partnerLink),
                                         partnersSessionId);
                                 
                             }
@@ -162,17 +159,17 @@ public class INVOKE extends ACTIVITY {
                         // TODO update output variable with data from non-initiate correlation sets
 
                         _self.parent.completed(fault, CompensationHandler.emptySet());
-                        getBpelRuntimeContext().releasePartnerMex(mexId);
+                        getBpelRuntime().releasePartnerMex(mexId);
                     }
 
                     public void onFault() {
-                        QName faultName = getBpelRuntimeContext().getPartnerFault(mexId);
-                        Element msg = getBpelRuntimeContext().getPartnerResponse(mexId);
-                        QName msgType = getBpelRuntimeContext().getPartnerResponseType(mexId);
+                        QName faultName = getBpelRuntime().getPartnerFault(mexId);
+                        Element msg = getBpelRuntime().getPartnerResponse(mexId);
+                        QName msgType = getBpelRuntime().getPartnerResponseType(mexId);
                         FaultData fault = createFault(faultName, msg,
                             _oinvoke.getOwner().messageTypes.get(msgType), _self.o);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
-                        getBpelRuntimeContext().releasePartnerMex(mexId);
+                        getBpelRuntime().releasePartnerMex(mexId);
                     }
 
                     public void onFailure() {
@@ -180,8 +177,8 @@ public class INVOKE extends ACTIVITY {
                         // because there is no fault, instead we'll re-incarnate the invoke
                         // and either retry or indicate failure condition.
                         // admin to resume the process.
-                        _self.parent.failure(getBpelRuntimeContext().getPartnerFaultExplanation(mexId), null);
-                        getBpelRuntimeContext().releasePartnerMex(mexId);
+                        _self.parent.failure(getBpelRuntime().getPartnerFaultExplanation(mexId), null);
+                        getBpelRuntime().releasePartnerMex(mexId);
                     }
                 });
             }
@@ -231,10 +228,10 @@ public class INVOKE extends ACTIVITY {
         
         if (__log.isDebugEnabled())
             __log.debug("ActivityRecovery: Retrying invoke activity " + _self.aId);
-        Date future = new Date(new Date().getTime() + 
-            (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
+        Date future = new Date(new Date().getTime() + failureHandling.retryDelay * 1000);
         final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
-        getBpelRuntimeContext().registerTimer(timerChannel, future);
+        getBpelRuntime().registerTimer(timerChannel, future);
+
         object(false, new TimerResponseChannelListener(timerChannel) {
           private static final long serialVersionUID = -261911108068231376L;
             public void onTimeout() {
@@ -262,7 +259,7 @@ public class INVOKE extends ACTIVITY {
             __log.debug("ActivityRecovery: Invoke activity " + _self.aId + " requires recovery");
         sendEvent(new ActivityFailureEvent(_failureReason));
         final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
-        getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, _failureData,
+        getBpelRuntime().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, _failureData,
             new String[] { "retry", "cancel", "fault" }, _invoked - 1);
         object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
             private static final long serialVersionUID = 8397883882810521685L;
@@ -270,21 +267,21 @@ public class INVOKE extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Retrying invoke activity " + _self.aId + " (user initiated)");
                 sendEvent(new ActivityRecoveryEvent("retry"));
-                getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                 instance(INVOKE.this);
             }
             public void cancel() {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Cancelling invoke activity " + _self.aId + " (user initiated)");
                 sendEvent(new ActivityRecoveryEvent("cancel"));
-                getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                 _self.parent.cancelled();
             }
             public void fault(FaultData faultData) {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Faulting invoke activity " + _self.aId + " (user initiated)");
                 sendEvent(new ActivityRecoveryEvent("fault"));
-                getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                 if (faultData == null)
                   faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
@@ -295,7 +292,7 @@ public class INVOKE extends ACTIVITY {
             public void terminate() {
                 if (__log.isDebugEnabled())
                     __log.debug("ActivityRecovery: Cancelling invoke activity " + _self.aId + " (terminated by scope)");
-                getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                 _self.parent.completed(null, CompensationHandler.emptySet());
             }
         }));

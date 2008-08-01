@@ -16,40 +16,61 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.rtrep.rapi.PartnerLink;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
 
-public class Selector implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class Selector implements Serializable, org.apache.ode.bpel.rtrep.rapi.Selector {
+    private static final long serialVersionUID = 1L;
 
-	public final PartnerLinkInstance plinkInstance;
-  public final CorrelationKey correlationKey;
-  public final String opName;
-  public final String messageExchangeId;
-  public final int idx;
-  public final boolean oneWay;
+    public final PartnerLinkInstance plinkInstance;
+    public final CorrelationKey correlationKey;
+    public final String opName;
+    public final String messageExchangeId;
+    public final int idx;
+    public final boolean oneWay;
 
-  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKey ckey) {
-    this.idx = idx;
-    this.plinkInstance = plinkInstance;
-    this.correlationKey = ckey;
-    this.opName = opName;
-    this.messageExchangeId = mexId;
-    this.oneWay = oneWay;
-  }
+    Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKey ckey) {
+        this.idx = idx;
+        this.plinkInstance = plinkInstance;
+        this.correlationKey = ckey;
+        this.opName = opName;
+        this.messageExchangeId = mexId;
+        this.oneWay = oneWay;
+    }
 
-  public String toString() {
-    return ObjectPrinter.toString(this, new Object[] {
-      "plinkInstnace", plinkInstance,
-      "ckey", correlationKey,
-      "opName" ,opName,
-      "oneWay", oneWay ? "yes" : "no",
-      "mexId", messageExchangeId,
-      "idx", Integer.valueOf(idx)
-    });
-  }
+    public String toString() {
+        return ObjectPrinter.toString(this, new Object[] {
+                "plinkInstnace", plinkInstance,
+                "ckey", correlationKey,
+                "opName" ,opName,
+                "oneWay", oneWay ? "yes" : "no",
+                "mexId", messageExchangeId,
+                "idx", Integer.valueOf(idx)
+        });
+    }
+
+    public CorrelationKey getCorrelationKey() {
+        return correlationKey;
+    }
+
+    public String getMesageExchangeId() {
+        return messageExchangeId;
+    }
+
+    public String getOperation() {
+        return opName;
+    }
+
+    public PartnerLink getPartnerLink() {
+        return plinkInstance;
+    }
+
+    public boolean isOneWay() {
+        return oneWay;
+    }
 }

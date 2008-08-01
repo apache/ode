@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,20 +27,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OForEach;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -184,7 +180,7 @@ public class FOREACH extends ACTIVITY {
     private int evaluateCondition(OExpression condition)
             throws FaultException {
         try {
-            return getBpelRuntimeContext().getExpLangRuntime().
+            return getBpelRuntime().getExpLangRuntime().
                     evaluateAsNumber(condition, getEvaluationContext()).intValue();
         } catch (FaultException e) {
             String msg;
@@ -206,17 +202,11 @@ public class FOREACH extends ACTIVITY {
         // Instantiating the scope directly to keep control of its scope frame, allows
         // the introduction of the counter variable in there (monkey business that is).
         ScopeFrame newFrame = new ScopeFrame(
-                _oforEach.innerScope, getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,
+                _oforEach.innerScope, getBpelRuntime().createScopeInstance(_scopeFrame.scopeInstanceId,
                 _oforEach.innerScope), _scopeFrame, null);
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
 
-        try {
-        initializeVariable(vinst, counterNode);
-        } catch (ExternalVariableModuleException e) {
-        	__log.error("Exception while initializing external variable", e);
-            _self.parent.failure(e.toString(), null);
-            return;
-        }
+        getBpelRuntime().initializeVariable(vinst, counterNode);
 
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);

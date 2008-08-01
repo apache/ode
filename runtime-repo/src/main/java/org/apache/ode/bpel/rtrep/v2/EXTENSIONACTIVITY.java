@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import javax.xml.namespace.QName;
 
@@ -25,8 +25,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.o.OExtensionActivity;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
-import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.v2.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.v2.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 
 /**
@@ -48,14 +50,15 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
 	}
 
     public final void run() {
-    	final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntimeContext());
+    	final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntime());
     	final QName extensionId = DOMUtils.getElementQName(_oext.nestedElement.getElement());
     	try {
-    		ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
+    		ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(extensionId);
     		if (ea == null) {
     			if (_oext.getOwner().mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
     				__log.warn("Lookup of extension activity " + extensionId + " failed.");
-    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+    				throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME,
+                            "Lookup of extension activity " + extensionId + " failed. No implementation found.");
     			} else {
     				// act like <empty> - do nothing
     				context.complete();

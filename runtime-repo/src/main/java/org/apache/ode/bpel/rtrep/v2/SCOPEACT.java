@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -29,15 +29,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ReadWriteLockChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.SynchChannelListener;
@@ -65,7 +62,7 @@ public class SCOPEACT extends ACTIVITY {
             instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class)));
 
         } else {
-            ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntimeContext().createScopeInstance(
+            ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntime().createScopeInstance(
                     _scopeFrame.scopeInstanceId, (OScope) _self.o), _scopeFrame, null);
 
             // Depending on whether we are ATOMIC or not, we'll need to create outgoing link status interceptors
@@ -95,10 +92,10 @@ public class SCOPEACT extends ACTIVITY {
         LinkedList<IsolationLock> requiredLocks = new LinkedList<IsolationLock>();
         OScope o = ((OScope) _self.o);
 
-        Set<Variable> vrs = new HashSet<Variable>(o.variableRd);
+        Set<OScope.Variable> vrs = new HashSet<OScope.Variable>(o.variableRd);
         vrs.addAll(o.variableWr);
 
-        for (Variable v : vrs)
+        for (OScope.Variable v : vrs)
             requiredLocks.add(new IsolationLock(v, o.variableWr.contains(v), _scopeFrame.globals._varLocks.get(v)));
 
         // Very important, we must sort the locks to prevent deadlocks.
@@ -238,7 +235,7 @@ public class SCOPEACT extends ACTIVITY {
                 // acquired all locks.
                 __log.debug("ISOLATIONGUARD: got all required locks: " + _locksAcquired);
 
-                ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntimeContext().createScopeInstance(
+                ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntime().createScopeInstance(
                         _scopeFrame.scopeInstanceId, (OScope) _self.o), _scopeFrame, null);
 
                 
@@ -351,7 +348,7 @@ public class SCOPEACT extends ACTIVITY {
             __log.debug("UNLOCKER: unlockAll: " + _locks);
 
             if (((OScope)SCOPEACT.this._self.o).atomicScope)
-                getBpelRuntimeContext().forceFlush();
+                getBpelRuntime().forceFlush();
                 
             for (IsolationLock il : _locks)
                 il.lockChannel.unlock(_synchChannel);

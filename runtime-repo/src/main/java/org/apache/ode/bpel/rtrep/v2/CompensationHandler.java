@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.CompensationChannel;
 
 import java.io.Serializable;
 import java.util.Collections;

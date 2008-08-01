@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import java.io.Serializable;
@@ -24,21 +24,13 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.FaultException;
 
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.jacob.IndexedObject;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
@@ -95,7 +87,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         }
         _scopeFrame.fillEventInfo(event);
         fillEventContext(event);
-        getBpelRuntimeContext().sendEvent(event);
+        getBpelRuntime().sendEvent(event);
     }
 
     /**
@@ -104,9 +96,8 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
      */
     protected void fillEventContext(ScopeEvent event)
     {
-        EventContext eventContext = new EventContextImpl(_scopeFrame.oscope,
-                                                            _scopeFrame.scopeInstanceId,
-                                                            getBpelRuntimeContext());
+        EventContext eventContext = new EventContextImpl(
+                _scopeFrame.oscope, _scopeFrame.scopeInstanceId, getBpelRuntime());
         event.eventContext = eventContext;
     }
 
@@ -136,7 +127,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     protected EvaluationContext getEvaluationContext() {
-        return new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext());
+        return new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntime());
     }
 
     private int getLineNo() {
@@ -146,43 +137,14 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return -1;
     }
 
-    //
-    // Syntactic sugar for methods that used to be on BpelRuntimeContext.. 
-    //
-    
-    Node fetchVariableData(VariableInstance variable, boolean forWriting) 
-        throws FaultException
-    {
-    	return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
-	}
-
-    Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
-        throws FaultException 
-    {
-      return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), var, part, forWriting);
-    }
-    
-    Node initializeVariable(VariableInstance lvar, Node val) 
-        throws ExternalVariableModuleException
-    {
-    	return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
+    Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
+        if (variable.declaration.extVar != null) {
+            return getBpelRuntime().fetchVariableData(_scopeFrame.resolve(variable.declaration.extVar.related), forWriting);
+        } else {
+            return getBpelRuntime().fetchVariableData(variable, forWriting);
+        }
     }
 
-    void commitChanges(VariableInstance lval, Node lvalue) 
-        throws ExternalVariableModuleException
-    {
-    	_scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
-	}
-
-    Node getPartData(Element message, Part part) {
-    	return _scopeFrame.getPartData(message, part);
-    }
-
-    
-    //
-    // End syntactic sugar.
-    //
-    
     public static final class Key implements Serializable {
         private static final long serialVersionUID = 1L;
 

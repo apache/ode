@@ -17,12 +17,11 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath10.runtime;
+package org.apache.ode.bpel.rtrep.v2.xpath10;
 
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.StreamUtils;
-import org.apache.ode.utils.fs.FileUtils; 
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.ode.bpel.rtrep.v2.OXslSheet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

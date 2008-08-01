@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.o;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,8 +42,7 @@ public class OXsdTypeVarType extends OVarType {
         if (simple)
             return doc.createTextNode("");
         else {
-            Element el = doc.createElementNS(null, "xsd-complex-type-wrapper");
-            return el;
+            return doc.createElementNS(null, "xsd-complex-type-wrapper");
         }
     }
 }

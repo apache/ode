@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -29,15 +29,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPickReceive;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
@@ -83,10 +79,10 @@ class PICK extends ACTIVITY {
                 if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
                     // Adding a route for opaque correlation. In this case,
                     // correlation is on "out-of-band" session-id
-                    String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
+                    String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
                     key = new CorrelationKey(-1, new String[] { sessionId });
                 } else if (onMessage.matchCorrelation != null) {
-                    if (!getBpelRuntimeContext().isCorrelationInitialized(
+                    if (!getBpelRuntime().isCorrelationInitialized(
                             _scopeFrame.resolve(onMessage.matchCorrelation))) {
                         // the following should really test if this is a "join"
                         // type correlation...
@@ -95,7 +91,7 @@ class PICK extends ACTIVITY {
                                     "Correlation not initialized.");
                     } else {
 
-                        key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
+                        key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
 
                         assert key != null;
                     }
@@ -108,15 +104,15 @@ class PICK extends ACTIVITY {
 
             timeout = null;
             for (OPickReceive.OnAlarm onAlarm : _opick.onAlarms) {
-                Date dt = onAlarm.forExpr != null ? offsetFromNow(getBpelRuntimeContext().getExpLangRuntime()
-                        .evaluateAsDuration(onAlarm.forExpr, getEvaluationContext())) : getBpelRuntimeContext()
+                Date dt = onAlarm.forExpr != null ? offsetFromNow(getBpelRuntime().getExpLangRuntime()
+                        .evaluateAsDuration(onAlarm.forExpr, getEvaluationContext())) : getBpelRuntime()
                         .getExpLangRuntime().evaluateAsDate(onAlarm.untilExpr, getEvaluationContext()).getTime();
                 if (timeout == null || timeout.compareTo(dt) > 0) {
                     timeout = dt;
                     _alarm = onAlarm;
                 }
             }
-            getBpelRuntimeContext().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
+            getBpelRuntime().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
         } catch (FaultException e) {
             __log.error(e);
             FaultData fault = createFault(e.getQName(), _opick, e.getMessage());
@@ -157,7 +153,7 @@ class PICK extends ACTIVITY {
         try {
             // At this point, not being able to get the request is most probably
             // a mex that hasn't properly replied to (process issue).
-            msgEl = getBpelRuntimeContext().getMyRequest(mexId);
+            msgEl = getBpelRuntime().getMyRequest(mexId);
         } catch (BpelEngineException e) {
             __log.error("The message exchange seems to be in an unconsistent state, you're " +
                 "probably missing a reply on a request/response interaction.");
@@ -182,7 +178,7 @@ class PICK extends ACTIVITY {
         for (String pName : partNames) {
             QName partName = new QName(null, pName);
             Element msgPart = DOMUtils.findChildByName(msgEl, partName);
-            Part part = vartype.parts.get(pName);
+            OMessageVarType.Part part = vartype.parts.get(pName);
             if (part == null) {
                 String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.messageType;
                 __log.fatal(errmsg);
@@ -220,7 +216,7 @@ class PICK extends ACTIVITY {
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
         
         try {
-            initializeVariable(vinst, msgEl);
+            getBpelRuntime().initializeVariable(vinst, msgEl);
         } catch (ExternalVariableModuleException e) {
         	__log.error("Exception while initializing external variable", e);
             _self.parent.failure(e.toString(), null);
@@ -274,23 +270,23 @@ class PICK extends ACTIVITY {
                             // Trying to initialize partner epr based on a
                             // message-provided epr/session.
 
-                            if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(
+                            if (!getBpelRuntime().isPartnerRoleEndpointInitialized(
                                     _scopeFrame.resolve(onMessage.partnerLink))
                                     || !onMessage.partnerLink.initializePartnerRole) {
 
-                                Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
+                                Node fromEpr = getBpelRuntime().getSourceEPR(mexId);
                                 if (fromEpr != null) {
                                     if (__log.isDebugEnabled())
                                         __log.debug("Received callback EPR " + DOMUtils.domToString(fromEpr)
                                                 + " saving it on partner link " + onMessage.partnerLink.getName());
-                                    getBpelRuntimeContext().writeEndpointReference(
+                                    getBpelRuntime().writeEndpointReference(
                                             _scopeFrame.resolve(onMessage.partnerLink), (Element) fromEpr);
                                 }
                             }
 
-                            String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
+                            String partnersSessionId = getBpelRuntime().getSourceSessionId(mexId);
                             if (partnersSessionId != null)
-                                getBpelRuntimeContext().initializePartnersSessionId(
+                                getBpelRuntime().initializePartnersSessionId(
                                         _scopeFrame.resolve(onMessage.partnerLink), partnersSessionId);
 
                         }
@@ -332,7 +328,7 @@ class PICK extends ACTIVITY {
                 private static final long serialVersionUID = 4399496341785922396L;
 
                 public void terminate() {
-                    getBpelRuntimeContext().cancel(_pickResponseChannel);
+                    getBpelRuntime().cancel(_pickResponseChannel);
                     instance(WAITING.this);
                 }
             }));

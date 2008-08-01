@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,20 +26,16 @@ import org.apache.ode.bpel.evt.ActivityExecEndEvent;
 import org.apache.ode.bpel.evt.ActivityExecStartEvent;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannelListener;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 
@@ -135,8 +131,8 @@ class ACTIVITYGUARD extends ACTIVITY {
         if (transitionCondition == null)
             return true;
 
-        return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
-                new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntimeContext()));
+        return getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
+                new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntime()));
 
     }
 
@@ -154,7 +150,7 @@ class ACTIVITYGUARD extends ACTIVITY {
             return _linkVals.values().contains(Boolean.TRUE);
 
         try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(_oactivity.joinCondition,
+            return getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(_oactivity.joinCondition,
                     new ExprEvaluationContextImpl(null, null,_linkVals));
         } catch (Exception e) {
             String msg = "Unexpected error evaluating a join condition: " + _oactivity.joinCondition;
@@ -180,7 +176,7 @@ class ACTIVITYGUARD extends ACTIVITY {
 
     /**
      * Intercepts the
-     * {@link ParentScopeChannel#completed(org.apache.ode.bpel.runtime.channels.FaultData, java.util.Set<org.apache.ode.bpel.runtime.CompensationHandler>)}
+     * {@link ParentScopeChannel#completed(org.apache.ode.bpel.rtrep.v2.channels.FaultData, java.util.Set<org.apache.ode.bpel.rtrep.v2.CompensationHandler>)}
      * call, to evaluate transition conditions before returning to the parent.
      */
     private class TCONDINTERCEPT extends BpelJacobRunnable {
@@ -258,7 +254,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     Date future = new Date(new Date().getTime() + 
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
-                    getBpelRuntimeContext().registerTimer(timerChannel, future);
+                    getBpelRuntime().registerTimer(timerChannel, future);
                     object(false, new TimerResponseChannelListener(timerChannel) {
                         private static final long serialVersionUID = -261911108068231376L;
                             public void onTimeout() {
@@ -276,7 +272,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         __log.debug("ActivityRecovery: Activity " + _self.aId + " requires recovery");
                     sendEvent(new ActivityFailureEvent(_failure.reason));
                     final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
-                    getBpelRuntimeContext().registerActivityForRecovery(
+                    getBpelRuntime().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
                     object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
@@ -285,7 +281,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
                             sendEvent(new ActivityRecoveryEvent("retry"));
-                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                             ++_failure.retryCount;
                             startGuardedActivity();
                         }
@@ -293,14 +289,14 @@ class ACTIVITYGUARD extends ACTIVITY {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (user initiated)");
                             sendEvent(new ActivityRecoveryEvent("cancel"));
-                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                             cancelled();
                         }
                         public void fault(FaultData faultData) {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Faulting activity " + _self.aId + " (user initiated)");
                             sendEvent(new ActivityRecoveryEvent("fault"));
-                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                             if (faultData == null)
                                 faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failure.reason);
                             completed(faultData, CompensationHandler.emptySet());
@@ -311,7 +307,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         public void terminate() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");
-                            getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
+                            getBpelRuntime().unregisterActivityForRecovery(recoveryChannel);
                             cancelled();
                         }
                     }));
