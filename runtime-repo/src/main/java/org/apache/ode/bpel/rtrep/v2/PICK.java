@@ -33,7 +33,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
-import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;

@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.SwitchActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OSwitch;
 
 /**
  * Generator for legacy BPEL 1.1 <code>&lt;switch&gt;</code> actiivty.

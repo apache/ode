@@ -252,7 +252,7 @@ define "ode" do
 
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "runtime-repo", "bpel-schemas",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils"),
       BACKPORT, COMMONS.logging, COMMONS.httpclient, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
       JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
@@ -287,7 +287,7 @@ define "ode" do
 
   desc "ODE Process Store"
   define "bpel-store" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "runtime-repo", "bpel-schemas", "il-common",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-schemas", "il-common",
       "dao-hibernate", "utils"),
       COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
     compile { open_jpa_enhance }
@@ -413,7 +413,7 @@ define "ode" do
 
   desc "ODE JBI Integration Layer"
   define "jbi" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common", "runtime-repo",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common",
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 

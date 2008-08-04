@@ -23,8 +23,8 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.OnAlarm;
 import org.apache.ode.bpel.compiler.bom.OnMessage;
 import org.apache.ode.bpel.compiler.bom.PickActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OPickReceive;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OPickReceive;
 
 
 /**

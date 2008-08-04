@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rtrep.rapi.PartnerLink;
-import org.apache.ode.bpel.rtrep.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;

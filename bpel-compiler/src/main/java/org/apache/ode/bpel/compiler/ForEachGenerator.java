@@ -28,10 +28,10 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ForEachActivity;
 import org.apache.ode.bpel.compiler.bom.Scope;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OForEach;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OForEach;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OXsdTypeVarType;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.Namespaces;
 

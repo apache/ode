@@ -1,7 +1,7 @@
 package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OConstants;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OConstants;
 
 import javax.xml.namespace.QName;
 

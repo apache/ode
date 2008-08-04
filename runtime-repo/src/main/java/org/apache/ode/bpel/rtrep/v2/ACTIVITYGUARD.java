@@ -35,7 +35,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
-import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 

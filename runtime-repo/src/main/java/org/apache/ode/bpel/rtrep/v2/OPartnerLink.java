@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rtrep.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rtrep.rapi.CorrelationSetModel;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.CorrelationSetModel;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;

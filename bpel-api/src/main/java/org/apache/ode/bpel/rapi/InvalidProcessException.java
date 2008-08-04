@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.rtrep.rapi;
+package org.apache.ode.bpel.rapi;
 
 /**
  * A run-time exception indicating that the process is invalid. This should not

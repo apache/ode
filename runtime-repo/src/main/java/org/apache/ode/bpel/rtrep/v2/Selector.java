@@ -19,12 +19,12 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.rtrep.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLink;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
 
-public class Selector implements Serializable, org.apache.ode.bpel.rtrep.rapi.Selector {
+public class Selector implements Serializable, org.apache.ode.bpel.rapi.Selector {
     private static final long serialVersionUID = 1L;
 
     public final PartnerLinkInstance plinkInstance;

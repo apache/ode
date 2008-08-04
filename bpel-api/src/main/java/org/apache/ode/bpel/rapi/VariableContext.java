@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.rtrep.rapi;
+package org.apache.ode.bpel.rapi;
 
 import java.util.Collection;
 
@@ -6,7 +6,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evar.IncompleteKeyException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rtrep.rapi.Variable;
+import org.apache.ode.bpel.rapi.Variable;
 
 import java.io.Serializable;
 

@@ -27,17 +27,17 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OExpression;
+import org.apache.ode.bpel.rtrep.v2.OLValueExpression;
+import org.apache.ode.bpel.rtrep.v2.OLink;
+import org.apache.ode.bpel.rtrep.v2.OMessageVarType;
+import org.apache.ode.bpel.rtrep.v2.OPartnerLink;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OXsdTypeVarType;
+import org.apache.ode.bpel.rtrep.v2.OXslSheet;
+import org.apache.ode.bpel.rtrep.v2.OScope.Variable;
 import org.apache.ode.utils.NSContext;
 
 

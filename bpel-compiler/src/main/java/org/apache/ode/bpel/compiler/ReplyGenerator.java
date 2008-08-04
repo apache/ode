@@ -21,11 +21,11 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OReply;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OMessageVarType;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OReply;
+import org.apache.ode.bpel.rtrep.v2.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.wsdl.Fault;

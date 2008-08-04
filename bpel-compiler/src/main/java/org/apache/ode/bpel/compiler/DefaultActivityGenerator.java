@@ -20,10 +20,10 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
-import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.compiler.bom.FailureHandling;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OFailureHandling;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.w3c.dom.Element;
 
 /**

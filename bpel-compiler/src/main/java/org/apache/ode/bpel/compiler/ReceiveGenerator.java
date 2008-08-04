@@ -20,9 +20,9 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ReceiveActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OEmpty;
-import org.apache.ode.bpel.o.OPickReceive;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OEmpty;
+import org.apache.ode.bpel.rtrep.v2.OPickReceive;
 
 class ReceiveGenerator extends PickReceiveGenerator {
 

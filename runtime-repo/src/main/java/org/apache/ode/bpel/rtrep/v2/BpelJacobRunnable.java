@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.rapi.OdeRTInstanceContext;
+import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
@@ -62,7 +62,6 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
     protected final FaultData createFault(QName fault, OBase location){
         return createFault(fault, location, null);
     }
-    
 
     protected JacobRunnable createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         return new ACTIVITYGUARD(childInfo, scopeFrame, linkFrame);

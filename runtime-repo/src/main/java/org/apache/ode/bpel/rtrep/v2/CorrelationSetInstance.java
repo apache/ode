@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rtrep.rapi.CorrelationSet;
+import org.apache.ode.bpel.rapi.CorrelationSet;
 
 public class CorrelationSetInstance implements CorrelationSet {
     public OScope.CorrelationSet declaration;

@@ -21,7 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 import java.net.URI;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

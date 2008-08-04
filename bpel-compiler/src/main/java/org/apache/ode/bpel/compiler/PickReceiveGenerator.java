@@ -21,10 +21,10 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OPickReceive;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OPickReceive;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
@@ -33,7 +33,7 @@ import java.util.Collection;
 /**
  * Base class for the {@link PickGenerator} and {@link ReceiveGenerator}
  * classes. Provides common functionality related to generating
- * {@link org.apache.ode.bpel.o.OPickReceive.OnMessage} objects.
+ * {@link org.apache.ode.bpel.rtrep.v2.OPickReceive.OnMessage} objects.
  */
 abstract class PickReceiveGenerator extends DefaultActivityGenerator {
     protected static final CommonCompilationMessages __cmsgsGeneral = MessageBundle

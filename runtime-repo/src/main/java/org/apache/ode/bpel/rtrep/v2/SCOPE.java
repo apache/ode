@@ -40,7 +40,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
-import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;

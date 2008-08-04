@@ -22,8 +22,8 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.SequenceActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OSequence;
 import org.apache.ode.utils.msg.MessageBundle;
 
 

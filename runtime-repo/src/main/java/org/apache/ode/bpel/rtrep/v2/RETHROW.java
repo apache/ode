@@ -21,7 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 
 
 /**

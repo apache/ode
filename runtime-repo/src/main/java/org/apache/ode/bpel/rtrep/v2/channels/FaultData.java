@@ -23,7 +23,7 @@ import org.apache.ode.bpel.rtrep.v2.OBase;
 import org.apache.ode.bpel.rtrep.v2.OVarType;
 import org.apache.ode.bpel.rtrep.v2.OElementVarType;
 import org.apache.ode.bpel.rtrep.v2.OMessageVarType;
-import org.apache.ode.bpel.rtrep.rapi.FaultInfo;
+import org.apache.ode.bpel.rapi.FaultInfo;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;

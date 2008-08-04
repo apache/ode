@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.apache.ode.bpel.rtrep.rapi;
+package org.apache.ode.bpel.rapi;
 
 /**
  * Indicates that the engine could not complete an operation because a variable was not initialized.

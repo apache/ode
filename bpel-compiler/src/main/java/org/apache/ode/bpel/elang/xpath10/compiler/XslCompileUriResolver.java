@@ -20,8 +20,8 @@
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
+import org.apache.ode.bpel.rtrep.v2.OXslSheet;
 
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.Source;

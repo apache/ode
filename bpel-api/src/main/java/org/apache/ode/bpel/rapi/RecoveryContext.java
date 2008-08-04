@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.rtrep.rapi;
+package org.apache.ode.bpel.rapi;
 
 import java.util.Date;
 

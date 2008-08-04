@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OTerminate;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OTerminate;
 
 
 /**

@@ -24,8 +24,8 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.IfActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OSwitch;
 import org.apache.ode.utils.msg.MessageBundle;
 
 
