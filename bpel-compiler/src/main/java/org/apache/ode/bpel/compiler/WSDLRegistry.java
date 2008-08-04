@@ -21,7 +21,7 @@ package org.apache.ode.bpel.compiler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
 import org.apache.ode.bpel.compiler.bom.PropertyAlias;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
@@ -49,7 +49,7 @@ import java.util.*;
 /**
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
-class WSDLRegistry {
+public class WSDLRegistry {
     private static final Log __log = LogFactory.getLog(WSDLRegistry.class);
 
     private static final CommonCompilationMessages __cmsgs =
@@ -65,7 +65,7 @@ class WSDLRegistry {
     private CompilerContext _ctx;
 
 
-    WSDLRegistry(CompilerContext cc) {
+    public WSDLRegistry(CompilerContext cc) {
         // bogus schema to force schema creation
         _schemas.put(URI.create("http://fivesight.com/bogus/namespace"),
                 ("<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
@@ -130,7 +130,7 @@ class WSDLRegistry {
             }
         }
 
-        ArrayList<Definition4BPEL> defs = null;
+        ArrayList<Definition4BPEL> defs;
         if (_definitions.get(def.getTargetNamespace()) == null) defs = new ArrayList<Definition4BPEL>();
         else defs = _definitions.get(def.getTargetNamespace());
 
@@ -165,11 +165,11 @@ class WSDLRegistry {
                 if (importDef == null) {
                     CompilationException ce = new CompilationException(
                             __cmsgs.errWsdlImportNotFound(im.getNamespaceURI(),
-                                    im.getLocationURI()).setSource(new SourceLocationImpl(defuri)));
+                                    im.getLocationURI()).setSource(new SourceLocation(defuri)));
                     if (_ctx == null)
                         throw ce;
 
-                    _ctx.recoveredFromError(new SourceLocationImpl(defuri), ce);
+                    _ctx.recoveredFromError(new SourceLocation(defuri), ce);
                     continue;
                 }
 
@@ -193,13 +193,9 @@ class WSDLRegistry {
         Types types = def.getTypes();
 
         if (types != null) {
-            for (Iterator<ExtensibilityElement> iter =
-                    ((List<ExtensibilityElement>)def.getTypes().getExtensibilityElements()).iterator();
-                 iter.hasNext();) {
-                ExtensibilityElement ee = iter.next();
-                
+            for (ExtensibilityElement ee : ((List<ExtensibilityElement>) def.getTypes().getExtensibilityElements())) {
                 if (ee instanceof XMLSchemaType) {
-                    String schema = ((XMLSchemaType)ee).getXMLSchema();
+                    String schema = ((XMLSchemaType) ee).getXMLSchema();
 
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
 
@@ -216,10 +212,10 @@ class WSDLRegistry {
                             throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
                         }
                     } catch (XsdException xsde) {
-                        __log.debug("captureSchemas: capture failed for " + defuri,xsde);
+                        __log.debug("captureSchemas: capture failed for " + defuri, xsde);
 
                         LinkedList<XsdException> exceptions = new LinkedList<XsdException>();
-                        while (xsde != null)  {
+                        while (xsde != null) {
                             exceptions.addFirst(xsde);
                             xsde = xsde.getPrevious();
                         }
@@ -228,9 +224,9 @@ class WSDLRegistry {
                             // TODO: the line number here is going to be wrong for the in-line schema.
                             // String location = ex.getSystemId() + ":"  + ex.getLineNumber();
                             CompilationException ce = new CompilationException(
-                                    __cmsgs.errSchemaError(ex.getDetailMessage()).setSource(new SourceLocationImpl(defuri)));
+                                    __cmsgs.errSchemaError(ex.getDetailMessage()).setSource(new SourceLocation(defuri)));
                             if (_ctx != null)
-                                _ctx.recoveredFromError(new SourceLocationImpl(defuri),ce);
+                                _ctx.recoveredFromError(new SourceLocation(defuri), ce);
                             else
                                 throw ce;
                         }

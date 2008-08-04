@@ -166,7 +166,7 @@ public class RuntimeImpl implements OdeRuntime {
     private OProcess deserializeCompiledProcess(InputStream is) throws IOException, ClassNotFoundException {
         OProcess compiledProcess;
         Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readOProcess();
+        compiledProcess = ofh.readPModel();
         return compiledProcess;
     }
 

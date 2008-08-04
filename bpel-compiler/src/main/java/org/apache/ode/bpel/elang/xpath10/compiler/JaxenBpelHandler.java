@@ -23,7 +23,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.rtrep.v2.OExpression;
 import org.apache.ode.bpel.rtrep.v2.OLink;
 import org.apache.ode.bpel.rtrep.v2.OMessageVarType;

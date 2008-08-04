@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.compiler.v2.ExtensionValidator;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
@@ -32,6 +32,7 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.rapi.Serializer;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 

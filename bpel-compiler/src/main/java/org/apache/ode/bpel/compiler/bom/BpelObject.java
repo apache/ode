@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.SourceLocation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -41,7 +41,7 @@ import java.util.Map;
  * location information (i.e. line numbers) and namespace context (XML namespace
  * prefix maps).
  */
-public class BpelObject implements SourceLocation {
+public class BpelObject extends SourceLocation {
 
     public static final QName ATTR_LINENO = new QName("urn:org.apache.ode.bpel.compiler", "lineno");
 

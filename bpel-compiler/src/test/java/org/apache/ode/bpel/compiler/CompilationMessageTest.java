@@ -20,6 +20,7 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.v2.SourceLocationImpl;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import java.net.URI;
@@ -36,7 +37,7 @@ public class CompilationMessageTest extends TestCase {
   private static String WRONG_PARAMETER_CODE = "WrongParameter";
 
   private CompilationTestMessages _bundle;
-  private SourceLocationImpl sloc;
+  private SourceLocation sloc;
   private Locale oldLocale;
   @Override
   protected void setUp() throws Exception {
@@ -44,7 +45,7 @@ public class CompilationMessageTest extends TestCase {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.ENGLISH);
     _bundle = MessageBundle.getMessages(CompilationTestMessages.class);
-    sloc = new SourceLocationImpl(new URI("urn:foo"));
+    sloc = new SourceLocation(new URI("urn:foo"));
   }
 
   @Override

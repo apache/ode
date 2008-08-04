@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -34,12 +33,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
-import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.v2.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.rtrep.v2.OProcess;
-import org.apache.ode.bpel.rtrep.v2.Serializer;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.bpel.rtrep.Serializers;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
@@ -47,8 +46,7 @@ import org.xml.sax.InputSource;
 
 /**
  * <p>
- * Wrapper for {@link org.apache.ode.bpel.compiler.BpelCompiler} implementations,
- * providing basic utility methods and auto-detection of BPEL version.
+ * Wrapper for BpelCompiler implementations, providing basic utility methods and auto-detection of BPEL version.
  * </p>
 s */
 public class BpelC {
@@ -196,9 +194,7 @@ public class BpelC {
 
         logCompilationMessage(__cmsgs.infCompilingProcess());
 
-        BpelCompiler compiler;
         ResourceFinder wf;
-
         if (_wsdlFinder != null) {
             wf = _wsdlFinder;
         } else {
@@ -216,27 +212,25 @@ public class BpelC {
             }
         };
 
+        BpelCompiler compiler;
         try {
+            compiler = BpelCompilerFactory.latestCompiler(process.getBpelVersion());
+            compiler.setResourceFinder(wf);
+
             switch (process.getBpelVersion()) {
                 case BPEL20:
-                    compiler = new BpelCompiler20();
-                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
                         logCompilationMessage(cmsg);
                     }
                     break;
                 case BPEL20_DRAFT:
-                    compiler = new BpelCompiler20Draft();
-                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
                         logCompilationMessage(cmsg);
                     }
                     break;
                 case BPEL11:
-                    compiler = new BpelCompiler11();
-                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl,null);
                     } else {
@@ -270,9 +264,9 @@ public class BpelC {
             throw new CompilationException(cmsg,ex);
         }
 
-        OProcess oprocess;
+        ProcessModel pmodel;
         try {
-            oprocess = compiler.compile(process,wf);
+            pmodel = compiler.compile(process, wf);
         }
         catch (CompilationException cex) {
             this.invalidate();
@@ -294,8 +288,8 @@ public class BpelC {
             }
 
             try {
-                Serializer fileHeader = new Serializer(System.currentTimeMillis());
-                fileHeader.writeOProcess(oprocess, _outputStream);
+                Serializer fileHeader = Serializers.getLatest();
+                fileHeader.writePModel(pmodel, _outputStream);
             } finally {
                 // close & mark myself invalid
                 this.invalidate();
@@ -331,7 +325,7 @@ public class BpelC {
 
             process = BpelObjectFactory.getInstance().parse(isrc,_bpelFile.toURI());
         } catch (Exception e) {
-            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocationImpl(bpelFile.toURI()));
+            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocation(bpelFile.toURI()));
             this.invalidate();
             throw new CompilationException(cmsg, e);
         }

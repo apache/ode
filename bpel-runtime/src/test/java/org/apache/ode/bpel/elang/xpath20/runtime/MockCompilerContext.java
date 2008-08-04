@@ -27,34 +27,19 @@ import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
-import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
-import org.apache.ode.bpel.o.OScope.CorrelationSet;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.compiler.SourceLocation;
+import org.apache.ode.bpel.rtrep.v2.*;
 import org.apache.ode.utils.NSContext;
 
 public class MockCompilerContext implements CompilerContext {
     private OProcess _oprocess = new OProcess("20");
-    private Map<String , Variable> _vars =new  HashMap<String, Variable>();
+    private Map<String , OScope.Variable> _vars =new  HashMap<String, OScope.Variable>();
     
     public OExpression constantExpr(boolean value) {
         // TODO Auto-generated method stub
@@ -85,28 +70,28 @@ public class MockCompilerContext implements CompilerContext {
         return null;
     }
 
-    public OProperty resolveProperty(QName name) throws CompilationException {
+    public OProcess.OProperty resolveProperty(QName name) throws CompilationException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public Variable resolveVariable(String name) throws CompilationException {
+    public OScope.Variable resolveVariable(String name) throws CompilationException {
         return _vars.get(name);
     }
 
-    public List<Variable> getAccessibleVariables() {
-        return new ArrayList<Variable>(_vars.values());
+    public List<OScope.Variable> getAccessibleVariables() {
+        return new ArrayList<OScope.Variable>(_vars.values());
     }
 
-    public Variable resolveMessageVariable(String inputVar) throws CompilationException {
+    public OScope.Variable resolveMessageVariable(String inputVar) throws CompilationException {
         return _vars.get(inputVar);
     }
 
-    public Variable resolveMessageVariable(String inputVar, QName messageType) throws CompilationException {
+    public OScope.Variable resolveMessageVariable(String inputVar, QName messageType) throws CompilationException {
         return _vars.get(inputVar);
     }
 
-    public Part resolvePart(Variable variable, String partname) throws CompilationException {
+    public OMessageVarType.Part resolvePart(OScope.Variable variable, String partname) throws CompilationException {
         return ((OMessageVarType)variable.type).parts.get(partname);
     }
 
@@ -135,7 +120,7 @@ public class MockCompilerContext implements CompilerContext {
         return null;
     }
 
-    public OPropertyAlias resolvePropertyAlias(Variable variable, QName property) throws CompilationException {
+    public OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property) throws CompilationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -159,7 +144,7 @@ public class MockCompilerContext implements CompilerContext {
         return _oprocess;
     }
 
-    public CorrelationSet resolveCorrelationSet(String csetName) throws CompilationException {
+    public OScope.CorrelationSet resolveCorrelationSet(String csetName) throws CompilationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -198,7 +183,7 @@ public class MockCompilerContext implements CompilerContext {
         // TODO Auto-generated method stub
         return null;
     }
-    public OScope compileSLC(ScopeLikeActivity child, Variable[] variables) {
+    public OScope compileSLC(ScopeLikeActivity child, OScope.Variable[] variables) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -213,7 +198,7 @@ public class MockCompilerContext implements CompilerContext {
 		return null;
 	}
 
-     public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
+     public OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname) throws CompilationException {
          return null;
      }
 

@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
+import org.apache.ode.bpel.compiler.SourceLocation;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;

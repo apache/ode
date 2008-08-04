@@ -22,9 +22,9 @@ import java.net.URI;
 
 import javax.xml.transform.SourceLocator;
 
-import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.SourceLocation;
 
-public class SourceLocatorWrapper implements SourceLocation {
+public class SourceLocatorWrapper extends SourceLocation {
 
     private SourceLocator _sloc;
 

@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
@@ -51,7 +51,7 @@ public class XPath10ExpressionCompilerBPEL20 extends XPath10ExpressionCompilerIm
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compileJoinCondition(java.lang.Object)
      */
     public OExpression compileJoinCondition(Object source) throws CompilationException {
         return _compile((Expression)source, true);
@@ -64,13 +64,13 @@ public class XPath10ExpressionCompilerBPEL20 extends XPath10ExpressionCompilerIm
         XslTransformHandler.getInstance().setErrorListener(xe);
     }
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compile(java.lang.Object)
      */
     public OExpression compile(Object source) throws CompilationException {
         return _compile((Expression)source, false);
     }
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compileLValue(java.lang.Object)
      */
     public OLValueExpression compileLValue(Object source) throws CompilationException {
         return (OLValueExpression)_compile((Expression)source, false);

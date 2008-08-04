@@ -24,8 +24,8 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -73,14 +73,14 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#setCompilerContext(org.apache.ode.bpel.compiler.api.CompilerContext)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#setCompilerContext(org.apache.ode.bpel.compiler.v2.CompilerContext)
      */
     public void setCompilerContext(CompilerContext compilerContext) {
         _compilerContext = compilerContext;
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#getProperties()
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#getProperties()
      */
     public Map<String, String> getProperties() {
         return _properties;

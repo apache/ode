@@ -29,6 +29,7 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
+import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.utils.xsd.SchemaModel;
 
 public class WSDLRegistryTest extends TestCase {

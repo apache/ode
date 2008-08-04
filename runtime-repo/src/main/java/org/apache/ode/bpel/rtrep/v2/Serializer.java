@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
+import org.apache.ode.bpel.rapi.ProcessModel;
+
 import javax.xml.namespace.QName;
 import java.io.*;
 import java.util.Arrays;
@@ -25,7 +27,7 @@ import java.util.Arrays;
 /**
  * Header written at the beginning of every compiled BPEL object file.
  */
-public class Serializer  {
+public class Serializer implements org.apache.ode.bpel.rapi.Serializer {
 
     public static final byte[] MAGIC_NUMBER_OFH_20040908 =
             new byte[]  { 0x55, '5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x04, 0x09, 0x08  };
@@ -110,7 +112,8 @@ public class Serializer  {
         throw new IOException("Unrecognized file format (bad magic number).");
     }
  
-    public void writeOProcess(OProcess process, OutputStream os) throws IOException {
+    public void writePModel(ProcessModel pmodel, OutputStream os) throws IOException {
+        OProcess process = (OProcess) pmodel;
         DataOutputStream out = new DataOutputStream(os);
 
         out.write(MAGIC_NUMBER);
@@ -125,10 +128,7 @@ public class Serializer  {
         oos.flush();
     }
 
-    public OProcess readOProcess() throws IOException, ClassNotFoundException {
-//        if (_oprocess != null)
-//            return _oprocess;
-        
+    public OProcess readPModel() throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
         OProcess oprocess;
         try {

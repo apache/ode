@@ -20,7 +20,7 @@
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.rtrep.v2.OElementVarType;

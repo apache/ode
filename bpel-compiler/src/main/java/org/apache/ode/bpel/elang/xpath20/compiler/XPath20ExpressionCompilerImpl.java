@@ -32,8 +32,8 @@ import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
+import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.elang.xpath10.compiler.XslCompilationErrorListener;
@@ -83,28 +83,28 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compileJoinCondition(java.lang.Object)
      */
     public OExpression compileJoinCondition(Object source) throws CompilationException {
         return _compile((Expression) source, true);
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compile(java.lang.Object)
      */
     public OExpression compile(Object source) throws CompilationException {
         return _compile((Expression) source, false);
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compileLValue(java.lang.Object)
      */
     public OLValueExpression compileLValue(Object source) throws CompilationException {
         return (OLValueExpression) _compile((Expression) source, false);
     }
 
     /**
-     * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
+     * @see org.apache.ode.bpel.compiler.v2.ExpressionCompiler#compile(java.lang.Object)
      */
     private OExpression _compile(org.apache.ode.bpel.compiler.bom.Expression xpath, boolean isJoinCondition)
             throws CompilationException {
