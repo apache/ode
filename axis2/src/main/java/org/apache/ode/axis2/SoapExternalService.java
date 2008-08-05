@@ -140,6 +140,10 @@ public class SoapExternalService implements ExternalService {
             operationClient.addMessageContext(mctx);
             // this Options can be alter without impacting the ServiceClient options (which is a requirement)
             Options operationOptions = operationClient.getOptions();
+
+            // provide HTTP credentials if any
+            AuthenticationHelper.setHttpAuthentication(odeMex, operationOptions);
+            
             operationOptions.setAction(mctx.getSoapAction());
             operationOptions.setTo(axisEPR);
 
