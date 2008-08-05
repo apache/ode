@@ -62,7 +62,7 @@ public class BpelCompiler11 extends BpelCompilerImpl {
         registerActivityCompiler(WaitActivity.class, new WaitGenerator());
         registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
 
-        registerExpressionLanguage(EXPLANG_XPATH, "org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL11");
+        registerExpressionLanguage(EXPLANG_XPATH, "org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL11");
     }
 
 

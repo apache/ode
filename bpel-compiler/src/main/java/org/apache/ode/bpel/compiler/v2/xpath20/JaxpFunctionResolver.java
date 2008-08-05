@@ -17,12 +17,13 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath20;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
-import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
-import org.apache.ode.bpel.elang.xpath10.compiler.XslCompileUriResolver;
+import org.apache.ode.bpel.compiler.v2.xpath10.XslCompileUriResolver;
+import org.apache.ode.bpel.compiler.XPathMessages;
+import org.apache.ode.bpel.compiler.WrappedResolverException;
 import org.apache.ode.bpel.rtrep.v2.xpath20.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.rtrep.v2.OProcess;
 import org.apache.ode.bpel.rtrep.v2.OScope;

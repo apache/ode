@@ -16,32 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.compiler;
+
+package org.apache.ode.bpel.compiler.v2.xpath10;
+
+import org.apache.ode.utils.Namespaces;
 
 /**
- * XPath-4-BPEL related constants.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-class Constants {
-  /**
-   * Extension function bpws:getVariableData('variableName', 'partName'?,
-   * 'locationPath'?)
-   */
-  public static final String EXT_FUNCTION_GETVARIABLEDATA = "getVariableData";
+public class XPath10ExpressionCompilerBPEL20Draft extends XPath10ExpressionCompilerBPEL20 {
 
-  /**
-   * Extension function
-   * bpws:getVariableProperty('variableName','propertyName')
-   */
-  public static final String EXT_FUNCTION_GETVARIABLEPROPRTY = "getVariableProperty";
-
-  /**
-   * Extension function bpws:getLinkStatus('getLinkName')
-   */
-  public static final String EXT_FUNCTION_GETLINKSTATUS = "getLinkStatus";
-
-  /**
-   * Extension function bpws:doXslTransform('xslSheetUri', node-set, (xslParamKey, xslParamValue)*)
-   */
-  public static final String EXT_FUNCTION_DOXSLTRANSFORM = "doXslTransform";
+    public XPath10ExpressionCompilerBPEL20Draft() {
+        super(Namespaces.WS_BPEL_20_NS);
+    }
 
 }

@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.compiler;
+package org.apache.ode.bpel.compiler.v2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
 import org.apache.ode.bpel.compiler.bom.PropertyAlias;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.XMLSchemaType;
+import org.apache.ode.bpel.compiler.CommonCompilationMessages;
+import org.apache.ode.bpel.compiler.ResourceFinder;
+import org.apache.ode.bpel.compiler.SourceLocation;
+import org.apache.ode.bpel.compiler.WsdlFinderXMLEntityResolver;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.StreamUtils;

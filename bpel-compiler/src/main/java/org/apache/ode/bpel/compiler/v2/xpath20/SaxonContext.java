@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath20;
 
 import net.sf.saxon.xpath.StandaloneContext;
 import net.sf.saxon.xpath.XPathFunctionLibrary;
@@ -33,6 +33,8 @@ import net.sf.saxon.expr.VariableReference;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.bpel.compiler.v2.xpath20.JaxpVariableResolver;
+import org.apache.ode.bpel.compiler.v2.xpath20.JaxpFunctionResolver;
 
 import java.util.List;
 

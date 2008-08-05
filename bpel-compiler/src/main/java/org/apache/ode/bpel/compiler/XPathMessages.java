@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath10.compiler;
+package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;

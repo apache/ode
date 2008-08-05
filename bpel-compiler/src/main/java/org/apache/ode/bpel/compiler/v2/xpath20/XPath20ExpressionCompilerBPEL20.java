@@ -16,32 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.ode.bpel.compiler.v2.xpath20;
 
-package org.apache.ode.bpel.elang.xpath20.compiler;
+import org.apache.ode.utils.Namespaces;
 
-import org.apache.ode.bpel.compiler.api.CompilationMessage;
 
 /**
+ * XPath 2.0 compiler for the BPEL 2.0 final spec. 
  * @author mriou <mriou at apache dot org>
  */
-public class WrappedResolverException extends RuntimeException {
-    private static final long serialVersionUID = -2677245631724501573L;
-    
-    public CompilationMessage _compilationMsg;
+public class XPath20ExpressionCompilerBPEL20 extends XPath20ExpressionCompilerImpl {
 
-    public WrappedResolverException(String message) {
-        super(message);
-    }
-
-    public WrappedResolverException(CompilationMessage message) {
-        _compilationMsg = message;
-    }
-
-    public WrappedResolverException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public WrappedResolverException(Throwable cause) {
-        super(cause);
+    public XPath20ExpressionCompilerBPEL20() {
+        super(Namespaces.WSBPEL2_0_FINAL_EXEC);
     }
 }

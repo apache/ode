@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath10.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath10;
 
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;

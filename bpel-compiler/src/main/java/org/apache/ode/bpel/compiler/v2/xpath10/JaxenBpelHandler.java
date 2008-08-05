@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath10;
 
 import java.util.List;
 
@@ -32,6 +32,9 @@ import org.apache.ode.bpel.rtrep.v2.OScope;
 import org.apache.ode.bpel.rtrep.v2.OXslSheet;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10Expression;
+import org.apache.ode.bpel.rtrep.common.Constants;
+import org.apache.ode.bpel.compiler.XPathMessages;
+import org.apache.ode.bpel.compiler.CompilationExceptionWrapper;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;

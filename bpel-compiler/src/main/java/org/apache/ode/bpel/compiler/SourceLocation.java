@@ -30,7 +30,7 @@ public class SourceLocation {
     public SourceLocation() {
     }
 
-    SourceLocation(URI uri) {
+    public SourceLocation(URI uri) {
         _uri = uri;
     }
     

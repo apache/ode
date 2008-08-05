@@ -16,19 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.compiler.v2;
 
-import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
-import org.apache.ode.bpel.compiler.api.CompilationException;
+package org.apache.ode.bpel.compiler;
+
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
 
 /**
- * Interface that allows Ode extensions to validate an extension element's
- * content during compilation.
- * 
- * @author Tammo van Lessen (University of Stuttgart)
+ * @author mriou <mriou at apache dot org>
  */
-public interface ExtensionValidator {
+public class WrappedResolverException extends RuntimeException {
+    private static final long serialVersionUID = -2677245631724501573L;
+    
+    public CompilationMessage _compilationMsg;
 
-	void validate(CompilerContext context, ExtensibleElement element) throws CompilationException;
+    public WrappedResolverException(String message) {
+        super(message);
+    }
 
+    public WrappedResolverException(CompilationMessage message) {
+        _compilationMsg = message;
+    }
+
+    public WrappedResolverException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public WrappedResolverException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath20;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.trans.XPathException;
@@ -27,6 +27,8 @@ import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
 import java.util.ArrayList;
+
+import org.apache.ode.bpel.compiler.v2.xpath20.JaxpFunctionResolver;
 
 /**
  * Overloading the XPathFunctionLibrary to force it to initialize our functions giving

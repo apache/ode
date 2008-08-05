@@ -40,7 +40,7 @@ import org.apache.ode.bpel.compiler.bom.WaitActivity;
 import org.apache.ode.bpel.compiler.bom.WhileActivity;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20Draft;
-import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20Draft;
+import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL20Draft;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -75,7 +75,7 @@ public class BpelCompiler20Draft extends BpelCompilerImpl {
         registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20Draft());
         try {
             registerExpressionLanguage(OASIS_EXPLANG_XPATH_2_0,
-                    "org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft");
+                    "org.apache.ode.bpel.compiler.v2.xpath20.XPath20ExpressionCompilerBPEL20Draft");
         } catch (Exception e) {
             __log.error("Error loading XPath 2.0 Expression Language: it will not be available.");
         }

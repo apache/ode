@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath10.compiler;
+package org.apache.ode.bpel.compiler.v2.xpath10;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +25,7 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.SourceLocation;
+import org.apache.ode.bpel.compiler.SourceLocatorWrapper;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;

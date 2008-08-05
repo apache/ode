@@ -16,18 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath20.compiler;
+package org.apache.ode.bpel.compiler;
 
-import org.apache.ode.utils.Namespaces;
+import java.net.URI;
 
+import javax.xml.transform.SourceLocator;
 
-/**
- * XPath 2.0 compiler for the BPEL 2.0 final spec. 
- * @author mriou <mriou at apache dot org>
- */
-public class XPath20ExpressionCompilerBPEL20 extends XPath20ExpressionCompilerImpl {
+import org.apache.ode.bpel.compiler.SourceLocation;
 
-    public XPath20ExpressionCompilerBPEL20() {
-        super(Namespaces.WSBPEL2_0_FINAL_EXEC);
+public class SourceLocatorWrapper extends SourceLocation {
+
+    private SourceLocator _sloc;
+
+    public SourceLocatorWrapper(SourceLocator sloc) {
+        _sloc = sloc;
     }
+    
+    public int getColumnNo() {
+        return _sloc.getColumnNumber();
+    }
+
+    public int getLineNo() {
+        return _sloc.getLineNumber();
+    }
+
+    public String getPath() {
+        return "";
+    }
+
+    public URI getURI() {
+        try {
+            return new URI(_sloc.getSystemId());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

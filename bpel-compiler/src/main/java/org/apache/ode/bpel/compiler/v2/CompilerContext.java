@@ -28,7 +28,7 @@ import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
 import org.apache.ode.bpel.compiler.SourceLocation;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.v2.ExtensionValidator;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
 import org.apache.ode.bpel.rtrep.v2.OExpression;
 import org.apache.ode.bpel.rtrep.v2.OLValueExpression;
@@ -42,11 +42,8 @@ import org.apache.ode.bpel.rtrep.v2.OXslSheet;
 import org.apache.ode.bpel.rtrep.v2.OScope.Variable;
 import org.apache.ode.utils.NSContext;
 
-
 /**
  * Interface providing access to the compiler.
- * 
- * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public interface CompilerContext {
 

@@ -16,26 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.ode.bpel.compiler.api.CompilationException;
+package org.apache.ode.bpel.compiler.v2.xpath20;
 
-import org.jaxen.JaxenException;
+import org.apache.ode.utils.Namespaces;
 
 /**
- * Jaxen-compliant wrapper for
- * {@link org.apache.ode.bpel.compiler.api.CompilationException}.
+ * @author Matthieu Riou <mriou at apache dot org>
  */
-class CompilationExceptionWrapper extends JaxenException {
+public class XPath20ExpressionCompilerBPEL20Draft extends XPath20ExpressionCompilerImpl {
 
-	private static final long serialVersionUID = -6918197147269316065L;
+    public XPath20ExpressionCompilerBPEL20Draft() {
+        super(Namespaces.WS_BPEL_20_NS);
+    }
 
-	public CompilationExceptionWrapper(CompilationException cause) {
-		super(cause);
-		assert getCompilationException() != null;
-	}
-
-	public CompilationException getCompilationException() {
-		return (CompilationException) getCause();
-	}
 }

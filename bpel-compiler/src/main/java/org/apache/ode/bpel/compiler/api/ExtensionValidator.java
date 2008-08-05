@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.ode.bpel.compiler.api;
 
-package org.apache.ode.bpel.elang.xpath10.compiler;
-
-import org.apache.ode.utils.Namespaces;
+import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
 
 /**
- * @author Matthieu Riou <mriou at apache dot org>
+ * Interface that allows Ode extensions to validate an extension element's
+ * content during compilation.
+ * 
+ * @author Tammo van Lessen (University of Stuttgart)
  */
-public class XPath10ExpressionCompilerBPEL20Draft extends XPath10ExpressionCompilerBPEL20 {
+public interface ExtensionValidator {
 
-    public XPath10ExpressionCompilerBPEL20Draft() {
-        super(Namespaces.WS_BPEL_20_NS);
-    }
+    /**
+     * 
+     * @param compilerContext
+     * @param element
+     * @throws CompilationException
+     */
+    void validate(Object compilerContext, ExtensibleElement element) throws CompilationException;
 
 }
