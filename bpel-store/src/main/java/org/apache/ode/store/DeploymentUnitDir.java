@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
-import org.apache.ode.bpel.compiler.v2.ExtensionValidator;
+import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
@@ -31,8 +31,8 @@ import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.bpel.rtrep.Serializers;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 
@@ -177,9 +177,8 @@ class DeploymentUnitDir  {
         InputStream is = null;
         try {
             is = new FileInputStream(f);
-            Serializer ofh = new Serializer(is);
-            CBPInfo info = new CBPInfo(ofh.type,ofh.guid,f);
-            return info;
+            Serializer ofh = Serializers.getLatest(is);
+            return new CBPInfo(ofh.getType(), ofh.getGuid(), f);
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
         } finally {

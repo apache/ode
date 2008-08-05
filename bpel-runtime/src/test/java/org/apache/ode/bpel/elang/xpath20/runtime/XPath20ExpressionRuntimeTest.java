@@ -21,7 +21,7 @@ package org.apache.ode.bpel.elang.xpath20.runtime;
 import junit.framework.TestCase;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
+import org.apache.ode.bpel.compiler.v2.xpath20.XPath20ExpressionCompilerBPEL20;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OExpression;

@@ -55,8 +55,6 @@ public class Serializer implements org.apache.ode.bpel.rapi.Serializer {
 
     public String guid;
 
-//    public OProcess _oprocess;
-
     public QName type;
     
 
@@ -139,7 +137,15 @@ public class Serializer implements org.apache.ode.bpel.rapi.Serializer {
             
         return oprocess;
     }
-  
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public QName getType() {
+        return type;
+    }
+
     static class CustomObjectOutputStream extends ObjectOutputStream {
 
         /**
