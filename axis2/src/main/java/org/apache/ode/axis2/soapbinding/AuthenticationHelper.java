@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.soapbinding;
 
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
