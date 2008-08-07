@@ -78,7 +78,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     protected State _state = State.INVOKE_XXX;
 
-    PartnerRoleMessageExchangeImpl(BpelProcess process, Long iid, String mexId, OPartnerLink oplink, Operation operation,
+    PartnerRoleMessageExchangeImpl(ODEProcess process, Long iid, String mexId, OPartnerLink oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
         super(process, iid, mexId, oplink, oplink.partnerRolePortType, operation);
         _myRoleEPR = myRoleEPR;

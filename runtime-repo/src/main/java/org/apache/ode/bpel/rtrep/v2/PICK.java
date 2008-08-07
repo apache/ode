@@ -216,7 +216,7 @@ class PICK extends ACTIVITY {
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
         
         try {
-            getBpelRuntime().initializeVariable(vinst, msgEl);
+            initializeVariable(vinst, msgEl);
         } catch (ExternalVariableModuleException e) {
         	__log.error("Exception while initializing external variable", e);
             _self.parent.failure(e.toString(), null);

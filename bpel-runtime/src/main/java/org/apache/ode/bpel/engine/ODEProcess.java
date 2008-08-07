@@ -78,7 +78,10 @@ import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
+import org.apache.ode.bpel.runtime.msgs.Messages;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.FaultInfo;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ObjectPrinter;
@@ -94,14 +97,14 @@ import org.w3c.dom.Text;
  * @author Maciej Szefler <mszefler at gmail dot com>
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class BpelProcess {
-    static final Log __log = LogFactory.getLog(BpelProcess.class);
+public class ODEProcess {
+    static final Log __log = LogFactory.getLog(ODEProcess.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-    private volatile Map<OPartnerLink, PartnerLinkPartnerRoleImpl> _partnerRoles;
+    private volatile Map<PartnerLinkModel, PartnerLinkPartnerRoleImpl> _partnerRoles;
 
-    private volatile Map<OPartnerLink, PartnerLinkMyRoleImpl> _myRoles;
+    private volatile Map<PartnerLinkModel, PartnerLinkMyRoleImpl> _myRoles;
 
     /** Mapping from {"Service Name" (QNAME) / port} to a myrole. */
     private volatile Map<Endpoint, PartnerLinkMyRoleImpl> _endpointToMyRoleMap;
@@ -157,7 +160,7 @@ public class BpelProcess {
     
     private ExternalVariableManager _evm;
     
-    BpelProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
+    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
         _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -200,7 +203,7 @@ public class BpelProcess {
     
 
     public String toString() {
-        return "BpelProcess[" + _pid + "]";
+        return "ODEProcess[" + _pid + "]";
     }
  
     public ExternalVariableManager getEVM() {
@@ -208,7 +211,7 @@ public class BpelProcess {
     }
    
     void recoverActivity(ProcessInstanceDAO instanceDAO, final String channel, final long activityId, final String action,
-            final FaultData fault) {
+            final FaultInfo fault) {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
 
@@ -372,8 +375,7 @@ public class BpelProcess {
         assert worker.isWorkerThread();
 
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
-        if (brc.injectTimerEvent(timerChannel))
-            brc.execute();
+        if (brc.injectTimerEvent(timerChannel)) brc.execute();
 
     }
 
@@ -542,7 +544,7 @@ public class BpelProcess {
      * be handed off to a separate thread.
      * 
      * @throws JobProcessorException
-     * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
+     * @see ODEProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     void handleWorkEvent(final JobInfo jobInfo) throws JobProcessorException {
         assert !_contexts.isTransacted() : "work events must be received outside of a transaction";
@@ -672,7 +674,7 @@ public class BpelProcess {
         return isInMemory() ? _inMemDao.getConnection().getProcess(_pid) : _contexts.dao.getConnection().getProcess(_pid);
     }
 
-    static String genCorrelatorId(OPartnerLink plink, String opName) {
+    static String genCorrelatorId(PartnerLinkModel plink, String opName) {
         return plink.getId() + "." + opName;
     }
 
@@ -727,7 +729,7 @@ public class BpelProcess {
         // TODO Deactivate all the partner-role channels
     }
 
-    EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
+    EndpointReference getInitialPartnerRoleEPR(PartnerLinkModel link) {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
@@ -739,7 +741,7 @@ public class BpelProcess {
         }
     }
 
-    Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
+    Endpoint getInitialPartnerRoleEndpoint(PartnerLinkModel link) {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
@@ -751,7 +753,7 @@ public class BpelProcess {
         }
     }
 
-    EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
+    EndpointReference getInitialMyRoleEPR(PartnerLinkModel link) {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
@@ -766,7 +768,7 @@ public class BpelProcess {
         return _pid;
     }
 
-    PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
+    PartnerRoleChannel getPartnerRoleChannel(PartnerLinkModel partnerLink) {
         _hydrationLatch.latch(1);
         try {
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
@@ -1075,7 +1077,7 @@ public class BpelProcess {
 
     void onMyRoleMexAck(MessageExchangeDAO mexdao, Status old) {
         if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
-            BpelProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
+            ODEProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
             // process no longer deployed....
             if (caller == null) return;
 
@@ -1274,7 +1276,7 @@ public class BpelProcess {
         OPartnerLink oplink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
         PartnerLinkPartnerRoleImpl partnerRole = _partnerRoles.get(oplink);
         Endpoint partnerEndpoint = getInitialPartnerRoleEndpoint(oplink);
-        BpelProcess p2pProcess = null;
+        ODEProcess p2pProcess = null;
         if (partnerEndpoint != null)
             p2pProcess = _server.route(partnerEndpoint.serviceName, new DbBackedMessageImpl(mexdao.getRequest()));
 
@@ -1311,8 +1313,8 @@ public class BpelProcess {
      * @param outgoingMessage
      * @param partnerRoleMex
      */
-    private void invokeP2P(BpelProcess target, QName serviceName, Operation operation, MessageExchangeDAO partnerRoleMex) {
-        if (BpelProcess.__log.isDebugEnabled())
+    private void invokeP2P(ODEProcess target, QName serviceName, Operation operation, MessageExchangeDAO partnerRoleMex) {
+        if (ODEProcess.__log.isDebugEnabled())
             __log.debug("Invoking in a p2p interaction, partnerrole " + partnerRoleMex.getMessageExchangeId()
                     + " target=" + target);
 
@@ -1352,7 +1354,7 @@ public class BpelProcess {
         String mySessionId = partnerRoleMex.getPartnerLink().getMySessionId();
         String partnerSessionId = partnerRoleMex.getPartnerLink().getPartnerSessionId();
 
-        if (BpelProcess.__log.isDebugEnabled())
+        if (ODEProcess.__log.isDebugEnabled())
             __log.debug("Setting myRoleMex session ids for p2p interaction, mySession " + partnerSessionId
                     + " - partnerSess " + mySessionId);
 

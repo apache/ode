@@ -25,22 +25,17 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
+import org.apache.ode.bpel.rapi.Variable;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Manager for external variable instances; used by {@link BpelProcess} to manage external variables.
+ * Manager for external variable instances; used by {@link org.apache.ode.bpel.engine.ODEProcess} to manage external variables.
  * 
  * @author Maciej Szefler <mszefler at gmail dot com>
  *

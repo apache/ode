@@ -4,11 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import javax.wsdl.Operation;
-
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
@@ -25,9 +21,9 @@ class MyRoleMessageExchangeCache {
 
     private int _inserts = 0;
 
-    private BpelProcess _process;
+    private ODEProcess _process;
 
-    MyRoleMessageExchangeCache(BpelProcess process) {
+    MyRoleMessageExchangeCache(ODEProcess process) {
         _process = process;
     }
     

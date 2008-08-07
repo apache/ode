@@ -72,14 +72,10 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         if (__log.isDebugEnabled()) {
           __log.debug("Initializing correlation set " + cset.declaration.name);
         }
-        // if correlation set is already initialized,
-        // then skip
+        // if correlation set is already initialized, then skip
         if (getBpelRuntime().isCorrelationInitialized(cset)) {
           // if already set, we ignore
-            if (__log.isDebugEnabled()) {
-                __log.debug("OCorrelation set " + cset + " is already set: ignoring");
-            }
-
+            if (__log.isDebugEnabled()) __log.debug("OCorrelation set " + cset + " is already set: ignoring");
             return;
         }
 

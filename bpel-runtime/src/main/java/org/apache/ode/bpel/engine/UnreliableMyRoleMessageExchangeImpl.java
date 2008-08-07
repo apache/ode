@@ -29,7 +29,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
     ResponseFuture _future;
 
-    public UnreliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
+    public UnreliableMyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation,
             QName callee) {
         super(process, mexId, oplink, operation, callee);
     }

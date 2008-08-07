@@ -53,7 +53,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
     public PartnerRoleChannel _channel;
 
-    PartnerLinkPartnerRoleImpl(BpelProcess process, OPartnerLink plink, Endpoint initialPartner) {
+    PartnerLinkPartnerRoleImpl(ODEProcess process, OPartnerLink plink, Endpoint initialPartner) {
         super(process, plink);
         _initialPartner = initialPartner;
     }

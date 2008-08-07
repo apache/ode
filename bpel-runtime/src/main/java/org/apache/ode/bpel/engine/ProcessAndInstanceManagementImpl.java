@@ -397,7 +397,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         return null;
                     for (ActivityRecoveryDAO recovery : instance.getActivityRecoveries()) {
                         if (recovery.getActivityId() == aid) {
-                            BpelProcess process = _server.getBpelProcess(instance.getProcess().getProcessId());
+                            ODEProcess process = _server.getBpelProcess(instance.getProcess().getProcessId());
                             if (process != null) {
                                 process.recoverActivity(instance, recovery.getChannel(), aid, action, null);
                                 break;
@@ -519,7 +519,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      */
     protected final DebuggerSupport getDebugger(QName procid) throws ManagementException {
 
-        BpelProcess process = _server.getBpelProcess(procid);
+        ODEProcess process = _server.getBpelProcess(procid);
         if (process == null)
             throw new ProcessNotFoundException("The process \"" + procid + "\" does not exist.");
 

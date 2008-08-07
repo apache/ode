@@ -24,7 +24,7 @@ public class UnreliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessage
     private static final Log __log = LogFactory.getLog(UnreliablePartnerRoleMessageExchangeImpl.class);
     boolean _asyncReply;
 
-    UnreliablePartnerRoleMessageExchangeImpl(BpelProcess process, long iid, String mexId, OPartnerLink oplink, Operation operation,
+    UnreliablePartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, OPartnerLink oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
         super(process, iid, mexId, oplink, operation, epr, myRoleEPR, channel);
     }

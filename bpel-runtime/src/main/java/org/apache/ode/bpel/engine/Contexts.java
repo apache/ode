@@ -42,8 +42,8 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
 
 
 /**

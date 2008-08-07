@@ -101,10 +101,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * Set of processes that are registered with the server. Includes hydrated and dehydrated processes. Guarded by
      * _mngmtLock.writeLock().
      */
-    private final HashMap<QName, BpelProcess> _registeredProcesses = new HashMap<QName, BpelProcess>();
+    private final HashMap<QName, ODEProcess> _registeredProcesses = new HashMap<QName, ODEProcess>();
 
     /** Mapping from myrole service name to active process. */
-    private final HashMap<QName, BpelProcess> _serviceMap = new HashMap<QName, BpelProcess>();
+    private final HashMap<QName, ODEProcess> _serviceMap = new HashMap<QName, ODEProcess>();
 
     private State _state = State.SHUTDOWN;
 
@@ -344,7 +344,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            BpelProcess process = new BpelProcess(this, conf, null);
+            ODEProcess process = new ODEProcess(this, conf, null);
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -374,7 +374,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
 
         try {
-            BpelProcess p = _registeredProcesses.remove(pid);
+            ODEProcess p = _registeredProcesses.remove(pid);
             if (p == null)
                 return;
 
@@ -426,7 +426,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      *            request message
      * @return process corresponding to the targetted service, or <code>null</code> if service identifier is not recognized.
      */
-    BpelProcess route(QName service, Message request) {
+    ODEProcess route(QName service, Message request) {
         // TODO: use the message to route to the correct service if more than
         // one service is listening on the same endpoint.
 
@@ -475,7 +475,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _mngmtLock.readLock().lock();
         try {
             final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
-            BpelProcess process = _registeredProcesses.get(we.getProcessId());
+            ODEProcess process = _registeredProcesses.get(we.getProcessId());
             if (process == null) {
                 // If the process is not active, it means that we should not be
                 // doing any work on its behalf, therefore we will reschedule the
@@ -545,7 +545,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
         _mngmtLock.readLock().lock();
         try {
-            final BpelProcess target = route(targetService, null);
+            final ODEProcess target = route(targetService, null);
 
             if (target == null)
                 throw new BpelEngineException("NoSuchService: " + targetService);
@@ -577,7 +577,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         return null;
 
                     ProcessDAO pdao = mexdao.getProcess();
-                    BpelProcess process = pdao == null ? null : _registeredProcesses.get(pdao.getProcessId());
+                    ODEProcess process = pdao == null ? null : _registeredProcesses.get(pdao.getProcessId());
 
                     if (process == null) {
                         String errmsg = __msgs.msgProcessNotActive(pdao.getProcessId());
@@ -630,7 +630,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
         _mngmtLock.readLock().lock();
         try {
-            BpelProcess process = _serviceMap.get(serviceId);
+            ODEProcess process = _serviceMap.get(serviceId);
             if (process == null)
                 throw new BpelEngineException("No such service: " + serviceId);
             return process.getSupportedInvocationStyle(serviceId);
@@ -642,7 +642,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     MessageExchangeDAO getInMemMexDAO(String mexId) {
         _mngmtLock.readLock().lock();
         try {
-          for (BpelProcess p : _registeredProcesses.values()) {
+          for (ODEProcess p : _registeredProcesses.values()) {
               MessageExchangeDAO mexDao = p.getInMemMexDAO(mexId);
               if (mexDao != null)
                   return mexDao;
@@ -657,7 +657,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     OProcess getOProcess(QName processId) {
         _mngmtLock.readLock().lock();
         try {
-            BpelProcess process = _registeredProcesses.get(processId);
+            ODEProcess process = _registeredProcesses.get(processId);
 
             if (process == null) return null;
 
@@ -749,18 +749,18 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
                         // Copying the runnning process list to avoid synchronizatMessageExchangeInterion
                         // problems and a potential mess if a policy modifies the list
-                        List<BpelProcess> candidates = new ArrayList<BpelProcess>(_registeredProcesses.values());
-                        CollectionsX.remove_if(candidates, new MemberOfFunction<BpelProcess>() {
-                            public boolean isMember(BpelProcess o) {
+                        List<ODEProcess> candidates = new ArrayList<ODEProcess>(_registeredProcesses.values());
+                        CollectionsX.remove_if(candidates, new MemberOfFunction<ODEProcess>() {
+                            public boolean isMember(ODEProcess o) {
                                 return !o.hintIsHydrated();
                             }
 
                         });
 
                         // And the happy winners are...
-                        List<BpelProcess> ripped = _dehydrationPolicy.markForDehydration(candidates);
+                        List<ODEProcess> ripped = _dehydrationPolicy.markForDehydration(candidates);
                         // Bye bye
-                        for (BpelProcess process : ripped) {
+                        for (ODEProcess process : ripped) {
                             __log.debug("Dehydrating process " + process.getPID());
                             process.dehydrate();
                         }
@@ -774,7 +774,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public BpelProcess getBpelProcess(QName processId) {
+    public ODEProcess getBpelProcess(QName processId) {
         _mngmtLock.readLock().lock();
         try {
             return _registeredProcesses.get(processId);

@@ -27,10 +27,10 @@ import org.apache.ode.bpel.o.OPartnerLink;
 abstract class PartnerLinkRoleImpl {
     protected OPartnerLink _plinkDef;
     protected EndpointReference _initialEPR;
-    protected BpelProcess _process;
+    protected ODEProcess _process;
     protected Contexts _contexts;
 
-    PartnerLinkRoleImpl(BpelProcess process, OPartnerLink plink) {
+    PartnerLinkRoleImpl(ODEProcess process, OPartnerLink plink) {
         _plinkDef = plink;
         _process = process;
         _contexts = _process._contexts;

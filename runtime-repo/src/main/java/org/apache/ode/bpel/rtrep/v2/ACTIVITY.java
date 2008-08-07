@@ -30,6 +30,7 @@ import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.IndexedObject;
 import org.w3c.dom.Node;
 
@@ -142,6 +143,14 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
             return getBpelRuntime().fetchVariableData(_scopeFrame.resolve(variable.declaration.extVar.related), forWriting);
         } else {
             return getBpelRuntime().fetchVariableData(variable, forWriting);
+        }
+    }
+
+    Node initializeVariable(VariableInstance var, Node val) throws ExternalVariableModuleException {
+        if (var.declaration.extVar != null) /* external variable */ {
+            return getBpelRuntime().initializeVariable(_scopeFrame.resolve(var.declaration.extVar.related), val);
+        } else /* normal variable */ {
+            return getBpelRuntime().initializeVariable(var, val);
         }
     }
 

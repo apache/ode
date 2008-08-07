@@ -119,7 +119,7 @@ class ASSIGN extends ACTIVITY {
                     val = tempwrapper;
                 } else doc.appendChild(val);
                 // Only external variables need to be initialized, others are new and going to be overwtitten
-                if (lvar.declaration.extVar != null) lval = getBpelRuntime().initializeVariable(lvar, val);
+                if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
                 else lval = val;
             } else
                 lval = fetchVariableData(lvar, true);
@@ -320,7 +320,7 @@ class ASSIGN extends ACTIVITY {
                 final VariableInstance rval = _scopeFrame
                         .resolve(((OAssign.VariableRef) ocopy.from).getVariable());
                 Element lvalue = (Element) fetchVariableData(rval, false);
-                getBpelRuntime().initializeVariable(lval, lvalue);
+                initializeVariable(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {

@@ -60,14 +60,14 @@ import org.w3c.dom.Element;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
-    private static final Log __log = LogFactory.getLog(BpelProcess.class);
+    private static final Log __log = LogFactory.getLog(ODEProcess.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** The local endpoint for this "myrole". */
     public Endpoint _endpoint;
 
-    PartnerLinkMyRoleImpl(BpelProcess process, OPartnerLink plink, Endpoint endpoint) {
+    PartnerLinkMyRoleImpl(ODEProcess process, OPartnerLink plink, Endpoint endpoint) {
         super(process, plink);
         _endpoint = endpoint;
     }
@@ -104,7 +104,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         // Is this a /possible/ createInstance Operation?
         boolean isCreateInstnace = _plinkDef.isCreateInstanceOperation(operation);
-        String correlatorId = BpelProcess.genCorrelatorId(_plinkDef, operation.getName());
+        String correlatorId = ODEProcess.genCorrelatorId(_plinkDef, operation.getName());
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
 
         // Special logic for in-mem processes, only createInstance is allowed, so we can skip the

@@ -72,7 +72,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     
     final Contexts _contexts;
 
-    final BpelProcess _process;
+    final ODEProcess _process;
 
     final OPartnerLink _oplink;
 
@@ -134,7 +134,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
 
     public MessageExchangeImpl(
-            BpelProcess process, 
+            ODEProcess process,
             Long iid,
             String mexId, 
             OPartnerLink oplink, 

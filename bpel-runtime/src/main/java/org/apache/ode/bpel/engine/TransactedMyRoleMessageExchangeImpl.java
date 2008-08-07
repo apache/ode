@@ -17,7 +17,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
  */
 public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
-    public TransactedMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+    public TransactedMyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
         super(process, mexId, oplink, operation, callee);
     }
 

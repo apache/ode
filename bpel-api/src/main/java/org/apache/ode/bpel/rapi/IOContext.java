@@ -28,7 +28,7 @@ public interface IOContext {
      * @param selectId identifier for the select. 
      * @return <code>true</code> if select-id was found/cancelled. 
      */
-    boolean cancelSelect(String selectId);
+    void cancelSelect(String selectId);
   
     /**
      * Send a reply to an open message-exchange.
@@ -47,14 +47,10 @@ public interface IOContext {
     /**
      * Invoke a partner.
      * 
-     * @param invokeId
-     *            request identifier
-     * @param partnerLinkInstance
-     *            partner link (on which to communicate)
-     * @param operation
-     *            operation to invoke
-     * @param outboundMsg
-     *            outgoing message
+     * @param invokeId request identifier
+     * @param partnerLinkInstance partner link (on which to communicate)
+     * @param operation operation to invoke
+     * @param outboundMsg outgoing message
      * @return message exchange identifier
      * @throws UninitializedPartnerEPR
      * @throws FaultException
@@ -65,8 +61,7 @@ public interface IOContext {
     /**
      * Get partner's response to an invoke.
      * 
-     * @param mexId
-     *            message exchange identifier
+     * @param mexId message exchange identifier
      * @return partner's reply
      */
     Element getPartnerResponse(String mexId);
@@ -74,8 +69,7 @@ public interface IOContext {
     /**
      * Get partner's fault response to an invoke, or <code>null</code> if response was not a fault.
      * 
-     * @param mexId
-     *            message exchange identifier
+     * @param mexId message exchange identifier
      * @return partner's fault reply.
      */
     QName getPartnerFault(String mexId);
@@ -87,8 +81,7 @@ public interface IOContext {
     /**
      * Get the request (i.e. a message received) received from a partner's invoke.
      * 
-     * @param mexId
-     *            message exchange identifier
+     * @param mexId message exchange identifier
      * @return
      */
     Element getMyRequest(String mexId);
@@ -109,7 +102,6 @@ public interface IOContext {
      */
     void registerTimer(String timerId, Date timeToFire);
 
-
     /**
      * Cancel a timer.
      * 
@@ -117,6 +109,5 @@ public interface IOContext {
      * @returns <code>true</code> if timer was found and canelled. 
      */
     boolean cancelTimer(String timerId);
-
 
 }

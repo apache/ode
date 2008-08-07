@@ -18,7 +18,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
  */
 public class TransactedPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    TransactedPartnerRoleMessageExchangeImpl(BpelProcess process, long iid, String mexId, OPartnerLink oplink,Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+    TransactedPartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, OPartnerLink oplink,Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
         super(process, iid, mexId, oplink,  operation, epr, myRoleEPR, channel);
     }
     

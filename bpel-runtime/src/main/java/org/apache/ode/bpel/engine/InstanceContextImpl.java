@@ -543,7 +543,7 @@ class OdeRTInstanceContextImpl implements OdeRTInstanceContext {
 
     public String invoke(String requestId, PartnerLink partnerLink, Operation operation, Element outgoingMessage) throws UninitializedPartnerEPR {
 
-        // TODO: move a lot of this into BpelProcess
+        // TODO: move a lot of this into ODEProcess
 
         // TODO: think we should move the dao creation into bpelprocess --mbs
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),

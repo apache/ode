@@ -13,12 +13,6 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
-import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent;
 import org.apache.ode.bpel.o.OPartnerLink;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
@@ -31,7 +25,7 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     protected String _clientId;
 
-    public MyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+    public MyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
         super(process, null, mexId, oplink, oplink.myRolePortType, operation);
         _callee = callee;
     }

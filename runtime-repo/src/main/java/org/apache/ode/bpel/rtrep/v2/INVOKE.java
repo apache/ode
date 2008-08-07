@@ -116,7 +116,7 @@ public class INVOKE extends ACTIVITY {
                         }
 
                         try {
-                            getBpelRuntime().initializeVariable(outputVar, response);
+                            initializeVariable(outputVar, response);
                         } catch (ExternalVariableModuleException e) {
                         	__log.error("Exception while initializing external variable", e);
                             _self.parent.failure(e.toString(), null);

@@ -208,7 +208,7 @@ public class FOREACH extends ACTIVITY {
         VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
 
         try {
-            getBpelRuntime().initializeVariable(vinst, counterNode);
+            initializeVariable(vinst, counterNode);
         } catch (ExternalVariableModuleException e) {
           __log.error("Exception while initializing external variable", e);
             _self.parent.failure(e.toString(), null);

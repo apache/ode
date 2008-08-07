@@ -127,7 +127,6 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     }
 
     public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
-
         if (variable.declaration.extVar != null) {
             // Note, that when using external variables, the database will not contain the value of the
         	// variable, instead we need to go the external variable subsystems.
@@ -219,7 +218,6 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
      * Proxy to {@link VariableContext#readVariableProperty(Variable, QName)}.
      */
     public String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException {
-
         try {
             return _brc.readVariableProperty(variable, property.name);
         } catch (UninitializedVariableException e) {
@@ -239,7 +237,22 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
      */
     public Node initializeVariable(VariableInstance var, Node val) throws ExternalVariableModuleException {
         try {
-            return _brc.initializeVariable(var, val);
+            if (var.declaration.extVar != null) /* external variable */ {
+                if (__log.isDebugEnabled())
+                    __log.debug("Initialize external variable: name=" + var.declaration + " value="+DOMUtils.domToString(val));
+                Node reference = null;
+                try {
+                    reference = fetchVariableData(var, true);
+                } catch (FaultException fe) {
+                    // In this context this is not necessarily a problem, since the assignment may re-init the related var
+                }
+                if (reference != null) val = _brc.readExtVar(var, reference);
+                return val;
+            } else /* normal variable */ {
+                if (__log.isDebugEnabled()) __log.debug("Initialize variable: name=" + var.declaration +
+                        " value=" + DOMUtils.domToString(val));
+                return _brc.initializeVariable(var, val);
+            }
         } finally {
             writeProperties(var, val);
         }
@@ -638,11 +651,6 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#recoverActivity(java.lang.String, long, java.lang.String)
-     */
     public void recoverActivity(final String channel, final long activityId, final String action, FaultInfo fault) {
         // TODO: better translation here?
         final FaultData fdata = (fault != null) ? new FaultData(fault.getFaultName(), null, fault.getExplanation()) : null;
@@ -652,15 +660,12 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
 
             public void run() {
                 ActivityRecoveryChannel recovery = importChannel(channel, ActivityRecoveryChannel.class);
-                __log.info("ActivityRecovery: Recovering activity " + activityId + " with action " + action + " on channel "
-                        + recovery);
+                __log.info("ActivityRecovery: Recovering activity " + activityId +
+                        " with action " + action + " on channel " + recovery);
                 if (recovery != null) {
-                    if ("cancel".equals(action))
-                        recovery.cancel();
-                    else if ("retry".equals(action))
-                        recovery.retry();
-                    else if ("fault".equals(action))
-                        recovery.fault(fdata);
+                    if ("cancel".equals(action)) recovery.cancel();
+                    else if ("retry".equals(action)) recovery.retry();
+                    else if ("fault".equals(action)) recovery.fault(fdata);
                 }
             }
         });
@@ -675,8 +680,8 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
      * 
      */
     private void cleanupOutstandingMyRoleExchanges(FaultInfo optionalFaultData) {
-        // TODO: all this should be moved into the engine. We don't really need the ORM to find these mexs, we can just scan
-        // the database -mszefler 20feb08
+        // TODO: all this should be moved into the engine. We don't really need the ORM to find
+        // these mexs, we can just scan the database
         String[] mexRefs = getORM().releaseAll();
         for (String mexId : mexRefs) {
             _brc.noreply(mexId, optionalFaultData);
