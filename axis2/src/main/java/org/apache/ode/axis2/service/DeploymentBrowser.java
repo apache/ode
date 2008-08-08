@@ -124,7 +124,8 @@ public class DeploymentBrowser {
                                 if (processes != null) {
                                     List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     for (File file : files) {
-                                        String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
+                                        String relativePath = file.getPath().substring(file.getPath()
+                                            .indexOf("processes")+10).replaceAll("\\\\", "/");
                                         out.write("<p><a href=\"" + relativePath + "\">" + relativePath + "</a></p>");
                                     }
                                 } else {
@@ -193,8 +194,9 @@ public class DeploymentBrowser {
         if (docFile.indexOf("processes") >= 0) docFile = docFile.substring(docFile.indexOf("processes")+10);
         List<File> files = FileUtils.listFilesRecursively(_store.getDeployDir(), null);
         for (final File bundleFile : files) {
-            if (bundleFile.getPath().endsWith(docFile))
-                return "/deployment/bundles/" + bundleFile.getPath().substring(_store.getDeployDir().getPath().length() + 1);
+            if (bundleFile.getPath().replaceAll("\\\\", "/").endsWith(docFile))
+                return "/deployment/bundles/" + bundleFile.getPath()
+                  .substring(_store.getDeployDir().getPath().length() + 1).replaceAll("\\\\", "/");
         }
         return null;
     }
