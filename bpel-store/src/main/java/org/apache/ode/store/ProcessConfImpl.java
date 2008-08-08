@@ -184,6 +184,10 @@ public class ProcessConfImpl implements ProcessConf {
         return _version;
     }
 
+    public int getRuntimeVersion() {
+        return 2;
+    }
+
     public InputStream getCBPInputStream() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)

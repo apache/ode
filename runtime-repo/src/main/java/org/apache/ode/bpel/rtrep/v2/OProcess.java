@@ -21,6 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
+import org.apache.ode.bpel.rapi.ActivityModel;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -95,7 +96,7 @@ public class OProcess extends OBase implements ProcessModel {
         return guid;
     }
 
-    public OBase getChild(final int id) {
+    public ActivityModel getChild(final int id) {
         for (int i=_children.size()-1; i>=0; i--) {
             OBase child = _children.get(i);
             if (child.getId() == id) return child;

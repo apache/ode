@@ -24,9 +24,11 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 
@@ -41,6 +43,8 @@ import javax.xml.namespace.QName;
 public abstract class BpelJacobRunnable extends JacobRunnable {
     private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
 
+    protected ScopeFrame _scopeFrame;
+    
     protected RuntimeInstanceImpl getBpelRuntime() {
         RuntimeInstanceImpl nativeApi = (RuntimeInstanceImpl) JacobVPU.activeJacobThread().getExtension(OdeRTInstanceContext.class);
         assert nativeApi != null;
@@ -92,6 +96,14 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
 
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
         getBpelRuntime().writeCorrelation(cset,ckeyVal);
+    }
+
+    Node initializeVariable(VariableInstance var, Node val) throws ExternalVariableModuleException {
+        if (var.declaration.extVar != null) /* external variable */ {
+            return getBpelRuntime().initializeVariable(_scopeFrame.resolve(var.declaration.extVar.related), val);
+        } else /* normal variable */ {
+            return getBpelRuntime().initializeVariable(var, val);
+        }
     }
     
     protected long genMonotonic() {

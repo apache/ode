@@ -23,10 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.rapi.ExtensionBundle;
+import org.apache.ode.bpel.rapi.ExtensionValidator;
+
+import javax.xml.namespace.QName;
 //import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 
 /**
@@ -35,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 *  
 * @author Tammo van Lessen (University of Stuttgart)
 */
-public abstract class AbstractExtensionBundle {
+public abstract class AbstractExtensionBundle implements ExtensionBundle {
 	private static Log __log = LogFactory.getLog(AbstractExtensionBundle.class);
 	private Map<String, Class<? extends ExtensionOperation>> extensionsByName = new HashMap<String, Class<? extends ExtensionOperation>>();
 
@@ -75,19 +77,18 @@ public abstract class AbstractExtensionBundle {
 		return getExtensionOperationClass(localName).newInstance();
 	}
 
-    // TODO See what to do with the validation part
-//	public final Map<QName, ExtensionValidator> getExtensionValidators() {
-//		Map<QName, ExtensionValidator> result = new HashMap<QName, ExtensionValidator>();
-//		String ns = getNamespaceURI();
-//		for (String localName : extensionsByName.keySet()) {
-//			if (ExtensionValidator.class.isAssignableFrom(extensionsByName.get(localName))) {
-//				try {
-//					result.put(new QName(ns, localName), (ExtensionValidator)getExtensionOperationInstance(localName));
-//				} catch (Exception e) {
-//					__log.warn("Could not instantiate extension validator for '{" + ns + "}" + localName);
-//				}
-//			}
-//		}
-//		return result;
-//	}
+	public final Map<QName, ExtensionValidator> getExtensionValidators() {
+		Map<QName, ExtensionValidator> result = new HashMap<QName, ExtensionValidator>();
+		String ns = getNamespaceURI();
+		for (String localName : extensionsByName.keySet()) {
+			if (ExtensionValidator.class.isAssignableFrom(extensionsByName.get(localName))) {
+				try {
+					result.put(new QName(ns, localName), (ExtensionValidator)getExtensionOperationInstance(localName));
+				} catch (Exception e) {
+					__log.warn("Could not instantiate extension validator for '{" + ns + "}" + localName);
+				}
+			}
+		}
+		return result;
+    }
 }

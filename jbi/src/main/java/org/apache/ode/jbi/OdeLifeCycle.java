@@ -37,7 +37,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.rapi.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -45,7 +45,7 @@ import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;

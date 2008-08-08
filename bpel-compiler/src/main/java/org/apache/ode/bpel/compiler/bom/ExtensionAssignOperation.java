@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.compiler.bom;
 
 import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
+import org.apache.ode.bpel.rapi.ExtensibleElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,7 +30,7 @@ import org.w3c.dom.NodeList;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class ExtensionAssignOperation extends BpelObject implements AssignOperation,
-																	ExtensibleElement {
+        ExtensibleElement {
 	private Element _childElement;
 	
     public ExtensionAssignOperation(Element el) {

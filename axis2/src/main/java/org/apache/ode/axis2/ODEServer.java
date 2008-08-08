@@ -47,7 +47,7 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.axis2.soapbinding.SoapExternalService;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.rapi.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -62,7 +62,6 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -72,6 +71,7 @@ import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.bpel.rapi.ExtensionBundle;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -540,7 +540,7 @@ public class ODEServer {
                 String bundleCN = tokenizer.nextToken();
                 try {
                     // instantiate bundle
-                    AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
+                    ExtensionBundle bundle = (ExtensionBundle) Class.forName(bundleCN).newInstance();
 
                     // register extension bundle (BPEL server)
                     _server.registerExtensionBundle(bundle);

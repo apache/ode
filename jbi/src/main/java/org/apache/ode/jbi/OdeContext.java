@@ -44,11 +44,12 @@ import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rtrep.Serializers;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.util.WSDLFlattener;
 import org.apache.ode.store.ProcessStoreImpl;
@@ -178,13 +179,13 @@ final class OdeContext {
         OdeService service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
-            Serializer ofh = new Serializer(pc.getCBPInputStream());
-            OProcess compiledProcess = ofh.readOProcess();
+            Serializer ofh = Serializers.getLatest(pc.getCBPInputStream());
+            ProcessModel compiledProcess = ofh.readPModel();
             QName portType = null;
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
                 if (provide.getValue().equals(endpoint)) {
-                    OPartnerLink plink = compiledProcess.getPartnerLink(provide.getKey());
-                    portType = plink.myRolePortType.getQName();
+                    PartnerLinkModel plink = compiledProcess.getPartnerLink(provide.getKey());
+                    portType = plink.getMyRolePortType().getQName();
                     break;
                 }
             }

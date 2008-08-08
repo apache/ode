@@ -38,7 +38,7 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.w3c.dom.Element;
 
 /**
@@ -78,9 +78,9 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
 
     protected State _state = State.INVOKE_XXX;
 
-    PartnerRoleMessageExchangeImpl(ODEProcess process, Long iid, String mexId, OPartnerLink oplink, Operation operation,
+    PartnerRoleMessageExchangeImpl(ODEProcess process, Long iid, String mexId, PartnerLinkModel oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
-        super(process, iid, mexId, oplink, oplink.partnerRolePortType, operation);
+        super(process, iid, mexId, oplink, oplink.getPartnerRolePortType(), operation);
         _myRoleEPR = myRoleEPR;
         _partnerRoleChannel = channel;
     }

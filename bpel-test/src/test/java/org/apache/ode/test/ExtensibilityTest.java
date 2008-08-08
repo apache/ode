@@ -22,7 +22,7 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
-import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
+import org.apache.ode.bpel.rapi.ExtensibleElement;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.runtime.extension.AbstractAsyncExtensionOperation;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;

@@ -61,12 +61,13 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.rapi.OdeRuntime;
+import org.apache.ode.bpel.rapi.ExtensionBundle;
 
 /**
  * <p>
@@ -263,7 +264,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public void registerExtensionBundle(AbstractExtensionBundle bundle) {
+    public void registerExtensionBundle(ExtensionBundle bundle) {
     	_contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
     	bundle.registerExtensionActivities();
     }
@@ -344,7 +345,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            ODEProcess process = new ODEProcess(this, conf, null);
+            ODEProcess process = new ODEProcess(this, conf, null, buildRuntime(conf));
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -359,6 +360,17 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
             _mngmtLock.writeLock().unlock();
+        }
+    }
+
+    private OdeRuntime buildRuntime(ProcessConf conf) {
+        // Relying on package naming conventions to find our runtime
+        String qualifiedName = "org.apache.ode.bpel.rtrep.v" + conf.getRuntimeVersion() + ".RuntimeImpl";
+        try {
+            return (OdeRuntime) Class.forName(qualifiedName).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't instantiate ODE runtime version " + conf.getRuntimeVersion() +
+                    ", either your process definition version is outdated or we have a bug.");
         }
     }
 
@@ -556,7 +568,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 assertNoTransaction();
             
             
-            return target.createNewMyRoleMex(istyle, targetService, operation, clientKey);
+            return target.createNewMyRoleMex(istyle, targetService, operation);
         } finally {
             _mngmtLock.readLock().unlock();
         }
@@ -571,8 +583,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             Callable<MessageExchange> loadMex = new Callable<MessageExchange>() {
 
                 public MessageExchange call() {
-                    MessageExchangeDAO mexdao = (inmemdao == null) ? mexdao = _contexts.dao.getConnection().getMessageExchange(
-                            mexId) : inmemdao;
+                    MessageExchangeDAO mexdao = (inmemdao == null) ?
+                            mexdao = _contexts.dao.getConnection().getMessageExchange(mexId) : inmemdao;
                     if (mexdao == null)
                         return null;
 
@@ -654,14 +666,14 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return null;
     }
     
-    OProcess getOProcess(QName processId) {
+    ProcessModel getProcessModel(QName processId) {
         _mngmtLock.readLock().lock();
         try {
             ODEProcess process = _registeredProcesses.get(processId);
 
             if (process == null) return null;
 
-            return process.getOProcess();
+            return process.getProcessModel();
 
         } finally {
             _mngmtLock.readLock().unlock();
@@ -733,8 +745,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     private long randomExp(double mean) {
         double u = _random.nextDouble(); // Uniform
-        long delay = (long) (-Math.log(u) * mean); // Exponential
-        return delay;
+        return (long) (-Math.log(u) * mean);
     }
 
     private class ProcessDefReaper implements Runnable {
@@ -746,7 +757,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     Thread.sleep(pollingTime);
                     _mngmtLock.writeLock().lockInterruptibly();
                     try {
-                        __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
                         // Copying the runnning process list to avoid synchronizatMessageExchangeInterion
                         // problems and a potential mess if a policy modifies the list
                         List<ODEProcess> candidates = new ArrayList<ODEProcess>(_registeredProcesses.values());
@@ -754,7 +764,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                             public boolean isMember(ODEProcess o) {
                                 return !o.hintIsHydrated();
                             }
-
                         });
 
                         // And the happy winners are...

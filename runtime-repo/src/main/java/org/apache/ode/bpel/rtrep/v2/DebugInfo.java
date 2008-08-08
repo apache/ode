@@ -46,9 +46,8 @@ public class DebugInfo implements Serializable {
         this.sourceURI = sourceURI;
         this.startLine = startLine;
         this.endLine = endLine;
-        if (extElmt != null && extElmt.size() > 0) {
+        if (extElmt != null && extElmt.size() > 0)
             this.extensibilityElements = new HashMap<QName, Object>(extElmt);
-        }
     }
 
     public DebugInfo(String sourceURI, int line, Map<QName, Object> extElmt) {

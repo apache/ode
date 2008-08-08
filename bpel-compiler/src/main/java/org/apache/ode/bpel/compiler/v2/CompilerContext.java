@@ -28,7 +28,7 @@ import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
 import org.apache.ode.bpel.compiler.SourceLocation;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.rapi.ExtensionValidator;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
 import org.apache.ode.bpel.rtrep.v2.OExpression;
 import org.apache.ode.bpel.rtrep.v2.OLValueExpression;

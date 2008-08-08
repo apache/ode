@@ -18,13 +18,17 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
+import org.apache.ode.bpel.rapi.ActivityModel;
+
+import javax.xml.namespace.QName;
 import java.io.Serializable;
+import java.util.HashMap;
 
 
 /**
  * Base class for compiled BPEL objects.
  */
-public class OBase implements Serializable {
+public class OBase implements Serializable, ActivityModel {
   
     static final long serialVersionUID = -1L  ;
     
@@ -46,6 +50,10 @@ public class OBase implements Serializable {
 
     public OProcess getOwner() {
         return (OProcess) (_owner == null ? this : _owner);
+    }
+
+    public HashMap<QName, Object> getExtensibilityElements() {
+        return debugInfo.extensibilityElements;
     }
 
     public int hashCode() {

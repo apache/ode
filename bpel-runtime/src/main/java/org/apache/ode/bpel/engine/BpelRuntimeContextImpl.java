@@ -64,8 +64,6 @@ import org.apache.ode.utils.*;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.rapi.*;
-import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -537,6 +535,13 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         message.setHeader(header);
     }
 
+    public void executeCreateInstance(MessageExchangeDAO instantiatingMessageExchange) {
+        if (instantiatingMessageExchange == null) throw new NullPointerException();
+        _instantiatingMessageExchange = instantiatingMessageExchange;
+        _rti.onCreateInstance(instantiatingMessageExchange.getMessageExchangeId());
+        execute();
+    }
+
     void execute() {
         if (!_contexts.isTransacted())
             throw new BpelEngineException("MUST RUN IN TRANSACTION!");
@@ -890,22 +895,6 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _forceFlush = true;
     }
     
-	public ExtensionOperation createExtensionActivityImplementation(QName name) {
-		if (name == null) {
-			return null;
-		}
-		AbstractExtensionBundle bundle = _contexts.extensionRegistry.get(name.getNamespaceURI());
-		if (bundle == null) {
-			return null;
-		} else {
-			try {
-				return bundle.getExtensionOperationInstance(name.getLocalPart());
-			} catch (Exception e) {
-				return null;
-			}
-        }
-    }
-
 	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
 		Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
 		return val.value;

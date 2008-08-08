@@ -10,7 +10,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 /**
  * Implementation of the {@link PartnerRoleMessageExchange} interface that is passed to the IL when the UNRELIABLE invocation style
@@ -24,7 +24,7 @@ public class UnreliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessage
     private static final Log __log = LogFactory.getLog(UnreliablePartnerRoleMessageExchangeImpl.class);
     boolean _asyncReply;
 
-    UnreliablePartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, OPartnerLink oplink, Operation operation,
+    UnreliablePartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, PartnerLinkModel oplink, Operation operation,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
         super(process, iid, mexId, oplink, operation, epr, myRoleEPR, channel);
     }

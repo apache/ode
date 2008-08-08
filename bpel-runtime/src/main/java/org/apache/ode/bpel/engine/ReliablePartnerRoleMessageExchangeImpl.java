@@ -7,11 +7,11 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    public ReliablePartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, OPartnerLink oplink, Operation op,
+    public ReliablePartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, PartnerLinkModel oplink, Operation op,
             EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel partnerRoleChannel) {
         super(process, iid, mexId, oplink, op, epr, myRoleEPR, partnerRoleChannel);
     }

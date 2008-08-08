@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 /**
  * For invoking the engine using UNRELIABLE style.
@@ -29,7 +29,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
     ResponseFuture _future;
 
-    public UnreliableMyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation,
+    public UnreliableMyRoleMessageExchangeImpl(ODEProcess process, String mexId, PartnerLinkModel oplink, Operation operation,
             QName callee) {
         super(process, mexId, oplink, operation, callee);
     }

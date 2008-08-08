@@ -7,7 +7,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 
 /**
@@ -18,7 +18,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
  */
 public class TransactedPartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
 
-    TransactedPartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, OPartnerLink oplink,Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
+    TransactedPartnerRoleMessageExchangeImpl(ODEProcess process, long iid, String mexId, PartnerLinkModel oplink,Operation operation, EndpointReference epr, EndpointReference myRoleEPR, PartnerRoleChannel channel) {
         super(process, iid, mexId, oplink,  operation, epr, myRoleEPR, channel);
     }
     

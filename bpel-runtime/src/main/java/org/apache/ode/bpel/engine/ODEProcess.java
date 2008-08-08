@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.engine;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +38,6 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -49,7 +48,6 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -71,25 +69,14 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
-import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.bpel.runtime.PROCESS;
-import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
-import org.apache.ode.bpel.runtime.msgs.Messages;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rapi.FaultInfo;
+import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
+import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.jacob.soup.ReplacementMap;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -118,7 +105,7 @@ public class ODEProcess {
 
     final QName _pid;
 
-    private volatile OProcess _oprocess;
+    private volatile ProcessModel _processModel;
 
     // Has the process already been hydrated before?
     private boolean _hydratedOnce = false;
@@ -126,11 +113,9 @@ public class ODEProcess {
     /** Last time the process was used. */
     private volatile long _lastUsed;
 
-    DebuggerSupport _debugger;
+    volatile OdeRuntime _runtime;
 
-    ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
-    
-    private ReplacementMap _replacementMap;
+    DebuggerSupport _debugger;
 
     final ProcessConf _pconf;
 
@@ -160,7 +145,8 @@ public class ODEProcess {
     
     private ExternalVariableManager _evm;
     
-    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
+    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, OdeRuntime odeRuntime) {
+        _runtime = odeRuntime;
         _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -198,7 +184,7 @@ public class ODEProcess {
     void initExternalVariables() {
         List<Element> conf = _pconf.getExtensionElement(ExternalVariableConf.EXTVARCONF_ELEMENT);
         _extVarConf = new ExternalVariableConf(conf);
-        _evm = new ExternalVariableManager(_pid, _extVarConf, _contexts.externalVariableEngines, _oprocess);
+        _evm = new ExternalVariableManager(_pid, _extVarConf, _contexts.externalVariableEngines);
     }
     
 
@@ -219,15 +205,14 @@ public class ODEProcess {
         try {
             markused();
             BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceDAO.getInstanceId());
-            final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker, instanceDAO);
+            final OdeRTInstance rti = _runtime.newInstance(getState(instanceDAO));
+            final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker, instanceDAO, rti);
             try {
                 iworker.execInCurrentThread(new Callable<Void>() {
-
                     public Void call() throws Exception {
                         processInstance.recoverActivity(channel, activityId, action, fault);
                         return null;
                     }
-
                 });
             } catch (Exception e) {
                 throw new BpelEngineException(e);
@@ -342,9 +327,9 @@ public class ODEProcess {
 
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
-        BpelRuntimeContextImpl instanceCtx = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), new PROCESS(_oprocess),
-                mexdao);
-        instanceCtx.execute();
+        BpelRuntimeContextImpl rtictx = new BpelRuntimeContextImpl(
+                worker, mexdao.getInstance(), _runtime.newInstance(getState(mexdao.getInstance())));
+        rtictx.executeCreateInstance(mexdao);
     }
 
     void executeContinueInstanceMyRoleRequestReceived(MessageExchangeDAO mexdao) {
@@ -353,7 +338,8 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance());
+        OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+        BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
         int amp = mexdao.getChannel().indexOf('&');
         String groupId = mexdao.getChannel().substring(0, amp);
         int idx = Integer.valueOf(mexdao.getChannel().substring(amp + 1));
@@ -365,7 +351,8 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
         assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+        OdeRTInstance rti = _runtime.newInstance(getState(instanceDao));
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
         brc.execute();
 
     }
@@ -374,7 +361,8 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
         assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+        OdeRTInstance rti = _runtime.newInstance(getState(instanceDao));
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
         if (brc.injectTimerEvent(timerChannel)) brc.execute();
 
     }
@@ -413,14 +401,14 @@ public class ODEProcess {
             BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
             assert worker.isWorkerThread();
 
-            BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao);
+            OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+            BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
             brc.injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
             brc.execute();
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 
         }
-
     }
 
     void executeContinueInstancePartnerRoleResponseReceived(MessageExchangeDAO mexdao) {
@@ -432,7 +420,8 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance());
+        OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+        BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
 
         brc.injectPartnerResponse(mexdao.getMessageExchangeId(), mexdao.getChannel());
         brc.execute();
@@ -467,56 +456,7 @@ public class ODEProcess {
     }
 
     /**
-     * Extract the value of a BPEL property from a BPEL messsage variable.
-     * 
-     * @param msgData
-     *            message variable data
-     * @param alias
-     *            alias to apply
-     * @param target
-     *            description of the data (for error logging only)
-     * @return value of the property
-     * @throws FaultException
-     */
-    String extractProperty(Element msgData, OProcess.OPropertyAlias alias, String target) throws FaultException {
-        markused();
-        PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, alias);
-        Node lValue = ectx.getRootNode();
-
-        if (alias.location != null)
-            lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
-
-        if (lValue == null) {
-            String errmsg = __msgs.msgPropertyAliasReturnedNullSet(alias.getDescription(), target);
-            if (__log.isErrorEnabled()) {
-                __log.error(errmsg);
-            }
-            throw new FaultException(getOProcess().constants.qnSelectionFailure, errmsg);
-        }
-
-        if (lValue.getNodeType() == Node.ELEMENT_NODE) {
-            // This is a bit hokey, we concatenate all the children's values; we
-            // really should be checking to make sure that we are only dealing
-            // with
-            // text and attribute nodes.
-            StringBuffer val = new StringBuffer();
-            NodeList nl = lValue.getChildNodes();
-            for (int i = 0; i < nl.getLength(); ++i) {
-                Node n = nl.item(i);
-                val.append(n.getNodeValue());
-            }
-            return val.toString();
-        } else if (lValue.getNodeType() == Node.TEXT_NODE) {
-            return ((Text) lValue).getWholeText();
-        } else
-            return null;
-    }
-
-    /**
      * Process the message-exchange interceptors.
-     * 
-     * @param mex
-     *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
     boolean processInterceptors(MessageExchangeDAO mexdao, InterceptorInvoker invoker) {
@@ -542,9 +482,7 @@ public class ODEProcess {
     /**
      * Handle a work event; this method is called from the scheduler thread and should be very quick, i.e. any serious work needs to
      * be handed off to a separate thread.
-     * 
      * @throws JobProcessorException
-     * @see ODEProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
      */
     void handleWorkEvent(final JobInfo jobInfo) throws JobProcessorException {
         assert !_contexts.isTransacted() : "work events must be received outside of a transaction";
@@ -575,6 +513,30 @@ public class ODEProcess {
     <T> Future<T> enqueueTransaction(final Callable<T> tx) {
         // We have to wrap our transaction to make sure that we are hydrated when the transaction runs.
         return _server.enqueueTransaction(new ProcessCallable<T>(tx));
+    }
+
+    private Object getState(ProcessInstanceDAO instanceDAO) {
+        ExecutionQueueImpl state = null;
+        if (isInMemory()) {
+            ProcessInstanceDaoImpl inmem = (ProcessInstanceDaoImpl) instanceDAO;
+            if (inmem.getSoup() != null) {
+                state = (ExecutionQueueImpl) inmem.getSoup();
+            }
+        } else {
+            byte[] daoState = instanceDAO.getExecutionState();
+            if (daoState != null) {
+                state = new ExecutionQueueImpl(getClass().getClassLoader());
+                state.setReplacementMap((ReplacementMap) _runtime.getReplacementMap(instanceDAO.getProcess().getProcessId()));
+
+                ByteArrayInputStream iis = new ByteArrayInputStream(daoState);
+                try {
+                    state.read(iis);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+        return state;
     }
 
     private void execInstanceEvent(WorkEvent we) {
@@ -619,15 +581,15 @@ public class ODEProcess {
                 .getMessageExchange(mexId);
     }
 
-    private void setRoles(OProcess oprocess) {
-        _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
-        _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
+    private void setRoles(ProcessModel oprocess) {
+        _partnerRoles = new HashMap<PartnerLinkModel, PartnerLinkPartnerRoleImpl>();
+        _myRoles = new HashMap<PartnerLinkModel, PartnerLinkMyRoleImpl>();
         _endpointToMyRoleMap = new HashMap<Endpoint, PartnerLinkMyRoleImpl>();
 
         // Create myRole endpoint name mapping (from deployment descriptor)
-        HashMap<OPartnerLink, Endpoint> myRoleEndpoints = new HashMap<OPartnerLink, Endpoint>();
+        HashMap<PartnerLinkModel, Endpoint> myRoleEndpoints = new HashMap<PartnerLinkModel, Endpoint>();
         for (Map.Entry<String, Endpoint> provide : _pconf.getProvideEndpoints().entrySet()) {
-            OPartnerLink plink = oprocess.getPartnerLink(provide.getKey());
+            PartnerLinkModel plink = oprocess.getPartnerLink(provide.getKey());
             if (plink == null) {
                 String errmsg = "Error in deployment descriptor for process " + _pid + "; reference to unknown partner link "
                         + provide.getKey();
@@ -639,7 +601,7 @@ public class ODEProcess {
 
         // Create partnerRole initial value mapping
         for (Map.Entry<String, Endpoint> invoke : _pconf.getInvokeEndpoints().entrySet()) {
-            OPartnerLink plink = oprocess.getPartnerLink(invoke.getKey());
+            PartnerLinkModel plink = oprocess.getPartnerLink(invoke.getKey());
             if (plink == null) {
                 String errmsg = "Error in deployment descriptor for process " + _pid + "; reference to unknown partner link "
                         + invoke.getKey();
@@ -650,10 +612,10 @@ public class ODEProcess {
                     + invoke.getValue());
         }
 
-        for (OPartnerLink pl : oprocess.getAllPartnerLinks()) {
+        for (PartnerLinkModel pl : oprocess.getAllPartnerLinks()) {
             if (pl.hasMyRole()) {
                 Endpoint endpoint = myRoleEndpoints.get(pl);
-                if (endpoint == null && pl.initializePartnerRole)
+                if (endpoint == null && pl.isInitializePartnerRoleSet())
                     throw new IllegalArgumentException("No service name for myRole plink " + pl.getName());
                 PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(this, pl, endpoint);
                 _myRoles.put(pl, myRole);
@@ -676,20 +638,6 @@ public class ODEProcess {
 
     static String genCorrelatorId(PartnerLinkModel plink, String opName) {
         return plink.getId() + "." + opName;
-    }
-
-    /**
-     * De-serialize the compiled process representation from a stream.
-     * 
-     * @param is
-     *            input stream
-     * @return process information from configuration database
-     */
-    private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
-        OProcess compiledProcess;
-        Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readOProcess();
-        return compiledProcess;
     }
 
     /**
@@ -818,27 +766,27 @@ public class ODEProcess {
         }
     }
 
-    OProcess getOProcess() {
+    ProcessModel getProcessModel() {
         _hydrationLatch.latch(1);
         try {
-            return _oprocess;
+            return _processModel;
         } finally {
             _hydrationLatch.release(1);
         }
     }
 
-    private MyRoleMessageExchangeImpl newMyRoleMex(InvocationStyle istyle, String mexId, QName target, OPartnerLink oplink,
-            Operation operation) {
+    private MyRoleMessageExchangeImpl newMyRoleMex(InvocationStyle istyle, String mexId, QName target,
+                                                   PartnerLinkModel mplink, Operation operation) {
         MyRoleMessageExchangeImpl mex;
         switch (istyle) {
         case RELIABLE:
-            mex = new ReliableMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
+            mex = new ReliableMyRoleMessageExchangeImpl(this, mexId, mplink, operation, target);
             break;
         case TRANSACTED:
-            mex = new TransactedMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
+            mex = new TransactedMyRoleMessageExchangeImpl(this, mexId, mplink, operation, target);
             break;
         case UNRELIABLE:
-            mex = new UnreliableMyRoleMessageExchangeImpl(this, mexId, oplink, operation, target);
+            mex = new UnreliableMyRoleMessageExchangeImpl(this, mexId, mplink, operation, target);
             break;
         default:
             throw new AssertionError("Unexpected invocation style: " + istyle);
@@ -872,7 +820,7 @@ public class ODEProcess {
 
         _hydrationLatch.latch(1);
         try {
-            OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+            PartnerLinkModel plink = _processModel.getPartnerLink(mexdao.getPartnerLinkModelId());
             if (plink == null) {
                 String errmsg = __msgs.msgDbConsistencyError("MexDao #" + mexdao.getMessageExchangeId()
                         + " referenced unknown pLinkModelId " + mexdao.getPartnerLinkModelId());
@@ -909,7 +857,7 @@ public class ODEProcess {
 
         _hydrationLatch.latch(1);
         try {
-            OPartnerLink plink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+            PartnerLinkModel plink = _processModel.getPartnerLink(mexdao.getPartnerLinkModelId());
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(plink);
             return prole.createPartnerRoleMex(mexdao);
         } finally {
@@ -941,29 +889,6 @@ public class ODEProcess {
 
     }
 
-    /**
-     * Used by {@link BpelRuntimeContextImpl} constructor. Should only be called from latched context.
-     * 
-     * @return
-     */
-    ReplacementMap getReplacementMap(QName processName) {
-        assert _hydrationLatch.isLatched(1);
-        if (processName.equals(_pid)) return _replacementMap;
-        else
-            try {
-                // We're asked for an older version of this process, fetching it
-                OProcess oprocess = _server.getOProcess(processName);
-                // Older versions may ventually need more expression languages
-                registerExprLang(oprocess);
-
-                return new ReplacementMapImpl(oprocess);
-            } catch (Exception e) {
-                String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
-                __log.error(errmsg);
-                throw new BpelEngineException(errmsg, e);
-            }
-    }
-
     public boolean isInMemory() {
         return _pconf.isTransient();
     }
@@ -976,7 +901,7 @@ public class ODEProcess {
      * Get a hint as to whether this process is hydrated. Note this is only a hint, since things could change.
      */
     public boolean hintIsHydrated() {
-        return _oprocess != null;
+        return _processModel != null;
     }
 
     /** Keep track of the time the process was last used. */
@@ -988,23 +913,23 @@ public class ODEProcess {
      * If necessary, create an object in the data store to represent the process. We'll re-use an existing object if it already
      * exists and matches the GUID.
      */
-    private void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+    private void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
+        __log.debug("Creating process DAO for " + pid + " (guid=" + mprocess.getGuid() + ")");
         try {
             boolean create = true;
             ProcessDAO old = conn.getProcess(pid);
             if (old != null) {
                 __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-                if (oprocess.guid == null) {
+                if (mprocess.getGuid() == null) {
                     // No guid, old version assume its good
                     create = false;
                 } else {
-                    if (old.getGuid().equals(oprocess.guid)) {
+                    if (old.getGuid().equals(mprocess.getGuid())) {
                         // Guids match, no need to create
                         create = false;
                     } else {
                         // GUIDS dont match, delete and create new
-                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid + "; replacing.";
+                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + mprocess.getGuid() + "; replacing.";
                         __log.debug(errmsg);
                         old.delete();
                     }
@@ -1012,8 +937,8 @@ public class ODEProcess {
             }
 
             if (create) {
-                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, (int) version);
-                for (String correlator : oprocess.getCorrelators()) {
+                ProcessDAO newDao = conn.createProcess(pid, mprocess.getQName(), mprocess.getGuid(), (int) version);
+                for (String correlator : mprocess.getCorrelators()) {
                     newDao.addCorrelator(correlator);
                 }
             }
@@ -1055,9 +980,7 @@ public class ODEProcess {
         _server.enqueueRunnable(new ProcessRunnable(worker));
     }
 
-    MyRoleMessageExchange createNewMyRoleMex(final InvocationStyle istyle, final QName targetService, final String operation,
-            final String clientKey) {
-
+    MyRoleMessageExchange createNewMyRoleMex(final InvocationStyle istyle, final QName targetService, final String operation) {
         final String mexId = new GUID().toString();
         _hydrationLatch.latch(1);
         try {
@@ -1069,7 +992,6 @@ public class ODEProcess {
                 throw new BpelEngineException("NoSuchOperation: " + operation);
 
             return newMyRoleMex(istyle, mexId, target._endpoint.serviceName, target._plinkDef, op);
-
         } finally {
             _hydrationLatch.release(1);
         }
@@ -1169,53 +1091,25 @@ public class ODEProcess {
         }
 
         private void doDehydrate() {
-            _oprocess = null;
+            _processModel = null;
             _partnerRoles = null;
             _myRoles = null;
             _endpointToMyRoleMap = null;
-            _replacementMap = null;
-            _expLangRuntimeRegistry = null;
         }
 
         private void doHydrate() {
             markused();
-            __log.debug("Rehydrating process " + _pconf.getProcessId());
-            try {
-                _oprocess = deserializeCompiledProcess(_pconf.getCBPInputStream());
-            } catch (Exception e) {
-                String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
-                __log.error(errmsg);
-                throw new BpelEngineException(errmsg, e);
-            }
+            _runtime.init(_pconf);
+            _processModel = _runtime.getModel();
 
-            _replacementMap = new ReplacementMapImpl(_oprocess);
-
-            // Create an expression language registry for this process
-            _expLangRuntimeRegistry = new ExpressionLanguageRuntimeRegistry();
-            registerExprLang(_oprocess);
-
-            // Checking for registered extension bundles, throw an exception when
-            // a "mustUnderstand" extension is not available
-            for (OProcess.OExtension extension : _oprocess.mustUnderstandExtensions) {
-            	if (extension.mustUnderstand) {
-            		if (_contexts.extensionRegistry.get(extension.namespaceURI) == null) {
-            			String msg = __msgs.msgExtensionMustUnderstandError(_pid, extension.namespaceURI);
-            			__log.error(msg);
-            			throw new BpelEngineException(msg);
-            		}
-            	} else {
-        			__log.warn("The process declares the extension namespace " + extension.namespaceURI + " that is unkown to the engine");
-        		}
-            }
-
-            setRoles(_oprocess);
+            setRoles(_processModel);
     		initExternalVariables();
     
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
                     if (prole._initialPartner != null) {
                         PartnerRoleChannel channel = _contexts.bindingContext.createPartnerRoleChannel(_pid,
-                                prole._plinkDef.partnerRolePortType, prole._initialPartner);
+                                prole._plinkDef.getPartnerRolePortType(), prole._initialPartner);
                         prole._channel = channel;
                         _partnerChannels.put(prole._initialPartner, prole._channel);
                         EndpointReference epr = channel.getInitialEndpointReference();
@@ -1242,16 +1136,16 @@ public class ODEProcess {
             }
 
             if (isInMemory()) {
-                bounceProcessDAO(_inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                bounceProcessDAO(_inMemDao.getConnection(), _pid, _pconf.getVersion(), _processModel);
             } else if (_contexts.isTransacted()) {
                 // If we have a transaction, we do this in the current transaction.
-                bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
             } else {
                 // If we do not have a transaction we need to create one.
                 try {
                     _contexts.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
-                            bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                            bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
                             return null;
                         }
                     });
@@ -1273,7 +1167,7 @@ public class ODEProcess {
     }
 
     void invokePartner(MessageExchangeDAO mexdao) {
-        OPartnerLink oplink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
+        PartnerLinkModel oplink = (PartnerLinkModel) _processModel.getPartnerLink(mexdao.getPartnerLinkModelId());
         PartnerLinkPartnerRoleImpl partnerRole = _partnerRoles.get(oplink);
         Endpoint partnerEndpoint = getInitialPartnerRoleEndpoint(oplink);
         ODEProcess p2pProcess = null;
@@ -1377,30 +1271,15 @@ public class ODEProcess {
      * @param prolemex
      */
     private void p2pWakeup(final MessageExchangeDAO prolemex) {
-
         try {
             doInstanceWork(prolemex.getInstance().getInstanceId(), new Callable<Void>() {
-
                 public Void call() throws Exception {
                     executeContinueInstancePartnerRoleResponseReceived(prolemex);
                     return null;
                 }
-
             });
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
-        }
-    }
-
-    private void registerExprLang(OProcess oprocess) {
-        for (OExpressionLanguage elang : oprocess.expressionLanguages) {
-            try {
-                _expLangRuntimeRegistry.registerRuntime(elang);
-            } catch (ConfigurationException e) {
-                String msg = __msgs.msgExpLangRegistrationError(elang.expressionLanguageUri, elang.properties);
-                __log.error(msg, e);
-                throw new BpelEngineException(msg, e);
-            }
         }
     }
 

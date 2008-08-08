@@ -16,12 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.explang.konst;
+package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.explang.*;
-import org.apache.ode.bpel.o.OConstantExpression;
-import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Node;
 
@@ -30,12 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An implementation of the {@link org.apache.ode.bpel.explang.ExpressionLanguageRuntime} interface
+ * An implementation of the ExpressionLanguageRuntime interface
  * for constant expressions.
  */
 public class KonstExpressionLanguageRuntimeImpl implements ExpressionLanguageRuntime {
 
-  public void initialize(Map properties) throws ConfigurationException {
+  public void initialize(Map properties) {
   }
 
   public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException  {
@@ -48,7 +45,7 @@ public class KonstExpressionLanguageRuntimeImpl implements ExpressionLanguageRun
   public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException {
     OConstantExpression konst = (OConstantExpression) cexp;
     if (konst.getVal() instanceof Boolean)
-      return ((Boolean)konst.getVal()).booleanValue();
+      return (Boolean) konst.getVal();
     throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue);
 
   }

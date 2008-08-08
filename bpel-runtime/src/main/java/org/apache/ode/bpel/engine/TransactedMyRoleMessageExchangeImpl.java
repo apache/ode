@@ -6,7 +6,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 /**
  * Transacted my-role message exchange.
@@ -17,8 +17,8 @@ import org.apache.ode.bpel.o.OPartnerLink;
  */
 public class TransactedMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
 
-    public TransactedMyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
-        super(process, mexId, oplink, operation, callee);
+    public TransactedMyRoleMessageExchangeImpl(ODEProcess process, String mexId, PartnerLinkModel mplink, Operation operation, QName callee) {
+        super(process, mexId, mplink, operation, callee);
     }
 
     @Override

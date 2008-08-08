@@ -53,7 +53,6 @@ class EH_EVENT extends BpelJacobRunnable {
     private EventHandlerControlChannel _ehc;
     private TerminationChannel _tc;
     private ParentScopeChannel _psc;
-    private ScopeFrame _scopeFrame;
     private OEventHandler.OEvent _oevent;
 
     /** Registered compensation handlers. */

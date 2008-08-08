@@ -43,8 +43,7 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
-
+import org.apache.ode.bpel.rapi.ExtensionBundle;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
@@ -53,15 +52,10 @@ class Contexts {
     private static final Log __log = LogFactory.getLog(Contexts.class);
     
     TransactionManager txManager;
-
     MessageExchangeContext mexContext;
-
     Scheduler scheduler;
-
     EndpointReferenceContext eprContext;
-
     BindingContext bindingContext;
-
     BpelDAOConnectionFactory dao;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */
@@ -71,7 +65,7 @@ class Contexts {
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
 
 	/** Global extension bundle registry **/
-    final Map<String, AbstractExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, AbstractExtensionBundle>();
+    final Map<String, ExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundle>();
     
     /** Mapping from external variable engine identifier to the engine implementation. */
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();

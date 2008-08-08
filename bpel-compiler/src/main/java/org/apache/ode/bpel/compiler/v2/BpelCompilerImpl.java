@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.rapi.ExtensionValidator;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Activity;

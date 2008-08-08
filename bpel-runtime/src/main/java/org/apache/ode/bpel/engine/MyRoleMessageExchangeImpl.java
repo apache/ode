@@ -13,7 +13,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
@@ -25,8 +25,9 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     protected String _clientId;
 
-    public MyRoleMessageExchangeImpl(ODEProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
-        super(process, null, mexId, oplink, oplink.myRolePortType, operation);
+    public MyRoleMessageExchangeImpl(ODEProcess process, String mexId, PartnerLinkModel oplink,
+                                     Operation operation, QName callee) {
+        super(process, null, mexId, oplink, oplink.getMyRolePortType(), operation);
         _callee = callee;
     }
 

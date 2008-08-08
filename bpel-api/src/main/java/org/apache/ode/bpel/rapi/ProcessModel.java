@@ -7,8 +7,6 @@ import javax.xml.namespace.QName;
 
 public interface ProcessModel {
 
-//	OdeRTInstance newInstance();
-
 	PartnerLinkModel getPartnerLink(String name);
 	
 	PartnerLinkModel getPartnerLink(int partnerLinkModelId);
@@ -21,4 +19,5 @@ public interface ProcessModel {
 
 	List<String> getCorrelators();
 
+    ActivityModel getChild(final int id);
 }

@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.rapi.Variable;
 
+import javax.xml.namespace.QName;
 import java.io.Serializable;
 
 /**
@@ -47,5 +48,15 @@ public class VariableInstance implements Serializable, Variable {
 
     public long getScopeId() {
         return scopeInstance;
+    }
+
+    public String getExternalId() {
+        if (declaration.extVar == null) return null;
+        return declaration.extVar.externalVariableId;
+    }
+
+    public QName getElementType() {
+        if (!(declaration.type instanceof OElementVarType)) return null;
+        else return ((OElementVarType)declaration.type).elementType;
     }
 }

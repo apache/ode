@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.o.OPartnerLink;
 
 /**
  * Manage {@link MyRoleMessageExchangeImpl} object references.
@@ -57,11 +56,8 @@ class MyRoleMessageExchangeCache {
                 mex = _process.recreateMyRoleMex(mexdao);
                 _cache.put(mexdao.getMessageExchangeId(), new WeakReference<MyRoleMessageExchangeImpl>(mex));
             }
-                
             return mex;
-
         }
-
     }
 
     /**
@@ -74,7 +70,6 @@ class MyRoleMessageExchangeCache {
             if (ref.get() == null)
                 i.remove();
         }
-
         _inserts = 0;
     }
 }

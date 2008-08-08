@@ -305,8 +305,7 @@ define "ode" do
       DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, 
       COMMONS.lang, COMMONS.httpclient, COMMONS.codec
 
-    test.with projects("jacob", "bpel-schemas",
-      "bpel-scripts", "scheduler-simple"),
+    test.with projects("jacob", "bpel-schemas", "bpel-scripts", "scheduler-simple", "runtime-repo"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN
 
@@ -414,7 +413,7 @@ define "ode" do
   desc "ODE JBI Integration Layer"
   define "jbi" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao", "il-common",
-      "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
+      "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "runtime-repo"),
       AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
     package(:jar)

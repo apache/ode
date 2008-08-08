@@ -61,9 +61,6 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.ActivityExtInfoListDocument;
 import org.apache.ode.bpel.pmapi.ActivityInfoDocument;
 import org.apache.ode.bpel.pmapi.EventInfoListDocument;
@@ -106,6 +103,9 @@ import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.bpel.pmapi.TVariableInfo;
 import org.apache.ode.bpel.pmapi.TVariableRef;
 import org.apache.ode.bpel.pmapi.VariableInfoDocument;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ActivityModel;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -481,14 +481,14 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public ActivityExtInfoListDocument getExtensibilityElements(QName pid, Integer[] aids) {
         ActivityExtInfoListDocument aeild = ActivityExtInfoListDocument.Factory.newInstance();
         TActivitytExtInfoList taeil = aeild.addNewActivityExtInfoList();
-        OProcess oprocess = _server.getOProcess(pid);
-        if (oprocess == null)
+        ProcessModel pmodel = _server.getProcessModel(pid);
+        if (pmodel == null)
             throw new ProcessNotFoundException("The process \"" + pid + "\" does not exist.");
 
         for (int aid : aids) {
-            OBase obase = oprocess.getChild(aid);
-            if (obase != null && obase.debugInfo != null && obase.debugInfo.extensibilityElements != null) {
-                for (Map.Entry<QName, Object> entry : obase.debugInfo.extensibilityElements.entrySet()) {
+            ActivityModel amodel = pmodel.getChild(aid);
+            if (amodel != null && amodel.getExtensibilityElements() != null) {
+                for (Map.Entry<QName, Object> entry : amodel.getExtensibilityElements().entrySet()) {
                     TActivityExtInfo taei = taeil.addNewActivityExtInfo();
                     taei.setAiid("" + aid);
                     Object extValue = entry.getValue();
@@ -753,14 +753,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
 
         TEndpointReferences eprs = info.addNewEndpoints();
-        OProcess oprocess = _server.getOProcess(pconf.getProcessId());
-        if (custom.includeEndpoints() && oprocess != null) {
-            for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
-                if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
+        ProcessModel pmodel = _server.getProcessModel(pconf.getProcessId());
+        if (custom.includeEndpoints() && pmodel != null) {
+            for (PartnerLinkModel oplink : pmodel.getAllPartnerLinks()) {
+                if (oplink.hasPartnerRole() && oplink.isInitializePartnerRoleSet()) {
                     // TODO: this is very uncool.
-                    EndpointReference pepr = _server.getBpelProcess(pconf.getProcessId())
-                            .getInitialPartnerRoleEPR(oplink);
-
+                    EndpointReference pepr = _server.getBpelProcess(pconf.getProcessId()).getInitialPartnerRoleEPR(oplink);
                     if (pepr != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();

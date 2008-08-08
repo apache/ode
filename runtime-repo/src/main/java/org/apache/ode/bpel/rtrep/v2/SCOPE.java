@@ -64,8 +64,7 @@ class SCOPE extends ACTIVITY {
         assert _oscope.activity != null;
     }
 
-    public void run() {
-        
+    public void run() {        
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,

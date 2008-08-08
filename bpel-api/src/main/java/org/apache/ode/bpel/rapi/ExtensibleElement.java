@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.compiler.api;
+package org.apache.ode.bpel.rapi;
 
-import org.apache.ode.bpel.compiler.bom.ExtensibleElement;
+import org.w3c.dom.Element;
 
 /**
- * Interface that allows Ode extensions to validate an extension element's
- * content during compilation.
+ * Common interface for ExtensionActivity and AssignExtensionOperation.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public interface ExtensionValidator {
-
-    /**
-     * 
-     * @param compilerContext
-     * @param element
-     * @throws CompilationException
-     */
-    void validate(Object compilerContext, ExtensibleElement element) throws CompilationException;
-
+public interface ExtensibleElement {
+	
+	Element getNestedElement();
+	
 }

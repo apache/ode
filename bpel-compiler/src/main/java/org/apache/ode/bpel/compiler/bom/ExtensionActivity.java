@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.w3c.dom.Element;
+import org.apache.ode.bpel.rapi.ExtensibleElement;
 
 /**
  * BOM representation of the BPEL <code>&lt;extensionActivity&gt;</code> activity. The

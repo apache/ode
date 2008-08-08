@@ -16,32 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.monitor;
+package org.apache.ode.bpel.rapi;
 
 /**
- * Error occured while monitoring process.
+ * Interface that allows Ode extensions to validate an extension element's
+ * content during compilation.
+ * 
+ * @author Tammo van Lessen (University of Stuttgart)
  */
-public class MonitorException extends Exception {
-  private static final long serialVersionUID = 545154231227628391L;
+public interface ExtensionValidator {
 
-  /**
-   * @see Exception#Exception(String)
-   */
-  public MonitorException(String message) {
-    super(message);
-  }
+    /**
+     * 
+     * @param compilerContext
+     * @param element
+     */
+    void validate(Object compilerContext, ExtensibleElement element);
 
-  /**
-   * @see Exception#Exception(String,Throwable)
-   */
-  public MonitorException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  /**
-   * @see Exception#Exception(Throwable)=
-   */
-  public MonitorException(Throwable cause) {
-    super(cause);
-  }
 }

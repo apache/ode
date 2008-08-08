@@ -37,7 +37,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
@@ -74,7 +74,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     final ODEProcess _process;
 
-    final OPartnerLink _oplink;
+    final PartnerLinkModel _oplink;
 
     /** Message-exchange id. */
     final String _mexId;
@@ -137,7 +137,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
             ODEProcess process,
             Long iid,
             String mexId, 
-            OPartnerLink oplink, 
+            PartnerLinkModel oplink,
             PortType ptype, Operation operation) {
         _process = process;
         _contexts = process._contexts;
