@@ -88,7 +88,7 @@ public class OMUtils {
             else newAttr = doc.createAttributeNS(null,attr.getLocalName());
 
             newAttr.appendChild(doc.createTextNode(attr.getAttributeValue()));
-            domElement.setAttributeNode(newAttr);
+            domElement.setAttributeNodeNS(newAttr);
 
             // Case of qualified attribute values, we're forced to add corresponding namespace declaration manually...
             int colonIdx = attr.getAttributeValue().indexOf(":");
@@ -168,9 +168,10 @@ public class OMUtils {
             OMNamespace attrOmNs = null;
             String attrNs = attr.getNamespaceURI();
             String attrPrefix = attr.getPrefix();
-            if (attrNs != null) attrOmNs = omElement.findNamespace(attrNs,null);
-            if (attrOmNs == null && attrPrefix != null) attrOmNs = omElement.findNamespace(null, attrPrefix);
-            if (attrOmNs == null && attrNs != null) attrOmNs = omf.createOMNamespace(attrNs, null);
+            if (attrNs != null)
+                attrOmNs = omElement.findNamespace(attrNs,null);
+            if (attrOmNs == null && attrPrefix != null)
+                attrOmNs = omElement.findNamespace(null, attrPrefix);
             omElement.addAttribute(attr.getLocalName(), attr.getValue(), attrOmNs);
         }
 
