@@ -75,7 +75,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     String _nodeId;
 
     /** Maximum number of jobs in the "near future" / todo queue. */
-    volatile int _todoLimit = 200;
+    int _todoLimit = 10000;
 
     /** The object that actually handles the jobs. */
     volatile JobProcessor _jobProcessor;
@@ -100,9 +100,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private Random _random = new Random();
 
-    public SimpleScheduler(String nodeId, DatabaseDelegate del) {
+    public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
+        _todoLimit = Integer.parseInt(conf.getProperty("ode.scheduler.queueLength", "10000"));
         _todo = new SchedulerThread(this);
     }
 
@@ -172,8 +173,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         try {
             if (immediate) {
                 // If we have too many jobs in the queue, we don't allow any new ones
-                if (_todo.size() > _todoLimit)
-                    throw new ContextException("The execution queue is backed up... Forcing ContextException");
+                if (_todo.size() > _todoLimit) {
+                    __log.error("The execution queue is backed up, the engine can't keep up with the load. Either " +
+                            "increase the queue size or regulate the flow.");
+                    return null;
+                }
 
                 // Immediate scheduling means we put it in the DB for safe keeping
                 _db.insertJob(job, _nodeId, true);

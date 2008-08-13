@@ -19,10 +19,7 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.transaction.TransactionManager;
 
@@ -215,7 +212,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
     }
 
     private SimpleScheduler newScheduler(String nodeId) {
-        SimpleScheduler scheduler = new SimpleScheduler(nodeId, _ds.delegate());
+        SimpleScheduler scheduler = new SimpleScheduler(nodeId, _ds.delegate(), new Properties());
         scheduler.setJobProcessor(this);
         scheduler.setTransactionManager(_txm);
         return scheduler;
