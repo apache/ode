@@ -4,10 +4,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 import javax.transaction.TransactionManager;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Date;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -64,7 +61,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     }
 
     private SimpleScheduler newScheduler(String nodeId) {
-        SimpleScheduler scheduler = new SimpleScheduler(nodeId, _ds.delegate());
+        SimpleScheduler scheduler = new SimpleScheduler(nodeId, _ds.delegate(), new Properties());
         scheduler.setJobProcessor(this);
         scheduler.setTransactionManager(_txm);
         return scheduler;
