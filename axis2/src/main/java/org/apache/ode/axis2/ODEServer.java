@@ -472,7 +472,8 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()));
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(), 
+                new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
         scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
         return scheduler;
