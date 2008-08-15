@@ -319,10 +319,12 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                     "The bpws:domToString function MUST be passed a single " +
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
+                } else if (args.get(0) instanceof NodeWrapper) {
+                    varElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Element) {
+                    varElmt = (Element) args.get(0);
                 } else {
-                    if (args.get(1) instanceof NodeWrapper)
-                        varElmt = (Element) ((NodeWrapper) args.get(1)).getUnderlyingNode();
-                    else varElmt = (Element) args.get(1);
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
                 }
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
