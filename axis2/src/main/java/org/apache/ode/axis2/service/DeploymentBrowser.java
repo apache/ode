@@ -59,9 +59,19 @@ public class DeploymentBrowser {
                                     if (!"Version".equals(serviceName)) {
                                         AxisService service = _config.getService(serviceName.toString());
 
-                                        String url = service.getName();
-                                        if (service.getFileName() != null)
-                                          url = root + bundleUrlFor(service.getFileName().getFile());
+                                        // The service can be one of the dynamically registered ODE services, a process
+                                        // service or an unknown service deployed in the same Axis2 instance.
+                                        String url = null;
+                                        if ("DeploymentService".equals(service.getName())
+                                                || "InstanceManagement".equals(service.getName())
+                                                || "ProcessManagement".equals(service.getName()))
+                                            url = service.getName();
+                                        else if (service.getFileName() != null) {
+                                            String relative = bundleUrlFor(service.getFileName().getFile());
+                                            if (relative != null) url = root + relative;
+                                            else url = root + "/services/" + service.getName() + "?wsdl";
+                                        }
+
                                         out.write("<p><a href=\"" + url + "\">" + serviceName + "</a></p>");
 
                                         out.write("<ul><li>Endpoint: " + (root + "/processes/" + serviceName) + "</li>");
