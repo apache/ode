@@ -137,6 +137,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
         try {
+            if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
             _txm.begin();
         } catch (Exception ex) {
             String errmsg = "Internal Error, could not begin transaction.";
@@ -150,10 +151,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         } catch (Exception ex) {
             throw ex;
         } finally {
-            if (success)
+            if (success) {
+                if (__log.isDebugEnabled()) __log.debug("Commiting...");
                 _txm.commit();
-            else
+            } else {
+                if (__log.isDebugEnabled()) __log.debug("Rollbacking...");
                 _txm.rollback();
+            }
         }
     }
 
