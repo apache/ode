@@ -321,13 +321,10 @@ public class ODEServer {
     }
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        Definition wsdlDefinition = pconf.getDefinitionForService(serviceName);
-
         // Since multiple processes may provide services at the same (JMS) endpoint, qualify
         // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
-        QName uniqueServiceName = new QName(serviceName.getNamespaceURI(),
-                ODEAxisService.extractServiceName(wsdlDefinition, serviceName, portName,
-                        ODEAxisService.deriveBaseServiceUri(pconf)));
+        QName uniqueServiceName = new QName(
+        		ODEAxisService.extractServiceName(pconf, serviceName, portName));
 
         destroyService(uniqueServiceName, portName);
 
