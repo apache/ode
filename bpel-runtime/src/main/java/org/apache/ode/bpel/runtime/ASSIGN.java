@@ -434,10 +434,14 @@ class ASSIGN extends ACTIVITY {
             Document doc = DOMUtils.newDocument();
             Element serviceRef = doc.createElementNS(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
             doc.appendChild(serviceRef);
-            NodeList children = rvalue.getChildNodes();
-            for (int m = 0; m < children.getLength(); m++) {
-                Node child = children.item(m);
-                serviceRef.appendChild(doc.importNode(child, true));
+            if (rvalue.getNodeType() == Node.TEXT_NODE) {
+                serviceRef.appendChild(doc.importNode(rvalue, true));
+            } else {
+                NodeList children = rvalue.getChildNodes();
+                for (int m = 0; m < children.getLength(); m++) {
+                    Node child = children.item(m);
+                    serviceRef.appendChild(doc.importNode(child, true));
+                }
             }
             rvalue = serviceRef;
         }
