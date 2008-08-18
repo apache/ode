@@ -21,6 +21,7 @@ package org.apache.ode.daohib;
 import java.util.Properties;
 
 import javax.transaction.TransactionManager;
+import javax.transaction.Transaction;
 
 import org.hibernate.HibernateException;
 import org.hibernate.transaction.TransactionManagerLookup;
@@ -44,4 +45,8 @@ public class HibernateTransactionManagerLookup implements TransactionManagerLook
 	public String getUserTransactionName() {
 		return null;
 	}
+
+    public Object getTransactionIdentifier(Transaction transaction) {
+        return transaction;
+    }
 }
