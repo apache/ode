@@ -19,17 +19,21 @@
 
 package org.apache.ode.axis2.hooks;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.wsdl.*;
+import javax.wsdl.Definition;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
@@ -122,8 +126,11 @@ public class ODEAxisService extends AxisService {
                 }
             }
             
-            // Set the JMS destination name on the Axis Service (used only if endpoint is JMS)  
-            axisService.addParameter(new Parameter(JMSConstants.DEST_PARAM, extractJMSDestinationName(axisServiceName)));
+            // Set the JMS destination name on the Axis Service
+            if (isJmsEndpoint(pconf, wsdlServiceName, portName)) {
+	            axisService.addParameter(new Parameter(JMSConstants.DEST_PARAM, 
+	            		extractJMSDestinationName(axisServiceName, deriveBaseServiceUri(pconf))));
+            }
 
             return axisService;
         } catch (Exception e) {
@@ -136,18 +143,18 @@ public class ODEAxisService extends AxisService {
      * @param serviceName the name of the axis service
      * @return the corresponding JMS destination name
      */
-    private static String extractJMSDestinationName(String serviceName) {
+    private static String extractJMSDestinationName(String serviceName, String baseUri) {
     	String destinationPrefix = "dynamicQueues/";
         int index = serviceName.indexOf(destinationPrefix);
         if (index == -1) {
         	destinationPrefix = "dynamicTopics/";
         	index = serviceName.indexOf(destinationPrefix);
         }
-        if (index != -1) {
-            return serviceName.substring(index);
+        if (index == -1) {
+        	destinationPrefix = baseUri + "/";
+        	index = serviceName.indexOf(destinationPrefix);
         }
-    	
-		return null;
+        return (index != -1) ? serviceName.substring(index) : serviceName;
 	}
 
 	public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
@@ -168,8 +175,9 @@ public class ODEAxisService extends AxisService {
         return axisService;
     }
 
-    public static String extractServiceName(Definition wsdlDefinition, QName wsdlServiceName, String portName, String baseUri)
-            throws AxisFault {
+	private static String extractEndpointUri(ProcessConf pconf, QName wsdlServiceName, String portName) 
+			throws AxisFault {
+    	Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);
         String url = null;
         Service service = wsdlDefinition.getService(wsdlServiceName);
         if (service == null) {
@@ -187,8 +195,19 @@ public class ODEAxisService extends AxisService {
         if (url == null) {
             throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName
                     + " (necessary to establish the process target address)!");
-        }
-        String serviceName = parseURLForService(url, baseUri);
+        }		
+        return url;
+	}
+	
+	private static boolean isJmsEndpoint(ProcessConf pconf, QName wsdlServiceName, String portName) 
+			throws AxisFault {
+		String url = extractEndpointUri(pconf, wsdlServiceName, portName);
+		return url.startsWith("jms:");
+	}
+	
+    public static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
+            throws AxisFault {
+        String serviceName = parseURLForService(extractEndpointUri(pconf, wsdlServiceName, portName), deriveBaseServiceUri(pconf));
         if (serviceName == null) {
             throw new OdeFault("The soap:address used for service WSDL definition " + wsdlServiceName + " and port "
                     + portName + " should be of the form http://hostname:port/ode/processes/myProcessEndpointName");
