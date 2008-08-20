@@ -287,7 +287,6 @@ public class BpelEngineImpl implements BpelEngine {
         // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
         // to a grinding halt.
         try {
-
             BpelProcess process;
             if (we.getProcessId() != null) {
                 process = _activeProcesses.get(we.getProcessId());
@@ -347,50 +346,8 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     private boolean checkRetry(final JobInfo jobInfo, Throwable t) {
-        // TODO, better handling of failed jobs (put them in the DB perhaps?)
-        if (jobInfo.retryCount < MAX_RETRIES)
-            return true;
-
-        __log.error("Job could not be completed after " + MAX_RETRIES + ": " + jobInfo, t);
-
-        boolean saveToDisk = false;
-        if (jobInfo.jobDetail.get("final") == null) {
-            __log.error("Rescheduling problematic job for a bit later: " + jobInfo, t);
-
-            try {
-                if (jobInfo.jobDetail.get("inmem") != null)
-                    _contexts.scheduler.scheduleVolatileJob(true, jobInfo.jobDetail);
-                else
-                    _contexts.scheduler.execIsolatedTransaction(new Callable<Void>() {
-                        public Void call() throws Exception {
-                            jobInfo.jobDetail.put("final", true);
-                            _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail,
-                                    new Date(System.currentTimeMillis() + 60 * 1000));
-                            return null;
-                        }
-                    });
-            } catch (Exception ex) {
-                __log.error("Error rescheduling problematic job: " + jobInfo,ex);
-                saveToDisk = true;
-            }
-        } else {
-            saveToDisk = true;
-        }
-
-        if (saveToDisk)
-            try {
-                File f = File.createTempFile("ode-bad-job", ".ser", new File(""));
-                ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream(f));
-                fos.writeObject(jobInfo);
-                fos.close();
-                __log.error("Saved problematic job to disk (last resort): " + jobInfo +" in file " + f);
-            } catch (Exception ex) {
-                __log.error("Could not save bad job; it will be lost: " + jobInfo, ex);
-            }
-
-
-        // No more retries.
-        return false;
+        __log.error("Job could not be completed after " + jobInfo.retryCount + " retries: " + jobInfo, t);
+        return jobInfo.jobDetail.get("inmem") == null;
     }
 
     /**
