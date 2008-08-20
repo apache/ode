@@ -102,7 +102,7 @@ public class INVOKE extends ACTIVITY {
                     outboundMsg, invokeResponseChannel);
 
                 object(new InvokeResponseChannelListener(invokeResponseChannel) {
-                    private static final long serialVersionUID = 4496880438819196765L;
+                    private static final long serialVerstmptmpionUID = 4496880438819196765L;
 
                     public void onResponse() {
                         // we don't have to write variable data -> this already
@@ -189,7 +189,28 @@ public class INVOKE extends ACTIVITY {
                         }
                         getBpelRuntimeContext().releasePartnerMex(mexId);
                     }
-                });
+
+                }.or(new TerminationChannelListener(_self.self) {
+                    private static final long serialVersionUID = 4219496341785922396L;
+
+                    public void terminate() {
+                    	_self.parent.completed(null, CompensationHandler.emptySet());
+                    	object(new InvokeResponseChannelListener(invokeResponseChannel) {
+                        private static final long serialVersionUID = 688746737897792929L;
+						public void onFailure() {
+							__log.debug("Failure on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+						}
+						public void onFault() {
+                            __log.debug("Fault on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+						}
+						public void onResponse() {
+                            __log.debug("Response on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+						}
+
+                    });
+                    }
+                }));
+;
             }
         } catch (FaultException fault) {
             __log.error(fault);
