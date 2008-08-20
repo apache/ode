@@ -93,7 +93,7 @@ public class ProcessConfImpl implements ProcessConf {
     // provide the IL properties
     private HierarchicalProperties ilProperties;
     // monitor the IL property file and reload it if necessary
-    private ILWatchDog ilWatchDog;
+    private PropertiesWatchDog propertiesWatchDog;
     private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
 
     private EndpointReferenceContext eprContext;
@@ -110,7 +110,7 @@ public class ProcessConfImpl implements ProcessConf {
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
         this.eprContext = eprContext;
-        ilWatchDog = new ILWatchDog();
+        propertiesWatchDog = new PropertiesWatchDog();
 
         initLinks();
         initMexInterceptors();
@@ -381,7 +381,7 @@ public class ProcessConfImpl implements ProcessConf {
 
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
-        ilWatchDog.check();
+        propertiesWatchDog.check();
         if (ilProperties == null) {
             return Collections.EMPTY_MAP;
         } else {
@@ -399,8 +399,8 @@ public class ProcessConfImpl implements ProcessConf {
      * Manage the reloading of the propery file every {@link org.apache.ode.utils.fs.FileWatchDog#DEFAULT_DELAY}.
      * The check is done manually, meaning that {@link #check()} must be invoked each time _ilProperties is accessed.
      */
-    private class ILWatchDog extends FileWatchDog {
-        public ILWatchDog() {
+    private class PropertiesWatchDog extends FileWatchDog {
+        public PropertiesWatchDog() {
             super(_du.getEPRConfigFile());
         }
 
