@@ -444,6 +444,10 @@ return endpointReference;
                 public Map lastModified() {
                     return _pconf.getEndpointProperties(endpointReference);
                 }
+
+                public String toString() {
+                    return "Properties for Endpoint: "+endpointReference;
+                }
             });
         }
 
