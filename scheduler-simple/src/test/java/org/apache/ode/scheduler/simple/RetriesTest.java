@@ -44,14 +44,14 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
             _txm.commit();
         }
 
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         assertEquals(3, _tried);
     }
 
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         _tried++;
-        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 2);
+        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 3);
     }
 
     Map<String, Object> newDetail(String x) {
