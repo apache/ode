@@ -95,13 +95,13 @@ public class INVOKE extends ACTIVITY {
 
             } else /* two-way */{
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
-                InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
+                final InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
 
                 final String mexId = getBpelRuntimeContext().invoke(
                     _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                     outboundMsg, invokeResponseChannel);
 
-                object(new InvokeResponseChannelListener(invokeResponseChannel) {
+                object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
                     private static final long serialVerstmptmpionUID = 4496880438819196765L;
 
                     public void onResponse() {
@@ -210,7 +210,7 @@ public class INVOKE extends ACTIVITY {
                     });
                     }
                 }));
-;
+                
             }
         } catch (FaultException fault) {
             __log.error(fault);
