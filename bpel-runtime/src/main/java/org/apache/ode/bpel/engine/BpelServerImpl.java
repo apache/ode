@@ -496,7 +496,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             process.handleWorkEvent(jobInfo);
         } catch (Exception ex) {
-            throw new JobProcessorException(ex, true);
+            throw new JobProcessorException(ex, jobInfo.jobDetail.get("inmem") == null);
         } finally {
             _mngmtLock.readLock().unlock();
         }

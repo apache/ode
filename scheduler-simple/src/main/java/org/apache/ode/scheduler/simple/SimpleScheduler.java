@@ -313,10 +313,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             try {
                 _jobProcessor.onScheduledJob(jobInfo);
             } catch (JobProcessorException jpe) {
-                if (jpe.retry) {
-                    __log.error("Error while processing transaction, retrying.", jpe);
-                    doRetry(job);
-                } else __log.error("Error while processing transaction, no retry.", jpe);
+                if (jpe.retry)
+                    __log.error("Error while processing transaction, retrying in " + doRetry(job) + "s");
+                else
+                    __log.error("Error while processing transaction, no retry.", jpe);
             }
         } catch (Exception ex) {
             __log.error("Error in scheduler processor.", ex);
@@ -470,15 +470,17 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         } finally {
             __log.debug("node recovery complete");
         }
-
     }
 
-    private void doRetry(Job job) throws DatabaseException {
-        Calendar retryTime = Calendar.getInstance();
-        retryTime.add(Calendar.SECOND, 2);
-        job.detail.put("retry", job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 1);
-        Job jobRetry = new Job(retryTime.getTime().getTime(), true, job.detail);
+    private long doRetry(Job job) throws DatabaseException {
+        int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
+        job.detail.put("retry", retry);
+        long delay = (long)(Math.pow(5, retry));
+        // Don't want to go further than a day
+        if (delay > 24*60*60) delay = 24*60*60;
+        Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
         _db.insertJob(jobRetry, _nodeId, false);
+        return delay;
     }
 
     private abstract class SchedulerTask extends Task implements Runnable {
