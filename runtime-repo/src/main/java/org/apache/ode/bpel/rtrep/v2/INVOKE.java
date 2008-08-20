@@ -180,7 +180,27 @@ public class INVOKE extends ACTIVITY {
                         _self.parent.failure(getBpelRuntime().getPartnerFaultExplanation(mexId), null);
                         getBpelRuntime().releasePartnerMex(mexId);
                     }
-                });
+
+                }.or(new TerminationChannelListener(_self.self) {
+                    private static final long serialVersionUID = 4219496341785922396L;
+
+                    public void terminate() {
+                        _self.parent.completed(null, CompensationHandler.emptySet());
+                        object(new InvokeResponseChannelListener(invokeResponseChannel) {
+                            private static final long serialVersionUID = 688746737897792929L;
+                                public void onFailure() {
+                                    __log.debug("Failure on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+                                }
+                                public void onFault() {
+                                    __log.debug("Fault on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+                                }
+                                public void onResponse() {
+                                    __log.debug("Response on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
+                                }
+                            });
+                        }
+                }));
+
             }
         } catch (FaultException fault) {
             __log.error(fault);
