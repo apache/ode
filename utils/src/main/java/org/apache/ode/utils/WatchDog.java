@@ -123,28 +123,29 @@ public class WatchDog<T> implements Runnable {
         long now = System.currentTimeMillis();
         if (expire <= now) {
             expire = now + delay;
-
+            if (log.isDebugEnabled()) log.debug("Check for changes: "+mutable);
             if (mutable.exists()) {
                 existedBefore = true;
                 if (lastModif==null || mutable.hasChangedSince(lastModif)) {
                     lastModif = mutable.lastModified();
-                    if (log.isDebugEnabled())
-                        log.debug(mutable + " has been modified");
                     doOnUpdate();
+                    if (log.isInfoEnabled()) log.info(mutable + " updated");
                     warnedAlready = false;
                 }
             } else if (!isInitialized()) {
                 // no resource and first time
                 init();
+                if (log.isInfoEnabled()) log.info(mutable + " initialized");
             } else {
                 if (existedBefore) {
                     existedBefore = false;
                     lastModif = null;
                     doOnDelete();
+                    if (log.isInfoEnabled()) log.info(mutable + " deleted");
                 }
                 if (!warnedAlready) {
                     warnedAlready = true;
-                    if (log.isDebugEnabled()) log.debug(mutable + "] does not exist.");
+                    if (log.isInfoEnabled()) log.info(mutable + " does not exist.");
                 }
             }
         }

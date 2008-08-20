@@ -54,6 +54,10 @@ public class FileWatchDog extends WatchDog<Long> {
         public Long lastModified() {
             return Long.valueOf(file.lastModified());
         }
+
+        public String toString() {
+            return file.toString();
+        }
     }
 
 
