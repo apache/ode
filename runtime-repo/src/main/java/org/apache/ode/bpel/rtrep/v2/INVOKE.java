@@ -92,13 +92,13 @@ public class INVOKE extends ACTIVITY {
 
             } else /* two-way */{
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
-                InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
+                final InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
 
                 final String mexId = getBpelRuntime().invoke(invokeResponseChannel.export(),
                     _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                     outboundMsg, invokeResponseChannel);
 
-                object(new InvokeResponseChannelListener(invokeResponseChannel) {
+                object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
                     private static final long serialVersionUID = 4496880438819196765L;
 
                     public void onResponse() {
