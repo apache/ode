@@ -149,6 +149,13 @@ public interface ProcessConf {
     Map<String, Endpoint> getInvokeEndpoints();
     
     /**
+     * Tells if the service is shareable
+     * @param serviceName
+     * @return true if the given service can be shared by processes
+     */
+    boolean isSharedService(QName serviceName);
+    
+    /**
      * Generic facility to get additional stuff out of the process descriptor. 
      * @param qname name of the extension element.
      * @return list of extension elements 

@@ -113,6 +113,7 @@
     <xs:complexType name="tProvide">
         <xs:sequence>
             <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
+			<xs:element name="enableSharing" minOccurs="0" maxOccurs="1" type="dd:tEnableSharing"/>
         </xs:sequence>
         <xs:attribute name="partnerLink" type="xs:string" use="required"/>
     </xs:complexType>
@@ -135,6 +136,13 @@
         </xs:sequence>
         <xs:attribute name="name" type="xs:QName" use="required"/>
         <xs:attribute name="port" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="tEnableSharing">
+        <xs:complexContent>
+			<xs:restriction base="xs:anyType">
+			</xs:restriction>
+		</xs:complexContent>
     </xs:complexType>
 
     <xs:complexType name="tMexInterceptor" >

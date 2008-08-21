@@ -81,6 +81,9 @@ public class BpelProcess {
      * it's important to note that the same process with the same endpoint can have 2 different myroles. */
     private volatile Map<PartnerLinkMyRoleImpl, Endpoint> _endpointToMyRoleMap;
 
+    /** Mapping from a potentially shared endpoint to its EPR */ 
+    private SharedEndpoints _sharedEps;
+    
     // Backup hashmaps to keep initial endpoints handy after dehydration
     private Map<Endpoint, EndpointReference> _myEprs = new HashMap<Endpoint, EndpointReference>();
     private Map<Endpoint, EndpointReference> _partnerEprs = new HashMap<Endpoint, EndpointReference>();
@@ -497,14 +500,31 @@ public class BpelProcess {
 
     void activate(BpelEngineImpl engine) {
         _engine = engine;
+        _sharedEps = _engine.getSharedEndpoints();
         _debugger = new DebuggerSupport(this);
 
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
-            EndpointReference initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
-            __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-            _myEprs.put(entry.getValue(), initialEPR);
+        	Endpoint endpoint = entry.getValue();
+        	EndpointReference initialEPR = null;
+        	if (isShareable(endpoint)) {
+	        	// Check if the EPR already exists for the given endpoint
+	        	initialEPR = _sharedEps.getEndpointReference(endpoint); 
+	        	if (initialEPR == null) {
+	        		// Create an EPR by physically activating the endpoint 
+	                initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+	                _sharedEps.addEndpoint(endpoint, initialEPR);
+	                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+	        	}
+	            // Increment the reference count on the endpoint  
+	            _sharedEps.incrementReferenceCount(endpoint);
+        	} else {
+        		// Create an EPR by physically activating the endpoint 
+                initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+        	}
+            _myEprs.put(endpoint, initialEPR);
         }
         __log.debug("Activated " + _pid);
 
@@ -513,12 +533,43 @@ public class BpelProcess {
 
     void deactivate() {
         // Deactivate all the my-role endpoints.
-        for (Endpoint endpoint : _myEprs.keySet())
-            _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-
+        for (Endpoint endpoint : _myEprs.keySet()) {
+        	// Deactivate the EPR only if there are no more references 
+        	// to this endpoint from any (active) BPEL process.
+        	if (isShareable(endpoint)) {
+	        	__log.debug("deactivating shared endpoint " + endpoint);
+	        	if (!_sharedEps.decrementReferenceCount(endpoint)) {
+		            _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+		            _sharedEps.removeEndpoint(endpoint);
+	        	}
+        	} else {
+	        	__log.debug("deactivating non-shared endpoint " + endpoint);
+	            _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+        	}
+        }
         // TODO Deactivate all the partner-role channels
     }
 
+    private boolean isShareable(Endpoint endpoint) {
+    	if (!_pconf.isSharedService(endpoint.serviceName)) {
+    		return false;
+    	}
+    	PartnerLinkMyRoleImpl partnerLink = null;
+    	if (_endpointToMyRoleMap == null) {
+    		return false;
+    	}
+    	for (Map.Entry<PartnerLinkMyRoleImpl, Endpoint> entry : _endpointToMyRoleMap.entrySet()) {
+    		if (entry.getValue().equals(endpoint)) {
+    			partnerLink = entry.getKey();
+    			break;
+    		}
+    	}
+    	if (partnerLink == null) {
+    		return false;    	
+    	}
+    	return partnerLink.isOneWayOnly();
+    }
+    
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
         try {
             _hydrationLatch.latch(1);
@@ -659,6 +710,10 @@ public class BpelProcess {
     public long getLastUsed() {
         return _lastUsed;
     }
+    
+    QName getProcessType() {
+    	return _pconf.getType();
+    }    	 
 
     /**
      * Get a hint as to whether this process is hydrated. Note this is only a hint, since things could change.
