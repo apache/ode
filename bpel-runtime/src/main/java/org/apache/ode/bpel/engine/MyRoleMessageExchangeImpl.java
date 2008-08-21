@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.engine;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
@@ -20,6 +21,8 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent;
 import org.apache.ode.bpel.o.OPartnerLink;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
@@ -136,7 +139,26 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     }
 
 
-    
+    /**
+     * Return a deep clone of the given message
+     * 
+     * @param message
+     * @return
+     */
+	protected Message cloneMessage(Message message) {
+		Message clone = createMessage(message.getType());
+		clone.setMessage((Element) message.getMessage().cloneNode(true));
+		Map<String, Node> headerParts = message.getHeaderParts();
+		for (String partName : headerParts.keySet()) {
+			clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
+		}
+		Map<String, Node> parts = message.getHeaderParts();
+		for (String partName : parts.keySet()) {
+			clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
+		}
+		return clone;
+	}
+	    
     protected abstract void onAsyncAck(MessageExchangeDAO mexdao);    
 
 }

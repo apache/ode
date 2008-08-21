@@ -24,6 +24,9 @@ public class HttpBindingTest extends Axis2TestBase {
 
     protected JettyWrapper jettyWrapper;
 
+    public HttpBindingTest(String name) {
+    	super(name);
+    }
 
     protected void setUp() throws Exception {
         super.setUp();

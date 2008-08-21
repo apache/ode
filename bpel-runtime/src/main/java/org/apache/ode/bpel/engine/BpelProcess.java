@@ -106,6 +106,9 @@ public class BpelProcess {
     /** Mapping from {"Service Name" (QNAME) / port} to a myrole. */
     private volatile Map<Endpoint, PartnerLinkMyRoleImpl> _endpointToMyRoleMap;
 
+    /** Mapping from a potentially shared endpoint to its EPR */ 
+    private SharedEndpoints _sharedEps;
+    
     // Backup hashmaps to keep initial endpoints handy after dehydration
     private Map<Endpoint, EndpointReference> _myEprs = new HashMap<Endpoint, EndpointReference>();
 
@@ -163,6 +166,7 @@ public class BpelProcess {
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();
         _contexts = server._contexts;
+        _sharedEps = server.getSharedEndpoints();
         _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
@@ -710,9 +714,25 @@ public class BpelProcess {
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
-            EndpointReference initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
-            __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-            _myEprs.put(entry.getValue(), initialEPR);
+        	Endpoint endpoint = entry.getValue();
+        	EndpointReference initialEPR = null;
+        	if (isShareable(endpoint)) {
+	        	// Check if the EPR already exists for the given endpoint
+	        	initialEPR = _sharedEps.getEndpointReference(endpoint); 
+	        	if (initialEPR == null) {
+	        		// Create an EPR by physically activating the endpoint 
+	                initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+	                _sharedEps.addEndpoint(endpoint, initialEPR);
+	                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+	        	}
+	            // Increment the reference count on the endpoint  
+	            _sharedEps.incrementReferenceCount(endpoint);
+        	} else {
+        		// Create an EPR by physically activating the endpoint 
+                initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+        	}
+            _myEprs.put(endpoint, initialEPR);
         }
         __log.debug("Activated " + _pid);
 
@@ -721,10 +741,32 @@ public class BpelProcess {
 
     void deactivate() {
         // Deactivate all the my-role endpoints.
-        for (Endpoint endpoint : _myEprs.keySet())
-            _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-
+        for (Endpoint endpoint : _myEprs.keySet()) {
+        	// Deactivate the EPR only if there are no more references 
+        	// to this endpoint from any (active) BPEL process.
+        	if (isShareable(endpoint)) {
+	        	__log.debug("deactivating shared endpoint " + endpoint);
+	        	if (!_sharedEps.decrementReferenceCount(endpoint)) {
+		            _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+		            _sharedEps.removeEndpoint(endpoint);
+	        	}
+        	} else {
+	        	__log.debug("deactivating non-shared endpoint " + endpoint);
+	            _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+        	}
+        }
         // TODO Deactivate all the partner-role channels
+    }
+    
+    private boolean isShareable(Endpoint endpoint) {
+    	if (!_pconf.isSharedService(endpoint.serviceName)) {
+    		return false;
+    	}
+    	PartnerLinkMyRoleImpl partnerLink = _endpointToMyRoleMap.get(endpoint);
+    	if (partnerLink == null) {
+    		return false;    	
+    	}
+    	return partnerLink.isOneWayOnly();
     }
 
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
@@ -764,6 +806,10 @@ public class BpelProcess {
 
     QName getPID() {
         return _pid;
+    }
+    
+    QName getProcessType() {
+    	return _pconf.getType();
     }
 
     PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
@@ -1274,9 +1320,9 @@ public class BpelProcess {
         OPartnerLink oplink = (OPartnerLink) _oprocess.getChild(mexdao.getPartnerLinkModelId());
         PartnerLinkPartnerRoleImpl partnerRole = _partnerRoles.get(oplink);
         Endpoint partnerEndpoint = getInitialPartnerRoleEndpoint(oplink);
-        BpelProcess p2pProcess = null;
+        List<BpelProcess> p2pProcesses = null;
         if (partnerEndpoint != null)
-            p2pProcess = _server.route(partnerEndpoint.serviceName, new DbBackedMessageImpl(mexdao.getRequest()));
+            p2pProcesses = _server.route(partnerEndpoint.serviceName, new DbBackedMessageImpl(mexdao.getRequest()));
 
         Operation operation = oplink.getPartnerRoleOperation(mexdao.getOperation());
 
@@ -1287,9 +1333,21 @@ public class BpelProcess {
 
         mexdao.setStatus(Status.REQ);
         try {
-            if (p2pProcess != null) {
+            if (p2pProcesses != null && p2pProcesses.size() != 0) {
                 /* P2P (process-to-process) invocation, special logic */
-                invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, mexdao);
+            	// First, make a copy of the original request message 
+        		MessageDAO request = mexdao.getRequest();
+        		// Then, iterate over each subscribing process
+            	for (BpelProcess p2pProcess : p2pProcesses) {
+            		// Clone the request message for this subscriber
+            		MessageDAO clone = mexdao.createMessage(request.getType());
+            		clone.setData((Element) request.getData().cloneNode(true));
+            		clone.setHeader((Element) request.getHeader().cloneNode(true));
+            		// Set the request on the MEX to the clone 
+            		mexdao.setRequest(clone);
+            		// Send the cloned message to the subscribing process
+	                invokeP2P(p2pProcess, partnerEndpoint.serviceName, operation, mexdao);
+            	}
             } else {
                 partnerRole.invokeIL(mexdao);
             }
