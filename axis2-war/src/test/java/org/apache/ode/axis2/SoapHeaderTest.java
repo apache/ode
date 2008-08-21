@@ -19,7 +19,11 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class SoapHeaderTest extends Axis2TestBase {
-
+	
+	public SoapHeaderTest(String name) {
+		super(name);
+	}
+	
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",
                 new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http", 
@@ -62,7 +66,7 @@ public class SoapHeaderTest extends Axis2TestBase {
         assertEquals("ConversationId", cidElemt.getLocalName());
         assertEquals("ZZYV", cidElemt.getTextContent());
 
-        server.undeployProcess("TestStructuredFault");
+        server.undeployProcess("TestSoapHeader");
     }
     
 }

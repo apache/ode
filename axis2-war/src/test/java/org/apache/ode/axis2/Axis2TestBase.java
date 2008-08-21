@@ -20,8 +20,11 @@ import java.io.*;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Collection;
+import java.util.Random;
+
 import org.junit.*;
 
 /**
@@ -31,7 +34,16 @@ import org.junit.*;
 public abstract class Axis2TestBase extends TestCase {
 
     protected ODEAxis2Server server;
-
+    
+    // Provide standard constructors to accommodate creation of test suites
+    public Axis2TestBase(String name) {
+    	super(name);
+    }
+    
+    public Axis2TestBase() {
+    	this(null);
+    }
+    
     public void startServer() throws Exception {
         String webappPath = getClass().getClassLoader().getResource("webapp").getFile();
         server = new ODEAxis2Server(webappPath);
@@ -77,6 +89,7 @@ public abstract class Axis2TestBase extends TestCase {
 
         public void stop() throws AxisFault {
             _ode.shutDown();
+            _ode = null;
             super.stop();
         }
 

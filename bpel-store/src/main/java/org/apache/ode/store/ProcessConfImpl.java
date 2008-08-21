@@ -78,6 +78,7 @@ public class ProcessConfImpl implements ProcessConf {
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
 
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
+    private final ArrayList<QName> _sharedServices = new ArrayList<QName>();
     private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
     private final ArrayList<String> _mexi = new ArrayList<String>();
     ProcessState _state;
@@ -152,6 +153,10 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.debug("Processing <provide> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service.getName() + " : " + service.getPort());
                 _myRoleEndpoints.put(plinkName, new Endpoint(service.getName(), service.getPort()));
+                
+                if (provide.isSetEnableSharing()) {
+                	_sharedServices.add(service.getName());
+                }
             }
         }
     }
@@ -238,6 +243,10 @@ public class ProcessConfImpl implements ProcessConf {
 
     public Map<String, Endpoint> getProvideEndpoints() {
         return Collections.unmodifiableMap(_myRoleEndpoints);
+    }
+    
+    public boolean isSharedService(QName serviceName) {
+    	return _sharedServices.contains(serviceName);
     }
 
     private void handleEndpoints() {

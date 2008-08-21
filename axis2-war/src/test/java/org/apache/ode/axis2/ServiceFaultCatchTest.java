@@ -7,7 +7,10 @@ package org.apache.ode.axis2;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class ServiceFaultCatchTest extends Axis2TestBase {
-
+	public ServiceFaultCatchTest(String name) {
+		super(name);
+	}
+	
     public void testSimpleFaultCatch() throws Exception {
         String bundleName = "TestStructuredFault";
         // deploy the required service

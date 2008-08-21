@@ -28,7 +28,15 @@ import java.util.StringTokenizer;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
-import javax.transaction.*;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -43,9 +51,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
+import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
-import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.axis2.soapbinding.SoapExternalService;
 import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 import org.apache.ode.bpel.connector.BpelServerConnector;
@@ -56,22 +64,22 @@ import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
-import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.apache.ode.bpel.pmapi.InstanceManagement;
-import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.utils.wsdl.WsdlUtils;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -302,15 +310,20 @@ public class ODEServer {
     }
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        destroyService(serviceName, portName);
-        AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
+        // Since multiple processes may provide services at the same (JMS) endpoint, qualify
+        // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
+        QName uniqueServiceName = new QName(
+        		ODEAxisService.extractServiceName(pconf, serviceName, portName));
+        
+        destroyService(uniqueServiceName, portName);
+        AxisService axisService = ODEAxisService.createService(
+                _axisConfig, pconf, serviceName, portName, uniqueServiceName.getLocalPart());
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server);
 
-        _services.put(serviceName, portName, odeService);
+        _services.put(uniqueServiceName, portName, odeService);
 
         // Setting our new service on the receiver, the same receiver handles
-        // all
-        // operations so the first one should fit them all
+        // all operations so the first one should fit them all
         AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
         ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
 

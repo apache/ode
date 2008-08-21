@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -43,6 +44,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -61,12 +63,13 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.bpel.evar.ExternalVariableModule;
 
 /**
  * <p>
@@ -103,8 +106,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     private final HashMap<QName, BpelProcess> _registeredProcesses = new HashMap<QName, BpelProcess>();
 
-    /** Mapping from myrole service name to active process. */
-    private final HashMap<QName, BpelProcess> _serviceMap = new HashMap<QName, BpelProcess>();
+    /** Mapping from myrole service name to list of active processes */
+    private final HashMap<QName, List<BpelProcess>> _serviceMap = new HashMap<QName, List<BpelProcess>>();
 
     private State _state = State.SHUTDOWN;
 
@@ -128,6 +131,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * The last time we started a {@link ServerCallable}. Useful for keeping track of idleness.
      */
     private final AtomicLong _lastTimeOfServerCallable = new AtomicLong(System.currentTimeMillis());
+    
+    /** Mapping from a potentially shared endpoint to its EPR */ 
+    private SharedEndpoints _sharedEps;        
 
     static {
         // TODO Clean this up and factorize engine configuration
@@ -300,6 +306,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _db = new BpelDatabase(_contexts);
             _state = State.INIT;
+            _sharedEps = new SharedEndpoints();
+            _sharedEps.init();
 
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -312,6 +320,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             stop();
             unregisterBpelEventListeners();
 
+            _sharedEps = null;
             _db = null;
             _state = State.SHUTDOWN;
         } finally {
@@ -348,7 +357,22 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
-                _serviceMap.put(e.serviceName, process);
+                // Get the list of processes associated with the given service
+                List<BpelProcess> processes = _serviceMap.get(e.serviceName);
+                if (processes == null) {
+                	// Create an empty list, if no processes were associated
+                	_serviceMap.put(e.serviceName, processes = new ArrayList<BpelProcess>());
+                }
+                // Remove any older version of the process from the list
+                for (int i = 0; i < processes.size(); i++) {
+                	BpelProcess cachedVersion = processes.get(i);
+                	__log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
+                	if (cachedVersion.getProcessType().equals(process.getProcessType())) {
+                		processes.remove(cachedVersion);
+                	}
+                }
+                // Add the given process to the list associated with the given service
+                processes.add(process);
             }
 
             process.activate(_contexts);
@@ -381,8 +405,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             // TODO Looks like there are some possible bugs here, if a new version of a process gets
             // deployed, the service will be removed.
             p.deactivate();
-            while (_serviceMap.values().remove(p))
-                ;
+            
+            // Remove the process from any services that might reference it.
+            // However, don't remove the service itself from the map.
+            for (List<BpelProcess> processes : _serviceMap.values()) {
+                __log.debug("removing process " + pid + "; handle " + p + "; exists " + processes.contains(p));
+            	processes.remove(p);
+            }
 
             __log.info(__msgs.msgProcessUnregistered(pid));
 
@@ -426,7 +455,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      *            request message
      * @return process corresponding to the targetted service, or <code>null</code> if service identifier is not recognized.
      */
-    BpelProcess route(QName service, Message request) {
+    List<BpelProcess> route(QName service, Message request) {
         // TODO: use the message to route to the correct service if more than
         // one service is listening on the same endpoint.
 
@@ -437,7 +466,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.readLock().unlock();
         }
     }
-
+    
     /**
      * Check a state transition from state "i" to state "j".
      */
@@ -539,30 +568,88 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public void setBindingContext(BindingContext bc) {
         _contexts.bindingContext = bc;
     }
+    
+    public SharedEndpoints getSharedEndpoints() {
+    	return _sharedEps;
+    }
 
     public MyRoleMessageExchange createMessageExchange(final InvocationStyle istyle, final QName targetService,
             final String operation, final String clientKey) throws BpelEngineException {
 
         _mngmtLock.readLock().lock();
         try {
-            final BpelProcess target = route(targetService, null);
+        	// Obtain the list of processes that this service is potentially targeted at
+            final List<BpelProcess> targets = route(targetService, null);
 
-            if (target == null)
+            if (targets == null || targets.size() == 0)
                 throw new BpelEngineException("NoSuchService: " + targetService);
-
-            if (istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
-                assertTransaction();
-            else
-                assertNoTransaction();
             
-            
-            return target.createNewMyRoleMex(istyle, targetService, operation, clientKey);
+            if (targets.size() == 1) {
+                // If the number of targets is one, create and return a simple MEX
+            	BpelProcess target = targets.get(0);
+            	return createNewMyRoleMex(target, istyle, targetService, operation, clientKey);
+            } else {
+            	// If the number of targets is greater than one, create and return
+            	// a brokered MEX that embeds the simple MEXs for each of the targets
+                ArrayList<MyRoleMessageExchange> meps = new ArrayList<MyRoleMessageExchange>();
+            	for (BpelProcess target : targets) {
+            		meps.add(createNewMyRoleMex(target, istyle, targetService, operation, clientKey));
+            	}
+            	return createNewMyRoleMex(targets.get(0), meps, istyle);	
+            }
         } finally {
             _mngmtLock.readLock().unlock();
         }
     }
     
-    public MessageExchange getMessageExchange(final String mexId) throws BpelEngineException {
+    /**
+     * Return a simple type of MEX for a given process target
+     * @param process
+     * @param istyle
+     * @param targetService
+     * @param operation
+     * @param clientKey
+     * @return
+     */
+    private MyRoleMessageExchange createNewMyRoleMex(BpelProcess process, final InvocationStyle istyle, final QName targetService,
+            final String operation, final String clientKey) {
+	    if (istyle == InvocationStyle.RELIABLE || istyle == InvocationStyle.TRANSACTED)
+	        assertTransaction();
+	    else
+	        assertNoTransaction();
+    
+	    return process.createNewMyRoleMex(istyle, targetService, operation, clientKey);
+    }
+    
+    /**
+     * Return a brokered MEX that delegates invocations to each of the embedded
+     * MEXs contained in the <code>meps</code> list, using the appropriate style.
+     * 
+     * @param target
+     * @param meps
+     * @param istyle
+     * @return
+     * @throws BpelEngineException
+     */
+    private MyRoleMessageExchange createNewMyRoleMex(BpelProcess target, List<MyRoleMessageExchange> meps, InvocationStyle istyle) 
+    		throws BpelEngineException {
+    	String mexId = new GUID().toString();
+    	OPartnerLink oplink = new OPartnerLink(null);
+    	MyRoleMessageExchange template = meps.get(0);
+    	switch (istyle) {
+    	case RELIABLE:
+    		return new BrokeredReliableMyRoleMessageExchangeImpl(target, meps, mexId, oplink, template);
+    	case TRANSACTED:
+    		return new BrokeredTransactedMyRoleMessageExchangeImpl(target, meps, mexId, oplink, template);
+    	case UNRELIABLE:
+    		return new BrokeredUnreliableMyRoleMessageExchangeImpl(target, meps, mexId, oplink, template);
+    	case P2P:
+		default:
+            throw new BpelEngineException("Unsupported Invocation Style: " + istyle);
+    	}
+    }
+    
+	public MessageExchange getMessageExchange(final String mexId) throws BpelEngineException {
 
         _mngmtLock.readLock().lock();
         try {
@@ -626,14 +713,35 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return null;
     }
 
+    /*
+     * Calculate the invocation style of the target(s) associated with the given service
+     * If more than one target exists, then take the intersection of their individual styles.
+     *   
+     * (non-Javadoc)
+     * @see org.apache.ode.bpel.iapi.BpelServer#getSupportedInvocationStyle(javax.xml.namespace.QName)
+     */
     public Set<InvocationStyle> getSupportedInvocationStyle(QName serviceId) {
 
         _mngmtLock.readLock().lock();
         try {
-            BpelProcess process = _serviceMap.get(serviceId);
-            if (process == null)
+            List<BpelProcess> processes = route(serviceId, null);
+            if (processes == null || processes.size() == 0)
                 throw new BpelEngineException("No such service: " + serviceId);
-            return process.getSupportedInvocationStyle(serviceId);
+            // Compute the intersection of the styles of all providing processes 
+            Set<InvocationStyle> istyles = new HashSet<InvocationStyle>();
+            for (BpelProcess process : processes) {
+            	Set<InvocationStyle> pistyles = process.getSupportedInvocationStyle(serviceId);
+            	if (istyles.isEmpty()) {
+            		istyles.addAll(pistyles);
+            	} else {
+            		for (InvocationStyle istyle : istyles) {
+            			if (!pistyles.contains(istyle)) {
+            				istyles.remove(istyle);
+            			}
+            		}
+            	}
+            }
+            return istyles;
         } finally {
             _mngmtLock.readLock().unlock();
         }
