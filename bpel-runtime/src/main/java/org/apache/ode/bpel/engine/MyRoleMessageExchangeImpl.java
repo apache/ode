@@ -19,6 +19,16 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -31,26 +41,22 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
-
-import javax.xml.namespace.QName;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
+    
+    protected BpelProcess _process;
 
     private static Map<String, ResponseCallback> _waitingCallbacks =
             new ConcurrentHashMap<String, ResponseCallback>();
 
-
-    public MyRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO mexdao) {
+    public MyRoleMessageExchangeImpl(BpelProcess process, BpelEngineImpl engine, MessageExchangeDAO mexdao) {
         super(engine, mexdao);
+        _process = process;
     }
 
     public CorrelationStatus getCorrelationStatus() {
@@ -111,12 +117,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked))
             return null;
 
-        BpelProcess target = _engine.route(getDAO().getCallee(), request);
+        List<BpelProcess> targets = _engine.route(getDAO().getCallee(), request);
 
         if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + target);
+            __log.debug("invoke() EPR= " + _epr + " ==> " + targets);
 
-        if (target == null) {
+        if (targets == null || targets.isEmpty()) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));
 
@@ -124,24 +130,29 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
             return null;
         } else {
-            // Schedule a new job for invocation
-            WorkEvent we = new WorkEvent();
-            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
-            if (target.isInMemory()) we.setInMem(true);
-            we.setProcessId(target.getPID());
-            we.setMexId(getDAO().getMessageExchangeId());
-
-            if (getOperation().getOutput() != null) {
-                ResponseCallback callback = new ResponseCallback();
-                _waitingCallbacks.put(getClientId(), callback);
-            }
-
-            setStatus(Status.ASYNC);
-            if (target.isInMemory())
-                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-            else
-                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-            return new ResponseFuture(getClientId());
+        	for (BpelProcess target : targets) {
+        		if (target.getPID().equals(_process.getPID())) {
+		            // Schedule a new job for invocation
+		            WorkEvent we = new WorkEvent();
+		            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
+		            if (target.isInMemory()) we.setInMem(true);
+		            we.setProcessId(target.getPID());
+		            we.setMexId(getDAO().getMessageExchangeId());
+		
+		            if (getOperation().getOutput() != null) {
+		                ResponseCallback callback = new ResponseCallback();
+		                _waitingCallbacks.put(getClientId(), callback);
+		            }
+		
+		            setStatus(Status.ASYNC);
+		            if (target.isInMemory())
+		                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+		            else
+		                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+		            return new ResponseFuture(getClientId());
+        		}
+        	}
+        	return null;
         }
     }
 
@@ -172,6 +183,27 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
     public boolean isAsynchronous() {
         return true;
     }
+    
+    /**
+     * Return a deep clone of the given message
+     * 
+     * @param message
+     * @return
+     */
+	protected Message cloneMessage(Message message) {
+		Message clone = createMessage(message.getType());
+		clone.setMessage((Element) message.getMessage().cloneNode(true));
+		Map<String, Node> headerParts = message.getHeaderParts();
+		for (String partName : headerParts.keySet()) {
+			clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
+		}
+		Map<String, Node> parts = message.getHeaderParts();
+		for (String partName : parts.keySet()) {
+			clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
+		}
+		return clone;
+	}
+    
 
     static class ResponseFuture implements Future {
         private String _clientId;

@@ -514,7 +514,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 .getMessage().getQName());
         buildOutgoingMessage(message, msg);
 
-        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mex);
+        MyRoleMessageExchangeImpl m = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mex);
         _bpelProcess.initMyRoleMex(m);
         m.setResponse(new MessageImpl(message));
 
@@ -730,12 +730,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, _bpelProcess
                 .getPartnerRoleChannel(partnerLink.partnerLink));
 
-        BpelProcess p2pProcess = null;
+        List<BpelProcess> p2pProcesses = null;
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
         if (partnerEndpoint != null)
-            p2pProcess = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
+            p2pProcesses = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
 
-        if (p2pProcess != null) {
+        if (p2pProcesses != null && !p2pProcesses.isEmpty()) {
             // Creating a my mex using the same message id as partner mex to "pipe" them
             MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
                     mex.getMessageExchangeId(), partnerEndpoint.serviceName,
@@ -1073,7 +1073,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexDao);
                 switch (mex.getStatus()) {
                     case ASYNC:
                     case RESPONSE:
@@ -1098,7 +1098,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexDao);
                 _bpelProcess.initMyRoleMex(mex);
 
                 Message message = mex.createMessage(faultData.getFaultName());
@@ -1118,7 +1118,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexDao);
+                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexDao);
                 _bpelProcess.initMyRoleMex(mex);
                 mex.setFailure(FailureType.OTHER, "No response.", null);
                 _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
@@ -1356,7 +1356,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                         + " on CKEY " + ckey);
             }
 
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess._engine, mexdao);
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
 
             inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
             execute();

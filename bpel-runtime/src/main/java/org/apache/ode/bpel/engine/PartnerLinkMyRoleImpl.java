@@ -18,6 +18,16 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -45,10 +55,6 @@ import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-import java.util.*;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -320,5 +326,17 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         CorrelationKey key = new CorrelationKey(cset.getId(), values);
         return key;
     }
-
+    
+    public boolean isOneWayOnly() {
+		PortType portType = _plinkDef.myRolePortType;
+		if (portType == null) {
+			return false;
+		}
+    	for (Operation operation : (List<Operation>) portType.getOperations()) {
+	    	if (operation.getOutput() != null) {
+	    		return false;
+	    	}
+    	}
+    	return true;
+    }    
 }
