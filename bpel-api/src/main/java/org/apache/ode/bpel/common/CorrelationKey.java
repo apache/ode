@@ -44,14 +44,12 @@ import org.apache.ode.utils.CollectionUtils;
  * the <code>&lt;propertyAlias;&gt</code> BPEL process document element).
  * </p>
  */
-public class CorrelationKey {
-    // Changed so that it's not serializable
+public class CorrelationKey implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /** CorrelationSet identifier. */
     private int _csetId;
-
     /** Key values. */
     private final String _keyValues[];
 

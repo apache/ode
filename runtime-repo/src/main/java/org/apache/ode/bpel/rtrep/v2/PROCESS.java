@@ -62,7 +62,7 @@ public class PROCESS extends BpelJacobRunnable {
             }
 
             public void completed(FaultData fault, Set<CompensationHandler> compensations) {
-                RuntimeInstanceImpl nativeAPI = (RuntimeInstanceImpl) getExtension(RuntimeInstanceImpl.class);
+                RuntimeInstanceImpl nativeAPI = getBpelRuntime();
                 if (fault == null) {
                     nativeAPI.completedOk();
                 } else {

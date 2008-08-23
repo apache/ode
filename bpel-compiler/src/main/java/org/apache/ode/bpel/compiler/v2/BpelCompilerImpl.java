@@ -665,7 +665,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         _konstExprLang.debugInfo = createDebugInfo(_processDef, "Constant Value Expression Language");
         _konstExprLang.expressionLanguageUri = "uri:www.fivesight.com/konstExpression";
         _konstExprLang.properties.put("runtime-class",
-                "org.apache.ode.bpel.runtime.explang.konst.KonstExpressionLanguageRuntimeImpl");
+                "org.apache.ode.bpel.rtrep.v2.KonstExpressionLanguageRuntimeImpl");
         _oprocess.expressionLanguages.add(_konstExprLang);
 
         // Process the imports. Note, we expect all processes (Event BPEL 1.1)

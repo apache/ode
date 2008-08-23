@@ -60,7 +60,7 @@ class SEQUENCE extends ACTIVITY {
             _remaining.get(0),
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
         instance(createChild(child, _scopeFrame, _linkFrame));
-        instance(new ACTIVE(child));
+        instance(new ACTIVE(_scopeFrame, child));
     }
 
     private class ACTIVE extends BpelJacobRunnable {
@@ -68,7 +68,8 @@ class SEQUENCE extends ACTIVITY {
         private ActivityInfo _child;
         private boolean _terminateRequested = false;
 
-        ACTIVE(ActivityInfo child) {
+        ACTIVE(ScopeFrame scopeFrame, ActivityInfo child) {
+            _scopeFrame = scopeFrame;
             _child = child;
         }
 

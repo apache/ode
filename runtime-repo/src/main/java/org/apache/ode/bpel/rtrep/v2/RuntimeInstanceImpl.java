@@ -632,6 +632,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
                     importChannel(invokeId, InvokeResponseChannel.class).onResponse();
                 }
             });
+            break;
         case FAULT:
             _vpu.inject(new BpelJacobRunnable() {
                 private static final long serialVersionUID = -1095444335740879981L;
@@ -640,6 +641,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
                     importChannel(invokeId, InvokeResponseChannel.class).onFault();
                 }
             });
+            break;
         case FAILURE:
             _vpu.inject(new BpelJacobRunnable() {
                 private static final long serialVersionUID = -1095444335740879981L;
@@ -648,6 +650,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
                     importChannel(invokeId, InvokeResponseChannel.class).onFailure();
                 }
             });
+            break;
         }
     }
 

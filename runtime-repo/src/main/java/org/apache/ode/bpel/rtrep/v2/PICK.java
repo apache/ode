@@ -128,7 +128,7 @@ class PICK extends ACTIVITY {
             }
         }
 
-        instance(new WAITING(pickResponseChannel));
+        instance(new WAITING(_scopeFrame, pickResponseChannel));
     }
 
     /**
@@ -236,8 +236,9 @@ class PICK extends ACTIVITY {
 
         private PickResponseChannel _pickResponseChannel;
 
-        private WAITING(PickResponseChannel pickResponseChannel) {
+        private WAITING(ScopeFrame scopeFrame, PickResponseChannel pickResponseChannel) {
             this._pickResponseChannel = pickResponseChannel;
+            this._scopeFrame = scopeFrame;
         }
 
         public void run() {

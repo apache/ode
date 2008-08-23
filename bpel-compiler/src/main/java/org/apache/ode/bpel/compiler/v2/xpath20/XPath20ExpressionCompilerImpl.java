@@ -73,7 +73,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         _qnVarData = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEDATA);
         _qnXslTransform = new QName(_bpelNS, Constants.EXT_FUNCTION_DOXSLTRANSFORM);
 
-        _properties.put("runtime-class", "org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime");
+        _properties.put("runtime-class", "org.apache.ode.bpel.rtrep.v2.xpath20.XPath20ExpressionRuntime");
         TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
         XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }

@@ -392,6 +392,7 @@ public class ODEProcess {
 
             // We have a match, so we can get rid of the routing entries.
             correlator.removeRoutes(mroute.getGroupId(), instanceDao);
+            mexdao.setInstance(instanceDao);
 
             // Found message matching one of our selectors.
             if (__log.isDebugEnabled()) {
@@ -1196,7 +1197,6 @@ public class ODEProcess {
         }
 
         assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
-
     }
 
     /**

@@ -40,22 +40,18 @@ public class ExpressionLanguageRuntimeRegistry {
     }
 
     public void registerRuntime(OExpressionLanguage oelang) throws ConfigurationException {
+        String className = oelang.properties.get("runtime-class");
         try {
-            String className = oelang.properties.get("runtime-class");
-            // backward compatibility.
-            className = className.replace("com.fs.pxe.", "org.apache.ode.");
             Class cls = Class.forName(className);
             ExpressionLanguageRuntime elangRT = (ExpressionLanguageRuntime) cls.newInstance();
             elangRT.initialize(oelang.properties);
             _runtimes.put(oelang, elangRT);
-        } catch (ConfigurationException ce) {
-            throw ce;
         } catch (IllegalAccessException e) {
             throw new ConfigurationException("Illegal Access Error", e);
         } catch (InstantiationException e) {
             throw new ConfigurationException("Instantiation Error", e);
         } catch (ClassNotFoundException e) {
-            throw new ConfigurationException("Class Not Found Error", e);
+            throw new ConfigurationException("Class Not Found Error: " + className, e);
         }
 
     }

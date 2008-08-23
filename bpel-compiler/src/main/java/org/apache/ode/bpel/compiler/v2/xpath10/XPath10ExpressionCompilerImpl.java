@@ -71,7 +71,7 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
         _qnFnGetVariableData = new QName(_bpelNsURI, "getVariableData");
         _qnFnGetVariableProperty = new QName(_bpelNsURI, "getVariableProperty");
         _qnFnGetLinkStatus = new QName(_bpelNsURI, "getLinkStatus");
-        _properties.put("runtime-class", "org.apache.ode.bpel.elang.xpath10.runtime.XPath10ExpressionRuntime");        
+        _properties.put("runtime-class", "org.apache.ode.bpel.rtrep.v2.xpath10.XPath10ExpressionRuntime");
     }
 
     /**
