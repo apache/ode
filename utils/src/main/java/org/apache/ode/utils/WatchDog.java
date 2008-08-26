@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class WatchDog<T> implements Runnable {
     static final public long DEFAULT_DELAY = 30000;
-    final Log log = LogFactory.getLog(getClass());
+    final Log log = LogFactory.getLog(WatchDog.class);
 
     private long expire;
     private T lastModif;
