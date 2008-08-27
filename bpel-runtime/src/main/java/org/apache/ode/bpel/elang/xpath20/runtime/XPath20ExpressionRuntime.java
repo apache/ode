@@ -209,10 +209,10 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             }
             throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
         } catch (WrappedResolverException wre) {
-            wre.printStackTrace();
+        	 __log.debug("Could not evaluate expression because of ", wre);
             throw (FaultException)wre.getCause();
         } catch (Throwable t) {
-            t.printStackTrace();
+        	 __log.debug("Could not evaluate expression because of ", t);
             throw new EvaluationException("Error while executing an XPath expression: ", t);
         }
 

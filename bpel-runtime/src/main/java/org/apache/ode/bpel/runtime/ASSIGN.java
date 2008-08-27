@@ -80,6 +80,18 @@ class ASSIGN extends ACTIVITY {
             try {
                 copy(aCopy);
             } catch (FaultException fault) {
+            	if (aCopy.ignoreMissingFromData) {
+	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+	            			(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
+	            	continue;
+	            	}
+            	}
+            	if (aCopy.ignoreUninitializedFromVariable) {
+	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+	            			(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
+	            	continue;
+	            	}
+            	}
                 faultData = createFault(fault.getQName(), aCopy, fault
                         .getMessage());
                 break;
@@ -203,7 +215,7 @@ class ASSIGN extends ACTIVITY {
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
@@ -311,7 +323,7 @@ class ASSIGN extends ACTIVITY {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
-
+        
         ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
@@ -420,6 +432,19 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
+	@Override
+	Node fetchVariableData(VariableInstance variable, boolean forWriting)
+			throws FaultException {
+		try {
+			return super.fetchVariableData(variable, forWriting);
+		} catch (FaultException fe) {
+			if (forWriting) {
+				fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
+			}
+			throw fe;
+		}
+	}
+	
 	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
