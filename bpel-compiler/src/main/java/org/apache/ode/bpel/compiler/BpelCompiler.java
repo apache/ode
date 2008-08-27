@@ -416,6 +416,7 @@ abstract class BpelCompiler extends BaseCompiler implements CompilerContext {
     public OXsdTypeVarType resolveXsdType(QName typeName) throws CompilationException {
         OXsdTypeVarType type = _oprocess.xsdTypes.get(typeName);
         if (type == null) {
+            __log.debug("Resolving XSD type " + typeName);
             SchemaModel model = null;
             try {
                 model = _wsdlRegistry.getSchemaModel();
