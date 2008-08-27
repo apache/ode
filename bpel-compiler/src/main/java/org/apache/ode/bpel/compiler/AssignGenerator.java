@@ -64,6 +64,8 @@ class AssignGenerator extends DefaultActivityGenerator {
         for (Copy scopy : ad.getCopies()) {
             OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
             ocopy.keepSrcElementName = scopy.isKeepSrcElement();
+            ocopy.ignoreMissingFromData = scopy.isIgnoreMissingFromData();
+            ocopy.ignoreUninitializedFromVariable = scopy.isIgnoreUninitializedFromVariable();
             ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
                     source.getExtensibilityElements());
             try {
