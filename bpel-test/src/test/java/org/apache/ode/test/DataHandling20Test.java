@@ -73,5 +73,7 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testDuration() throws Throwable {
         go("/bpel/2.0/TestDuration");
     }
-
+    @Test public void testAssignMissingData() throws Throwable {
+        go("/bpel/2.0/TestAssignMissingData");
+    }
 }

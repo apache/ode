@@ -54,4 +54,11 @@ public class Copy extends BpelObject implements AssignOperation {
         return getAttribute("keepSrcElementName", "no").equals("yes");
     }
 
+    public boolean isIgnoreMissingFromData() {
+        return getAttribute("ignoreMissingFromData", "no").equals("yes");
+    }
+    
+    public boolean isIgnoreUninitializedFromVariable() {
+        return getAttribute("ignoreUninitializedFromVariable", "no").equals("yes");
+    }
 }

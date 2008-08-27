@@ -659,6 +659,7 @@
 				</xsd:sequence>
 				<xsd:attribute name="keepSrcElementName" type="tBoolean" use="optional" default="no"/>
 				<xsd:attribute name="ignoreMissingFromData" type="tBoolean" use="optional" default="no"/>
+				<xsd:attribute name="ignoreUninitializedFromVariable" type="tBoolean" use="optional" default="no"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
