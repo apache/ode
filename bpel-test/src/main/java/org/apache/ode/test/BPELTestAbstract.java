@@ -359,7 +359,7 @@ public abstract class BPELTestAbstract {
 
         for (Thread testThread : testThreads) {
             testThread.start();
-            if (testThreads.size() > 0) Thread.sleep(3000);
+            if (testThreads.size() > 0) Thread.sleep(2000);
         }
 
         for (Thread testThread : testThreads)
