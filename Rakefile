@@ -132,7 +132,7 @@ JAVAX               = struct(
   :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
-  :stream           => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec") #"stax:stax-api:jar:1.0.1",
+  :stream           => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec"), #"stax:stax-api:jar:1.0.1",
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1"
 )
 JAXEN               = findArtifacts(AXIS2_DEPS, "jaxen:jaxen") #"jaxen:jaxen:jar:1.1.1"
