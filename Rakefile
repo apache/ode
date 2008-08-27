@@ -226,7 +226,7 @@ define "ode" do
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*").exclude('/WEB-INF/services/*')
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
