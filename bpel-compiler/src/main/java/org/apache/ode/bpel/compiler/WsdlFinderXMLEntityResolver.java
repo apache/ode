@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,6 +85,14 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
         if (resourceIdentifier.getLiteralSystemId() == null) {
             // import without schemaLocation
             if (__log.isDebugEnabled()) __log.debug("resolveEntity: no schema location for "+resourceIdentifier.getNamespace());
+            try {
+                if (_internalSchemas.get(new URI(resourceIdentifier.getNamespace())) != null) {
+                    src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(new URI(resourceIdentifier.getNamespace())).getBytes()));
+                    return src;
+                }
+            } catch (URISyntaxException e) {
+                __log.debug("resolveEntity: no schema location an no known namespace for: " + resourceIdentifier.getNamespace());
+            }
             return null;
         } else if (resourceIdentifier.getExpandedSystemId() != null) { 
             // schema imported by other schema
