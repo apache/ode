@@ -25,7 +25,7 @@ public class ExternalVariableTest extends BPELTestAbstract {
         
         EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
         ds.setCreateDatabase("create");
-        ds.setDatabaseName("ExternalVariableTest");
+        ds.setDatabaseName("target/ExternalVariableTest");
         _ds = ds;
 
         _jdbcext = new JdbcExternalVariableModule();
