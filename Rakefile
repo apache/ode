@@ -27,27 +27,88 @@ require "tasks/xmlbeans"
 VERSION_NUMBER = "1.3-SNAPSHOT"
 NEXT_VERSION = "1.3"
 
+# finds one or artifacts by a regex in a set of artifacts
+def findArtifacts(artifacts, expr)
+    artifacts.flatten.reject { |item| item.is_a?(String) ? !item.match(/^#{expr}/) : !item.to_spec.match(/^#{expr}/) }
+end
+
+## all axis2 jar that are in their distro-war.
+AXIS2_DEPS = [
+    "javax.activation:activation:jar:1.1",
+    "annogen:annogen:jar:0.1.0",
+    "antlr:antlr:jar:2.7.7",
+
+    group("axiom-api", "axiom-impl", "axiom-dom",
+          :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7"),
+
+    group("axis2-adb", "axis2-adb-codegen", "axis2-codegen", "axis2-corba", "axis2-fastinfoset", "axis2-java2wsdl", 
+          "axis2-jaxbri", "axis2-jaxws", "axis2-jaxws-api", "axis2-jibx", "axis2-json", "axis2-jws-api", "axis2-kernel",
+          "axis2-metadata", "axis2-mtompolicy", "axis2-saaj", "axis2-saaj-api", "axis2-spring", "axis2-xmlbeans",
+          :under=>"org.apache.axis2", :version=>"1.4.1"),
+          
+    "backport-util-concurrent:backport-util-concurrent:jar:3.1",
+
+    "commons-codec:commons-codec:jar:1.3",
+    "commons-fileupload:commons-fileupload:jar:1.2",
+    "commons-httpclient:commons-httpclient:jar:3.1",
+    "commons-io:commons-io:jar:1.4",
+    "commons-logging:commons-logging:jar:1.1.1",
+
+    "org.apache.geronimo.specs:geronimo-activation_1.1_spec:jar:1.0.1",
+    "org.apache.geronimo.specs:geronimo-annotation_1.0_spec:jar:1.1",
+    "org.apache.geronimo.specs:geronimo-javamail_1.4_spec:jar:1.2",
+    "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:jar:1.0.1",
+
+    group("httpcore", "httpcore-nio", 
+          :under=>"org.apache.httpcomponents", :version=>"4.0-beta1"),
+
+    "javax.xml.bind:jaxb-api:jar:2.1",
+    group("jaxb-impl", "jaxb-xjc",
+          :under=>"com.sun.xml.bind", :version=>"2.1.6"),
+
+    "jaxen:jaxen:jar:1.1.1",
+
+    "org.codehaus.jettison:jettison:jar:1.0-RC2",
+
+    "org.jibx:jibx-bind:jar:1.1.5",
+    "org.jibx:jibx-run:jar:1.1.5",
+
+    "log4j:log4j:jar:1.2.15",
+
+    "org.apache.neethi:neethi:jar:2.0.4",
+
+    group("woden-api", "woden-impl-dom",
+          :under=>"org.apache.woden", :version=>"1.0M8"),
+
+    "wsdl4j:wsdl4j:jar:1.6.2",
+    "woodstox:wstx-asl:jar:3.2.4",
+    "org.apache.ode:xalan:jar:2.7.0",
+    "xerces:xercesImpl:jar:2.8.1",
+    "org.apache.xmlbeans:xmlbeans:jar:2.3.0",
+    "org.apache.ws.commons.schema:XmlSchema:jar:1.4.2",
+    "xml-apis:xml-apis:jar:1.3.04",
+    "xml-resolver:xml-resolver:jar:1.2",
+    "javax.mail:mail:jar:1.4",
+    #"mex:jar:1.41-impl", # aren't they actually module archives?
+    #"soapmonitor:jar:1.4.1", # aren't they actually module archives?
+]
+
 ACTIVEMQ            = "org.apache.activemq:apache-activemq:jar:4.1.1"
-ANNONGEN            = "annogen:annogen:jar:0.1.0"
-ANT                 = "ant:ant:jar:1.6.5"
-ANTLR               = "org.antlr:antlr:jar:3.0"
-AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
-                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
-AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
-                        "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.3")
-AXIS2_TEST          = group("httpcore", "httpcore-nio", "httpcore-niossl", 
-                            :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
-BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
+ANNONGEN            = findArtifacts(AXIS2_DEPS, "annogen:annogen") #"annogen:annogen:jar:0.1.0"
+ANT                 = "ant:ant:jar:1.6.5" # TODO: do we need ant? Currently referenced in JBI deployable
+AXIOM               = findArtifacts(AXIS2_DEPS, "org.apache.ws.commons.axiom") #[ group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7") ]
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.4.1"
+AXIS2_ALL           = AXIS2_DEPS #group("axis2-adb", "axis2-codegen", "axis2-kernel", "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans", :under=>"org.apache.axis2", :version=>"1.4.1")
+HTTPCORE            = findArtifacts(AXIS2_DEPS, "org.apache.httpcomponents") #group("httpcore", "httpcore-nio", :under=>"org.apache.httpcomponents", :version=>"4.0-beta1")
+BACKPORT            = findArtifacts(AXIS2_DEPS, "backport-util-concurrent:backport-util-concurrent") #backport-util-concurrent:backport-util-concurrent:jar:3.1"
 COMMONS             = struct(
-  :codec            =>"commons-codec:commons-codec:jar:1.3",
+  :codec            => findArtifacts(AXIS2_DEPS, "commons-codec:commons-codec"), #"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.1",
   :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.1",
-  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
-  :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
+  :fileupload       =>findArtifacts(AXIS2_DEPS, "commons-fileupload:commons-fileupload"), #"commons-fileupload:commons-fileupload:jar:1.2",
+  :httpclient       =>findArtifacts(AXIS2_DEPS, "commons-httpclient:commons-httpclient"), #"commons-httpclient:commons-httpclient:jar:3.1",
   :lang             =>"commons-lang:commons-lang:jar:2.1",
-  :logging          =>"commons-logging:commons-logging:jar:1.1",
+  :logging          =>findArtifacts(AXIS2_DEPS, "commons-logging:commons-logging"), #"commons-logging:commons-logging:jar:1.1.1",
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
@@ -63,23 +124,22 @@ HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
-  :activation       =>"javax.activation:activation:jar:1.1",
+  :activation       => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-activation_1.1_spec"),   #"javax.activation:activation:jar:1.1", # TODO: do we use Sun's or Geronimo's?
   #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",
-  :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
-  :ejb              =>"org.apache.geronimo.specs:geronimo-ejb_2.1_spec:jar:1.1",
-  :javamail         =>"geronimo-spec:geronimo-spec-javamail:jar:1.3.1-rc5",
+  :connector        => "org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
+  :ejb              => "org.apache.geronimo.specs:geronimo-ejb_2.1_spec:jar:1.1",
+  :javamail         => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-javamail_1.4_spec"), # "geronimo-spec:geronimo-spec-javamail:jar:1.3.1-rc5",
   :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
-  :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
-  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
+  :stream           => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec") #"stax:stax-api:jar:1.0.1",
+  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1"
 )
-JAXEN               = "jaxen:jaxen:jar:1.1-beta-8"
+JAXEN               = findArtifacts(AXIS2_DEPS, "jaxen:jaxen") #"jaxen:jaxen:jar:1.1.1"
 JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating"
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
-JIBX                = "jibx:jibx-run:jar:1.1-beta3"
-LOG4J               = "log4j:log4j:jar:1.2.13"
+JIBX                = findArtifacts(AXIS2_DEPS, "jibx:jibx-run") #"jibx:jibx-run:jar:1.1-beta3"
+LOG4J               = findArtifacts(AXIS2_DEPS, "log4j:log4j") #"log4j:log4j:jar:1.2.15"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
@@ -88,19 +148,20 @@ SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-
 SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx",
                         :under=>"org.springframework", :version=>"2.0.1")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
-WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
-WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
-XALAN               = "org.apache.ode:xalan:jar:2.7.0"
-XERCES              = "xerces:xercesImpl:jar:2.9.0"
+WOODSTOX            = findArtifacts(AXIS2_DEPS, "woodstox:wstx-asl") #"woodstox:wstx-asl:jar:3.2.1"
+WSDL4J              = findArtifacts(AXIS2_DEPS, "wsdl4j:wsdl4j") #"wsdl4j:wsdl4j:jar:1.6.2"
+XALAN               = findArtifacts(AXIS2_DEPS, "org.apache.ode:xalan") #"org.apache.ode:xalan:jar:2.7.0"
+XERCES              = findArtifacts(AXIS2_DEPS, "xerces:xercesImpl") #"xerces:xercesImpl:jar:2.9.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
+  :neethi           =>findArtifacts(AXIS2_DEPS, "org.apache.neethi:neethi"), #"org.apache.neethi:neethi:jar:2.0.2",
+  :xml_schema       =>findArtifacts(AXIS2_DEPS, "org.apache.ws.commons.schema:XmlSchema") #"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
 XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
                         :under=>"org.apache.xbean", :version=>"2.8")
-XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
+XMLBEANS            = findArtifacts(AXIS2_DEPS, "org.apache.xmlbeans:xmlbeans") #"org.apache.xmlbeans:xmlbeans:jar:2.3.0"
+WODEN               = findArtifacts(AXIS2_DEPS, "org.apache.woden") #["org.apache.woden:woden-api:jar:1.0M8", "org.apache.woden:woden-impl-dom:jar:1.0M8"]
 
 repositories.remote << "http://pxe.intalio.org/public/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
@@ -151,10 +212,11 @@ define "ode" do
       "il-common", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
+      
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
-      GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
+      GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL, WODEN,
       WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
@@ -164,7 +226,7 @@ define "ode" do
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*").exclude('/WEB-INF/services/*')
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
@@ -180,7 +242,7 @@ define "ode" do
       end
     end
     
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))
+    test.with(projects("tools"), libs, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _("target/test")
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test")
@@ -266,7 +328,7 @@ define "ode" do
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
 	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
-	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
+	test.with HSQLDB, JAVAX.transaction, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end

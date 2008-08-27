@@ -17,9 +17,9 @@
 
 module Derby
 
-  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.1.2.1")
+  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.4.1.3")
 
-  Java.rjb.onload { Java.rjb.classpath << REQUIRES  }
+  Java.classpath <<  REQUIRES
 
   class << self
 
