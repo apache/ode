@@ -153,7 +153,6 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 if (messageRoute != null) {
                     if (__log.isDebugEnabled()) {
                         __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " ROUTED TO (grp,index,iid) = (" + messageRoute.getGroupId() + "," + messageRoute.getIndex() + ", " + messageRoute.getTargetInstance().getInstanceId() +  ")");
-   
                     }
                     matchedKey = key;
                     break;
@@ -281,7 +280,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     }
 
     private CorrelationKey computeCorrelationKey(CorrelationSetModel cset, QName messageName, Element msg) {
-        Set<PropertyAliasModel> aliases = cset.getAliases(messageName);
+        List<PropertyAliasModel> aliases = cset.getAliases(messageName);
         String[] values = new String[aliases.size()];
         int jIdx = 0;
         for (PropertyAliasModel alias : aliases) {
@@ -293,7 +292,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 __log.error(emsg, fe);
                 throw new InvalidMessageException(emsg, fe);
             }
-            values[jIdx] = value;
+            values[jIdx++] = value;
         }
 
         return new CorrelationKey(cset.getId(), values);

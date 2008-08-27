@@ -56,8 +56,12 @@ class BpelInstanceWorker implements Runnable {
         _todoQueue.add(runnable);
         // We mayh need to reschedule this thread if we've dropped out of the end of the run() method.
         if (!_running) {
+            System.out.println("! RUNNING");
             _running = true;
             _process.enqueueRunnable(this);
+        } else {
+            System.out.println("RUNNING");
+//            _process.enqueueRunnable(this);
         }
     }
  

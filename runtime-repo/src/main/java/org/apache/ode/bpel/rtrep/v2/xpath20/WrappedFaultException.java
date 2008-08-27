@@ -12,11 +12,13 @@ public class WrappedFaultException extends RuntimeException {
     }
 
     public WrappedFaultException(FaultException message) {
+        super(message);
         _fault = message;
     }
 
     public WrappedFaultException(String message, FaultException cause) {
         super(message, cause);
+        _fault = cause;
     }
 
 }

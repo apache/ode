@@ -66,13 +66,12 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         OXPath10ExpressionBPEL20 expr = _oxpath;
         if(expr.isJoinExpression){
             OLink olink = _oxpath.links.get(variableName.getLocalPart());
-
             try {
                 return _ectx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
             } catch (FaultException e) {
                 throw new WrappedFaultException(e);
             }
-        }else{
+        } else {
             String varName;
             String partName;
             int dotloc = variableName.getLocalPart().indexOf('.');
@@ -102,7 +101,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 // value
                 return new SingletonNodeList(variableNode);
                 
-            }catch(FaultException e){
+            } catch(FaultException e){
                 throw new WrappedFaultException(e);
             }
         }

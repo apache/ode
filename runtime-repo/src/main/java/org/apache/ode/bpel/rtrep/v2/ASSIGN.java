@@ -397,7 +397,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
                             "' value '" + DOMUtils.domToString(lvalue) +"'");
-                getBpelRuntime().commitChanges(lval, lvalue);
+                commitChanges(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             }

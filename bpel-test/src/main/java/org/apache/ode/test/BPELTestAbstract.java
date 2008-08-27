@@ -359,7 +359,7 @@ public abstract class BPELTestAbstract {
 
         for (Thread testThread : testThreads) {
             testThread.start();
-            if (testThreads.size() > 0) Thread.sleep(2000);
+            if (testThreads.size() > 0) Thread.sleep(3000);
         }
 
         for (Thread testThread : testThreads)
@@ -556,7 +556,9 @@ public abstract class BPELTestAbstract {
                 request.setMessage(_invocation.request);
                 _invocation.invokeTime = System.currentTimeMillis();
                 mex.setRequest(request);
+                System.out.println("INVOKE BLCOKING " + _invocation.id);
                 mex.invokeBlocking();
+                System.out.println("DONE INVOKE BLCOKING " + _invocation.id);
 
                 CorrelationStatus cstatus = mex.getCorrelationStatus();
                 if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))

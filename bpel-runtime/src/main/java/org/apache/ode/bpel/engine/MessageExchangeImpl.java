@@ -91,7 +91,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     MessageImpl _request;
 
     /** The point at which this message-exchange will time out. */
-    long _timeout = 30 * 1000;
+    long _timeout = 90 * 1000;
 
     //
     // The following fields need to be volatile, since a random  IL thread may set them.
@@ -130,8 +130,6 @@ abstract class MessageExchangeImpl implements MessageExchange {
     private Set<String> _propNames;
 
     private AckType _ackType;
-
-
 
     public MessageExchangeImpl(
             ODEProcess process,

@@ -86,24 +86,24 @@ public class ExtensionContextImpl implements ExtensionContext {
 	public Node readVariable(OScope.Variable variable)
 			throws FaultException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
-		return _context.fetchVariableData(vi, true);
+		return _context.fetchVariableData(vi, _scopeFrame, true);
 	}
 
 	public void writeVariable(String variableName, Node value)
 			throws FaultException, ExternalVariableModuleException {
 		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		_context.commitChanges(vi, value);
+		_context.commitChanges(vi, _scopeFrame, value);
 	}
 
 	public Node readVariable(String variableName) throws FaultException {
 		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		return _context.fetchVariableData(vi, true);
+		return _context.fetchVariableData(vi, _scopeFrame, true);
 	}
 
 	public void writeVariable(OScope.Variable variable, Node value)
 			throws FaultException, ExternalVariableModuleException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
-		_context.commitChanges(vi, value);
+		_context.commitChanges(vi, _scopeFrame, value);
         VariableModificationEvent vme = new VariableModificationEvent(variable.name);
         vme.setNewValue(value);
         sendEvent(vme);

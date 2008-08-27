@@ -170,8 +170,8 @@ public class OScope extends OActivity {
             return "{CSet " + name + " " + properties + "}";
         }
 
-        public Set<PropertyAliasModel> getAliases(QName messageName) {
-            HashSet<PropertyAliasModel> aliases = new HashSet<PropertyAliasModel>();
+        public List<PropertyAliasModel> getAliases(QName messageName) {
+            List<PropertyAliasModel> aliases = new ArrayList<PropertyAliasModel>();
             OVarType messageType = getOwner().messageTypes.get(messageName);
             for (Object prop : properties) {
                 OProcess.OProperty property = (OProcess.OProperty) prop;

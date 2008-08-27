@@ -82,7 +82,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
 
     public void run() {
-        instance(new SELECT());
+        instance(new SELECT(_scopeFrame));
     }
 
     /**
@@ -103,6 +103,10 @@ class EH_EVENT extends BpelJacobRunnable {
     class SELECT extends BpelJacobRunnable {
 
         private static final long serialVersionUID = 1L;
+
+        public SELECT(ScopeFrame scopeFrame) {
+            _scopeFrame = scopeFrame;
+        }
 
         /**
          * @see org.apache.ode.jacob.JacobRunnable#run()
@@ -127,14 +131,14 @@ class EH_EVENT extends BpelJacobRunnable {
 
                 selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key);
                 getBpelRuntime().select(pickResponseChannel, null, false, new Selector[] { selector} );
-                instance(new WAITING(pickResponseChannel));
+                instance(new WAITING(pickResponseChannel, _scopeFrame));
             } catch(FaultException e){
                 __log.error(e);
                 if (_fault == null) {
                     _fault = createFault(e.getQName(), _oevent);
                 }
                 terminateActive();
-                instance(new WAITING(null));
+                instance(new WAITING(null, _scopeFrame));
             }
         }
     }
@@ -146,8 +150,9 @@ class EH_EVENT extends BpelJacobRunnable {
         private static final long serialVersionUID = 1L;
         private PickResponseChannel _pickResponseChannel;
 
-        private WAITING(PickResponseChannel pickResponseChannel) {
+        private WAITING(PickResponseChannel pickResponseChannel, ScopeFrame scopeFrame) {
             _pickResponseChannel = pickResponseChannel;
+            _scopeFrame = scopeFrame;
         }
 
         public void run() {
@@ -275,7 +280,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                     _fault = createFault(e.getQName(), _oevent);
                                     terminateActive();
                                 }
-                                instance(new WAITING(null));
+                                instance(new WAITING(null, _scopeFrame));
                                 return;
                             }
 
@@ -301,18 +306,18 @@ class EH_EVENT extends BpelJacobRunnable {
 
 
                             if (_terminated || _stopped || _fault != null)
-                                instance(new WAITING(null));
+                                instance(new WAITING(null, _scopeFrame));
                             else
-                                instance(new SELECT());
+                                instance(new SELECT(_scopeFrame));
                         }
 
 
                         public void onTimeout() {
-                            instance(new WAITING(null));
+                            instance(new WAITING(null, _scopeFrame));
                         }
 
                         public void onCancel() {
-                            instance(new WAITING(null));
+                            instance(new WAITING(null, _scopeFrame));
                         }
                     });
 

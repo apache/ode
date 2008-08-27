@@ -30,6 +30,7 @@ import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.IndexedObject;
 import org.w3c.dom.Node;
 
@@ -136,11 +137,11 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
-        if (variable.declaration.extVar != null) {
-            return getBpelRuntime().fetchVariableData(_scopeFrame.resolve(variable.declaration.extVar.related), forWriting);
-        } else {
-            return getBpelRuntime().fetchVariableData(variable, forWriting);
-        }
+        return getBpelRuntime().fetchVariableData(variable, _scopeFrame, forWriting);
+    }
+
+    void commitChanges(VariableInstance var, Node val) throws ExternalVariableModuleException {
+        getBpelRuntime().commitChanges(var, _scopeFrame, val);
     }
 
     public static final class Key implements Serializable {

@@ -105,7 +105,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             if (_contexts.eprContext != null)
                 partnerEpr = _contexts.eprContext.resolveEndpointReference(partnerEprXml);
             else
-                __log.warn("Partner EPR will not be resolved, no EPR context specified!" );
+                __log.debug("Partner EPR will not be resolved, no EPR context specified!" );
         }
 
         EndpointReference myRoleEpr = null;

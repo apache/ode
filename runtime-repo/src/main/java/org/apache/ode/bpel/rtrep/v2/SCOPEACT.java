@@ -59,7 +59,7 @@ public class SCOPEACT extends ACTIVITY {
         
         if (((OScope) _self.o).isolatedScope) {
             __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
-            instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class)));
+            instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class), _scopeFrame));
 
         } else {
             ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntime().createScopeInstance(
@@ -224,9 +224,10 @@ public class SCOPEACT extends ACTIVITY {
 
         final SynchChannel _synchChannel;
 
-        ISOLATEDGUARD(List<IsolationLock> locks, SynchChannel synchChannel) {
+        ISOLATEDGUARD(List<IsolationLock> locks, SynchChannel synchChannel, ScopeFrame scopeFrame) {
             _locksNeeded = locks;
             _synchChannel = synchChannel;
+            _scopeFrame = scopeFrame;
         }
 
         @Override

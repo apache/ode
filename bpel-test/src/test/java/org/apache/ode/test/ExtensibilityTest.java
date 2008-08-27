@@ -20,14 +20,11 @@ package org.apache.ode.test;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.v2.CompilerContext;
-import org.apache.ode.bpel.rapi.ExtensibleElement;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.runtime.extension.AbstractAsyncExtensionOperation;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
-import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractAsyncExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -157,13 +154,14 @@ public class ExtensibilityTest extends BPELTestAbstract {
 			context.complete();
 		}
 
-		@Override
-		public void validate(CompilerContext context, ExtensibleElement element)
-				throws CompilationException {
-			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
-				throw new CompilationException(new CompilationMessage());
-			}
-		}
+//      TODO fix with extensibility validation
+//		@Override
+//		public void validate(CompilerContext context, ExtensibleElement element)
+//				throws CompilationException {
+//			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
+//				throw new CompilationException(new CompilationMessage());
+//			}
+//		}
 	}
 
 }

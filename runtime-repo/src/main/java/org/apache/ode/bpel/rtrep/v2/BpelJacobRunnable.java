@@ -99,13 +99,9 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
     }
 
     Node initializeVariable(VariableInstance var, Node val) throws ExternalVariableModuleException {
-        if (var.declaration.extVar != null) /* external variable */ {
-            return getBpelRuntime().initializeVariable(_scopeFrame.resolve(var.declaration.extVar.related), val);
-        } else /* normal variable */ {
-            return getBpelRuntime().initializeVariable(var, val);
-        }
+        return getBpelRuntime().initializeVariable(var, _scopeFrame, val);
     }
-    
+
     protected long genMonotonic() {
         return getBpelRuntime().genId();
     }

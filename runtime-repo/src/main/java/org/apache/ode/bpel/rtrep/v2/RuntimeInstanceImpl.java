@@ -126,11 +126,11 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
         return _brc.readCorrelation(cset);
     }
 
-    public Node fetchVariableData(VariableInstance variable, boolean forWriting) throws FaultException {
+    public Node fetchVariableData(VariableInstance variable, ScopeFrame scopeFrame, boolean forWriting) throws FaultException {
         if (variable.declaration.extVar != null) {
             // Note, that when using external variables, the database will not contain the value of the
         	// variable, instead we need to go the external variable subsystems.
-        	Element reference = (Element) _brc.fetchVariableData(variable, false);
+        	Element reference = (Element) _brc.fetchVariableData(scopeFrame.resolve(variable.declaration.extVar.related), false);
             try {
                 Node ret = _brc.readExtVar(variable, reference);
                 if (ret == null) {
@@ -168,8 +168,9 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
         }
     }
 
-    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting) throws FaultException {
-        Node val = _brc.fetchVariableData(var, forWriting);
+    public Node fetchVariableData(VariableInstance var, ScopeFrame scopeFrame,
+                                  OMessageVarType.Part part, boolean forWriting) throws FaultException {
+        Node val = fetchVariableData(var, scopeFrame, forWriting);
         if (part != null) return getPartData((Element) val, part);
         return val;
     }
@@ -235,14 +236,14 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     /**
      * Proxy to {@link OdeRTInstanceContext#initializeVariable(Variable, Node)} then write properties.
      */
-    public Node initializeVariable(VariableInstance var, Node val) throws ExternalVariableModuleException {
+    public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame, Node val) throws ExternalVariableModuleException {
         try {
             if (var.declaration.extVar != null) /* external variable */ {
                 if (__log.isDebugEnabled())
                     __log.debug("Initialize external variable: name=" + var.declaration + " value="+DOMUtils.domToString(val));
                 Node reference = null;
                 try {
-                    reference = fetchVariableData(var, true);
+                    reference = fetchVariableData(var, scopeFrame, true);
                 } catch (FaultException fe) {
                     // In this context this is not necessarily a problem, since the assignment may re-init the related var
                 }
@@ -282,13 +283,25 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
         return _brc.convertEndpointReference(epr, lvaluePtr);
     }
 
-    /**
-     * Proxy to {@link OdeRTInstanceContext#commitChanges(Variable, Node) }, then write variable properties.
-     */
-    public void commitChanges(VariableInstance lval, Node lvalue) {
-        _brc.commitChanges(lval, lvalue);
-        writeProperties(lval, lvalue);
+    public void commitChanges(VariableInstance var, ScopeFrame scopeFrame, Node value) throws ExternalVariableModuleException {
+        if (var.declaration.extVar != null) /* external variable */ {
+            __log.debug("Write external variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+            VariableInstance related = scopeFrame.resolve(var.declaration.extVar.related);
+            Node reference = null;
+            try {
+                reference = fetchVariableData(var, scopeFrame, true);
+            } catch (FaultException fe) {
+                // In this context this is not necessarily a problem, since the assignment may re-init the related var
+            }
+            VariableContext.ValueReferencePair vrp  = _brc.writeExtVar(var, reference, value);
+            commitChanges(related, scopeFrame, vrp.reference);
+        } else /* normal variable */ {
+            __log.debug("Write variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+            _brc.commitChanges(var, value);
+        }
+        writeProperties(var, value);
     }
+
 
     /**
      * Proxy to {@link BpelRuntimeContext# }.
@@ -403,8 +416,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
      * Proxy to {@link IOContext#getPartnerResponseType(String) }.
      */
     public QName getPartnerResponseType(String mexId) {
-        // TODO Auto-generated method stub
-        return null;
+        return _brc.getPartnerResponseType(mexId);
     }
 
     /**

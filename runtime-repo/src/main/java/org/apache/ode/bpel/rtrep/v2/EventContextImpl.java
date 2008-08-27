@@ -68,7 +68,7 @@ public class EventContextImpl implements EventContext
         {
             OScope.Variable var = __scope.getVisibleVariable(varName);
             VariableInstance varInstance = new VariableInstance(__scopeInstanceId, var);
-            Node varNode = __runtimeContext.fetchVariableData(varInstance, false);
+            Node varNode = __runtimeContext.fetchVariableData(varInstance, null, false);
             value = DOMUtils.domToString(varNode);
         }
         catch(Throwable e)

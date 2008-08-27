@@ -75,7 +75,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
             VariableReadEvent vre = new VariableReadEvent();
             vre.setVarName(varInstance.declaration.name);
             sendEvent(vre);
-            ret = _native.fetchVariableData(varInstance, part, false);
+            ret = _native.fetchVariableData(varInstance, _scopeInstance, part, false);
         }
         return ret;
     }

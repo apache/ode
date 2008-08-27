@@ -87,7 +87,7 @@ class EH_ALARM extends BpelJacobRunnable {
             }
 
         // We reduce to waiting for the alarm to be triggered.
-        instance(new WAIT(alarm));
+        instance(new WAIT(alarm, _scopeFrame));
     }
 
     protected EvaluationContext getEvaluationContext() {
@@ -107,8 +107,9 @@ class EH_ALARM extends BpelJacobRunnable {
          * Concretion constructor.
          * @param alarm date at which time to fire
          */
-        WAIT(Calendar alarm) {
+        WAIT(Calendar alarm, ScopeFrame scopeFrame) {
             _alarm = alarm;
+            _scopeFrame = scopeFrame;
         }
 
         public void run() {
@@ -122,7 +123,7 @@ class EH_ALARM extends BpelJacobRunnable {
 
                     public void onTimeout() {
                         // This is what we are waiting for, fire the activity
-                        instance(new FIRE());
+                        instance(new FIRE(_scopeFrame));
                     }
 
                     public void onCancel() {
@@ -144,7 +145,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 })));
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
-                instance(new FIRE());
+                instance(new FIRE(_scopeFrame));
             }
 
         }
@@ -156,13 +157,17 @@ class EH_ALARM extends BpelJacobRunnable {
     private class FIRE extends BpelJacobRunnable {
         private static final long serialVersionUID = -7261315204412433250L;
 
+        public FIRE(ScopeFrame scopeFrame) {
+            this._scopeFrame = scopeFrame;
+        }
+
         public void run() {
             // Start the child activity.
             ActivityInfo child = new ActivityInfo(genMonotonic(),
                     _oalarm.activity,
                     newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
             instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
-            instance(new ACTIVE(child));
+            instance(new ACTIVE(child, _scopeFrame));
         }
     }
 
@@ -177,8 +182,9 @@ class EH_ALARM extends BpelJacobRunnable {
         /** Indicates whether our parent has requested a stop. */
         private boolean _stopped = false;
 
-        ACTIVE(ActivityInfo activity) {
+        ACTIVE(ActivityInfo activity, ScopeFrame scopeFrame) {
             _activity = activity;
+            _scopeFrame = scopeFrame;
         }
 
         public void run() {
@@ -201,7 +207,7 @@ class EH_ALARM extends BpelJacobRunnable {
                             _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
                             return;
                         }
-                        instance(new WAIT(next));
+                        instance(new WAIT(next, _scopeFrame));
                     } else {
                         _psc.completed(faultData, _comps);
                     }

@@ -36,7 +36,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
     public Future<Status> invokeAsync() {
         if (_future != null) return _future;
-
         if (_request == null) throw new IllegalStateException("Must call setRequest(...)!");
 
         _future = new ResponseFuture();
@@ -66,6 +65,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         try {
             future.get(Math.max(_timeout, 1), TimeUnit.MILLISECONDS);
             _done = true;
+            System.out.println("EXIT BLOCKING.");
             return getStatus();
         } catch (InterruptedException e) {
             throw new BpelEngineException(e);
@@ -91,16 +91,14 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         }
 
         public Status get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-
             synchronized (this) {
                 if (_status != null)
                     return _status;
 
                 this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
+                System.out.println("EXIT WAIT LOOP.");
 
-                if (_status == null)
-                    throw new TimeoutException();
-
+                if (_status == null) throw new TimeoutException();
                 return _status;
             }
         }
@@ -114,7 +112,9 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         }
 
         void done(Status status) {
+            System.out.println("DONE1.");
             synchronized (this) {
+                System.out.println("DONE2.");
                 _status = status;
                 this.notifyAll();
             }
@@ -146,6 +146,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 _failureType = failureType;
                 _explanation = explanation;
                 ack(ackType);
+                System.out.println("FUTURE DONE.");
                 _future.done(Status.ACK);
 
             }
