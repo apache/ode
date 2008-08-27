@@ -73,7 +73,7 @@ class ASSIGN extends ACTIVITY {
 
     private static final ASSIGNMessages __msgs = MessageBundle
             .getMessages(ASSIGNMessages.class);
-
+    
     public ASSIGN(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
     }
@@ -91,6 +91,20 @@ class ASSIGN extends ACTIVITY {
                 	invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation)operation);
                 }
             } catch (FaultException fault) {
+            	if (operation instanceof OAssign.Copy) {
+            		if (((OAssign.Copy) operation).ignoreMissingFromData) {
+            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+            					(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
+            				continue;
+    					}
+            		}
+            		if (((OAssign.Copy) operation).ignoreUninitializedFromVariable) {
+            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+            					(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
+            				continue;
+            			}
+            		}
+            	}
                 faultData = createFault(fault.getQName(), operation, fault
                         .getMessage());
                 break;
@@ -133,7 +147,7 @@ class ASSIGN extends ACTIVITY {
                     tempwrapper.appendChild(val);
                     val = tempwrapper;
                 } else doc.appendChild(val);
-                // Only external variables need to be initialized, others are new and going to be overwtitten
+                // Only external variables need to be initialized, others are new and going to be overwritten
                 if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
                 else lval = val;
             } else
@@ -203,13 +217,13 @@ class ASSIGN extends ACTIVITY {
         } else if (from instanceof OAssign.Expression) {
             List<Node> l;
             OExpression expr = ((OAssign.Expression) from).expression;
-
+            
             l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr, getEvaluationContext());
 
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure,msg);
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
@@ -425,6 +439,19 @@ class ASSIGN extends ACTIVITY {
             se.setLineNo(ocopy.debugInfo.startLine);
         sendEvent(se);
     }
+
+	@Override
+	Node fetchVariableData(VariableInstance variable, boolean forWriting)
+			throws FaultException {
+		try {
+			return super.fetchVariableData(variable, forWriting);
+		} catch (FaultException fe) {
+			if (forWriting) {
+				fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
+			}
+			throw fe;
+		}
+	}
 
 	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
