@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime;
+package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Collection;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -32,41 +32,27 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OEmpty;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.o.OThrow;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.extension.ExtensionOperation;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.rtrep.v2.channels.*;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.junit.Assert;
 
 /**
  * Test core BPEL processing capabilities.
  */
-public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
+public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     private boolean _completedOk;
 
     private boolean _terminate;
 
-    private FaultData _fault;
+    private FaultInfo _fault;
 
     private ExecutionQueueImpl _soup;
 
@@ -82,54 +68,16 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         _fault = null;
         _soup = new ExecutionQueueImpl(CoreBpelTest.class.getClassLoader());
         _vpu = new JacobVPU(_soup);
-        _vpu.registerExtension(BpelRuntimeContext.class, this);
-        _pid = new Long(19355);
+        _vpu.registerExtension(OdeRTInstanceContext.class, this);
+        _pid = (long) 19355;
     }
 
     public Long getPid() {
         return _pid;
     }
 
-    public boolean isVariableInitialized(VariableInstance variable) {
-        return false;
-    }
-
-    public Long createScopeInstance(Long parentScopeId, OScope scopeType) {
-        return new Long((long) (Math.random() * 1000L) + scopeType.getId());
-    }
-
-    public Node fetchVariableData(VariableInstance var, boolean forWriting) throws FaultException {
-        return null;
-    }
-
-    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
-            throws FaultException {
-        return null;
-    }
-
-    public String readProperty(VariableInstance var, OProcess.OProperty property) throws FaultException {
-        return null;
-    }
-
-    public Node initializeVariable(VariableInstance var, Node initData) {
-        return null;
-    }
-
-    public void commitChanges(VariableInstance var, Node changes) {
-    }
-
-    public boolean isCorrelationInitialized(CorrelationSetInstance cset) {
-        return false;
-    }
-
-    public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
-        return null;
-    }
-
-    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
-    }
-
-    public void cancel(TimerResponseChannel timerResponseChannel) {
+    public Long createScopeInstance(Long parentScopeId, String scopename, int scopemodelid) {
+        return (long) (Math.random() * 1000L) + scopemodelid;
     }
 
     public void completedOk() {
@@ -140,36 +88,86 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         _fault = faultData;
     }
 
-    public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors)
-            throws FaultException {
-    }
-
-    public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault)
-            throws FaultException {
-    }
-
-    public String invoke(PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
-            InvokeResponseChannel invokeResponseChannel) {
-        return null;
-    }
-
-    public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
-    }
-
     public void terminate() {
         _terminate = true;
     }
 
-    public void sendEvent(ProcessInstanceEvent event) {
+    public boolean isCorrelationInitialized(CorrelationSetInstance correlationSet) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public ExpressionLanguageRuntimeRegistry getExpLangRuntime() {
-        return null;
+    public String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey ckeyVal) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame, Node val) throws ExternalVariableModuleException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Long createScopeInstance(Long scopeInstanceId, OScope scopedef) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
-    
+
+    public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void registerTimer(TimerResponseChannel timerChannel, Date future) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public ExpressionLanguageRuntimeRegistry getExpLangRuntime() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void cancel(PickResponseChannel responseChannel) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void commitChanges(VariableInstance var, ScopeFrame scopeFrame, Node value) throws ExternalVariableModuleException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Node fetchVariableData(VariableInstance var, ScopeFrame scopeFrame, OMessageVarType.Part part, boolean forWriting) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void sendEvent(ScopeEvent event) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void sendEvent(ProcessInstanceStartedEvent evt) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isVariableInitialized(VariableInstance var) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Node fetchVariableData(VariableInstance variable, ScopeFrame scopeFrame, boolean forWriting) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void testEmptyProcess() {
         OProcess proc = new OProcess("2.0");
         proc.procesScope = new OScope(proc, null);
@@ -177,9 +175,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testThrow() {
@@ -191,9 +189,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertFalse(_completedOk);
-        assertFalse(_terminate);
-        assertEquals(_fault.getFaultName(), othrow.faultName);
+        Assert.assertFalse(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertEquals(_fault.getFaultName(), othrow.faultName);
     }
 
     public void testFaultHandling() {
@@ -208,9 +206,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         ocatch.activity = new OEmpty(proc, ocatch);
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testOneElementSequence() {
@@ -222,9 +220,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testTwoElementSequence() {
@@ -237,9 +235,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testEmptyFlow() {
@@ -249,9 +247,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testSingleElementFlow() {
@@ -263,9 +261,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testTwoElementFlow() {
@@ -278,9 +276,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertTrue(_completedOk);
-        assertFalse(_terminate);
-        assertNull(_fault);
+        Assert.assertTrue(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertNull(_fault);
     }
 
     public void testFlowTermination() {
@@ -300,9 +298,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
         run(proc);
 
-        assertFalse(_completedOk);
-        assertFalse(_terminate);
-        assertEquals(_fault.getFaultName(), othrow.faultName);
+        Assert.assertFalse(_completedOk);
+        Assert.assertFalse(_terminate);
+        Assert.assertEquals(_fault.getFaultName(), othrow.faultName);
     }
 
     private void run(OProcess proc) {
@@ -311,7 +309,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
             _vpu.execute();
         }
 
-        assertTrue(_soup.isComplete());
+        Assert.assertTrue(_soup.isComplete());
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
@@ -352,7 +350,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-    public Node getPartData(Element message, Part part) {
+    public Node getPartData(Element message, OMessageVarType.Part part) {
         return null;
     }
 
@@ -360,7 +358,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-    public void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException {
+    public void writeEndpointReference(PartnerLinkInstance variable, Element data) {
     }
 
     public Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink) {
@@ -432,7 +430,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         
     }
 
-	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
+	public Node readExtVar(OScope.Variable variable, Node reference) throws ExternalVariableModuleException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -442,7 +440,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 		return null;
 	}
 
-	public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
+	public VariableContext.ValueReferencePair writeExtVar(OScope.Variable variable, Node reference, Node value)
+            throws ExternalVariableModuleException {
 		// TODO Auto-generated method stub
 		return null;
 	}

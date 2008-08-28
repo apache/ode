@@ -41,7 +41,7 @@ public class EventContextImpl implements EventContext
     /**
      * BPEL Runtime Context
      */
-    private RuntimeInstanceImpl __runtimeContext;
+    private OdeInternalInstance __runtimeContext;
 
     /**
      * Constructor
@@ -49,7 +49,7 @@ public class EventContextImpl implements EventContext
      * @param __scopeInstanceId Scope Instance ID
      * @param __runtimeContext BPEL Runtime Context
      */
-    public EventContextImpl(OScope __scope, Long __scopeInstanceId, RuntimeInstanceImpl __runtimeContext)
+    public EventContextImpl(OScope __scope, Long __scopeInstanceId, OdeInternalInstance __runtimeContext)
     {
         this.__scope = __scope;
         this.__scopeInstanceId = __scopeInstanceId;

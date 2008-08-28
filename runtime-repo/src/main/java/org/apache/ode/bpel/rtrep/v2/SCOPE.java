@@ -290,7 +290,7 @@ class SCOPE extends ACTIVITY {
                         linksNeedingDPE.removeAll(catchBlock.outgoingLinks);
 
                         // We have to create a scope for the catch block.
-                        RuntimeInstanceImpl ntive = getBpelRuntime();
+                        OdeInternalInstance ntive = getBpelRuntime();
 
                         ActivityInfo faultHandlerActivity = new ActivityInfo(genMonotonic(), catchBlock,
                                 newChannel(TerminationChannel.class,"FH"), newChannel(ParentScopeChannel.class,"FH"));

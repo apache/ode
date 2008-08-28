@@ -8,12 +8,12 @@ public interface OdeRTInstance {
 
     enum InvokeResponseType {
         REPLY,
-        FAULT, 
+        FAULT,
         FAILURE
     }
 
     /**
-     * Set the execution context. 
+     * Set the execution context.
      * @param ctx
      */
     void setContext(OdeRTInstanceContext ctx);
@@ -27,25 +27,25 @@ public interface OdeRTInstance {
 
 
     /**
-     * Called when the engine detects a matching selector (i.e. when a partner invokes the process). 
-     * 
-     * @param selectId selector identifier 
+     * Called when the engine detects a matching selector (i.e. when a partner invokes the process).
+     *
+     * @param selectId selector identifier
      * @param messageExchangeId message exchange identifier
      * @param selectorIdx which selector in the set matched
      */
     void onSelectEvent(String selectId, String messageExchangeId, int selectorIdx);
 
     /**
-     * Called when an invoke received a response. 
+     * Called when an invoke received a response.
      * @param invokeId
      * @param mexid
      */
     void onInvokeResponse(String invokeId, InvokeResponseType irt, String mexid);
 
-    
+
     /**
-     * Called when the engine determines that a registered timer is ready to fire. 
-     * 
+     * Called when the engine determines that a registered timer is ready to fire.
+     *
      * @param timerId
      */
     void onTimerEvent(String timerId);
@@ -64,12 +64,10 @@ public interface OdeRTInstance {
 
     /**
      * Save the execution state into the given output stream, and return a cached representation of the state. The cached
-     * representation will be used by the engine to speed up state recovery (i.e. when de-serializing can be avoided).   
-     * 
-     * @return cached 
+     * representation will be used by the engine to speed up state recovery (i.e. when de-serializing can be avoided).
+     *
+     * @return cached
      */
     Object saveState(OutputStream os) throws IOException ;
-    
 
-	
 }

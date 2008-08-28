@@ -34,7 +34,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 /**
- * Implementation of {@link OdeRTInstance} for the "modern" runtime. This class also serves as a repository for kitchen sink type
+ * Implementation of {@link OdeInternalInstance} for the "modern" runtime. This class also serves as a repository for kitchen sink type
  * methods that the activities all use. A lot of these methods are simply deferals to similar methods on
  * {@link OdeRTInstanceContext}; however here these methods use representation-specific classes (e.g.
  * {@link OPartnerLink) while the {@link OdeRTInstanceContext} methods use only the general (non-representation specific) interfaces
@@ -43,7 +43,7 @@ import org.w3c.dom.Text;
  * @author Maciej Szefler
  * 
  */
-public class RuntimeInstanceImpl implements OdeRTInstance {
+public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     private static final Log __log = LogFactory.getLog(RuntimeInstanceImpl.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -584,7 +584,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#onMyRoleMessageExchange(java.lang.String, java.lang.String)
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#onMyRoleMessageExchange(java.lang.String, java.lang.String)
      */
     public void onSelectEvent(final String selectId, final String messageExchangeId, final int selectorIdx) {
         getORM().associate(selectId, messageExchangeId);
@@ -603,7 +603,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#onTimerEvent(java.lang.String)
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#onTimerEvent(java.lang.String)
      */
     public void onTimerEvent(final String timerId) {
         getORM().cancel(timerId);
@@ -622,7 +622,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#execute()
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#execute()
      */
     public boolean execute() {
         return _vpu.execute();
@@ -631,7 +631,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#onInvokeResponse(java.lang.String, java.lang.String)
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#onInvokeResponse(java.lang.String, java.lang.String)
      */
     public void onInvokeResponse(final String invokeId, InvokeResponseType irt, final String mexid) {
         // NOTE: do the switch outside the inject, since we don't want to end up serializing InvokeResponseType objects!
@@ -704,7 +704,7 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#saveState()
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#saveState()
      */
     public Object saveState(OutputStream bos) throws IOException {
         _soup.write(bos);
@@ -712,14 +712,14 @@ public class RuntimeInstanceImpl implements OdeRTInstance {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#createInstance(java.lang.String)
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#createInstance(java.lang.String)
      */
     public void onCreateInstance(String messageExchangeId) {
         _vpu.inject(new PROCESS(_runtime._oprocess));
     }
 
     /* (non-Javadoc)
-     * @see org.apache.ode.bpel.engine.rapi.OdeRTInstance#setContext(org.apache.ode.bpel.engine.rapi.OdeRTInstanceContext)
+     * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#setContext(org.apache.ode.bpel.engine.rapi.OdeRTInstanceContext)
      */
     public void setContext(OdeRTInstanceContext ctx) {
         _brc = ctx;

@@ -20,7 +20,6 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
-import org.apache.ode.bpel.compiler.v2.SourceLocationImpl;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import java.net.URI;

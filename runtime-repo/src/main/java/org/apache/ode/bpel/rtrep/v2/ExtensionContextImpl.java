@@ -43,13 +43,13 @@ import org.w3c.dom.Node;
 public class ExtensionContextImpl implements ExtensionContext {
 	private static final Log __log = LogFactory.getLog(ExtensionContextImpl.class);
 	
-	private RuntimeInstanceImpl _context;
+	private OdeInternalInstance _context;
 	private ScopeFrame _scopeFrame;
 	private ActivityInfo _activityInfo;
 	
 	private boolean hasCompleted = false;
 
-	public ExtensionContextImpl(ActivityInfo activityInfo, ScopeFrame scopeFrame, RuntimeInstanceImpl context) {
+	public ExtensionContextImpl(ActivityInfo activityInfo, ScopeFrame scopeFrame, OdeInternalInstance context) {
 		_activityInfo = activityInfo;
 		_context = context;
 		_scopeFrame = scopeFrame;

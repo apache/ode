@@ -257,7 +257,7 @@ define "ode" do
       BACKPORT, COMMONS.logging, COMMONS.httpclient, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
       JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 
-    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "il-common"),
+    test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "il-common", "runtime-repo"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, XALAN

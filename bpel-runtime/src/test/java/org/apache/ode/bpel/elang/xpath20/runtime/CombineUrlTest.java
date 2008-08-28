@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.ode.bpel.rtrep.v2.xpath20.JaxpFunctionResolver;
+
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */

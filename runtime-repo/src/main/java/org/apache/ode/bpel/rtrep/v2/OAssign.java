@@ -64,6 +64,8 @@ public class OAssign extends OActivity {
         public LValue to;
         public RValue from;
         public boolean keepSrcElementName;
+        public boolean ignoreMissingFromData;
+        public boolean ignoreUninitializedFromVariable;
 
         public Copy(OProcess owner) {
             super(owner);

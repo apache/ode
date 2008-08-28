@@ -39,7 +39,7 @@ public class PROCESS extends BpelJacobRunnable {
     }
 
     public void run() {
-        RuntimeInstanceImpl ntive = getBpelRuntime();
+        OdeInternalInstance ntive = getBpelRuntime();
         Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
 
         createGlobals();
@@ -62,7 +62,7 @@ public class PROCESS extends BpelJacobRunnable {
             }
 
             public void completed(FaultData fault, Set<CompensationHandler> compensations) {
-                RuntimeInstanceImpl nativeAPI = getBpelRuntime();
+                OdeInternalInstance nativeAPI = getBpelRuntime();
                 if (fault == null) {
                     nativeAPI.completedOk();
                 } else {

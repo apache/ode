@@ -24,6 +24,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
+import org.apache.ode.bpel.rtrep.v2.OdeInternalInstance;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -45,8 +46,8 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
 
     protected ScopeFrame _scopeFrame;
     
-    protected RuntimeInstanceImpl getBpelRuntime() {
-        RuntimeInstanceImpl nativeApi = (RuntimeInstanceImpl) JacobVPU.activeJacobThread().getExtension(OdeRTInstanceContext.class);
+    protected OdeInternalInstance getBpelRuntime() {
+        OdeInternalInstance nativeApi = (OdeInternalInstance) JacobVPU.activeJacobThread().getExtension(OdeRTInstanceContext.class);
         assert nativeApi != null;
         return nativeApi;
     }

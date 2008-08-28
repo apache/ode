@@ -22,13 +22,9 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.v2.xpath20.XPath20ExpressionCompilerBPEL20;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.rtrep.v2.xpath20.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.rtrep.v2.xpath20.XPath20ExpressionRuntime;
+import org.apache.ode.bpel.rtrep.v2.*;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -108,16 +104,16 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         assertNull(DOMUtils.getFirstChildElement((Element)retVal));
     }
 
-    public Node readVariable(Variable variable, Part part) throws FaultException {
+    public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) throws FaultException {
         return _vars.get(variable.name);
     }
 
-    public Node getPartData(Element message, Part part) throws FaultException {
+    public Node getPartData(Element message, OMessageVarType.Part part) throws FaultException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public String readMessageProperty(Variable variable, OProperty property) throws FaultException {
+    public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property) throws FaultException {
         // TODO Auto-generated method stub
         return null;
     }

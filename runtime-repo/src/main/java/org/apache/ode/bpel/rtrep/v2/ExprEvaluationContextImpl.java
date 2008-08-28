@@ -36,7 +36,7 @@ import org.w3c.dom.Node;
 public class ExprEvaluationContextImpl implements EvaluationContext {
     private static final Log __log = LogFactory.getLog(ExprEvaluationContextImpl.class);
 
-	private RuntimeInstanceImpl _native;
+	private OdeInternalInstance _native;
 
 	private ScopeFrame _scopeInstance;
 
@@ -44,17 +44,17 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 
 	private Node _root;
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, RuntimeInstanceImpl ntv) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, OdeInternalInstance ntv) {
         _native = ntv;
         _scopeInstance = scopeInstace;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, RuntimeInstanceImpl ntv, Node root) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace, OdeInternalInstance ntv, Node root) {
         this(scopeInstace, ntv);
         _root = root;
     }
 
-    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce, RuntimeInstanceImpl ntv, Map<OLink, Boolean> linkVals) {
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce, OdeInternalInstance ntv, Map<OLink, Boolean> linkVals) {
         this(scopeInstnce, ntv);
         _linkVals = linkVals;
     }
