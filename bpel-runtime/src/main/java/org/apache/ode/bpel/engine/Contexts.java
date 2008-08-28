@@ -43,7 +43,7 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.rapi.ExtensionBundle;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
@@ -65,7 +65,7 @@ class Contexts {
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
 
 	/** Global extension bundle registry **/
-    final Map<String, ExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundle>();
+    final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
     
     /** Mapping from external variable engine identifier to the engine implementation. */
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();

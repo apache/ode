@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.rtrep.common.extension;
+package org.apache.ode.bpel.extension;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.w3c.dom.Element;
@@ -35,6 +35,6 @@ import org.w3c.dom.Element;
  */
 public interface ExtensionOperation {
 
-	void run(ExtensionContext context, Element element) throws FaultException;
+	void run(Object context, Element element) throws FaultException;
 	
 }

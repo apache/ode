@@ -39,7 +39,7 @@ import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.v2.channels.*;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.junit.Assert;

@@ -17,11 +17,11 @@ import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.v2.channels.*;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
-import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.IncompleteKeyException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -369,10 +369,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     }
 
     public ExtensionOperation createExtensionActivityImplementation(QName name) {
-        if (name == null) {
-            return null;
-        }
-        AbstractExtensionBundle bundle = _runtime._extensionRegistry.get(name.getNamespaceURI());
+        if (name == null) return null;
+        ExtensionBundleRuntime bundle = _runtime._extensionRegistry.get(name.getNamespaceURI());
         if (bundle == null) {
             return null;
         } else {

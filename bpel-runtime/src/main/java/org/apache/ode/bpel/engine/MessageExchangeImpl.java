@@ -71,37 +71,27 @@ abstract class MessageExchangeImpl implements MessageExchange {
     //
     
     final Contexts _contexts;
-
     final ODEProcess _process;
-
     final PartnerLinkModel _oplink;
-
     /** Message-exchange id. */
     final String _mexId;
-
     final PortType _portType;
-
     final Operation _operation;
 
     /** Instance identifier. */
     Long _iid;
-
     EndpointReference _epr;
-
     MessageImpl _request;
 
     /** The point at which this message-exchange will time out. */
-    long _timeout = 90 * 1000;
+    long _timeout = 30 * 1000;
 
     //
     // The following fields need to be volatile, since a random  IL thread may set them.
     //
     private volatile Status _status = Status.NEW;
-
     volatile QName _fault;
-
     volatile String _explanation;
-
     volatile MessageImpl _response;
 
     /** 

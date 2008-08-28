@@ -556,9 +556,7 @@ public abstract class BPELTestAbstract {
                 request.setMessage(_invocation.request);
                 _invocation.invokeTime = System.currentTimeMillis();
                 mex.setRequest(request);
-                System.out.println("INVOKE BLCOKING " + _invocation.id);
                 mex.invokeBlocking();
-                System.out.println("DONE INVOKE BLCOKING " + _invocation.id);
 
                 CorrelationStatus cstatus = mex.getCorrelationStatus();
                 if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))

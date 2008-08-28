@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.rapi.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.rapi.ProcessModel;

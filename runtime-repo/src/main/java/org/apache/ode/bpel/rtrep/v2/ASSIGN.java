@@ -32,7 +32,7 @@ import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;

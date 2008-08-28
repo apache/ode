@@ -23,7 +23,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.utils.DOMUtils;

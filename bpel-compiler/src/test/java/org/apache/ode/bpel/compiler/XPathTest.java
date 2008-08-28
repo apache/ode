@@ -32,7 +32,7 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
-import org.apache.ode.bpel.rapi.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL11;
 import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL20;

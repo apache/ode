@@ -18,6 +18,7 @@ import org.apache.ode.bpel.rtrep.v2.OdeInternalInstance;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
 import org.apache.ode.bpel.rapi.OdeRTInstance;
 import org.apache.ode.bpel.rtrep.common.ConfigurationException;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -38,7 +39,7 @@ public class RuntimeImpl implements OdeRuntime {
     Set<String> _mustUnderstandExtensions;
     ReplacementMap _replacementMap;
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
-    Map<String, AbstractExtensionBundle> _extensionRegistry;
+    Map<String, ExtensionBundleRuntime> _extensionRegistry;
 
     /**
      * Initialize according to process configuration.
@@ -153,6 +154,10 @@ public class RuntimeImpl implements OdeRuntime {
         _replacementMap = null;
         _expLangRuntimeRegistry = null;
         _extensionRegistry = null;
+    }
+
+    public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
+        _extensionRegistry = extensionRegistry;
     }
 
     /**

@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.rtrep.common.extension;
 
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 
 /**
@@ -26,15 +27,9 @@ import org.w3c.dom.Element;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public abstract class AbstractAsyncExtensionOperation implements //ExtensionValidator,
-															ExtensionOperation {
+public abstract class AbstractAsyncExtensionOperation implements ExtensionOperation {
 
-    // TODO check what to do with compiler context
-//	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
-//		// default behavior: pass
-//	}
-
-	public abstract void run(ExtensionContext context, Element element)
+	public abstract void run(Object context, Element element)
 			throws FaultException;
 	
 }

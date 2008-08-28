@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
@@ -37,7 +38,9 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.rapi.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -336,28 +339,40 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
- 	private void registerExtensionActivityBundles() {
-        String extensionsStr = _ode._config.getExtensionActivityBundles();
-        if (extensionsStr != null) {
-        	Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
-        	// TODO replace StringTokenizer by regex
-            for (String bundleCN : extensionsStr.split("\\s*(,|;)\\s*")) {
-            	try {
-                	// instantiate bundle
-                	AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
-                	
-                	// register extension bundle (BPEL server)
-                	_ode._server.registerExtensionBundle(bundle);
-                	
-                	//add validators
-                	validators.putAll(bundle.getExtensionValidators());
+    private void registerExtensionActivityBundles() {
+        String extensionsRTStr = _ode._config.getExtensionActivityBundlesRT();
+        String extensionsValStr = _ode._config.getExtensionActivityBundlesValidation();
+        if (extensionsRTStr != null) {
+            // TODO replace StringTokenizer by regex
+            for (StringTokenizer tokenizer = new StringTokenizer(extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
+                String bundleCN = tokenizer.nextToken();
+                try {
+                    // instantiate bundle
+                    ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class.forName(bundleCN).newInstance();
+                    // register extension bundle (BPEL server)
+                    _ode._server.registerExtensionBundle(bundleRT);
                 } catch (Exception e) {
-                    __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
+                    __log.warn("Couldn't register the extension bundle runtime " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
                 }
             }
-        	// register extension bundle (BPEL store)
-        	_ode._store.setExtensionValidators(validators);
+        }
+        if (extensionsValStr != null) {
+            Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+            for (StringTokenizer tokenizer = new StringTokenizer(extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
+                String bundleCN = tokenizer.nextToken();
+                try {
+                    // instantiate bundle
+                    ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class.forName(bundleCN).newInstance();
+                    //add validators
+                    validators.putAll(bundleVal.getExtensionValidators());
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the extension bundle validator " + bundleCN + ", the class couldn't be " +
+                            "loaded properly.");
+                }
+            }
+            // register extension bundle (BPEL store)
+            _ode._store.setExtensionValidators(validators);
         }
     }
 

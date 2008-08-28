@@ -1026,7 +1026,6 @@ public class ODEProcess {
             // the stack.
             if (old == Status.ASYNC) {
                 MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao, this);
-                System.out.println("ON ASYNC ACK");
                 mymex.onAsyncAck(mexdao);
                 try {
                     _contexts.mexContext.onMyRoleMessageExchangeStateChanged(mymex);

@@ -25,11 +25,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.rapi.ExtensionBundle;
-import org.apache.ode.bpel.rapi.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionBundleValidation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 
 import javax.xml.namespace.QName;
-//import org.apache.ode.bpel.compiler.api.ExtensionValidator;
 
 /**
 * Abstract class that bundles and registers <code>&lt;extensionActivity&gt;</code> and
@@ -37,7 +38,8 @@ import javax.xml.namespace.QName;
 *  
 * @author Tammo van Lessen (University of Stuttgart)
 */
-public abstract class AbstractExtensionBundle implements ExtensionBundle {
+public abstract class AbstractExtensionBundle implements ExtensionBundleRuntime, ExtensionBundleValidation {
+
 	private static Log __log = LogFactory.getLog(AbstractExtensionBundle.class);
 	private Map<String, Class<? extends ExtensionOperation>> extensionsByName = new HashMap<String, Class<? extends ExtensionOperation>>();
 
@@ -53,7 +55,7 @@ public abstract class AbstractExtensionBundle implements ExtensionBundle {
 	public abstract void registerExtensionActivities();
 
 	/**
-	 * Register an {@link ExtensionOperation} implementation as <code>&lt;extensionActivity&gt;</code>.
+	 * Register an {@link org.apache.ode.bpel.extension.ExtensionOperation} implementation as <code>&lt;extensionActivity&gt;</code>.
 	 *
 	 * @param localName
 	 * @param activity

@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.rtrep.common.extension;
 
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 
 /**
@@ -26,18 +27,13 @@ import org.w3c.dom.Element;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public abstract class AbstractSyncExtensionOperation implements //ExtensionValidator,
-															ExtensionOperation {
-
-    // TODO check what to do with compiler context
-//	public void validate(CompilerContext context, ExtensibleElement element) throws CompilationException {
-//		// default behavior: pass
-//	}
+public abstract class AbstractSyncExtensionOperation implements ExtensionOperation {
 
 	protected abstract void runSync(ExtensionContext context, Element element) throws FaultException;
 	
-	public void run(ExtensionContext context, Element element)
+	public void run(Object contexto, Element element)
 			throws FaultException {
+        ExtensionContext context = (ExtensionContext) contexto;
 		try {
 			runSync(context, element);
 			context.complete();

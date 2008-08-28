@@ -2,9 +2,11 @@ package org.apache.ode.bpel.rapi;
 
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
+import java.util.Map;
 
 public interface OdeRuntime {
     
@@ -19,4 +21,6 @@ public interface OdeRuntime {
     void clear();
 
     String extractProperty(Element msgData, PropertyAliasModel alias, String target) throws FaultException;
+
+    void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry);
 }

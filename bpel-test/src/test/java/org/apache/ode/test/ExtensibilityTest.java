@@ -20,11 +20,14 @@ package org.apache.ode.test;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.api.CompilationMessage;
+import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.common.extension.AbstractAsyncExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensibleElement;
 import org.apache.ode.utils.DOMUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -119,18 +122,19 @@ public class ExtensibilityTest extends BPELTestAbstract {
 	public static class TestExtensionActivity implements ExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(ExtensionContext context,
+		public void run(Object context,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
-			context.complete();
+			((ExtensionContext)context).complete();
 		}
 	}
 	
 	public static class TestExtensionAssignOperation implements ExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(ExtensionContext context, Element element)
+		public void run(Object contexto, Element element)
 				throws FaultException {
+            ExtensionContext context = (ExtensionContext) contexto;
 			//Node val = context.readVariable("myVar");
 			StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			sb.append("<message><TestPart>Small</TestPart></message>");
@@ -148,20 +152,18 @@ public class ExtensibilityTest extends BPELTestAbstract {
 	public static class TestExtensionValidatorActivity extends AbstractAsyncExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(ExtensionContext context,
+		public void run(Object context,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
-			context.complete();
+			((ExtensionContext)context).complete();
 		}
 
-//      TODO fix with extensibility validation
-//		@Override
-//		public void validate(CompilerContext context, ExtensibleElement element)
-//				throws CompilationException {
-//			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
-//				throw new CompilationException(new CompilationMessage());
-//			}
-//		}
+		public void validate(CompilerContext context, ExtensibleElement element)
+				throws CompilationException {
+			if (element.getNestedElement().getTextContent().trim().equals(TestExtensionBundle.cmpString)) {
+				throw new CompilationException(new CompilationMessage());
+			}
+		}
 	}
 
 }

@@ -81,7 +81,8 @@ public class OdeConfigProperties {
 
     public static final String PROP_DAOCF = "dao.factory";
     
-    public static final String PROP_EXTENSION_BUNDLES= "extension.bundles";
+    public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
+    public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
 
     private File _cfgFile;
 
@@ -264,8 +265,12 @@ public class OdeConfigProperties {
         return getProperty(PROP_DB_INTERNAL_PASSWORD);
     }
 
-    public String getExtensionActivityBundles() {
-    	return getProperty(PROP_EXTENSION_BUNDLES);
+    public String getExtensionActivityBundlesRT() {
+    	return getProperty(PROP_EXTENSION_BUNDLES_RT);
+    }
+
+    public String getExtensionActivityBundlesValidation() {
+    	return getProperty(PROP_EXTENSION_BUNDLES_VAL);
     }
 
 }

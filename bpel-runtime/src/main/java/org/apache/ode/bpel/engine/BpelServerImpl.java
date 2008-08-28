@@ -67,7 +67,7 @@ import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.OdeRuntime;
-import org.apache.ode.bpel.rapi.ExtensionBundle;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * <p>
@@ -267,7 +267,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public void registerExtensionBundle(ExtensionBundle bundle) {
+    public void registerExtensionBundle(ExtensionBundleRuntime bundle) {
     	_contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
     	bundle.registerExtensionActivities();
     }
@@ -371,6 +371,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         String qualifiedName = "org.apache.ode.bpel.rtrep.v" + conf.getRuntimeVersion() + ".RuntimeImpl";
         try {
             OdeRuntime runtime = (OdeRuntime) Class.forName(qualifiedName).newInstance();
+            runtime.setExtensionRegistry(_contexts.extensionRegistry);
             return runtime;
         } catch (Exception e) {
             throw new RuntimeException("Couldn't instantiate ODE runtime version " + conf.getRuntimeVersion() +

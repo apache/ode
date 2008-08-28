@@ -30,7 +30,7 @@ import org.w3c.dom.Node;
 
 /**
  * Context for executing extension activities or extension assign operations. 
- * Implementations of the {@link ExtensionOperation} class use this interface to access BPEL
+ * Implementations of the {@link org.apache.ode.bpel.extension.ExtensionOperation} class use this interface to access BPEL
  * variables, property sets and link status.
  * 
  * @author Tammo van Lessen (University of Stuttgart)

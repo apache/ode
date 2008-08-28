@@ -1,7 +1,7 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.rapi.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.w3c.dom.Node;

@@ -1,7 +1,5 @@
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
-import org.apache.ode.bpel.rapi.FaultInfo;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
@@ -9,7 +7,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionOperation;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.w3c.dom.Node;
@@ -17,8 +15,6 @@ import org.w3c.dom.Element;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.net.URI;

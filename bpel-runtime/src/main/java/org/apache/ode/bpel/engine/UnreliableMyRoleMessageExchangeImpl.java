@@ -65,7 +65,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         try {
             future.get(Math.max(_timeout, 1), TimeUnit.MILLISECONDS);
             _done = true;
-            System.out.println("EXIT BLOCKING.");
             return getStatus();
         } catch (InterruptedException e) {
             throw new BpelEngineException(e);
@@ -96,7 +95,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                     return _status;
 
                 this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
-                System.out.println("EXIT WAIT LOOP.");
 
                 if (_status == null) throw new TimeoutException();
                 return _status;
@@ -112,9 +110,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         }
 
         void done(Status status) {
-            System.out.println("DONE1.");
             synchronized (this) {
-                System.out.println("DONE2.");
                 _status = status;
                 this.notifyAll();
             }
@@ -149,7 +145,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 _explanation = explanation;
 
                 ack(ackType);
-                System.out.println("FUTURE DONE.");
                 _future.done(Status.ACK);
 
             }
