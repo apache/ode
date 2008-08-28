@@ -107,6 +107,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /** Mapping from myrole service name to active process. */
     private final HashMap<QName, ODEProcess> _serviceMap = new HashMap<QName, ODEProcess>();
 
+    /** Weak-reference cache of all the my-role message exchange objects. */
+    private final MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache();
+
     private State _state = State.SHUTDOWN;
 
     Contexts _contexts = new Contexts();
@@ -345,7 +348,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            ODEProcess process = new ODEProcess(this, conf, null, buildRuntime(conf));
+            ODEProcess process = new ODEProcess(this, conf, null, buildRuntime(conf), _myRoleMexCache);
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -367,7 +370,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         // Relying on package naming conventions to find our runtime
         String qualifiedName = "org.apache.ode.bpel.rtrep.v" + conf.getRuntimeVersion() + ".RuntimeImpl";
         try {
-            return (OdeRuntime) Class.forName(qualifiedName).newInstance();
+            OdeRuntime runtime = (OdeRuntime) Class.forName(qualifiedName).newInstance();
+            return runtime;
         } catch (Exception e) {
             throw new RuntimeException("Couldn't instantiate ODE runtime version " + conf.getRuntimeVersion() +
                     ", either your process definition version is outdated or we have a bug.");

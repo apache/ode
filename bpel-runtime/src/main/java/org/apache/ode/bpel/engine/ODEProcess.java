@@ -137,15 +137,15 @@ public class ODEProcess {
 
     final BpelServerImpl _server;
 
-    /** Weak-reference cache of all the my-role message exchange objects. */
-    final private MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache(this);
+    private MyRoleMessageExchangeCache _myRoleMexCache;
 
     /** Deploy-time configuraton for external variables. */
     private ExternalVariableConf _extVarConf;
     
     private ExternalVariableManager _evm;
     
-    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, OdeRuntime odeRuntime) {
+    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger,
+               OdeRuntime odeRuntime, MyRoleMessageExchangeCache mexCache) {
         _runtime = odeRuntime;
         _server = server;
         _pid = conf.getProcessId();
@@ -153,17 +153,14 @@ public class ODEProcess {
         _hydrationLatch = new HydrationLatch();
         _contexts = server._contexts;
         _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
+        _myRoleMexCache = mexCache;
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
         HashSet<InvocationStyle> istyles = new HashSet<InvocationStyle>();
         istyles.add(InvocationStyle.UNRELIABLE);
 
-        if (!conf.isTransient()) {
-            istyles.add(InvocationStyle.RELIABLE);
-        } else {
-            istyles.add(InvocationStyle.TRANSACTED);
-        }
-
+        if (!conf.isTransient()) istyles.add(InvocationStyle.RELIABLE);
+        else istyles.add(InvocationStyle.TRANSACTED);
         _invocationStyles = Collections.unmodifiableSet(istyles);
     }
 
@@ -304,7 +301,8 @@ public class ODEProcess {
                     we.setType(WorkEvent.Type.MYROLE_INVOKE);
                     we.setIID(mexdao.getInstance().getInstanceId());
                     we.setMexId(mexdao.getMessageExchangeId());
-                    we.setProcessId(_pid);
+                    // Could be different to this pid when routing to an older version
+                    we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
 
                     scheduleWorkEvent(we, null);
                 }
@@ -791,7 +789,6 @@ public class ODEProcess {
             break;
         default:
             throw new AssertionError("Unexpected invocation style: " + istyle);
-
         }
 
         _myRoleMexCache.put(mex);
@@ -806,7 +803,7 @@ public class ODEProcess {
      * @return client representation
      */
     MyRoleMessageExchangeImpl lookupMyRoleMex(MessageExchangeDAO mexdao) {
-        return _myRoleMexCache.get(mexdao); // this will re-create if necessary
+        return _myRoleMexCache.get(mexdao, this); // this will re-create if necessary
     }
 
     /**
@@ -1028,7 +1025,7 @@ public class ODEProcess {
             // Do an Async wakeup if we are in the ASYNC state. If we're not, we'll pick up the ACK when we unwind
             // the stack.
             if (old == Status.ASYNC) {
-                MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao);
+                MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao, this);
                 System.out.println("ON ASYNC ACK");
                 mymex.onAsyncAck(mexdao);
                 try {

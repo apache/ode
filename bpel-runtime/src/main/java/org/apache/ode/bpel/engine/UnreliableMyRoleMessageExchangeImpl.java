@@ -138,6 +138,8 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
             response = null;
         }
 
+        final UnreliableMyRoleMessageExchangeImpl self = this;
+        final ResponseFuture f = _future;
         // Lets be careful, the TX can still rollback!
         _process.scheduleRunnable(new Runnable() {
             public void run() {
@@ -145,6 +147,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 _fault = fault;
                 _failureType = failureType;
                 _explanation = explanation;
+
                 ack(ackType);
                 System.out.println("FUTURE DONE.");
                 _future.done(Status.ACK);
