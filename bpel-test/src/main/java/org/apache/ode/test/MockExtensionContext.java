@@ -22,12 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.BpelRuntimeContext;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OLink;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Node;
 
@@ -68,11 +67,7 @@ public class MockExtensionContext implements ExtensionContext {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 	
-	public BpelRuntimeContext getBpelRuntimeContext() {
-		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
-	}
-	
-	public Map<String, Variable> getVisibleVariables()
+	public Map<String, OScope.Variable> getVisibleVariables()
 		throws FaultException {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
@@ -81,16 +76,16 @@ public class MockExtensionContext implements ExtensionContext {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 	
-	public String readMessageProperty(Variable variable, OProperty property)
+	public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property)
 		throws FaultException {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 	
-	public Node readVariable(Variable variable) throws FaultException {
+	public Node readVariable(OScope.Variable variable) throws FaultException {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 	
-	public void writeVariable(Variable variable, Node value) throws FaultException {
+	public void writeVariable(OScope.Variable variable, Node value) throws FaultException {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 

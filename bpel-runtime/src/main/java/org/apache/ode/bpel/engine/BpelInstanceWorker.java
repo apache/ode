@@ -20,7 +20,7 @@ class BpelInstanceWorker implements Runnable {
 
     private static final Log __log = LogFactory.getLog(BpelInstanceWorker.class);
     
-    final BpelProcess _process;
+    final ODEProcess _process;
 
     final Long _iid;
 
@@ -36,7 +36,7 @@ class BpelInstanceWorker implements Runnable {
 
     private CachedState _cachedState;
 
-    BpelInstanceWorker(BpelProcess process, Long iid) {
+    BpelInstanceWorker(ODEProcess process, Long iid) {
         _process = process;
         _iid = iid;
         _contexts = _process._contexts;

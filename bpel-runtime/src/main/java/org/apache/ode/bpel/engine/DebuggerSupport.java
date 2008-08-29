@@ -74,7 +74,7 @@ class DebuggerSupport {
     private BpelProcessDatabase _db;
 
     /** BPEL process. */
-    private BpelProcess _process;
+    private ODEProcess _process;
 
     /**
      * Constructor.
@@ -82,7 +82,7 @@ class DebuggerSupport {
      * @param db
      *            BPEL process database
      */
-    DebuggerSupport(BpelProcess process) {
+    DebuggerSupport(ODEProcess process) {
         _process = process;
         _db = new BpelProcessDatabase(_process._contexts, _process._pid);
 

@@ -24,6 +24,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.dom.NodeWrapper;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.bpel.rtrep.v2.xpath20.JaxpFunctionResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Text;
 

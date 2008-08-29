@@ -19,6 +19,7 @@
 package org.apache.ode.test;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 public class PubSubTest extends BPELTestAbstract {
 	
@@ -26,7 +27,8 @@ public class PubSubTest extends BPELTestAbstract {
         go("/bpel/2.0/TestPubSubInProc");
     }
 
-	@Test public void testPubSubOutOfProc() throws Throwable {
+	@Ignore
+    @Test public void testPubSubOutOfProc() throws Throwable {
         go("/bpel/2.0/TestPubSubOutOfProc");
     }
 }

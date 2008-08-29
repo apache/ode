@@ -33,13 +33,13 @@ public class CountLRUDehydrationPolicy implements DehydrationPolicy {
     /** Maximum process count before oldest ones get quiesced */
     private int _processMaxCount = 1000;
 
-    public List<BpelProcess> markForDehydration(List<BpelProcess> runningProcesses) {
-        ArrayList<BpelProcess> ripped = new ArrayList<BpelProcess>();
+    public List<ODEProcess> markForDehydration(List<ODEProcess> runningProcesses) {
+        ArrayList<ODEProcess> ripped = new ArrayList<ODEProcess>();
 
         if (_processMaxAge > 0) {
             // The oldies have to go first
             long now = System.currentTimeMillis();
-            for (BpelProcess process : runningProcesses) {
+            for (ODEProcess process : runningProcesses) {
                 if (now - process.getLastUsed() > _processMaxAge) {
                     ripped.add(process);
                 }
@@ -49,8 +49,8 @@ public class CountLRUDehydrationPolicy implements DehydrationPolicy {
         // If it's not enough, other ones must be put to the axe
         if (runningProcesses.size() - ripped.size() > _processMaxCount) {
             runningProcesses.removeAll(ripped);
-            Collections.sort(runningProcesses, new Comparator<BpelProcess>() {
-                public int compare(BpelProcess p1, BpelProcess p2) {
+            Collections.sort(runningProcesses, new Comparator<ODEProcess>() {
+                public int compare(ODEProcess p1, ODEProcess p2) {
                     if (p1.getLastUsed() > p2.getLastUsed()) return -1;
                     if (p1.getLastUsed() < p2.getLastUsed()) return 1;
                     return 0;

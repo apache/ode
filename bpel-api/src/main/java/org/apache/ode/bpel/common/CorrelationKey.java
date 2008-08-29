@@ -50,7 +50,6 @@ public class CorrelationKey implements Serializable {
 
     /** CorrelationSet identifier. */
     private int _csetId;
-
     /** Key values. */
     private final String _keyValues[];
 

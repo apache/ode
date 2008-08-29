@@ -6,8 +6,6 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
-
 
 /**
  * A transacted MEP that delegates messages to a list of subscribers  
@@ -29,10 +27,9 @@ public class BrokeredTransactedMyRoleMessageExchangeImpl
      * @param oplink 
      * @param template 
      */
-    public BrokeredTransactedMyRoleMessageExchangeImpl(BpelProcess process,
-        List<MyRoleMessageExchange> subscribers, String mexId,
-        OPartnerLink oplink, MyRoleMessageExchange template) {
-        super(process, mexId, oplink, template.getOperation(),
+    public BrokeredTransactedMyRoleMessageExchangeImpl(ODEProcess process,
+        List<MyRoleMessageExchange> subscribers, String mexId, MyRoleMessageExchange template) {
+        super(process, mexId, null, template.getOperation(),
             template.getServiceName());
         this.subscribers = subscribers;
         this.template = template;

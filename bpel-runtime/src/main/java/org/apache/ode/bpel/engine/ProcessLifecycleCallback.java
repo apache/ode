@@ -23,5 +23,5 @@ package org.apache.ode.bpel.engine;
  */
 public interface ProcessLifecycleCallback {
 
-    void hydrated(BpelProcess process);
+    void hydrated(ODEProcess process);
 }

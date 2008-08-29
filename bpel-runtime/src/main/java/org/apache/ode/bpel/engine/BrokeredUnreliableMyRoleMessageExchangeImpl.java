@@ -10,8 +10,6 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
-
 
 /**
  * An unreliable MEP that delegates messages to a list of subscribers  
@@ -30,14 +28,11 @@ public class BrokeredUnreliableMyRoleMessageExchangeImpl
      * @param process 
      * @param subscribers 
      * @param mexId 
-     * @param oplink 
-     * @param template 
+     * @param template
      */
-    public BrokeredUnreliableMyRoleMessageExchangeImpl(BpelProcess process,
-        List<MyRoleMessageExchange> subscribers, String mexId,
-        OPartnerLink oplink, MyRoleMessageExchange template) {
-        super(process, mexId, oplink, template.getOperation(),
-            template.getServiceName());
+    public BrokeredUnreliableMyRoleMessageExchangeImpl(ODEProcess process,
+        List<MyRoleMessageExchange> subscribers, String mexId, MyRoleMessageExchange template) {
+        super(process, mexId, null, template.getOperation(), template.getServiceName());
         this.subscribers = subscribers;
         this.template = template;
     }
@@ -51,7 +46,6 @@ public class BrokeredUnreliableMyRoleMessageExchangeImpl
         for (MyRoleMessageExchange subscriber : subscribers) {
             subscriber.invokeAsync();
         }
-
         return new CompletedFuture();
     }
 
@@ -67,7 +61,6 @@ public class BrokeredUnreliableMyRoleMessageExchangeImpl
         for (MyRoleMessageExchange subscriber : subscribers) {
             subscriber.invokeBlocking();
         }
-
         return Status.COMPLETED;
     }
 

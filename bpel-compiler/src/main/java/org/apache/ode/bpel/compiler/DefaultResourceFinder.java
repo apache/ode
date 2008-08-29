@@ -27,9 +27,10 @@ import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.ResourceFinder;
 
 /**
- * Basic implementation of the {@link ResourceFinder} interface. Resolves
+ * Basic implementation of the {@link org.apache.ode.bpel.compiler.ResourceFinder} interface. Resolves
  * URIs relative to a base URI specified at the time of construction.
  *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m

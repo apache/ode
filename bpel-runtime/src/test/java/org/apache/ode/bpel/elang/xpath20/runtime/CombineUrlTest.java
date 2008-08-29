@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.ode.bpel.rtrep.v2.xpath20.JaxpFunctionResolver;
+
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -36,7 +38,7 @@ public class CombineUrlTest extends TestCase {
         final String baseURL = "http://WebReference.com/html/";
 
         // key: the relative URL,  value: the expected result
-        Map m = new TreeMap();
+        Map<String,String> m = new TreeMap<String,String>();
 
         // relative-path references
         m.put("about.html", "http://WebReference.com/html/about.html");

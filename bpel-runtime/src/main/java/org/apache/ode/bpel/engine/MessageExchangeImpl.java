@@ -37,7 +37,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
@@ -71,23 +71,16 @@ abstract class MessageExchangeImpl implements MessageExchange {
     //
     
     final Contexts _contexts;
-
-    final BpelProcess _process;
-
-    final OPartnerLink _oplink;
-
+    final ODEProcess _process;
+    final PartnerLinkModel _oplink;
     /** Message-exchange id. */
     final String _mexId;
-
     final PortType _portType;
-
     final Operation _operation;
 
     /** Instance identifier. */
     Long _iid;
-
     EndpointReference _epr;
-
     MessageImpl _request;
 
     /** The point at which this message-exchange will time out. */
@@ -97,11 +90,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
     // The following fields need to be volatile, since a random  IL thread may set them.
     //
     private volatile Status _status = Status.NEW;
-
     volatile QName _fault;
-
     volatile String _explanation;
-
     volatile MessageImpl _response;
 
     /** 
@@ -131,13 +121,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     private AckType _ackType;
 
-
-
     public MessageExchangeImpl(
-            BpelProcess process, 
+            ODEProcess process,
             Long iid,
             String mexId, 
-            OPartnerLink oplink, 
+            PartnerLinkModel oplink,
             PortType ptype, Operation operation) {
         _process = process;
         _contexts = process._contexts;
@@ -178,7 +166,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         dao.setAckType(_ackType);
        
         if (_changes.contains(Change.EPR)) {
-            _changes.remove(_epr);
+            _changes.remove(Change.EPR);
             if (_epr != null) dao.setEPR(_epr.toXML().getDocumentElement());
             else dao.setEPR(null);
         }
@@ -204,7 +192,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         if (val == null)
             return false;
         try {
-            return new Boolean(val.toString());
+            return Boolean.valueOf(val.toString());
         } catch (Exception ex) {
             return false;
         }

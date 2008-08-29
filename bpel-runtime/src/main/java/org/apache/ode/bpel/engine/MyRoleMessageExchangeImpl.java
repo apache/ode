@@ -14,13 +14,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
-import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -29,13 +23,12 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
 
     protected final QName _callee;
-
     protected CorrelationStatus _cstatus;
-
     protected String _clientId;
 
-    public MyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
-        super(process, null, mexId, oplink, oplink.myRolePortType, operation);
+    public MyRoleMessageExchangeImpl(ODEProcess process, String mexId, PartnerLinkModel oplink,
+                                     Operation operation, QName callee) {
+        super(process, null, mexId, oplink, oplink != null ? oplink.getMyRolePortType() : null, operation);
         _callee = callee;
     }
 
