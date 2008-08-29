@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler.bom;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.bom.IfActivity.Case;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;

@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 /**
  * For invoking the engine using UNRELIABLE style.
@@ -29,14 +29,13 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
     ResponseFuture _future;
 
-    public UnreliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation,
-            QName callee) {
+    public UnreliableMyRoleMessageExchangeImpl(ODEProcess process, String mexId, PartnerLinkModel oplink,
+                                               Operation operation, QName callee) {
         super(process, mexId, oplink, operation, callee);
     }
 
     public Future<Status> invokeAsync() {
         if (_future != null) return _future;
-
         if (_request == null) throw new IllegalStateException("Must call setRequest(...)!");
 
         _future = new ResponseFuture();
@@ -91,16 +90,13 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         }
 
         public Status get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-
             synchronized (this) {
                 if (_status != null)
                     return _status;
 
                 this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
 
-                if (_status == null)
-                    throw new TimeoutException();
-
+                if (_status == null) throw new TimeoutException();
                 return _status;
             }
         }
@@ -138,6 +134,8 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
             response = null;
         }
 
+        final UnreliableMyRoleMessageExchangeImpl self = this;
+        final ResponseFuture f = _future;
         // Lets be careful, the TX can still rollback!
         _process.scheduleRunnable(new Runnable() {
             public void run() {
@@ -145,6 +143,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
                 _fault = fault;
                 _failureType = failureType;
                 _explanation = explanation;
+
                 ack(ackType);
                 _future.done(Status.ACK);
 

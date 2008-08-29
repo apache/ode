@@ -55,7 +55,9 @@ import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.soapbinding.SoapExternalService;
-import org.apache.ode.bpel.compiler.api.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -72,7 +74,6 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -461,7 +462,7 @@ public class ODEServer {
         return scheduler;
     }
 
-    private void initBpelServer(EndpointReferenceContextImpl eprContext) {
+    protected void initBpelServer(EndpointReferenceContextImpl eprContext) {
         if (__log.isDebugEnabled()) {
             __log.debug("ODE initializing");
         }
@@ -545,23 +546,34 @@ public class ODEServer {
     }
 
     private void registerExtensionActivityBundles() {
-        String extensionsStr = _odeConfig.getExtensionActivityBundles();
-        if (extensionsStr != null) {
-            Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+        String extensionsRTStr = _odeConfig.getExtensionActivityBundlesRT();
+        String extensionsValStr = _odeConfig.getExtensionActivityBundlesValidation();
+        if (extensionsRTStr != null) {
             // TODO replace StringTokenizer by regex
-            for (StringTokenizer tokenizer = new StringTokenizer(extensionsStr, ",;"); tokenizer.hasMoreTokens();) {
+            for (StringTokenizer tokenizer = new StringTokenizer(extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
                 String bundleCN = tokenizer.nextToken();
                 try {
                     // instantiate bundle
-                    AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
-
+                    ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class.forName(bundleCN).newInstance();
                     // register extension bundle (BPEL server)
-                    _server.registerExtensionBundle(bundle);
-
-                    //add validators
-                    validators.putAll(bundle.getExtensionValidators());
+                    _server.registerExtensionBundle(bundleRT);
                 } catch (Exception e) {
-                    __log.warn("Couldn't register the extension bundle " + bundleCN + ", the class couldn't be " +
+                    __log.warn("Couldn't register the extension bundle runtime " + bundleCN + ", the class couldn't be " +
+                            "loaded properly.");
+                }
+            }
+        }
+        if (extensionsValStr != null) {
+            Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+            for (StringTokenizer tokenizer = new StringTokenizer(extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
+                String bundleCN = tokenizer.nextToken();
+                try {
+                    // instantiate bundle
+                    ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class.forName(bundleCN).newInstance();
+                    //add validators
+                    validators.putAll(bundleVal.getExtensionValidators());
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the extension bundle validator " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
                 }
             }

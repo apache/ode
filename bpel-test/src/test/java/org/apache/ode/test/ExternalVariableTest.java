@@ -17,7 +17,6 @@ import org.junit.Test;
 public class ExternalVariableTest extends BPELTestAbstract {
 
     private JdbcExternalVariableModule _jdbcext;
-
     private DataSource _ds;
 
     public void setUp() throws Exception {

@@ -24,7 +24,6 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -58,6 +57,8 @@ public interface ProcessConf {
      * @return version
      */
     long getVersion();
+
+    int getRuntimeVersion();
 
     /**
      * Is this a <em>transient</em> process? Transient processes are not persisted in the store.
@@ -114,7 +115,6 @@ public interface ProcessConf {
     
     /**
      * Gets the WSDL definition used in a process into which a service is defined.
-     * @param processId
      * @param serviceName
      * @return definition
      */
@@ -122,14 +122,12 @@ public interface ProcessConf {
 
     /**
      * Gets the list of endpoints a process should provide.
-     * @param processId
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getProvideEndpoints();
 
     /**
      * Gets the list of endpoints a process invokes.
-     * @param processId
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getInvokeEndpoints();

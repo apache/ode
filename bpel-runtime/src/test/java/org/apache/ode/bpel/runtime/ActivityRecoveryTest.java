@@ -31,7 +31,6 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
@@ -122,7 +121,6 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         recover("retry");
         recover("fault");
         assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
-        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
         assertNoFailures();
     }
 
@@ -155,7 +153,6 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
         execute("FailureToFault");
         assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
-        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
         assertNoFailures();
     }
 

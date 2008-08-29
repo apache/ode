@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler.bom;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 
 /**
  * BPEL Variable declaration.

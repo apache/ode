@@ -25,11 +25,9 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 /**
  * Provides an implementation of the {@link MyRoleMessageExchange} inteface for interactions performed in the
@@ -42,7 +40,8 @@ class ReliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl implem
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
     
-    public ReliableMyRoleMessageExchangeImpl(BpelProcess process, String mexId, OPartnerLink oplink, Operation operation, QName callee) {
+    public ReliableMyRoleMessageExchangeImpl(ODEProcess process, String mexId,
+                                             PartnerLinkModel oplink, Operation operation, QName callee) {
         super(process, mexId, oplink, operation, callee);
     }
 

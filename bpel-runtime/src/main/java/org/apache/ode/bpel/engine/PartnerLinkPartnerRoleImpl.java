@@ -36,7 +36,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.w3c.dom.Element;
 
 /**
@@ -53,7 +53,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
     public PartnerRoleChannel _channel;
 
-    PartnerLinkPartnerRoleImpl(BpelProcess process, OPartnerLink plink, Endpoint initialPartner) {
+    PartnerLinkPartnerRoleImpl(ODEProcess process, PartnerLinkModel plink, Endpoint initialPartner) {
         super(process, plink);
         _initialPartner = initialPartner;
     }
@@ -105,7 +105,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
             if (_contexts.eprContext != null)
                 partnerEpr = _contexts.eprContext.resolveEndpointReference(partnerEprXml);
             else
-                __log.warn("Partner EPR will not be resolved, no EPR context specified!" );
+                __log.debug("Partner EPR will not be resolved, no EPR context specified!" );
         }
 
         EndpointReference myRoleEpr = null;

@@ -34,5 +34,5 @@ public interface DehydrationPolicy {
      * @param runningProcesses all running (currently hydrated) processes
      * @return processes elected for dehydration
      */
-    List<BpelProcess> markForDehydration(List<BpelProcess> runningProcesses);
+    List<ODEProcess> markForDehydration(List<ODEProcess> runningProcesses);
 }

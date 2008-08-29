@@ -23,7 +23,6 @@ import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.OProcess;
 
 import javax.xml.namespace.QName;
 import java.util.Date;
@@ -127,13 +126,6 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    */
   CorrelationKey getCorrelation(Long iid, Long scopeId, String correlationSet) throws ManagementException;
   
-  /**
-   * Return the process model.
-   * @return
-   * @param procId
-   */
-  OProcess getProcessDef(String procId) throws ManagementException;
-
   /**
    * Single step through a process instance.
    * @param iid

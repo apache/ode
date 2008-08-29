@@ -4,7 +4,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.WeakHashMap;
 
 /**
  * A cache of {@link BpelInstanceWorker} objects. 
@@ -16,9 +15,9 @@ class BpelInstanceWorkerCache {
     private HashMap<Long, WeakReference<BpelInstanceWorker>> _cache = new HashMap<Long, WeakReference<BpelInstanceWorker>>();
     private ReferenceQueue<BpelInstanceWorker> _refQ = new ReferenceQueue<BpelInstanceWorker>();
     
-    private BpelProcess _process;
+    private ODEProcess _process;
     
-    public BpelInstanceWorkerCache(BpelProcess process) {
+    public BpelInstanceWorkerCache(ODEProcess process) {
         _process = process;
     }
     

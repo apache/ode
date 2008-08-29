@@ -16,6 +16,7 @@ public class TestSimpleScenario extends Axis2TestBase {
 
     }
 
+    
     public void testDynPartner() throws Exception {
         String bundleName = "TestDynPartner";
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
