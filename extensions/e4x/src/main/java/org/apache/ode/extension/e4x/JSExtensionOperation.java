@@ -21,8 +21,8 @@ package org.apache.ode.extension.e4x;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.runtime.extension.AbstractSyncExtensionOperation;
-import org.apache.ode.bpel.runtime.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractSyncExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
