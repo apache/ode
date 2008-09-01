@@ -18,7 +18,7 @@
  */
 package org.apache.ode.extension.e4x;
 
-import org.apache.ode.bpel.runtime.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
 
 /**
  * Implementation of a Javascript extension bundle.
