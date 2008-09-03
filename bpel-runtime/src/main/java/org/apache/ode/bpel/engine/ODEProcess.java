@@ -421,6 +421,9 @@ public class ODEProcess {
 
         OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
+        // Canceling invoke check
+        String jobId = mexdao.getProperty("invokeCheckJobId");
+        _contexts.scheduler.cancelJob(jobId);        
 
         brc.injectPartnerResponse(mexdao.getMessageExchangeId(), mexdao.getChannel());
         brc.execute();
@@ -498,7 +501,6 @@ public class ODEProcess {
                 _contexts.scheduler.jobCompleted(jobInfo.jobName);
                 execInstanceEvent(we);
             }
-
         });
 
     }
@@ -1192,11 +1194,11 @@ public class ODEProcess {
 
     }
 
-    public void scheduleWorkEvent(WorkEvent we, Date timeToFire) {
+    public String scheduleWorkEvent(WorkEvent we, Date timeToFire) {
         // if (isInMemory())
         // throw new InvalidProcessException("In-mem process execution resulted in event scheduling.");
 
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        return _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
     void invokePartner(MessageExchangeDAO mexdao) {
@@ -1233,6 +1235,9 @@ public class ODEProcess {
                 }
             } else {
                 partnerRole.invokeIL(mexdao);
+                // Scheduling a verification to see if the invoke has really been processed. Otherwise
+                // we put it in activity recovery mode (case of a server crash during invocation).
+                scheduleInvokeCheck(mexdao);
             }
         } finally {
             if (mexdao.getStatus() != Status.ACK)
@@ -1241,6 +1246,21 @@ public class ODEProcess {
         }
 
         assert mexdao.getStatus() == Status.ACK || mexdao.getStatus() == Status.ASYNC;
+    }
+
+    private void scheduleInvokeCheck(MessageExchangeDAO mex) {
+        boolean isTwoWay = mex.getPattern() ==
+                org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
+        if (!isInMemory() && isTwoWay) {
+            if (__log.isDebugEnabled()) __log.debug("Creating invocation check event for mexid " + mex.getMessageExchangeId());
+            WorkEvent event = new WorkEvent();
+            event.setMexId(mex.getMessageExchangeId());
+            event.setProcessId(getPID());
+            event.setType(WorkEvent.Type.INVOKE_CHECK);
+            Date future = new Date(System.currentTimeMillis() + (180 * 1000));
+            String jobId = scheduleWorkEvent(event, future);
+            mex.setProperty("invokeCheckJobId", jobId);
+        }
     }
 
     /**
