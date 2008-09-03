@@ -109,7 +109,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private Random _random = new Random();
 
-
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
@@ -146,7 +145,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public void cancelJob(String jobId) throws ContextException {
-        // TODO: maybe later, not really necessary.
+        _todo.dequeue(new Job(0, jobId, false, null));
+        try {
+            _db.deleteJob(jobId, _nodeId);
+        } catch (DatabaseException e) {
+            __log.debug("Job removal failed.", e);
+            throw new ContextException("Job removal failed.", e);
+        }
     }
 
     public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {

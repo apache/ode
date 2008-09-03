@@ -113,6 +113,21 @@ class SchedulerThread implements Runnable {
 	}
 
 	/**
+	 * Remove a job to the todo queue.
+	 *
+	 * @param job
+	 */
+	void dequeue(Task task) {
+		_lock.lock();
+		try {
+			_todo.remove(task);
+			_activity.signal();
+		} finally {
+			_lock.unlock();
+		}
+	}
+
+	/**
 	 * Get the size of the todo queue.
 	 * 
 	 * @return
