@@ -46,20 +46,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -520,7 +507,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 // doing any work on its behalf, therefore we will reschedule the
                 // events for some time in the future (1 minute).
                 _contexts.execTransaction(new Callable<Void>() {
-
                     public Void call() throws Exception {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
                         Date future = new Date(System.currentTimeMillis() + (60 * 1000));
@@ -532,6 +518,19 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 });
                 return;
             }
+            
+            if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
+                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
+
+                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) getMessageExchange(we.getMexId());
+                if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.ACK) {
+                    String msg = "Dangling invocation (mexId=" + we.getMexId() + "), forcing it into a failed state.";
+                    if (__log.isDebugEnabled()) __log.debug(msg);
+                    mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, msg, null);
+                }
+                return;
+            }
+
             process.handleWorkEvent(jobInfo);
         } catch (Exception ex) {
             throw new JobProcessorException(ex, jobInfo.jobDetail.get("inmem") == null);

@@ -76,7 +76,9 @@ public class WorkEvent {
         /** Invoke a "my role" operation (i.e. implemented by the process). */
         MYROLE_INVOKE, 
         
-        MYROLE_INVOKE_ASYNC_RESPONSE
+        MYROLE_INVOKE_ASYNC_RESPONSE,
+
+        INVOKE_CHECK
     }
 
     public String getChannel() {

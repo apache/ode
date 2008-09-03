@@ -132,7 +132,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public void cancelJob(String jobId) throws ContextException {
-        // TODO: maybe later, not really necessary.
+        _todo.dequeue(new Job(0, jobId, false, null));
+        try {
+            _db.deleteJob(jobId, _nodeId);
+        } catch (DatabaseException e) {
+            __log.debug("Job removal failed.", e);
+            throw new ContextException("Job removal failed.", e);
+        }
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {

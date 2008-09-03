@@ -265,7 +265,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             __log.error(emsg, e);
 
         }
-
     }
 
     private void reply(final PartnerRoleMessageExchange odeMex, final Operation operation, final MessageContext reply, final boolean isFault) {
