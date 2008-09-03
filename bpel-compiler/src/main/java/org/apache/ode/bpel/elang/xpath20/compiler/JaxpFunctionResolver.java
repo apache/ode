@@ -19,6 +19,13 @@
 
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
+import java.util.List;
+
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathFunction;
+import javax.xml.xpath.XPathFunctionException;
+import javax.xml.xpath.XPathFunctionResolver;
+
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
@@ -31,12 +38,6 @@ import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
-
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionException;
-import javax.xml.xpath.XPathFunctionResolver;
-import java.util.List;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -73,15 +74,32 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
         } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
             String localName = functionName.getLocalPart();
-            if (Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS.equals(localName)) {
+            if (Constants.NON_STDRD_FUNCTION_SPLIT_TO_ELEMENTS.equals(localName) ||
+            		Constants.NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS.equals(localName)) {
                 return new SplitToElements();
-            } else if (Constants.NON_STDRD_FUNCTION_COMBINE_URL.equals(localName)) {
+            } else if (Constants.NON_STDRD_FUNCTION_COMBINE_URL.equals(localName) ||
+            		Constants.NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL.equals(localName)) {
                 return new CombineUrl();
-            } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName)
-                    || Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName)) {
+            } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName) ||
+                    Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName) ||
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_COMPOSE_URL.equals(localName) ||
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_EXPAND_TEMPLATE.equals(localName)) {
                 return new ComposeUrl();
-            } else if ( Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName)) {
+            } else if (Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName) ||
+            		Constants.NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING.equals(localName)) {
             	return new DomToString();
+            } else if (Constants.NON_STDRD_FUNCTION_INSERT_AFTER.equals(localName)) {
+            	return new InsertAfter();
+            } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO.equals(localName)) {
+            	return new InsertAsFirstInto();
+            } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO.equals(localName)) {
+            	return new InsertAsLastInto();
+            } else if (Constants.NON_STDRD_FUNCTION_INSERT_BEFORE.equals(localName)) {
+            	return new InsertBefore();
+            } else if (Constants.NON_STDRD_FUNCTION_DELETE.equals(localName)) {
+            	return new Delete();
+            } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
+            	return new Rename();
             }
         }
 
@@ -144,7 +162,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         public Object evaluate(List params) throws XPathFunctionException {
             if (params.size() < 3 || params.size() > 4) {
                 throw new CompilationException(
-                        __msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_SPLITTOELEMENTS));
+                        __msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_SPLIT_TO_ELEMENTS));
             }
             return "";
         }
@@ -177,5 +195,69 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
+    
+    public class InsertInto implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 3) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
+            }
+            return "";
+    	}
+    }
+    
+    public class InsertAfter implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() < 2 || args.size() > 3) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
+            }
+            return "";
+    	}
+    }
+    
+    public class InsertBefore implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() < 2 || args.size() > 3) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_BEFORE));
+            }
+            return "";
+    	}
+    }
+
+    public class InsertAsFirstInto implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 2) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO));
+            }
+            return "";
+    	}
+    }
+
+    public class InsertAsLastInto implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 2) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO));
+            }
+            return "";
+    	}
+    }
+
+    public class Delete implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() < 1 || args.size() > 2) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DELETE));
+            }
+            return "";
+    	}
+    }
+    
+    public class Rename implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() < 2) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_RENAME));
+            }
+            return "";
+    	}
+    }
+    
 
 }

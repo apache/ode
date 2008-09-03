@@ -49,11 +49,22 @@ public class Constants {
     /**
      * Non standard extension function ode:splitToElements(sourceText, 'separator' 'targetLocalName', 'targetNS'?)
      */
-    public static final String NON_STDRD_FUNCTION_SPLITTOELEMENTS = "splitToElements";
-    public static final String NON_STDRD_FUNCTION_COMBINE_URL = "combineUrl";
-    public static final String NON_STDRD_FUNCTION_COMPOSE_URL = "composeUrl";
-    public static final String NON_STDRD_FUNCTION_EXPAND_TEMPLATE = "expandTemplate";
-    public static final String NON_STDRD_FUNCTION_DOM_TO_STRING= "domToString";
+    public static final String NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS = "splitToElements";
+    public static final String NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL = "combineUrl";
+    public static final String NON_STDRD_FUNCTION_DEPRECATED_COMPOSE_URL = "composeUrl";
+    public static final String NON_STDRD_FUNCTION_DEPRECATED_EXPAND_TEMPLATE = "expandTemplate";
+    public static final String NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING= "domToString";
+    public static final String NON_STDRD_FUNCTION_SPLIT_TO_ELEMENTS = "split-to-elements";
+    public static final String NON_STDRD_FUNCTION_COMBINE_URL = "combine-url";
+    public static final String NON_STDRD_FUNCTION_COMPOSE_URL = "compose-url";
+    public static final String NON_STDRD_FUNCTION_EXPAND_TEMPLATE = "expand-template";
+    public static final String NON_STDRD_FUNCTION_DOM_TO_STRING= "dom-to-string";
+    public static final String NON_STDRD_FUNCTION_INSERT_AFTER = "insert-after";
+    public static final String NON_STDRD_FUNCTION_INSERT_BEFORE = "insert-before";
+    public static final String NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO = "insert-as-first-into";
+    public static final String NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO = "insert-as-last-into";
+    public static final String NON_STDRD_FUNCTION_DELETE = "delete";
+    public static final String NON_STDRD_FUNCTION_RENAME = "rename";
 
     public static boolean isBpelNamespace(String uri){
         return Namespaces.WS_BPEL_20_NS.equals(uri) || Namespaces.WSBPEL2_0_FINAL_EXEC.equals(uri)
