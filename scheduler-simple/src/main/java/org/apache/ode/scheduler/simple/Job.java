@@ -45,5 +45,13 @@ class Job extends Task {
         this.transacted = transacted;
     }
 
-    
+    @Override
+    public int hashCode() {
+        return jobId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Job && jobId.equals(((Job) obj).jobId);
+    }
 }

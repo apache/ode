@@ -819,7 +819,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             event.setInMem(false);
             event.setType(WorkEvent.Type.INVOKE_CHECK);
             Date future = new Date(System.currentTimeMillis() + (180 * 1000));
-            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), future);
+            String jobId = _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), future);
+            mex.setProperty("invokeCheckJobId", jobId);
         }
     }
 
@@ -1243,6 +1244,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void releasePartnerMex(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
         dao.release();
+
+        // Canceling invocation check job
+        String jobId = dao.getProperty("invokeCheckJobId");
+        _bpelProcess._engine._contexts.scheduler.cancelJob(jobId);
     }
 
 
