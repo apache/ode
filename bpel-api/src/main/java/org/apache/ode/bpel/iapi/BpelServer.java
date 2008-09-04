@@ -117,4 +117,6 @@ public interface BpelServer {
      */
     void unregister(QName pid) throws BpelEngineException;
 
+    void cleanupProcess(QName pid) throws BpelEngineException;
+
 }

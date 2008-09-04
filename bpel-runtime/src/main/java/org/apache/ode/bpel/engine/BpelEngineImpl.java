@@ -395,12 +395,8 @@ public class BpelEngineImpl implements BpelEngine {
             }
 
             if (process == null) {
-                // If the process is not active, it means that we should not be
-                // doing any work on its behalf, therefore we will reschedule the
-                // events for some time in the future (1 minute).
-                Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
-                _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, future);
+                // The process is not active, there's nothing we can do with this job
+                __log.debug("Process " + we.getProcessId() + " can't be found, job abandoned.");
                 return;
             }
 

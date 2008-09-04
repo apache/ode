@@ -318,6 +318,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+    public void cleanupProcess(QName pid) throws BpelEngineException {
+        deleteProcessDAO(pid);
+    }
+
     /**
      * Register a global message exchange interceptor.
      * @param interceptor message-exchange interceptor
@@ -339,13 +343,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /**
      * Check a state transition from state "i" to state "j".
      */
-    private final boolean checkState(State i, State j) {
+    private boolean checkState(State i, State j) {
         if (_state == i)
             return true;
         if (_state == j)
             return false;
         return false;
-//        throw new IllegalStateException("Unexpected state: " + i);
     }
 
     /* TODO: We need to have a method of cleaning up old deployment data. */
