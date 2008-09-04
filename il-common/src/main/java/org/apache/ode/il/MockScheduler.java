@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.utils.GUID;
 
 /**
  * 
@@ -84,12 +85,11 @@ public class MockScheduler implements Scheduler {
             public void beforeCompletion() {
             }
         });
-        return null;
-
+        return new GUID().toString();
     }
 
     public void cancelJob(String arg0) throws ContextException {
-
+        
     }
 
     public void start() {
