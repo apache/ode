@@ -481,7 +481,8 @@ class ASSIGN extends ACTIVITY {
                 if (colonIdx > 0) {
                     String prefix = attr.getValue().substring(0, colonIdx);
                     String attrValNs = src.lookupPrefix(prefix);
-                    replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
+                    if (attrValNs != null)
+                        replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
                 }
             }
         }
