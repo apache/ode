@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -205,14 +206,62 @@ public class LoggingConnectionWrapper implements Connection {
     }
 
     private boolean shouldPrint() {
-        if (_log != null)
-            return _log.isDebugEnabled();
-        else return true;
+        return _log == null || _log.isDebugEnabled();
     }
 
     private void print(String str) {
         if (_log != null)
             _log.debug(str);
         else System.out.println(str);
+    }
+
+    public Clob createClob() throws SQLException {
+        return null;
+    }
+
+    public Blob createBlob() throws SQLException {
+        return null;
+    }
+
+    public NClob createNClob() throws SQLException {
+        return null;
+    }
+
+    public SQLXML createSQLXML() throws SQLException {
+        return null;
+    }
+
+    public boolean isValid(int timeout) throws SQLException {
+        return false;
+    }
+
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+    }
+
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+    }
+
+    public String getClientInfo(String name) throws SQLException {
+        return null;
+    }
+
+    public Properties getClientInfo() throws SQLException {
+        return null;
+    }
+
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        return null;
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        return null;
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return null;
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return false;
     }
 }
