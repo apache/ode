@@ -446,6 +446,10 @@ class ASSIGN extends ACTIVITY {
 	}
 	
 	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+      if (rvalue.getNodeType() == Node.ATTRIBUTE_NODE)
+          throw new FaultException(getOAsssign().getOwner().constants.qnMismatchedAssignmentFailure,
+                "Can't assign an attribute to an endpoint, you probably want to select the attribute text.");
+
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
         if (rvalue.getNodeType() == Node.TEXT_NODE ||
