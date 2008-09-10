@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.rtrep.v2;
+package org.apache.ode.bpel.rtrep.v1;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,15 +26,15 @@ import org.apache.ode.bpel.evt.ActivityExecEndEvent;
 import org.apache.ode.bpel.evt.ActivityExecStartEvent;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannelListener;
-import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
-import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannelListener;
-import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
+import org.apache.ode.bpel.rtrep.v1.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v1.channels.LinkStatusChannelListener;
+import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannel;
+import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.rtrep.v1.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rtrep.v1.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.rtrep.v1.channels.ActivityRecoveryChannelListener;
+import org.apache.ode.bpel.rtrep.v1.channels.TimerResponseChannel;
+import org.apache.ode.bpel.rtrep.v1.channels.TimerResponseChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
@@ -111,11 +111,11 @@ class ACTIVITYGUARD extends ACTIVITY {
                 }
             });
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).channel) {
+                mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).sub) {
                     private static final long serialVersionUID = 1024137371118887935L;
 
                     public void linkStatus(boolean value) {
-                        _linkVals.put(link, value);
+                        _linkVals.put(link, Boolean.valueOf(value));
                         instance(ACTIVITYGUARD.this);
                     }
                 });
@@ -130,9 +130,8 @@ class ACTIVITYGUARD extends ACTIVITY {
             throws FaultException {
         if (transitionCondition == null) return true;
 
-        return getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
-                new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntime()));
-
+            return getBpelRuntime().getExpLangRuntime().evaluateAsBoolean(transitionCondition,
+                    new ExprEvaluationContextImpl(_scopeFrame, getBpelRuntime()));
     }
 
     /**
@@ -175,7 +174,7 @@ class ACTIVITYGUARD extends ACTIVITY {
 
     /**
      * Intercepts the
-     * {@link ParentScopeChannel#completed(org.apache.ode.bpel.rtrep.v2.channels.FaultData, java.util.Set<org.apache.ode.bpel.rtrep.v2.CompensationHandler>)}
+     * {@link ParentScopeChannel#completed(org.apache.ode.bpel.rtrep.v1.channels.FaultData, java.util.Set<org.apache.ode.bpel.rtrep.v1.CompensationHandler>)}
      * call, to evaluate transition conditions before returning to the parent.
      */
     private class TCONDINTERCEPT extends BpelJacobRunnable {
@@ -207,9 +206,9 @@ class ACTIVITYGUARD extends ACTIVITY {
                             LinkInfo linfo = _linkFrame.resolve(olink);
                             try {
                                 boolean val = evaluateTransitionCondition(olink.transitionCondition);
-                                linfo.channel.linkStatus(val);
+                                linfo.pub.linkStatus(val);
                             } catch (FaultException e) {
-                                linfo.channel.linkStatus(false);
+                                linfo.pub.linkStatus(false);
                                 __log.error(e);
                                 if (fault == null)
                                     fault = createFault(e.getQName(),olink.transitionCondition);
