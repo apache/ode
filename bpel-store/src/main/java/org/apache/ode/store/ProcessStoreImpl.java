@@ -603,7 +603,7 @@ public class ProcessStoreImpl implements ProcessStore {
         File dudir = findDeployDir(dudao);
 
         if (dudir == null || !dudir.exists())
-            throw new ContextException("Deployed directory " + dudir + " no longer there!");
+            throw new ContextException("Deployed directory " + (dudir == null ? "(unknown)" : dudir) + " no longer there!");
         DeploymentUnitDir dud = new DeploymentUnitDir(dudir);
         dud.scan();
 
