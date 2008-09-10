@@ -16,12 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.rtrep.v2;
-
-import java.util.List;
-import java.net.URI;
-
-import javax.xml.namespace.QName;
+package org.apache.ode.bpel.rtrep.v1;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,14 +24,19 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
-import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.v1.OAssign.DirectRef;
+import org.apache.ode.bpel.rtrep.v1.OAssign.LValueExpression;
+import org.apache.ode.bpel.rtrep.v1.OAssign.PropertyRef;
+import org.apache.ode.bpel.rtrep.v1.OAssign.VariableRef;
+import org.apache.ode.bpel.rtrep.v1.OMessageVarType.Part;
+import org.apache.ode.bpel.rtrep.v1.OProcess.OProperty;
+import org.apache.ode.bpel.rtrep.v1.OScope.Variable;
+import org.apache.ode.bpel.rtrep.v1.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,11 +45,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import javax.xml.namespace.QName;
+import java.net.URI;
+import java.util.List;
+
 /**
  * Assign activity run-time template.
- *
- * @author Ode team
- * @author Tammo van Lessen (University of Stuttgart) - extensionAssignOperation
  */
 class ASSIGN extends ACTIVITY {
     private static final long serialVersionUID = 1L;
@@ -58,7 +59,7 @@ class ASSIGN extends ACTIVITY {
 
     private static final ASSIGNMessages __msgs = MessageBundle
             .getMessages(ASSIGNMessages.class);
-    
+
     public ASSIGN(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
     }
@@ -68,33 +69,27 @@ class ASSIGN extends ACTIVITY {
 
         FaultData faultData = null;
 
-        for (OAssign.OAssignOperation operation : oassign.operations) {
+        for (OAssign.Copy aCopy : oassign.copy) {
             try {
-                if (operation instanceof OAssign.Copy) {
-                    copy((OAssign.Copy)operation);
-                } else if (operation instanceof OAssign.ExtensionAssignOperation) {
-                    invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation)operation);
-                }
+                copy(aCopy);
             } catch (FaultException fault) {
-            	if (operation instanceof OAssign.Copy) {
-            		if (((OAssign.Copy) operation).ignoreMissingFromData) {
-            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
-            					(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
-            				continue;
-    					}
-            		}
-            		if (((OAssign.Copy) operation).ignoreUninitializedFromVariable) {
-            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
-            					(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
-            				continue;
-            			}
-            		}
+            	if (aCopy.ignoreMissingFromData) {
+	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+	            			(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
+	            	continue;
+	            	}
             	}
-                faultData = createFault(fault.getQName(), operation, fault
+            	if (aCopy.ignoreUninitializedFromVariable) {
+	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+	            			(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
+	            	continue;
+	            	}
+            	}
+                faultData = createFault(fault.getQName(), aCopy, fault
                         .getMessage());
                 break;
             } catch (ExternalVariableModuleException e) {
-                __log.error("Exception while initializing external variable", e);
+            	__log.error("Exception while initializing external variable", e);
                 _self.parent.failure(e.toString(), null);
                 return;
             }
@@ -132,7 +127,7 @@ class ASSIGN extends ACTIVITY {
                     tempwrapper.appendChild(val);
                     val = tempwrapper;
                 } else doc.appendChild(val);
-                // Only external variables need to be initialized, others are new and going to be overwritten
+                // Only external variables need to be initialized, others are new and going to be overwtitten
                 if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
                 else lval = val;
             } else
@@ -141,7 +136,7 @@ class ASSIGN extends ACTIVITY {
         return lval;
     }
 
-    /**
+	/**
      * Get the r-value. There are several possibilities:
      * <ul>
      * <li>a message is selected - an element representing the whole message is
@@ -172,10 +167,11 @@ class ASSIGN extends ACTIVITY {
             __log.debug("Evaluating FROM expression \"" + from + "\".");
 
         Node retVal;
-        if (from instanceof OAssign.DirectRef) {
+        if (from instanceof DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
             sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
-            Node data = fetchVariableData(_scopeFrame.resolve(dref.variable), false);
+            Node data = fetchVariableData(
+                    _scopeFrame.resolve(dref.variable), false);
             retVal = DOMUtils.findChildByName((Element)data, dref.elName);
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
@@ -201,18 +197,16 @@ class ASSIGN extends ACTIVITY {
         } else if (from instanceof OAssign.Expression) {
             OExpression expr = ((OAssign.Expression) from).expression;
             List<Node> l = getBpelRuntime().getExpLangRuntime().evaluate(expr, getEvaluationContext());
-
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants
-                    .qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
                 throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
             }
-            retVal = l.get(0);
+            retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
             Element literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
             assert literalRoot.getLocalName().equals("literal");
@@ -310,29 +304,29 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-    private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
+	private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
-
+        
         ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
         // the database.
-        if ((ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to)
+        if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
                 .isMessageRef())
-                || (ocopy.from instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.from)
+                || (ocopy.from instanceof VariableRef && ((VariableRef) ocopy.from)
                 .isMessageRef())) {
 
-            if ((ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to)
+            if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
                     .isMessageRef())
-                    && ocopy.from instanceof OAssign.VariableRef
-                    && ((OAssign.VariableRef) ocopy.from).isMessageRef()) {
+                    && ocopy.from instanceof VariableRef
+                    && ((VariableRef) ocopy.from).isMessageRef()) {
 
                 final VariableInstance lval = _scopeFrame.resolve(ocopy.to
                         .getVariable());
                 final VariableInstance rval = _scopeFrame
-                        .resolve(((OAssign.VariableRef) ocopy.from).getVariable());
+                        .resolve(((VariableRef) ocopy.from).getVariable());
                 Element lvalue = (Element) fetchVariableData(rval, false);
                 initializeVariable(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
@@ -359,7 +353,7 @@ class ASSIGN extends ACTIVITY {
             Node lvaluePtr = lvalue;
             boolean headerAssign = false;
             if (ocopy.to instanceof OAssign.DirectRef) {
-                OAssign.DirectRef dref = ((OAssign.DirectRef) ocopy.to);
+                DirectRef dref = ((DirectRef) ocopy.to);
                 Element el = DOMUtils.findChildByName((Element)lvalue, dref.elName);
                 if (el == null) {
                     el = (Element) ((Element)lvalue).appendChild(lvalue.getOwnerDocument()
@@ -367,17 +361,18 @@ class ASSIGN extends ACTIVITY {
                 }
                 lvaluePtr = el;
             } else if (ocopy.to instanceof OAssign.VariableRef) {
-                OAssign.VariableRef varRef = ((OAssign.VariableRef) ocopy.to);
+                VariableRef varRef = ((VariableRef) ocopy.to);
                 if (varRef.headerPart != null) headerAssign = true;
                 lvaluePtr = evalQuery(lvalue, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location,
                         new EvaluationContextProxy(varRef.getVariable(), lvalue));
             } else if (ocopy.to instanceof OAssign.PropertyRef) {
-                OAssign.PropertyRef propRef = ((OAssign.PropertyRef) ocopy.to);
+                PropertyRef propRef = ((PropertyRef) ocopy.to);
                 lvaluePtr = evalQuery(lvalue, propRef.propertyAlias.part,
                         propRef.propertyAlias.location,
-                        new EvaluationContextProxy(propRef.getVariable(), lvalue));
+                        new EvaluationContextProxy(propRef.getVariable(),
+                                lvalue));
             } else if (ocopy.to instanceof OAssign.LValueExpression) {
-                OAssign.LValueExpression lexpr = (OAssign.LValueExpression) ocopy.to;
+                LValueExpression lexpr = (LValueExpression) ocopy.to;
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
@@ -410,7 +405,7 @@ class ASSIGN extends ACTIVITY {
                 final VariableInstance lval = _scopeFrame.resolve(ocopy.to.getVariable());
                 if (__log.isDebugEnabled())
                     __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
-                            "' value '" + DOMUtils.domToString(lvalue) +"'");
+                                "' value '" + DOMUtils.domToString(lvalue) +"'");
                 commitChanges(lval, lvalue);
                 se = new VariableModificationEvent(lval.declaration.name);
                 ((VariableModificationEvent)se).setNewValue(lvalue);
@@ -422,22 +417,20 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
-
-   	@Override
- 	  Node fetchVariableData(VariableInstance variable, boolean forWriting)
- 		  	    throws FaultException {
- 		    try {
- 		  	    return super.fetchVariableData(variable, forWriting);
- 		    } catch (FaultException fe) {
- 			      if (forWriting) {
- 				        fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
- 			      }
- 			      throw fe;
- 		    }
- 	  }
- 
-
-    private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+	@Override
+	Node fetchVariableData(VariableInstance variable, boolean forWriting)
+			throws FaultException {
+		try {
+			return super.fetchVariableData(variable, forWriting);
+		} catch (FaultException fe) {
+			if (forWriting) {
+				fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
+			}
+			throw fe;
+		}
+	}
+	
+	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         // Eventually wrapping with service-ref element if we've been directly assigned some
         // value that isn't wrapped.
         if (rvalue.getNodeType() == Node.TEXT_NODE ||
@@ -445,10 +438,14 @@ class ASSIGN extends ACTIVITY {
             Document doc = DOMUtils.newDocument();
             Element serviceRef = doc.createElementNS(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
             doc.appendChild(serviceRef);
-            NodeList children = rvalue.getChildNodes();
-            for (int m = 0; m < children.getLength(); m++) {
-                Node child = children.item(m);
-                serviceRef.appendChild(doc.importNode(child, true));
+            if (rvalue.getNodeType() == Node.TEXT_NODE) {
+                serviceRef.appendChild(doc.importNode(rvalue, true));
+            } else {
+                NodeList children = rvalue.getChildNodes();
+                for (int m = 0; m < children.getLength(); m++) {
+                    Node child = children.item(m);
+                    serviceRef.appendChild(doc.importNode(child, true));
+                }
             }
             rvalue = serviceRef;
         }
@@ -457,7 +454,7 @@ class ASSIGN extends ACTIVITY {
     }
 
     private Element replaceElement(Element lval, Element ptr, Element src,
-                                   boolean keepSrcElement) {
+                                boolean keepSrcElement) {
         Document doc = ptr.getOwnerDocument();
         Node parent = ptr.getParentNode();
         if (keepSrcElement) {
@@ -481,13 +478,13 @@ class ASSIGN extends ACTIVITY {
                     String prefix = attr.getValue().substring(0, colonIdx);
                     String attrValNs = src.lookupPrefix(prefix);
                     if (attrValNs != null)
-                        replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
+                       replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
                 }
             }
         }
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
-
+        
         return (lval == ptr) ? replacement :  lval;
     }
 
@@ -605,34 +602,9 @@ class ASSIGN extends ACTIVITY {
         return data;
     }
 
-    private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-        final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntime());
-        final QName extensionId = DOMUtils.getElementQName(eao.nestedElement.getElement());
-        try {
-            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(extensionId);
-            if (ea == null) {
-                for (OProcess.OExtension oe : eao.getOwner().mustUnderstandExtensions) {
-                    if (extensionId.getNamespaceURI().equals(oe.namespaceURI)) {
-                        __log.warn("Lookup of extension activity " + extensionId + " failed.");
-                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
-                    }
-                }
-                // act like <empty> - do nothing
-                context.complete();
-                return;
-            }
-
-            ea.run(context, eao.nestedElement.getElement());
-        } catch (FaultException fault) {
-            __log.error(fault);
-            context.completeWithFault(fault);
-        }
-    }
-
-
     private class EvaluationContextProxy implements EvaluationContext {
 
-        private OScope.Variable _var;
+        private Variable _var;
 
         private Node _varNode;
 
@@ -640,7 +612,7 @@ class ASSIGN extends ACTIVITY {
 
         private EvaluationContext _ctx;
 
-        private EvaluationContextProxy(OScope.Variable var, Node varNode) {
+        private EvaluationContextProxy(Variable var, Node varNode) {
             _var = var;
             _varNode = varNode;
             _ctx = getEvaluationContext();
@@ -655,28 +627,40 @@ class ASSIGN extends ACTIVITY {
             } else
                 return _ctx.readVariable(variable, part);
 
-        }
+        }		/**
+     * @see org.apache.ode.bpel.explang.EvaluationContext#readMessageProperty(org.apache.ode.bpel.rtrep.v1.OScope.Variable,
+     *      org.apache.ode.bpel.rtrep.v1.OProcess.OProperty)
+     */
+    public String readMessageProperty(Variable variable, OProperty property)
+            throws FaultException {
+        return _ctx.readMessageProperty(variable, property);
+    }
 
-        public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property)
-                throws FaultException {
-            return _ctx.readMessageProperty(variable, property);
-        }
-
+        /**
+         * @see org.apache.ode.bpel.explang.EvaluationContext#isLinkActive(org.apache.ode.bpel.rtrep.v1.OLink)
+         */
         public boolean isLinkActive(OLink olink) throws FaultException {
             return _ctx.isLinkActive(olink);
         }
 
+        /**
+         * @see org.apache.ode.bpel.explang.EvaluationContext#getRootNode()
+         */
         public Node getRootNode() {
             return _rootNode;
         }
 
+        /**
+         * @see org.apache.ode.bpel.explang.EvaluationContext#evaluateQuery(org.w3c.dom.Node,
+         *      org.apache.ode.bpel.rtrep.v1.OExpression)
+         */
         public Node evaluateQuery(Node root, OExpression expr)
                 throws FaultException {
             _rootNode = root;
             return getBpelRuntime().getExpLangRuntime().evaluateNode(expr, this);
         }
 
-        public Node getPartData(Element message, OMessageVarType.Part part) throws FaultException {
+        public Node getPartData(Element message, Part part) throws FaultException {
             return _ctx.getPartData(message,part);
         }
 
@@ -688,9 +672,9 @@ class ASSIGN extends ACTIVITY {
             return false;
         }
 
-        public URI getBaseResourceURI() {
-            return _ctx.getBaseResourceURI();
-        }
+		public URI getBaseResourceURI() {
+			return _ctx.getBaseResourceURI();
+		}
     }
 
 }

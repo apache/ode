@@ -4,6 +4,8 @@ import org.apache.ode.bpel.rapi.Serializer;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Factory to instantiate OModel serializers/deserializers for a specific version of the model. It's
@@ -20,12 +22,22 @@ public class Serializers {
 
 
     public static Serializer getVersion(int version) {
-        // TODO switch on the version when we'll have more than one
-        return getLatest();
+        try {
+            Class serializerClass = Class.forName("org.apache.ode.bpel.rtrep.v" + version + ".Serializer");
+            Constructor cstrct = serializerClass.getConstructor(Long.TYPE);
+            return (Serializer) cstrct.newInstance(System.currentTimeMillis());
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't build an OModel serializer for version " + version);
+        }
     }
     public static Serializer getVersion(InputStream stream, int version) throws IOException {
-        // TODO switch on the version when we'll have more than one
-        return getLatest(stream);
+        try {
+            Class serializerClass = Class.forName("org.apache.ode.bpel.rtrep.v" + version + ".Serializer");
+            Constructor cstrct = serializerClass.getConstructor(InputStream.class);
+            return (Serializer) cstrct.newInstance(stream);
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't build an OModel serializer for version " + version);
+        }
     }
 
 }
