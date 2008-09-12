@@ -252,6 +252,7 @@ define "ode" do
       rm_rf Dir[_("target/test/webapp") + "/**/.svn"]
     end
     test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
+    test.exclude('*') unless Buildr.environment != 'test'
   end
 
   desc "ODE APIs"
