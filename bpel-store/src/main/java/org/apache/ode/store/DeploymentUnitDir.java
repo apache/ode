@@ -32,7 +32,6 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.rapi.Serializer;
-import org.apache.ode.bpel.rtrep.Serializers;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 
@@ -55,9 +54,6 @@ import java.util.Set;
 
 /**
  * Container providing various functions on the deployment directory.
- *
- * @author mriou
- * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class DeploymentUnitDir  {
 
@@ -177,7 +173,7 @@ class DeploymentUnitDir  {
         InputStream is = null;
         try {
             is = new FileInputStream(f);
-            Serializer ofh = Serializers.getLatest(is);
+            Serializer ofh = new Serializer(is);
             return new CBPInfo(ofh.getType(), ofh.getGuid(), f);
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);

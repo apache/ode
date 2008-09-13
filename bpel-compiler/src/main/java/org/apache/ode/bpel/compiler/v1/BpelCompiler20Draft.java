@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler.v1;
 
 import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.v1.xpath10.XPath10ExpressionCompilerBPEL20Draft;
+import org.apache.ode.bpel.compiler.v1.xpath20.XPath20ExpressionCompilerBPEL20Draft;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20Draft;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 
@@ -55,8 +56,7 @@ public class BpelCompiler20Draft extends BpelCompiler {
 
         registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20Draft());
         try {
-            registerExpressionLanguage(OASIS_EXPLANG_XPATH_2_0,
-                    "org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft");
+            registerExpressionLanguage(OASIS_EXPLANG_XPATH_2_0, new XPath20ExpressionCompilerBPEL20Draft());
         } catch (Exception e) {
             __log.error("Error loading XPath 2.0 Expression Language: it will not be available.");
         }

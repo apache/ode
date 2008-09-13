@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler.v1;
 import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.compiler.v1.xpath10.XPath10ExpressionCompilerBPEL11;
 
 /**
  * BPEL v1.1 compiler.
@@ -48,7 +49,7 @@ public class BpelCompiler11 extends BpelCompiler {
         registerActivityCompiler(WaitActivity.class, new WaitGenerator());
         registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
 
-        registerExpressionLanguage(EXPLANG_XPATH, "org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL11");
+        registerExpressionLanguage(EXPLANG_XPATH, new XPath10ExpressionCompilerBPEL11());
     }
 
 

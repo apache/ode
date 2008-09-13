@@ -726,7 +726,19 @@ public class ExecutionQueueImpl implements ExecutionQueue {
                 String clsName = readUTF();
                 ObjectStreamClass cached = _classDescriptors.get(clsName);
                 if (cached == null) {
-                    cached = ObjectStreamClass.lookup(Class.forName(clsName, true, _classLoader));
+                    String newClsName = clsName;
+                    if (newClsName.startsWith("org.apache.ode.bpel.runtime."))
+                        newClsName = clsName.replace("org.apache.ode.bpel.runtime.", "org.apache.ode.bpel.rtrep.v1.");
+                    if (newClsName.startsWith("org.apache.ode.bpel.o.Serializer"))
+                        newClsName = clsName.replace("org.apache.ode.bpel.o.Serializer", "org.apache.ode.bpel.rapi.Serializer");
+                    if (newClsName.startsWith("org.apache.ode.bpel.elang.xpath20.o."))
+                        newClsName = clsName.replace("org.apache.ode.bpel.elang.xpath20.o.", "org.apache.ode.bpel.rtrep.v1.xpath20.");
+                    if (newClsName.startsWith("org.apache.ode.bpel.o."))
+                        newClsName = clsName.replace("org.apache.ode.bpel.o.", "org.apache.ode.bpel.rtrep.v1.");
+                    if (newClsName.startsWith("org.apache.ode.bpel.engine."))
+                        newClsName = clsName.replace("org.apache.ode.bpel.engine.", "org.apache.ode.bpel.rtrep.v1.");
+
+                    cached = ObjectStreamClass.lookup(Class.forName(newClsName, true, _classLoader));
                     _classDescriptors.put(clsName, cached);
                 }
                 return cached;

@@ -20,6 +20,8 @@ package org.apache.ode.bpel.rtrep.v1;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,11 +50,11 @@ import org.junit.Assert;
  * Test core BPEL processing capabilities.
  */
 public class CoreBpelTest extends TestCase implements OdeInternalInstance {
-    private boolean _completedOk;
+    public boolean _completedOk;
 
-    private boolean _terminate;
+    public boolean _terminate;
 
-    private FaultInfo _fault;
+    public FaultInfo _fault;
 
     private ExecutionQueueImpl _soup;
 
@@ -303,10 +305,17 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         Assert.assertEquals(_fault.getFaultName(), othrow.faultName);
     }
 
+    private static int count = 0;
+
     private void run(OProcess proc) {
         _vpu.inject(new PROCESS(proc));
         for (int i = 0; i < 100000 && !_completedOk && _fault == null && !_terminate; ++i) {
             _vpu.execute();
+            try {
+                _soup.write(new FileOutputStream("soup-" + count++));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         Assert.assertTrue(_soup.isComplete());

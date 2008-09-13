@@ -20,4 +20,6 @@ public interface ProcessModel {
 	List<String> getCorrelators();
 
     ActivityModel getChild(final int id);
+
+    int getModelVersion();
 }

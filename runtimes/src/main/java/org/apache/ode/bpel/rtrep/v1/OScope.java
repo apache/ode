@@ -19,6 +19,10 @@
 
 package org.apache.ode.bpel.rtrep.v1;
 
+import org.apache.ode.bpel.rapi.CorrelationSetModel;
+import org.apache.ode.bpel.rapi.PropertyAliasModel;
+
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -147,7 +151,7 @@ public class OScope extends OActivity {
         return "{OScope '" + name + "' id=" + getId() + "}";
     }
 
-    public static final class CorrelationSet extends OBase {
+    public static final class CorrelationSet extends OBase implements CorrelationSetModel {
       
         static final long serialVersionUID = -1L  ;
         public String name;
@@ -162,6 +166,21 @@ public class OScope extends OActivity {
         public String toString() {
             return "{CSet " + name + " " + properties + "}";
         }
+
+        public List<PropertyAliasModel> getAliases(QName messageName) {
+            List<PropertyAliasModel> aliases = new ArrayList<PropertyAliasModel>();
+            OVarType messageType = getOwner().messageTypes.get(messageName);
+            for (Object prop : properties) {
+                OProcess.OProperty property = (OProcess.OProperty) prop;
+                OProcess.OPropertyAlias alias = property.getAlias(messageType);
+                if (alias == null)
+                    throw new IllegalArgumentException("No alias found for property " + property.name +
+                            " and message " + messageName + ", should have been caught at compilation.");
+                aliases.add(alias);
+            }
+            return aliases;
+        }
+
     }
 
     public static final class Variable extends OBase {
