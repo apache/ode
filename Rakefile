@@ -299,7 +299,7 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-dao", "jacob", "jacob-ap", "utils"),
       COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, JAXEN, JAVAX.persistence,
-      JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
+      JAVAX.stream, SAXON, WSDL4J, XMLBEANS, XERCES, JAVAX.transaction
 
     package :jar
   end

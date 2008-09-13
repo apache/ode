@@ -18,11 +18,10 @@
  */
 package org.apache.ode.bpel.rtrep.v1;
 
-import org.apache.ode.utils.stl.CollectionsX;
-import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.ActivityModel;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.PropertyAliasModel;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -160,7 +159,7 @@ public class OProcess extends OBase implements ProcessModel {
         }
     }
 
-    public static class OPropertyAlias extends OBase {
+    public static class OPropertyAlias extends OBase implements PropertyAliasModel {
 
         static final long serialVersionUID = -1L  ;
 
@@ -212,5 +211,9 @@ public class OProcess extends OBase implements ProcessModel {
 
     public String getGuid() {
         return guid;
+    }
+
+    public int getModelVersion() {
+        return 1;
     }
 }

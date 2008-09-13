@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface OdeRuntime {
     
-    void init(ProcessConf pconf);
+    void init(ProcessConf pconf, ProcessModel pmodel);
 
     OdeRTInstance newInstance(Object state);
 

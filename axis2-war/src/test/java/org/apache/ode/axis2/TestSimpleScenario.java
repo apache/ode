@@ -1,5 +1,7 @@
 package org.apache.ode.axis2;
 
+import org.apache.ode.bpel.compiler.BpelCompilerFactory;
+
 public class TestSimpleScenario extends Axis2TestBase {
 
     public void testHelloWorld2() throws Exception {
@@ -15,7 +17,6 @@ public class TestSimpleScenario extends Axis2TestBase {
         }
 
     }
-
     
     public void testDynPartner() throws Exception {
         String bundleName = "TestDynPartner";

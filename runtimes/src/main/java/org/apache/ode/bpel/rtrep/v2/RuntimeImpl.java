@@ -1,7 +1,5 @@
 package org.apache.ode.bpel.rtrep.v2;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,10 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
 import org.apache.ode.bpel.rapi.OdeRuntime;
 import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rtrep.v2.OdeInternalInstance;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
 import org.apache.ode.bpel.rapi.OdeRTInstance;
 import org.apache.ode.bpel.rtrep.common.ConfigurationException;
@@ -44,15 +40,9 @@ public class RuntimeImpl implements OdeRuntime {
     /**
      * Initialize according to process configuration.
      */
-    public void init(ProcessConf pconf) {
+    public void init(ProcessConf pconf, ProcessModel pmodel) {
         _pconf = pconf;
-        try {
-            _oprocess = deserializeCompiledProcess(_pconf.getCBPInputStream());
-        } catch (Exception e) {
-            String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
-            __log.error(errmsg);
-            throw new BpelEngineException(errmsg, e);
-        }
+        _oprocess = (OProcess) pmodel;
 
         _replacementMap = new ReplacementMapImpl(_oprocess);
 
@@ -159,22 +149,5 @@ public class RuntimeImpl implements OdeRuntime {
     public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
         _extensionRegistry = extensionRegistry;
     }
-
-    /**
-     * Read an {@link OProcess} representation from a stream.
-     * 
-     * @param is
-     *            input stream
-     * @return deserialized process representation
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private OProcess deserializeCompiledProcess(InputStream is) throws IOException, ClassNotFoundException {
-        OProcess compiledProcess;
-        Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readPModel();
-        return compiledProcess;
-    }
-
 
 }

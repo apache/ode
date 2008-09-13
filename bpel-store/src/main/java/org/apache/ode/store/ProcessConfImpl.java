@@ -189,10 +189,6 @@ public class ProcessConfImpl implements ProcessConf {
         return _version;
     }
 
-    public int getRuntimeVersion() {
-        return 2;
-    }
-
     public InputStream getCBPInputStream() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)
@@ -251,41 +247,6 @@ public class ProcessConfImpl implements ProcessConf {
     
     public boolean isSharedService(QName serviceName) {
     	return _sharedServices.contains(serviceName);
-    }
-
-    private void handleEndpoints() {
-        // for (TProvide provide : _pinfo.getProvideList()) {
-        // OPartnerLink pLink = _oprocess.getPartnerLink(provide.getPartnerLink());
-        // if (pLink == null) {
-        // String msg = __msgs.msgDDPartnerLinkNotFound(provide.getPartnerLink());
-        // __log.error(msg);
-        // throw new BpelEngineException(msg);
-        // }
-        // if (!pLink.hasMyRole()) {
-        // String msg = __msgs.msgDDMyRoleNotFound(provide.getPartnerLink());
-        // __log.error(msg);
-        // throw new BpelEngineException(msg);
-        // }
-        // }
-        // for (TInvoke invoke : _pinfo.getInvokeList()) {
-        // OPartnerLink pLink = _oprocess.getPartnerLink(invoke.getPartnerLink());
-        // if (pLink == null) {
-        // String msg = __msgs.msgDDPartnerLinkNotFound(invoke.getPartnerLink());
-        // __log.error(msg);
-        // throw new BpelEngineException(msg);
-        // }
-        // if (!pLink.hasPartnerRole()) {
-        // String msg = __msgs.msgDDPartnerRoleNotFound(invoke.getPartnerLink());
-        // __log.error(msg);
-        // throw new BpelEngineException(msg);
-        // }
-        // TODO Handle non initialize partner roles that just provide a binding
-        // if (!pLink.initializePartnerRole && _oprocess.version.equals(Namespaces.WS_BPEL_20_NS)) {
-        // String msg = ProcessDDInitializer.__msgs.msgDDNoInitiliazePartnerRole(invoke.getPartnerLink());
-        // ProcessDDInitializer.__log.error(msg);
-        // throw new BpelEngineException(msg);
-        // }
-        // }
     }
 
     DeploymentUnitDir getDeploymentUnit() {

@@ -41,15 +41,9 @@ public class RuntimeImpl implements OdeRuntime {
     /**
      * Initialize according to process configuration.
      */
-    public void init(ProcessConf pconf) {
+    public void init(ProcessConf pconf, ProcessModel pmodel) {
         _pconf = pconf;
-        try {
-            _oprocess = deserializeCompiledProcess(_pconf.getCBPInputStream());
-        } catch (Exception e) {
-            String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
-            __log.error(errmsg);
-            throw new BpelEngineException(errmsg, e);
-        }
+        _oprocess = (OProcess) pmodel;
 
         _replacementMap = new ReplacementMapImpl(_oprocess);
 
@@ -142,20 +136,5 @@ public class RuntimeImpl implements OdeRuntime {
     public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
         _extensionRegistry = extensionRegistry;
     }
-
-    /**
-     * Read an {@link org.apache.ode.bpel.rtrep.v1.OProcess} representation from a stream.
-     * @param is input stream
-     * @return deserialized process representation
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     */
-    private OProcess deserializeCompiledProcess(InputStream is) throws IOException, ClassNotFoundException {
-        OProcess compiledProcess;
-        Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readOProcess();
-        return compiledProcess;
-    }
-
 
 }

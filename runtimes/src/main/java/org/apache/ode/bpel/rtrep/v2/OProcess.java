@@ -229,4 +229,8 @@ public class OProcess extends OBase implements ProcessModel {
         in.defaultReadObject();
         instanceCount++;
     }
+
+    public int getModelVersion() {
+        return 2;
+    }
 }

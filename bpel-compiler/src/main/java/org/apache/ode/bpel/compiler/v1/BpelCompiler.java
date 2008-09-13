@@ -53,6 +53,7 @@ import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.compiler.bom.CompensationHandler;
 import org.apache.ode.bpel.rtrep.v1.*;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
@@ -72,7 +73,7 @@ import org.w3c.dom.Node;
  * and XSD documents) into compiled representations suitable for execution by
  * the ODE BPEL Service Provider. TODO: Move process validation into this class.
  */
-abstract class BpelCompiler implements CompilerContext {
+abstract class BpelCompiler implements CompilerContext, org.apache.ode.bpel.compiler.BpelCompiler {
     /** Class-severity logger. */
     protected static final Log __log = LogFactory.getLog(BpelCompiler.class);
 
@@ -608,7 +609,7 @@ abstract class BpelCompiler implements CompilerContext {
         _konstExprLang.debugInfo = createDebugInfo(_processDef, "Constant Value Expression Language");
         _konstExprLang.expressionLanguageUri = "uri:www.fivesight.com/konstExpression";
         _konstExprLang.properties.put("runtime-class",
-                "org.apache.ode.bpel.runtime.explang.konst.KonstExpressionLanguageRuntimeImpl");
+                "org.apache.ode.bpel.rtrep.v1.KonstExpressionLanguageRuntimeImpl");
         _oprocess.expressionLanguages.add(_konstExprLang);
 
         // Process the imports. Note, we expect all processes (Event BPEL 1.1)
@@ -1676,5 +1677,8 @@ abstract class BpelCompiler implements CompilerContext {
             Collections.reverse(rval);
             return rval.iterator();
         }
+    }
+
+    public void setExtensionValidators(Map<QName, ExtensionValidator> validators) {
     }
 }

@@ -342,7 +342,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            ODEProcess process = new ODEProcess(this, conf, null, buildRuntime(conf), _myRoleMexCache);
+            ODEProcess process = new ODEProcess(this, conf, null, _myRoleMexCache);
 
             for (Endpoint e : process.getServiceNames()) {
                 __log.debug("Register process: serviceId=" + e + ", process=" + process);
@@ -372,19 +372,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
             _mngmtLock.writeLock().unlock();
-        }
-    }
-
-    private OdeRuntime buildRuntime(ProcessConf conf) {
-        // Relying on package naming conventions to find our runtime
-        String qualifiedName = "org.apache.ode.bpel.rtrep.v" + conf.getRuntimeVersion() + ".RuntimeImpl";
-        try {
-            OdeRuntime runtime = (OdeRuntime) Class.forName(qualifiedName).newInstance();
-            runtime.setExtensionRegistry(_contexts.extensionRegistry);
-            return runtime;
-        } catch (Exception e) {
-            throw new RuntimeException("Couldn't instantiate ODE runtime version " + conf.getRuntimeVersion() +
-                    ", either your process definition version is outdated or we have a bug.");
         }
     }
 

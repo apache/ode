@@ -19,6 +19,8 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +72,7 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.rapi.Serializer;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.utils.GUID;
@@ -144,9 +147,7 @@ public class ODEProcess {
     
     private ExternalVariableManager _evm;
     
-    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger,
-               OdeRuntime odeRuntime, MyRoleMessageExchangeCache mexCache) {
-        _runtime = odeRuntime;
+    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, MyRoleMessageExchangeCache mexCache) {
         _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -1074,6 +1075,22 @@ public class ODEProcess {
         }
     }
 
+    /**
+     * Read an {@link org.apache.ode.bpel.rtrep.v2.OProcess} representation from a stream.
+     *
+     * @param is input stream
+     * @return deserialized process representation
+     * @throws java.io.IOException
+     * @throws ClassNotFoundException
+     */
+    private ProcessModel deserializeCompiledProcess(InputStream is) throws IOException, ClassNotFoundException {
+        ProcessModel compiledProcess;
+        Serializer ofh = new Serializer(is);
+        compiledProcess = (ProcessModel) ofh.readPModel();
+        return compiledProcess;
+    }
+
+
     class ProcessRunnable implements Runnable {
         Runnable _work;
 
@@ -1134,8 +1151,15 @@ public class ODEProcess {
 
         private void doHydrate() {
             markused();
-            _runtime.init(_pconf);
-            _processModel = _runtime.getModel();
+            try {
+                _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
+            } catch (Exception e) {
+                String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
+                __log.error(errmsg);
+                throw new BpelEngineException(errmsg, e);
+            }
+            _runtime = buildRuntime(_processModel.getModelVersion());
+            _runtime.init(_pconf, _processModel);
 
             setRoles(_processModel);
     		initExternalVariables();
@@ -1302,6 +1326,19 @@ public class ODEProcess {
         // in the local transaction but the invoked process is not supposed to hold our thread
         // and the reply should come in a separate transaction.
         target.invokeProcess(myRoleMex);
+    }
+
+    private OdeRuntime buildRuntime(int modelVersion) {
+        // Relying on package naming conventions to find our runtime
+        String qualifiedName = "org.apache.ode.bpel.rtrep.v" + modelVersion + ".RuntimeImpl";
+        try {
+            OdeRuntime runtime = (OdeRuntime) Class.forName(qualifiedName).newInstance();
+            runtime.setExtensionRegistry(_contexts.extensionRegistry);
+            return runtime;
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't instantiate ODE runtime version " + modelVersion +
+                    ", either your process definition version is outdated or we have a bug.");
+        }
     }
 
     void setStatefulEPRs(MessageExchangeDAO partnerRoleMex) {

@@ -38,7 +38,6 @@ import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.Serializer;
-import org.apache.ode.bpel.rtrep.Serializers;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Node;
@@ -288,7 +287,7 @@ public class BpelC {
             }
 
             try {
-                Serializer fileHeader = Serializers.getLatest();
+                Serializer fileHeader = new Serializer(System.currentTimeMillis());
                 fileHeader.writePModel(pmodel, _outputStream);
             } finally {
                 // close & mark myself invalid
