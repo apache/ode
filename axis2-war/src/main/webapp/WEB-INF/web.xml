@@ -77,7 +77,7 @@
     </servlet-mapping>
 
    <welcome-file-list>
-      <welcome-file>/axis2-web/index.jsp</welcome-file>
+      <welcome-file>/index.html</welcome-file>
     </welcome-file-list>
 
     <error-page>

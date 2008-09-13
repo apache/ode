@@ -46,6 +46,7 @@ COMMONS             = struct(
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
   :lang             =>"commons-lang:commons-lang:jar:2.3",
   :logging          =>"commons-logging:commons-logging:jar:1.1",
+  :io               =>"commons-io:commons-io:jar:1.4",
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
@@ -148,7 +149,7 @@ define "ode" do
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
       "utils", "dao-jpa"),
-      AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.httpclient,
+      AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient,
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
@@ -161,7 +162,7 @@ define "ode" do
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*").exclude("axis2-web/index.jsp")
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
