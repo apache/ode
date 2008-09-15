@@ -161,8 +161,10 @@ public class ODEAxisService extends AxisService {
         if (index == -1) {
         	destinationPrefix = baseUri + "/";
         	index = serviceName.indexOf(destinationPrefix);
+        	return (index != -1) ? serviceName.substring(destinationPrefix.length()) : serviceName;
+        } else {
+        	return serviceName.substring(index);
         }
-        return (index != -1) ? serviceName.substring(index) : serviceName;
 	}
 
 	private static String extractEndpointUri(ProcessConf pconf, QName wsdlServiceName, String portName) 
@@ -213,8 +215,8 @@ public class ODEAxisService extends AxisService {
 		// Assume that path is HTTP-based, by default
 		String servicePrefix = "/processes/";
 		// Don't assume JMS-based paths start the same way 
-		if (path.startsWith("jms")) {
-			servicePrefix = "jms:/";
+		if (path.startsWith("jms://")) {
+			servicePrefix = "jms://";
 		}
 		int index = path.indexOf(servicePrefix);
 		if (-1 != index) {
@@ -230,7 +232,8 @@ public class ODEAxisService extends AxisService {
 		        }
 		        // Qualify shared JMS names with unique baseUri
 		        if (path.startsWith("jms")) {
-		        	service = baseUri + "/" + service;
+		        	boolean slashPresent = baseUri.endsWith("/") || service.startsWith("/");
+		        	service = baseUri + (slashPresent ? "" : "/") + service;		        
 		        }
 		        return service;
 		    }
@@ -251,11 +254,11 @@ public class ODEAxisService extends AxisService {
 			if (bundleName != null) {
 				baseServiceUri.append(bundleName).append("/");
 				if (pconf.getBpelDocument() != null) {
-					String diagramName = pconf.getBpelDocument();
-					if (diagramName.indexOf(".") > 0) {
-						diagramName = diagramName.substring(0, diagramName.indexOf(".") - 1);
+					String bpelDocumentName = pconf.getBpelDocument();
+					if (bpelDocumentName.indexOf(".") > 0) {
+						bpelDocumentName = bpelDocumentName.substring(0, bpelDocumentName.indexOf("."));
 					}
-					baseServiceUri.append(diagramName).append("/");
+					baseServiceUri.append(bpelDocumentName).append("/");
 					String processName = pconf.getType() != null 
 						? pconf.getType().getLocalPart() : null;
 					if (processName != null) {
