@@ -129,7 +129,8 @@ public class Serializer {
         try {
             pmodel = (ProcessModel) ois.readObject();
         } catch (ClassNotFoundException e) {
-            throw new IOException("DataStream Error", e);
+            //throw new IOException("DataStream Error", e); // we keep this until we've moved to JDK6, okay?
+            throw new IOException("DataStream Error");
         }
             
         return pmodel;
