@@ -39,7 +39,7 @@ import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrack
 import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.utils.LoggingDataSourceWrapper;
+import org.apache.ode.utils.LoggingInterceptor;
 import org.tranql.connector.jdbc.JDBCDriverMCF;
 
 /**
@@ -135,7 +135,7 @@ public class Database {
     }
 
     public DataSource getDataSource() {
-        return __logSql.isDebugEnabled() ? new LoggingDataSourceWrapper(_datasource, __logSql) : _datasource;
+        return __logSql.isDebugEnabled() ? LoggingInterceptor.createLoggingDS(_datasource, __logSql) : _datasource;
     }
 
     private void initDataSource() throws DatabaseConfigException {
