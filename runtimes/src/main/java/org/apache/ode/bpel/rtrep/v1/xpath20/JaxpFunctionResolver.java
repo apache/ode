@@ -38,6 +38,7 @@ import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
 
 import net.sf.saxon.dom.NodeWrapper;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
 
@@ -1137,7 +1138,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 	    		return Integer.parseInt(extractString(arg));
             } catch (ClassCastException cce) {
             	if (arg instanceof IntegerValue) {
-            		return (int) ((IntegerValue) arg).longValue();
+            		try {
+						return (int) ((IntegerValue) arg).longValue();
+					} catch (Exception e) {
+		                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", cce);
+					}
             	}
                 throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", cce);
         	} catch (NumberFormatException nfe) {
