@@ -55,7 +55,17 @@ public class BrokeredTransactedMyRoleMessageExchangeImpl
      */
     @Override
     public AckType getAckType() {
-        return AckType.ONEWAY;
+        return template.getAckType();
+    }
+    
+    /**
+     * Return the status of one of the subscribers
+     *
+     * @return status
+     */
+    @Override
+    public Status getStatus() {
+    	return template.getStatus();
     }
 
     /**

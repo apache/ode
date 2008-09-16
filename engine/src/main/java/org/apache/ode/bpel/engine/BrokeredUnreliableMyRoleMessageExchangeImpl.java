@@ -71,7 +71,7 @@ public class BrokeredUnreliableMyRoleMessageExchangeImpl
      */
     @Override
     public AckType getAckType() {
-        return AckType.ONEWAY;
+        return template.getAckType();
     }
 
     /**
@@ -118,6 +118,16 @@ public class BrokeredUnreliableMyRoleMessageExchangeImpl
         for (MyRoleMessageExchange subscriber : subscribers) {
             subscriber.setTimeout(timeout);
         }
+    }
+    
+    /**
+     * Return the status of one of the subscribers
+     *
+     * @return status
+     */
+    @Override
+    public Status getStatus() {
+    	return template.getStatus();
     }
 
     /**

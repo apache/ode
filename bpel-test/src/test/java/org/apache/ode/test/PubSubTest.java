@@ -23,11 +23,11 @@ import org.junit.Ignore;
 
 public class PubSubTest extends BPELTestAbstract {
 	
+	@Ignore
 	@Test public void testPubSubInProc() throws Throwable {
         go("/bpel/2.0/TestPubSubInProc");
     }
 
-	@Ignore
     @Test public void testPubSubOutOfProc() throws Throwable {
         go("/bpel/2.0/TestPubSubOutOfProc");
     }
