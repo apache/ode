@@ -67,12 +67,17 @@
     </servlet-mapping>
 
     <servlet-mapping>
+	    <servlet-name>AxisServlet</servlet-name>
+	    <url-pattern>/deployment/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>AxisAdminServlet</servlet-name>
         <url-pattern>/axis2-admin/*</url-pattern>
     </servlet-mapping>
 
    <welcome-file-list>
-      <welcome-file>/axis2-web/index.jsp</welcome-file>
+      <welcome-file>/index.html</welcome-file>
     </welcome-file-list>
 
     <error-page>

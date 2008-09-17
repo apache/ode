@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Apache ODE | Instances</title>
+        <link rel="stylesheet" href="css/style.css" type="text/css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/yui/css/container.css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/yui/css/button.css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/bubbling/assets/accordion.css" media="screen, projection"/>
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+        <script type="text/javascript" src="js/WSRequest.js">
+        </script>
+        <script type="text/javascript" src="js/ProcessManagementAPI.js">
+        </script>
+        <script type="text/javascript" src="js/InstanceManagementAPI.js">
+        </script>
+        <script type="text/javascript" src="js/yui/utilities.js">
+        </script>
+        <script type="text/javascript" src="js/yui/container.js"></script>
+        <script type="text/javascript" src="js/yui/button.js"></script>
+        <script type="text/javascript" src="js/yui/button.js">
+        </script>
+		<script type="text/javascript" src="js/yui/animation.js">
+        </script>
+        <script type="text/javascript" src="js/bubbling/bubbling.js">
+        </script>
+        <script type="text/javascript" src="js/bubbling/accordion.js">
+        </script>
+        <script type="text/javascript" src="js/ODE.js">
+        </script>
+        <script type="text/javascript">
+            function init(){
+				org.apache.ode.InstanceHandling.populateContent();
+                setInterval('org.apache.ode.InstanceHandling.populateContent()', 15000);
+            }
+            
+            YAHOO.util.Event.onDOMReady(init);
+        </script>
+        <style type="text/css">
+            .link {
+                margin-left: 5px;
+                color: blue;
+            }
+            
+            .myAccordion .yui-cms-accordion .yui-cms-item {
+                margin-bottom: 10px;
+            }
+            
+            .bd {
+                background: #FFFFFF none repeat scroll 0 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <div id="login">
+                <a id="loginLink" href="#">Login</a>
+                |<a href="http://apache.org">Apache</a>
+                |<a href="http://ode.apache.org">ODE</a>
+                |<a href="http://ode.apache.org/user-guide.html">User Guide</a>
+                |<a href="http://ode.apache.org/developer-guide.html">Developer Guide</a>
+            </div>
+            <h1><img src="images/logo.png" alt="Apache ODE"/></h1>
+        </div>
+        <div id="siteNav">
+            <ul>
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="processes.html">Processes</a>
+                </li>
+                <li class="current">
+                    <a href="#">Instances</a>
+                </li>
+                <li>
+                    <a href="deployment.html">Deployment</a>
+                </li>
+            </ul>
+        </div>
+        <div id="wrapper">
+            <dir id="insideW">
+                <div id="insideL">
+                    <div id="content" class="yui-skin-sam">
+                    </div>
+                </div>
+            </dir>
+        </div>
+    </body>
+</html>

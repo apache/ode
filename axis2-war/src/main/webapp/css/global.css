@@ -1,0 +1,395 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*------------------------------------------------------------------
+[Global Stylesheet]
+
+Version:        1.0
+Last change:	05/06/2008
+Assigned to:	Apache Software Foundation
+Primary use:	ODE Management Console
+-------------------------------------------------------------------*/
+
+/**
+* ----------------------------------------------------------------
+* html, body
+* ----------------------------------------------------------------
+*/
+
+html {
+    background: #27343c;
+    color: #666;
+    font: 76% Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    text-align: left;
+    width: 930px;
+    margin: 0 auto;
+    line-height: 1em;
+}
+
+#header {
+    clear: both;
+}
+
+#login {
+    color: #334550;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    float: right;
+    height: 74px;
+    line-height: 88px;
+}
+
+#login a:link, #login a:visited {
+    color: #57B3E1;
+}
+
+.greeting {
+    color: #fff;
+}
+
+#siteNav {
+    background: #0c1216 url( ../images/navBack.png ) top left no-repeat;
+    height: 32px;
+}
+
+/*-------------------------------------
+ 	SiteNav
+---------------------------------------*/
+
+#siteNav ul {
+    margin-left: 15px;
+    padding-top: 4px;
+    z-index: 1;
+}
+
+#siteNav li {
+    float: left;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+#siteNav li a {
+    padding: 8px 12px 8px 12px;
+}
+
+#siteNav li.current a {
+    margin-bottom: 0px;
+}
+
+#siteNav li ul {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#siteNav ul:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+#siteNav li ul li ul {
+    position: relative;
+}
+
+#siteNav li ul li {
+    width: 175px;
+}
+
+#siteNav li > ul {
+    top: auto;
+    left: auto;
+}
+
+#siteNav li:hover ul {
+    display: block;
+}
+
+#siteNav li.current ul {
+    padding-bottom: 1px;
+}
+
+#siteNav li {
+    font-size: 12px;
+    text-align: center;
+}
+
+#siteNav li li {
+    text-align: left;
+}
+
+#siteNav li li li {
+    text-indent: 10px;
+}
+
+#siteNav a {
+    text-decoration: none;
+    display: block;
+}
+
+#siteNav li {
+}
+
+#siteNav li a:link, #siteNav li a:visited {
+    background: transparent url( ../images/site_nav_borders.gif ) bottom right no-repeat;
+    color: #c2d4dd;
+}
+
+#siteNav li a:hover {
+    background: #baced7 url( ../images/site_nav_hover_bg.gif ) bottom left repeat-x;
+    color: #24495e;
+}
+
+#siteNav li.current a:link, #siteNav li.current a:visited {
+    background: #f0f5f8 url( ../images/tab-selected-mid.png ) bottom left repeat-x;
+    color: #37454e; /*border-bottom:			1px solid #d7e5ed;*/
+}
+
+#siteNav li ul, #siteNav li.current ul {
+    border-left: 1px solid #bcd1df;
+    border-bottom: 1px solid #bcd1df;
+    border-right: 1px solid #bcd1df;
+}
+
+#siteNav li.over {
+    color: yellow;
+    border: 1px solid red;
+}
+
+#wrapper {
+    background: transparent url( ../images/wrapper_back.png ) repeat-y scroll left top;
+    border-top: 1px solid #FFFFFF;
+}
+
+#wrapper #insideW {
+    background: transparent url( ../images/inner_back.png ) repeat-x scroll left top;
+    margin: 0px;
+    padding: 0px;
+
+}
+
+#insideW #insideL {
+    background: transparent url( ../images/bottom_m.png ) no-repeat scroll left bottom;
+}
+
+#wrapper #pageNav {
+    background: transparent url( ../images/pagenav_back.png ) repeat-y scroll left top;
+    float: right;
+    width: 234px;
+    min-height: 110px;
+}
+
+#wrapper #content {
+    padding-bottom: 32px;
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-right: 25px; /*width: 620px;*/
+    min-height: 80px;
+}
+#wrapper #content_index {
+    padding-bottom: 32px;
+    padding-top: 5px;
+    padding-left:10.5px;
+    padding-right:10.5px; /*width: 620px;*/
+    min-height: 80px;
+}
+
+#content_index #main_img{
+    background:transparent url(../images/img_main.png) no-repeat scroll left top;
+    min-height:60px;
+    padding-top:230px;
+    padding-left:20px;
+}
+#content_index #main_img #nav{
+   
+}
+
+/* Table style */
+caption {
+    padding: 0 0 5px 0;
+    font: italic 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    text-align: left;
+    border-bottom: 1px dotted #000000;
+    margin-bottom: 10px;
+}
+
+th {
+    font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica,
+    sans-serif;
+    color: #6D929B;
+    letter-spacing: 2px;
+    text-align: left;
+    padding: 6px 6px 6px 12px;      
+}
+
+th.nobg {
+    border-top: 0;
+    border-left: 0;
+    border-right: 1px solid #C1DAD7;
+    background: none;
+}
+
+th.spec {
+    border-left: 1px solid #C1DAD7;
+    border-top: 0;
+    background: #fff url( ../images/bullet1.gif ) no-repeat;
+    font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica,
+    sans-serif;
+}
+
+th.specalt {
+    border-left: 1px solid #C1DAD7;
+    border-top: 0;
+    background: #f5fafa url( ../images/bullet2.gif ) no-repeat;
+    font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica,
+    sans-serif;
+    color: #B4AA9D;
+}
+
+td {
+    background: #fff;
+    padding: 6px 6px 6px 12px;
+    color: #6D929B;
+}
+
+td.alt {
+    font: italic 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    text-align: left;    
+    color: #B4AA9D;
+}
+
+tr.alt {
+    background: #F5FAFA;
+    color: #B4AA9D;
+}
+
+.process {
+    margin-top: 10px;
+    padding: 0px;
+    border: 1px solid;
+}
+
+.process h3 {
+    color:#000000;
+    font: bold 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    padding-left: 5px;
+    padding-bottom:5px;
+    padding-top:5px;
+    background: #ffc;
+    padding-right:5px;
+    border-bottom:1px solid #B4AA9D;         
+}
+
+.process h3 img{
+    font: bold 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    vertical-align:middle;
+    margin-right:4px;
+    background: #B4AA9D;
+}
+
+.clearboth{
+    clear:both;
+}
+
+.processcontrols{
+    float:right;
+}
+
+.instance {
+    margin-top: 10px;
+    padding: 0px;
+    border: 1px solid;
+}
+
+.instance h3 {
+    color:#000000;
+    font: bold 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    padding-left: 5px;
+    padding-bottom:5px;
+    padding-top:5px;
+    background: #ffc;
+    padding-right:5px;
+    border-bottom:1px solid #B4AA9D;
+}
+
+.instance h3 img{
+    font: bold 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    vertical-align:middle;
+    margin-right:4px;
+    background: #B4AA9D;
+}
+
+h2 {
+    padding: 0 0 5px 0;
+    font: italic 17px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    font-weight:bold;
+    text-align: left;
+    border-bottom: 1px dotted #000000;
+    margin-bottom: 10px;
+}
+
+/* BUTTONS */
+
+.clear { /* generic container (i.e. div) for floating buttons */
+    overflow: hidden;
+    width: 100%;
+}
+
+a.button {
+    background: transparent url('../images/bg_button_a.gif') no-repeat scroll top right;
+    color: #444;
+    display: block;
+    float: left;
+    font: normal 12px arial, sans-serif;
+    height: 24px;
+    margin-right: 6px;
+    padding-right: 18px; /* sliding doors padding */
+    text-decoration: none;
+}
+
+a.button span {
+    background: transparent url('../images/bg_button_span.gif') no-repeat;
+    display: block;
+    line-height: 14px;
+    padding: 5px 0 5px 18px;
+}
+
+a.button:active {
+    background-position: bottom right;
+    color: #000;
+    outline: none; /* hide dotted outline in Firefox */
+}
+
+a.button:active span {
+    background-position: bottom left;
+    padding: 6px 0 4px 18px; /* push text down 1px */
+}

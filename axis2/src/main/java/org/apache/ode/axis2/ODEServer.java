@@ -502,6 +502,9 @@ public class ODEServer {
         return _mgtService.getProcessMgmt();
     }
 
+    public File getAppRoot() {
+        return _appRoot;
+    }
 
     /**
      * Register event listeners configured in the configuration.

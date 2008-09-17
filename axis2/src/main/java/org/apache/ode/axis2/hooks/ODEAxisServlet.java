@@ -19,12 +19,17 @@
 
 package org.apache.ode.axis2.hooks;
 
+import java.io.IOException;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.ode.axis2.ODEServer;
+import org.apache.ode.axis2.service.DeploymentBrowser;
 
 /**
  * Overrides standard AxisServlet to handle our service configurations and
@@ -34,6 +39,7 @@ public class ODEAxisServlet extends AxisServlet {
     private static final long serialVersionUID = 4898351526757154917L;
 
     private ODEServer _odeServer;
+    private DeploymentBrowser _browser;
 
     /**
      * Initialize the Axis configuration context
@@ -45,11 +51,16 @@ public class ODEAxisServlet extends AxisServlet {
         super.init(config);
         _odeServer = createODEServer();
         _odeServer.init(config, axisConfiguration);
+        _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration, _odeServer.getAppRoot());
     }
 
     public void stop() throws AxisFault {
         super.stop();
         _odeServer.shutDown();
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (!_browser.doFilter(request, response)) super.doGet(request, response);
     }
 
     protected ODEServer createODEServer() {
