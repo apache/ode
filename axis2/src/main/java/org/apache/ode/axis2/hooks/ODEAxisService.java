@@ -19,10 +19,12 @@
 
 package org.apache.ode.axis2.hooks;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -86,6 +88,13 @@ public class ODEAxisService extends AxisService {
             axisService.setWsdlFound(true);
             axisService.setCustomWsdl(true);
             axisService.setClassLoader(axisConfig.getServiceClassLoader());
+
+            URL wsdlUrl = null;
+            for (File file : pconf.getFiles()) {
+                if (file.getAbsolutePath().indexOf(wsdlDefinition.getDocumentBaseURI()) > 0)
+                    wsdlUrl = file.toURI().toURL();
+            }
+            if (wsdlUrl != null) axisService.setFileName(wsdlUrl);
 
             // axis2 service configuration  
             URI axis2config = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2");

@@ -731,6 +731,10 @@ public class ProcessStoreImpl implements ProcessStore {
         _deployDir = depDir;
     }
 
+    public File getDeployDir() {
+        return _deployDir;
+    }
+
     public static DataSource createInternalDS(String guid) {
         jdbcDataSource hsqlds = new jdbcDataSource();
         hsqlds.setDatabase("jdbc:hsqldb:mem:" + guid);
