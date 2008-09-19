@@ -36,6 +36,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Enumeration;
 
 /**
  * Hibernate-based {@link org.apache.ode.bpel.dao.BpelDAOConnectionFactory}
@@ -120,8 +121,16 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         if (System.getProperty("ode.connection.isolation") != null) {
             String level = System.getProperty("ode.connection.isolation", "2");
             properties.put(Environment.ISOLATION, level);
-        }        
+        }
 
+        if (__log.isDebugEnabled()) {
+            Enumeration names = properties.propertyNames();
+            __log.debug("Properties passed to Hibernate:");
+            while (names.hasMoreElements()) {
+                String name = (String) names.nextElement();
+                __log.debug(name + "=" + properties.getProperty(name));
+            }
+        }
         SessionManager sm = new SessionManager(properties, _ds, _tm);
         _sessionManager = sm;
     }
