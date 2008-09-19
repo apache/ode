@@ -28,6 +28,7 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -36,8 +37,8 @@ public class LoggingStatementWrapper implements CallableStatement {
 
     private PreparedStatement _stmt;
     private Log _log;
-    private HashMap<String,Object> _paramsStr  = new HashMap<String,Object>();
-    private HashMap<Integer,Object> _paramsIdxr  = new HashMap<Integer,Object>();
+    private TreeMap<String,Object> _paramsStr  = new TreeMap<String,Object>();
+    private TreeMap<Integer,Object> _paramsIdxr  = new TreeMap<Integer,Object>();
 
     public LoggingStatementWrapper(CallableStatement stmt, Log log) {
         _stmt = stmt;
