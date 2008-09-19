@@ -146,7 +146,7 @@ public class HProcess extends HObject{
      * Get the partner links values as deployed.
      *
      * @return {@link Set}&lt;{@link HPartnerLink}&gt; with variable values
-     * @hibernate.set lazy="false" inverse="true" cascade="delete"
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
      * @hibernate.collection-key column="PROCESS"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HPartnerLink"
      */
