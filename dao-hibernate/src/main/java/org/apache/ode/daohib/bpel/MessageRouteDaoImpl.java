@@ -39,6 +39,7 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
 
     public MessageRouteDaoImpl(SessionManager sm, HCorrelatorSelector hobj) {
         super(sm, hobj);
+        entering("MessageRouteDaoImpl.MessageRouteDaoImpl");
         _selector = hobj;
     }
 
@@ -46,6 +47,7 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
      * @see org.apache.ode.bpel.dao.MessageRouteDAO#getTargetInstance()
      */
     public ProcessInstanceDAO getTargetInstance() {
+        entering("MessageRouteDaoImpl.getTargetInstance");
         // First we need to reliably lock the instance:
         if (!_locked) {
             Query q = getSession().createQuery(LOCK_INSTANCE);
@@ -59,10 +61,12 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
     }
 
     public String getGroupId() {
+        entering("MessageRouteDaoImpl.getGroupId");
         return _selector.getGroupId();
     }
 
     public int getIndex() {
+        entering("MessageRouteDaoImpl.getIndex");
         return _selector.getIndex();
     }
 

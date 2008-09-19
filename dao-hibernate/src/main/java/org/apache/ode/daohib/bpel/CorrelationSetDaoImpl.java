@@ -39,6 +39,7 @@ class CorrelationSetDaoImpl extends HibernateDao
 
   public CorrelationSetDaoImpl(SessionManager sessionManager, HCorrelationSet correlationSet) {
     super(sessionManager, correlationSet);
+      entering("CorrelationSetDaoImpl.CorrelationSetDaoImpl");
     _correlationSet = correlationSet;
   }
 
@@ -51,10 +52,12 @@ class CorrelationSetDaoImpl extends HibernateDao
   }
 
   public ScopeDAO getScope() {
+      entering("CorrelationSetDaoImpl.getScope");
     return new ScopeDaoImpl(_sm, _correlationSet.getScope());
   }
 
   public void setValue(QName[] names, CorrelationKey values) {
+      entering("CorrelationSetDaoImpl.setValue");
     _correlationSet.setValue(values.toCanonicalString());
     if (_correlationSet.getProperties() == null || _correlationSet.getProperties().size() == 0) {
       for (int m = 0; m < names.length; m++) {
@@ -74,11 +77,13 @@ class CorrelationSetDaoImpl extends HibernateDao
   }
 
   public CorrelationKey getValue() {
+      entering("CorrelationSetDaoImpl.getValue");
     if (_correlationSet.getValue() != null) return new CorrelationKey(_correlationSet.getValue());
     else return null;
   }
 
   public Map<QName, String> getProperties() {
+      entering("CorrelationSetDaoImpl.getProperties");
     HashMap<QName, String> result = new HashMap<QName, String>();
     for (HCorrelationProperty property : _correlationSet.getProperties()) {
       result.put(property.getQName(), property.getValue());
@@ -87,6 +92,7 @@ class CorrelationSetDaoImpl extends HibernateDao
   }
 
   private HCorrelationProperty getProperty(QName qName) {
+      entering("CorrelationSetDaoImpl.getProperty");
     for (HCorrelationProperty property : _correlationSet.getProperties()) {
       if (qName.getLocalPart().equals(property.getName())
               && qName.getNamespaceURI().equals(property.getNamespace()))

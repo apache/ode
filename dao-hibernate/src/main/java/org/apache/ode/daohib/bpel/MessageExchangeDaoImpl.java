@@ -49,6 +49,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 
     public MessageExchangeDaoImpl(SessionManager sm, HMessageExchange mex) {
         super(sm, mex);
+        entering("MessageExchangeDaoImpl.MessageExchangeDaoImpl");
         _hself = mex;
     }
 
@@ -57,6 +58,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public MessageDAO getResponse() {
+        entering("MessageExchangeDaoImpl.getResponse");
         return _hself.getResponse() == null ? null : new MessageDaoImpl(_sm, _hself.getResponse());
     }
 
@@ -65,6 +67,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public MessageDAO getRequest() {
+        entering("MessageExchangeDaoImpl.getRequest");
         return _hself.getRequest() == null ? null : new MessageDaoImpl(_sm, _hself.getRequest());
     }
 
@@ -77,11 +80,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setPortType(QName porttype) {
+        entering("MessageExchangeDaoImpl.setPortType");
         _hself.setPortType(porttype == null ? null : porttype.toString());
         update();
     }
 
     public void setStatus(String status) {
+        entering("MessageExchangeDaoImpl.setStatus");
         _hself.setState(status);
         update();
     }
@@ -91,6 +96,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public MessageDAO createMessage(QName type) {
+        entering("MessageExchangeDaoImpl.createMessage");
         HMessage message = new HMessage();
         message.setType(type == null ? null : type.toString());
         message.setCreated(new Date());
@@ -101,11 +107,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setRequest(MessageDAO msg) {
+        entering("MessageExchangeDaoImpl.setRequest");
         _hself.setRequest(msg == null ? null : (HMessage) ((MessageDaoImpl) msg).getHibernateObj());
         update();
     }
 
     public void setResponse(MessageDAO msg) {
+        entering("MessageExchangeDaoImpl.setResponse");
         _hself.setResponse(msg == null ? null : (HMessage) ((MessageDaoImpl) msg).getHibernateObj());
         update();
     }
@@ -115,6 +123,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setPartnerLinkModelId(int modelId) {
+        entering("MessageExchangeDaoImpl.setPartnerLinkModelId");
         _hself.setPartnerLinkModelId(modelId);
         update();
     }
@@ -124,22 +133,26 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setCorrelationId(String clientKey) {
+        entering("MessageExchangeDaoImpl.setCorrelationId");
         _hself.setClientKey(clientKey);
         update();
     }
 
     public void setPattern(String pattern) {
+        entering("MessageExchangeDaoImpl.setPattern");
         _hself.setPattern(pattern);
         update();
 
     }
 
     public void setOperation(String opname) {
+        entering("MessageExchangeDaoImpl.setOperation");
         _hself.setOperationName(opname);
         update();
     }
 
     public void setEPR(Element source) {
+        entering("MessageExchangeDaoImpl.setEPR");
         if (source == null)
             _hself.setEndpoint(null);
         else {
@@ -153,6 +166,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public Element getEPR() {
+        entering("MessageExchangeDaoImpl.getEPR");
         HLargeData ld = _hself.getEndpoint();
         if (ld == null)
             return null;
@@ -164,6 +178,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setCallbackEPR(Element source) {
+        entering("MessageExchangeDaoImpl.setCallbackEPR");
         if (source == null)
             _hself.setCallbackEndpoint(null);
         else {
@@ -177,6 +192,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public Element getCallbackEPR() {
+        entering("MessageExchangeDaoImpl.getCallbackEPR");
         HLargeData ld = _hself.getCallbackEndpoint();
         if (ld == null)
             return null;
@@ -196,6 +212,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setChannel(String channel) {
+        entering("MessageExchangeDaoImpl.setChannel");
         _hself.setChannelName(channel);
         update();
     }
@@ -210,6 +227,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setFault(QName faultType) {
+        entering("MessageExchangeDaoImpl.setFault");
         _hself.setFault(faultType == null ? null : faultType.toString());
         update();
     }
@@ -219,11 +237,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setFaultExplanation(String explanation) {
+        entering("MessageExchangeDaoImpl.setFaultExplanation");
         _hself.setFaultExplanation(explanation);
         update();
     }
 
     public void setCorrelationStatus(String cstatus) {
+        entering("MessageExchangeDaoImpl.setCorrelationStatus");
         _hself.setCorrelationStatus(cstatus);
         update();
     }
@@ -233,11 +253,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public ProcessDAO getProcess() {
+        entering("MessageExchangeDaoImpl.getProcess");
         if (_externalProcess != null) return _externalProcess;
         else return _hself.getProcess() == null ? null : new ProcessDaoImpl(_sm, _hself.getProcess());
     }
 
     public void setProcess(ProcessDAO process) {
+        entering("MessageExchangeDaoImpl.setProcess");
         if (process == null || process instanceof ProcessDaoImpl) {
         _hself.setProcess(process == null ? null : (HProcess) ((ProcessDaoImpl) process).getHibernateObj());
         update();
@@ -247,6 +269,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setInstance(ProcessInstanceDAO instance) {
+        entering("MessageExchangeDaoImpl.setInstance");
         if (instance == null || instance instanceof ProcessInstanceDaoImpl) {
         _hself.setInstance(instance == null ? null : (HProcessInstance) ((ProcessInstanceDaoImpl) instance)
                 .getHibernateObj());
@@ -258,6 +281,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public ProcessInstanceDAO getInstance() {
+        entering("MessageExchangeDaoImpl.getInstance");
         if (_externalInstance != null) return _externalInstance;
         else return _hself.getInstance() == null ? null : new ProcessInstanceDaoImpl(_sm, _hself.getInstance());
     }
@@ -272,29 +296,35 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setCallee(QName callee) {
+        entering("MessageExchangeDaoImpl.setCallee");
         _hself.setCallee(callee == null ? null : callee.toString());
         update();
     }
 
     public String getProperty(String key) {
+        entering("MessageExchangeDaoImpl.getProperty");
         return _hself.getProperties().get(key);
     }
 
     public void setProperty(String key, String value) {
+        entering("MessageExchangeDaoImpl.setProperty");
         _hself.getProperties().put(key, value);
         update();
     }
 
     public void setPartnerLink(PartnerLinkDAO plinkDAO) {
+        entering("MessageExchangeDaoImpl.setPartnerLink");
         _hself.setPartnerLink(((PartnerLinkDAOImpl) plinkDAO)._self);
         update();
     }
 
     public PartnerLinkDAO getPartnerLink() {
+        entering("MessageExchangeDaoImpl.getPartnerLink");
         return new PartnerLinkDAOImpl(_sm, _hself.getPartnerLink());
     }
 
     public Set<String> getPropertyNames() {
+        entering("MessageExchangeDaoImpl.getPropertyNames");
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
@@ -303,6 +333,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setPipedMessageExchangeId(String mexId) {
+        entering("MessageExchangeDaoImpl.setPipedMessageExchangeId");
         _hself.setPipedMessageExchangeId(mexId);
     }
 
