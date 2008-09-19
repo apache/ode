@@ -61,7 +61,7 @@ public class HMessage extends HObject {
     _data = data;
   }
 
-  /** @hibernate.many-to-one column="HEADER" */
+  /** @hibernate.many-to-one column="HEADER"  lazy="false" outer-join="true" */
   public HLargeData getHeader() {
     return _header;
   }

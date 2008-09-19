@@ -31,6 +31,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 
+
 public class MessageDaoImpl extends HibernateDao implements MessageDAO {
 
     private HMessage _hself;
@@ -38,11 +39,13 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
 
     protected MessageDaoImpl(SessionManager sessionManager, HMessage hobj) {
         super(sessionManager, hobj);
+        entering("MessageDaoImpl.MessageDaoImpl");
         _hself = hobj;
         _session = sessionManager.getSession();
     }
 
     public void setType(QName type) {
+        entering("MessageDaoImpl.setType");
         _hself.setType(type == null ? null : type.toString());
     }
 
@@ -51,6 +54,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     }
 
     public void setData(Element value) {
+        entering("MessageDaoImpl.setData");
         if (value == null) return;
         if (_hself.getMessageData() != null)
             _session.delete(_hself.getMessageData());
@@ -61,6 +65,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     }
 
     public Element getData() {
+        entering("MessageDaoImpl.getData");
         if (_hself.getMessageData() == null)
             return null;
         try {
@@ -71,6 +76,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     }
 
     public void setHeader(Element value) {
+        entering("MessageDaoImpl.setHeader");
         if (value == null) return;
         if (_hself.getHeader() != null)
             _session.delete(_hself.getHeader());
@@ -81,6 +87,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     }
 
     public Element getHeader() {
+        entering("MessageDaoImpl.getHeader");
         if (_hself.getHeader() == null) return null;
         try {
             return DOMUtils.stringToDOM(_hself.getHeader().getText());
@@ -90,6 +97,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     }
 
     public MessageExchangeDAO getMessageExchange() {
+        entering("MessageDaoImpl.getMessageExchange");
         return new MessageExchangeDaoImpl(_sm,_hself.getMessageExchange());
     }
 
