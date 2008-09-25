@@ -365,7 +365,7 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "engine",
       "bpel-store", "utils", "il-common", "dao-jpa", "runtimes"),
-      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, 
+      DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction, 
       COMMONS.lang, COMMONS.httpclient, COMMONS.codec
 
     test.with projects("jacob", "bpel-schemas", "bpel-scripts", "scheduler-simple", "runtimes"),
