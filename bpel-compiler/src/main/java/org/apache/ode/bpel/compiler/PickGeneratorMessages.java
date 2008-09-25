@@ -38,6 +38,10 @@ public class PickGeneratorMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("errForOrUntilMustBeGiven");
     }
 
+    public CompilationMessage errEmptyOnMessage() {
+        return this.formatCompilationMessage("An onMessage element declared in a pick can't be empty.");
+    }
+
     // TODO: better error message
     public CompilationMessage errOnAlarmWithCreateInstance() {
         return this.formatCompilationMessage("errOnAlarmWithCreateInstance");
