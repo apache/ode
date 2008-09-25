@@ -37,6 +37,10 @@ public class PickGeneratorMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("An <onAlarm> block must include a <for> or <until> block.");
     }
 
+    public CompilationMessage errEmptyOnMessage() {
+        return this.formatCompilationMessage("An onMessage element withing a pick can't be empty.");
+    }
+    
     public CompilationMessage errOnAlarmWithCreateInstance() {
         return this.formatCompilationMessage("An <onAlarm> may not be used when createInstance=yes.");
     }
