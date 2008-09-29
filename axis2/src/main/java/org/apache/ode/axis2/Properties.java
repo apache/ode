@@ -27,19 +27,17 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.ProtocolException;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.apache.commons.httpclient.params.HostParams;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -182,7 +180,8 @@ public class Properties {
         }
 
         public static HttpParams translate(Map<String, String> properties, HttpParams p) {
-            if (log.isDebugEnabled()) log.debug("Translating Properties for HttpClient. Properties size=" + properties.size());
+            if (log.isDebugEnabled())
+                log.debug("Translating Properties for HttpClient. Properties size=" + properties.size());
             if (properties.isEmpty()) return p;
 
             /*first add all property pairs so that new properties (with string value)
@@ -231,7 +230,8 @@ public class Properties {
                 p.setBooleanParameter(PROP_HTTP_REQUEST_CHUNK, Boolean.parseBoolean(properties.get(PROP_HTTP_REQUEST_CHUNK)));
             }
             if (properties.containsKey(PROP_HTTP_REQUEST_GZIP)) {
-                if (log.isWarnEnabled()) log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_REQUEST_GZIP);
+                if (log.isWarnEnabled())
+                    log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_REQUEST_GZIP);
             }
 
             if (Boolean.parseBoolean(properties.get(PROP_HTTP_ACCEPT_GZIP))) {
@@ -239,7 +239,8 @@ public class Properties {
                 // HttpClient does not support compression natively
                 // Additional code would be necessary to handle it.
 //                ((Collection) p.getParameter(HostParams.DEFAULT_HEADERS)).add(new Header("Accept-Encoding", "gzip"));
-                if (log.isWarnEnabled()) log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_ACCEPT_GZIP);
+                if (log.isWarnEnabled())
+                    log.warn("Property not supported by HTTP External Services: " + PROP_HTTP_ACCEPT_GZIP);
             }
 
             if (properties.containsKey(PROP_HTTP_MAX_REDIRECTS)) {
@@ -259,8 +260,79 @@ public class Properties {
                 ((Collection) p.getParameter(HostParams.DEFAULT_HEADERS)).addAll(headers);
             if (proxy != null) p.setParameter(PROP_HTTP_PROXY_PREFIX, proxy);
 
-            return p;
+            return new UnmodifiableHttpParams(p);
         }
 
+        static class UnmodifiableHttpParams implements HttpParams {
+
+            final HttpParams p;
+            private UnmodifiableHttpParams(HttpParams p) {
+                this.p = p;
+            }
+
+            public void setBooleanParameter(String name, boolean value) {
+                throw new UnsupportedOperationException();
+            }
+
+            public void setDefaults(HttpParams params) {
+                throw new UnsupportedOperationException();
+            }
+
+            public void setDoubleParameter(String name, double value) {
+                throw new UnsupportedOperationException();
+            }
+
+            public void setIntParameter(String name, int value) {
+                throw new UnsupportedOperationException();
+            }
+
+            public void setLongParameter(String name, long value) {
+                throw new UnsupportedOperationException();
+            }
+
+            public void setParameter(String name, Object value) {
+                throw new UnsupportedOperationException();
+            }
+
+            public boolean getBooleanParameter(String name, boolean defaultValue) {
+                return p.getBooleanParameter(name, defaultValue);
+            }
+
+            public HttpParams getDefaults() {
+                return null;
+            }
+
+            public double getDoubleParameter(String name, double defaultValue) {
+                return p.getDoubleParameter(name, defaultValue);
+            }
+
+            public int getIntParameter(String name, int defaultValue) {
+                return p.getIntParameter(name, defaultValue);
+            }
+
+            public long getLongParameter(String name, long defaultValue) {
+                return p.getLongParameter(name, defaultValue);
+            }
+
+            public Object getParameter(String name) {
+                return p.getParameter(name);
+            }
+
+            public boolean isParameterFalse(String name) {
+                return p.isParameterFalse(name);
+            }
+
+            public boolean isParameterSet(String name) {
+                return p.isParameterSet(name);
+            }
+
+            public boolean isParameterSetLocally(String name) {
+                return p.isParameterSetLocally(name);
+            }
+
+            public boolean isParameterTrue(String name) {
+                return p.isParameterTrue(name);
+            }
+        }
     }
 }

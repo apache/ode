@@ -20,6 +20,7 @@
 package org.apache.ode.utils;
 
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.collections.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,16 +28,18 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * This class load a regular property file in {@link java.util.Properties} instance. The main feature is that property can
+ * This class load a list of regular property files (order matters). The main feature is that property can
  * be chained in three levels. Then when querying for a property, if it's not found in the deepest level,
  * the parent will be queryed and so on.
  * <p/>
@@ -51,22 +54,24 @@ import java.util.Iterator;
  * <p/>
  * For instance, if the property file looks like this:
  * <pre>
+ *alias.foo_ns=http://foo.com
+ *
  * timeout=40000
- * film-service.port-of-cannes.ode.timeout=50000
+ * a_namespace_with_no_alias_defined.film-service.port-of-cannes.ode.timeout=50000
  * <p/>
  * max-redirects=30
- * brel-service.ode.max-redirects=40
- * brel-service.port-of-amsterdam.ode.max-redirects=60
+ * foo_ns.brel-service.ode.max-redirects=40
+ * foo_ns.brel-service.port-of-amsterdam.ode.max-redirects=60
  * </pre>
  * The following values may be expected:
  * <pre>
- * getProperty("max-redirects")                                       => 30
- * getProperty("brel-service", "max-redirects")                       => 40
- * getProperty("brel-service", "port-of-amsterdam", "max-redirects")  => 60
+ * getProperty("max-redirects")                                                         => 30
+ * getProperty("http://foo.com", "brel-service", "max-redirects")                       => 40
+ * getProperty("http://foo.com", "brel-service", "port-of-amsterdam", "max-redirects")  => 60
  * <p/>
- * getProperty("film-service", "timeout")                       => 40000
- * getProperty("film-service", "port-of-cannes", "timeout")     => 50000
- * getProperty("brel-service", "port-of-amsterdam", "timeout")  => 40000
+ * getProperty("a_namespace_with_no_alias_defined", "film-service", "timeout")                       => 40000
+ * getProperty("a_namespace_with_no_alias_defined", "film-service", "port-of-cannes", "timeout")     => 50000
+ * getProperty("http://foo.com", "port-of-amsterdam", "timeout")                                     => 40000
  * </pre>
  * <p/>
  * Values may contain some environment variables. For instance, message=You're using ${java.version}.
@@ -81,14 +86,11 @@ public class HierarchicalProperties {
 
     public static final String ODE_PREFFIX = "ode";
 
-    // the raw properties as of loaded from the filesystem
-    private Properties props = new Properties();
-    private Map<String, String> aliases = new HashMap<String, String>();
-    private File file;
+    private File[] files;
     private String prefix;
     private String dotted_prefix;
     /*
-        This map contains ChainedMap instances chained according to the service and/or port they are associated with.
+        This map contains ChainedMap instances chained according to the (qualified) service and/or port they are associated with.
         All ChainedMap instances has a common parent.
         The ChainedMap instances are chained to each others so that if a property is not found for [service, port],
         the ChainedMap associated to [service] will be queried, and if still not found, then the common parent.
@@ -105,35 +107,54 @@ public class HierarchicalProperties {
     private transient MultiKeyMap cacheOfImmutableMaps = new MultiKeyMap();
 
     /**
-     * @param file   the property file to be loaded. The file may not exist.
+     * @param files  the property file to be loaded. The file may not exist.
      *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown.
      * @param prefix the property prefix
      * @throws IOException
      */
-    public HierarchicalProperties(File file, String prefix) throws IOException {
-        this.file = file;
+    public HierarchicalProperties(File[] files, String prefix) throws IOException {
+        this.files = files;
         this.prefix = prefix;
         this.dotted_prefix = "." + prefix + ".";
-        loadFile();
+        loadFiles();
+    }
+
+    public HierarchicalProperties(File[] files) throws IOException {
+        this(files, ODE_PREFFIX);
+    }
+
+    public HierarchicalProperties(File file, String prefix) throws IOException {
+        this(new File[]{file}, prefix);
     }
 
     public HierarchicalProperties(File file) throws IOException {
-        this(file, ODE_PREFFIX);
+        this(new File[]{file}, ODE_PREFFIX);
+    }
+
+    public HierarchicalProperties(List<File> propFiles) throws IOException {
+        this(propFiles.toArray(new File[propFiles.size()]), ODE_PREFFIX);
     }
 
     /**
-     * Clear all existing content, read the file and parse each property. Simply logs a message and returns if the file does not exist.
+     * Clear all existing content, then read the file and parse each property. Simply logs a message and returns if the file does not exist.
      *
      * @throws IOException if the file is a Directory
      */
-    public void loadFile() throws IOException {
-        if (!file.exists()) {
-            if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "] Properties will be empty.");
-            return;
-        }
+    public void loadFiles() throws IOException {
         // #1. clear all existing content
         clear();
+        // #3. put the root map
+        hierarchicalMap.put(null, null, new ChainedMap());
 
+        for (File file : files) loadFile(file);
+    }
+
+    protected void loadFile(File file) throws IOException {
+        if (!file.exists()) {
+            if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "]");
+            return;
+        }
+        Properties props = new Properties();
         // #2. read the file
         FileInputStream fis = new FileInputStream(file);
         try {
@@ -143,8 +164,29 @@ public class HierarchicalProperties {
             fis.close();
         }
 
-        // #3. put the root map
-        hierarchicalMap.put(null, null, new ChainedMap());
+        // gather all aliases
+        Map<String, String> nsByAlias = new HashMap<String, String>();
+
+        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry e = (Map.Entry) it.next();
+            String key = (String) e.getKey();
+            String namespace = (String) e.getValue();
+
+
+            // replace any env variables by its value
+            namespace = SystemUtils.replaceSystemProperties(namespace);
+            props.put(key, namespace);
+
+            if (key.startsWith("alias.")) {
+                final String alias = key.substring("alias.".length(), key.length());
+                if (log.isDebugEnabled()) log.debug("Alias found: " + alias + " -> " + namespace);
+                if (nsByAlias.containsKey(alias) && namespace.equals(nsByAlias.get(alias)))
+                    throw new RuntimeException("Same alias used twice for 2 different namespaces! file=" + file + ", alias=" + alias);
+                nsByAlias.put(alias, namespace);
+                // remove the pair
+                it.remove();
+            }
+        }
 
         // #4. process each property
 
@@ -153,54 +195,46 @@ public class HierarchicalProperties {
             String key = (String) e.getKey();
             String value = (String) e.getValue();
 
-            // replace any env variables by its value
-            value = SystemUtils.replaceSystemProperties(value);
-            props.put(key, value);
 
-            if (key.startsWith("alias.")) {
-                final String alias = key.substring("alias.".length(), key.length());
-                if(log.isDebugEnabled()) log.debug("Alias found: "+alias+" -> "+value);
-                aliases.put(value, alias);
-            } else {
-                // parse the property name
-                String[] info = parseProperty((String) key);
-                String nsalias = info[0];
-                String service = info[1];
-                String port = info[2];
-                String targetedProperty = info[3];
+            // parse the property name
+            String[] info = parseProperty(key);
+            String nsalias = info[0];
+            String service = info[1];
+            String port = info[2];
+            String targetedProperty = info[3];
 
-                QName qname = nsalias != null ? new QName(nsalias, service) : null;
-                // get the map associated to this port
-                ChainedMap p = (ChainedMap) hierarchicalMap.get(qname, port);
-                if (p == null) {
-                    // create it if necessary
-                    // get the associated service map
-                    ChainedMap s = (ChainedMap) hierarchicalMap.get(qname, null);
-                    if (s == null) {
-                        // create the service map if necessary, the parent is the root map.
-                        s = new ChainedMap(getRootMap());
-                        // put it in the multi-map
-                        hierarchicalMap.put(qname, null, s);
-                    }
-
-                    // create the map itself and link it to theservice map
-                    p = new ChainedMap(s);
+            QName qname = null;
+            if (nsalias != null) {
+                qname = new QName(nsByAlias.get(nsalias) != null ? nsByAlias.get(nsalias) : nsalias, service);
+            }
+            // get the map associated to this port
+            ChainedMap p = (ChainedMap) hierarchicalMap.get(qname, port);
+            if (p == null) {
+                // create it if necessary
+                // get the associated service map
+                ChainedMap s = (ChainedMap) hierarchicalMap.get(qname, null);
+                if (s == null) {
+                    // create the service map if necessary, the parent is the root map.
+                    s = new ChainedMap(getRootMap());
                     // put it in the multi-map
-                    hierarchicalMap.put(qname, port, p);
+                    hierarchicalMap.put(qname, null, s);
                 }
 
-                // save the key/value in its chained map
-                p.put(targetedProperty, value);
+                // create the map itself and link it to the service map
+                p = new ChainedMap(s);
+                // put it in the multi-map
+                hierarchicalMap.put(qname, port, p);
             }
+
+            // save the key/value in its chained map
+            p.put(targetedProperty, value);
         }
     }
 
     /**
-     * Clear all content. If {@link #loadFile()} is not invoked later, all returned values will be null.
+     * Clear all content. If {@link #loadFiles()} is not invoked later, all returned values will be null.
      */
     public void clear() {
-        props.clear();
-        aliases.clear();
         hierarchicalMap.clear();
         cacheOfImmutableMaps.clear();
     }
@@ -243,7 +277,6 @@ public class HierarchicalProperties {
         // no need to go further if no properties
         if (hierarchicalMap.isEmpty()) return Collections.EMPTY_MAP;
 
-        service = resolveAlias(service);
         // else check the cache of ChainedMap already converted into immutable maps
         Map cachedMap = (Map) this.cacheOfImmutableMaps.get(service, port);
         if (cachedMap != null) {
@@ -287,23 +320,14 @@ public class HierarchicalProperties {
     }
 
     public String getProperty(QName service, String port, String property) {
-        ChainedMap cm = (ChainedMap) hierarchicalMap.get(resolveAlias(service), port);
-        // if this port is not explicitly mentioned in the multimap, get the default values.
-        if (cm == null) cm = getRootMap();
-        return (String) cm.get(property);
+        return (String) getProperties(service, port).get(property);
     }
 
     public String getPrefix() {
         return prefix;
     }
 
-    private QName resolveAlias(QName service) {
-        if (service != null && aliases.containsKey(service.getNamespaceURI())) {
-            return new QName(aliases.get(service.getNamespaceURI()), service.getLocalPart());
-        }
-        return service;
-    }
-    
+
     private String[] parseProperty(String property) {
         // aliaas ns, service, port, targeted property
         String[] res = new String[4];
