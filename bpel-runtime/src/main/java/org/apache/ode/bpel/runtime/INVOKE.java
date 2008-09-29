@@ -89,17 +89,17 @@ public class INVOKE extends ACTIVITY {
             if (!isTwoWay) {
                 FaultData faultData = null;
                 getBpelRuntimeContext().invoke(
-                    _scopeFrame.resolve(_oinvoke.partnerLink),
-                    _oinvoke.operation, outboundMsg, null);
+                        _scopeFrame.resolve(_oinvoke.partnerLink),
+                        _oinvoke.operation, outboundMsg, null);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 
             } else /* two-way */{
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
-                final InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
+                InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
 
                 final String mexId = getBpelRuntimeContext().invoke(
-                    _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
-                    outboundMsg, invokeResponseChannel);
+                        _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
+                        outboundMsg, invokeResponseChannel);
 
                 object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
                     private static final long serialVerstmptmpionUID = 4496880438819196765L;
@@ -118,13 +118,13 @@ public class INVOKE extends ACTIVITY {
                         }
 
                         try {
-                        initializeVariable(outputVar, response);
+                            initializeVariable(outputVar, response);
                         } catch (ExternalVariableModuleException e) {
-                        	__log.error("Exception while initializing external variable", e);
+                            __log.error("Exception while initializing external variable", e);
                             _self.parent.failure(e.toString(), null);
                             return;
                         }
-                        
+
                         // Generating event
                         VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
                         se.setNewValue(response);
@@ -140,19 +140,19 @@ public class INVOKE extends ACTIVITY {
                                 // Trying to initialize partner epr based on a message-provided epr/session.
                                 if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
                                         .resolve(_oinvoke.partnerLink)) || !_oinvoke.partnerLink.initializePartnerRole) {
-                    
+
                                     Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                     if (fromEpr != null) {
                                         getBpelRuntimeContext().writeEndpointReference(
-                                            _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
+                                                _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
                                     }
-                                }                    
-                                
+                                }
+
                                 String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
                                 if (partnersSessionId != null)
                                     getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.partnerLink),
-                                        partnersSessionId);
-                                
+                                            partnersSessionId);
+
                             }
                         } catch (FaultException e) {
                             fault = createFault(e.getQName(), _oinvoke);
@@ -169,7 +169,7 @@ public class INVOKE extends ACTIVITY {
                         Element msg = getBpelRuntimeContext().getPartnerResponse(mexId);
                         QName msgType = getBpelRuntimeContext().getPartnerResponseType(mexId);
                         FaultData fault = createFault(faultName, msg,
-                            _oinvoke.getOwner().messageTypes.get(msgType), _self.o);
+                                _oinvoke.getOwner().messageTypes.get(msgType), _self.o);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
                         getBpelRuntimeContext().releasePartnerMex(mexId);
                     }
@@ -194,23 +194,10 @@ public class INVOKE extends ACTIVITY {
                     private static final long serialVersionUID = 4219496341785922396L;
 
                     public void terminate() {
-                    	_self.parent.completed(null, CompensationHandler.emptySet());
-                    	object(new InvokeResponseChannelListener(invokeResponseChannel) {
-                        private static final long serialVersionUID = 688746737897792929L;
-						public void onFailure() {
-							__log.debug("Failure on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
-						}
-						public void onFault() {
-                            __log.debug("Fault on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
-						}
-						public void onResponse() {
-                            __log.debug("Response on invoke ignored, the invoke has already been terminated: " + _oinvoke.toString());
-						}
-
-                    });
+                        _self.parent.completed(null, CompensationHandler.emptySet());
                     }
                 }));
-                
+
             }
         } catch (FaultException fault) {
             __log.error(fault);
@@ -220,7 +207,7 @@ public class INVOKE extends ACTIVITY {
     }
 
     private Element setupOutbound(OInvoke oinvoke, Collection<OScope.CorrelationSet> outboundInitiations)
-        throws FaultException, ExternalVariableModuleException {
+            throws FaultException, ExternalVariableModuleException {
         if (outboundInitiations.size() > 0) {
             for (OScope.CorrelationSet c : outboundInitiations) {
                 initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
@@ -242,7 +229,7 @@ public class INVOKE extends ACTIVITY {
         sendEvent(new ActivityFailureEvent(_failureReason));
         final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
         getBpelRuntimeContext().registerActivityForRecovery(recoveryChannel, _self.aId, _failureReason, _lastFailure, _failureData,
-            new String[] { "retry", "cancel", "fault" }, _invoked - 1);
+                new String[] { "retry", "cancel", "fault" }, _invoked - 1);
         object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
             private static final long serialVersionUID = 8397883882810521685L;
             public void retry() {
@@ -265,7 +252,7 @@ public class INVOKE extends ACTIVITY {
                 sendEvent(new ActivityRecoveryEvent("fault"));
                 getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
                 if (faultData == null)
-                  faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
+                    faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failureReason);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
             }
         }.or(new TerminationChannelListener(_self.self) {
