@@ -46,11 +46,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -58,7 +60,7 @@ import java.util.Set;
  * @author mriou
  * @author Maciej Szefler <mszefler at gmail dot com>
  */
-class DeploymentUnitDir  {
+class DeploymentUnitDir {
 
 
     private static Log __log = LogFactory.getLog(DeploymentUnitDir.class);
@@ -67,8 +69,8 @@ class DeploymentUnitDir  {
     private File _duDirectory;
     private File _descriptorFile;
 
-    private HashMap<QName, CBPInfo> _processes = new HashMap<QName,CBPInfo>();
-    private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName,TDeployment.Process>();
+    private HashMap<QName, CBPInfo> _processes = new HashMap<QName, CBPInfo>();
+    private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName, TDeployment.Process>();
 
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
@@ -90,6 +92,13 @@ class DeploymentUnitDir  {
     private static final FileFilter _bpelFilter = new FileFilter() {
         public boolean accept(File path) {
             return path.getName().endsWith(".bpel") && path.isFile();
+        }
+    };
+
+    private static final FileFilter _endpointFilter = new FileFilter() {
+        public boolean accept(File path) {
+            // endpoint-configuration.properties is deprecated, keep it for backward compatibility
+            return (path.getName().endsWith(".endpoint") || path.getName().equals("endpoint-configuration.properties")) && path.isFile();
         }
     };
 
@@ -116,8 +125,8 @@ class DeploymentUnitDir  {
 
 
     /**
-     * Checking for each BPEL file if we have a corresponding compiled process. If we don't, 
-     * starts compilation. 
+     * Checking for each BPEL file if we have a corresponding compiled process. If we don't,
+     * starts compilation.
      */
     void compile() {
         ArrayList<File> bpels = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
@@ -151,12 +160,12 @@ class DeploymentUnitDir  {
 
     private void compile(File bpelFile) {
         BpelC bpelc = BpelC.newBpelCompiler();
-        
+
         // BPEL 1.1 does not suport the <import> element, so "global" WSDL needs to be configured explicitly.
         File bpel11wsdl = findBpel11Wsdl(bpelFile);
         if (bpel11wsdl != null)
             bpelc.setProcessWSDL(bpel11wsdl.toURI());
-        
+
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         bpelc.setBaseDirectory(_duDirectory);
         try {
@@ -174,7 +183,7 @@ class DeploymentUnitDir  {
         try {
             is = new FileInputStream(f);
             Serializer ofh = new Serializer(is);
-            CBPInfo info = new CBPInfo(ofh.type,ofh.guid,f);
+            CBPInfo info = new CBPInfo(ofh.type, ofh.guid, f);
             return info;
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
@@ -195,15 +204,22 @@ class DeploymentUnitDir  {
 
     public boolean equals(Object obj) {
         if (!(obj instanceof DeploymentUnitDir)) return false;
-        return ((DeploymentUnitDir)obj).getDeployDir().getAbsolutePath().equals(getDeployDir().getAbsolutePath());
+        return ((DeploymentUnitDir) obj).getDeployDir().getAbsolutePath().equals(getDeployDir().getAbsolutePath());
     }
 
     public File getDeployDir() {
         return _duDirectory;
     }
 
-    public File getEPRConfigFile(){
-        return new File(getDeployDir(), "endpoint-configuration.properties");
+    /**
+     *
+     * @return the list of endpoint configuration files. the list is built on each call to handle changes. 
+     */
+    public TreeSet<File> getEndpointConfigFiles() {
+        File[] files = getDeployDir().listFiles(_endpointFilter);
+        TreeSet<File> set = new TreeSet<File>();
+        set.addAll(Arrays.asList(files));
+        return set;
     }
 
     public DeployDocument getDeploymentDescriptor() {
@@ -240,7 +256,7 @@ class DeploymentUnitDir  {
                 try {
                     _docRegistry.addDefinition((Definition4BPEL) r.readWSDL(new WSDLLocatorImpl(rf, uri)));
                 } catch (WSDLException e) {
-                    throw new ContextException("Couldn't read WSDL document at " +  uri, e);
+                    throw new ContextException("Couldn't read WSDL document at " + uri, e);
                 }
             }
         }
@@ -313,7 +329,7 @@ class DeploymentUnitDir  {
         for (Process process : plist) {
             if (process.getFileName() == null || "".equals(process.getFileName()))
                 continue;
-            
+
             if (bpelFile.getName().equals(process.getFileName())) {
                 Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(process);
                 Map<String, Object> result = new HashMap<String, Object>();
@@ -324,9 +340,10 @@ class DeploymentUnitDir  {
         return null;
     }
 
-    
+
     /**
-     * Figure out the name of the WSDL file for a BPEL 1.1 process. 
+     * Figure out the name of the WSDL file for a BPEL 1.1 process.
+     *
      * @param bpelFile BPEL process file name
      * @return file name of the WSDL, or null if none specified.
      */
@@ -339,12 +356,12 @@ class DeploymentUnitDir  {
                 continue;
             if (process.getBpel11WsdlFileName() == null || "".equals(process.getBpel11WsdlFileName()))
                 return null;
-            
+
             return new File(bpelFile.getParentFile(), process.getBpel11WsdlFileName());
         }
         return null;
     }
-    
+
     public long getVersion() {
         return _version;
     }

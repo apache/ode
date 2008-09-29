@@ -94,6 +94,8 @@ public class ODEServer {
 
     protected File _workRoot;
 
+    protected File _configRoot;
+
     protected BpelServerImpl _server;
 
     protected ProcessStoreImpl _store;
@@ -138,8 +140,8 @@ public class ODEServer {
 
             __log.debug("Loading properties");
             String confDir = System.getProperty("org.apache.ode.configDir");
-            if (confDir == null) _odeConfig = new ODEConfigProperties(new File(_appRoot, "conf"));
-            else _odeConfig = new ODEConfigProperties(new File(confDir));
+            _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
+            _odeConfig = new ODEConfigProperties(_configRoot);
 
             try {
                 _odeConfig.load();
@@ -462,6 +464,7 @@ public class ODEServer {
         _store = createProcessStore(eprContext, _db.getDataSource());
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(new File(_workRoot, "processes"));
+        _store.setConfigDir(_configRoot);
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {

@@ -28,6 +28,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -41,7 +42,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.http.HttpUtils;
 import static org.apache.ode.utils.http.HttpUtils.bodyAllowed;
-import static org.apache.ode.utils.http.StatusCode.*;
+import static org.apache.ode.utils.http.StatusCode._202_ACCEPTED;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Document;
@@ -68,6 +69,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class HttpMethodConverter {
 
@@ -220,30 +223,45 @@ public class HttpMethodConverter {
             throw new IllegalArgumentException("Unsupported HTTP method: " + verb);
         }
 
-        // link params together
-        method.getParams().setDefaults(params);
         method.setPath(completeUri); // assumes that the path is properly encoded (URL safe).
         method.setQueryString(queryPath);
 
         // set headers
-        setHttpRequestHeaders(method, partValues, headers, opBinding);
+        setHttpRequestHeaders(method, opBinding, partValues, headers, params);
         return method;
     }
 
     /**
-     * Go through the list of message headers and set them if empty.
+     * First go through the list of default headers set in the method params. This param is then remove to avoid interference with HttpClient.
+     * Actually the default headers should be overriden by any headers set from the process.
+     * Not to mention that, for a given header, HttpClient do not overwrite any previous values but simply append the default value.<br/>
+     *  See {@link see org.apache.commons.httpclient.params.HostParams.DEFAULT_HEADERS}
      * <p/>
-     * Then go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding.
+     * Then go through the list of message headers and set them if empty.
+     * <p/>
+     * Finally go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding.
      * For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
      * or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
      * <p/>
      * Finally, set the 'Accept' header if the output content type of the operation exists.
      * <p/>
      * Notice that the last header value overrides any values set previoulsy. Meaning that message headers might get overriden by parts bound to headers.
+     *
      */
-    public void setHttpRequestHeaders(HttpMethod method, Map<String, Element> partValues, Map<String, Node> headers, BindingOperation opBinding) {
+    public void setHttpRequestHeaders(HttpMethod method, BindingOperation opBinding, Map<String, Element> partValues, Map<String, Node> headers, HttpParams params) {
         BindingInput inputBinding = opBinding.getBindingInput();
         Message inputMessage = opBinding.getOperation().getInput().getMessage();
+
+        // Do not let HttpClient manage the default headers
+        // Actually the default headers should be overriden by any headers set from the process.
+        // (Not to mention that, for a given header, HttpClient do not overwrite any previous values but simply append the default value)
+        Collection defaultHeaders = (Collection) params.getParameter(HostParams.DEFAULT_HEADERS);
+        if (defaultHeaders != null) {
+            Iterator i = defaultHeaders.iterator();
+            while (i.hasNext()) {
+                method.setRequestHeader((Header) i.next());
+            }
+        }
 
         // process message headers
         for (Iterator<Map.Entry<String, Node>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
@@ -299,7 +317,9 @@ public class HttpMethodConverter {
                 if (log.isErrorEnabled()) log.error(errMsg);
                 throw new RuntimeException(errMsg);
             }
-            method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
+            // do not set the header isf the value is empty
+            if (StringUtils.isNotEmpty(headerValue))
+                method.setRequestHeader(headerName, HttpHelper.replaceCRLFwithLWS(headerValue));
         }
 
         MIMEContent outputContent = WsdlUtils.getMimeContent(opBinding.getBindingOutput().getExtensibilityElements());
@@ -412,12 +432,9 @@ public class HttpMethodConverter {
             Part part = messageDef.getPart(partName);
             if (StringUtils.isNotEmpty(partName)) {
                 Header responseHeader = method.getResponseHeader(headerName);
+                // if the response header is not set, just skip it. no need to fail. 
                 if (responseHeader != null) {
                     odeMessage.setPart(partName, createPartElement(part, responseHeader.getValue()));
-                } else {
-                    String errMsg = "Part [" + partName + "] is bound to header [" + headerName + "], but this header is not set in the HTTP response.";
-                    if (log.isErrorEnabled()) log.error(errMsg);
-                    throw new RuntimeException(errMsg);
                 }
             } else {
                 String errMsg = "Invalid binding: missing required attribute! Part name: " + new QName(Namespaces.ODE_HTTP_EXTENSION_NS, "part");
@@ -426,12 +443,10 @@ public class HttpMethodConverter {
             }
         }
 
-        // add all HTTP headers into the messade as header parts
-        Header[] reqHeaders = method.getResponseHeaders();
-        for (int i = 0; i < reqHeaders.length; i++) {
-            Header h = reqHeaders[i];
-            odeMessage.setHeaderPart(h.getName(), h.getValue());
-        }
+        // add all HTTP response headers (in their condensed form) into the message as header parts
+        Set<String> headerNames = new HashSet<String>();
+        for (Header header : method.getResponseHeaders()) headerNames.add(header.getName());
+        for(String hname:headerNames) odeMessage.setHeaderPart(hname, method.getResponseHeader(hname).getValue());
 
         // make the status line information available as a single element
         odeMessage.setHeaderPart("Status-Line", HttpHelper.statusLineToElement(method.getStatusLine()));

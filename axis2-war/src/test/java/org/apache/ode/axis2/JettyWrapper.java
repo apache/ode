@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2.httpbinding;
+package org.apache.ode.axis2;
 
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -27,6 +27,8 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Request;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.StreamUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -36,11 +38,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class JettyWrapper {
+
+    static List REQUEST_HEADERS = new ArrayList();
+
+    static {
+        REQUEST_HEADERS.add("");
+    }
 
     protected Server server;
     private ContextHandlerCollection handlerColl;
@@ -51,21 +62,70 @@ public class JettyWrapper {
 
     public JettyWrapper(int port) throws Exception {
         server = new Server(port);
-        // Adding the buildr handler to control our server lifecycle
         ContextHandler arithmeticsContext = new ContextHandler();
         arithmeticsContext.setContextPath("/HttpBindingTest/ArithmeticsService");
         arithmeticsContext.setHandler(new ArithmeticsServiceHandler());
-
 
         ContextHandler blogContext = new ContextHandler();
         blogContext.setContextPath("/HttpBindingTest/BlogService");
         blogContext.setHandler(new BlogServiceHandler());
 
+        ContextHandler echoContext = new ContextHandler();
+        echoContext.setContextPath("/EchoService");
+        echoContext.setHandler(new EchoServiceHandler());
+
         handlerColl = new ContextHandlerCollection();
-        Handler[] handlers = {arithmeticsContext, blogContext};
+        Handler[] handlers = {arithmeticsContext, blogContext, echoContext};
         handlerColl.setHandlers(handlers);
 
         server.addHandler(handlerColl);
+    }
+
+    public void start() throws Exception {
+        if (!server.isStarted())
+            server.start();
+    }
+
+    public void stop() throws Exception {
+        server.stop();
+    }
+
+    private class EchoServiceHandler extends AbstractHandler {
+
+
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
+            String method = request.getMethod();
+            if (StringUtils.isNotEmpty(request.getParameter("ping"))) {
+                response.setStatus(200);
+                response.getOutputStream().println("Yep, I'm here!");
+            } else {
+                if (!"GET".equals(method) && !"POST".equals(method)) {
+                    response.setStatus(405);
+                    response.setHeader("Allow", "GET, POST");
+                } else {
+                    Enumeration h = request.getHeaderNames();
+                    // send back all headers
+                    while (h.hasMoreElements()) {
+                        String hname = (String) h.nextElement();
+                        Enumeration values = request.getHeaders(hname);
+                        while (values.hasMoreElements()) {
+                            String next = (String) values.nextElement();
+                            System.out.println(hname + ": " + next);
+                            response.addHeader(hname, next);
+                        }
+                    }
+
+                    // send back the body if any
+                    String body = new String(StreamUtils.read(request.getInputStream()));
+                    if (StringUtils.isNotEmpty(body))
+                        response.getOutputStream().println(body);
+
+                }
+            }
+
+
+            ((Request) request).setHandled(true);
+        }
     }
 
     private class ArithmeticsServiceHandler extends AbstractHandler {
@@ -376,7 +436,6 @@ public class JettyWrapper {
         }
     }
 
-
     public static void main(String[] args) {
         try {
             new JettyWrapper().server.start();
@@ -384,4 +443,5 @@ public class JettyWrapper {
             e.printStackTrace();
         }
     }
+
 }

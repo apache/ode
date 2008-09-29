@@ -28,9 +28,11 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.StatusLine;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
@@ -44,21 +46,39 @@ import org.w3c.dom.Document;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collections;
 
 public class HttpHelper {
 
     private static final Log log = LogFactory.getLog(HttpHelper.class);
 
-    public static void configure(HostConfiguration hostConfig, HttpState state, URI targetURI, HttpParams params) throws URIException {
+    public static void configure(HttpClient client, URI targetURI, HttpParams params) throws URIException {
         if (log.isDebugEnabled()) log.debug("Configuring http client...");
+
+
+        /* Do not forget to wire params so that endpoint properties are passed around
+           Down the road, when the request will be executed, the hierarchy of parameters will be the following:
+             (-> means "is parent of")
+             default params -> params from endpoint properties -> HttpClient -> HostConfig -> Method
+           This wiring is done by HttpClient.
+        */
+        client.getParams().setDefaults(params);
+
+        // Here we make sure HttpClient will not handle the default headers. 
+        // Actually HttpClient *appends* default headers while we want them to be ignored if the process assign them 
+        client.getParams().setParameter(HostParams.DEFAULT_HEADERS, Collections.EMPTY_LIST);
+
+
         // proxy configuration
         if (ProxyConf.isProxyEnabled(params, targetURI.getHost())) {
             if (log.isDebugEnabled()) log.debug("ProxyConf");
-            ProxyConf.configure(hostConfig, state, (HttpTransportProperties.ProxyProperties) params.getParameter(Properties.PROP_HTTP_PROXY_PREFIX));
+            ProxyConf.configure(client.getHostConfiguration(), client.getState(), (HttpTransportProperties.ProxyProperties) params.getParameter(Properties.PROP_HTTP_PROXY_PREFIX));
         }
 
         // security
         // ...
+
+
 
     }
 

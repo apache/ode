@@ -95,6 +95,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
     protected File _deployDir;
 
+    protected File _configDir;
+
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
      * time. We don't really care to parallelize these operations because: i) HSQL does not isolate transactions and we don't want
@@ -112,22 +114,22 @@ public class ProcessStoreImpl implements ProcessStore {
         this(null, null, "", new OdeConfigProperties(new Properties(), ""), true);
     }
 
-    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean auto) {
+    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel) {
         this.eprContext = eprContext;
         if (ds != null) {
             // ugly hack
             if (persistenceType.toLowerCase().indexOf("hib") != -1)
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), auto);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, auto);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, createDatamodel);
         } else {
             // If the datasource is not provided, then we create a HSQL-based in-memory
             // database. Makes testing a bit simpler.
             DataSource hsqlds = createInternalDS(_guid);
             if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), auto);
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel);
             else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, auto);
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, createDatamodel);
             _inMemDs = hsqlds;
         }
 
@@ -214,9 +216,8 @@ public class ProcessStoreImpl implements ProcessStore {
                     throw new ContextException(errmsg);
                 }
 
-                // final OProcess oprocess = loadCBP(cbpInfo.cbp);
                 ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
-                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext);
+                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext, _configDir);
                 processes.add(pconf);
             }
 
@@ -625,7 +626,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 // TODO: update the props based on the values in the DB.
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao
-                        .getDeployDate(), props, p.getState(), eprContext);
+                        .getDeployDate(), props, p.getState(), eprContext, _configDir);
                 version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);
@@ -727,6 +728,14 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public File getDeployDir() {
         return _deployDir;
+    }
+
+    public File getConfigDir() {
+        return _configDir;
+    }
+
+    public void setConfigDir(File configDir) {
+        this._configDir = configDir;
     }
 
     public static DataSource createInternalDS(String guid) {

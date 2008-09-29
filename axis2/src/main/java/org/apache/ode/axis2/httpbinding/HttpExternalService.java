@@ -24,6 +24,9 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.apache.commons.httpclient.params.HostParams;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
@@ -53,6 +56,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -144,11 +148,9 @@ public class HttpExternalService implements ExternalService {
 
             // create a client
             HttpClient client = new HttpClient(connections);
-            // don't forget to wire params so that EPR properties are passed around
-            client.getParams().setDefaults(params);
 
             // configure the client (proxy, security, etc)
-            HttpHelper.configure(client.getHostConfiguration(), client.getState(), method.getURI(), params);
+            HttpHelper.configure(client, method.getURI(), params);
 
             // this callable encapsulates the http method execution and the process of the response
             final Callable executionCallable;
@@ -300,7 +302,7 @@ public class HttpExternalService implements ExternalService {
 
         private void _4xx_5xx_error() throws Exception {
             int status = method.getStatusCode();
-            if(HttpHelper.isFaultOrFailure(status)>0){
+            if (HttpHelper.isFaultOrFailure(status) > 0) {
                 // reply with a fault, meaning the request should not be repeated
                 replyWithFault();
             } else {

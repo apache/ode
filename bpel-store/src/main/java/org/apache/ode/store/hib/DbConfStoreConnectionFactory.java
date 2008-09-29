@@ -78,7 +78,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     final SessionFactory _sessionFactory;
 
-    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean auto) {
+    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean createDatamodel) {
         _ds = ds;
 
         // Don't want to pollute original properties
@@ -102,7 +102,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
             }
         }
 
-        if (auto) {
+        if (createDatamodel) {
             properties.put(Environment.HBM2DDL_AUTO, "create-drop");
         }
 

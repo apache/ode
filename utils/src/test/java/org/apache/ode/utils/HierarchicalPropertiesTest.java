@@ -23,9 +23,9 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -34,35 +34,27 @@ public class HierarchicalPropertiesTest extends TestCase {
     protected HierarchicalProperties hp;
 
     protected void setUp() throws Exception {
-        File file = new File(getClass().getResource("/hierarchical.properties").toURI());
-        hp = new HierarchicalProperties(file);
+        File[] files = new File[]{new File(getClass().getResource("/hierarchical-2.properties").toURI()),
+                new File(getClass().getResource("/hierarchical-1.properties").toURI())};
+        hp = new HierarchicalProperties(files);
     }
 
-    public void testGetPropertyUsingAliases() {
+    public void testGetProperty() {
         String msg = "Returned value does not match expected value for this property!";
-        assertEquals(msg, hp.getProperty("max-redirects"), "30");
-        assertEquals(msg, hp.getProperty("bar", "brel-service", "max-redirects"), "40");
-        assertEquals(msg, hp.getProperty("bar", "brel-service", "port-of-amsterdam", "max-redirects"), "60");
-        assertEquals(msg, hp.getProperty("bar", "brel-service", "port-of-amsterdam", "timeout"), "40000");
-        assertEquals(msg, hp.getProperty("foo", "film-service", "timeout"), "40000");
-        assertEquals(msg, hp.getProperty("foo", "film-service", "port-of-cannes", "timeout"), "50000");
-        assertEquals(msg, hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"), "so green or red?");
-    }
-
-    public void testGetPropertyUsingURI() {
-        String msg = "Returned value does not match expected value for this property!";
-        assertEquals(msg, hp.getProperty("max-redirects"), "30");
-        assertEquals(msg, hp.getProperty("http://bar.com", "brel-service", "max-redirects"), "40");
-        assertEquals(msg, hp.getProperty("http://bar.com", "brel-service", "port-of-amsterdam", "max-redirects"), "60");
-        assertEquals(msg, hp.getProperty("http://bar.com", "brel-service", "port-of-amsterdam", "timeout"), "40000");
-        assertEquals(msg, hp.getProperty("http://foo.com", "film-service", "timeout"), "40000");
-        assertEquals(msg, hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "timeout"), "50000");
-        assertEquals(msg, hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"), "so green or red?");
+        assertEquals(msg, "30", hp.getProperty("max-redirects"));
+        assertEquals(msg, "40", hp.getProperty("http://bar.com", "brel-service", "max-redirects"));
+        assertEquals(msg, "60", hp.getProperty("http://bar.com", "brel-service", "port-of-amsterdam", "max-redirects"));
+        assertEquals(msg, "40000", hp.getProperty("http://bar.com", "brel-service", "port-of-amsterdam", "timeout"));
+        assertEquals(msg, "40000", hp.getProperty("http://foo.com", "film-service", "timeout"));
+        assertEquals(msg, "hi!", hp.getProperty("http://hello.com", "a_service", "worldproperty"));
+        assertEquals(msg, "4", hp.getProperty("a_namespace_with_no_alias", "a_service", "poolsize"));
+        assertEquals("If the same property is set by two different files, the order of precedence should be the alphabetical order.", "60000", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "timeout"));
+        assertEquals("The prefix could be use without interfering", "so green or red?", hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"));
     }
 
     public void testGetProperties() {
         final List keys = Arrays.asList("timeout", "max-redirects", "ode.a.property.beginning.with.the.prefix.but.no.service");
-        Map map = hp.getProperties("foo", "film-service");
+        Map map = hp.getProperties("http://foo.com", "film-service");
         assertEquals("Number of properties is wrong", keys.size(), map.size());
         assertEquals("40000", map.get("timeout"));
         assertEquals("30", map.get("max-redirects"));
