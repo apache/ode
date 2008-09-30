@@ -102,7 +102,7 @@ public class INVOKE extends ACTIVITY {
                         outboundMsg, invokeResponseChannel);
 
                 object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
-                    private static final long serialVerstmptmpionUID = 4496880438819196765L;
+                    private static final long serialVersionUID = 4496880438819196765L;
 
                     public void onResponse() {
                         // we don't have to write variable data -> this already
