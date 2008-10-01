@@ -9,7 +9,19 @@
         xmlns:odex="http://www.apache.org/ode/type/extension/http"
         targetNamespace="http://ode/bpel/test/properties">
 
+    <wsdl:types>
+        <xsd:schema xmlns:ns="http://ode/bpel/test/properties" attributeFormDefault="qualified"
+                    elementFormDefault="unqualified" targetNamespace="http://ode/bpel/test/properties">
 
+            <xsd:element name="credentials">
+                <xsd:complexType>
+                    <xsd:attribute name="scheme" type="xsd:string" default="server-decide"/>
+                    <xsd:attribute name="username" type="xsd:string"/>
+                    <xsd:attribute name="password" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
     <!--
     The goal of this test is to make sure endpoint properties are properly passed around.
     Endpoint properties might be set with property files matching *.endpoint.
@@ -33,6 +45,7 @@
         <wsdl:part name="header_BC" type="xsd:string"/>
         <wsdl:part name="header_AA" type="xsd:string"/>
         <wsdl:part name="header_BB" type="xsd:string"/>
+        <wsdl:part name="WWW-Authenticate" element="credentials"/>
     </wsdl:message>
 
 
@@ -49,9 +62,9 @@
             <odex:binding verb="GET"/>
             <wsdl:input>
                 <http:urlReplacement/>
-                <odex:header name="header_A"  part="header_A" />
-                <odex:header name="header_B"  part="header_B" />
-                <odex:header name="header_C"  part="header_C" />
+                <odex:header name="header_A" part="header_A"/>
+                <odex:header name="header_B" part="header_B"/>
+                <odex:header name="header_C" part="header_C"/>
                 <odex:header name="header_ABC" part="header_ABC"/>
                 <odex:header name="header_AB" part="header_AB"/>
                 <odex:header name="header_AC" part="header_AC"/>
@@ -60,9 +73,9 @@
                 <odex:header name="header_BB" part="header_BB"/>
             </wsdl:input>
             <wsdl:output>
-                <odex:header name="header_A"  part="header_A" />
-                <odex:header name="header_B"  part="header_B" />
-                <odex:header name="header_C"  part="header_C" />
+                <odex:header name="header_A" part="header_A"/>
+                <odex:header name="header_B" part="header_B"/>
+                <odex:header name="header_C" part="header_C"/>
                 <odex:header name="header_ABC" part="header_ABC"/>
                 <odex:header name="header_AB" part="header_AB"/>
                 <odex:header name="header_AC" part="header_AC"/>

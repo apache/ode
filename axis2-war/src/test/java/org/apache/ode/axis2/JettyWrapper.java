@@ -19,42 +19,32 @@
 
 package org.apache.ode.axis2;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.StreamUtils;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Request;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.StreamUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class JettyWrapper {
 
-    static List REQUEST_HEADERS = new ArrayList();
-
-    static {
-        REQUEST_HEADERS.add("");
-    }
-
     protected Server server;
-    private ContextHandlerCollection handlerColl;
 
     public JettyWrapper() throws Exception {
         this(7070);
@@ -62,6 +52,18 @@ public class JettyWrapper {
 
     public JettyWrapper(int port) throws Exception {
         server = new Server(port);
+        addDefaultHandlers();
+    }
+
+
+    public JettyWrapper(ContextHandler handler) {
+        server = new Server(7070);
+        if(handler!=null) server.addHandler(handler);
+        else addDefaultHandlers();
+    }
+
+
+    private void addDefaultHandlers() {
         ContextHandler arithmeticsContext = new ContextHandler();
         arithmeticsContext.setContextPath("/HttpBindingTest/ArithmeticsService");
         arithmeticsContext.setHandler(new ArithmeticsServiceHandler());
@@ -74,7 +76,7 @@ public class JettyWrapper {
         echoContext.setContextPath("/EchoService");
         echoContext.setHandler(new EchoServiceHandler());
 
-        handlerColl = new ContextHandlerCollection();
+        ContextHandlerCollection handlerColl = new ContextHandlerCollection();
         Handler[] handlers = {arithmeticsContext, blogContext, echoContext};
         handlerColl.setHandlers(handlers);
 
@@ -82,20 +84,18 @@ public class JettyWrapper {
     }
 
     public void start() throws Exception {
-        if (!server.isStarted())
-            server.start();
+        server.start();
     }
 
     public void stop() throws Exception {
         server.stop();
     }
 
-    private class EchoServiceHandler extends AbstractHandler {
-
+    static public class EchoServiceHandler extends AbstractHandler {
 
         public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
             String method = request.getMethod();
-            if (StringUtils.isNotEmpty(request.getParameter("ping"))) {
+            if (request.getParameter("ping")!=null) {
                 response.setStatus(200);
                 response.getOutputStream().println("Yep, I'm here!");
             } else {

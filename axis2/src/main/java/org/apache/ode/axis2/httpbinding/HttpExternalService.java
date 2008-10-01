@@ -144,8 +144,10 @@ public class HttpExternalService implements ExternalService {
             // create a client
             HttpClient client = new HttpClient(connections);
 
+
             // configure the client (proxy, security, etc)
-            HttpHelper.configure(client, method.getURI(), params);
+            Element authenticatePart = DOMUtils.findChildByName(odeMex.getRequest().getMessage(), new QName(null, "WWW-Authenticate"));
+            HttpHelper.configure(client, method.getURI(), authenticatePart, params);
 
             // this callable encapsulates the http method execution and the process of the response 
             final Callable executionCallable;
@@ -193,7 +195,6 @@ public class HttpExternalService implements ExternalService {
         public Void call() {
             try {
                 // simply execute the http method
-                HttpClient client = new HttpClient(connections);
                 if (log.isDebugEnabled()) {
                     log.debug("Executing http request : " + method.getName() + " " + method.getURI());
                     log.debug(HttpHelper.requestToString(method));
