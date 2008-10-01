@@ -49,15 +49,14 @@ import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.wsdl.Messages;
-import org.apache.ode.utils.fs.FileWatchDog;
 import org.apache.ode.utils.uuid.UUID;
+import org.apache.ode.utils.wsdl.Messages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Definition;
-import javax.wsdl.Operation;
 import javax.wsdl.Fault;
+import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.InputStream;
@@ -73,9 +72,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     private static final Log __log = LogFactory.getLog(ExternalService.class);
     private static final int EXPIRE_SERVICE_CLIENT = 30000;
 
-    private static ThreadLocal<CachedOptions> _cachedOptions = new ThreadLocal<CachedOptions>();
-    private static ThreadLocal<CachedServiceClient> _cachedClients = new ThreadLocal<CachedServiceClient>();
-   
+    private static ThreadLocal<WatchDog<Map, OptionsObserver>> _cachedOptions = new ThreadLocal<WatchDog<Map, OptionsObserver>>();
+    private static ThreadLocal<WatchDog<Long, ServiceFileObserver>> _cachedClients = new ThreadLocal<WatchDog<Long, ServiceFileObserver>>();
+
     private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
 
     private Definition _definition;
@@ -106,7 +105,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         try {
             // Override options are passed to the axis MessageContext so we can
-            // retrieve them in our session out handler.
+            // retrieve them in our session out changeHandler.
             MessageContext mctx = new MessageContext();
             writeHeader(mctx, odeMex);
 
@@ -119,7 +118,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 __log.debug("Message: " + soapEnv);
             }
 
-            ServiceClient client = getCachedServiceClient().client;
+            ServiceClient client = getServiceClient();
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.addMessageContext(mctx);
@@ -160,30 +159,52 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
     }
 
-    private CachedServiceClient getCachedServiceClient() throws AxisFault {
-        CachedServiceClient cachedServiceClient = _cachedClients.get();
-        if (cachedServiceClient == null) {
-            cachedServiceClient = new CachedServiceClient(new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2")), EXPIRE_SERVICE_CLIENT);
-            _cachedClients.set(cachedServiceClient);
+    private ServiceClient getServiceClient() throws AxisFault {
+        WatchDog<Long, ServiceFileObserver> serviceClientWatchDog = _cachedClients.get();
+        if (serviceClientWatchDog == null) {
+            File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
+            serviceClientWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
+            serviceClientWatchDog.setDelay(EXPIRE_SERVICE_CLIENT);
+            _cachedClients.set(serviceClientWatchDog);
         }
         try {
             // call manually the check procedure
             // we dont want a dedicated thread for that
-            cachedServiceClient.check();
+            serviceClientWatchDog.check();
         } catch (RuntimeException e) {
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
 
-        SoapExternalService.CachedOptions cachedOptions = _cachedOptions.get();
-        if (cachedOptions == null) {
-            cachedOptions = new CachedOptions();
-            _cachedOptions.set(cachedOptions);
+        WatchDog<Map, OptionsObserver> optionsWatchDog = _cachedOptions.get();
+        if (optionsWatchDog == null) {
+            optionsWatchDog = new WatchDog<Map, OptionsObserver>(new WatchDog.Mutable<Map>() {
+                // ProcessConf#getProperties(String...) cannot return ull (by contract)
+                public boolean exists() {
+                    return true;
+                }
+
+                public boolean hasChangedSince(Map since) {
+                    Map latest = lastModified();  // cannot be null but better be prepared
+                    // check if mappings are equal
+                    return !CollectionUtils.equals(latest, since);
+                }
+
+                public Map lastModified() {
+                    return _pconf.getEndpointProperties(endpointReference);
+                }
+
+                public String toString() {
+                    return "Properties for Endpoint: "+endpointReference;
+                }
+            }, new OptionsObserver());
+            _cachedOptions.set(optionsWatchDog);
         }
-        cachedOptions.check();
+        optionsWatchDog.check();
 
         // apply the options to the service client
-        cachedServiceClient.client.setOptions(cachedOptions.options);
-        return cachedServiceClient;
+        ServiceClient serviceClient = serviceClientWatchDog.getObserver().client;
+        serviceClient.setOptions(optionsWatchDog.getObserver().options);
+        return serviceClient;
     }
 
     /**
@@ -314,18 +335,19 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
      * The {@link org.apache.axis2.client.ServiceClient} instance is created from the main Axis2 config instance and
      * this service-specific config file.
      */
-    private class CachedServiceClient extends FileWatchDog {
+    private class ServiceFileObserver extends WatchDog.DefaultObserver {
         ServiceClient client;
+        File file;
 
-        protected CachedServiceClient(File file, long delay) {
-            super(file, delay);
+        private ServiceFileObserver(File file) {
+            this.file = file;
         }
 
-        protected boolean isInitialized() {
+        public boolean isInitialized() {
             return client != null;
         }
 
-        protected void init() {
+        public void init() {
             try {
                 client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
             } catch (AxisFault axisFault) {
@@ -333,7 +355,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             }
         }
 
-        protected void doOnUpdate() {
+        public void onUpdate() {
             // axis2 service configuration
             // if the config file has been modified (i.e added or updated), re-create a ServiceClient
             // and load the new config.
@@ -351,42 +373,20 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
     }
 
-    private class CachedOptions extends WatchDog<Map> {
+    private class OptionsObserver extends WatchDog.DefaultObserver {
 
         Options options;
 
-        private CachedOptions() {
-            super(new WatchDog.Mutable<Map>() {
-                // ProcessConf#getProperties(String...) cannot return ull (by contract)
-                public boolean exists() {
-                    return true;
-                }
 
-                public boolean hasChangedSince(Map since) {
-                    Map latest = lastModified();  // cannot be null but better be prepared
-                    // check if mappings are equal
-                    return !CollectionUtils.equals(latest, since);
-                }
-
-                public Map lastModified() {
-                    return _pconf.getEndpointProperties(endpointReference);
-                }
-
-                public String toString() {
-                    return "Properties for Endpoint: "+endpointReference;
-                }
-            });
-        }
-
-        protected boolean isInitialized() {
+        public boolean isInitialized() {
             return options != null;
         }
 
-        protected void init() {
+        public void init() {
             options = new Options();
         }
 
-        protected void doOnUpdate() {
+        public void doOnUpdate() {
             init();
 
             // note: don't make this map an instance attribute, so we always get the latest version

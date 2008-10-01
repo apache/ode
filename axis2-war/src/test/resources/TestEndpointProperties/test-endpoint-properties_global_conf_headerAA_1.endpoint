@@ -1,0 +1,4 @@
+
+alias.myns1=http://ode/bpel/test/properties
+
+myns1.PropertiesService.ode.http.default-headers.header_AA=from_global_conf#file1

@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileFilter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -57,8 +59,8 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
-import org.apache.ode.utils.fs.FileWatchDog;
-import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.WatchDog;
+import org.apache.ode.utils.CollectionUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -71,9 +73,9 @@ import org.w3c.dom.Node;
  */
 public class ProcessConfImpl implements ProcessConf {
     private static final Log __log = LogFactory.getLog(ProcessConfImpl.class);
-    private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     private final Date _deployDate;
+    private File _configDir;
     private final Map<QName, Node> _props;
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
 
@@ -91,32 +93,51 @@ public class ProcessConfImpl implements ProcessConf {
     // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
     private volatile boolean _inMemory = false;
 
-    // provide the EPR properties
-    private HierarchicalProperties eprProperties;
+    // provide the IL properties
+    private HierarchicalProperties ilProperties;
     // monitor the EPR property file and reload it if necessary
-    private EPRPropertiesWatchDog eprPropertiesWatchDog;
-    private final ReadWriteLock eprPropertiesLock = new ReentrantReadWriteLock();
+    private WatchDog<Map<File, Long>, PropertiesObserver> propertiesWatchDog;
+    private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
 
     private EndpointReferenceContext eprContext;
 
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
-                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext) {
+                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir) {
         _pid = pid;
         _version = version;
         _du = du;
         _pinfo = pinfo;
         _deployDate = deployDate;
+        _configDir = configDir;
         _props = Collections.unmodifiableMap(props);
         _state = pstate;
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
         this.eprContext = eprContext;
-        eprPropertiesWatchDog = new EPRPropertiesWatchDog();
+        propertiesWatchDog = new WatchDog<Map<File, Long>, PropertiesObserver>(new PropertiesMutable(), new PropertiesObserver());
 
         initLinks();
         initMexInterceptors();
         initEventList();
     }
+
+    private List<File> collectEndpointConfigFiles() {
+        // please mind the order: process-level files must be before system-level files
+        List<File> propFiles = new ArrayList<File>();
+
+        propFiles.addAll(_du.getEndpointConfigFiles());
+        if (_configDir != null) {
+            // list and sort endpoint config files
+            File[] files = _configDir.listFiles(new FileFilter() {
+                public boolean accept(File path) {
+                    return path.getName().endsWith(".endpoint") && path.isFile();
+                }
+            });
+            Arrays.sort(files);
+            propFiles.addAll(Arrays.asList(files));
+        }
+        return propFiles;
+    }    
 
     private void initMexInterceptors() {
         if (_pinfo.getMexInterceptors() != null) {
@@ -155,7 +176,7 @@ public class ProcessConfImpl implements ProcessConf {
                 _myRoleEndpoints.put(plinkName, new Endpoint(service.getName(), service.getPort()));
                 
                 if (provide.isSetEnableSharing()) {
-                	_sharedServices.add(service.getName());
+                    _sharedServices.add(service.getName());
                 }
             }
         }
@@ -347,64 +368,77 @@ public class ProcessConfImpl implements ProcessConf {
 
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
-        eprPropertiesWatchDog.check();
-        if (eprProperties == null) {
+        propertiesWatchDog.check();
+        if (ilProperties == null) {
             return Collections.EMPTY_MAP;
         } else {
             // take a lock so we can have a consistent snapshot of the properties
-            eprPropertiesLock.readLock().lock();
+            ilPropertiesLock.readLock().lock();
             try {
-                return eprProperties.getProperties(service, port);
+                return ilProperties.getProperties(service, port);
             } finally {
-                eprPropertiesLock.readLock().unlock();
+                ilPropertiesLock.readLock().unlock();
             }
         }
     }
 
-    /**
-     * Manage the reloading of the propery file every {@link org.apache.ode.utils.fs.FileWatchDog#DEFAULT_DELAY}.
-     * The check is done manually, meaning that {@link #check()} must be invoked each time eprProperties is accessed.
-     */
-    private class EPRPropertiesWatchDog extends FileWatchDog {
-        public EPRPropertiesWatchDog() {
-            super(_du.getEPRConfigFile());
-        }
+    private class PropertiesMutable implements WatchDog.Mutable<Map<File, Long>> {
 
-        protected void init() {
-            eprPropertiesLock.writeLock().lock();
-            try {
-                if (eprProperties == null) {
-                    try {
-                        eprProperties = new HierarchicalProperties(super.file);
-                    } catch (IOException e) {
-                        throw new ContextException("EPR Config Properties cannot be loaded!", e);
-                    }
-                } else {
-                    eprProperties.clear();
-                }
-            } finally {
-                eprPropertiesLock.writeLock().unlock();
+            public boolean exists() {
+                return true;
+            }
+
+            public boolean hasChangedSince(Map<File, Long> since) {
+                return !CollectionUtils.equals(lastModified(), since);
+            }
+
+            public Map<File, Long> lastModified() {
+                List<File> files = collectEndpointConfigFiles();
+                Map<File, Long> m = new HashMap<File, Long>(files.size() * 15 / 10);
+                for (File f : files) m.put(f, Long.valueOf(f.lastModified()));
+                return m;
             }
         }
 
-        protected boolean isInitialized() {
-            return eprProperties != null;
-        }
+        private class PropertiesObserver implements WatchDog.Observer {
 
-        protected void doOnUpdate() {
-            eprPropertiesLock.writeLock().lock();
-            try {
-                init();
+            public void init() {
+                ilPropertiesLock.writeLock().lock();
                 try {
-                    eprProperties.loadFile();
-                } catch (IOException e) {
-                    throw new ContextException("EPR Config Properties cannot be loaded!", e);
+                    try {
+                        // do not hold a reference on the file list, so that changes are handled
+                        // and always create a new instance of the HierarchicalProperties
+                        ilProperties = new HierarchicalProperties(collectEndpointConfigFiles());
+                    } catch (IOException e) {
+                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                    }
+                } finally {
+                    ilPropertiesLock.writeLock().unlock();
                 }
-            } finally {
-                eprPropertiesLock.writeLock().unlock();
+            }
+
+            public boolean isInitialized() {
+                return ilProperties != null;
+            }
+
+            public void onUpdate() {
+                ilPropertiesLock.writeLock().lock();
+                try {
+                    init();
+                    try {
+                        ilProperties.loadFiles();
+                    } catch (IOException e) {
+                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+                    }
+                } finally {
+                    ilPropertiesLock.writeLock().unlock();
+                }
+            }
+
+            public void onDelete() {
+                init();
             }
         }
-    }
 
 
 }

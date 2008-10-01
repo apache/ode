@@ -1,6 +1,7 @@
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.JettyWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +36,7 @@ public class HttpBindingTest extends Axis2TestBase {
         new Thread("HttpBindingJetty") {
             public void run() {
                 try {
-                    jettyWrapper.server.start();
+                    jettyWrapper.start();
                     latch.countDown();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -47,7 +48,7 @@ public class HttpBindingTest extends Axis2TestBase {
     }
 
     protected void tearDown() throws Exception {
-        jettyWrapper.server.stop();
+        jettyWrapper.stop();
         super.tearDown();
     }
 
