@@ -326,7 +326,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="false" cascade="delete"
+     * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="true" cascade="delete"
      * @hibernate.collection-key column="MEX"
      * @hibernate.collection-index column="NAME" type="string"
      * @hibernate.collection-element column="VALUE" type="string" length="8000"
