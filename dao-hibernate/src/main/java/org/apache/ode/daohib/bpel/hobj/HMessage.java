@@ -40,7 +40,7 @@ public class HMessage extends HObject {
         return _type;
     }
 
-    /** @hibernate.many-to-one column="DATA" */
+    /** @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" */
     public HLargeData getMessageData() {
         return _data;
     }
