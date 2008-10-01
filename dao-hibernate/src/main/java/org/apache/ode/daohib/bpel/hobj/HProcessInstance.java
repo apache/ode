@@ -163,7 +163,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PROCESS_ID"
+     *
+     * @hibernate.many-to-one column="PROCESS_ID" lazy="false" outer-join="true"
      */
     public HProcess getProcess() {
         return _process;
