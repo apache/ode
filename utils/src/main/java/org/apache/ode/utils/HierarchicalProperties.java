@@ -227,6 +227,7 @@ public class HierarchicalProperties {
             }
 
             // save the key/value in its chained map
+            if(log.isDebugEnabled()) log.debug("New property: "+targetedProperty+" -> "+value);
             p.put(targetedProperty, value);
         }
     }
