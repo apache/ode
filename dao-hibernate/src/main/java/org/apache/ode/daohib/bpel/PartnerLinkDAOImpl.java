@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
  */
 public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
 
+
     /** Cached copy of my epr */
     private Element _myEPR;
 
@@ -46,6 +47,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
 
     public PartnerLinkDAOImpl(SessionManager sessionManager, HPartnerLink hobj) {
         super(sessionManager, hobj);
+        entering("PartnerLinkDAOImpl.PartnerLinkDAOImpl");
         _self = hobj;
     }
 
@@ -70,11 +72,13 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     }
 
     public void setMyRoleServiceName(QName svcName) {
+        entering("PartnerLinkDAOImpl.setMyRoleServiceName");
         _self.setServiceName(svcName == null ? null : svcName.toString());
         update();
     }
 
     public Element getMyEPR() {
+        entering("PartnerLinkDAOImpl.getMyEPR");
         if (_myEPR != null)
             return _myEPR;
         if (_self.getMyEPR() == null)
@@ -87,6 +91,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     }
 
     public void setMyEPR(Element val) {
+        entering("PartnerLinkDAOImpl.setMyEPR");
         _myEPR = val;
         if (_self.getMyEPR() != null)
             _sm.getSession().delete(_self.getMyEPR());
@@ -101,6 +106,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     }
 
     public Element getPartnerEPR() {
+        entering("PartnerLinkDAOImpl.getPartnerEPR");
         if (_partnerEPR != null)
             return _partnerEPR;
         if (_self.getPartnerEPR() == null)
@@ -113,6 +119,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     }
 
     public void setPartnerEPR(Element val) {
+        entering("PartnerLinkDAOImpl.setPartnerEPR");
         _partnerEPR = val;
         if (_self.getPartnerEPR() != null)
             _sm.getSession().delete(_self.getPartnerEPR());
@@ -135,10 +142,12 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     }
 
     public void setPartnerSessionId(String session) {
+        entering("PartnerLinkDAOImpl.setPartnerSessionId");
         _self.setPartnerSessionId(session);
     }
 
     public void setMySessionId(String sessionId) {
+        entering("PartnerLinkDAOImpl.setMySessionId");
         _self.setMySessionId(sessionId);
 
     }

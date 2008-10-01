@@ -55,6 +55,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
 
     public ProcessInstanceDaoImpl(SessionManager sm, HProcessInstance instance) {
         super(sm, instance);
+        entering("ProcessInstanceDaoImpl.ProcessInstanceDaoImpl");
         _instance = instance;
     }
 
@@ -66,6 +67,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public void setFault(FaultDAO fault) {
+      entering("ProcessInstanceDaoImpl.setFault");
         _instance.setFault(((FaultDAOImpl) fault)._self);
         getSession().update(_instance);
 
@@ -75,6 +77,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setFault(javax.xml.namespace.QName, String, int, int, org.w3c.dom.Element)
      */
     public void setFault(QName name, String explanation, int lineNo, int activityId, Element faultData) {
+      entering("ProcessInstanceDaoImpl.setFault");
         if (_instance.getFault() != null)
             getSession().delete(_instance.getFault());
 
@@ -98,6 +101,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getFault()
      */
     public FaultDAO getFault() {
+      entering("ProcessInstanceDaoImpl.getFault");
         if (_instance.getFault() == null)
             return null;
         else
@@ -108,6 +112,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getExecutionState()
      */
     public byte[] getExecutionState() {
+      entering("ProcessInstanceDaoImpl.getExecutionSate");
         if (_instance.getJacobState() == null)
             return null;
         return _instance.getJacobState().getBinary();
@@ -117,6 +122,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setExecutionState(byte[])
      */
     public void setExecutionState(byte[] bytes) {
+      entering("ProcessInstanceDaoImpl.setExecutionSate");
         if (_instance.getJacobState() != null)
             getSession().delete(_instance.getJacobState());
         if (bytes.length > 0) {
@@ -131,6 +137,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getProcess()
      */
     public ProcessDAO getProcess() {
+      entering("ProcessInstanceDaoImpl.getProcess");
         return new ProcessDaoImpl(_sm, _instance.getProcess());
     }
 
@@ -138,6 +145,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getRootScope()
      */
     public ScopeDAO getRootScope() {
+        entering("ProcessInstanceDaoImpl.getRootScope");
         if (_root != null)
             return _root;
         Query rootQry = getSession().createFilter(_instance.getScopes(), "where this.parentScope is null");
@@ -151,6 +159,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setState(short)
      */
     public void setState(short state) {
+        entering("ProcessInstanceDaoImpl.setState");
         _instance.setPreviousState(_instance.getState());
         _instance.setState(state);
         if (state == ProcessState.STATE_TERMINATED) {
@@ -174,6 +183,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
+        entering("ProcessInstanceDaoImpl.createScope");
         HScope scope = new HScope();
         scope.setParentScope(parentScope != null ? (HScope) ((ScopeDaoImpl) parentScope).getHibernateObj() : null);
         scope.setName(name);
@@ -195,6 +205,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public ScopeDAO getScope(Long scopeInstanceId) {
+        entering("ProcessInstanceDaoImpl.getScope");
         Long id = Long.valueOf(scopeInstanceId);
         HScope scope = (HScope) getSession().get(HScope.class, id);
         return scope != null ? new ScopeDaoImpl(_sm, scope) : null;
@@ -205,6 +216,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      */
     @SuppressWarnings("unchecked")
     public Collection<ScopeDAO> getScopes(String scopeName) {
+        entering("ProcessInstanceDaoImpl.getScopes");
         Collection<HScope> hscopes;
         if (scopeName != null) {
             Query filter = _sm.getSession().createFilter(_instance.getScopes(), "where this.name=?");
@@ -229,6 +241,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
      */
     public CorrelatorDAO getInstantiatingCorrelator() {
+        entering("ProcessInstanceDaoImpl.getInstantiatingCorrelator");
         return new CorrelatorDaoImpl(_sm, _instance.getInstantiatingCorrelator());
     }
 
@@ -243,10 +256,12 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
      */
     public void setLastActiveTime(Date dt) {
+        entering("ProcessInstanceDaoImpl.setLastActiveTime");
         _instance.setLastActiveTime(dt);
     }
 
     public Set<CorrelationSetDAO> getCorrelationSets() {
+        entering("ProcessInstanceDaoImpl.getCorrelationSets");
         Set<CorrelationSetDAO> results = new HashSet<CorrelationSetDAO>();
 
         for (HCorrelationSet hCorrelationSet : _instance.getCorrelationSets()) {
@@ -257,6 +272,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public CorrelationSetDAO getCorrelationSet(String name) {
+        entering("ProcessInstanceDaoImpl.getCorrelationSet");
         for (HCorrelationSet hCorrelationSet : _instance.getCorrelationSets()) {
             if (hCorrelationSet.getName().equals(name))
                 return new CorrelationSetDaoImpl(_sm, hCorrelationSet);
@@ -269,6 +285,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getVariables(java.lang.String, int)
      */
     public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
+        entering("ProcessInstanceDaoImpl.getVariables");
         List<XmlDataDAO> results = new ArrayList<XmlDataDAO>();
 
         Iterator iter;
@@ -290,6 +307,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#finishCompletion()
      */
     public void finishCompletion() {
+        entering("ProcessInstanceDaoImpl.finishCompletion");
         // make sure we have completed.
         assert (ProcessState.isFinished(this.getState()));
         // let our process know that we've done our work.
@@ -297,16 +315,18 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public void delete() {
+        entering("ProcessInstanceDaoImpl.delete");
         _sm.getSession().delete(_instance);
     }
 
     public void insertBpelEvent(ProcessInstanceEvent event) {
+        entering("ProcessInstanceDaoImpl.insertBpelEvent");
         // Defer to the BpelDAOConnectionImpl
         BpelDAOConnectionImpl._insertBpelEvent(_sm.getSession(), event, this.getProcess(), this);
     }
 
     public EventsFirstLastCountTuple getEventsFirstLastCount() {
-
+        entering("ProcessInstanceDaoImpl.getEventsFirstLastCount");
         // Using a criteria, find the min,max, and count of event tstamps.
         Criteria c = _sm.getSession().createCriteria(HBpelEvent.class);
         c.add(Restrictions.eq("instance", _instance));
@@ -322,12 +342,14 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public long genMonotonic() {
+        entering("ProcessInstanceDaoImpl.genMonotonic");
         long seq = _instance.getSequence() + 1;
         _instance.setSequence(seq);
         return seq;
     }
 
     protected void clearSelectors() {
+        entering("ProcessInstanceDaoImpl.clearSelectors");
         Query q = getSession().createQuery(QRY_DELSELECTORS);
         q.setEntity(0, _instance);
         q.executeUpdate();
@@ -342,6 +364,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
+        entering("ProcessInstanceDaoImpl.getActivityRecoveries");
         List<ActivityRecoveryDAO> results = new ArrayList<ActivityRecoveryDAO>();
         Query qry = getSession().createQuery(QRY_RECOVERIES);
         qry.setLong(0, _instance.getId());
@@ -354,6 +377,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
 
     public void createActivityRecovery(String channel, long activityId, String reason, Date dateTime, Element data,
             String[] actions, int retries) {
+        entering("ProcessInstanceDaoImpl.createActivityRecovery");
         HActivityRecovery recovery = new HActivityRecovery();
         recovery.setInstance(_instance);
         recovery.setChannel(channel);
@@ -381,6 +405,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * Delete previously registered activity recovery.
      */
     public void deleteActivityRecovery(String channel) {
+        entering("ProcessInstanceDaoImpl.deleteActivityRecovery");
         for (HActivityRecovery recovery : _instance.getActivityRecoveries()) {
             if (recovery.getChannel().equals(channel)) {
                 getSession().delete(recovery);
@@ -392,6 +417,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     }
 
     public BpelDAOConnection getConnection() {
+        entering("ProcessInstanceDaoImpl.getConnection");
         return new BpelDAOConnectionImpl(_sm);
     }
 

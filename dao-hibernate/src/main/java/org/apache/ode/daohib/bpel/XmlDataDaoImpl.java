@@ -38,6 +38,8 @@ import org.w3c.dom.Text;
  * Hibernate-based {@link XmlDataDAO} implementation.
  */
 class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
+
+
     private static final String QUERY_PROPERTY =
             "from " + HVariableProperty.class.getName() +
                     " as p where p.xmlData.id = ? and p.name = ?";
@@ -50,12 +52,14 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      */
     public XmlDataDaoImpl(SessionManager sm, HXmlData hobj) {
         super(sm, hobj);
+        entering("XmlDataDaoImpl.XmlDataDaoImpl");
         _data = hobj;
     }
     /**
      * @see org.apache.ode.bpel.dao.XmlDataDAO#isNull()
      */
     public boolean isNull() {
+        entering("XmlDataDaoImpl.isNull");
         return _data.getData() == null;
     }
 
@@ -63,6 +67,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      * @see org.apache.ode.bpel.dao.XmlDataDAO#get()
      */
     public Node get() {
+        entering("XmlDataDaoImpl.get");
         if(_node == null){
             _node = prepare();
         }
@@ -78,6 +83,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      * @see org.apache.ode.bpel.dao.XmlDataDAO#set(org.w3c.dom.Node)
      */
     public void set(Node val) {
+        entering("XmlDataDaoImpl.set");
         _node = val;
         _data.setSimpleType(!(val instanceof Element));
         if (_data.getData() != null) _sm.getSession().delete(_data.getData());
@@ -97,7 +103,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      * @see org.apache.ode.bpel.dao.XmlDataDAO#getProperty(java.lang.String)
      */
     public String getProperty(String propertyName) {
-
+        entering("XmlDataDaoImpl.getProperty");
         HVariableProperty p = _getProperty(propertyName);
         return p == null
                 ? null
@@ -108,6 +114,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      * @see org.apache.ode.bpel.dao.XmlDataDAO#setProperty(java.lang.String, java.lang.String)
      */
     public void setProperty(String pname, String pvalue) {
+        entering("XmlDataDaoImpl.setProperty");
         HVariableProperty p = _getProperty(pname);
         if(p == null){
             p = new HVariableProperty(_data, pname, pvalue);
@@ -123,10 +130,12 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      * @see org.apache.ode.bpel.dao.XmlDataDAO#getScopeDAO()
      */
     public ScopeDAO getScopeDAO() {
+        entering("XmlDataDaoImpl.getScopeDAO");
         return new ScopeDaoImpl(_sm,_data.getScope());
     }
 
     private HVariableProperty _getProperty(String propertyName){
+        entering("XmlDataDaoImpl._getProperty");
         Iterator iter;
         Query qry = getSession().createQuery(QUERY_PROPERTY);
         qry.setLong(0, _data.getId());
