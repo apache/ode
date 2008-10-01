@@ -29,6 +29,8 @@ import org.apache.commons.httpclient.StatusLine;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
@@ -40,9 +42,11 @@ import org.apache.ode.axis2.Properties;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.http.HttpUtils;
 import static org.apache.ode.utils.http.StatusCode.*;
+import org.apache.ode.bpel.iapi.Message;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,9 +56,9 @@ public class HttpHelper {
 
     private static final Log log = LogFactory.getLog(HttpHelper.class);
 
-    public static void configure(HttpClient client, URI targetURI, HttpParams params) throws URIException {
-        if (log.isDebugEnabled()) log.debug("Configuring http client...");
 
+    public static void configure(HttpClient client, URI targetURI, Element authPart, HttpParams params) throws URIException {
+        if (log.isDebugEnabled()) log.debug("Configuring http client...");
 
         /* Do not forget to wire params so that endpoint properties are passed around
            Down the road, when the request will be executed, the hierarchy of parameters will be the following:
@@ -68,7 +72,6 @@ public class HttpHelper {
         // Actually HttpClient *appends* default headers while we want them to be ignored if the process assign them 
         client.getParams().setParameter(HostParams.DEFAULT_HEADERS, Collections.EMPTY_LIST);
 
-
         // proxy configuration
         if (ProxyConf.isProxyEnabled(params, targetURI.getHost())) {
             if (log.isDebugEnabled()) log.debug("ProxyConf");
@@ -78,8 +81,39 @@ public class HttpHelper {
         // security
         // ...
 
+        // authentication
+        /*
+        We're expecting the following element:
+        <xs:complexType name="credentialType">
+            <xs:attribute name="scheme" type="xs:string" default="server-decide" />
+            <xs:attribute name="username" type="xs:string" />
+            <xs:attribute name="password" type="xs:string" />
+        </xs:complexType>
+        <xs:element type="rest_connector:credentialType" name="credentials" />
+         */
+        if (authPart != null) {
+            // the part must be defined with an element, so take the fist child
+            Element credentialsElement = DOMUtils.getFirstChildElement(authPart);
+            if (credentialsElement != null && credentialsElement.getAttributes().getLength() != 0) {
+                String scheme = DOMUtils.getAttribute(credentialsElement, "scheme");
+                String username = DOMUtils.getAttribute(credentialsElement, "username");
+                String password = DOMUtils.getAttribute(credentialsElement, "password");
 
-
+                if (scheme != null
+                        && !"server-decides".equalsIgnoreCase(scheme)
+                        && !"basic".equalsIgnoreCase(scheme)
+                        && !"digest".equalsIgnoreCase(scheme)) {
+                    throw new IllegalArgumentException("Unknown Authentication scheme: [" + scheme + "] Accepted values are: Basic, Digest, Server-Decides");
+                } else {
+                    if(log.isDebugEnabled()) log.debug("credentials provided");
+                    client.getState().setCredentials(
+                            new AuthScope(targetURI.getHost(), targetURI.getPort(), AuthScope.ANY_REALM, scheme),
+                            new UsernamePasswordCredentials(username, password));
+                    // save one round trip if basic
+                    client.getParams().setAuthenticationPreemptive("basic".equalsIgnoreCase(scheme));
+                }
+            }
+        }
     }
 
     /**
@@ -90,11 +124,15 @@ public class HttpHelper {
      * @throws HttpException
      * @see #statusLineToElement(org.w3c.dom.Document, org.apache.commons.httpclient.StatusLine)
      */
-    public static Element statusLineToElement(String statusLine) throws HttpException {
+    public static Element statusLineToElement
+            (String
+                    statusLine) throws HttpException {
         return statusLineToElement(new StatusLine(statusLine));
     }
 
-    public static Element statusLineToElement(StatusLine statusLine) {
+    public static Element statusLineToElement
+            (StatusLine
+                    statusLine) {
         return statusLineToElement(DOMUtils.newDocument(), statusLine);
     }
 
@@ -111,7 +149,10 @@ public class HttpHelper {
      * @param doc        - the document to use to create new nodes
      * @return an Element
      */
-    public static Element statusLineToElement(Document doc, StatusLine statusLine) {
+    public static Element statusLineToElement
+            (Document
+                    doc, StatusLine
+                    statusLine) {
         Element statusLineEl = doc.createElementNS(null, "Status-Line");
         Element versionEl = doc.createElementNS(null, "HTTP-Version");
         Element codeEl = doc.createElementNS(null, "Status-Code");
@@ -142,7 +183,9 @@ public class HttpHelper {
      * @return
      * @throws IOException
      */
-    public static Element prepareDetailsElement(HttpMethod method) {
+    public static Element prepareDetailsElement
+            (HttpMethod
+                    method) {
         Header h = method.getResponseHeader("Content-Type");
         String receivedType = h != null ? h.getValue() : null;
         boolean bodyIsXml = receivedType != null && HttpUtils.isXml(receivedType);
@@ -209,7 +252,9 @@ public class HttpHelper {
      * @param header
      * @return the string properly ready to be used as an HTTP header field-content
      */
-    public static String replaceCRLFwithLWS(String header) {
+    public static String replaceCRLFwithLWS
+            (String
+                    header) {
         Matcher m = NON_LWS_PATTERN.matcher(header);
         StringBuffer sb = new StringBuffer(header.length());
         while (m.find()) {
@@ -220,7 +265,9 @@ public class HttpHelper {
         return sb.toString();
     }
 
-    public static String requestToString(HttpMethod m) {
+    public static String requestToString
+            (HttpMethod
+                    m) {
         StringBuilder sb = new StringBuilder(256);
         try {
             sb.append("HTTP Request Details: \n").append(m.getName()).append(" ").append(m.getURI());
@@ -251,7 +298,9 @@ public class HttpHelper {
         return sb.toString();
     }
 
-    public static String responseToString(HttpMethod m) {
+    public static String responseToString
+            (HttpMethod
+                    m) {
         StringBuilder sb = new StringBuilder(256);
         try {
             sb.append("HTTP Response Details: \n").append(m.getName()).append(" ").append(m.getURI());
@@ -283,11 +332,12 @@ public class HttpHelper {
     }
 
     /**
-     *
      * @param s, the status code to test, must be in [400, 600[
      * @return 1 if fault, -1 if failure, 0 if undetermined
      */
-    public static int isFaultOrFailure(int s) {
+    public static int isFaultOrFailure
+            (
+                    int s) {
         if (s < 400 || s >= 600) {
             throw new IllegalArgumentException("Status-Code must be in interval [400;600[");
         }

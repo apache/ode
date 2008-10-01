@@ -149,8 +149,10 @@ public class HttpExternalService implements ExternalService {
             // create a client
             HttpClient client = new HttpClient(connections);
 
+
             // configure the client (proxy, security, etc)
-            HttpHelper.configure(client, method.getURI(), params);
+            Element authenticatePart = DOMUtils.findChildByName(odeMex.getRequest().getMessage(), new QName(null, "WWW-Authenticate"));
+            HttpHelper.configure(client, method.getURI(), authenticatePart, params);
 
             // this callable encapsulates the http method execution and the process of the response
             final Callable executionCallable;

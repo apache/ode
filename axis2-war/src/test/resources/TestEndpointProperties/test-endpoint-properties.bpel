@@ -68,6 +68,11 @@
 
         <!-- Assign all header parts -->
         <assign>
+
+            <copy>
+                <from><literal><credentials username="superuser" password="topsecret"/></literal></from>
+                <to>$reqMsg.WWW-Authenticate</to>
+            </copy>
             <!-- header_A will be set through a property file in the global config dir -->
             <!-- header_B will be set through a property file in the deployment unit dir -->
 
