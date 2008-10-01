@@ -187,6 +187,8 @@ define "ode" do
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("#{webapp_dir}/WEB-INF")
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       mkdir _"#{webapp_dir}/WEB-INF/processes" unless File.exist?(_"#{webapp_dir}/WEB-INF/processes")
+      # move around some property files for test purpose
+      mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("#{webapp_dir}/WEB-INF/conf")
     end
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
