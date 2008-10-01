@@ -21,6 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.rapi.CorrelationSetModel;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
+import org.apache.ode.bpel.rapi.PropertyExtractor;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -161,6 +162,7 @@ public class OScope extends OActivity {
         public String name;
         public OScope declaringScope;
         public final List<OProcess.OProperty> properties = new ArrayList<OProcess.OProperty>();
+        public final List<PropertyExtractor> extractors = new ArrayList<PropertyExtractor>();
 
         public CorrelationSet(OProcess owner) {
             super(owner);
@@ -182,6 +184,10 @@ public class OScope extends OActivity {
                 aliases.add(alias);
             }
             return aliases;
+        }
+
+        public List<PropertyExtractor> getExtractors() {
+            return extractors;
         }
     }
 

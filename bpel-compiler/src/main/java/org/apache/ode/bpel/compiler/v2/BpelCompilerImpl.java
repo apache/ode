@@ -711,7 +711,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         OScope procesScope = new OScope(_oprocess, null);
         procesScope.name = "__PROCESS_SCOPE:" + process.getName();
         procesScope.debugInfo = createDebugInfo(process, null);
-        _oprocess.procesScope = compileScope(procesScope, process, new Runnable() {
+        _oprocess.processScope = compileScope(procesScope, process, new Runnable() {
             public void run() {
                 if (process.getRootActivity() == null) {
                     throw new CompilationException(__cmsgs.errNoRootActivity());

@@ -26,9 +26,11 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
@@ -387,10 +389,18 @@ class ASSIGN extends ACTIVITY {
             // For partner link assignmenent, the whole content is assigned.
             if (ocopy.to instanceof OAssign.PartnerLinkRef) {
                 OAssign.PartnerLinkRef pLinkRef = ((OAssign.PartnerLinkRef) ocopy.to);
-                PartnerLinkInstance plval = _scopeFrame
-                        .resolve(pLinkRef.partnerLink);
+                PartnerLinkInstance plval = _scopeFrame.resolve(pLinkRef.partnerLink);
                 replaceEndpointRefence(plval, rvalue);
                 se = new PartnerLinkModificationEvent(((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
+            } else if (ocopy.to.getVariable().type instanceof OPropertyVarType) {
+                // For poperty assignment, the property, the variable that points to it and the correlation set
+                // all have the same name
+                CorrelationSetInstance csetInstance = _scopeFrame.resolve(ocopy.to.getVariable().name);
+                CorrelationKey ckey = new CorrelationKey(csetInstance.declaration.getId(), new String[] { rvalue.getTextContent() });
+                if (__log.isDebugEnabled()) __log.debug("Writing correlation " + csetInstance.getName()
+                        + " using value " + rvalue.getTextContent());
+                getBpelRuntime().writeCorrelation(csetInstance, ckey);
+                se = new CorrelationSetWriteEvent(csetInstance.declaration.name, ckey);
             } else {
                 // Sneakily converting the EPR if it's not the format expected by the lvalue
                 if (ocopy.from instanceof OAssign.PartnerLinkRef) {

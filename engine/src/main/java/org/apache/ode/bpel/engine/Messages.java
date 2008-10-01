@@ -170,6 +170,10 @@ public class Messages extends MessageBundle {
         return this.format("Unable to evaluate apply property alias \"{0}\" to incoming message: {1}", aliasDescription, reason);
     }
 
+    String msgMatchExtractionOnMessage(String expression, String reason) {
+        return this.format("Unable extract expression \"{0}\" from incoming message: {1}", expression, reason);
+    }
+
     public String msgDeployStarting(File deploymentUnitDirectory) {
         return format("Starting deployment of processes from directory \"{0}\". ", deploymentUnitDirectory);
     }

@@ -56,7 +56,7 @@ public class OProcess extends OBase implements ProcessModel {
     public String processName;
 
     /** ProcessImpl-level scope. */
-    public OScope procesScope;
+    public OScope processScope;
 
     /** All partner links in the process. */
     public final Set<PartnerLinkModel> allPartnerLinks = new HashSet<PartnerLinkModel>();
@@ -71,6 +71,8 @@ public class OProcess extends OBase implements ProcessModel {
 
     /** Date process was compiled. */
     public Date compileDate;
+
+    public byte[] globalState;
 
     int _childIdCounter = 0;
 

@@ -170,8 +170,8 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testEmptyProcess() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        proc.procesScope.activity = new OEmpty(proc, proc.procesScope);
+        proc.processScope = new OScope(proc, null);
+        proc.processScope.activity = new OEmpty(proc, proc.processScope);
 
         run(proc);
 
@@ -182,10 +182,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testThrow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OThrow othrow = new OThrow(proc, proc.procesScope);
+        proc.processScope = new OScope(proc, null);
+        OThrow othrow = new OThrow(proc, proc.processScope);
         othrow.faultName = new QName("foo", "bar");
-        proc.procesScope.activity = othrow;
+        proc.processScope.activity = othrow;
 
         run(proc);
 
@@ -196,13 +196,13 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testFaultHandling() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OThrow othrow = new OThrow(proc, proc.procesScope);
+        proc.processScope = new OScope(proc, null);
+        OThrow othrow = new OThrow(proc, proc.processScope);
         othrow.faultName = new QName("foo", "bar");
-        proc.procesScope.activity = othrow;
-        proc.procesScope.faultHandler = new OFaultHandler(proc);
-        OCatch ocatch = new OCatch(proc, proc.procesScope);
-        proc.procesScope.faultHandler.catchBlocks.add(ocatch);
+        proc.processScope.activity = othrow;
+        proc.processScope.faultHandler = new OFaultHandler(proc);
+        OCatch ocatch = new OCatch(proc, proc.processScope);
+        proc.processScope.faultHandler.catchBlocks.add(ocatch);
         ocatch.activity = new OEmpty(proc, ocatch);
         run(proc);
 
@@ -213,9 +213,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testOneElementSequence() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OSequence sequence = new OSequence(proc, proc.procesScope);
-        proc.procesScope.activity = sequence;
+        proc.processScope = new OScope(proc, null);
+        OSequence sequence = new OSequence(proc, proc.processScope);
+        proc.processScope.activity = sequence;
         sequence.sequence.add(new OEmpty(proc, sequence));
 
         run(proc);
@@ -227,9 +227,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testTwoElementSequence() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OSequence sequence = new OSequence(proc, proc.procesScope);
-        proc.procesScope.activity = sequence;
+        proc.processScope = new OScope(proc, null);
+        OSequence sequence = new OSequence(proc, proc.processScope);
+        proc.processScope.activity = sequence;
         sequence.sequence.add(new OEmpty(proc, sequence));
         sequence.sequence.add(new OEmpty(proc, sequence));
 
@@ -242,8 +242,8 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testEmptyFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        proc.procesScope.activity = new OFlow(proc, proc.procesScope);
+        proc.processScope = new OScope(proc, null);
+        proc.processScope.activity = new OFlow(proc, proc.processScope);
 
         run(proc);
 
@@ -254,9 +254,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testSingleElementFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
+        proc.processScope = new OScope(proc, null);
+        OFlow flow = new OFlow(proc, proc.processScope);
+        proc.processScope.activity = flow;
         flow.parallelActivities.add(new OEmpty(proc, flow));
 
         run(proc);
@@ -268,9 +268,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testTwoElementFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
+        proc.processScope = new OScope(proc, null);
+        OFlow flow = new OFlow(proc, proc.processScope);
+        proc.processScope.activity = flow;
         flow.parallelActivities.add(new OEmpty(proc, flow));
         flow.parallelActivities.add(new OEmpty(proc, flow));
 
@@ -283,9 +283,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void testFlowTermination() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
+        proc.processScope = new OScope(proc, null);
+        OFlow flow = new OFlow(proc, proc.processScope);
+        proc.processScope.activity = flow;
         OThrow othrow = new OThrow(proc, flow);
         othrow.faultName = new QName("foo", "bar");
         flow.parallelActivities.add(othrow);

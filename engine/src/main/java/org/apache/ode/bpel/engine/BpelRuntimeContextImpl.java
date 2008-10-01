@@ -64,6 +64,7 @@ import org.apache.ode.utils.*;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -578,19 +579,26 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     private void saveState() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Object cachedState;
-        try {
-            cachedState = _rti.saveState(bos);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (_bpelProcess.isInMemory()) {
+            try {
+                ((ProcessInstanceDaoImpl)_dao).setSoup(_rti.saveState(null));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            Object cachedState;
+            try {
+                cachedState = _rti.saveState(bos);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            int newcount = _dao.getExecutionStateCounter() + 1;
+            _dao.setExecutionStateCounter(newcount);
+            _dao.setExecutionState(bos.toByteArray());
+            _instanceWorker.setCachedState(newcount, cachedState);
+            __log.debug("CACHE SAVE: #" + newcount + " for instance " + _dao.getInstanceId());
         }
-        int newcount = _dao.getExecutionStateCounter() + 1;
-        _dao.setExecutionStateCounter(newcount);
-        _dao.setExecutionState(bos.toByteArray());
-        _instanceWorker.setCachedState(newcount, cachedState);
-
-        __log.debug("CACHE SAVE: #" + newcount + " for instance " + _dao.getInstanceId());
     }
 
     void injectMyRoleMessageExchange(final String responseChannelId, final int idx, MessageExchangeDAO mexdao) {

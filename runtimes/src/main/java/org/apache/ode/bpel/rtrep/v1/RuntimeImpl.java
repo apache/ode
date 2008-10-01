@@ -11,10 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rapi.OdeRuntime;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.PropertyAliasModel;
-import org.apache.ode.bpel.rapi.OdeRTInstance;
+import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.jacob.soup.ReplacementMap;
@@ -122,6 +119,10 @@ public class RuntimeImpl implements OdeRuntime {
             return ((Text) lValue).getWholeText();
         } else
             return null;
+    }
+
+    public String extractMatch(Element msgData, PropertyExtractor extractor) throws FaultException {
+        return null;
     }
 
     public void clear() {

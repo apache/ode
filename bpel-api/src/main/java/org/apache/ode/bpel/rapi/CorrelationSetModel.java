@@ -8,4 +8,6 @@ public interface CorrelationSetModel {
     int getId();
 
     List<PropertyAliasModel> getAliases(QName messageType);
+
+    List<PropertyExtractor> getExtractors();
 }

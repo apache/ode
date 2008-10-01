@@ -705,7 +705,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
      * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#saveState()
      */
     public Object saveState(OutputStream bos) throws IOException {
-        _soup.write(bos);
+        if (bos != null) _soup.write(bos);
         return _soup;
     }
 

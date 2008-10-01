@@ -21,6 +21,7 @@ package org.apache.ode.bpel.rtrep.v1;
 
 import org.apache.ode.bpel.rapi.CorrelationSetModel;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
+import org.apache.ode.bpel.rapi.PropertyExtractor;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -181,6 +182,9 @@ public class OScope extends OActivity {
             return aliases;
         }
 
+        public List<PropertyExtractor> getExtractors() {
+            return new ArrayList();
+        }
     }
 
     public static final class Variable extends OBase {
