@@ -40,18 +40,18 @@ public class PROCESS extends BpelJacobRunnable {
 
     public void run() {
         OdeInternalInstance ntive = getBpelRuntime();
-        Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
+        Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.processScope);
 
         createGlobals();
         ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
         evt.setRootScopeId(scopeInstanceId);
-        evt.setScopeDeclarationId(_oprocess.procesScope.getId());
+        evt.setScopeDeclarationId(_oprocess.processScope.getId());
         ntive.sendEvent(evt);
 
         ActivityInfo child = new ActivityInfo(genMonotonic(),
-            _oprocess.procesScope,
+            _oprocess.processScope,
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-        ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
+        ScopeFrame processFrame = new ScopeFrame(_oprocess.processScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
         object(new ParentScopeChannelListener(child.parent) {

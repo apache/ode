@@ -81,7 +81,7 @@ class ScopeFrame implements Serializable {
 
 
     public ScopeFrame find(OScope scope) {
-        if (oscope.name.equals(scope.name)) return this;
+        if (oscope.getId() == scope.getId()) return this;
         return (parent != null) ? parent.find(scope) : null;
     }
 
@@ -93,6 +93,13 @@ class ScopeFrame implements Serializable {
 
     public CorrelationSetInstance resolve(OScope.CorrelationSet cset) {
         return new CorrelationSetInstance(find(cset.declaringScope).scopeInstanceId, cset);
+    }
+
+    public CorrelationSetInstance resolve(String correlationName) {
+        OScope.CorrelationSet cset = oscope.getCorrelationSet(correlationName);
+        if (cset != null) return new CorrelationSetInstance(scopeInstanceId, cset);
+        else if (parent != null) return parent.resolve(correlationName);
+        else return null;
     }
 
     public PartnerLinkInstance resolve(OPartnerLink partnerLink) {

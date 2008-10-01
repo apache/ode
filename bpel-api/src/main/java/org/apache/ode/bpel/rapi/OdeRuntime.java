@@ -22,5 +22,7 @@ public interface OdeRuntime {
 
     String extractProperty(Element msgData, PropertyAliasModel alias, String target) throws FaultException;
 
+    String extractMatch(Element msgData, PropertyExtractor extractor) throws FaultException;
+
     void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry);
 }

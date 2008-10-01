@@ -9,10 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rapi.OdeRuntime;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.PropertyAliasModel;
-import org.apache.ode.bpel.rapi.OdeRTInstance;
+import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.jacob.soup.ReplacementMap;
@@ -26,8 +23,8 @@ import org.w3c.dom.Text;
 import javax.xml.namespace.QName;
 
 public class RuntimeImpl implements OdeRuntime {
-    private static final Log __log = LogFactory.getLog(RuntimeImpl.class);
 
+    private static final Log __log = LogFactory.getLog(RuntimeImpl.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     ProcessConf _pconf;
@@ -76,7 +73,6 @@ public class RuntimeImpl implements OdeRuntime {
                         + " that is unkown to the engine");
             }
         }
-
     }
 
     /*
@@ -135,6 +131,13 @@ public class RuntimeImpl implements OdeRuntime {
             return ((Text) lValue).getWholeText();
         } else
             return null;
+    }
+
+    public String extractMatch(Element msgData, PropertyExtractor extractor) throws FaultException {
+        OExpression expr = (OExpression) extractor;
+        BoundVariableEvaluationContext ctx = new BoundVariableEvaluationContext();
+        ctx.addBoundVariable(extractor.getMessageVariableName(), msgData);
+        return ((Text)_expLangRuntimeRegistry.evaluateNode(expr, ctx)).getWholeText();
     }
 
     public void clear() {

@@ -203,7 +203,7 @@ public class ODEProcess {
         try {
             markused();
             BpelInstanceWorker iworker = _instanceWorkerCache.get(instanceDAO.getInstanceId());
-            final OdeRTInstance rti = _runtime.newInstance(getState(instanceDAO));
+            final OdeRTInstance rti = _runtime.newInstance(getState(iworker, instanceDAO));
             final BpelRuntimeContextImpl processInstance = new BpelRuntimeContextImpl(iworker, instanceDAO, rti);
             try {
                 iworker.execInCurrentThread(new Callable<Void>() {
@@ -327,7 +327,7 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
         BpelRuntimeContextImpl rtictx = new BpelRuntimeContextImpl(
-                worker, mexdao.getInstance(), _runtime.newInstance(getState(mexdao.getInstance())));
+                worker, mexdao.getInstance(), _runtime.newInstance(getState(worker, mexdao.getInstance())));
         rtictx.executeCreateInstance(mexdao);
     }
 
@@ -337,7 +337,7 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-        OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+        OdeRTInstance rti = _runtime.newInstance(getState(worker, mexdao.getInstance()));
         BpelRuntimeContextImpl instance = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
         int amp = mexdao.getChannel().indexOf('&');
         String groupId = mexdao.getChannel().substring(0, amp);
@@ -350,7 +350,7 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
         assert worker.isWorkerThread();
 
-        OdeRTInstance rti = _runtime.newInstance(getState(instanceDao));
+        OdeRTInstance rti = _runtime.newInstance(getState(worker, instanceDao));
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
         brc.execute();
 
@@ -360,7 +360,7 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
         assert worker.isWorkerThread();
 
-        OdeRTInstance rti = _runtime.newInstance(getState(instanceDao));
+        OdeRTInstance rti = _runtime.newInstance(getState(worker, instanceDao));
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
         if (brc.injectTimerEvent(timerChannel)) brc.execute();
 
@@ -401,7 +401,7 @@ public class ODEProcess {
             BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
             assert worker.isWorkerThread();
 
-            OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+            OdeRTInstance rti = _runtime.newInstance(getState(worker, mexdao.getInstance()));
             BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
             brc.injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
             brc.execute();
@@ -420,7 +420,7 @@ public class ODEProcess {
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
-        OdeRTInstance rti = _runtime.newInstance(getState(mexdao.getInstance()));
+        OdeRTInstance rti = _runtime.newInstance(getState(worker, mexdao.getInstance()));
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
         // Canceling invoke check
         String jobId = mexdao.getProperty("invokeCheckJobId");
@@ -517,8 +517,10 @@ public class ODEProcess {
         return _server.enqueueTransaction(new ProcessCallable<T>(tx));
     }
 
-    private Object getState(ProcessInstanceDAO instanceDAO) {
-        ExecutionQueueImpl state = null;
+    private Object getState(BpelInstanceWorker worker, ProcessInstanceDAO instanceDAO) {
+        ExecutionQueueImpl state = (ExecutionQueueImpl) worker.getCachedState(instanceDAO.getExecutionStateCounter());
+        if (state != null) return state;
+
         if (isInMemory()) {
             ProcessInstanceDaoImpl inmem = (ProcessInstanceDaoImpl) instanceDAO;
             if (inmem.getSoup() != null) {
