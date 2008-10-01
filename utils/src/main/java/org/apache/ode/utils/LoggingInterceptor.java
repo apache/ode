@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.sql.DataSource;
 
@@ -40,8 +41,8 @@ public class LoggingInterceptor<T> implements InvocationHandler {
 	
 	private Log _log;
 	private T _delegate;
-    private Map<String, Object> _paramsByName = new HashMap<String, Object>();
-    private Map<Integer, Object> _paramsByIdx = new HashMap<Integer, Object>();
+    private TreeMap<String, Object> _paramsByName = new TreeMap<String, Object>();
+    private TreeMap<Integer, Object> _paramsByIdx = new TreeMap<Integer, Object>();
 
 
 	public LoggingInterceptor(T delegate, Log log) {
