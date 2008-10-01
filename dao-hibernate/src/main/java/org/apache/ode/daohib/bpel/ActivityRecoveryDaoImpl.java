@@ -34,10 +34,12 @@ import java.util.Date;
  */
 public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRecoveryDAO {
 
+
     HActivityRecovery _self;
 
     public ActivityRecoveryDaoImpl(SessionManager sm, HActivityRecovery recovery) {
         super(sm, recovery);
+        entering("ActivityRecoveryDaoImpl.ActivityRecoveryDaoImpl");
         _self = recovery;
     }
 
@@ -58,6 +60,7 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     }
 
     public Element getDetails() {
+        entering("ActivityRecoveryDaoImpl.getDetails");
         if (_self.getDetails() == null) return null;
         try {
             return DOMUtils.stringToDOM(_self.getDetails().getText());

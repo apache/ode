@@ -42,12 +42,14 @@ import java.util.Iterator;
  * Hibernate-based {@link ProcessDAO} implementation.
  */
 class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
+
     private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
 
     private HProcess _process;
 
     public ProcessDaoImpl(SessionManager sm, HProcess process) {
         super(sm,process);
+        entering("ProcessDaoImpl.ProcessDaoImpl");
         _process = process;
     }
 
@@ -56,6 +58,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     public ProcessInstanceDAO getInstance(Long iid) {
+        entering("ProcessDaoImpl.getInstance");
         ProcessInstanceDAO instance = BpelDAOConnectionImpl._getInstance(_sm, getSession(), iid);
         if (instance == null || !instance.getProcess().getProcessId().equals(getProcessId()))
             return null;
@@ -64,6 +67,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 
 
     public CorrelatorDAO getCorrelator(String  corrId) {
+        entering("ProcessDaoImpl.getCorrelator");
         Iterator results;
         Query q = getSession().createFilter(_process.getCorrelators(),
                 QRY_CORRELATOR);
@@ -81,12 +85,14 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     public void removeRoutes(String routeId, ProcessInstanceDAO target) {
+        entering("ProcessDaoImpl.removeRoutes");
         for (HCorrelator hCorrelator : _process.getCorrelators()) {
             new CorrelatorDaoImpl(_sm, hCorrelator).removeRoutes(routeId, target);
         }
     }
 
     public ProcessInstanceDAO createInstance(CorrelatorDAO correlator) {
+        entering("ProcessDaoImpl.createInstance");
         HProcessInstance instance = new HProcessInstance();
         instance.setInstantiatingCorrelator((HCorrelator)((CorrelatorDaoImpl)correlator).getHibernateObj());
         instance.setProcess(_process);
@@ -102,7 +108,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
      */
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckeyValue) {
-
+        entering("ProcessDaoImpl.findInstance");
         Criteria criteria = getSession().createCriteria(HCorrelationSet.class);
         criteria.add(Expression.eq("scope.instance.process.id",_process.getId()));
         criteria.add(Expression.eq("value", ckeyValue.toCanonicalString()));
@@ -119,6 +125,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     public void delete() {
+        entering("ProcessDaoImpl.delete");
         getSession().delete(_process);
     }
 
@@ -131,6 +138,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     public CorrelatorDAO addCorrelator(String corrid) {
+        entering("ProcessDaoImpl.addCorrelator");
         HCorrelator correlator = new HCorrelator();
         correlator.setCorrelatorId(corrid);
         correlator.setProcess(_process);
@@ -142,7 +150,9 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
 	public int getNumInstances() {
-		// TODO: Is this efficient? 
+        entering("ProcessDaoImpl.getNumInstances");
+        // this should be efficient if the relation is tagged as extra-lazy.
+        // If the collection is not initialized yet, Hibernate will do a count(*) and the whole collection will not be fetched.
 		return _process.getInstances().size();
 	}
 

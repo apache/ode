@@ -46,6 +46,7 @@ import java.util.*;
  */
 class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
+
     private static final String QRY_VARIABLE = "from " + HXmlData.class.getName() +
             " as x where x.name = ? and x.scope.id = ?";
 
@@ -61,6 +62,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
     public ScopeDaoImpl(SessionManager sm, HScope scope) {
         super(sm, scope);
+        entering("ScopeDaoImpl.ScopeDaoImpl");
         _scope = scope;
     }
 
@@ -68,6 +70,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getCorrelationSet(java.lang.String)
      */
     public CorrelationSetDAO getCorrelationSet(String corrSetName) {
+        entering("ScopeDaoImpl.getCorrelationSet");
         Query qry = getSession().createQuery(QRY_CSET);
         qry.setString(0,corrSetName);
         qry.setLong(1,_scope.getId());
@@ -88,6 +91,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getParentScope()
      */
     public ScopeDAO getParentScope() {
+        entering("ScopeDaoImpl.getParentScope");
         return _scope.getParentScope() != null
                 ? new ScopeDaoImpl(_sm, _scope.getParentScope())
                 : null;
@@ -96,12 +100,14 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getProcessInstance()
      */
     public ProcessInstanceDAO getProcessInstance() {
+        entering("ScopeDaoImpl.getProcessInstance");
         return new ProcessInstanceDaoImpl(_sm, _scope.getInstance());
     }
     /**
      * @see org.apache.ode.bpel.dao.ScopeDAO#setState(org.apache.ode.bpel.dao.ScopeStateEnum)
      */
     public void setState(ScopeStateEnum state) {
+        entering("ScopeDaoImpl.setState");
         _scope.setState(state.toString());
         getSession().update(_scope);
     }
@@ -121,6 +127,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getVariable(java.lang.String)
      */
     public XmlDataDAO getVariable(String varName) {
+        entering("ScopeDaoImpl.getVariable");
         XmlDataDAO cached = _variables.get(varName);
         if (cached != null) return _variables.get(varName);
 
@@ -144,6 +151,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     }
 
     public PartnerLinkDAO createPartnerLink(int modelId, String pLinkName, String myRole, String partnerRole) {
+        entering("ScopeDaoImpl.createPartnerLink");
         HPartnerLink epr = new HPartnerLink();
         epr.setModelId(modelId);
         epr.setLinkName(pLinkName);
@@ -157,6 +165,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     }
 
     public PartnerLinkDAO getPartnerLink(int plinkId) {
+        entering("ScopeDaoImpl.getPartnerLink");
         Query qry = getSession().createQuery(QRY_SCOPE_EPR);
         qry.setInteger(0,plinkId);
         qry.setEntity(1,_scope);
@@ -167,6 +176,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     }
 
     public Collection<PartnerLinkDAO> getPartnerLinks() {
+        entering("ScopeDaoImpl.getPartnerLinks");
         ArrayList<PartnerLinkDAO> plinks = new ArrayList<PartnerLinkDAO>();
         for (HPartnerLink hPartnerLink : _scope.getPartnerLinks()) {
             plinks.add(new PartnerLinkDAOImpl(_sm, hPartnerLink));
@@ -189,6 +199,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
     }
 
     public Set<CorrelationSetDAO> getCorrelationSets() {
+        entering("ScopeDaoImpl.getCorrelationSets");
         Set<CorrelationSetDAO> results = new HashSet<CorrelationSetDAO>();
         for (HCorrelationSet hCorrelationSet : _scope.getCorrelationSets()) {
             results.add(new CorrelationSetDaoImpl(_sm, hCorrelationSet));
@@ -199,6 +210,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
     @SuppressWarnings("unchecked")
     public Collection<ScopeDAO> getChildScopes() {
+        entering("ScopeDaoImpl.getChildScopes");
         Query q = getSession().createQuery("from " + HScope.class.getName() + " as x where x.parentScope=?");
         q.setEntity(0, _scope);
         Collection<HScope> hscopes = q.list();
@@ -212,6 +224,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
     @SuppressWarnings("unchecked")
     public Collection<XmlDataDAO> getVariables() {
+        entering("ScopeDaoImpl.getVariables");
         Query q = getSession().createFilter(_scope.getVariables(), "where this.scope=?");
         q.setEntity(0, _scope);
         return CollectionsX.transform(new LinkedList<XmlDataDAO>(), (Collection<HXmlData>)q.list(), new UnaryFunction<HXmlData,XmlDataDAO>() {
@@ -224,7 +237,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
     @SuppressWarnings("unchecked")
     public List<BpelEvent> listEvents() {
-
+        entering("ScopeDaoImpl.listEvents");
 //        CriteriaBuilder cb = new CriteriaBuilder();
         Criteria crit = _sm.getSession().createCriteria(HBpelEvent.class);
 //        if (efilter != null)
