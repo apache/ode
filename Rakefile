@@ -250,6 +250,8 @@ define "ode" do
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test/webapp/WEB-INF")
       mkdir_p _("target/test/webapp/WEB-INF/processes")
       rm_rf Dir[_("target/test/webapp") + "/**/.svn"]
+      # move around some property files for test purpose
+      mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("target/test/webapp/WEB-INF/conf")
     end
     test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
     test.exclude('*') unless Buildr.environment != 'test'

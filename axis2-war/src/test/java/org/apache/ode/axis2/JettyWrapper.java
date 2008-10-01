@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2.httpbinding;
+package org.apache.ode.axis2;
 
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -27,6 +27,8 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Request;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.StreamUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -35,13 +37,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
-import javax.xml.namespace.QName;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class JettyWrapper {
+
+    static List REQUEST_HEADERS = new ArrayList();
+
+    static {
+        REQUEST_HEADERS.add("");
+    }
 
     protected Server server;
     private ContextHandlerCollection handlerColl;
@@ -52,8 +62,6 @@ public class JettyWrapper {
 
     public JettyWrapper(int port) throws Exception {
         server = new Server(port);
-
-        // Arithmetics Service
         ContextHandler arithmeticsContext = new ContextHandler();
         arithmeticsContext.setContextPath("/HttpBindingTest/ArithmeticsService");
         arithmeticsContext.setHandler(new ArithmeticsServiceHandler());
@@ -62,25 +70,62 @@ public class JettyWrapper {
         blogContext.setContextPath("/HttpBindingTest/BlogService");
         blogContext.setHandler(new BlogServiceHandler());
 
+        ContextHandler echoContext = new ContextHandler();
+        echoContext.setContextPath("/EchoService");
+        echoContext.setHandler(new EchoServiceHandler());
+
         handlerColl = new ContextHandlerCollection();
-        Handler[] handlers = {arithmeticsContext, blogContext};
+        Handler[] handlers = {arithmeticsContext, blogContext, echoContext};
         handlerColl.setHandlers(handlers);
 
         server.addHandler(handlerColl);
     }
 
+    public void start() throws Exception {
+        if (!server.isStarted())
+            server.start();
+    }
 
-    private Document parseBody(ServletInputStream bodyStream, HttpServletResponse response) throws IOException {
-        if (bodyStream == null) {
-            response.sendError(400, "Missing body!");
-        } else {
-            try {
-                return DOMUtils.parse(bodyStream);
-            } catch (SAXException e) {
-                response.sendError(400, "Failed to parse body! " + e.getMessage());
+    public void stop() throws Exception {
+        server.stop();
+    }
+
+    private class EchoServiceHandler extends AbstractHandler {
+
+
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
+            String method = request.getMethod();
+            if (StringUtils.isNotEmpty(request.getParameter("ping"))) {
+                response.setStatus(200);
+                response.getOutputStream().println("Yep, I'm here!");
+            } else {
+                if (!"GET".equals(method) && !"POST".equals(method)) {
+                    response.setStatus(405);
+                    response.setHeader("Allow", "GET, POST");
+                } else {
+                    Enumeration h = request.getHeaderNames();
+                    // send back all headers
+                    while (h.hasMoreElements()) {
+                        String hname = (String) h.nextElement();
+                        Enumeration values = request.getHeaders(hname);
+                        while (values.hasMoreElements()) {
+                            String next = (String) values.nextElement();
+                            System.out.println(hname + ": " + next);
+                            response.addHeader(hname, next);
+                        }
+                    }
+
+                    // send back the body if any
+                    String body = new String(StreamUtils.read(request.getInputStream()));
+                    if (StringUtils.isNotEmpty(body))
+                        response.getOutputStream().println(body);
+
+                }
             }
+
+
+            ((Request) request).setHandled(true);
         }
-        return null;
     }
 
     private class ArithmeticsServiceHandler extends AbstractHandler {
@@ -105,76 +150,89 @@ public class JettyWrapper {
                 if ("/HttpBindingTestService/".equals(uri)) {
                     response.getWriter().println("HttpBindingTestService ready!");
                 } else if (uri.contains("OlaElMundo-GET") || uri.contains("OlaElMundo-DELETE")) {
-                    if (!uri.contains("plus") && !uri.contains("minus")) {
-                        response.sendError(404);
+//                    if (!"GET".equalsIgnoreCase(method)) {
+                    if (false) {
+                        response.sendError(405, "Expecting method is GET");
                     } else {
-                        boolean ok = true;
-                        int left = 0, right = 0;
-                        try {
-                            if (uri.contains("plus")) {
-                                int index = uri.lastIndexOf("/");
-                                String[] op = uri.substring(index + 1).split(":");
-                                left = Integer.parseInt(op[0]);
-                                right = Integer.parseInt(op[1]);
-                            } else if (uri.contains("minus")) {
-                                left = Integer.parseInt(request.getParameter("left"));
-                                right = -1 * Integer.parseInt(request.getParameter("right"));
-                            } else {
-                                ok = false;
-                            }
-                        } catch (NumberFormatException e) {
-                            ok = false;
-                        }
-
-                        if (!ok) {
-                            response.sendError(400);
+                        if (!uri.contains("plus") && !uri.contains("minus")) {
+                            response.sendError(404);
                         } else {
-                            Document doc = DOMUtils.newDocument();
-                            Element resElt = doc.createElement("theresult");
-                            resElt.setTextContent(String.valueOf(left + right));
-                            response.getOutputStream().print(DOMUtils.domToString(resElt));
-                            response.getOutputStream().close();
-                            response.setStatus(200);
-                        }
-                    }
-                } else if (uri.contains("OlaElMundo-POST") || uri.contains("OlaElMundo-PUT")) {
-                    if (!uri.contains("plus") && !uri.contains("minus")) {
-                        response.sendError(404);
-                    } else {
-                        // parse body, form-urlencoded
-                        int res = Integer.MIN_VALUE;
-                        boolean ok = true;
-                        String body = new String(StreamUtils.read(request.getInputStream()));
-                        if (!body.matches("[^=]*=[+-]?\\d*&[^=]*=[+-]?\\d*")) {
-                            ok = false;
-                        } else {
-                            String[] sp = body.split("&");
-                            String[] op0 = sp[0].split("=");
-                            String[] op1 = sp[1].split("=");
+                            boolean ok = true;
+                            int left = 0, right = 0;
                             try {
-                                int left, right;
-                                if (op0[0].equals("left")) {
-                                    left = Integer.valueOf(op0[1]);
-                                    right = Integer.valueOf(op1[1]);
+                                if (uri.contains("plus")) {
+                                    int index = uri.lastIndexOf("/");
+                                    String[] op = uri.substring(index + 1).split(":");
+                                    left = Integer.parseInt(op[0]);
+                                    right = Integer.parseInt(op[1]);
+                                } else if (uri.contains("minus")) {
+                                    left = Integer.parseInt(request.getParameter("left"));
+                                    right = -1 * Integer.parseInt(request.getParameter("right"));
                                 } else {
-                                    left = Integer.valueOf(op1[1]);
-                                    right = Integer.valueOf(op0[1]);
+                                    ok = false;
                                 }
-                                if (uri.contains("minus")) {
-                                    right = -1 * right;
-                                }
-                                res = left + right;
                             } catch (NumberFormatException e) {
                                 ok = false;
                             }
+
+                            if (!ok) {
+                                response.sendError(400);
+                            } else {
+                                Document doc = DOMUtils.newDocument();
+                                Element resElt = doc.createElement("theresult");
+                                resElt.setTextContent(String.valueOf(left + right));
+                                response.getOutputStream().print(DOMUtils.domToString(resElt));
+                                response.getOutputStream().close();
+                                response.setStatus(200);
+                            }
                         }
-                        if (!ok) {
-                            response.sendError(400);
+                    }
+                } else if (uri.contains("OlaElMundo-POST") || uri.contains("OlaElMundo-PUT")) {
+//                    if (!"POST".equalsIgnoreCase(method)) {
+                    if (false) {
+                        response.sendError(405, "Expecting method is POST");
+                        return;
+                    } else {
+                        String operation;
+                        if (!uri.contains("plus") && !uri.contains("minus")) {
+                            response.sendError(404);
                         } else {
-                            Element resElt = DOMUtils.newDocument().createElement("theresult");
-                            resElt.setTextContent(String.valueOf(res));
-                            response.getOutputStream().print(DOMUtils.domToString(resElt));
-                            response.setStatus(200);
+                            // parse body, form-urlencoded
+                            int res = Integer.MIN_VALUE;
+                            boolean ok = true;
+                            StringBuffer sb = null;
+                            String body = new String(StreamUtils.read(request.getInputStream()));
+                            if (!body.matches("[^=]*=[+-]?\\d*&[^=]*=[+-]?\\d*")) {
+                                ok = false;
+                            } else {
+                                String[] sp = body.split("&");
+                                String[] op0 = sp[0].split("=");
+                                String[] op1 = sp[1].split("=");
+                                try {
+                                    int left, right;
+                                    if (op0[0].equals("left")) {
+                                        left = Integer.valueOf(op0[1]);
+                                        right = Integer.valueOf(op1[1]);
+                                    } else {
+                                        left = Integer.valueOf(op1[1]);
+                                        right = Integer.valueOf(op0[1]);
+                                    }
+                                    if (uri.contains("minus")) {
+                                        right = -1 * right;
+                                    }
+                                    res = left + right;
+                                } catch (NumberFormatException e) {
+                                    ok = false;
+                                }
+                            }
+                            if (!ok) {
+                                response.sendError(400);
+                            } else {
+                                Element resElt = DOMUtils.newDocument().createElement("theresult");
+                                resElt.setTextContent(String.valueOf(res));
+                                response.getOutputStream().print(DOMUtils.domToString(resElt));
+                                response.setStatus(200);
+                            }
                         }
                     }
                 } else if (uri.contains("SalutLaTerre")) {
@@ -234,8 +292,19 @@ public class JettyWrapper {
             }
         }
 
+        private Document parseBody(ServletInputStream bodyStream, HttpServletResponse response) throws IOException {
+            if (bodyStream == null) {
+                response.sendError(400, "Missing body!");
+            } else {
+                try {
+                    return DOMUtils.parse(bodyStream);
+                } catch (SAXException e) {
+                    response.sendError(400, "Failed to parse body! " + e.getMessage());
+                }
+            }
+            return null;
+        }
     }
-
 
     private class BlogServiceHandler extends AbstractHandler {
 
@@ -261,7 +330,7 @@ public class JettyWrapper {
             if ("400_not_found".equals(faultType)) {
                 response.setStatus(400);
             } else if ("500_operation_with_no_fault_failed".equals(faultType)) {
-                response.setStatus(500);                
+                response.setStatus(500);
             } else if ("200_missing_part_in_header".equals(faultType)) {
                 // a part is bound to a custom header
                 // this test does not set it on purpose
@@ -367,7 +436,6 @@ public class JettyWrapper {
         }
     }
 
-
     public static void main(String[] args) {
         try {
             new JettyWrapper().server.start();
@@ -375,4 +443,5 @@ public class JettyWrapper {
             e.printStackTrace();
         }
     }
+
 }

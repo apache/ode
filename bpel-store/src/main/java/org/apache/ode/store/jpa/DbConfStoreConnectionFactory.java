@@ -35,13 +35,13 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
     private DataSource _ds;
     private EntityManagerFactory _emf;
 
-    public DbConfStoreConnectionFactory(DataSource ds, boolean auto) {
+    public DbConfStoreConnectionFactory(DataSource ds, boolean createDatamodel) {
         _ds = ds;
         HashMap propMap = new HashMap();
         propMap.put("javax.persistence.nonJtaDataSource", ds);
         propMap.put("openjpa.Log", "log4j");
 //        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
-        if (auto) propMap.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
+        if (createDatamodel) propMap.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
         _emf = Persistence.createEntityManagerFactory("ode-store", propMap);
     }
 
