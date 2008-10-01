@@ -119,7 +119,6 @@ public class JettyWrapper {
                         Enumeration values = request.getHeaders(hname);
                         while (values.hasMoreElements()) {
                             String next = (String) values.nextElement();
-                            System.out.println(hname + ": " + next);
                             response.addHeader(hname, next);
                         }
                     }
