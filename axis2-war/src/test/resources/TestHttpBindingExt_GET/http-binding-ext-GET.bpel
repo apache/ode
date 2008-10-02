@@ -310,23 +310,9 @@
         </scope>
 
         <!-- ############################################### -->
-        <!-- 200_missing_part_in_header - failure expected  -->
+        <!-- 200_missing_part_in_header - should pass, missing or empty header are allowed -->
         <!-- ############################################### -->
         <scope>
-            <ext:failureHandling>
-                <ext:faultOnFailure>true</ext:faultOnFailure>
-            </ext:failureHandling>
-            <faultHandlers>
-                <catch faultName="ext:activityFailure">
-                    <!-- expected result-->
-                    <!--
-                    Warning #1!! At this point what we know for sure is that a failure occured
-                    but we don't know which failure exactly.
-                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
-                    -->
-                    <empty/>
-                </catch>
-            </faultHandlers>
             <sequence>
                 <assign>
                     <copy>
@@ -336,14 +322,6 @@
                 </assign>
                 <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
                         operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
-                <assign>
-                    <copy>
-                        <from>'200_missing_part_in_header: A failure should have been thrown'</from>
-                        <to>$outputVar.TestPart</to>
-                    </copy>
-                </assign>
-                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
-                       operation="hello" variable="outputVar"/>
             </sequence>
         </scope>
 

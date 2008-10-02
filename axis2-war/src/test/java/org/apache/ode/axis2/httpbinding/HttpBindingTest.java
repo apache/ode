@@ -99,9 +99,9 @@ public class HttpBindingTest extends Axis2TestBase {
         server.deployProcess(bundleName);
         try {
             String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld", bundleName, "testRequest.soap");
-            System.out.println(response);
-            if (log.isDebugEnabled()) log.debug(response);
-            assertTrue("Test failed. See xml response for details", response.indexOf("What a success!") >= 0);
+            System.out.println("Test Response Received: "+response);
+            if (log.isDebugEnabled()) log.debug("Test Response Received: "+response);
+            assertTrue("Test failed. Response is:"+response, response.indexOf("What a success!") >= 0);
         } finally {
             server.undeployProcess(bundleName);
         }
