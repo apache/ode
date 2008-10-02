@@ -40,7 +40,7 @@ public class FaultDAOImpl extends HibernateDao implements FaultDAO {
 
     public FaultDAOImpl(SessionManager sm, HFaultData fault) {
         super(sm, fault);
-        if (logDao.isDebugEnabled()) logDao.debug("FaultDAOImpl.FaultDAOImpl");
+        entering("FaultDAOImpl.FaultDAOImpl");
         _self = fault;
     }
 
