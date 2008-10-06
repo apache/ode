@@ -184,8 +184,7 @@ public class ODEServer {
                 throw new ServletException(errmsg, ex);
             }
 
-            File deploymentDir = new File(_workRoot, "processes");
-            _poller = new DeploymentPoller(deploymentDir, this);
+            _poller = new DeploymentPoller(_store.getDeployDir(), this);
 
             _mgtService = new ManagementService();
             _mgtService.enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
@@ -199,7 +198,7 @@ public class ODEServer {
             initConnector();
 
             _poller.start();
-            __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
+            __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
             __log.info(__msgs.msgOdeStarted());
             success = true;
         } finally {
