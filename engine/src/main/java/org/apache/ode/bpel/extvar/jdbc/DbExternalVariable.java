@@ -443,7 +443,7 @@ class DbExternalVariable {
                         return 1;
                     if (v.equals("false"))
                         return 0;
-					return java.math.BigDecimal(val).longValue;
+					return new java.math.BigDecimal(val).longValue();
                 } else if (isReal())
 					return Double.valueOf(val);
                 else if (isBoolean()) {
