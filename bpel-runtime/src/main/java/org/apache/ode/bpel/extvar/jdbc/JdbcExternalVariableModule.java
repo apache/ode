@@ -193,15 +193,18 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
                 Column c = dbev.new Column(name, colname, key.equalsIgnoreCase("yes"), gtype, expression);
                 ResultSet cmd = metaData.getColumns(null, dbev.schema, dbev.table, colname);
-                if (cmd.next()) {
-                    c.dataType = cmd.getInt("DATA_TYPE");
-                    c.nullok = cmd.getInt("NULLABLE") != 0;
-                } else
-                    throw new ExternalVariableModuleException("External variable " + evarId + " referenced "
+                try {
+                    if (cmd.next()) {
+                        c.dataType = cmd.getInt("DATA_TYPE");
+                        c.nullok = cmd.getInt("NULLABLE") != 0;
+                    } else
+                        throw new ExternalVariableModuleException("External variable " + evarId + " referenced "
                             + "non-existant column \"" + colname + "\"!");
+                } finally {
+                    cmd.close();
+                }
 
                 dbev.addColumn(c);
-
             }
 
             if (dbev.numColumns() == 0)
@@ -310,12 +313,13 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     int execUpdate(DbExternalVariable dbev, RowKey key, RowVal values) throws SQLException {
         Connection conn = dbev.dataSource.getConnection();
+        PreparedStatement stmt = null;
         try {
             if (__log.isDebugEnabled()) {
                 __log.debug("execUpdate: key=" + key + " values=" + values);
                 __log.debug("Prepare statement: " + dbev.update);
             }
-            PreparedStatement stmt = conn.prepareStatement(dbev.update);
+            stmt = conn.prepareStatement(dbev.update);
             int idx = 1;
             for (Column c : dbev._updcolumns) {
                 Object val = values.get(c.name);
@@ -338,6 +342,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             }
             return stmt.executeUpdate();
         } finally {
+            if (stmt != null) stmt.close();
             conn.close();
         }
     }
@@ -356,9 +361,10 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         
         RowVal ret = dbev.new RowVal();
         Connection conn = dbev.dataSource.getConnection();
+        PreparedStatement stmt = null;
         try {
             if (__log.isDebugEnabled()) __log.debug("Prepare statement: " + dbev.select);
-            PreparedStatement stmt = conn.prepareStatement(dbev.select);
+            stmt = conn.prepareStatement(dbev.select);
             int idx = 1;
             for (Object k : rowkey) {
                 if (__log.isDebugEnabled()) __log.debug("Set key parameter "+idx+": "+k);
@@ -387,6 +393,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 rs.close();
             }
         } finally {
+            if (stmt != null) stmt.close();
             conn.close();
         }
 
@@ -395,6 +402,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     RowKey execInsert(DbExternalVariable dbev, Locator locator, RowKey keys, RowVal values) throws SQLException {
         Connection conn = dbev.dataSource.getConnection();
+        PreparedStatement stmt = null; 
         try {
             if (__log.isDebugEnabled()) {
                 __log.debug("execInsert: keys=" + keys + " values=" + values);
@@ -403,7 +411,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 __log.debug("_autoColNames: " + ObjectPrinter.stringifyNvList(dbev._autoColNames));
             }
 
-            PreparedStatement stmt = keys.missingDatabaseGeneratedValues() 
+            stmt = keys.missingDatabaseGeneratedValues() 
                 ? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
                 : conn.prepareStatement(dbev.insert);
 
@@ -430,17 +438,22 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             if (keys.missingDatabaseGeneratedValues() ) {
                 // With JDBC 3, we can get the values of the key columns (if the db supports it)
                 ResultSet keyRS = stmt.getGeneratedKeys();
-                if (keyRS == null) 
-                    throw new SQLException("Database did not return generated keys");
-                keyRS.next();
-                for (Column ck : keys._columns) {
-                    Object value = keyRS.getObject(ck.idx+1);
-                    if (__log.isDebugEnabled()) __log.debug("Generated key "+ck.name+": "+value);
-                    keys.put(ck.name, value);
+                try {
+                    if (keyRS == null) 
+                        throw new SQLException("Database did not return generated keys");
+                    keyRS.next();
+                    for (Column ck : keys._columns) {
+                        Object value = keyRS.getObject(ck.idx+1);
+                        if (__log.isDebugEnabled()) __log.debug("Generated key "+ck.name+": "+value);
+                        keys.put(ck.name, value);
+                    }
+                } finally {
+                    keyRS.close();
                 }
             } 
             return keys;
         } finally {
+            if (stmt != null) stmt.close();
             conn.close();
         }
     }
