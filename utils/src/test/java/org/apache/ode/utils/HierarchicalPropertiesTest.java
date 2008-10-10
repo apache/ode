@@ -48,7 +48,8 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertEquals(msg, "40000", hp.getProperty("http://foo.com", "film-service", "timeout"));
         assertEquals(msg, "hi!", hp.getProperty("http://hello.com", "a_service", "worldproperty"));
         assertEquals(msg, "4", hp.getProperty("a_namespace_with_no_alias", "a_service", "poolsize"));
-        assertEquals("If the same property is set by two different files, the order of precedence should be the alphabetical order.", "60000", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "timeout"));
+        assertEquals("If the same property is set by two different files, the last loaded file must take precedence", "50000", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "timeout"));
+
         assertEquals("The prefix could be use without interfering", "so green or red?", hp.getProperty("ode.a.property.beginning.with.the.prefix.but.no.service"));
     }
 
