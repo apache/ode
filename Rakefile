@@ -178,6 +178,7 @@ define "ode" do
       end
     end
     
+    test.using :testng
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     test.setup task(:prepare_webapp) do |task|
       webapp_dir = "target/test-classes/webapp"

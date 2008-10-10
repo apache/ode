@@ -1,17 +1,16 @@
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
-import org.junit.Ignore;
+import org.testng.annotations.Test;
 
 /**
  * This test requires very specific timing values to work which is why it's set to ignored, it
  * probably wouldn't work on most machines. BpelRuntimeContextImpl.scheduleInvokeCheck also has to
  * use a timer value of 5s instead of 180s (a bit too long for testing).
  */
-@Ignore
 public class FailureInvokeTest extends Axis2TestBase {
 
-    @Ignore
+  @Test(enabled = false)
     public void testSimpleFaultCatch() throws Exception {
         String bundleName = "TestFailureInInvoke";
         // deploy the required service

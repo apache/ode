@@ -1,9 +1,13 @@
 package org.apache.ode.axis2.httpbinding;
 
-import org.apache.ode.axis2.Axis2TestBase;
-import org.apache.ode.axis2.JettyWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.JettyWrapper;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -27,6 +31,7 @@ public class HttpBindingTest extends Axis2TestBase {
     protected JettyWrapper jettyWrapper;
 
 
+  @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -45,11 +50,13 @@ public class HttpBindingTest extends Axis2TestBase {
         latch.await();
     }
 
+  @AfterMethod
     protected void tearDown() throws Exception {
         jettyWrapper.stop();
         super.tearDown();
     }
 
+  @Test
     public void testHttpBinding() throws Exception {
         String bundleName = "TestHttpBinding";
         // deploy the required service
@@ -67,22 +74,26 @@ public class HttpBindingTest extends Axis2TestBase {
         }
     }
 
+  @Test
     public void testHttpBindingExt_GET() throws Exception {
         String bundleName = "TestHttpBindingExt_GET";
         executeBundle(bundleName);
 
     }
 
+  @Test
     public void testHttpBindingExt_DELETE() throws Exception {
         String bundleName = "TestHttpBindingExt_DELETE";
         executeBundle(bundleName);
     }
 
+  @Test
     public void testHttpBindingExt_POST() throws Exception {
         String bundleName = "TestHttpBindingExt_POST";
         executeBundle(bundleName);
     }
 
+  @Test
     public void testHttpBindingExt_PUT() throws Exception {
         String bundleName = "TestHttpBindingExt_PUT";
         executeBundle(bundleName);
