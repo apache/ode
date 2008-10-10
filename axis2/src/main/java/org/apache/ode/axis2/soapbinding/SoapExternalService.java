@@ -384,6 +384,13 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
         public void init() {
             options = new Options();
+            // set defaults values
+            options.setExceptionToBeThrownOnSOAPFault(false);
+
+            // this value does NOT override Properties.PROP_HTTP_CONNECTION_TIMEOUT
+            // nor Properties.PROP_HTTP_SOCKET_TIMEOUT.
+            // it will be applied only if the laters are not set.
+            options.setTimeOutInMilliSeconds(60000);
         }
 
         public void doOnUpdate() {
@@ -392,14 +399,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // note: don't make this map an instance attribute, so we always get the latest version
             final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
             Properties.Axis2.translate(properties, options);
-
-            // set defaults values
-            options.setExceptionToBeThrownOnSOAPFault(false);
-
-            // this value does NOT override Properties.PROP_HTTP_CONNECTION_TIMEOUT
-            // nor Properties.PROP_HTTP_SOCKET_TIMEOUT.
-            // it will be applied only if the laters are not set.
-            options.setTimeOutInMilliSeconds(60000);
         }
     }
 
