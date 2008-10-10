@@ -89,7 +89,7 @@
     <assign>
       <copy>
         <from>
-          <literal>http://localhost:8080/ode/processes/DynResponderService</literal>
+          <literal>http://localhost:8888/ode/processes/DynResponderService</literal>
         </from>
         <to partnerLink="responderPartnerLink"/>
       </copy>
@@ -97,7 +97,7 @@
         <from>
           <literal>
             <sref:service-ref>
-              <soap:address location="http://localhost:8080/ode/processes/DynResponderService"/>
+              <soap:address location="http://localhost:8888/ode/processes/DynResponderService"/>
             </sref:service-ref>
           </literal>
         </from>

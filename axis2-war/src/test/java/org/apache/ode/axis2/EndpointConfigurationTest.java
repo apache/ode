@@ -54,7 +54,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
             if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
             server.deployProcess(bundleName);
             try {
-                String response = server.sendRequestFile("http://localhost:8080/processes/helloWorld",
+                String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
                         bundleName, "testRequest.soap");
                 assertTrue(response.contains("helloResponse") && response.contains("OK!!!"));
             } finally {

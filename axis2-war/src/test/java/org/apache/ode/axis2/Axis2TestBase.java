@@ -5,6 +5,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
@@ -33,8 +34,10 @@ import org.junit.*;
 @Ignore
 public abstract class Axis2TestBase extends TestCase {
 
-    protected ODEAxis2Server server;
+    private static final int DEFAULT_TEST_PORT = 8888;
     
+    protected ODEAxis2Server server;
+
     // Provide standard constructors to accommodate creation of test suites
     public Axis2TestBase(String name) {
     	super(name);
@@ -75,6 +78,8 @@ public abstract class Axis2TestBase extends TestCase {
             String repoLocation = webappPath + "/WEB-INF";
             configContext = ConfigurationContextFactory
                     .createConfigurationContextFromFileSystem(repoLocation, confLocation);
+            // do not use 8080 for tests
+            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+DEFAULT_TEST_PORT));
         }
 
         protected void start() throws AxisFault {
