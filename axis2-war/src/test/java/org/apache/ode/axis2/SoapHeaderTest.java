@@ -50,7 +50,7 @@ public class SoapHeaderTest extends Axis2TestBase {
 
         if (!server.isDeployed("TestSoapHeader")) server.deployProcess("TestSoapHeader");
 
-        String response = server.sendRequestFile("http://localhost:8080/processes/headerTest",
+        String response = server.sendRequestFile("http://localhost:8888/processes/headerTest",
                 "TestSoapHeader", "testRequest.soap");
         System.out.println(response);
 
