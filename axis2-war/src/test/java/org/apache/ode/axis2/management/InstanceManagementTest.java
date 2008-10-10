@@ -19,13 +19,20 @@
 
 package org.apache.ode.axis2.management;
 
-import org.apache.axiom.om.*;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
-import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.apache.ode.utils.Namespaces;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -43,6 +50,7 @@ public class InstanceManagementTest extends Axis2TestBase {
     private ServiceClientUtil _client;
     private String _deployedName;
 
+  @Test
     public void testListInstances() throws Exception {
         OMElement listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
@@ -61,6 +69,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         assert(result.toString().split("instance-info").length == 5);
     }
 
+  @Test
     public void testListAllInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
@@ -71,6 +80,7 @@ public class InstanceManagementTest extends Axis2TestBase {
                 result.toString().indexOf("DynPartnerResponder") >= 0);
     }
 
+  @Test
     public void testInstanceSummaryListProcess() throws Exception {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
@@ -87,6 +97,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         assert(count == 1);
     }
 
+  @Test
     public void testGetInstanceInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
@@ -97,6 +108,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         assert(result.toString().split("instance-info").length == 3);
     }
 
+  @Test
     public void testGetInstanceInfoFault() throws Exception {
         // Hopefully this id won't exist
         OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {"65431"});
@@ -108,6 +120,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         }
     }
 
+  @Test
     public void testGetScopeInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
@@ -121,6 +134,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         assert(result.toString().indexOf("activity-info") >= 0);
     }
 
+  @Test
     public void testGetVariableInfo() throws Exception {
         OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
@@ -150,6 +164,7 @@ public class InstanceManagementTest extends Axis2TestBase {
 //        assert(result.toString().split("element").length > 10);
 //    }
 
+  @Test
     public void testDeleteInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
@@ -158,6 +173,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         _client.buildMessage("delete", new String[] {"piid"}, new String[] {iid});
     }
 
+  @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -198,6 +214,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         Thread.sleep(1000);
     }
 
+  @AfterMethod
     protected void tearDown() throws Exception {
         // Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
@@ -227,10 +244,6 @@ public class InstanceManagementTest extends Axis2TestBase {
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
         return _client.send(msg, "http://localhost:8888/processes/DeploymentService");
-    }
-
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(new InstanceManagementTest());
     }
 
 }

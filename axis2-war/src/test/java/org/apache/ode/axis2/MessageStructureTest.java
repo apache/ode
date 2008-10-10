@@ -1,10 +1,13 @@
 package org.apache.ode.axis2;
 
 import org.apache.ode.utils.DOMUtils;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 import org.w3c.dom.Element;
 
 public class MessageStructureTest extends Axis2TestBase {
 
+  @Test
     public void testAttrWithNsValue() throws Exception {
         String bundleName = "TestAttributeNamespaces";
         // deploy the required service
