@@ -108,7 +108,7 @@ public class HierarchicalProperties {
 
     /**
      * @param files  the property file to be loaded. The file may not exist.
-     *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown.
+     *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown. Files will be loaded in the given order.
      * @param prefix the property prefix
      * @throws IOException
      */
@@ -149,7 +149,7 @@ public class HierarchicalProperties {
         for (File file : files) loadFile(file);
     }
 
-    protected void loadFile(File file) throws IOException {
+    public void loadFile(File file) throws IOException {
         if (!file.exists()) {
             if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "]");
             return;
