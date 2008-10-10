@@ -1,32 +1,38 @@
 package org.apache.ode.axis2;
 
-import junit.framework.TestCase;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
-import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
+import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
-import org.apache.ode.axis2.hooks.ODEAxisService;
+import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import javax.servlet.ServletException;
 import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
  */
-public abstract class Axis2TestBase extends TestCase {
+public abstract class Axis2TestBase {
 
     protected ODEAxis2Server server;
 
@@ -40,14 +46,14 @@ public abstract class Axis2TestBase extends TestCase {
         server.stop();
     }
 
+  @BeforeMethod
     protected void setUp() throws Exception {
-        super.setUp();
         startServer();
     }
 
+  @AfterMethod
     protected void tearDown() throws Exception {
         stopServer();
-        super.tearDown();
     }
 
     protected class ODEAxis2Server extends AxisServer {

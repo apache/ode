@@ -19,12 +19,20 @@
 
 package org.apache.ode.axis2.management;
 
-import org.apache.axiom.om.*;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
-import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.utils.Namespaces;
+import static org.testng.AssertJUnit.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +48,7 @@ public class DeploymentTest extends Axis2TestBase {
     private ArrayList<QName> _deployed = new ArrayList<QName>();
     private String _package;
 
+  @Test
     public void testDeployUndeploy() throws Exception {
         // Setup and tear down are doing ost of the job here, just checking in the middle
 
@@ -74,12 +83,14 @@ public class DeploymentTest extends Axis2TestBase {
         assertEquals(_deployed.get(1).toString(), pid.getText());
     }
 
+  @Test
     public void testListDeployedPackages() throws Exception {
         OMElement root = _client.buildMessage("listDeployedPackages", new String[] {}, new String[] {});
         OMElement result = sendToDeployment(root);
         assertTrue(result.toString().indexOf(_package) > 0);
     }
 
+  @Test
     public void testListProcesses() throws Exception {
         OMElement root = _client.buildMessage("listProcesses", new String[] {"packagesNames"},
                 new String[] {_package});
@@ -90,6 +101,7 @@ public class DeploymentTest extends Axis2TestBase {
         assertTrue(result.toString().indexOf("DynPartnerResponder")>=0);
     }
 
+  @Test
     public void testGetProcessPackage() throws Exception {
         OMElement root = _client.buildMessage("getProcessPackage", new String[] {"processId"},
                 new Object[] { _deployed.get(0) } );
@@ -102,6 +114,7 @@ public class DeploymentTest extends Axis2TestBase {
         assertEquals(_package, result2.getText());
     }
 
+  @Test
     public void testMultipleDeployUndeployVersion() throws Exception {
         ArrayList<String> deployed = new ArrayList<String>();
         // Testing that versions are monotonically increased
@@ -129,6 +142,7 @@ public class DeploymentTest extends Axis2TestBase {
         }
     }
 
+  @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();
         // Create a factory
@@ -143,6 +157,7 @@ public class DeploymentTest extends Axis2TestBase {
         Thread.sleep(1000);
     }
 
+  @AfterMethod
     protected void tearDown() throws Exception {
         undeploy(_package);
         super.tearDown();

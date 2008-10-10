@@ -1,14 +1,20 @@
 package org.apache.ode.axis2;
 
-import org.apache.axis2.engine.MessageReceiver;
-import org.apache.axis2.engine.AxisEngine;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.util.Utils;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.engine.AxisEngine;
+import org.apache.axis2.engine.MessageReceiver;
+import org.apache.axis2.util.Utils;
 import org.apache.ode.utils.DOMUtils;
+import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.Test;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -20,6 +26,7 @@ import javax.xml.namespace.QName;
  */
 public class SoapHeaderTest extends Axis2TestBase {
 
+  @Test
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",
                 new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http", 

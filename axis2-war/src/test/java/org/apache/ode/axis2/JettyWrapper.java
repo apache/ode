@@ -19,34 +19,25 @@
 
 package org.apache.ode.axis2;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.StreamUtils;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.StreamUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
