@@ -9,7 +9,7 @@ public class TestSimpleScenarioV1 extends Axis2TestBase {
         BpelCompilerFactory.forceVersion = 1;
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8080/ode/processes/helloWorld",
+            String response = server.sendRequestFile("http://localhost:8888/ode/processes/helloWorld",
                     bundleName, "testRequest.soap");
 
             assertTrue(response.indexOf("Hello World") > 0);
@@ -24,7 +24,7 @@ public class TestSimpleScenarioV1 extends Axis2TestBase {
         BpelCompilerFactory.forceVersion = 1;
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8080/ode/processes/DynMainService",
+            String response = server.sendRequestFile("http://localhost:8888/ode/processes/DynMainService",
                     bundleName, "testRequest.soap");
 
             assertTrue(response.indexOf("OK") > 0);
@@ -40,7 +40,7 @@ public class TestSimpleScenarioV1 extends Axis2TestBase {
         BpelCompilerFactory.forceVersion = 1;
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8080/ode/processes/MSMainExecuteService",
+            String response = server.sendRequestFile("http://localhost:8888/ode/processes/MSMainExecuteService",
                     bundleName, "testRequest.soap");
 
             System.out.println("->" + response);

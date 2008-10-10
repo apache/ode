@@ -131,9 +131,9 @@ public class JettyWrapper {
     private class ArithmeticsServiceHandler extends AbstractHandler {
         /*
         8 urls to handle:
-        (GET)       http://localhost:8080/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
+        (GET)       http://localhost:8888/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
         (GET)       http://         ........                    /OlaElMundo-GET/minus?left=&right=
-        (DELETE)    http://localhost:8080/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)
+        (DELETE)    http://localhost:8888/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)
         (DELETE)    http://         ........                    /OlaElMundo-DELETE/minus?left=&right=
         (POST)      http://         ........                    /OlaElMundo-POST/plus
         (POST)      http://         ........                    /OlaElMundo-POST/minus

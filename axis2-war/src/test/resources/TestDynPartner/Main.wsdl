@@ -63,7 +63,7 @@
 
   <wsdl:service name="DynMainService">
     <wsdl:port name="DynMainPort" binding="tns:DynMainBinding">
-      <soap:address location="http://localhost:8080/ode/processes/DynMainService"/>
+      <soap:address location="http://localhost:8888/ode/processes/DynMainService"/>
     </wsdl:port>
   </wsdl:service>
 

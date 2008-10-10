@@ -148,13 +148,13 @@
    </wsdl:binding>
    <wsdl:service name="DummyService">
       <wsdl:port name="DummyServiceSOAP11port_http" binding="ns1:DummyServiceSOAP11Binding">
-         <soap:address location="http://localhost:8080/processes/DummyService"/>
+         <soap:address location="http://localhost:8888/processes/DummyService"/>
       </wsdl:port>
       <wsdl:port name="DummyServiceSOAP12port_http" binding="ns1:DummyServiceSOAP12Binding">
-         <soap12:address location="http://localhost:8080/processes/DummyService"/>
+         <soap12:address location="http://localhost:8888/processes/DummyService"/>
       </wsdl:port>
       <wsdl:port name="DummyServiceHttpport" binding="ns1:DummyServiceHttpBinding">
-         <http:address location="http://localhost:8080/processes/DummyService"/>
+         <http:address location="http://localhost:8888/processes/DummyService"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>

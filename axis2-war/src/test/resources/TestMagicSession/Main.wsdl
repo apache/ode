@@ -160,21 +160,21 @@
     <!-- This service should be used to start the example. -->
     <wsdl:service name="MSMainExecuteService">
         <wsdl:port name="MSExecutePort" binding="tns:MSExecuteBinding">
-            <soap:address location="http://localhost:8080/ode/processes/MSMainExecuteService"/>
+            <soap:address location="http://localhost:8888/ode/processes/MSMainExecuteService"/>
         </wsdl:port>
     </wsdl:service>
 
     <!-- This service is internal, only used by the responder. -->
     <wsdl:service name="MSMainService">
         <wsdl:port name="MSMainPort" binding="tns:MSMainBinding">
-            <soap:address location="http://localhost:8080/ode/processes/MSMainService"/>
+            <soap:address location="http://localhost:8888/ode/processes/MSMainService"/>
         </wsdl:port>
     </wsdl:service>
 
     <!-- Service responding to the main service requests. -->
     <wsdl:service name="MSResponderService">
         <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
-            <soap:address location="http://localhost:8080/ode/processes/MSResponderService"/>
+            <soap:address location="http://localhost:8888/ode/processes/MSResponderService"/>
         </wsdl:port>
     </wsdl:service>
 

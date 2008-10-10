@@ -211,11 +211,11 @@ public class DeploymentTest extends Axis2TestBase {
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8080/processes/ProcessManagement");
+        return _client.send(msg, "http://localhost:8888/processes/ProcessManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8080/processes/DeploymentService");
+        return _client.send(msg, "http://localhost:8888/processes/DeploymentService");
     }
 
 }

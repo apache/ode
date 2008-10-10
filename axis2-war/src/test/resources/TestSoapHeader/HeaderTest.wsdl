@@ -74,12 +74,12 @@
     </wsdl:binding>
     <wsdl:service name="HeaderTestService">
         <wsdl:port name="HeaderTestPort" binding="tns:HeaderTestSoapBinding">
-            <soap:address location="http://localhost:8080/ode/processes/headerTest"/>
+            <soap:address location="http://localhost:8888/ode/processes/headerTest"/>
         </wsdl:port>
     </wsdl:service>
     <wsdl:service name="HeaderTestFacticeService">
         <wsdl:port name="HeaderTestFacticePort" binding="tns:HeaderTestFacticeSoapBinding">
-            <soap:address location="http://localhost:8080/ode/processes/facticeHeaderTest"/>
+            <soap:address location="http://localhost:8888/ode/processes/facticeHeaderTest"/>
         </wsdl:port>
     </wsdl:service>
 
