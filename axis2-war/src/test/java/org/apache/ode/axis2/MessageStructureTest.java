@@ -12,7 +12,7 @@ public class MessageStructureTest extends Axis2TestBase {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8080/processes/attrNSWorld",
+            String response = server.sendRequestFile("http://localhost:8888/processes/attrNSWorld",
                     bundleName, "testRequest.soap");
             Element domResponse = DOMUtils.stringToDOM(response);
             Element out = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(domResponse)));

@@ -55,7 +55,7 @@
     </wsdl:binding>
     <wsdl:service name="HeaderTestService">
         <wsdl:port name="HeaderTestPort" binding="tns:HeaderTestSoapBinding">
-            <soap:address location="http://localhost:8080/ode/processes/invokeFailureTest"/>
+            <soap:address location="http://localhost:8888/ode/processes/invokeFailureTest"/>
         </wsdl:port>
     </wsdl:service>
 

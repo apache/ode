@@ -34,7 +34,7 @@
     </wsdl:binding>
     <wsdl:service name="CanonicServiceForPooldo">
         <wsdl:port name="canonicPort" binding="this:CanonicBindingForPooldo">
-            <soap:address location="http://localhost:8080/ode/processes/testXSDko/BPMN/NewDiagram2/Pool0/Pooldo"/>
+            <soap:address location="http://localhost:8888/ode/processes/testXSDko/BPMN/NewDiagram2/Pool0/Pooldo"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
