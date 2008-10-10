@@ -1,7 +1,8 @@
 package org.apache.ode.axis2.management;
 
 import org.apache.ode.axis2.Axis2TestBase;
-import org.apache.ode.axis2.DummyService;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 
 import javax.xml.namespace.QName;
 
@@ -10,6 +11,7 @@ import javax.xml.namespace.QName;
  */
 public class RetireTest extends Axis2TestBase {
 
+  @Test
     public void testRetiredInstance() throws Exception {
         String bundleName = "TestInstanceRetire";
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());

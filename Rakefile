@@ -242,6 +242,7 @@ define "ode" do
       end
     end
     
+    test.using :testng
     test.with(projects("tools"), libs, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _("target/test")

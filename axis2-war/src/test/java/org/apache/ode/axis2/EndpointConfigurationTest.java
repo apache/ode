@@ -19,16 +19,14 @@
 
 package org.apache.ode.axis2;
 
-import junit.framework.TestCase;
-import org.apache.ode.axis2.JettyWrapper;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.HashUserRealm;
-
-import java.util.concurrent.CountDownLatch;
+import org.mortbay.jetty.security.SecurityHandler;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -37,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
 public class EndpointConfigurationTest extends Axis2TestBase {
 
 
+  @Test
     public void testEndpointProperties() throws Exception {
         executeProcess();
     }
@@ -69,6 +68,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
      * Redo the exact same test but with Basic Authentication activated on the external service
      * @throws Exception
      */
+  @Test
     public void testHttpAuthentication() throws Exception {
         ContextHandler securedEchoContext;
         {

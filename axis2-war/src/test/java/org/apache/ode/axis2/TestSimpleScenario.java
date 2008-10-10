@@ -1,9 +1,11 @@
 package org.apache.ode.axis2;
 
-import org.apache.ode.bpel.compiler.BpelCompilerFactory;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 
 public class TestSimpleScenario extends Axis2TestBase {
 
+  @Test
     public void testHelloWorld2() throws Exception {
         String bundleName = "TestHelloWorld2";
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
@@ -18,6 +20,7 @@ public class TestSimpleScenario extends Axis2TestBase {
 
     }
     
+  @Test
     public void testDynPartner() throws Exception {
         String bundleName = "TestDynPartner";
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
@@ -33,6 +36,7 @@ public class TestSimpleScenario extends Axis2TestBase {
 
     }
 
+  @Test
     public void testMagicSession() throws Exception {
         String bundleName = "TestMagicSession";
         if(!server._ode.getProcessStore().getPackages().contains(bundleName)) server.deployProcess(bundleName);
