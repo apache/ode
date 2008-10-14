@@ -58,8 +58,8 @@ class WHILE extends ACTIVITY {
         }
 
         if (condResult) {
-            ActivityInfo child = new ActivityInfo(genMonotonic(), getOWhile().activity, newChannel(TerminationChannel.class),
-                    newChannel(ParentScopeChannel.class));
+            ActivityInfo child = new ActivityInfo(genMonotonic(), getOWhile().activity,
+                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
             instance(createChild(child, _scopeFrame, _linkFrame));
             instance(new WAITER(child));
         } else /* stop. */{
