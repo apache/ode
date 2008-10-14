@@ -24,10 +24,13 @@ import java.net.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * The context in which BPEL expressions are evaluated. This class is handed of the OExpression
@@ -68,6 +71,13 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
         Node ret;
         if (variable.type instanceof OConstantVarType) {
             ret = ((OConstantVarType) variable.type).getValue();
+        } else if (variable.type instanceof OPropertyVarType) {
+            CorrelationSetInstance set = _scopeInstance.resolve(variable.name);
+            CorrelationKey key = _native.readCorrelation(set);
+            if (key == null) return null;
+            String keyValue = key.getValues()[0];
+            Document doc = DOMUtils.newDocument();
+            ret = doc.createTextNode(keyValue);
         } else {
             VariableInstance varInstance = _scopeInstance.resolve(variable);
             if (varInstance == null)
