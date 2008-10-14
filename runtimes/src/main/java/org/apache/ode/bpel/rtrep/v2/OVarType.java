@@ -25,6 +25,12 @@ import org.w3c.dom.Node;
  * Base class for variable types. 
  */
 public abstract class OVarType extends OBase {
+
+    public static int SCHEMA_TYPE = 0;
+    public static int NUMBER_TYPE = 1;
+    public static int STRING_TYPE = 2;
+
+    public int underlyingType = SCHEMA_TYPE;
     
     public OVarType(OProcess owner) {
         super(owner);
