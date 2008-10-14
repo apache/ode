@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with this
 # work for additional information regarding copyright ownership.  The ASF
@@ -287,7 +288,6 @@ def perform(options)
   
   `git clone #{origin} #{local} 1>&2` unless File.directory?(File.join('.git', origin))
   
-  puts
   puts "Entering #{local} directory"
   puts
   Dir.chdir(local) do
