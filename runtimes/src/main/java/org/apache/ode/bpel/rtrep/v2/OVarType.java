@@ -26,6 +26,8 @@ import org.w3c.dom.Node;
  */
 public abstract class OVarType extends OBase {
 
+    static final long serialVersionUID = 3785545734056078041L;
+
     public static int SCHEMA_TYPE = 0;
     public static int NUMBER_TYPE = 1;
     public static int STRING_TYPE = 2;
