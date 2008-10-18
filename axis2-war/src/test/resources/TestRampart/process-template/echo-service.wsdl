@@ -56,7 +56,7 @@
    </wsdl:binding>
    <wsdl:service name="{sample.service.name}">
       <wsdl:port name="{sample.service.name}SOAP11port_http" binding="ns0:{sample.service.name}SOAP11Binding">
-         <soap:address location="http://localhost:8080/axis2/processes/{sample.service.name}"/>
+         <soap:address location="http://localhost:8888/axis2/processes/{sample.service.name}"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>
