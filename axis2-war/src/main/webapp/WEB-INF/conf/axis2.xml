@@ -214,6 +214,8 @@
     <!--<parameter name="addressingPara" locked="false">N/A</parameter>-->
     <!--</moduleConfig>-->
 
+    <module ref="rampart" />
+
     <!-- ================================================= -->
     <!-- Phases  -->
     <!-- ================================================= -->
@@ -226,6 +228,10 @@
             </handler>
             <handler name="SOAPActionBasedDispatcher"
                      class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher">
+                <order phase="Transport"/>
+            </handler>
+            <handler name="ODEAxisDispatcher"
+                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
                 <order phase="Transport"/>
             </handler>
         </phase>
@@ -244,11 +250,6 @@
                      class="org.apache.axis2.dispatchers.RequestURIOperationDispatcher"/>
             <handler name="HTTPLocationBasedDispatcher"
                      class="org.apache.axis2.dispatchers.HTTPLocationBasedDispatcher"/>
-
-            <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
-                <order phase="Dispatch"/>
-            </handler>
         </phase>
         <!--  System pre defined phases       -->
         <!--   After Postdispatch phase module author or or service author can add any phase he want      -->
