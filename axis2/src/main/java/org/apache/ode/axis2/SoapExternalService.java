@@ -252,8 +252,6 @@ public class SoapExternalService implements ExternalService {
                     // make sure the proper modules are engaged
                     if (!serviceClient.getAxisConfiguration().isEngaged("rampart"))
                         serviceClient.engageModule("rampart");
-                    if (!serviceClient.getAxisConfiguration().isEngaged("addressing"))
-                        serviceClient.engageModule("addressing");
                 } finally {
                     policyStream.close();
                 }
