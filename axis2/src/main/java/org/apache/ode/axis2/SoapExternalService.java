@@ -144,7 +144,7 @@ public class SoapExternalService implements ExternalService {
 
             // provide HTTP credentials if any
             AuthenticationHelper.setHttpAuthentication(odeMex, operationOptions);
-            
+
             operationOptions.setAction(mctx.getSoapAction());
             operationOptions.setTo(axisEPR);
 
@@ -223,26 +223,7 @@ public class SoapExternalService implements ExternalService {
 
         WatchDog<Map, OptionsObserver> optionsWatchDog = _cachedOptions.get();
         if (optionsWatchDog == null) {
-            optionsWatchDog = new WatchDog<Map, OptionsObserver>(new WatchDog.Mutable<Map>() {
-                // ProcessConf#getProperties(String...) cannot return ull (by contract)
-                public boolean exists() {
-                    return true;
-                }
-
-                public boolean hasChangedSince(Map since) {
-                    Map latest = lastModified();  // cannot be null but better be prepared
-                    // check if mappings are equal
-                    return !CollectionUtils.equals(latest, since);
-                }
-
-                public Map lastModified() {
-                    return _pconf.getEndpointProperties(endpointReference);
-                }
-
-                public String toString() {
-                    return "Properties for Endpoint: "+endpointReference;
-                }
-            }, new OptionsObserver());
+            optionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
             _cachedOptions.set(optionsWatchDog);
         }
         optionsWatchDog.check();
@@ -265,8 +246,10 @@ public class SoapExternalService implements ExternalService {
                     options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policyDoc);
 
                     // make sure the proper modules are engaged
-                    if (!serviceClient.getAxisConfiguration().isEngaged("rampart")) serviceClient.engageModule("rampart");
-                    if (!serviceClient.getAxisConfiguration().isEngaged("addressing")) serviceClient.engageModule("addressing");
+                    if (!serviceClient.getAxisConfiguration().isEngaged("rampart"))
+                        serviceClient.engageModule("rampart");
+                    if (!serviceClient.getAxisConfiguration().isEngaged("addressing"))
+                        serviceClient.engageModule("addressing");
                 } finally {
                     policyStream.close();
                 }
@@ -474,7 +457,6 @@ public class SoapExternalService implements ExternalService {
 
         Options options;
 
-
         public boolean isInitialized() {
             return options != null;
         }
@@ -490,12 +472,33 @@ public class SoapExternalService implements ExternalService {
             options.setTimeOutInMilliSeconds(60000);
         }
 
-        public void doOnUpdate() {
+        public void onUpdate() {
             init();
 
             // note: don't make this map an instance attribute, so we always get the latest version
             final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
             Properties.Axis2.translate(properties, options);
+        }
+    }
+
+    private class EndpointPropertiesMutable implements WatchDog.Mutable<Map> {
+        // ProcessConf#getProperties(String...) cannot return null (by contract)
+        public boolean exists() {
+            return true;
+        }
+
+        public boolean hasChangedSince(Map since) {
+            Map latest = lastModified();  // cannot be null but better be prepared
+            // check if mappings are equal
+            return !CollectionUtils.equals(latest, since);
+        }
+
+        public Map lastModified() {
+            return _pconf.getEndpointProperties(endpointReference);
+        }
+
+        public String toString() {
+            return "Properties for Endpoint: " + endpointReference;
         }
     }
 
