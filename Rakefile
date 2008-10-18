@@ -221,24 +221,29 @@ define "ode" do
       artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
       cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
       # generate one process per test
-    Dir.chdir(test_dir) do
-     Dir["policy-sample*.xml"].each do |sample| 
-       sample.gsub!(".xml","")
-       proc_dir = "process-#{sample}"
-       mkdir proc_dir unless File.directory? proc_dir
-       (Dir.entries("process-template")-['.','..']) .each do |file|
-         lines = IO.readlines("process-template/#{file}")
-         # copy file and replace template values
-         File.open("process-#{sample}/#{file}", 'w') { |f| 
-            lines.each { |l| 
-              l.gsub!("{sample.namespace}", "http://sample#{sample[-2,2]}.policy.samples.rampart.apache.org")
-              l.gsub!("{sample.service.name}", sample)
-              f<<l
+      Dir.chdir(test_dir) do
+        Dir["policy-sample*.xml"].each do |policy_file| 
+          sample_name = policy_file.gsub(".xml","")
+          # create process directory
+          proc_dir = "process-#{sample_name}"
+          mkdir proc_dir unless File.directory? proc_dir
+          # copy files
+          [policy_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+          # copy files from template and replace variable names
+          Dir["process-template/*"].each do |file|
+            lines = IO.readlines(file)
+            # copy file and replace template values
+            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
+              lines.each { |l| 
+                sample_id = sample_name[-2,2]
+                l.gsub!("{sample.namespace}", "http://sample#{sample_id}.policy.samples.rampart.apache.org")
+                l.gsub!("{sample.service.name}", sample_name)
+                f<<l
+              }
             }
-          }
+          end
         end
-       end
-    end
+      end
     end
   end
 
