@@ -52,14 +52,13 @@ public class RampartTest extends Axis2TestBase {
         for (int i = 0; i < policies.length; i++) {
             bundles[i] = new Object[]{"TestRampart/" + policies[i].getName()};
         }
-//        bundles = new Object[][]{new Object[]{"TestRampart/process-policy-sample05"}};
         return bundles;
     }
 
 
     @BeforeClass
     protected void setUp() throws Exception {
-        // mind the annotatio above also
+        // mind the annotation above also
         startServer("TestRampart", "webapp/WEB-INF/conf/axis2.xml");
     }
 
