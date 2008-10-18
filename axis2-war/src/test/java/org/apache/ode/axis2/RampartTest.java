@@ -22,6 +22,9 @@ package org.apache.ode.axis2;
 import org.apache.axis2.transport.http.SimpleHTTPServer;
 
 import java.net.URL;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.FileFilter;
 
 /**
  *
@@ -34,11 +37,16 @@ public class RampartTest extends Axis2TestBase {
     }
 
     public void testPolicySamples() throws Exception {
-        for (int i = 1; i < 5; i++) {
-            String prevPackage = "process-policy-sample0" + (i - 1);
-            String nextPackage = "process-policy-sample0" + i;
+        File[] policies = new File(server.getBundleDir("TestRampart")).listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.isDirectory() && pathname.getName().matches("process-policy-sample\\d*");
+            }
+        });
+        for (int i = 0; i < policies.length; i++) {
+            String prevPackage = i>0?policies[i-1].getName():null;
+            String nextPackage = policies[i].getName();
             // make sure everything is clean to avoid side effects
-            if (server.isDeployed(prevPackage)) server.undeployProcess("TestRampart/"+prevPackage);
+            if (prevPackage!=null && server.isDeployed(prevPackage)) server.undeployProcess("TestRampart/"+prevPackage);
             if (server.isDeployed(nextPackage)) server.undeployProcess("TestRampart/"+nextPackage);
 
             executeTest("TestRampart/"+nextPackage);
