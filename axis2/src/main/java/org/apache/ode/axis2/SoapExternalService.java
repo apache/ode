@@ -19,30 +19,21 @@
 
 package org.apache.ode.axis2;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.Map;
-import java.io.File;
-import java.io.InputStream;
-
-import javax.wsdl.Definition;
-import javax.wsdl.Operation;
-import javax.wsdl.Fault;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyEngine;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
@@ -50,19 +41,32 @@ import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.il.OMUtils;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.CollectionUtils;
-import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.uuid.UUID;
+import org.apache.ode.utils.wsdl.Messages;
+import org.apache.rampart.RampartMessageData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL description of used
@@ -130,8 +134,8 @@ public class SoapExternalService implements ExternalService {
                 __log.debug("Message: " + soapEnv);
             }
 
-
             ServiceClient client = getServiceClient();
+
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.addMessageContext(mctx);
@@ -143,7 +147,6 @@ public class SoapExternalService implements ExternalService {
             
             operationOptions.setAction(mctx.getSoapAction());
             operationOptions.setTo(axisEPR);
-
 
             if (isTwoWay) {
                 final String mexId = odeMex.getMessageExchangeId();
@@ -247,7 +250,30 @@ public class SoapExternalService implements ExternalService {
         // apply the options to the service client
         ServiceClient serviceClient = serviceClientWatchDog.getObserver().client;
         serviceClient.setOptions(optionsWatchDog.getObserver().options);
+        prepareSecurityPolicy(optionsWatchDog.getObserver().options, serviceClient);
         return serviceClient;
+    }
+
+    private void prepareSecurityPolicy(Options options, ServiceClient serviceClient) throws AxisFault {
+        if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
+            String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
+            URI policyUri = _pconf.getBaseURI().resolve(policy);
+            try {
+                InputStream policyStream = policyUri.toURL().openStream();
+                try {
+                    Policy policyDoc = PolicyEngine.getPolicy(policyStream);
+                    options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policyDoc);
+
+                    // make sure the proper modules are engaged
+                    if (!serviceClient.getAxisConfiguration().isEngaged("rampart")) serviceClient.engageModule("rampart");
+                    if (!serviceClient.getAxisConfiguration().isEngaged("addressing")) serviceClient.engageModule("addressing");
+                } finally {
+                    policyStream.close();
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Exception while parsing policy: " + policyUri, e);
+            }
+        }
     }
 
     /**
@@ -310,7 +336,7 @@ public class SoapExternalService implements ExternalService {
     }
 
     public org.apache.ode.bpel.iapi.EndpointReference getInitialEndpointReference() {
-return endpointReference;
+        return endpointReference;
     }
 
     public void close() {
@@ -362,8 +388,8 @@ return endpointReference;
 
                             if (fault != null) {
                                 if (__log.isWarnEnabled())
-                                    __log.warn("Fault response: faultName=" + fault.getName() + " faultType="+fault.getMessage().getQName()+ "\n" + DOMUtils.domToString(odeMsgEl));
-                                
+                                    __log.warn("Fault response: faultName=" + fault.getName() + " faultType=" + fault.getMessage().getQName() + "\n" + DOMUtils.domToString(odeMsgEl));
+
                                 QName faultType = fault.getMessage().getQName();
                                 QName faultName = new QName(_definition.getTargetNamespace(), fault.getName());
                                 Message response = odeMex.createMessage(faultType);
