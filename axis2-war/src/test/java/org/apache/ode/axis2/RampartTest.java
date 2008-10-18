@@ -71,7 +71,9 @@ public class RampartTest extends Axis2TestBase {
 
     @Test(dataProvider = "bundles")
     public void executeProcess(String bundleName) throws Exception {
-        if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
+        if (server.isDeployed(new File(bundleName).getName())){
+            server.undeployProcess(bundleName);
+        }
         server.deployProcess(bundleName);
         try {
             String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
