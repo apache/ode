@@ -31,12 +31,24 @@ ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
                         :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.3")
 AXIS2_TEST          = group("httpcore", "httpcore-nio", "httpcore-niossl", 
-                            :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
+                           :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
+AXIS2_MODULES        = struct(
+ :mods              => ["org.apache.rampart:rampart:mar:1.3", 
+                         "org.apache.rampart:rahas:mar:1.3",
+                         "org.apache.axis2:addressing:mar:1.3"],
+ :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
+                              :under=>"org.apache.rampart",
+                              :version=>"1.3"), 
+                        "org.apache.ws.security:wss4j:jar:1.5.3", 
+                        "org.apache.santuario:xmlsec:jar:1.4.0",
+                        "opensaml:opensaml:jar:1.1",
+                        "bouncycastle:bcprov-jdk15:jar:132"] 
+)
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
@@ -82,16 +94,6 @@ LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
-RAMPART             = struct(
-   :modules         => ["org.apache.rampart:rampart:mar:1.3", "org.apache.rampart:rahas:mar:1.3"],
-   :libs            => [group("rampart-core", "rampart-policy", "rampart-trust",
-                              :under=>"org.apache.rampart",
-                              :version=>"1.3"), 
-                        "org.apache.ws.security:wss4j:jar:1.5.3", 
-                        "org.apache.santuario:xmlsec:jar:1.4.0",
-                        "opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:132"] 
-)
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
                         :under=>"org.apache.servicemix", :version=>"3.1-incubating")
@@ -166,7 +168,7 @@ define "ode" do
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
       WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS,
-      RAMPART.libs
+      AXIS2_MODULES.libs
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -174,7 +176,7 @@ define "ode" do
       web_inf.include project("axis2").path_to("src/main/wsdl/*")
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
-    package(:war).path("WEB-INF/modules").include(artifacts(RAMPART.modules))
+    package(:war).path("WEB-INF/modules").include(artifacts(AXIS2_MODULES.mods))
     package(:war).tap do |root|
       root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
@@ -203,10 +205,10 @@ define "ode" do
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?(_("#{webapp_dir}/WEB-INF/processes"))
       mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?(_("#{webapp_dir}/WEB-INF/modules"))
-      # copy axis2 modules
-      cp RAMPART.modules.map {|a| repositories.locate(a)} , _("#{webapp_dir}/WEB-INF/modules")
       # move around some property files for test purpose
       mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("#{webapp_dir}/WEB-INF/conf")
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{webapp_dir}/WEB-INF/modules")
     end
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
