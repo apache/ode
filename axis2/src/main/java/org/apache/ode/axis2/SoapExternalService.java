@@ -28,6 +28,9 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.deployment.ServiceBuilder;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.OutInAxisOperation;
+import org.apache.axis2.description.OutOnlyAxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -83,8 +86,11 @@ public class SoapExternalService implements ExternalService {
 
     private static final int EXPIRE_SERVICE_CLIENT = 30000;
 
-    private static ThreadLocal<WatchDog<Map, OptionsObserver>> _cachedOptions = new ThreadLocal<WatchDog<Map, OptionsObserver>>();
-    private static ThreadLocal<WatchDog<Long, ServiceFileObserver>> _cachedClients = new ThreadLocal<WatchDog<Long, ServiceFileObserver>>();
+    private static ThreadLocal<ServiceClient> _cachedClients = new ThreadLocal<ServiceClient>();
+    private WatchDog<Map, OptionsObserver> _axisOptionsWatchDog;
+    private WatchDog<Long, ServiceFileObserver> _axisServiceWatchDog;
+    private ConfigurationContext _configContext;
+
 
     private ExecutorService _executorService;
     private Definition _definition;
@@ -108,6 +114,11 @@ public class SoapExternalService implements ExternalService {
         _converter = new SoapMessageConverter(_definition, serviceName, portName);
         _server = server;
         _pconf = pconf;
+
+        File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
+        _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
+        _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
+        _configContext = new ConfigurationContext(_axisConfig);
 
         // initial endpoint reference
         Element eprElmt = ODEService.genEPRfromWSDL(_definition, serviceName, portName);
@@ -206,32 +217,24 @@ public class SoapExternalService implements ExternalService {
     }
 
     private ServiceClient getServiceClient() throws AxisFault {
-        WatchDog<Long, ServiceFileObserver> serviceClientWatchDog = _cachedClients.get();
-        if (serviceClientWatchDog == null) {
-            File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
-            serviceClientWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
-            serviceClientWatchDog.setDelay(EXPIRE_SERVICE_CLIENT);
-            _cachedClients.set(serviceClientWatchDog);
-        }
         try {
             // call manually the check procedure
             // we dont want a dedicated thread for that
-            serviceClientWatchDog.check();
+            _axisServiceWatchDog.check();
+            _axisOptionsWatchDog.check();
         } catch (RuntimeException e) {
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
 
-        WatchDog<Map, OptionsObserver> optionsWatchDog = _cachedOptions.get();
-        if (optionsWatchDog == null) {
-            optionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
-            _cachedOptions.set(optionsWatchDog);
-        }
-        optionsWatchDog.check();
-
         // apply the options to the service client
-        ServiceClient serviceClient = serviceClientWatchDog.getObserver().client;
-        serviceClient.setOptions(optionsWatchDog.getObserver().options);
-        prepareSecurityPolicy(optionsWatchDog.getObserver().options, serviceClient);
+        ServiceClient serviceClient = _cachedClients.get();
+        if (serviceClient == null) {
+            _cachedClients.set(new ServiceClient(_configContext, null));
+        }
+        serviceClient.setAxisService(_axisServiceWatchDog.getObserver().service);
+        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
+        prepareSecurityPolicy(_axisOptionsWatchDog.getObserver().options, serviceClient);
+
         return serviceClient;
     }
 
@@ -416,7 +419,7 @@ public class SoapExternalService implements ExternalService {
      * this service-specific config file.
      */
     private class ServiceFileObserver extends WatchDog.DefaultObserver {
-        ServiceClient client;
+        AxisService service;
         File file;
 
         private ServiceFileObserver(File file) {
@@ -424,15 +427,16 @@ public class SoapExternalService implements ExternalService {
         }
 
         public boolean isInitialized() {
-            return client != null;
+            return service != null;
         }
 
         public void init() {
-            try {
-                client = new ServiceClient(new ConfigurationContext(_axisConfig), null);
-            } catch (AxisFault axisFault) {
-                throw new RuntimeException(axisFault);
-            }
+            service = new AxisService(_serviceName.toString());
+            OutOnlyAxisOperation outOnlyOperation = new OutOnlyAxisOperation(ServiceClient.ANON_OUT_ONLY_OP);
+            service.addOperation(outOnlyOperation);
+
+            OutInAxisOperation outInOperation = new OutInAxisOperation(ServiceClient.ANON_OUT_IN_OP);
+            service.addOperation(outInOperation);
         }
 
         public void onUpdate() {
@@ -444,7 +448,7 @@ public class SoapExternalService implements ExternalService {
                 InputStream ais = file.toURI().toURL().openStream();
                 if (ais != null) {
                     if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, new ConfigurationContext(client.getAxisConfiguration()), client.getAxisService());
+                    ServiceBuilder builder = new ServiceBuilder(ais, _configContext, service);
                     builder.populateService(builder.buildOM());
                 }
             } catch (Exception e) {
