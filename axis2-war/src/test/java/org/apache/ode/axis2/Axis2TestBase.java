@@ -4,10 +4,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -37,6 +39,8 @@ public abstract class Axis2TestBase {
 
     public static final int DEFAULT_TEST_PORT = 8888;
 
+    private static final Log log = LogFactory.getLog(Axis2TestBase.class);
+
     protected ODEAxis2Server server;
 
     public void startServer() throws Exception {
@@ -60,6 +64,7 @@ public abstract class Axis2TestBase {
     }
 
     protected class ODEAxis2Server extends AxisServer {
+
         ODEServer _ode = new ODEServer();
         String webappPath;
 
@@ -68,6 +73,12 @@ public abstract class Axis2TestBase {
             this.webappPath = webappPath;
             String confLocation = webappPath + "/WEB-INF/conf/axis2.xml";
             String repoLocation = webappPath + "/WEB-INF";
+            if(log.isInfoEnabled()){
+                log.info("Webapp dir: "+webappPath);
+                log.info("Axis2 Conf file: "+confLocation);
+                log.info("Axis2 Repo dir: "+repoLocation);
+            }
+
             configContext = ConfigurationContextFactory
                     .createConfigurationContextFromFileSystem(repoLocation, confLocation);
             // do not use 8080 for tests
