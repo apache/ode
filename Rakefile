@@ -213,9 +213,9 @@ define "ode" do
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
     
-    test.setup task(:prepare_rampart_test) do |task|
+    test.setup task(:prepare_rampart_policy_test) do |task|
       # test_dir will be the Axis2 Repo dir
-      test_dir = _("target/test-classes/TestRampart")
+      test_dir = _("target/test-classes/TestRampartPolicy")
       # copy the required modules
       mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
       artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
