@@ -229,7 +229,8 @@ public class SoapExternalService implements ExternalService {
         // apply the options to the service client
         ServiceClient serviceClient = _cachedClients.get();
         if (serviceClient == null) {
-            _cachedClients.set(new ServiceClient(_configContext, null));
+            serviceClient = new ServiceClient(_configContext, null);
+            _cachedClients.set(serviceClient);
         }
         serviceClient.setAxisService(_axisServiceWatchDog.getObserver().service);
         serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
