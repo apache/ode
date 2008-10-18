@@ -53,6 +53,7 @@ import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.WatchDog;
+import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.rampart.RampartMessageData;
@@ -242,7 +243,13 @@ public class SoapExternalService implements ExternalService {
     private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
-            URI policyUri = _pconf.getBaseURI().resolve(policy);
+            // if the policy path is relative, the full uri is resolved against the process conf directory
+            URI policyUri;
+            if (FileUtils.isRelative(policy)) {
+                policyUri = _pconf.getBaseURI().resolve(policy);
+            } else {
+                policyUri = new File(policy).toURI();
+            }
             try {
                 InputStream policyStream = policyUri.toURL().openStream();
                 try {
@@ -250,8 +257,9 @@ public class SoapExternalService implements ExternalService {
                     options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policyDoc);
 
                     // make sure the proper modules are engaged
-                    if (!serviceClient.getAxisConfiguration().isEngaged("rampart"))
+                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("rampart")){
                         serviceClient.engageModule("rampart");
+                    }
                 } finally {
                     policyStream.close();
                 }
