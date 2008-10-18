@@ -217,7 +217,7 @@ define "ode" do
       # test_dir will be the Axis2 Repo dir
       test_dir = _("target/test-classes/TestRampart")
       # copy the required modules
-      mkdir "#{test_dir}/modules"
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
       artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
       cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
       # generate one process per test
