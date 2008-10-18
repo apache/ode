@@ -245,6 +245,43 @@ define "ode" do
         end
       end
     end
+
+    test.setup task(:prepare_rampart_basic_test) do |task|
+      # test_dir will be the Axis2 Repo dir
+      test_dir = _("target/test-classes/TestRampartBasic")
+      # copy the required modules
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+      # generate one process per test
+      Dir.chdir(test_dir) do
+        Dir["sample*.axis2"].each do |axis2_file| 
+          sample_name = axis2_file.gsub(".axis2","")
+          # create process directory
+          proc_dir = "process-basic-#{sample_name}"
+          mkdir proc_dir unless File.directory? proc_dir
+          # copy files
+          [axis2_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+         # cp axis2_file, "#{proc_dir}/"
+          # copy files from template and replace variable names
+          Dir["process-template/*"].each do |file|
+            lines = IO.readlines(file)
+            # copy file and replace template values
+            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
+              lines.each { |l| 
+                sample_id = sample_name[-2,2]
+                l.gsub!("{sample.namespace}", "http://sample#{sample_id}.samples.rampart.apache.org")
+                l.gsub!("{sample.service.name}", sample_name)
+                f<<l
+              }
+            }
+          end
+        end
+      end
+    end
+
+
+
   end
 
   desc "ODE APIs"
