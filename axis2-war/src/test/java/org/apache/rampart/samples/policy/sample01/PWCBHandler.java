@@ -28,7 +28,6 @@ public class PWCBHandler implements CallbackHandler {
 
     public void handle(Callback[] callbacks) throws IOException,
             UnsupportedCallbackException {
-        System.out.println("PWCBHandler!!!!!!!");
         for (int i = 0; i < callbacks.length; i++) {
 
             //When the server side need to authenticate the user
