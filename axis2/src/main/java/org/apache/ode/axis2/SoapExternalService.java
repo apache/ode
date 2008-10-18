@@ -234,12 +234,12 @@ public class SoapExternalService implements ExternalService {
         }
         serviceClient.setAxisService(_axisServiceWatchDog.getObserver().service);
         serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
-        prepareSecurityPolicy(_axisOptionsWatchDog.getObserver().options, serviceClient);
+        applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
 
         return serviceClient;
     }
 
-    private void prepareSecurityPolicy(Options options, ServiceClient serviceClient) throws AxisFault {
+    private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
             URI policyUri = _pconf.getBaseURI().resolve(policy);
