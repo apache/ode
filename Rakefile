@@ -149,7 +149,7 @@ define "ode" do
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, 
       DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream, 
-      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema, XMLBEANS
+      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs
 
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
     test.exclude '*'
@@ -167,7 +167,7 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
-      WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS,
+      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS,
       AXIS2_MODULES.libs
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
@@ -212,6 +212,34 @@ define "ode" do
     end
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
+    
+    test.setup task(:prepare_rampart_test) do |task|
+      # test_dir will be the Axis2 Repo dir
+      test_dir = _("target/test-classes/TestRampart")
+      # copy the required modules
+      mkdir "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+      # generate one process per test
+    Dir.chdir(test_dir) do
+     Dir["policy-sample*.xml"].each do |sample| 
+       sample.gsub!(".xml","")
+       proc_dir = "process-#{sample}"
+       mkdir proc_dir unless File.directory? proc_dir
+       (Dir.entries("process-template")-['.','..']) .each do |file|
+         lines = IO.readlines("process-template/#{file}")
+         # copy file and replace template values
+         File.open("process-#{sample}/#{file}", 'w') { |f| 
+            lines.each { |l| 
+              l.gsub!("{sample.namespace}", "http://sample#{sample[-2,2]}.policy.samples.rampart.apache.org")
+              l.gsub!("{sample.service.name}", sample)
+              f<<l
+            }
+          }
+        end
+       end
+    end
+    end
   end
 
   desc "ODE APIs"
