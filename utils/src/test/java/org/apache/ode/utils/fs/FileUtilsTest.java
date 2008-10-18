@@ -72,4 +72,10 @@ public class FileUtilsTest extends TestCase {
     assertEquals(tmpFile.getName(), fi.next().getName());
   }
 
+    public void testIsRelative(){
+        // we don't test isAbsolute because it's platform dependent
+        // for instance "c:\foo" will tested as relative on unix.
+        String[] rPaths = new String[]{"policy.xml", "../foo/bar", "../../bar.xml"};
+        for(String p:rPaths) assertTrue("This path is not relative! ", FileUtils.isRelative(p));
+    }
 }

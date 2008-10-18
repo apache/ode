@@ -35,6 +35,27 @@ public class FileUtils {
     private static final Log __log = LogFactory.getLog(FileUtils.class);
 
     /**
+     * Test if the given path is absolute or not.
+     * @param path
+     * @return true is absolute
+     * @see java.io.File#isAbsolute() 
+     */
+    public static boolean isAbsolute(String path){
+        return new File(path).isAbsolute();
+    }
+
+    /**
+     * Test if the given path is relative or absolute.
+     * @param path
+     * @return true is relative
+     * @see java.io.File#isAbsolute() 
+     */
+    public static boolean isRelative(String path){
+        return !isAbsolute(path);
+    }
+
+
+    /**
      * Delete a file/directory, recursively.
      *
      * @param file
