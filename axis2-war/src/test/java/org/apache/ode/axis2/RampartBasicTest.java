@@ -19,21 +19,18 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axis2.transport.http.SimpleHTTPServer;
-import org.testng.annotations.Test;
-import org.testng.annotations.Factory;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.AfterMethod;
+import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterTest;
+import org.apache.axis2.transport.http.server.SimpleHttpServer;
+import org.apache.axis2.transport.http.SimpleHTTPServer;
 
-import java.net.URL;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.FileFilter;
-import java.util.Arrays;
 
 /**
  *
@@ -59,28 +56,19 @@ public class RampartBasicTest extends Axis2TestBase {
 
     @BeforeClass
     protected void setUp() throws Exception {
-        // mind the annotation above also
+        // mind the annotation above: start the server only once for all tests
         startServer("TestRampartBasic", "webapp/WEB-INF/conf/axis2.xml");
-//        try{
-//            while(true){
-//                synchronized (this){
-//                    wait(50);
-//                }
-//            }
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
     }
 
     @AfterClass
     protected void tearDown() throws Exception {
-        // simply change the annotation, see above
+        // mind the annotation above: start the server only once for all tests
         super.tearDown();
     }
 
     @Test(dataProvider = "bundles")
     public void executeProcess(String bundleName) throws Exception {
-        if (server.isDeployed(new File(bundleName).getName())){
+        if (server.isDeployed(new File(bundleName).getName())) {
             server.undeployProcess(bundleName);
         }
         server.deployProcess(bundleName);
