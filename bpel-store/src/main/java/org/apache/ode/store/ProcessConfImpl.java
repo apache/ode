@@ -278,6 +278,10 @@ public class ProcessConfImpl implements ProcessConf {
         return _inMemory;
     }
 
+    public boolean isRestful() {
+        return getProvideEndpoints().size() == 0;
+    }
+
     public void setTransient(boolean t) {
         _pinfo.setInMemory(t);
         _inMemory = t;

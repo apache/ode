@@ -130,16 +130,14 @@ public interface MessageExchange {
      *
      * @return name of the operation (WSDL 1.1) /message exchange (WSDL 1.2?).
      */
-    String getOperationName()
-            throws BpelEngineException;
+    String getOperationName() throws BpelEngineException;
 
 
     /**
      * Get a reference to the end-point targeted by this message exchange.
      * @return end-point reference for this message exchange
      */
-    EndpointReference getEndpointReference()
-            throws BpelEngineException;
+    EndpointReference getEndpointReference() throws BpelEngineException;
 
 
     AckType getAckType();

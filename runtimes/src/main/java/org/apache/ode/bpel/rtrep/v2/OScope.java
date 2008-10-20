@@ -60,6 +60,9 @@ public class OScope extends OActivity {
     /** Variables declared within the scope. */
     public final HashMap<String,Variable> variables = new HashMap<String,Variable>();
 
+    /** Resources declared within the scope. */
+    public final HashMap<String,OResource> resource = new HashMap<String,OResource>();
+
     /** OCorrelation sets declared within the scope. */
     public final Map<String,CorrelationSet> correlationSets = new HashMap<String, CorrelationSet>();
 

@@ -37,6 +37,8 @@ public class OReply extends OActivity {
     /** The type of the fault (if isFaultReply). */
     public QName fault;
 
+    public OResource resource;
+
     public OPartnerLink partnerLink;
     public Operation operation;
     public OScope.Variable variable;

@@ -62,6 +62,7 @@ public class OPickReceive extends OActivity{
         /** Correlation set to match on. */
         public OScope.CorrelationSet matchCorrelation;
 
+        public OResource resource;
         public OPartnerLink partnerLink;
         public Operation operation;
         public OScope.Variable variable;
@@ -76,6 +77,10 @@ public class OPickReceive extends OActivity{
 
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();
+        }
+
+        public boolean isRestful() {
+            return partnerLink == null && resource != null;
         }
     }
 }

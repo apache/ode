@@ -98,19 +98,11 @@ public class SchemaModelImpl implements SchemaModel {
 
     private static class SchemaErrorHandler implements DOMErrorHandler {
         public boolean handleError(DOMError error) {
-            boolean isWarning = (error.getSeverity() == DOMError.SEVERITY_WARNING); 
-            if (isWarning) {
-                __log.warn("Schema error", ((Exception)error.getRelatedException()));
-                __log.warn(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
-                __log.warn(error.getRelatedData());
-                __log.warn(error.getRelatedException());
-            } else {
-                __log.error("Schema error", ((Exception)error.getRelatedException()));
-                __log.error(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
-                __log.error(error.getRelatedData());
-                __log.error(error.getRelatedException());
-            }
-            return isWarning;
+            __log.warn("Schema error", ((Exception)error.getRelatedException()));
+            __log.warn(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
+            __log.warn(error.getRelatedData());
+            __log.warn(error.getRelatedException());
+            return true;
         }
     }
 

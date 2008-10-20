@@ -48,7 +48,6 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
-
     public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
 
     public static final String PROP_DB_INTERNAL_PASSWORD = "db.int.password";

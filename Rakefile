@@ -170,16 +170,7 @@ repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
-# Changing releases tag names
-class Release
-  class << self
-    def tag_with_apache_ode(version)
-      tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
-    end
-    alias :tag_without_apache_ode :tag
-    alias :tag :tag_with_apache_ode 
-  end
-end
+Release.tag_name = lambda { |ver| "APACHE_ODE_#{ver.upcase}" } 
 
 desc "Apache ODE"
 #define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -552,7 +543,7 @@ define "ode-extensions", :base_dir => "extensions" do
               "ode:bpel-dao", "ode:engine", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
               COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
               JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN,
-              DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+              DERBY, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
     package :jar
   end
 

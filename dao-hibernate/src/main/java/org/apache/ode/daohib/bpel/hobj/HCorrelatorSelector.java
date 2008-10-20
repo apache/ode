@@ -43,7 +43,7 @@ public class HCorrelatorSelector extends HObject {
         _instance = instance;
     }
 
-    /**
+    /** after c
      * @hibernate.property column="SELGRPID"
      * @hibernate.column name="SELGRPID" index="IDX_SELECTOR_SELGRPID" not-null="true"
      */

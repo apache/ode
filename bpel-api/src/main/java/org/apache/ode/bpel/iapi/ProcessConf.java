@@ -63,7 +63,12 @@ public interface ProcessConf {
      * @return <code>true</code> if this is a transient process.
      */
     boolean isTransient();
-    
+
+    /**
+     * Indicates whether this process implements REST-style resources.
+     */
+    boolean isRestful();
+
     /**
      * Get the CBP stream. 
      * @return new stream to the CBP file.

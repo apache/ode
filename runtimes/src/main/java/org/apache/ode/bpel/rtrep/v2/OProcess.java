@@ -58,8 +58,15 @@ public class OProcess extends OBase implements ProcessModel {
     /** ProcessImpl-level scope. */
     public OScope processScope;
 
+    /** First receive met during the compilation of the process. Serves as a hint when the instantiating
+     * receive isn't explicitly specified (optional in simpel). */
+    public OActivity firstReceive;
+
     /** All partner links in the process. */
     public final Set<PartnerLinkModel> allPartnerLinks = new HashSet<PartnerLinkModel>();
+
+    /** All web resources in the process. */
+    public final Set<OResource> allResources = new HashSet<OResource>();
 
     public final List<OProperty> properties = new ArrayList<OProperty>();
     
@@ -114,7 +121,6 @@ public class OProcess extends OBase implements ProcessModel {
         throw new UnsupportedOperationException();
     }
 
-
     public Set<PartnerLinkModel> getAllPartnerLinks() {
         return Collections.unmodifiableSet(allPartnerLinks);
     }
@@ -124,6 +130,10 @@ public class OProcess extends OBase implements ProcessModel {
             if (partnerLink.getName().equals(name)) return partnerLink;
         }
         return null;
+    }
+
+    public Set<OResource> getAllResources() {
+        return Collections.unmodifiableSet(allResources);
     }
 
     public PartnerLinkModel getPartnerLink(int partnerLinkModelId) {
