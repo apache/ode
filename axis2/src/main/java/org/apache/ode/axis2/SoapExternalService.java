@@ -31,6 +31,7 @@ import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.OutOnlyAxisOperation;
+import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -53,6 +54,7 @@ import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.WatchDog;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
@@ -233,8 +235,10 @@ public class SoapExternalService implements ExternalService {
             serviceClient = new ServiceClient(_configContext, null);
             _cachedClients.set(serviceClient);
         }
-        serviceClient.setAxisService(_axisServiceWatchDog.getObserver().service);
+        AxisService anonymousService = _axisServiceWatchDog.getObserver().anonymousService;
+        serviceClient.setAxisService(anonymousService);
         serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
+
         applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
 
         return serviceClient;
@@ -257,7 +261,8 @@ public class SoapExternalService implements ExternalService {
                     options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policyDoc);
 
                     // make sure the proper modules are engaged
-                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("rampart")){
+                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("rampart")
+                            && !serviceClient.getAxisService().isEngaged("rampart")) {
                         serviceClient.engageModule("rampart");
                     }
                 } finally {
@@ -426,7 +431,8 @@ public class SoapExternalService implements ExternalService {
      * this service-specific config file.
      */
     private class ServiceFileObserver extends WatchDog.DefaultObserver {
-        AxisService service;
+        String serviceName = "anonymous_service_" + new GUID().toString();
+        AxisService anonymousService;
         File file;
 
         private ServiceFileObserver(File file) {
@@ -434,16 +440,21 @@ public class SoapExternalService implements ExternalService {
         }
 
         public boolean isInitialized() {
-            return service != null;
+            return anonymousService != null;
         }
 
         public void init() {
-            service = new AxisService(_serviceName.toString());
+            // create an anonymous axis service that will be used by the ServiceClient
+            // this service will be added to the AxisConfig so do not reuse the name of the external service
+            // as it could blow up if the service is deployed in the same axis2 instance
+            anonymousService = new AxisService(serviceName);
+            anonymousService.setParent(_axisConfig);
+
             OutOnlyAxisOperation outOnlyOperation = new OutOnlyAxisOperation(ServiceClient.ANON_OUT_ONLY_OP);
-            service.addOperation(outOnlyOperation);
+            anonymousService.addOperation(outOnlyOperation);
 
             OutInAxisOperation outInOperation = new OutInAxisOperation(ServiceClient.ANON_OUT_IN_OP);
-            service.addOperation(outInOperation);
+            anonymousService.addOperation(outInOperation);
         }
 
         public void onUpdate() {
@@ -455,11 +466,26 @@ public class SoapExternalService implements ExternalService {
                 InputStream ais = file.toURI().toURL().openStream();
                 if (ais != null) {
                     if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, _configContext, service);
+                    ServiceBuilder builder = new ServiceBuilder(ais, _configContext, anonymousService);
                     builder.populateService(builder.buildOM());
+                    // do not allow the service.xml file to change the service name 
+                    anonymousService.setName(serviceName);
+
+                    // the service builder only updates the module list but do not engage them
+                    // module have to be engaged manually,
+                    for (int i = 0; i < anonymousService.getModules().size(); i++) {
+                        String moduleRef = (String) anonymousService.getModules().get(i);
+                        AxisModule module = _axisConfig.getModule(moduleRef);
+                        if (module != null) {
+                            anonymousService.engageModule(module);
+                        } else {
+                            throw new AxisFault("Unable to engage module : " + moduleRef);
+                        }
+                    }
                 }
             } catch (Exception e) {
-                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
+                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName,e);
+                throw new RuntimeException("Exception while configuring service: " + _serviceName,e);
             }
         }
     }

@@ -214,8 +214,6 @@
     <!--<parameter name="addressingPara" locked="false">N/A</parameter>-->
     <!--</moduleConfig>-->
 
-    <module ref="rampart" />
-
     <!-- ================================================= -->
     <!-- Phases  -->
     <!-- ================================================= -->
