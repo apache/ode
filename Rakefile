@@ -545,9 +545,9 @@ define "ode-extensions", :base_dir => "extensions" do
 
   desc "E4X Extension"
   define "e4x", :version=>"1.0-beta" do
-    compile.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:runtimes", "ode:engine", 
+    compile.with "rhino:js:jar:1.7R1", COMMONS.logging, projects("ode:bpel-api", "ode:runtimes", "ode:engine", 
                  "ode:bpel-compiler", "ode:utils")
-    test.with "rhino:js:jar:1.6R7", projects("ode:bpel-api", "ode:runtimes", "ode:jacob", "ode:bpel-schemas",
+    test.with "rhino:js:jar:1.7R1", projects("ode:bpel-api", "ode:runtimes", "ode:jacob", "ode:bpel-schemas",
               "ode:bpel-scripts", "ode:scheduler-simple", "ode:bpel-test", "ode:utils", "ode:bpel-compiler",
               "ode:bpel-dao", "ode:engine", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
               COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
