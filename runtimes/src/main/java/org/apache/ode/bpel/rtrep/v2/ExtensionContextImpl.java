@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +29,11 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Node;
 
@@ -91,27 +92,39 @@ public class ExtensionContextImpl implements ExtensionContext {
 
 	public void writeVariable(String variableName, Node value)
 			throws FaultException, ExternalVariableModuleException {
-		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		_context.commitChanges(vi, _scopeFrame, value);
+		OScope.Variable var = getVisibleVariable(variableName);
+		if (var == null) {
+			throw new RuntimeException("Variable '" + variableName + "' not visible.");
+		}
+		writeVariable(var, value);
 	}
 
 	public Node readVariable(String variableName) throws FaultException {
-		VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
-		return _context.fetchVariableData(vi, _scopeFrame, true);
+		OScope.Variable var = getVisibleVariable(variableName);
+		if (var == null) {
+			throw new RuntimeException("Variable '" + variableName + "' not visible.");
+		}
+
+		return readVariable(var);
 	}
 
 	public void writeVariable(OScope.Variable variable, Node value)
 			throws FaultException, ExternalVariableModuleException {
 		VariableInstance vi = _scopeFrame.resolve(variable);
-		_context.commitChanges(vi, _scopeFrame, value);
+		//_context.commitChanges(vi, _scopeFrame, value);
+		_context.initializeVariable(vi, _scopeFrame, value);
         VariableModificationEvent vme = new VariableModificationEvent(variable.name);
         vme.setNewValue(value);
         sendEvent(vme);
 	}
 
-	private OScope.Variable getVisibleVariable(String varName) {
+	public OScope.Variable getVisibleVariable(String varName) {
     	return _scopeFrame.oscope.getVisibleVariable(varName);
     }
+	
+	public boolean isVariableVisible(String varName) {
+		return _scopeFrame.oscope.getVisibleVariable(varName) != null;
+	}
 
 	public String getActivityName() {
 		return _activityInfo.o.name;
@@ -166,5 +179,17 @@ public class ExtensionContextImpl implements ExtensionContext {
 			}
 		}
 
+	}
+
+	public OdeInternalInstance getInternalInstance() {
+		return _context;
+	}
+
+	public URI getDUDir() {
+		return _context.getBaseResourceURI();
+	}
+
+	public void printToConsole(String msg) {
+		LogFactory.getLog("org.apache.ode.extension.Console").info(msg);		
 	}
 }
