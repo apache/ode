@@ -43,6 +43,7 @@ public class MockExtensionContext implements ExtensionContext {
 	private Map<String, Node> variables = new HashMap<String, Node>();
 	public boolean completed;
 	public boolean faulted;
+	public FaultException fault;
 	public URI duDir;
 	public List<String> msgs = new ArrayList<String>();
 	
@@ -111,6 +112,7 @@ public class MockExtensionContext implements ExtensionContext {
 	public void completeWithFault(FaultException fault) {
 		this.completed = true;
 		this.faulted = true;
+		this.fault = fault;
 	}
 
 	public OdeInternalInstance getInternalInstance() {

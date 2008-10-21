@@ -163,4 +163,38 @@ public class JSOperationTest {
 		Assert.assertEquals("4711", c.msgs.get(0));
 	}
 
+	@Test public void testActivityName() throws Exception {
+		StringBuffer s = new StringBuffer();
+		s.append("myvar = activityName();\n");
+		s.append("print(myvar);\n");
+
+		MockExtensionContext c = new MockExtensionContext();
+		c.duDir = this.getClass().getResource("/").toURI();
+		JSExtensionOperation jso = new JSExtensionOperation();
+		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
+		jso.run(c, e);
+		Assert.assertTrue(c.completed);
+		Assert.assertFalse(c.faulted);
+		Assert.assertEquals(1, c.msgs.size());
+		Assert.assertEquals("mockActivity", c.msgs.get(0));
+	}
+
+	@Test public void testThrowFault() throws Exception {
+		StringBuffer s = new StringBuffer();
+		s.append("throwFault('urn:test', 'myfault', 'Ohje');\n");
+		s.append("print('unreachable');\n");
+
+		MockExtensionContext c = new MockExtensionContext();
+		c.duDir = this.getClass().getResource("/").toURI();
+		JSExtensionOperation jso = new JSExtensionOperation();
+		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
+		jso.run(c, e);
+		Assert.assertTrue(c.completed);
+		Assert.assertTrue(c.faulted);
+		Assert.assertEquals(0, c.msgs.size());
+		Assert.assertEquals("myfault", c.fault.getQName().getLocalPart());
+		Assert.assertEquals("urn:test", c.fault.getQName().getNamespaceURI());
+		Assert.assertEquals("{urn:test}myfault: Ohje", c.fault.getMessage());
+	}
+
 }

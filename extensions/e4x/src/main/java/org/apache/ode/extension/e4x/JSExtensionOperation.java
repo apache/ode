@@ -28,6 +28,7 @@ import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.WrappedException;
 import org.mozilla.javascript.xml.XMLLib;
 import org.mozilla.javascript.xml.XMLLib.Factory;
 import org.w3c.dom.Element;
@@ -54,11 +55,17 @@ public class JSExtensionOperation extends AbstractSyncExtensionOperation {
 			VariableDelegator delegator = new VariableDelegator(scope, context, ctx);
 			ctx.evaluateString(delegator, source, context.getActivityName(), 1, null);
 			delegator.writeVariables();
+		} catch (WrappedException e) {
+			__logger.warn("Error during JS execution.", e);
+			if (e.getWrappedException() instanceof FaultException) {
+				throw (FaultException)e.getWrappedException();
+			}
+			throw new FaultException(new QName("ExtensionEvaluationFault", JSExtensionBundle.NS), e.getMessage());
 		} catch (FaultException e) {
-			__logger.error("Fault during JS execution.", e);
+			__logger.warn("Fault during JS execution.", e);
 			throw e;
 		} catch (Exception e) {
-			__logger.error("Error during JS execution.", e);
+			__logger.warn("Error during JS execution.", e);
 			throw new FaultException(new QName("ExtensionEvaluationFault", JSExtensionBundle.NS), e.getMessage());
 		} finally {
 			Context.exit();
