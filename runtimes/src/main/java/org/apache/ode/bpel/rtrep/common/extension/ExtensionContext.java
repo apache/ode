@@ -18,20 +18,25 @@
  */
 package org.apache.ode.bpel.rtrep.common.extension;
 
+import java.net.URI;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.rtrep.v2.OScope;
-import org.apache.ode.bpel.rtrep.v2.OProcess;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OdeInternalInstance;
 import org.w3c.dom.Node;
 
 
 /**
  * Context for executing extension activities or extension assign operations. 
- * Implementations of the {@link org.apache.ode.bpel.extension.ExtensionOperation} class use this interface to access BPEL
- * variables, property sets and link status.
+ * Implementations of the {@link org.apache.ode.bpel.extension.ExtensionOperation} class 
+ * use this interface to access BPEL variables, property sets and link status.
+ * 
+ * All <code>ExtensionOperation</code> implementations must complete with
+ * <code>complete()</code>, <code>completeWithFault(...)</code>.
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
@@ -46,12 +51,19 @@ public interface ExtensionContext {
 	Map<String, OScope.Variable> getVisibleVariables() throws FaultException;
 	
 	/**
+	 * Returns whether a variable is visible in the current scope or not.
+	 *
+	 * @param variableName name of the variable.
+	 * @return true if the variable is visible.
+	 * @throws FaultException
+	 */
+	boolean isVariableVisible(String variableName);
+	
+	/**
      * Read the value of a BPEL variable.
      *
      * @param variable
      *          variable to read
-     * @param part
-     *          the part (or <code>null</code>)
      * @return the value of the variable, wrapped in a <code>Node</code>
      */
     Node readVariable(OScope.Variable variable) throws FaultException;
@@ -61,8 +73,6 @@ public interface ExtensionContext {
      *
      * @param variableName
      *          variable to read
-     * @param part
-     *          the part (or <code>null</code>)
      * @return the value of the variable, wrapped in a <code>Node</code>
      */
     Node readVariable(String variableName) throws FaultException;
@@ -114,13 +124,47 @@ public interface ExtensionContext {
     String getActivityName();
     
     /**
-     * Low-level-method
+     * Returns the location of the deployment bundle of the executed process.
+     * @return URI of the deployment bundle.
+     */
+    URI getDUDir();
+    
+	/**
+	 * Allows printing debug output to the console. Output will be redirected
+	 * to the logger associated with <code>org.apache.ode.extension.Console</code>.
+	 * The target log level is INFO.
+	 */
+    void printToConsole(String msg);
+    
+    /**
+     * Marks the currently executed activity as successfully completed.
+     */
+    void complete();
+    
+    /**
+     * Marks the currently executed activity as faulted.
+     * @param t an exception to be reported as the fault cause.
+     */
+    void completeWithFault(Throwable t);
+
+    /**
+     * Marks the currently executed activity as faulted.
+     * @param fault a fault.
+     */
+    void completeWithFault(FaultException fault);
+
+    /*
+     * Low-level-methods
+     */
+    
+    /**
+     * Returns the OActivity object. 
      */
     OActivity getOActivity();
     
-    //ScopeFrame getScopeFrame();
-    void complete();
+    /**
+     * Returns ODE's internal runtime instance. 
+     */
+    OdeInternalInstance getInternalInstance();
     
-    void completeWithFault(Throwable t);
-    void completeWithFault(FaultException fault);
 }

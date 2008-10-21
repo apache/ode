@@ -18,15 +18,19 @@
  */
 package org.apache.ode.test;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.v2.OScope;
-import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
 import org.apache.ode.bpel.rtrep.v2.OLink;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OdeInternalInstance;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Node;
 
@@ -39,13 +43,15 @@ public class MockExtensionContext implements ExtensionContext {
 	private Map<String, Node> variables = new HashMap<String, Node>();
 	public boolean completed;
 	public boolean faulted;
+	public URI duDir;
+	public List<String> msgs = new ArrayList<String>();
 	
 	public Map<String, Node> getVariables() {
 		return variables;
 	}
 	
 	public Long getProcessId() {
-		return 0L;
+		return 4711L;
 	}
 
 	public Node readVariable(String variableName) throws FaultException {
@@ -57,6 +63,10 @@ public class MockExtensionContext implements ExtensionContext {
 			throws FaultException {
 		variables.put(variableName, value);
 		System.out.println("Storing in " + variableName + ": " + DOMUtils.domToString(value));
+	}
+
+	public boolean isVariableVisible(String varName) {
+		return variables.containsKey(varName);
 	}
 
 	public String getActivityName() {
@@ -101,6 +111,19 @@ public class MockExtensionContext implements ExtensionContext {
 	public void completeWithFault(FaultException fault) {
 		this.completed = true;
 		this.faulted = true;
+	}
+
+	public OdeInternalInstance getInternalInstance() {
+		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
+	}
+
+	public URI getDUDir() {
+		return duDir;
+	}
+
+	public void printToConsole(String msg) {
+		System.out.println(msg);
+		msgs.add(msg);
 	}
 	
 }
