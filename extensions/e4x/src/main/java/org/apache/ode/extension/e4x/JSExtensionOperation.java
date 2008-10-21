@@ -20,13 +20,14 @@ package org.apache.ode.extension.e4x;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.common.extension.AbstractSyncExtensionOperation;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.xml.XMLLib;
 import org.mozilla.javascript.xml.XMLLib.Factory;
 import org.w3c.dom.Element;
@@ -37,19 +38,27 @@ import org.w3c.dom.Element;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class JSExtensionOperation extends AbstractSyncExtensionOperation {
+	private static final Log __logger = LogFactory.getLog(JSExtensionOperation.class);
 	
 	public void runSync(ExtensionContext context, Element element) throws FaultException {
-
 		CustomContextFactory.init();
-		Context ctx = Context.enter();
+        Context ctx = ContextFactory.getGlobal().enterContext();
+        ctx.setOptimizationLevel(-1);
+        ctx.setGeneratingDebug(false);
+        ctx.setGeneratingSource(false);
+        ctx.setDebugger(null, null);
+        
 		try {
-			Scriptable scope = ctx.initStandardObjects();
-			ScriptableObject.defineClass(scope, ExtensionContextWrapper.class);
-			Scriptable wrappedContext = ctx.newObject(scope, "ExtensionContext", new Object[] {context, ctx});
-			ScriptableObject.putProperty(scope, "context", wrappedContext);
+			Scriptable scope = new TopLevelFunctions(context, ctx, context.getDUDir());
 			String source = element.getTextContent();
-			ctx.evaluateString(scope, source, context.getActivityName(), 1, null);
+			VariableDelegator delegator = new VariableDelegator(scope, context, ctx);
+			ctx.evaluateString(delegator, source, context.getActivityName(), 1, null);
+			delegator.writeVariables();
+		} catch (FaultException e) {
+			__logger.error("Fault during JS execution.", e);
+			throw e;
 		} catch (Exception e) {
+			__logger.error("Error during JS execution.", e);
 			throw new FaultException(new QName("ExtensionEvaluationFault", JSExtensionBundle.NS), e.getMessage());
 		} finally {
 			Context.exit();
@@ -67,6 +76,5 @@ public class JSExtensionOperation extends AbstractSyncExtensionOperation {
 				ContextFactory.initGlobal(new CustomContextFactory());
 			}
 		}
-		
 	}
 }

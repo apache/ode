@@ -29,7 +29,7 @@
          expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
          xmlns:js="http://ode.apache.org/extensions/e4x">
 
-    <import location="TestE4X.wsdl"
+    <import location="TestE4XDirect.wsdl"
             namespace="http://ode/bpel/unit-testAssign1.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
@@ -56,9 +56,8 @@
         <assign name="assign1">
 			<extensionAssignOperation>
 				<js:snippet>
-				var request = dom2js(_context.readVariable('myVar'));
-				request.TestPart += ' World';
-				_context.writeVariable('otherMsgVar', js2dom(request));
+				myVar.TestPart += ' World';
+				otherMsgVar = myVar;
 				</js:snippet>
 			</extensionAssignOperation>
         </assign>

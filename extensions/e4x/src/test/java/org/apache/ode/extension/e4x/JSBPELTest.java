@@ -18,6 +18,7 @@
  */
 package org.apache.ode.extension.e4x;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.ode.test.BPELTestAbstract;
 import org.junit.Test;
 
@@ -30,6 +31,13 @@ public class JSBPELTest extends BPELTestAbstract {
         // Test E4X
 		registerExtensionBundle(new JSExtensionBundle());
         go("/bpel/TestE4X");
+    }
+
+	@Test public void testE4XAssignDirect() throws Throwable {
+        // Test E4X
+		BasicConfigurator.configure();
+		registerExtensionBundle(new JSExtensionBundle());
+        go("/bpel/TestE4XDirect");
     }
 
 }
