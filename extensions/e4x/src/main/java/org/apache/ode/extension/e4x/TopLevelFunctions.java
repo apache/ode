@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 
+import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -34,6 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -53,7 +55,7 @@ import org.w3c.dom.Node;
  */
 public class TopLevelFunctions extends ImporterTopLevel {
 	private static final long serialVersionUID = 1L;
-	private static final String[] METHODS = { "load", "print", "pid", "js2dom", "dom2js" };
+	private static final String[] METHODS = { "load", "print", "pid", "activityName", "js2dom", "dom2js", "throwFault" };
 	private URI _duDir;
 	private ExtensionContext _ectx;
 	
@@ -164,6 +166,23 @@ public class TopLevelFunctions extends ImporterTopLevel {
 		}
 	}
 	
+	/**
+	 * This method is exposed to the JS environment and allows users to
+	 * throw BPEL faults.
+	 * 
+	 * @throws FaultException 
+	 */
+	public static void throwFault(Context cx, Scriptable thisObj, Object[] args,
+			Function funObj) throws FaultException {
+		if (args.length != 3) {
+			Context.reportError("throwFault expects the following parameters: throwFault(namespace, localname, faultMessage)");
+		}
+		String ns = Context.toString(args[0]);
+		String localname = Context.toString(args[1]);
+		String msg = Context.toString(args[2]);
+		throw new FaultException(new QName(ns, localname), msg);
+	}
+
 	public static String domToString(Node n) throws TransformerException {
 		TransformerFactory xformFactory	= TransformerFactory.newInstance();
 		Transformer idTransform = xformFactory.newTransformer();

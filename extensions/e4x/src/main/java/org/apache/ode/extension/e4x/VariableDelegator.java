@@ -80,7 +80,7 @@ public class VariableDelegator extends Delegator {
 			Node n = _ectx.readVariable(name);
 			XMLObject xmlObj = (XMLObject)_sctx.newObject(start, "XML", new Object[] {Context.javaToJS(TopLevelFunctions.domToString(n), start)});
 			_env.put(name, xmlObj);
-			if (_variables.contains(name)) {
+			if (!_variables.contains(name)) {
 				_variables.add(name);
 			}
 			return xmlObj;
