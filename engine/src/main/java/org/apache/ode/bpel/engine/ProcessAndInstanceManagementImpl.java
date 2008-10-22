@@ -695,8 +695,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      *            destination XMLBean
      * @param pconf
      *            process configuration object (from store)
-     * @param proc
-     *            source DAO object
      * @param custom
      *            used to customize the quantity of information produced in the
      *            info
@@ -758,7 +756,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             for (PartnerLinkModel oplink : pmodel.getAllPartnerLinks()) {
                 if (oplink.hasPartnerRole() && oplink.isInitializePartnerRoleSet()) {
                     // TODO: this is very uncool.
-                    EndpointReference pepr = _server.getBpelProcess(pconf.getProcessId()).getInitialPartnerRoleEPR(oplink);
+                    EndpointReference pepr = ((ODEWSProcess)_server.getBpelProcess(pconf.getProcessId()))
+                            .getInitialPartnerRoleEPR(oplink);
                     if (pepr != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();

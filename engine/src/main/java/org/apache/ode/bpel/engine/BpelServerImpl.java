@@ -55,7 +55,6 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.OdeRuntime;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
@@ -94,7 +93,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private final HashMap<QName, ODEProcess> _registeredProcesses = new HashMap<QName, ODEProcess>();
 
     /** Mapping from myrole service name to active process. */
-    private final HashMap<QName, List<ODEProcess>> _serviceMap = new HashMap<QName, List<ODEProcess>>();
+    private final HashMap<QName, List<ODEProcess>> _wsServiceMap = new HashMap<QName, List<ODEProcess>>();
+
+    private final HashMap<String, ODEProcess> _restServiceMap = new HashMap<String, ODEProcess>();
 
     /** Weak-reference cache of all the my-role message exchange objects. */
     private final MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache();
@@ -123,7 +124,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private final AtomicLong _lastTimeOfServerCallable = new AtomicLong(System.currentTimeMillis());
     
     /** Mapping from a potentially shared endpoint to its EPR */ 
-    private SharedEndpoints _sharedEps;        
+    private SharedEndpoints _sharedEps;
 
     static {
         // TODO Clean this up and factorize engine configuration
@@ -342,30 +343,38 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            ODEProcess process = new ODEWSProcess(this, conf, null, _myRoleMexCache);
-
-            for (Endpoint e : process.getServiceNames()) {
-                __log.debug("Register process: serviceId=" + e + ", process=" + process);
-                // Get the list of processes associated with the given service
-                List<ODEProcess> processes = _serviceMap.get(e.serviceName);
-                if (processes == null) {
-                	// Create an empty list, if no processes were associated
-                	_serviceMap.put(e.serviceName, processes = new ArrayList<ODEProcess>());
+            ODEProcess process;
+            if (conf.isRestful()) {
+                ODERestfulProcess restProcess = new ODERestfulProcess(this, conf, null);
+                for (String resUrl : restProcess.getResourceUrls()) {
+                    _restServiceMap.put(resUrl, restProcess);
                 }
-                // Remove any older version of the process from the list
-                for (int i = 0; i < processes.size(); i++) {
-                	ODEProcess cachedVersion = processes.get(i);
-                	__log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
-                	if (cachedVersion.getProcessType().equals(process.getProcessType())) {
-                		processes.remove(cachedVersion);
-                	}
+                process = restProcess;
+            } else {
+                ODEWSProcess wsProcess = new ODEWSProcess(this, conf, null, _myRoleMexCache);
+                for (Endpoint e : wsProcess.getServiceNames()) {
+                    __log.debug("Register process: serviceId=" + e + ", process=" + wsProcess);
+                    // Get the list of processes associated with the given service
+                    List<ODEProcess> processes = _wsServiceMap.get(e.serviceName);
+                    if (processes == null) {
+                        // Create an empty list, if no processes were associated
+                        _wsServiceMap.put(e.serviceName, processes = new ArrayList<ODEProcess>());
+                    }
+                    // Remove any older version of the process from the list
+                    for (int i = 0; i < processes.size(); i++) {
+                        ODEProcess cachedVersion = processes.get(i);
+                        __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + wsProcess.getPID());
+                        if (cachedVersion.getProcessType().equals(wsProcess.getProcessType())) {
+                            processes.remove(cachedVersion);
+                        }
+                    }
+                    // Add the given process to the list associated with the given service
+                    processes.add(wsProcess);
                 }
-                // Add the given process to the list associated with the given service
-                processes.add(process);
+                process = wsProcess;
             }
 
             process.activate(_contexts);
-
             _registeredProcesses.put(process.getPID(), process);
             if (_dehydrationPolicy == null) process.hydrate();
 
@@ -397,7 +406,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             
             // Remove the process from any services that might reference it.
             // However, don't remove the service itself from the map.
-            for (List<ODEProcess> processes : _serviceMap.values()) {
+            for (List<ODEProcess> processes : _wsServiceMap.values()) {
                 __log.debug("removing process " + pid + "; handle " + p + "; exists " + processes.contains(p));
             	processes.remove(p);
             }
@@ -446,7 +455,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         // one service is listening on the same endpoint.
         _mngmtLock.readLock().lock();
         try {
-            return _serviceMap.get(service);
+            return _wsServiceMap.get(service);
         } finally {
             _mngmtLock.readLock().unlock();
         }
@@ -596,7 +605,17 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.readLock().unlock();
         }
     }
-    
+
+    public RESTMessageExchange createMessageExchange(Resource resource, String foreignKey) throws BpelEngineException {
+        _mngmtLock.readLock().lock();
+        try {
+            // Do stuff
+            return null;
+        } finally {
+            _mngmtLock.readLock().unlock();
+        }
+    }
+
     /**
      * Return a simple type of MEX for a given process target
      * @param process
@@ -613,7 +632,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 	    else
 	        assertNoTransaction();
     
-	    return process.createNewMyRoleMex(istyle, targetService, operation);
+	    return ((ODEWSProcess)process).createNewMyRoleMex(istyle, targetService, operation);
     }
     
     /**
@@ -673,9 +692,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
                     switch (mexdao.getDirection()) {
                     case MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE:
-                        return process.createPartnerRoleMex(mexdao);
+                        return ((ODEWSProcess)process).createPartnerRoleMex(mexdao);
                     case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
-                        return process.lookupMyRoleMex(mexdao);
+                        return ((ODEWSProcess)process).lookupMyRoleMex(mexdao);
                     default:
                         String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
                         __log.fatal(errmsg);

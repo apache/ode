@@ -39,7 +39,7 @@ class MyRoleMessageExchangeCache {
      * @param mexdao
      * @return
      */
-    MyRoleMessageExchangeImpl get(MessageExchangeDAO mexdao, ODEProcess process) {
+    MyRoleMessageExchangeImpl get(MessageExchangeDAO mexdao, ODEWSProcess process) {
         WeakReference<MyRoleMessageExchangeImpl> ref = _cache.get(mexdao.getMessageExchangeId());
         MyRoleMessageExchangeImpl mex = ref == null ? null : ref.get();
 

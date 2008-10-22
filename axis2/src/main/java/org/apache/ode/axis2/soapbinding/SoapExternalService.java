@@ -35,12 +35,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.axis2.Properties;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
@@ -228,8 +224,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         WSAEndpoint targetEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
         WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
 
-        String partnerSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
-        String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+        String partnerSessionId = odeMex.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
+        String myRoleSessionId = odeMex.getProperty(WSMessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
 
         if (partnerSessionId != null) {
             if (__log.isDebugEnabled()) {

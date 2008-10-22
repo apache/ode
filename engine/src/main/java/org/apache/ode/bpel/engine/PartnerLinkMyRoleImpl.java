@@ -37,10 +37,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.evt.CorrelationNoMatchEvent;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
@@ -125,8 +122,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             return null;
         }
 
-        String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
-        String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
+        String mySessionId = mex.getProperty(WSMessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+        String partnerSessionId = mex.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
             __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + CollectionUtils.makeCollection(HashSet.class, keys)
                     + " mySessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
@@ -256,7 +253,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         // Let's creata a key based on the sessionId
-        String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
+        String mySessionId = mex.getProperty(WSMessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         if (mySessionId != null)
             keys.add(new CorrelationKey(-1, new String[] { mySessionId }));
 

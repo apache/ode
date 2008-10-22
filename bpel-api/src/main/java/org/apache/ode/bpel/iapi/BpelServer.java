@@ -130,11 +130,10 @@ public interface BpelServer {
      * 
      * @return {@link MyRoleMessageExchange} the newly created message exchange
      */
-    MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, 
-            QName serviceId, 
-            String operation,
-            String foreignKey)
-            throws BpelEngineException;
+    MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, QName serviceId, String operation,
+                                                String foreignKey) throws BpelEngineException;
+
+    RESTMessageExchange createMessageExchange(Resource resource, String foreignKey) throws BpelEngineException;
 
     /**
      * Retrieve a message identified by the given identifer.

@@ -18,10 +18,7 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rapi.PropertyAliasModel;
-import org.apache.ode.bpel.rapi.ActivityModel;
+import org.apache.ode.bpel.rapi.*;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -66,7 +63,7 @@ public class OProcess extends OBase implements ProcessModel {
     public final Set<PartnerLinkModel> allPartnerLinks = new HashSet<PartnerLinkModel>();
 
     /** All web resources in the process. */
-    public final Set<OResource> allResources = new HashSet<OResource>();
+    public final Set<ResourceModel> providedResources = new HashSet<ResourceModel>();
 
     public final List<OProperty> properties = new ArrayList<OProperty>();
     
@@ -132,8 +129,8 @@ public class OProcess extends OBase implements ProcessModel {
         return null;
     }
 
-    public Set<OResource> getAllResources() {
-        return Collections.unmodifiableSet(allResources);
+    public Set<ResourceModel> getProvidedResources() {
+        return Collections.unmodifiableSet(providedResources);
     }
 
     public PartnerLinkModel getPartnerLink(int partnerLinkModelId) {

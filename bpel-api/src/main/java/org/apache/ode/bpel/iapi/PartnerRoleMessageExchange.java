@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  * 
  */
-public interface PartnerRoleMessageExchange extends MessageExchange {
+public interface PartnerRoleMessageExchange extends WSMessageExchange {
 
 
     /**

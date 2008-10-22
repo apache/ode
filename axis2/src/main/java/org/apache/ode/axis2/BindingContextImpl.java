@@ -21,13 +21,7 @@
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
-import org.apache.ode.bpel.iapi.BindingContext;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.*;
 
 import javax.wsdl.Definition;
 import javax.wsdl.PortType;
@@ -81,4 +75,11 @@ public class BindingContextImpl implements BindingContext {
         return _server.createExternalService(pconf, initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 
+    public void activateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in Axis2 integration layer.");
+    }
+
+    public void deactivateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in Axis2 integration layer.");
+    }
 }

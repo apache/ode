@@ -18,10 +18,7 @@
  */
 package org.apache.ode.bpel.rtrep.v1;
 
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.ActivityModel;
-import org.apache.ode.bpel.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rapi.PropertyAliasModel;
+import org.apache.ode.bpel.rapi.*;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -215,5 +212,9 @@ public class OProcess extends OBase implements ProcessModel {
 
     public int getModelVersion() {
         return 1;
+    }
+
+    public Collection<? extends ResourceModel> getProvidedResources() {
+        return null;
     }
 }

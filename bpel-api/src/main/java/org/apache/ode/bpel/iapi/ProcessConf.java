@@ -29,14 +29,13 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.rapi.ProcessModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
  * Deployed process configuration. IMPORTANT: Implementations of this class <em>MUST BE IMMUTABLE</em>,
  * otherwise the engine will get confused.  
- * 
- * @author mriou <mriou at apache dot org>
  */
 public interface ProcessConf {
 
@@ -74,7 +73,15 @@ public interface ProcessConf {
      * @return new stream to the CBP file.
      */
     InputStream getCBPInputStream();
-   
+
+    /**
+     * Returns the process model is it's already been loaded. Implementations of ProcessConf aren't required to
+     * implement this method, it's only present for optimization purposes. Users should default to getCBPInputStream()
+     * when this method isn't supported.
+     * @throw UnsupportedOperationException
+     */
+    ProcessModel getProcessModel();
+
     /**
      * Get the path of the BPEL document, relative to its deployment unit 
      * @return Relative path of BPEL document

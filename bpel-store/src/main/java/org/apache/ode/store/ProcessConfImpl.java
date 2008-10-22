@@ -56,6 +56,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
@@ -219,6 +220,10 @@ public class ProcessConfImpl implements ProcessConf {
         } catch (FileNotFoundException e) {
             throw new ContextException("File Not Found: " + cbpInfo.cbp, e);
         }
+    }
+
+    public ProcessModel getProcessModel() {
+        throw new UnsupportedOperationException();
     }
 
     public String getBpelDocument() {

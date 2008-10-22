@@ -50,11 +50,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -143,7 +139,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     public boolean isPartnerRoleEndpointInitialized(PartnerLink pLink) {
         PartnerLinkDAO spl = fetchPartnerLinkDAO(pLink);
 
-        return spl.getPartnerEPR() != null || _bpelProcess.getInitialPartnerRoleEPR(pLink.getModel()) != null;
+        return spl.getPartnerEPR() != null || ((ODEWSProcess)_bpelProcess).getInitialPartnerRoleEPR(pLink.getModel()) != null;
     }
 
     public void completedFault(FaultInfo faultData) {
@@ -287,7 +283,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
         Element epr = pl.getPartnerEPR();
         if (epr == null) {
-            EndpointReference e = _bpelProcess.getInitialPartnerRoleEPR(pLink.getModel());
+            EndpointReference e = ((ODEWSProcess)_bpelProcess).getInitialPartnerRoleEPR(pLink.getModel());
             if (e != null)
                 epr = e.toXML().getDocumentElement();
         }
@@ -296,7 +292,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public Element fetchMyRoleEndpointReferenceData(PartnerLink pLink) {
-        return _bpelProcess.getInitialMyRoleEPR(pLink.getModel()).toXML().getDocumentElement();
+        return ((ODEWSProcess)_bpelProcess).getInitialMyRoleEPR(pLink.getModel()).toXML().getDocumentElement();
     }
 
     private PartnerLinkDAO fetchPartnerLinkDAO(PartnerLink pLink) {
@@ -404,7 +400,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         Status previousStatus = myrolemex.getStatus();
         myrolemex.setStatus(Status.ACK);
         myrolemex.setAckType(ackType);
-        _bpelProcess.onMyRoleMexAck(myrolemex, previousStatus);
+        ((ODEWSProcess)_bpelProcess).onMyRoleMexAck(myrolemex, previousStatus);
         sendEvent(evt);
     }
 
@@ -461,7 +457,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         mexDao.setPortType(partnerLink.getModel().getPartnerRolePortType().getQName());
         mexDao.setPartnerLinkModelId(partnerLink.getModel().getId());
 
-        PartnerRoleChannel partnerRoleChannel = _bpelProcess.getPartnerRoleChannel(partnerLink.getModel());
+        PartnerRoleChannel partnerRoleChannel = ((ODEWSProcess)_bpelProcess).getPartnerRoleChannel(partnerLink.getModel());
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
 
         Element partnerEPR = plinkDAO.getPartnerEPR();
@@ -501,7 +497,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             __log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" +
                     operation.getName() + " channel=" + requestId + ")");
         }
-        _bpelProcess.invokePartner(mexDao);
+        ((ODEWSProcess)_bpelProcess).invokePartner(mexDao);
 
         // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
         // we need to inject a message on the response channel, so that the process continues.
@@ -724,7 +720,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             }
             mexDao.setFaultExplanation("Process did not respond.");
             mexDao.setStatus(Status.ACK);
-            _bpelProcess.onMyRoleMexAck(mexDao, status);
+            ((ODEWSProcess)_bpelProcess).onMyRoleMexAck(mexDao, status);
         }
     }
 
@@ -843,13 +839,13 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
     public Element getSourceEPR(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        String epr = dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR);
+        String epr = dao.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_EPR);
         if (epr == null)
             return null;
         try {
             return DOMUtils.stringToDOM(epr);
         } catch (Exception ex) {
-            __log.error("Invalid value for SEP property " + MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR + ": " + epr);
+            __log.error("Invalid value for SEP property " + WSMessageExchange.PROPERTY_SEP_PARTNERROLE_EPR + ": " + epr);
         }
 
         return null;
@@ -857,7 +853,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
     public String getSourceSessionId(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        return dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
+        return dao.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
     public void registerActivityForRecovery(String channel, long activityId, String reason, Date dateTime,

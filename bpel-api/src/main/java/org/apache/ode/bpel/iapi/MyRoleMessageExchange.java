@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
  * that is provided by the engine for message-exchanges where the engine acts as
  * the server (i.e. where the engine is "invoked").
  */
-public interface MyRoleMessageExchange extends MessageExchange {
+public interface MyRoleMessageExchange extends WSMessageExchange {
 
     /**
      * Enumeration of message correlation results.

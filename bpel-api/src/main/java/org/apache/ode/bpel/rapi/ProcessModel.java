@@ -13,6 +13,8 @@ public interface ProcessModel {
 
 	Collection<? extends PartnerLinkModel> getAllPartnerLinks();
 
+    Collection<? extends ResourceModel> getProvidedResources();
+
 	String getGuid();
 
 	QName getQName();
