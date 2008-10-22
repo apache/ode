@@ -568,6 +568,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     	return _sharedEps;
     }
 
+    public void setExecutor(ExecutorService exec) {
+      _exec = exec;
+    }
+
     public MyRoleMessageExchange createMessageExchange(final InvocationStyle istyle, final QName targetService,
             final String operation, final String clientKey) throws BpelEngineException {
 
