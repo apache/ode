@@ -351,6 +351,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         _changes.add(Change.RELEASE);
+		_process.releaseMessageExchange(getMessageExchangeId());
     }
 
     public String toString() {

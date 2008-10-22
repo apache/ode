@@ -118,5 +118,7 @@ public interface BpelDAOConnection {
     MessageExchangeDAO createMessageExchange(String mexId, char dir);
 
     MessageExchangeDAO getMessageExchange(String mexid);
+    
+    void releaseMessageExchange(String mexid);
 
 }
