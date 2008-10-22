@@ -1001,6 +1001,11 @@ public class ODEProcess {
         return _inMemDao.getConnection().getMessageExchange(mexId);
     }
 
+	public void releaseMessageExchange(String mexId) {
+		if (isInMemory()) {
+			_inMemDao.getConnection().releaseMessageExchange(mexId);
+		}
+	}
     /**
      * Schedule process-level work. This method defers to the server to do the scheduling and wraps the {@link Runnable} in a
      * try-finally block that ensures that the process is hydrated.

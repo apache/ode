@@ -83,8 +83,12 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             throw e;
         }
     }
+	
+    public void releaseMessageExchange(String mexid) {
+		// TODO Auto-generated method stub
+	}
 
-    public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
+	public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());
