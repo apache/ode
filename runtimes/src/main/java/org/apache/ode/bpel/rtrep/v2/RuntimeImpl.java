@@ -133,12 +133,16 @@ public class RuntimeImpl implements OdeRuntime {
             return null;
     }
 
-    public String extractAddress(ResourceModel resourceModel) {
+    public String extractAddress(ResourceModel resourceModel) throws FaultException {
         OResource resource = (OResource) resourceModel;
         String rootPath = "";
         if (resource.getReference() != null)
-            rootPath = extractAddress(resource.getReference());
-        return rootPath + "/" + resource.getSubpath();
+            rootPath = extractAddress(resource.getReference()) + "/";
+
+        BoundVariableEvaluationContext ctx = new BoundVariableEvaluationContext();
+        String subpath = ((Text)_expLangRuntimeRegistry.evaluateNode(resource.getSubpath(), ctx)).getWholeText();
+
+        return rootPath + subpath;
     }
 
     public String extractMatch(Element msgData, PropertyExtractor extractor) throws FaultException {

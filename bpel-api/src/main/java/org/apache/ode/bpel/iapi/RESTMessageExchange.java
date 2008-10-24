@@ -1,5 +1,7 @@
 package org.apache.ode.bpel.iapi;
 
+import java.util.concurrent.TimeoutException;
+
 /**
  * Message exchange used for a web-service based interaction between the integration layer and the
  * engine. Adds resource information.
@@ -7,4 +9,8 @@ package org.apache.ode.bpel.iapi;
 public interface RESTMessageExchange extends MessageExchange {
 
     Resource getResource();
+
+    Status invokeBlocking() throws BpelEngineException, TimeoutException;
+
+    void setRequest(Message message);
 }

@@ -77,7 +77,6 @@ class BpelInstanceWorker implements Runnable {
      *             forwarded from {@link Callable#call()}
      */
     <T> T execInCurrentThread(Callable<T> callable) throws Exception {
-
         // Allow recursive invocations. This allows us to nest P2P invocations to an arbitrary depth.
         if (isWorkerThread())
             return doInstanceWork(callable);
@@ -103,13 +102,11 @@ class BpelInstanceWorker implements Runnable {
             throw new BpelEngineException("Thread interrupted.", ex);
         }
 
-
         try {
             return doInstanceWork(callable);
         } finally {
             finished.release();
         }
-
     }
 
    

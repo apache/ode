@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.Resource;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -175,6 +176,10 @@ public interface MessageExchangeDAO {
     void setEPR(Element epr);
 
     Element getEPR();
+
+    String getResource();
+
+    void setResource(String resourceStr);
 
     MessageExchangePattern getPattern();
 

@@ -686,7 +686,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         event.setProcessId(_dao.getProcess().getProcessId());
         event.setProcessName(_dao.getProcess().getType());
         event.setProcessInstanceId(_dao.getInstanceId());
-        _bpelProcess._debugger.onEvent(event);
+        if (_bpelProcess._debugger != null) _bpelProcess._debugger.onEvent(event);
 
         //filter events
         List<String> scopeNames = null;

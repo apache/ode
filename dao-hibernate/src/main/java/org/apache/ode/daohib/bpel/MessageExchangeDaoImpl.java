@@ -151,7 +151,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setOperation(String opname) {
-      entering("MessageExchangeDaoImpl.setOperation");
+        entering("MessageExchangeDaoImpl.setOperation");
         _hself.setOperationName(opname);
         update();
     }
@@ -387,4 +387,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         _hself.setPipedPID(pipedPid == null ? null : pipedPid.toString());
         
     }
+
+    public void setResource(String resource) {
+        _hself.setResource(resource);
+    }
+
+    public String getResource() {
+        return _hself.getResource();
+    }
+
 }

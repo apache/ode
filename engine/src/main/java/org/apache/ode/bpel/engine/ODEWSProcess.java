@@ -56,8 +56,7 @@ public class ODEWSProcess extends ODEProcess {
         return null;
     }
 
-    void activate(Contexts contexts) {
-        _contexts = contexts;
+    void activate() {
         _debugger = new DebuggerSupport(this);
 
         __log.debug("Activating endpoints for " + _pid);
@@ -272,12 +271,15 @@ public class ODEWSProcess extends ODEProcess {
 
         private void doHydrate() {
             markused();
-            try {
-                _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
-            } catch (Exception e) {
-                String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
-                __log.error(errmsg);
-                throw new BpelEngineException(errmsg, e);
+            _processModel = _pconf.getProcessModel();
+            if (_processModel == null) {
+                try {
+                    _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
+                } catch (Exception e) {
+                    String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
+                    __log.error(errmsg);
+                    throw new BpelEngineException(errmsg, e);
+                }
             }
             _runtime = buildRuntime(_processModel.getModelVersion());
             _runtime.init(_pconf, _processModel);
@@ -315,26 +317,7 @@ public class ODEWSProcess extends ODEProcess {
                 }
             }
 
-            if (isInMemory()) {
-                bounceProcessDAO(_inMemDao.getConnection(), _pid, _pconf.getVersion(), _processModel);
-            } else if (_contexts.isTransacted()) {
-                // If we have a transaction, we do this in the current transaction.
-                bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
-            } else {
-                // If we do not have a transaction we need to create one.
-                try {
-                    _contexts.execTransaction(new Callable<Object>() {
-                        public Object call() throws Exception {
-                            bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
-                            return null;
-                        }
-                    });
-                } catch (Exception ex) {
-                    String errmsg = "DbError";
-                    __log.error(errmsg, ex);
-                    throw new BpelEngineException(errmsg, ex);
-                }
-            }
+            bounceProcessDAO();
         }
 
     }

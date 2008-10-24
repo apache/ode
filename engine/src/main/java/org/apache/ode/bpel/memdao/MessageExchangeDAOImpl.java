@@ -53,6 +53,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	MessageExchangePattern pattern;
 	Element ePR;
 	String channel;
+	String resource;
 	QName fault;
     String faultExplanation;
     String correlationStatus;
@@ -146,7 +147,15 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 	}
 
-	public void setPattern(MessageExchangePattern pattern) {
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public void setPattern(MessageExchangePattern pattern) {
 		this.pattern = pattern;
 
 	}

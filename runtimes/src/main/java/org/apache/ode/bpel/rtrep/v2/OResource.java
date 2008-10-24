@@ -11,6 +11,7 @@ public class OResource extends OBase implements ResourceModel {
     private OExpression subpath;
     private OResource reference;
     private String method;
+    private boolean instantiateResource;
 
     public OResource(OProcess owner) {
         super(owner);
@@ -46,5 +47,13 @@ public class OResource extends OBase implements ResourceModel {
 
     public void setMethod(String method) {
         this.method = method;
+    }
+
+    public boolean isInstantiateResource() {
+        return instantiateResource;
+    }
+
+    public void setInstantiateResource(boolean instantiateResource) {
+        this.instantiateResource = instantiateResource;
     }
 }

@@ -73,50 +73,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
         }
     }
 
-    private static class ResponseFuture implements Future<Status> {
-        private Status _status;
-
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        public Status get() throws InterruptedException, ExecutionException {
-            try {
-                return get(0, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                // If it's thrown it's definitely a bug
-                throw new RuntimeException(e);
-            }
-        }
-
-        public Status get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            synchronized (this) {
-                if (_status != null)
-                    return _status;
-
-                this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
-
-                if (_status == null) throw new TimeoutException();
-                return _status;
-            }
-        }
-
-        public boolean isCancelled() {
-            return false;
-        }
-
-        public boolean isDone() {
-            return _status != null;
-        }
-
-        void done(Status status) {
-            synchronized (this) {
-                _status = status;
-                this.notifyAll();
-            }
-        }
-    }
-
     @Override
     protected void onAsyncAck(MessageExchangeDAO mexdao) {
         final MemBackedMessageImpl response;
@@ -134,7 +90,6 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
             response = null;
         }
 
-        final UnreliableMyRoleMessageExchangeImpl self = this;
         final ResponseFuture f = _future;
         // Lets be careful, the TX can still rollback!
         _process.scheduleRunnable(new Runnable() {
@@ -146,9 +101,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
                 ack(ackType);
                 _future.done(Status.ACK);
-
             }
-
         });
     }
 

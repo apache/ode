@@ -24,7 +24,7 @@ public interface OdeRuntime {
 
     String extractMatch(Element msgData, PropertyExtractor extractor) throws FaultException;
 
-    String extractAddress(ResourceModel resource);
+    String extractAddress(ResourceModel resource) throws FaultException;
 
     void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry);
 

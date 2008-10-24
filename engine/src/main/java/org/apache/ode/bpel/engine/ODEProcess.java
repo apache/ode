@@ -103,7 +103,7 @@ public abstract class ODEProcess {
         _invocationStyles = Collections.unmodifiableSet(istyles);
     }
 
-    abstract void activate(Contexts contexts);
+    abstract void activate();
     abstract void deactivate();
     abstract void hydrate();
     abstract void dehydrate();
@@ -497,11 +497,34 @@ public abstract class ODEProcess {
         _lastUsed = System.currentTimeMillis();
     }
 
+    protected void bounceProcessDAO() {
+        if (isInMemory()) {
+            doBounce(_inMemDao.getConnection(), _pid, _pconf.getVersion(), _processModel);
+        } else if (_contexts.isTransacted()) {
+            // If we have a transaction, we do this in the current transaction.
+            doBounce(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
+        } else {
+            // If we do not have a transaction we need to create one.
+            try {
+                _contexts.execTransaction(new Callable<Object>() {
+                    public Object call() throws Exception {
+                        doBounce(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                String errmsg = "DbError";
+                __log.error(errmsg, ex);
+                throw new BpelEngineException(errmsg, ex);
+            }
+        }
+    }
+
     /**
      * If necessary, create an object in the data store to represent the process. We'll re-use an existing object if it already
      * exists and matches the GUID.
      */
-    protected void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
+    protected void doBounce(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + mprocess.getGuid() + ")");
         try {
             boolean create = true;

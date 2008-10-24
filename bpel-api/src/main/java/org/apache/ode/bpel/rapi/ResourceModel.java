@@ -12,4 +12,6 @@ public interface ResourceModel {
     ResourceModel getReference();
 
     String getMethod();
+
+    boolean isInstantiateResource();
 }

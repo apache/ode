@@ -74,6 +74,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private char _direction;
 	@Lob   @Column(name="EPR")
     private String _epr;
+	@Basic   @Column(name="RESOURCE", length=255)
+    private String _resource;
 	@Transient private
     Element _eprElement;
 	@Basic @Column(name="FAULT")
@@ -402,5 +404,13 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void setPipedPID(QName pipedPid) {
         _pipedPid = pipedPid == null ? null : pipedPid.toString();
+    }
+
+    public String getResource() {
+        return _resource;
+    }
+
+    public void setResource(String resourceStr) {
+        _resource = resourceStr;
     }
 }

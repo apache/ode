@@ -95,7 +95,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     /** Mapping from myrole service name to active process. */
     private final HashMap<QName, List<ODEProcess>> _wsServiceMap = new HashMap<QName, List<ODEProcess>>();
 
-    private final HashMap<String, ODEProcess> _restServiceMap = new HashMap<String, ODEProcess>();
+    private final HashMap<String, ODERESTProcess> _restServiceMap = new HashMap<String, ODERESTProcess>();
 
     /** Weak-reference cache of all the my-role message exchange objects. */
     private final MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache();
@@ -345,8 +345,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             ODEProcess process;
             if (conf.isRestful()) {
-                ODERestfulProcess restProcess = new ODERestfulProcess(this, conf, null);
-                for (String resUrl : restProcess.getResourceUrls()) {
+                ODERESTProcess restProcess = new ODERESTProcess(this, conf, null);
+                for (String resUrl : restProcess.getInitialResourceUrls()) {
                     _restServiceMap.put(resUrl, restProcess);
                 }
                 process = restProcess;
@@ -374,7 +374,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 process = wsProcess;
             }
 
-            process.activate(_contexts);
+            process.activate();
             _registeredProcesses.put(process.getPID(), process);
             if (_dehydrationPolicy == null) process.hydrate();
 
@@ -610,7 +610,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _mngmtLock.readLock().lock();
         try {
             // Do stuff
-            return null;
+            ODERESTProcess target = _restServiceMap.get(resource.getUrl());
+            if (target == null) throw new BpelEngineException("NoSuchResource: " + resource.getUrl());
+            assertNoTransaction();
+            return target.createRESTMessageExchange(resource, foreignKey);
         } finally {
             _mngmtLock.readLock().unlock();
         }
