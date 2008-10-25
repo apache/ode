@@ -26,7 +26,7 @@
         <passwordCallbackClass>org.apache.rampart.samples.sample07.PWCBHandler</passwordCallbackClass>
         <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
         <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
-        <encryptionKeyIdentifier>SKIKeyIdentifier</encryptionKeyIdentifier>
+        <encryptionKeyIdentifier>DirectReference</encryptionKeyIdentifier>
         <encryptionUser>service</encryptionUser>
       </action>
     </parameter>
