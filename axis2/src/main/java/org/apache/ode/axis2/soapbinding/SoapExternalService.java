@@ -224,6 +224,10 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                             && !serviceClient.getAxisService().isEngaged("rampart")) {
                         serviceClient.engageModule("rampart");
                     }
+                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("metadataExchange")
+                            && !serviceClient.getAxisService().isEngaged("metadataExchange")) {
+                        serviceClient.engageModule("metadataExchange");
+                    }
                 } finally {
                     policyStream.close();
                 }

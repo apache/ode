@@ -88,8 +88,7 @@ AXIS2_DEPS = [
     "org.apache.ws.commons.schema:XmlSchema:jar:1.4.2",
     "xml-apis:xml-apis:jar:1.3.04",
     "xml-resolver:xml-resolver:jar:1.2",
-    "javax.mail:mail:jar:1.4",
-    #"mex:jar:1.41-impl", # aren't they actually module archives?
+    "javax.mail:mail:jar:1.4"
     #"soapmonitor:jar:1.4.1", # aren't they actually module archives?
 ]
 
@@ -100,7 +99,8 @@ AXIOM               = findArtifacts(AXIS2_DEPS, "org.apache.ws.commons.axiom") #
 AXIS2_MODULES        = struct(
  :mods              => ["org.apache.rampart:rampart:mar:1.4", 
                          "org.apache.rampart:rahas:mar:1.4",
-                         "org.apache.axis2:addressing:mar:1.4"],
+                         "org.apache.axis2:addressing:mar:1.4",
+                              "org.apache.axis2:mex:mar:1.41"],
  :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
                               :under=>"org.apache.rampart",
                               :version=>"1.4"), 
@@ -258,7 +258,7 @@ define "ode" do
     end
     
     test.using :testng
-    test.with(projects("tools"), libs, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
+    test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _("target/test")
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test")
