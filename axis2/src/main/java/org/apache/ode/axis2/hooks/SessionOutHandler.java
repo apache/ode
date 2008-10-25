@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
@@ -65,32 +66,32 @@ public class SessionOutHandler extends AbstractHandler {
 
             	WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
             	
-            	OMElement to = factory.createOMElement("To", wsAddrNS);
+            	OMElement to = factory.createSOAPHeaderBlock("To", wsAddrNS);
                 header.addChild(to);
                 to.setText(targetEpr.getUrl());
 
                 String action = messageContext.getSoapAction(); 
-                OMElement wsaAction = factory.createOMElement("Action", wsAddrNS);
+                OMElement wsaAction = factory.createSOAPHeaderBlock("Action", wsAddrNS);
                 header.addChild(wsaAction);
                 wsaAction.setText(action);
 
                 // we only set the ReplyTo and MessageID headers if doing Request-Response
                 org.apache.axis2.addressing.EndpointReference replyToEpr = messageContext.getReplyTo();
                 if (replyToEpr != null) {
-                	OMElement replyTo = factory.createOMElement("ReplyTo", wsAddrNS);
+                	OMElement replyTo = factory.createSOAPHeaderBlock("ReplyTo", wsAddrNS);
                 	OMElement address = factory.createOMElement("Address", wsAddrNS);
                 	replyTo.addChild(address);
                     header.addChild(replyTo);
                     address.setText(replyToEpr.getAddress());
                     
                     String messageId = messageContext.getMessageID();
-                    OMElement messageIdElem = factory.createOMElement("MessageID", wsAddrNS);
+                    OMElement messageIdElem = factory.createSOAPHeaderBlock("MessageID", wsAddrNS);
                     header.addChild(messageIdElem);
                     messageIdElem.setText(messageId);                
                 }
 	            
                 if (targetEpr.getSessionId() != null) {
-                    OMElement session = factory.createOMElement("session", intalioSessNS);
+                    OMElement session = factory.createSOAPHeaderBlock("session", intalioSessNS);
                     header.addChild(session);
                     session.setText(targetEpr.getSessionId());
                 }
@@ -99,7 +100,7 @@ public class SessionOutHandler extends AbstractHandler {
 
             if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
                 WSAEndpoint callbackEpr = EndpointFactory.convertToWSA((MutableEndpoint) ocallbackSession);
-                OMElement callback = factory.createOMElement("callback", intalioSessNS);
+                OMElement callback = factory.createSOAPHeaderBlock("callback", intalioSessNS);
                 header.addChild(callback);
                 OMElement address = factory.createOMElement("Address", wsAddrNS);
                 callback.addChild(address);

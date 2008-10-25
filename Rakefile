@@ -97,6 +97,18 @@ ACTIVEMQ            = "org.apache.activemq:apache-activemq:jar:4.1.1"
 ANNONGEN            = findArtifacts(AXIS2_DEPS, "annogen:annogen") #"annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5" # TODO: do we need ant? Currently referenced in JBI deployable
 AXIOM               = findArtifacts(AXIS2_DEPS, "org.apache.ws.commons.axiom") #[ group("axiom-api", "axiom-impl", "axiom-dom", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7") ]
+AXIS2_MODULES        = struct(
+ :mods              => ["org.apache.rampart:rampart:mar:1.4", 
+                         "org.apache.rampart:rahas:mar:1.4",
+                         "org.apache.axis2:addressing:mar:1.4"],
+ :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
+                              :under=>"org.apache.rampart",
+                              :version=>"1.4"), 
+                        "org.apache.ws.security:wss4j:jar:1.5.4", 
+                        "org.apache.santuario:xmlsec:jar:1.4.1",
+                        "opensaml:opensaml:jar:1.1",
+                        "bouncycastle:bcprov-jdk15:jar:132"]
+)
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.4.1"
 AXIS2_ALL           = AXIS2_DEPS #group("axis2-adb", "axis2-codegen", "axis2-kernel", "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans", :under=>"org.apache.axis2", :version=>"1.4.1")
 HTTPCORE            = findArtifacts(AXIS2_DEPS, "org.apache.httpcomponents") #group("httpcore", "httpcore-nio", :under=>"org.apache.httpcomponents", :version=>"4.0-beta1")
@@ -142,6 +154,7 @@ JIBX                = findArtifacts(AXIS2_DEPS, "jibx:jibx-run") #"jibx:jibx-run
 LOG4J               = findArtifacts(AXIS2_DEPS, "log4j:log4j") #"log4j:log4j:jar:1.2.15"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
+
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", :under=>"net.sf.saxon", :version=>"8.7")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
                         :under=>"org.apache.servicemix", :version=>"3.1-incubating")
@@ -168,6 +181,7 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
+repositories.remote << "http://ws.zones.apache.org/repository2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 # Changing releases tag names
@@ -198,7 +212,7 @@ define "ode" do
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, DERBY, GERONIMO.kernel, GERONIMO.transaction,
       JAVAX.activation, JAVAX.servlet, JAVAX.stream, JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS.xml_schema,
-      XMLBEANS
+      XMLBEANS, AXIS2_MODULES.libs
 
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
     test.exclude '*'
@@ -217,7 +231,7 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL, WODEN,
-      WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS
+      WOODSTOX, WSDL4J, WS_COMMONS.axiom, WS_COMMONS.neethi, WS_COMMONS.xml_schema, XALAN, XERCES, XMLBEANS, AXIS2_MODULES.libs
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-db").package(:zip)
@@ -225,6 +239,7 @@ define "ode" do
       web_inf.include project("axis2").path_to("src/main/wsdl/*")
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
+    package(:war).path("WEB-INF/modules").include(artifacts(AXIS2_MODULES.mods))
     package(:war).tap do |root|
       root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/**/*").exclude("META-INF/**/*")
     end
@@ -251,11 +266,82 @@ define "ode" do
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test/webapp/WEB-INF")
       mkdir_p _("target/test/webapp/WEB-INF/processes")
       rm_rf Dir[_("target/test/webapp") + "/**/.svn"]
+      mkdir _("target/test/webapp/WEB-INF/processes") unless File.exist?(_("target/test/webapp/WEB-INF/processes"))
+      mkdir _("target/test/webapp/WEB-INF/modules") unless File.exist?(_("target/test/webapp/WEB-INF/modules"))
       # move around some property files for test purpose
       mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("target/test/webapp/WEB-INF/conf")
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("target/test/webapp/WEB-INF/modules")
     end
     test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
     test.exclude('*') unless Buildr.environment != 'test'
+
+     test.setup task(:prepare_rampart_policy_test) do |task|
+      # test_dir will be the Axis2 Repo dir
+      test_dir = _("target/test/resources/TestRampartPolicy")
+      # copy the required modules
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+      # generate one process per test
+      Dir.chdir(test_dir) do
+        Dir["policy-sample*.xml"].each do |policy_file| 
+          sample_name = policy_file.gsub(".xml","")
+          # create process directory
+          proc_dir = "process-#{sample_name}"
+          mkdir proc_dir unless File.directory? proc_dir
+          # copy files
+          [policy_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+          # copy files from template and replace variable names
+          Dir["process-template/*"].each do |file|
+            lines = IO.readlines(file)
+            # copy file and replace template values
+            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
+              lines.each { |l| 
+                sample_id = sample_name[-2,2]
+                l.gsub!("{sample.namespace}", "http://sample#{sample_id}.policy.samples.rampart.apache.org")
+                l.gsub!("{sample.service.name}", sample_name)
+                f<<l
+              }
+            }
+          end
+        end
+      end
+    end
+
+    test.setup task(:prepare_rampart_basic_test) do |task|
+      # test_dir will be the Axis2 Repo dir
+      test_dir = _("target/test/resources/TestRampartBasic")
+      # copy the required modules
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+      # generate one process per test
+      Dir.chdir(test_dir) do
+        Dir["sample*.axis2"].each do |axis2_file| 
+          sample_name = axis2_file.gsub(".axis2","")
+          # create process directory
+          proc_dir = "process-basic-#{sample_name}"
+          mkdir proc_dir unless File.directory? proc_dir
+          # copy files
+          [axis2_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+         # cp axis2_file, "#{proc_dir}/"
+          # copy files from template and replace variable names
+          Dir["process-template/*"].each do |file|
+            lines = IO.readlines(file)
+            # copy file and replace template values
+            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
+              lines.each { |l| 
+                sample_id = sample_name[-2,2]
+                l.gsub!("{sample.namespace}", "http://sample#{sample_id}.samples.rampart.apache.org")
+                l.gsub!("{sample.service.name}", sample_name)
+                f<<l
+              }
+            }
+          end
+        end
+      end
+    end
   end
 
   desc "ODE APIs"
