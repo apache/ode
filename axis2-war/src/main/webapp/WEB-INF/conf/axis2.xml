@@ -283,6 +283,7 @@
                 <order phase="Addressing"/>
             </handler>
         </phase>
+        <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="RequestURIBasedDispatcher"
@@ -310,6 +311,7 @@
         <phase name="OperationOutFaultPhase"/>
         <phase name="PolicyDetermination"/>
         <phase name="MessageOut"/>
+        <phase name="Security"/>
     </phaseOrder>
 </axisconfig>
 
