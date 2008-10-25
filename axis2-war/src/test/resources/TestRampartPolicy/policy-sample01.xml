@@ -22,7 +22,7 @@
 		  <wsp:Policy>
 			<sp:TransportToken>
 			  <wsp:Policy>
-				<sp:HttpsToken RequireClientCertificate="false"/>
+				<!--<sp:HttpsToken RequireClientCertificate="false"/>-->
 			  </wsp:Policy>
 			</sp:TransportToken>
 			<sp:AlgorithmSuite>

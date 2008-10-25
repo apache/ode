@@ -25,7 +25,8 @@
 						<wsp:Policy>
 							<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 								<wsp:Policy>
-									<sp:WssX509V3Token10/>
+                                     <sp:RequireThumbprintReference/>
+                                    <sp:WssX509V1Token10/>
 								</wsp:Policy>
 							</sp:X509Token>
 						</wsp:Policy>
@@ -34,7 +35,8 @@
 						<wsp:Policy>
 							<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
 								<wsp:Policy>
-									<sp:WssX509V3Token10/>
+                                     <sp:RequireThumbprintReference/>
+                                    <sp:WssX509V3Token10/>
 								</wsp:Policy>
 							</sp:X509Token>
 						</wsp:Policy>
