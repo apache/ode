@@ -8,6 +8,8 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -36,7 +38,8 @@ import java.util.Iterator;
 public abstract class Axis2TestBase {
 
     private static final int DEFAULT_TEST_PORT = 8888;
-    
+    private static final Log log = LogFactory.getLog(Axis2TestBase.class);
+
     protected ODEAxis2Server server;
 
     // Provide standard constructors to accommodate creation of test suites
@@ -46,13 +49,18 @@ public abstract class Axis2TestBase {
     public Axis2TestBase() {
     	this(null);
     }
-    
+
     public void startServer() throws Exception {
-        String webappPath = getClass().getClassLoader().getResource("webapp").getFile();
-        server = new ODEAxis2Server(webappPath);
-        server.start();
+        startServer("webapp/WEB-INF", "webapp/WEB-INF/conf/axis2.xml");
     }
 
+    public void startServer(String axis2RepoDir, String axis2ConfLocation) throws Exception {
+        String odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
+        String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
+        String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
+        server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath);
+        server.start();
+    }
     public void stopServer() throws AxisFault {
         server.stop();
     }
@@ -68,16 +76,20 @@ public abstract class Axis2TestBase {
     }
 
     protected class ODEAxis2Server extends AxisServer {
-        ODEServer _ode = new ODEServer();
-        String webappPath;
 
-        protected ODEAxis2Server (String webappPath) throws Exception {
+        ODEServer _ode;
+        String odeRootDir;
+
+        protected ODEAxis2Server(String odeRootDir, String axis2RepoDir, String axis2ConfLocation) throws Exception {
             super(false);
-            this.webappPath = webappPath;
-            String confLocation = webappPath + "/WEB-INF/conf/axis2.xml";
-            String repoLocation = webappPath + "/WEB-INF";
-            configContext = ConfigurationContextFactory
-                    .createConfigurationContextFromFileSystem(repoLocation, confLocation);
+            this.odeRootDir = odeRootDir;
+            if (log.isInfoEnabled()) {
+                log.info("Ode Root Dir: " + odeRootDir);
+                log.info("Axis2 Conf file: " + axis2ConfLocation);
+                log.info("Axis2 Repo dir: " + axis2RepoDir);
+            }
+
+            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
             // do not use 8080 for tests
             configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+DEFAULT_TEST_PORT));
         }
@@ -86,7 +98,7 @@ public abstract class Axis2TestBase {
             super.start();
             _ode = new ODEServer();
             try {
-                _ode.init(webappPath+"/WEB-INF", configContext.getAxisConfiguration());
+                _ode.init(odeRootDir, configContext.getAxisConfiguration());
             } catch (ServletException e) {
                 e.printStackTrace();
             }
@@ -101,9 +113,11 @@ public abstract class Axis2TestBase {
         public Collection<QName> deployProcess(String bundleName) {
             return _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
         }
+
         public void undeployProcess(String bundleName) {
             _ode.getProcessStore().undeploy(new File(getBundleDir(bundleName)));
         }
+
         public boolean isDeployed(String bundleName) {
             return _ode.getProcessStore().getPackages().contains(bundleName);
         }
@@ -136,17 +150,18 @@ public abstract class Axis2TestBase {
                     operation.setMessageReceiver(receiver);
                 }
             }
-            getConfigurationContext().getAxisConfiguration().addService(axisService);            
+            getConfigurationContext().getAxisConfiguration().addService(axisService);
         }
 
         public String sendRequestFile(String endpoint, String bundleName, String filename) {
             try {
                 return HttpSoapSender.doSend(new URL(endpoint),
-                        new FileInputStream(getBundleDir(bundleName)+"/" + filename), null, 0, null, null, null);
+                        new FileInputStream(getBundleDir(bundleName) + "/" + filename), null, 0, null, null, null);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+
         protected String getBundleDir(String bundleName) {
             return getClass().getClassLoader().getResource(bundleName).getFile();
         }
@@ -155,6 +170,7 @@ public abstract class Axis2TestBase {
          * Convenient methods to generate a WSDL for an Axis2 service. Often nice, but also often
          * generates crappy WSDL that aren't even valid (especially when faults are involved) so
          * use with care.
+         *
          * @param serviceName
          * @param fileName
          * @throws AxisFault

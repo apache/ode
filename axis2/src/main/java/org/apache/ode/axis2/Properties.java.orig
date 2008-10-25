@@ -72,7 +72,6 @@ public class Properties {
     public static final String PROP_HTTP_REQUEST_CHUNK = "http.request.chunk";
     public static final String PROP_HTTP_REQUEST_GZIP = "http.request.gzip";
     public static final String PROP_HTTP_ACCEPT_GZIP = "http.accept.gzip";
-    public static final String PROP_SECURITY_POLICY = "security.policy";
 
 
     protected static final Log log = LogFactory.getLog(Properties.class);
