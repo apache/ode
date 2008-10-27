@@ -1062,6 +1062,7 @@ public class ODEProcess {
                 presponse.setHeader(mexdao.getResponse().getHeader());
                 pmex.setResponse(presponse);
             }
+            pmex.setFault(mexdao.getFault());
             pmex.setStatus(mexdao.getStatus());
             pmex.setAckType(mexdao.getAckType());
             pmex.setFailureType(mexdao.getFailureType());
