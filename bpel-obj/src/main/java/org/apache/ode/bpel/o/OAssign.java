@@ -53,6 +53,7 @@ public class OAssign extends OActivity {
         public boolean keepSrcElementName;
         public boolean ignoreMissingFromData;
         public boolean ignoreUninitializedFromVariable;
+        public boolean insertMissingToData;
 
         public Copy(OProcess owner) {
             super(owner);
@@ -132,6 +133,12 @@ public class OAssign extends OActivity {
          */
         public Variable getVariable() {
             return expression.getVariable();
+        }
+        public boolean isInsertMissingToData() {
+        	return expression.insertMissingData;
+        }
+        public void setInsertMissingToData(boolean insertMissingToData) {
+        	expression.insertMissingData = insertMissingToData;
         }
       
     }

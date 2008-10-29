@@ -1056,4 +1056,9 @@ public class DOMUtils {
 	public static Document getDocument(Node contextNode) {
 		return (contextNode == null) ? DOMUtils.newDocument() : contextNode.getOwnerDocument();
     }
+
+    public static String getQualifiedName(QName qName) {
+    	String prefix = qName.getPrefix(), localPart = qName.getLocalPart();
+    	return (prefix == null || "".equals(prefix)) ? localPart : (prefix + ":" + localPart);
+    }
 }

@@ -60,4 +60,8 @@ public class Copy extends BpelObject {
     public boolean isIgnoreUninitializedFromVariable() {
         return getAttribute("ignoreUninitializedFromVariable", "no").equals("yes");
     }
+    
+    public boolean isInsertMissingToData() {
+        return getAttribute("insertMissingToData", "no").equals("yes");
+    }
 }

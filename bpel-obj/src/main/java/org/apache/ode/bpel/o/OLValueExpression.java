@@ -23,6 +23,14 @@ public abstract class OLValueExpression extends OExpression {
     private static final long serialVersionUID = 1L;
     
     /**
+     * Indicates whether the expression, if it is a simple path, must
+     * be created if missing By a simple path, we mean a path expression whose
+     * steps are fully-qualified names separated by slashes. In case any of
+     * the steps in the simple path is non-existent, then we must create it.
+     */
+    public boolean insertMissingData;
+    
+    /**
      * @param owner
      */
     public OLValueExpression(OProcess owner) {
