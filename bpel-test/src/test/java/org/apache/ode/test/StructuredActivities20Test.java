@@ -18,9 +18,11 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class StructuredActivities20Test extends BPELTestAbstract {
+	@Ignore
 	@Test public void testFlowActivity1() throws Throwable {
         // Test Flow with XPath20
         go("/bpel/2.0/TestFlowActivity1");
