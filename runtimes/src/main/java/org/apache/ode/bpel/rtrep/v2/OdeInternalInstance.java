@@ -74,6 +74,8 @@ public interface OdeInternalInstance {
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
 
+    void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx);
+
     CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
     ExpressionLanguageRuntimeRegistry getExpLangRuntime();

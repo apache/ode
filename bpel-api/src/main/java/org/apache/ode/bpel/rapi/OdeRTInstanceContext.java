@@ -57,5 +57,6 @@ public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, 
      * @param optionalFaultData
      */
     void noreply(String mexId, FaultInfo optionalFaultData);
-	
+
+    void checkResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx);
 }

@@ -271,16 +271,8 @@ public class ODEWSProcess extends ODEProcess {
 
         private void doHydrate() {
             markused();
-            _processModel = _pconf.getProcessModel();
-            if (_processModel == null) {
-                try {
-                    _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
-                } catch (Exception e) {
-                    String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
-                    __log.error(errmsg);
-                    throw new BpelEngineException(errmsg, e);
-                }
-            }
+            readModel();
+            
             _runtime = buildRuntime(_processModel.getModelVersion());
             _runtime.init(_pconf, _processModel);
 
@@ -318,6 +310,23 @@ public class ODEWSProcess extends ODEProcess {
             }
 
             bounceProcessDAO();
+        }
+
+        private void readModel() {
+            try {
+                _processModel = _pconf.getProcessModel();
+            } catch (Exception e) {
+                // Swallow, was just trying
+            }
+            if (_processModel == null) {
+                try {
+                    _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
+                } catch (Exception e) {
+                    String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
+                    __log.error(errmsg);
+                    throw new BpelEngineException(errmsg, e);
+                }
+            }
         }
 
     }

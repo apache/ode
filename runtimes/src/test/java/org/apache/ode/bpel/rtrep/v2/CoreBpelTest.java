@@ -112,6 +112,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public void checkResourceRoute(String url, String method, PickResponseChannel pickResponseChannel, int selectorIdx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -125,6 +129,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     }
 
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

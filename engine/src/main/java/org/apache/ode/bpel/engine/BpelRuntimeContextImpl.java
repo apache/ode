@@ -272,6 +272,28 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
     }
 
+    public void checkResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+        // check if this is first pick
+        if (_dao.getState() == ProcessState.STATE_NEW) {
+            // send event
+            ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
+            evt.setOldState(ProcessState.STATE_NEW);
+            _dao.setState(ProcessState.STATE_READY);
+            evt.setNewState(ProcessState.STATE_READY);
+            sendEvent(evt);
+        }
+
+        if (_instantiatingMessageExchange != null && method.equals("POST") && _dao.getState() == ProcessState.STATE_READY)
+            injectMyRoleMessageExchange(pickResponseChannel, selectorIdx, _instantiatingMessageExchange);
+        else {
+            _dao.createResourceRoute(url, method, pickResponseChannel, selectorIdx);
+            Resource res = new Resource(url, "application/xml", method);
+            _bpelProcess._contexts.bindingContext.activateProvidedResource(res);
+        }
+
+        // TODO schedule a matcher to see if the message arrived already
+    }
+
     public CorrelationKey readCorrelation(CorrelationSet cset) {
         ScopeDAO scopeDAO = _dao.getScope(cset.getScopeId());
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.getName());

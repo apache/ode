@@ -36,6 +36,8 @@ public class HProcessInstance extends HObject {
     /** Foreign key to the instantiating {@link HCorrelator}. */
     private HCorrelator _instantiatingCorrelator;
 
+    private String _instantiatingUrl;
+
     /** Scope instances belonging to this process instnace. */
     private Collection<HScope> _scopes = new HashSet<HScope>();
 
@@ -281,4 +283,15 @@ public class HProcessInstance extends HObject {
         
     }
 
+    /**
+     * @hibernate.property column="INSTANTIATE_URL" size=255
+     * @return
+     */
+    public String getInstantiatingUrl() {
+        return _instantiatingUrl;
+    }
+
+    public void setInstantiatingUrl(String instantiatingUrl) {
+        _instantiatingUrl = instantiatingUrl;
+    }
 }

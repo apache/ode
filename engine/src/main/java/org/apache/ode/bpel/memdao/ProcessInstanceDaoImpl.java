@@ -19,15 +19,7 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
@@ -51,44 +43,27 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     private static final Collection<ScopeDAO> EMPTY_SCOPE_DAOS = Collections.emptyList();
 
     private short _previousState;
-
     private short _state;
-
     private Long _instanceId;
-
     private ProcessDaoImpl _processDao;
-
     private Object _soup;
-
     private Map<Long, ScopeDAO> _scopes = new HashMap<Long, ScopeDAO>();
-
     private Map<String, List<ScopeDAO>> _scopesByName = new HashMap<String, List<ScopeDAO>>();
-
     private Map<String, byte[]> _messageExchanges = new HashMap<String, byte[]>();
-
+    private Map<String,ResourceRouteDAO> _resourceRoutes = new HashMap<String,ResourceRouteDAO>();
     private ScopeDAO _rootScope;
-
     private FaultDAO _fault;
-
     private CorrelatorDAO _instantiatingCorrelator;
-
     private BpelDAOConnection _conn;
-
     private int _failureCount;
-
     private Date _failureDateTime;
-
     private Map<String, ActivityRecoveryDAO> _activityRecoveries = new HashMap<String, ActivityRecoveryDAO>();
-
     // TODO: Remove this, we should be using the main event store...
     private List<ProcessInstanceEvent> _events = new ArrayList<ProcessInstanceEvent>();
-
     private Date _lastActive;
-
+    private String _instantiatingUrl;
     private int _seq;
-
     private byte[] _execState;
-
     private int _execStateCount;
 
     ProcessInstanceDaoImpl(BpelDAOConnection conn, ProcessDaoImpl processDao, CorrelatorDAO correlator) {
@@ -255,6 +230,18 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
      */
     public CorrelatorDAO getInstantiatingCorrelator() {
         return _instantiatingCorrelator;
+    }
+
+    public String getInstantiatingUrl() {
+        return _instantiatingUrl;
+    }
+
+    public void setInstantiatingUrl(String url) {
+        _instantiatingUrl = url;
+    }
+
+    public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+        _resourceRoutes.put(url, new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx));
     }
 
     /**

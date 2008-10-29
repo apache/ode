@@ -427,7 +427,23 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
 
     public void setExecutionStateCounter(int stateCounter) {
         _instance.setExecutionStateCounter(stateCounter);
-
     }
 
+    public String getInstantiatingUrl() {
+        return _instance.getInstantiatingUrl();
+    }
+
+    public void setInstantiatingUrl(String url) {
+        _instance.setInstantiatingUrl(url);
+    }
+
+    public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+        HResourceRoute resRoute = new HResourceRoute();
+        resRoute.setUrl(url);
+        resRoute.setMethod(method);
+        resRoute.setChannelId(pickResponseChannel);
+        resRoute.setIndex(selectorIdx);
+        resRoute.setInstance(_instance);
+        getSession().save(resRoute);
+    }
 }

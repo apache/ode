@@ -81,7 +81,10 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     private long _sequence;
 	@Basic @Column(name="DATE_CREATED")
     private Date _dateCreated = new Date();
-    
+
+	@Basic @Column(name="INSTANTIATE_URL", length=255)
+    private String _instantiatingUrl;
+
     @Basic @Column(name="EXEC_STATE_COUNTER")
     private int _execStateCounter;
 	
@@ -146,7 +149,19 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 
     }
 
-	public void finishCompletion() {
+    public String getInstantiatingUrl() {
+        return _instantiatingUrl;
+    }
+
+    public void setInstantiatingUrl(String url) {
+        _instantiatingUrl = url;
+    }
+
+    public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+        new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx, this);
+    }
+
+    public void finishCompletion() {
 	    // make sure we have completed.
 	    assert (ProcessState.isFinished(this.getState()));
 	    // let our process know that we've done our work.

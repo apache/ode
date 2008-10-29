@@ -71,6 +71,7 @@ public class ODERESTProcess extends ODEProcess {
         }
 
         ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
+        newInstance.setInstantiatingUrl(mexdao.getResource());
 
         // send process instance event
         NewProcessInstanceEvent evt = new NewProcessInstanceEvent(getProcessModel().getQName(),
@@ -121,6 +122,10 @@ public class ODERESTProcess extends ODEProcess {
             if (resource.getUrl().equals(url) && resource.getMethod().equals(method)) return resource;
         }
         return null;
+    }
+
+    public Resource getInstantiatingUrl(ProcessInstanceDAO instanceDao) {
+        return getResource(instanceDao.getInstantiatingUrl());
     }
 
     protected boolean isInstantiating(Resource res) {

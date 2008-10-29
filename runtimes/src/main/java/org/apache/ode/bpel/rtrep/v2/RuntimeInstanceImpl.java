@@ -105,7 +105,6 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
         _brc.initializePartnerLinks(parentScopeId, partnerLinks);
-
     }
 
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
@@ -120,6 +119,12 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         getORM().register(pickResponseChannelStr, selectors);
 
         _brc.select(pickResponseChannelStr, timeout, selectors);
+    }
+
+    public void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
+        final String pickResponseChannelStr = pickResponseChannel.export();
+        getORM().register(pickResponseChannelStr, url, method, mexRef);
+        _brc.checkResourceRoute(url, method, pickResponseChannelStr, selectorIdx);
     }
 
     public CorrelationKey readCorrelation(CorrelationSetInstance cset) {

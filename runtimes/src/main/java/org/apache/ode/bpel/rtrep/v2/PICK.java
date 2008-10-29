@@ -35,6 +35,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -69,39 +70,7 @@ class PICK extends ACTIVITY {
         Selector[] selectors;
 
         try {
-            selectors = new Selector[_opick.onMessages.size()];
-            int idx = 0;
-            for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
-                CorrelationKey key = null; // this will be the case for the
-                // createInstance activity
-
-                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
-                if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
-                    // Adding a route for opaque correlation. In this case,
-                    // correlation is on "out-of-band" session-id
-                    String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
-                    key = new CorrelationKey(-1, new String[] { sessionId });
-                } else if (onMessage.matchCorrelation != null) {
-                    if (!getBpelRuntime().isCorrelationInitialized(
-                            _scopeFrame.resolve(onMessage.matchCorrelation))) {
-                        // the following should really test if this is a "join"
-                        // type correlation...
-                        if (!_opick.createInstanceFlag)
-                            throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
-                                    "Correlation not initialized.");
-                    } else {
-
-                        key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
-
-                        assert key != null;
-                    }
-                }
-
-                selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
-                        .getOutput() == null, onMessage.messageExchangeId, key);
-                idx++;
-            }
-
+            // Pick onAlarm
             timeout = null;
             for (OPickReceive.OnAlarm onAlarm : _opick.onAlarms) {
                 Date dt = onAlarm.forExpr != null ? offsetFromNow(getBpelRuntime().getExpLangRuntime()
@@ -112,7 +81,47 @@ class PICK extends ACTIVITY {
                     _alarm = onAlarm;
                 }
             }
-            getBpelRuntime().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
+
+            // Pick onMessages (identical to a receive)
+            selectors = new Selector[_opick.onMessages.size()];
+            int idx = 0;
+            for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
+                if (onMessage.isRestful()) {
+                    // TODO here we should resolved a resource url value that's been previously instantiated by a scope
+                    String url = getBpelRuntime().getExpLangRuntime()
+                            .evaluateAsString(onMessage.resource.getSubpath(), getEvaluationContext());
+                    url = url + "/" + new GUID().toString();
+                    getBpelRuntime().checkResourceRoute(url, onMessage.resource.getMethod(),
+                            onMessage.messageExchangeId, pickResponseChannel, idx);
+                } else {
+                    CorrelationKey key = null;
+                    PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
+                    if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
+                        // Adding a route for opaque correlation. In this case,
+                        // correlation is on "out-of-band" session-id
+                        String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
+                        key = new CorrelationKey(-1, new String[] { sessionId });
+                    } else if (onMessage.matchCorrelation != null) {
+                        if (!getBpelRuntime().isCorrelationInitialized(
+                                _scopeFrame.resolve(onMessage.matchCorrelation))) {
+                            // the following should really test if this is a "join" type correlation...
+                            if (!_opick.createInstanceFlag)
+                                throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
+                                        "Correlation not initialized.");
+                        } else {
+                            key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
+                            assert key != null;
+                        }
+                    }
+
+                    selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
+                            .getOutput() == null, onMessage.messageExchangeId, key);
+                    idx++;
+                }
+            }
+
+            if (selectors[0] != null)
+                getBpelRuntime().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
         } catch (FaultException e) {
             __log.error(e);
             FaultData fault = createFault(e.getQName(), _opick, e.getMessage());
