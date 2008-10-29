@@ -859,12 +859,12 @@ public class BpelProcess {
             } else {
                 // If we do not have a transaction we need to create one. 
                 try {
-                    _engine._contexts.scheduler.execIsolatedTransaction(new Callable<Object>() {
+                    _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
                             bounceProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
                             return null;
                         }
-                    }).get(); // needs to be synchronous
+                    });
                 } catch (Exception ex) {
                     String errmsg = "DbError";
                     __log.error(errmsg, ex);
