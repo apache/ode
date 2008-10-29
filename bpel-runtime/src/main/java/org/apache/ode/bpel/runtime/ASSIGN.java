@@ -388,6 +388,7 @@ class ASSIGN extends ACTIVITY {
                                 lvalue));
             } else if (ocopy.to instanceof OAssign.LValueExpression) {
                 LValueExpression lexpr = (LValueExpression) ocopy.to;
+	            lexpr.setInsertMissingToData(ocopy.insertMissingToData);
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
@@ -630,14 +631,14 @@ class ASSIGN extends ACTIVITY {
         private Node _rootNode;
 
         private EvaluationContext _ctx;
+        
 
         private EvaluationContextProxy(Variable var, Node varNode) {
             _var = var;
             _varNode = varNode;
             _ctx = getEvaluationContext();
-
         }
-
+        
         public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) throws FaultException {
             if (variable.name.equals(_var.name)) {
                 if (part == null) return _varNode;

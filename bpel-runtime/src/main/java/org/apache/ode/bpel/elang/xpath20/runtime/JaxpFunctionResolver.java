@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathFunction;
@@ -925,11 +926,19 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 		            }
 	            }
             }
-            Element clonedElmt = (Element) parentElmt.cloneNode(true);
+            final Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             for (int target = 0; target < positions.length; target++) {
 	            Element deleteElmt = (Element) children.item(positions[target]);
 	            clonedElmt.removeChild(deleteElmt);
+            }
+            // Saxon doesn't like clones with no children, so I'll oblige
+            if (clonedElmt.getChildNodes().getLength() == 0) {
+            	try {
+	            	clonedElmt.appendChild(DOMUtils.toDOMDocument(parentElmt).createTextNode(""));
+            	} catch (TransformerException te) {
+            		throw new XPathFunctionException(te);
+            	}
             }
             return clonedElmt;
     	}

@@ -18,7 +18,6 @@
  */
 package org.apache.ode.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
@@ -78,5 +77,8 @@ public class DataHandling20Test extends BPELTestAbstract {
     }
     @Test public void testXQueryExpression() throws Throwable {
         go("/bpel/2.0/TestXQueryExpression");
+    }
+    @Test public void testInsertMissingData() throws Throwable {
+        go("/bpel/2.0/TestInsertMissingData");
     }
 }
