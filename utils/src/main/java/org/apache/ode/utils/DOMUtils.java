@@ -690,6 +690,15 @@ public class DOMUtils {
     public static QName getElementQName(Element el) {
         return new QName(el.getNamespaceURI(),el.getLocalName());
     }
+    
+    public static QName getNodeQName(String qualifiedName) {
+    	int index = qualifiedName.indexOf(":");
+    	if (index >= 0) {
+    		return new QName(qualifiedName.substring(0, index), qualifiedName.substring(index + 1));
+    	} else {
+    		return new QName(qualifiedName);
+    	}
+    }
 
     /**
      * Remove the child nodes under another node.
@@ -1044,4 +1053,7 @@ public class DOMUtils {
         return ll;
     }
 
+	public static Document getDocument(Node contextNode) {
+		return (contextNode == null) ? DOMUtils.newDocument() : contextNode.getOwnerDocument();
+    }
 }

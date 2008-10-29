@@ -18,23 +18,13 @@
  */
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
-import net.sf.saxon.xpath.StandaloneContext;
-import net.sf.saxon.xpath.XPathFunctionLibrary;
-import net.sf.saxon.trans.Variable;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.StaticError;
-import net.sf.saxon.om.QNameException;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.expr.VariableReference;
-
-import javax.xml.namespace.QName;
-
-import org.apache.ode.utils.Namespaces;
-
 import java.util.List;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.xpath.JAXPXPathStaticContext;
+import net.sf.saxon.xpath.XPathFunctionLibrary;
 
 /**
  * Hooks on Saxon StandaloneContext to be notified when the compilation
@@ -43,7 +33,7 @@ import java.util.List;
  * at runtime.
  * @author mriou <mriou at apache dot org>
  */
-public class SaxonContext extends StandaloneContext {
+public class SaxonContext extends JAXPXPathStaticContext {
 
     private JaxpVariableResolver _varResolver;
     private JaxpFunctionResolver _funcResolver;
@@ -66,46 +56,61 @@ public class SaxonContext extends StandaloneContext {
 
         oxpfl.setXPathFunctionResolver(_funcResolver);
         ((FunctionLibraryList)getFunctionLibrary()).addFunctionLibrary(oxpfl);
+        
+        setXPathFunctionResolver(funcResolver);
+        setXPathVariableResolver(varResolver);
 
         _varResolver = varResolver;
         _funcResolver = funcResolver;
     }
+    
+    // The following methods don't apply to the JAXPXPathStaticContext interface.
 
-    public Variable declareVariable(String qname, Object initialValue) throws XPathException {
-        String prefix;
-        String localName;
-        final NameChecker checker = getConfiguration().getNameChecker();
-        try {
-            String[] parts = checker.getQNameParts(qname);
-            prefix = parts[0];
-            localName = parts[1];
-        } catch (QNameException err) {
-            throw new StaticError("Invalid QName for variable: " + qname);
-        }
-        String uri = "";
-        if (!("".equals(prefix))) {
-            uri = getURIForPrefix(prefix);
-        }
+//    public Variable declareVariable(String qname, Object initialValue) throws XPathException {
+//        String prefix;
+//        String localName;
+//        final NameChecker checker = getConfiguration().getNameChecker();
+//        try {
+//            String[] parts = checker.getQNameParts(qname);
+//            prefix = parts[0];
+//            localName = parts[1];
+//        } catch (QNameException err) {
+//            throw new StaticError("Invalid QName for variable: " + qname);
+//        }
+//        String uri = "";
+//        if (!("".equals(prefix))) {
+//            uri = getURIForPrefix(prefix);
+//        }
+//
+//        _varResolver.resolveVariable(new QName(uri, localName, prefix));
+//
+//        return super.declareVariable(qname, initialValue);
+//    }
 
-        _varResolver.resolveVariable(new QName(uri, localName, prefix));
-
-        return super.declareVariable(qname, initialValue);
-    }
-
-    public VariableReference bindVariable(int fingerprint) throws StaticError {
-        String localName = getNamePool().getLocalName(fingerprint);
-        String prefix = getNamePool().getPrefix(fingerprint);
-        String ns = getNamePool().getURI(fingerprint);
-        // The prefix is lost by compilation, hardcoding it from the ns.
-        if (Namespaces.ODE_EXTENSION_NS.equals(ns)) prefix = "ode";
-        if (prefix != null && prefix.length() > 0) prefix = prefix + ":";
-        try {
-            declareVariable(prefix + localName, null);
-        } catch (XPathException e) {
-            throw new StaticError(e);
-        }
-        return super.bindVariable(fingerprint);
-    }
-
+//    public VariableReference bindVariable(int fingerprint) throws StaticError {
+//        String localName = getNamePool().getLocalName(fingerprint);
+//        String prefix = getNamePool().getPrefix(fingerprint);
+//        String ns = getNamePool().getURI(fingerprint);
+//        // The prefix is lost by compilation, hardcoding it from the ns.
+//        if (Namespaces.ODE_EXTENSION_NS.equals(ns)) prefix = "ode";
+//        if (prefix != null && prefix.length() > 0) prefix = prefix + ":";
+//        try {
+//            declareVariable(prefix + localName, null);
+//        } catch (XPathException e) {
+//            throw new StaticError(e);
+//        }
+////        return super.bindVariable(fingerprint);
+//        return null;
+//    }
+    
+//   public VariableReference bindVariable(StructuredQName qName) {
+//	   // The prefix is lost by compilation, hardcoding it from the ns.
+//	   String prefix = qName.getPrefix();
+//	   String ns = qName.getNamespaceURI();
+//	   if (prefix == null && Namespaces.ODE_EXTENSION_NS.equals(ns)) {
+//		   qName = new StructuredQName("ode", ns, qName.getLocalName());
+//	   }
+//	   return super.bindVariable(qName);
+//   }
 
 }

@@ -18,10 +18,11 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
-    @Test public void testComposeUrl() throws Throwable {
+	@Test public void testComposeUrl() throws Throwable {
         go("/bpel/2.0/TestComposeUrl");
     }
     @Test public void testCombineUrl() throws Throwable {
@@ -54,7 +55,7 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testSimpleVariableType() throws Throwable {
         go("/bpel/2.0/TestSimpleVariableType");
     }
-    @Test public void testXslTransform() throws Throwable {
+   @Test public void testXslTransform() throws Throwable {
         go("/bpel/2.0/TestXslTransform");
     }
     @Test public void testSplit() throws Throwable {
@@ -74,5 +75,8 @@ public class DataHandling20Test extends BPELTestAbstract {
     }
     @Test public void testAssignMissingData() throws Throwable {
       go("/bpel/2.0/TestAssignMissingData");
+    }
+    @Test public void testXQueryExpression() throws Throwable {
+        go("/bpel/2.0/TestXQueryExpression");
     }
 }
