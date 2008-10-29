@@ -18,10 +18,13 @@
  */
 package org.apache.ode.bpel.compiler.api;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
@@ -133,6 +136,7 @@ public interface CompilerContext {
     List<OActivity> getActivityStack();
 
     OActivity getCurrent();
-
+    
+    Map<URI, Source> getSchemaSources();
 
 }

@@ -19,7 +19,20 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathVariableResolver;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.dom.DocumentWrapper;
+import net.sf.saxon.dom.NodeWrapper;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.DateTimeValue;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -32,12 +45,9 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathVariableResolver;
-import java.util.Calendar;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -48,10 +58,12 @@ public class JaxpVariableResolver implements XPathVariableResolver {
 
     private EvaluationContext _ectx;
     private OXPath10ExpressionBPEL20 _oxpath;
+    private Configuration _config;
 
-    public JaxpVariableResolver(EvaluationContext ectx, OXPath10ExpressionBPEL20 oxpath) {
+    public JaxpVariableResolver(EvaluationContext ectx, OXPath10ExpressionBPEL20 oxpath, Configuration config) {
         _ectx = ectx;
         _oxpath = oxpath;
+        _config = config;
     }
 
     public Object resolveVariable(QName variableName) {
@@ -92,7 +104,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             OMessageVarType.Part part = partName == null ? null : ((OMessageVarType)variable.type).parts.get(partName);
 
             try{
-                Node variableNode = _ectx.readVariable(variable, part);
+                final Node variableNode = _ectx.readVariable(variable, part);
                 if (variableNode == null)
                     throw new FaultException(variable.getOwner().constants.qnSelectionFailure,
                             "Unknown variable " + variableName.getLocalPart());
@@ -103,10 +115,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                         return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
                 }
 
-                // Saxon expects a node list, this nodelist should contain exactly one item, the attribute
-                // value
-                return new SingletonNodeList(variableNode);
-                
+                // Saxon used to expect a node list, but now a regular node will suffice.
+                return variableNode;
             }catch(FaultException e){
                 throw new WrappedResolverException(e);
             }
@@ -114,43 +124,33 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     }
     
     private Object getSimpleContent(Node simpleNode, QName type) {
+    	Document doc = (simpleNode instanceof Document) ? ((Document) simpleNode) : simpleNode
+              .getOwnerDocument();
         String text = simpleNode.getTextContent();
         try {
     		Object jobj = XSTypes.toJavaObject(type,text);
             // Saxon wants its own dateTime type and doesn't like Calendar or Date
-            if (jobj instanceof Calendar) return new DateTimeValue((Calendar) jobj, true);
-            else return jobj;
+            if (jobj instanceof Calendar) {
+            	return new DateTimeValue((Calendar) jobj, true);
+            } else {
+            	// return the value wrapped in a text node
+                return doc.createTextNode(jobj.toString());
+            }
         } catch (Exception e) { }
-        // Elegant way failed, trying brute force
-    	try {
-    		return Integer.valueOf(text);
-    	} catch (NumberFormatException e) { }
-    	try {
-    		return Double.valueOf(text);
-    	} catch (NumberFormatException e) { }
+        // Elegant way failed, trying brute force 
+        // Actually, we don't want to return simple types, so no more brute force
+    	// try {
+    	//	return Integer.valueOf(text);
+    	//} catch (NumberFormatException e) { }
+    	//try {
+    	//	return Double.valueOf(text);
+    	//} catch (NumberFormatException e) { }
+        
         // Remember: always a node set
         if (simpleNode.getParentNode() != null)
             return simpleNode.getParentNode().getChildNodes();
-        else return text;
-    }
-
-    
-    private static class SingletonNodeList implements NodeList {
-        private Node _node;
-        
-        SingletonNodeList(Node node) {
-            _node = node;
+        else {        	
+        	return doc.createTextNode(text);
         }
-        
-        public Node item(int index) {
-            if (index != 0)
-                throw new IndexOutOfBoundsException(""+index);
-            return _node;
-        }
-
-        public int getLength() {
-            return 1;
-        }
-        
     }
 }

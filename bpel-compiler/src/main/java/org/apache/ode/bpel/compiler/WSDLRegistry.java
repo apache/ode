@@ -40,6 +40,8 @@ import org.xml.sax.InputSource;
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+
 import java.io.StringReader;
 import java.io.IOException;
 import java.net.URI;
@@ -59,6 +61,7 @@ class WSDLRegistry {
 
     private final Map<URI, byte[]> _schemas = new HashMap<URI,byte[]>();
     private final Map<URI, String> _internalSchemas = new HashMap<URI, String>();
+    private final Map<URI, Document> _documentSchemas = new HashMap<URI, Document>();
 
     private SchemaModel _model;
 
@@ -208,8 +211,10 @@ class WSDLRegistry {
                         try {
                             Document doc = DOMUtils.parse(new InputSource(new StringReader(schema)));
                             String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
-                            if (schemaTargetNS != null && schemaTargetNS.length() > 0)
+                            if (schemaTargetNS != null && schemaTargetNS.length() > 0) {
                                 _internalSchemas.put(new URI(schemaTargetNS), schema);
+                                _documentSchemas.put(new URI(schemaTargetNS), doc);
+                            }
                         } catch (Exception e) {
                             throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
                         }
@@ -290,5 +295,9 @@ class WSDLRegistry {
         }
         return null;
     }
+
+	Map<URI, Document> getSchemaDocuments() {
+		return _documentSchemas;
+	}
 
 }
