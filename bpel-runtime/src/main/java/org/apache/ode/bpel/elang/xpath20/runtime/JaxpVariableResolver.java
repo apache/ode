@@ -132,6 +132,18 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             // Saxon wants its own dateTime type and doesn't like Calendar or Date
             if (jobj instanceof Calendar) {
             	return new DateTimeValue((Calendar) jobj, true);
+            } else if (jobj instanceof Long) {
+            	 try {
+            		return Long.valueOf(text);
+            	} catch (NumberFormatException e) { }
+        	} else if (jobj instanceof Double) {
+            	try {
+            		return Double.valueOf(text);
+            	} catch (NumberFormatException e) { }
+        	} else if (jobj instanceof Integer) {
+            	try {
+            		return Integer.valueOf(text);
+            	} catch (NumberFormatException e) { }
             } else {
             	// return the value wrapped in a text node
                 return doc.createTextNode(jobj.toString());
@@ -139,12 +151,12 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         } catch (Exception e) { }
         // Elegant way failed, trying brute force 
         // Actually, we don't want to return simple types, so no more brute force
-    	// try {
-    	//	return Integer.valueOf(text);
-    	//} catch (NumberFormatException e) { }
-    	//try {
-    	//	return Double.valueOf(text);
-    	//} catch (NumberFormatException e) { }
+        try {
+    		return Integer.valueOf(text);
+    	} catch (NumberFormatException e) { }
+    	try {
+    		return Double.valueOf(text);
+    	} catch (NumberFormatException e) { }
         
         // Remember: always a node set
         if (simpleNode.getParentNode() != null)
