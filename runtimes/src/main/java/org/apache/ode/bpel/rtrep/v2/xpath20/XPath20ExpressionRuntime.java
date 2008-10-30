@@ -21,6 +21,8 @@ package org.apache.ode.bpel.rtrep.v2.xpath20;
 import net.sf.saxon.trans.DynamicError;
 import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.xpath.XPathEvaluator;
+import net.sf.saxon.xpath.XPathFactoryImpl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -176,6 +178,12 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
             // Just checking that the expression is valid
             XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
+            Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
+            // Create step nodes in XPath in case it is incompletely instantiated 
+            if (oxpath20.insertMissingData) {
+            	XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, xpe.getStaticContext().getNamePool());
+                modifier.insertMissingData(expr, ctx.getRootNode());
+            }
 
             Object evalResult = expr.evaluate(ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode(), type);
             if (evalResult != null && __log.isDebugEnabled()) {

@@ -380,6 +380,7 @@ class ASSIGN extends ACTIVITY {
                         new EvaluationContextProxy(propRef.getVariable(), lvalue));
             } else if (ocopy.to instanceof OAssign.LValueExpression) {
                 OAssign.LValueExpression lexpr = (OAssign.LValueExpression) ocopy.to;
+	            lexpr.setInsertMissingToData(ocopy.insertMissingToData);
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
