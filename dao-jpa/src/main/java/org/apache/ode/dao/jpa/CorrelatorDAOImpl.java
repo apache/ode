@@ -36,7 +36,7 @@ import java.util.List;
 @NamedQueries({
     @NamedQuery(name="RouteByCKey", query="SELECT route " +
             "FROM MessageRouteDAOImpl as route " +
-            "WHERE route._correlationKey = :ckey " +
+            "WHERE route._correlationKey like :ckey " +
                    "and route._correlator._process._processType = :ptype " +
                    "and route._correlator._correlatorKey = :corrkey")
         })
@@ -60,9 +60,9 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         _process = process;
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey) {
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey, String routePolicy) {
         MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,
-                routeGroupId, index, (ProcessInstanceDAOImpl) target, this);
+                routeGroupId, index, (ProcessInstanceDAOImpl) target, this, routePolicy);
         _routes.add(mr);
     }
 
@@ -88,15 +88,27 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
     }
 
-    public MessageRouteDAO findRoute(CorrelationKey correlationKey) {
+    public List<MessageRouteDAO> findRoute(CorrelationKey correlationKey) {
         Query qry = getEM().createNamedQuery("RouteByCKey");
-        qry.setParameter("ckey", correlationKey.toCanonicalString());
+        qry.setParameter("ckey", correlationKey == null ? "%" : correlationKey.toCanonicalString());
         qry.setParameter("ptype", _process.getType().toString());
         qry.setParameter("corrkey", _correlatorKey);
         List<MessageRouteDAO> routes = (List<MessageRouteDAO>) qry.getResultList();
         if (routes.size() > 0) {
-          return routes.get(0);
-        } else return null;
+        	List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
+            for (int i = 0; i < routes.size(); i++) {
+            	MessageRouteDAO route = routes.get(i);
+            	if ("all".equals(route.getRoute()) || 
+            			("one".equals(route.getRoute()) && !targets.contains(route.getTargetInstance()))) {
+            		targets.add(route.getTargetInstance());
+            	} else {
+            		routes.remove(i);
+            	}
+            }
+            return routes;
+        } else {
+        	return null;
+        }
     }
 
     public String getCorrelatorId() {

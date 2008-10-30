@@ -1272,6 +1272,7 @@ abstract class BpelCompiler implements CompilerContext {
                 oevent.partnerLink = resolvePartnerLink(onEvent.getPartnerLink());
                 oevent.operation = resolveMyRoleOperation(oevent.partnerLink, onEvent.getOperation());
                 oevent.messageExchangeId = onEvent.getMessageExchangeId();
+                oevent.route = onEvent.getRoute();
 
                 if (onEvent.getPortType() != null
                         && !onEvent.getPortType().equals(oevent.partnerLink.myRolePortType.getQName()))

@@ -51,8 +51,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
     protected EndpointReference _epr;
 
     protected MessageExchangeDAO _dao;
-
-    /**
+    
+	/**
      * Constructor: requires the minimal information for a message exchange.
      */
     MessageExchangeImpl(BpelEngineImpl engine,
@@ -224,6 +224,14 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return getDAO().getPropertyNames();
     }
 
+    public int getSubscriberCount() {
+    	return getDAO().getSubscriberCount();    	
+    }
+    
+    public void setSubscriberCount(int subscriberCount) {
+    	getDAO().setSubscriberCount(subscriberCount);
+    }
+    
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         _dao.release();

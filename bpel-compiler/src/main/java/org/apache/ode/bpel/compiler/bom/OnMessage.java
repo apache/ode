@@ -67,6 +67,10 @@ public class OnMessage extends BpelObject implements Communication {
     public String getMessageExchangeId() {
         return getAttribute("messageExchange", null);
     }
+    
+    public String getRoute() {
+    	return getAttribute("route", "one");
+    }
 
     /**
      * Get the activity associated with the event (i.e. the activity that is

@@ -378,7 +378,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             CorrelatorDAO correlator = correlators.get(i);
             Selector selector = selectors[i];
 
-            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKey);
+            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKey, selector.route);
             scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKey);
 
             if (BpelProcess.__log.isDebugEnabled()) {
@@ -740,6 +740,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
                     mex.getMessageExchangeId(), partnerEndpoint.serviceName,
                     operation.getName(), mex.getMessageExchangeId());
+            
+            if (myRoleMex instanceof BrokeredMyRoleMessageExchangeImpl) {
+            	mex.setSubscriberCount(((BrokeredMyRoleMessageExchangeImpl) myRoleMex).getSubscriberCount());
+            }
 
             if (BpelProcess.__log.isDebugEnabled()) {
                 __log.debug("Invoking in a p2p interaction, partnerrole " + mex + " - myrole " + myRoleMex);
@@ -1151,6 +1155,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         switch (status) {
             case ASYNC:
             case REQUEST:
+            // In the case of pub-sub, the status may already be OK. 
+	        case COMPLETED_OK:
                 MessageDAO request = dao.getRequest();
                 if (request == null) {
                     // this also should not happen
@@ -1340,8 +1346,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
         // So we want to acquire the lock before we do anthing else.
-        MessageRouteDAO mroute = correlator.findRoute(ckey);
-        if (mroute == null) {
+        List<MessageRouteDAO> mroutes = correlator.findRoute(ckey);
+        if (mroutes == null || mroutes.size() == 0) {
             // Ok, this means that a message arrived before we did, so nothing to do.
             __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
             return;
@@ -1352,19 +1358,25 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
 
-            // We have a match, so we can get rid of the routing entries.
-            correlator.removeRoutes(mroute.getGroupId(),_dao);
-
-            // Found message matching one of our selectors.
-            if (BpelProcess.__log.isDebugEnabled()) {
-                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
-                        + " on CKEY " + ckey);
+            Set<String> groupIds = new HashSet<String>();
+            for (MessageRouteDAO mroute : mroutes) {
+	            // We have a match, so we can get rid of the routing entries.
+            	groupIds.add(mroute.getGroupId());
+	
+	            // Found message matching one of our selectors.
+	            if (BpelProcess.__log.isDebugEnabled()) {
+	                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
+	                        + " on CKEY " + ckey);
+	            }
+	
+	            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
+	
+	            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
+	            execute();
             }
-
-            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
-
-            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
-            execute();
+            for (String groupId : groupIds) {
+	            correlator.removeRoutes(groupId, _dao);
+            }
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 

@@ -36,12 +36,18 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -190,22 +196,27 @@ public class BpelProcess {
 
             // Ideally, if Java supported closure, the routing code would return null or the appropriate
             // closure to handle the route.
-            PartnerLinkMyRoleImpl.RoutingInfo routing = null;
+            List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
             boolean routed = false;
             for (PartnerLinkMyRoleImpl target : targets) {
-                routing = target.findRoute(mex);
+                routings = target.findRoute(mex);
                 boolean createInstance = target.isCreateInstance(mex);
 
                 if (mex.getStatus() != MessageExchange.Status.FAILURE) {
-                    if (routing.messageRoute == null && createInstance) {
-                        // No route but we can create a new instance
-                        target.invokeNewInstance(mex, routing);
-                        routed = true; break;
-                    } else if (routing.messageRoute != null) {
-                        // Found a route, hitting it
-                        target.invokeInstance(mex, routing);
-                        routed = true; break;
-                    }
+                	for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
+	                    if (routing.messageRoute == null && createInstance) {
+	                        // No route but we can create a new instance
+	                        target.invokeNewInstance(mex, routing);
+	                        routed = true; 
+	                    } else if (routing.messageRoute != null) {
+	                        // Found a route, hitting it
+	                        target.invokeInstance(mex, routing);
+	                        routed = true; 
+	                    }
+                	}
+                }
+                if (routed) {
+                	break;
                 }
             }
 
@@ -214,7 +225,7 @@ public class BpelProcess {
                 // TODO this is kind of hackish when no match and more than one myrole is selected.
                 // we save the routing on the last myrole
                 // actually the message queue should be attached to the instance instead of the correlator
-                targets.get(targets.size()-1).noRoutingMatch(mex, routing);
+                targets.get(targets.size()-1).noRoutingMatch(mex, routings);
             }
 
             // Now we have to update our message exchange status. If the <reply> was not hit during the
@@ -551,23 +562,27 @@ public class BpelProcess {
     }
 
     private boolean isShareable(Endpoint endpoint) {
-    	if (!_pconf.isSharedService(endpoint.serviceName)) {
-    		return false;
-    	}
-    	PartnerLinkMyRoleImpl partnerLink = null;
-    	if (_endpointToMyRoleMap == null) {
-    		return false;
-    	}
-    	for (Map.Entry<PartnerLinkMyRoleImpl, Endpoint> entry : _endpointToMyRoleMap.entrySet()) {
-    		if (entry.getValue().equals(endpoint)) {
-    			partnerLink = entry.getKey();
-    			break;
-    		}
-    	}
-    	if (partnerLink == null) {
-    		return false;    	
-    	}
-    	return partnerLink.isOneWayOnly();
+    	return _pconf.isSharedService(endpoint.serviceName);
+
+// 		Can't use the logic below since it assumes process is loaded.
+//
+//    	if (!_pconf.isSharedService(endpoint.serviceName)) {
+//    		return false;
+//    	}
+//    	PartnerLinkMyRoleImpl partnerLink = null;
+//    	if (_endpointToMyRoleMap == null) {
+//    		return false;
+//    	}
+//    	for (Map.Entry<PartnerLinkMyRoleImpl, Endpoint> entry : _endpointToMyRoleMap.entrySet()) {
+//    		if (entry.getValue().equals(endpoint)) {
+//    			partnerLink = entry.getKey();
+//    			break;
+//    		}
+//    	}
+//    	if (partnerLink == null) {
+//    		return false;    	
+//    	}
+//    	return partnerLink.isOneWayOnly();
     }
     
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {

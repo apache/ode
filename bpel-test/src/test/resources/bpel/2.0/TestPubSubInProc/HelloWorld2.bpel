@@ -37,6 +37,7 @@
     
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
+     <variable name="pingVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
 
@@ -47,8 +48,18 @@
           portType="test:HelloPortType"
           operation="hello"
           variable="myVar"
-          createInstance="yes"/>
+          createInstance="yes"
+		  messageExchange="hello2"/>
 
+       <receive
+          name="ping"
+          partnerLink="helloPartnerLink"
+          portType="test:HelloPortType"
+          operation="ping"
+          variable="pingVar"
+          createInstance="no"
+          route="all"/>
+          
       <assign name="assign1">
           <copy>
               <from variable="myVar" part="TestPart"/>
@@ -59,10 +70,15 @@
               <to variable="myVar" part="TestPart"/>
           </copy>
       </assign>
+	  
+		<wait>
+			<for>'PT5S'</for>
+		</wait>
        <reply name="end"  
               partnerLink="helloPartnerLink"
               portType="test:HelloPortType" 
               operation="hello"
-              variable="myVar"/>
+              variable="myVar"
+			  messageExchange="hello2"/>
    </sequence>
 </process>

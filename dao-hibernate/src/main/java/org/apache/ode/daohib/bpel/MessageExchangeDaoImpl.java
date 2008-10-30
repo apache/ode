@@ -337,6 +337,19 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         _hself.setPipedMessageExchangeId(mexId);
     }
 
+
+	public int getSubscriberCount() {
+		return _hself.getSubscriberCount();
+	}
+	
+	public void setSubscriberCount(int subscriberCount) {
+		_hself.setSubscriberCount(subscriberCount);		
+	}
+
+	public void incrementSubscriberCount() {
+		_hself.incrementSubscriberCount();
+	}
+	
     public void release() {
         // no-op for now, could be used to do some cleanup
     }

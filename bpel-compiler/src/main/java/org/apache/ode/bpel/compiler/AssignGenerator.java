@@ -67,6 +67,7 @@ class AssignGenerator extends DefaultActivityGenerator {
             ocopy.ignoreMissingFromData = scopy.isIgnoreMissingFromData();
             ocopy.ignoreUninitializedFromVariable = scopy.isIgnoreUninitializedFromVariable();
             ocopy.insertMissingToData = scopy.isInsertMissingToData();
+            ocopy.insertMissingToData = scopy.isInsertMissingToData();
             ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
                     source.getExtensibilityElements());
             try {

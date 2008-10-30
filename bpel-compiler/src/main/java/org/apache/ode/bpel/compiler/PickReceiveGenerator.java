@@ -63,7 +63,7 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
      * @return
      */
     protected OPickReceive.OnMessage compileOnMessage(String varname, String plink, String operation,
-            String messageExchangeId, QName portType, boolean createInstance, Collection<Correlation> correlations) {
+            String messageExchangeId, QName portType, boolean createInstance, Collection<Correlation> correlations, String route) {
 
         OPickReceive.OnMessage onMessage = new OPickReceive.OnMessage(_context.getOProcess());
         onMessage.partnerLink = _context.resolvePartnerLink(plink);
@@ -72,6 +72,7 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
             onMessage.variable = _context.resolveMessageVariable(varname, onMessage.operation.getInput().getMessage()
                     .getQName());
         onMessage.messageExchangeId = messageExchangeId;
+        onMessage.route = route;
 
         if (portType != null && !portType.equals(onMessage.partnerLink.myRolePortType.getQName()))
             throw new CompilationException(__cmsgsGeneral.errPortTypeMismatch(portType,

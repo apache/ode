@@ -59,6 +59,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
     private String pipedMessageExchangeId;
+    private int subscriberCount;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -271,6 +272,18 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         this.pipedMessageExchangeId = pipedMessageExchangeId;
     }
 
+	public int getSubscriberCount() {
+		return subscriberCount;
+	}
+	
+	public void setSubscriberCount(int subscriberCount) {
+		this.subscriberCount = subscriberCount;
+	}
+
+	public void incrementSubscriberCount() {
+		++subscriberCount;
+	}
+	
     public void release() {
         instance = null;
         process = null;
@@ -283,4 +296,5 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
     }
+
 }

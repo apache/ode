@@ -31,6 +31,7 @@ public class HCorrelatorSelector extends HObject {
     private HCorrelator _correlator;
     private String _correlationKey;
     private String _processType;
+    private String _routePolicy;
     
     /**
      * @hibernate.many-to-one column="PIID" not-null="true"
@@ -98,6 +99,17 @@ public class HCorrelatorSelector extends HObject {
 
     public void setProcessType(String _processType) {
         this._processType = _processType;
+    }
+
+    /**
+     * @hibernate.property column="ROUTE_POLICY" not-null="true"
+     */
+    public String getRoute() {
+        return _routePolicy;
+    }
+
+    public void setRoutePolicy(String _routePolicy) {
+        this._routePolicy = _routePolicy;
     }
 
     /**

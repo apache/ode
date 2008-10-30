@@ -38,7 +38,8 @@ class ReceiveGenerator extends PickReceiveGenerator {
             rcvDef.getMessageExchangeId(),
             rcvDef.getPortType(),
             rcvDef.isCreateInstance(),
-            rcvDef.getCorrelations());
+            rcvDef.getCorrelations(),
+            rcvDef.getRoute());
 
     onMessage.activity = new OEmpty(_context.getOProcess(), opick);
     opick.onMessages.add(onMessage);

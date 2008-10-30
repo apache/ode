@@ -441,6 +441,14 @@
 				<xsd:attribute name="operation" type="xsd-derived:NCName" use="optional"/>
 				<xsd:attribute name="messageExchange" type="xsd-derived:NCName" use="optional"/>
 				<xsd:attribute name="variable" type="BPELVariableName" use="optional"/>
+				<xsd:attribute name="route" use="optional" default="one">
+                    <xsd:simpleType>
+                        <xs:restriction base="xs:NMTOKEN">
+                            <xs:enumeration value="all"/>
+                            <xs:enumeration value="one"/>
+                        </xs:restriction>
+                    </xsd:simpleType>
+                </xsd:attribute>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
@@ -973,6 +981,13 @@
 				<xsd:attribute name="variable" type="BPELVariableName" use="optional"/>
 				<xsd:attribute name="createInstance" type="tBoolean" default="no"/>
 				<xsd:attribute name="messageExchange" type="xsd-derived:NCName" use="optional"/>
+				<xsd:attribute name="route" use="optional" default="one">
+                    <xsd:simpleType>
+                        <xs:restriction base="xs:NMTOKEN">
+                            <xs:enumeration value="all"/>
+                            <xs:enumeration value="one"/>
+                        </xs:restriction>
+                    </xsd:simpleType>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>

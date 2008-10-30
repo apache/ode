@@ -31,12 +31,14 @@ class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
   String _groupId;
   CorrelationKey _ckey;
   int _idx;
+  String _route;
 
-  MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKey ckey, int idx) {
+  MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKey ckey, int idx, String routePolicy) {
     _instance = owner;
     _groupId = groupId;
     _ckey = ckey;
     _idx = idx;
+    _route = routePolicy;
   }
 
   public ProcessInstanceDAO getTargetInstance() {
@@ -49,5 +51,9 @@ class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
 
   public int getIndex() {
     return _idx;
+  }
+  
+  public String getRoute() {
+	  return _route;
   }
 }

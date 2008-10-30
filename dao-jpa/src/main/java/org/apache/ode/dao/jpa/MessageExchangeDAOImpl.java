@@ -91,6 +91,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     private String _correlationKeys;
     @Basic @Column(name="PIPED_ID")
     private String _pipedMessageExchangeId;
+    @Basic @Column(name="SUBSCRIBER_COUNT")
+    private int _subscriberCount;
 
     @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<MexProperty> _props = new ArrayList<MexProperty>();
@@ -329,11 +331,6 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
         return correlationKeys;
     }
 
-
-    public void release() {
-        // no-op for now, could be used to do some cleanup
-    }
-
     public CorrelatorDAOImpl getCorrelator() {
         return _correlator;
     }
@@ -341,4 +338,21 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     public void setCorrelator(CorrelatorDAOImpl correlator) {
         _correlator = correlator;
     }
+
+	public int getSubscriberCount() {
+		return _subscriberCount;
+	}
+	
+	public void setSubscriberCount(int subscriberCount) {
+		this._subscriberCount = subscriberCount;
+	}
+
+	public void incrementSubscriberCount() {
+		++_subscriberCount;
+	}
+	
+    public void release() {
+        // no-op for now, could be used to do some cleanup
+    }
+
 }

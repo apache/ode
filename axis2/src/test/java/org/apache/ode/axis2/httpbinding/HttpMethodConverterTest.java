@@ -346,5 +346,12 @@ public class HttpMethodConverterTest extends TestCase {
         public void setProperty(String key, String value) {
 
         }
+
+		public int getSubscriberCount() {
+			return 0;
+		}
+
+		public void setSubscriberCount(int subscriberCount) {
+		}
     }
 }
