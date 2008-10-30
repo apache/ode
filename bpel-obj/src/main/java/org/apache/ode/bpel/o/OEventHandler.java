@@ -64,7 +64,8 @@ public class OEventHandler extends OAgent {
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";
-
+        
+        public String route = "one";
 
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();

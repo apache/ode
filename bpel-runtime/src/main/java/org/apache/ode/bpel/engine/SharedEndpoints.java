@@ -90,4 +90,18 @@ public class SharedEndpoints {
     public boolean decrementReferenceCount(Endpoint endpoint) {
         return _referenceCounts.remove(endpoint);
     }
+    
+    public int getReferenceCount(EndpointReference epr) {
+    	int referenceCount = 0;
+    	for (Endpoint endpoint : _eprs.keySet()) {
+    		if (_eprs.get(endpoint).equals(epr)) {
+    			for (Endpoint reference : _referenceCounts) {
+    				if (reference.equals(endpoint)) {
+    					++referenceCount;
+    				}
+    			}
+    		}
+    	}
+    	return referenceCount;    	
+    }
 }

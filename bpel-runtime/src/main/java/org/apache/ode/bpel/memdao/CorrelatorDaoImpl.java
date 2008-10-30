@@ -59,7 +59,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         for (Iterator i = _messages.iterator(); i.hasNext();) {
             MsgQueueEntry mqe = (MsgQueueEntry)i.next();
             Set<CorrelationKey> keyset = (Set<CorrelationKey>) CollectionUtils.makeCollection(HashSet.class, mqe.keys);
-            if ((key == null) || keyset.contains(key)) {
+            if ((key == null) || (key.getValues().length == 0) || keyset.contains(key)) {
                 i.remove();
                 return mqe.message;
             }
@@ -70,16 +70,35 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         return null;
     }
 
-    public MessageRouteDAO findRoute(CorrelationKey key) {
+    public List<MessageRouteDAO> findRoute(CorrelationKey key) {
+    	List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+    	
         if (__log.isDebugEnabled()) {
             __log.debug("findRoute: key=" + key);
         }
+        List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
         for (MessageRouteDaoImpl we : _routes) {
-            if ((we._ckey == null && key == null) || (we._ckey != null && key != null && we._ckey.equals(key))) {
-                return we;
-            }
+        	if ("all".equals(we.getRoute())) {
+                if ((we._ckey == null && key == null) ||
+                		((we._ckey != null && key == null) &&
+								(we._ckey.getCSetId() == -1)) ||
+                		 (we._ckey != null && key != null && 
+                				((we._ckey.getCSetId() == -1 && key.getCSetId() == -1) ||                						
+                						we._ckey.equals(key)))) {
+	                routes.add(we);
+	                targets.add(we.getTargetInstance());
+            	}
+        	} else if ("one".equals(we.getRoute())) {
+                if (!targets.contains(we.getTargetInstance()) &&
+                		((we._ckey == null && key == null) || 
+                		 (we._ckey != null && key != null && 
+                				we._ckey.equals(key)))) {
+	                routes.add(we);
+	                targets.add(we.getTargetInstance());
+            	}
+        	}
         }
-        return null;
+        return routes;
     }
 
     public String getCorrelatorId() {
@@ -100,12 +119,12 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         _messages.add(mqe);
     }
 
-    public void addRoute(String routeId,ProcessInstanceDAO target, int idx, CorrelationKey key) {
+    public void addRoute(String routeId,ProcessInstanceDAO target, int idx, CorrelationKey key, String routePolicy) {
         if (__log.isDebugEnabled()) {
             __log.debug("addRoute: target=" + target + " correlationKey=" + key);
         }
 
-        final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx);
+        final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx, routePolicy);
         _conn.defer(new Runnable() {
             public void run() {
                 _routes.add(mr);

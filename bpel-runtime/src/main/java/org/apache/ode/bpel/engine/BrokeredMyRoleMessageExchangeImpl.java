@@ -47,7 +47,7 @@ public class BrokeredMyRoleMessageExchangeImpl
     	Future myFuture = null;
         for (MyRoleMessageExchange subscriber : subscribers) {
             Future theirFuture = subscriber.invoke(request);
-            if (myFuture == null) {
+            if (subscriber == template) {
             	myFuture = theirFuture;
             }
         }
@@ -74,5 +74,27 @@ public class BrokeredMyRoleMessageExchangeImpl
     @Override
     public Message getResponse() {
         return template.getResponse();
+    }
+    
+    @Override
+    public Status getStatus() {
+    	return template.getStatus();
+    }
+    
+    @Override
+    public CorrelationStatus getCorrelationStatus() {
+    	return template.getCorrelationStatus();
+    }
+    
+    @Override
+    public int getSubscriberCount() {
+    	return subscribers != null ? subscribers.size() : 0;
+    }
+    
+    @Override
+    public void setSubscriberCount(int subscriberCount) {
+    	for (MyRoleMessageExchange subscriber : subscribers) {
+	    	subscriber.setSubscriberCount(subscriberCount);
+    	}
     }
 }

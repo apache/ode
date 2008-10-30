@@ -88,7 +88,9 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return _plinkDef.isCreateInstanceOperation(operation);
     }
 
-    public RoutingInfo findRoute(MyRoleMessageExchangeImpl mex) {
+    public List<RoutingInfo> findRoute(MyRoleMessageExchangeImpl mex) {
+    	List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
+    	
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
                     "messageExchange", mex }));
@@ -110,7 +112,6 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
 
         CorrelationKey[] keys;
-        MessageRouteDAO messageRoute = null;
 
         // We need to compute the correlation keys (based on the operation
         // we can  infer which correlation keys to compute - this is merely a set
@@ -126,7 +127,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             mex.setFailure(MessageExchange.FailureType.FORMAT_ERROR, ime.getMessage(), null);
             return null;
         }
-
+        
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
@@ -135,21 +136,29 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                     + " partnerSessionId=" + partnerSessionId);
         }
 
-        CorrelationKey matchedKey = null;
-
+        if (keys == null || keys.length == 0) {
+        	keys = new CorrelationKey[] { null };
+        }
+        
         // Try to find a route for one of our keys.
         for (CorrelationKey key : keys) {
-            messageRoute = correlator.findRoute(key);
-            if (messageRoute != null) {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
+            List<MessageRouteDAO> messageRoutes = correlator.findRoute(key);
+            if (messageRoutes != null && messageRoutes.size() > 0) {
+                for (MessageRouteDAO messageRoute : messageRoutes) {
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
+                    }
+	                routingInfos.add(new RoutingInfo(messageRoute, key, correlator, keys));
                 }
-                matchedKey = key;
                 break;
             }
         }
+        
+        if (routingInfos.size() == 0) {
+        	routingInfos.add(new RoutingInfo(null, null, correlator, keys));
+        }
 
-        return new RoutingInfo(messageRoute, matchedKey, correlator, keys);
+        return routingInfos;
     }
 
     class RoutingInfo {
@@ -237,27 +246,32 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         instance.execute();
     }
 
-    public void noRoutingMatch(MyRoleMessageExchangeImpl mex, RoutingInfo routing) {
-        if (__log.isDebugEnabled()) {
-            __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": SAVING to DB (no match) ");
-        }
-
+    public void noRoutingMatch(MyRoleMessageExchangeImpl mex, List<RoutingInfo> routings) {
         if (!mex.isAsynchronous()) {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
-
         } else {
-            // send event
-            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-                    .getOperation().getName(), mex.getMessageExchangeId(), routing.keys);
+        	// enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
+        	RoutingInfo routing = 
+        		(routings != null && routings.size() > 0) ? 
+        				routings.get(routings.size() - 1) : null;
+        	if (routing != null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": SAVING to DB (no match) ");
+                }
 
-            evt.setProcessId(_process.getProcessDAO().getProcessId());
-            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
-            _process._debugger.onEvent(evt);
-
-            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
-
-            // No match, means we add message exchange to the queue.
-            routing.correlator.enqueueMessage(mex.getDAO(), routing.keys);
+	            // send event
+	            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
+	                    .getOperation().getName(), mex.getMessageExchangeId(), routing.keys);
+	
+	            evt.setProcessId(_process.getProcessDAO().getProcessId());
+	            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+	            _process._debugger.onEvent(evt);
+	
+	            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
+	
+	            // No match, means we add message exchange to the queue.
+	            routing.correlator.enqueueMessage(mex.getDAO(), routing.keys);
+        	}
         }
     }
 

@@ -145,11 +145,13 @@ class OutstandingRequestManager implements Serializable {
       throw new IllegalArgumentException(errmsg);
     }
 
-    if (entry.mexRef != null) {
-      String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
-      __log.fatal(errmsg);
-      throw new IllegalStateException(errmsg);
-    }
+//    For pub-sub cases, an entry may already be associated with a message
+//    Hence, the sanity check shown below is no longer valid
+//    if (entry.mexRef != null) {
+//      String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
+//      __log.fatal(errmsg);
+//      throw new IllegalStateException(errmsg);
+//    }
 
     entry.mexRef = mexRef;
   }

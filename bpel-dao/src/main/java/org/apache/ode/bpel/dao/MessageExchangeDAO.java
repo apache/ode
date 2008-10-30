@@ -240,6 +240,9 @@ public interface MessageExchangeDAO {
      */
     String getPipedMessageExchangeId();
     void setPipedMessageExchangeId(String mexId);
+    
+    int getSubscriberCount();
+    void setSubscriberCount(int subscriberCount);
 
     void release();
 

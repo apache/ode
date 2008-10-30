@@ -21,6 +21,7 @@ package org.apache.ode.daohib.bpel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,10 +56,10 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
     /** filter for finding a matching selector. */
     private static final String FLTR_SELECTORS = ("from " + HCorrelatorSelector.class.getName()
-            + " hs where hs.correlationKey = ? and hs.processType = ? and hs.correlator.correlatorId = ?").intern();
+            + " hs where hs.correlationKey like ? and hs.processType = ? and hs.correlator.correlatorId = ?").intern();
 
     private static final String LOCK_SELECTORS = "update from " + HCorrelatorSelector.class.getName() +
-        " set lock = lock+1 where correlationKey = ? and processType = ?".intern();
+        " set lock = lock+1 where correlationKey like ? and processType = ?".intern();
     
     /** Query for removing routes. */
     private static final String QRY_DELSELECTORS = "delete from " + HCorrelatorSelector.class.getName()
@@ -104,7 +105,9 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         }
     }
 
-    public MessageRouteDAO findRoute(CorrelationKey key) {
+    public List<MessageRouteDAO> findRoute(CorrelationKey key) {
+    	List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+    	
         entering("CorrelatorDaoImpl.findRoute");
         String hdr = "findRoute(key=" + key + "): ";
         if (__log.isDebugEnabled())
@@ -117,19 +120,30 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // is a much safer alternative.
         String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
         Query lockQry = getSession().createQuery(LOCK_SELECTORS);
-        lockQry.setString(0, key == null ? null : key.toCanonicalString());
+        lockQry.setString(0, key == null ? "%" : key.toCanonicalString());
         lockQry.setString(1, processType);
         if (lockQry.executeUpdate() > 0) {
             
             Query q = getSession().createQuery(FLTR_SELECTORS);
-            q.setString(0, key == null ? null : key.toCanonicalString());
+            q.setString(0, key == null ? "%" : key.toCanonicalString());
             q.setString(1, processType);
             q.setString(2, _hobj.getCorrelatorId());
             q.setLockMode("hs", LockMode.UPGRADE);
 
             HCorrelatorSelector selector;
             try {
-                selector = (HCorrelatorSelector) q.uniqueResult();
+            	List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
+            	Iterator selectors = q.iterate();
+            	while (selectors.hasNext()) {
+                    selector = (HCorrelatorSelector) selectors.next();
+                    if (selector != null) {
+                    	if ("all".equals(selector.getRoute()) || 
+                    			("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                        	routes.add(new MessageRouteDaoImpl(_sm, selector));
+                        	targets.add(selector.getInstance());
+                    	}
+                    }
+            	}
             } catch (Exception ex) {
                 __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
 
@@ -139,8 +153,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
                 Hibernate.close(i);
             }
     
-            __log.debug(hdr + "found " + selector);
-            return selector == null ? null : new MessageRouteDaoImpl(_sm, selector);
+            __log.debug(hdr + "found " + routes);
+            return routes;
         } 
         
         return null;
@@ -177,7 +191,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         return ret;
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int idx, CorrelationKey correlationKey) {
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int idx, CorrelationKey correlationKey, String routePolicy) {
         entering("CorrelatorDaoImpl.addRoute");
         String hdr = "addRoute(" + routeGroupId + ", iid=" + target.getInstanceId() + ", idx=" + idx + ", ckey="
                 + correlationKey + "): ";
@@ -192,6 +206,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setProcessType(target.getProcess().getType().toString());
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
+        hsel.setRoutePolicy(routePolicy);
 //        _hobj.addSelector(hsel);
         getSession().save(hsel);
 

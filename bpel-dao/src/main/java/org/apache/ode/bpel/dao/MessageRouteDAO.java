@@ -35,4 +35,6 @@ public interface MessageRouteDAO  {
   String getGroupId();
 
   int getIndex();
+  
+  String getRoute();
 }

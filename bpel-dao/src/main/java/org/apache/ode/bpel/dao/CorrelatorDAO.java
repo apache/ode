@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.dao;
 
+import java.util.List;
+
 import org.apache.ode.bpel.common.CorrelationKey;
 
 /**
@@ -75,7 +77,7 @@ public interface CorrelatorDAO {
    * @param correlationKey correlation key
    * @return route matching the given correlation key
    */
-  MessageRouteDAO findRoute(CorrelationKey correlationKey);
+  List<MessageRouteDAO> findRoute(CorrelationKey correlationKey);
 
   /**
    * Add a route from the given correlation key to the given process instance.
@@ -84,7 +86,7 @@ public interface CorrelatorDAO {
    * @param index relative order in which the route should be considered
    * @param correlationKey correlation key to match
    */
-  void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey);
+  void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey, String routePolicy);
 
   /**
    * Remove all routes with the given route-group identifier.

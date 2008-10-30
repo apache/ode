@@ -69,6 +69,8 @@ public class OPickReceive extends OActivity{
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";
+        
+        public String route = "one";
 
         public OnMessage(OProcess owner) {
             super(owner);

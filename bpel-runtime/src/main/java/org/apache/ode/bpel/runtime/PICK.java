@@ -103,7 +103,7 @@ class PICK extends ACTIVITY {
                 }
 
                 selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
-                        .getOutput() == null, onMessage.messageExchangeId, key);
+                        .getOutput() == null, onMessage.messageExchangeId, key, onMessage.route);
                 idx++;
             }
 

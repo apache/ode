@@ -71,6 +71,8 @@ public class HMessageExchange extends HObject {
     private String _callee;
 
     private String _pipedMessageExchangeId;
+    
+    private int _subscriberCount;
 
     private Map<String, String> _properties = new HashMap<String, String>();
 
@@ -333,5 +335,17 @@ public class HMessageExchange extends HObject {
 
     public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
         _pipedMessageExchangeId = pipedMessageExchangeId;
+    }
+    
+    public int getSubscriberCount() {
+    	return _subscriberCount;
+    }
+    
+    public void setSubscriberCount(int subscriberCount) {
+    	this._subscriberCount = subscriberCount;
+    }
+    
+    public void incrementSubscriberCount() {
+    	_subscriberCount++;
     }
 }

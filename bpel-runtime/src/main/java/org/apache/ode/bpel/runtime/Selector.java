@@ -32,14 +32,16 @@ public class Selector implements Serializable {
   public final String messageExchangeId;
   public final int idx;
   public final boolean oneWay;
+  public final String route;
 
-  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKey ckey) {
+  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKey ckey, String route) {
     this.idx = idx;
     this.plinkInstance = plinkInstance;
     this.correlationKey = ckey;
     this.opName = opName;
     this.messageExchangeId = mexId;
     this.oneWay = oneWay;
+    this.route = route;
   }
 
   public String toString() {
@@ -49,7 +51,8 @@ public class Selector implements Serializable {
       "opName" ,opName,
       "oneWay", oneWay ? "yes" : "no",
       "mexId", messageExchangeId,
-      "idx", Integer.valueOf(idx)
+      "idx", Integer.valueOf(idx),
+      "route", route
     });
   }
 }

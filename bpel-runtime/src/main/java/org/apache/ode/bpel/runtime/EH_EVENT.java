@@ -128,7 +128,7 @@ class EH_EVENT extends BpelJacobRunnable {
                     assert key != null;
                 }
 
-                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key);
+                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key, _oevent.route);
                 getBpelRuntimeContext().select(pickResponseChannel, null, false, new Selector[] { selector} );
                 instance(new WAITING(pickResponseChannel));
             } catch(FaultException e){

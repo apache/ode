@@ -39,6 +39,7 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
 
     private PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;
+    private int responsesReceived;
     
     PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
             Operation operation, 
@@ -84,6 +85,18 @@ class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements Part
         if (isAsync)
             continueAsync();
 
+    }
+    
+    @Override
+    void setResponse(Message outputMessage) throws BpelEngineException {
+    	// If pub-sub is enabled, we may receive multiple responses. In such cases,
+    	// don't bail out if our status is already set to RESPONSE.
+		if (++responsesReceived > 1) {
+			if (getSubscriberCount() > 1 && getStatus() == Status.RESPONSE) {
+	    		return;
+	    	}
+		}
+    	super.setResponse(outputMessage);
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
