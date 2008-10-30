@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathFunction;
@@ -38,6 +39,7 @@ import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
 
 import net.sf.saxon.dom.NodeWrapper;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
 
 import org.apache.commons.httpclient.URIException;
@@ -62,8 +64,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
-
-import com.sun.jdi.IntegerValue;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -925,6 +925,14 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 	            Element deleteElmt = (Element) children.item(positions[target]);
 	            clonedElmt.removeChild(deleteElmt);
             }
+            // Saxon doesn't like clones with no children, so I'll oblige
+            if (clonedElmt.getChildNodes().getLength() == 0) {
+            	try {
+	            	clonedElmt.appendChild(DOMUtils.toDOMDocument(parentElmt).createTextNode(""));
+            	} catch (TransformerException te) {
+            		throw new XPathFunctionException(te);
+            	}
+            }
             return clonedElmt;
     	}
     }
@@ -1142,7 +1150,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 	    		return Integer.parseInt(extractString(arg));
             } catch (ClassCastException cce) {
             	if (arg instanceof IntegerValue) {
-            		return ((IntegerValue) arg).intValue();
+            		return (int) ((IntegerValue) arg).getDoubleValue();
             	}
                 throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", cce);
         	} catch (NumberFormatException nfe) {

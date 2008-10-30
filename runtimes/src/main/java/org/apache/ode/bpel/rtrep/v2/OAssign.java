@@ -66,6 +66,7 @@ public class OAssign extends OActivity {
         public boolean keepSrcElementName;
         public boolean ignoreMissingFromData;
         public boolean ignoreUninitializedFromVariable;
+        public boolean insertMissingToData;
 
         public Copy(OProcess owner) {
             super(owner);
@@ -169,6 +170,13 @@ public class OAssign extends OActivity {
             return expression.getVariable();
         }
       
+        public boolean isInsertMissingToData() {
+        	return expression.insertMissingData;
+        }
+        
+        public void setInsertMissingToData(boolean insertMissingToData) {
+        	expression.insertMissingData = insertMissingToData;
+        }
     }
     public static class Expression extends OBase implements RValue {
         private static final long serialVersionUID = 1L;
