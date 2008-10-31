@@ -988,6 +988,7 @@
                             <xs:enumeration value="one"/>
                         </xs:restriction>
                     </xsd:simpleType>
+                </xsd:attribute>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
