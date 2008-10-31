@@ -230,9 +230,6 @@ public interface MessageExchange {
      */
     public void release();
 
-    int getSubscriberCount();
-    void setSubscriberCount(int subscriberCount);
-
     public static final String PROPERTY_SEP_MYROLE_SESSIONID = "org.apache.ode.bpel.myRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_SESSIONID = "org.apache.ode.bpel.partnerRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_EPR = "org.apache.ode.bpel.partnerRoleEPR";
