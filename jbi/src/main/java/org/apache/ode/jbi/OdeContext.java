@@ -59,7 +59,7 @@ import org.w3c.dom.Document;
  *
  * @author mszefler
  */
-final class OdeContext {
+final public class OdeContext {
     private static final Log __log = LogFactory.getLog(OdeContext.class);
 
     public static final QName PM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService");
