@@ -108,7 +108,7 @@ public class HCorrelatorSelector extends HObject {
         return _routePolicy;
     }
 
-    public void setRoutePolicy(String _routePolicy) {
+    public void setRoute(String _routePolicy) {
         this._routePolicy = _routePolicy;
     }
 
