@@ -54,7 +54,7 @@
 
     <target name="export">
         <schemaexport properties="${src.databases}/${db}.properties" quiet="yes" text="yes" delimiter=";" output="${build.ddl}/${db}.sql">
-            <fileset dir="${build.classes}"><include name="**/*.hbm.xml"/></fileset>
+            <fileset dir="${build.classes}"><include name="**/*.hbm.xml"/><exclude name="**/HMessageExchangeProperty.hbm.xml"/></fileset>
         </schemaexport>
     </target>
 </project>

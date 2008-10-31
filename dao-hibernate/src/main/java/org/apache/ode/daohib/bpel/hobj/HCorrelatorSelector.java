@@ -21,10 +21,11 @@ package org.apache.ode.daohib.bpel.hobj;
 
 /**
  * @hibernate.class table="BPEL_SELECTORS" lazy="true"
- * 
+ * @hibernate.query name="DELETE_MESSAGE_ROUTES_BY_INSTANCE" query="delete from HCorrelatorSelector as m where m.instance = :instance)"
  */
 public class HCorrelatorSelector extends HObject {
-
+	public static final String DELETE_MESSAGE_ROUTES_BY_INSTANCE = "DELETE_MESSAGE_ROUTES_BY_INSTANCE";
+	
     private HProcessInstance _instance;
     private String _groupId;
     private int _idx;
@@ -34,7 +35,7 @@ public class HCorrelatorSelector extends HObject {
     private String _routePolicy;
     
     /**
-     * @hibernate.many-to-one column="PIID" not-null="true"
+     * @hibernate.many-to-one column="PIID" not-null="true" foreign-key="none"
      */
     public HProcessInstance getInstance() {
         return _instance;
@@ -113,7 +114,7 @@ public class HCorrelatorSelector extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one not-null="true"
+     * @hibernate.many-to-one not-null="true" foreign-key="none"
      * @hibernate.column name="CORRELATOR" not-null="true" 
      *          index="IDX_SELECTOR_CORRELATOR" unique-key="UNIQ_SELECTOR"
      */

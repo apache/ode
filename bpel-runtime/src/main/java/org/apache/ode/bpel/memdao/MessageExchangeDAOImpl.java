@@ -284,7 +284,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 		++subscriberCount;
 	}
 	
-    public void release() {
+    public void release(boolean doClean) {
         instance = null;
         process = null;
         _plink = null;

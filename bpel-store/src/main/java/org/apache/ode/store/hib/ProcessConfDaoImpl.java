@@ -54,7 +54,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
 
 
     /**
-     * @hibernate.many-to-one 
+     * @hibernate.many-to-one foreign-key="none"
      * @hibernate.column name="DU"
      */
     public DeploymentUnitDaoImpl getDeploymentUnit() {
@@ -66,7 +66,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
     }
     /**
      * @hibernate.map table="STORE_PROCESS_PROP" role="properties_"
-     * @hibernate.collection-key column="propId" 
+     * @hibernate.collection-key column="propId" foreign-key="none"
      * @hibernate.collection-index column="name" type="string" 
      * @hibernate.collection-element column="value" type="string"
      */

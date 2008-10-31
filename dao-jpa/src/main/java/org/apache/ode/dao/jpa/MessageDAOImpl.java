@@ -35,17 +35,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 
-
 @Entity
 @Table(name="ODE_MESSAGE")
+@NamedQueries({
+	@NamedQuery(name=MessageDAOImpl.DELETE_MESSAGES_BY_PROCESS, query="delete from MessageDAOImpl as m where m._messageExchange._process = :process")
+})
 public class MessageDAOImpl implements MessageDAO {
-
+	public final static String DELETE_MESSAGES_BY_PROCESS = "DELETE_MESSAGES_BY_PROCESS";
+	
 	@Id @Column(name="MESSAGE_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@SuppressWarnings("unused")
 	private Long _id;
 	@Basic @Column(name="TYPE")
     private String _type;
@@ -61,8 +67,8 @@ public class MessageDAOImpl implements MessageDAO {
 	private MessageExchangeDAOImpl _messageExchange;
 
 	public MessageDAOImpl() {
-		
 	}
+	
 	public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
 		_type = type.toString();
 		_messageExchange = me;

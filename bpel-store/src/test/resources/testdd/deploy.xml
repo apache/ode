@@ -26,5 +26,12 @@
 		<provide partnerLink="helloPartnerLink">
 			<service name="wns:HelloService" port="HelloPort"/>
 		</provide>
+		<cleanup on="success">
+			<category>all</category>
+		</cleanup>
+		<cleanup on="failure">
+			<category>messages</category>
+			<category>events</category>
+		</cleanup>
 	</process>
 </deploy>

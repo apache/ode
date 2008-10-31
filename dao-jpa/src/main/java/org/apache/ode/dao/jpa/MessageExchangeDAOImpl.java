@@ -19,6 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -37,6 +39,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -51,8 +55,16 @@ import java.util.StringTokenizer;
 
 @Entity
 @Table(name="ODE_MESSAGE_EXCHANGE")
-public class MessageExchangeDAOImpl implements MessageExchangeDAO {
-
+@NamedQueries({
+    @NamedQuery(name=MessageExchangeDAOImpl.DELETE_MEXS_BY_PROCESS, query="delete from MessageExchangeDAOImpl as m where m._process = :process"),
+    @NamedQuery(name=MessageExchangeDAOImpl.DELETE_MEXS_BY_INSTANCE, query="delete from MessageExchangeDAOImpl as m where m._processInst = :instance")
+})
+public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchangeDAO {
+	private static final Log __log = LogFactory.getLog(MessageExchangeDAOImpl.class);
+	
+	public final static String DELETE_MEXS_BY_PROCESS = "DELETE_MEXS_BY_PROCESS";
+	public final static String DELETE_MEXS_BY_INSTANCE = "DELETE_MEXS_BY_INSTANCE";
+	
 	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
 	private String _id;
 	@Basic @Column(name="CALLEE")
@@ -110,7 +122,8 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     private CorrelatorDAOImpl _correlator;
 
-    public MessageExchangeDAOImpl() {}
+    public MessageExchangeDAOImpl() {
+    }
     
 	public MessageExchangeDAOImpl(char direction){
 		_direction = direction;
@@ -331,7 +344,19 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
         return correlationKeys;
     }
 
-    public CorrelatorDAOImpl getCorrelator() {
+	public void release(boolean doClean) {
+		if( doClean ) {
+			deleteMessages();
+		}
+	}
+
+	public void deleteMessages() {
+		if( __log.isDebugEnabled() ) __log.debug("Deleting message on MEX release.");
+		
+		getEM().remove(this); // This deletes MexProperty, REQUEST MessageDAO, RESPONSE MessageDAO
+	}
+
+	public CorrelatorDAOImpl getCorrelator() {
         return _correlator;
     }
 

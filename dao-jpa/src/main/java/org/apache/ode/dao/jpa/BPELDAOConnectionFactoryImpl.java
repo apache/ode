@@ -23,21 +23,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.openjpa.ee.ManagedRuntime;
+import org.apache.openjpa.util.GeneralException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -46,9 +43,9 @@ import java.util.Properties;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
-    static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
+	static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
 
-    private EntityManagerFactory _emf;
+    protected EntityManagerFactory _emf;
     private TransactionManager _tm;
     private DataSource _ds;
     private Object _dbdictionary;
@@ -58,6 +55,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     public BPELDAOConnectionFactoryImpl() {
     }
 
+    @SuppressWarnings("unchecked")
     public BpelDAOConnection getConnection() {
         try {
             _tm.getTransaction().registerSynchronization(new Synchronization() {
@@ -80,12 +78,17 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
             HashMap propMap2 = new HashMap();
             propMap2.put("openjpa.TransactionMode", "managed");
             EntityManager em = _emf.createEntityManager(propMap2);
-            BPELDAOConnectionImpl conn = new BPELDAOConnectionImpl(em);
+            BPELDAOConnectionImpl conn = createBPELDAOConnection(em);
             _connections.set(conn);
             return conn;
         }
     }
 
+    protected BPELDAOConnectionImpl createBPELDAOConnection(EntityManager em) {
+    	return new BPELDAOConnectionImpl(em);
+    }
+    
+    @SuppressWarnings("unchecked")
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();
 
@@ -137,20 +140,55 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     private class TxMgrProvider implements ManagedRuntime {
         public TxMgrProvider() {
         }
+        
         public TransactionManager getTransactionManager() throws Exception {
             return _tm;
         }
+        
         public void setRollbackOnly(Throwable cause) throws Exception {
             // there is no generic support for setting the rollback cause
             getTransactionManager().getTransaction().setRollbackOnly();
         }
+        
         public Throwable getRollbackCause() throws Exception {
             // there is no generic support for setting the rollback cause
             return null;
         }
+        
         public Object getTransactionKey() throws Exception, SystemException {
             return _tm.getTransaction();
         }
+        
+        public void doNonTransactionalWork(java.lang.Runnable runnable) throws NotSupportedException {
+            TransactionManager tm = null;
+            Transaction transaction = null;
+            
+            try { 
+                tm = getTransactionManager(); 
+                transaction = tm.suspend();
+            } catch (Exception e) {
+                NotSupportedException nse =
+                    new NotSupportedException(e.getMessage());
+                nse.initCause(e);
+                throw nse;
+            }
+            
+            runnable.run();
+            
+            try {
+                tm.resume(transaction);
+            } catch (Exception e) {
+                try {
+                    transaction.setRollbackOnly();
+                }
+                catch(SystemException se2) {
+                    throw new GeneralException(se2);
+                }
+                NotSupportedException nse =
+                    new NotSupportedException(e.getMessage());
+                nse.initCause(e);
+                throw nse;
+            } 
+        }
     }
-
 }

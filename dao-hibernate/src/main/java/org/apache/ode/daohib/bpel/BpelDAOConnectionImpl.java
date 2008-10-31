@@ -51,15 +51,15 @@ import java.util.*;
 /**
  * Hibernate-based {@link BpelDAOConnection} implementation.
  */
-class BpelDAOConnectionImpl implements BpelDAOConnection {
+public class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
     private Session _session;
 
-    private SessionManager _sm;
+    protected SessionManager _sm;
 
-    BpelDAOConnectionImpl(SessionManager sm) {
+    public BpelDAOConnectionImpl(SessionManager sm) {
         _sm = sm;
         _session = _sm.getSession();
     }
@@ -87,7 +87,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         _session.save(process);
         return new ProcessDaoImpl(_sm, process);
     }
-
+    
     public ProcessDAO getProcess(QName processId) {
 
         try {
@@ -131,7 +131,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return daos;
     }
 
-    
     @SuppressWarnings("unchecked")
     static Iterator<HProcessInstance> _instanceQuery(Session session, boolean countOnly, InstanceFilter filter) {
         Criteria crit = session.createCriteria(HProcessInstance.class);

@@ -54,7 +54,7 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
      *  cascade="all"
      *  role="store_processes"
      * @hibernate.collection-key
-     *  column="DU"
+     *  column="DU" foreign-key="none"
      * @hibernate.collection-one-to-many
      *  class="org.apache.ode.store.hib.ProcessConfDaoImpl"
      */

@@ -104,5 +104,4 @@ public interface BpelDAOConnection  {
   MessageExchangeDAO createMessageExchange(char dir);
 
   MessageExchangeDAO getMessageExchange(String mexid);
-
 }

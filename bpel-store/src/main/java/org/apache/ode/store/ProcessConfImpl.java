@@ -101,6 +101,8 @@ public class ProcessConfImpl implements ProcessConf {
 
     private EndpointReferenceContext eprContext;
 
+    private final ProcessCleanupConfImpl processCleanupConfImpl;
+    
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir) {
         _pid = pid;
@@ -120,6 +122,8 @@ public class ProcessConfImpl implements ProcessConf {
         initLinks();
         initMexInterceptors();
         initEventList();
+        
+        processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
     }
 
     private List<File> collectEndpointConfigFiles() {
@@ -484,5 +488,11 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
-
+    public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
+    	return processCleanupConfImpl.isCleanupCategoryEnabled(instanceSucceeded, category);
+    }
+    
+    public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
+    	return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
+    }
 }

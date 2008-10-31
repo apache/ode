@@ -20,6 +20,7 @@
 package org.apache.ode.bpel.iapi;
 
 import javax.xml.namespace.QName;
+
 import java.util.concurrent.Future;
 
 /**
@@ -68,6 +69,7 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
      * the response become available.
      */
+    @SuppressWarnings("unchecked")
     Future invoke(Message request);
 
     /**
@@ -96,5 +98,11 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * @return service name
      */
     QName getServiceName();
-
+    
+    /**
+     * Should be called by the external partner when it's done with the
+     * message exchange. Ncessary for a better resource management and
+     * proper mex cleanup.
+     */
+    void release(boolean instanceSucceeded);
 }

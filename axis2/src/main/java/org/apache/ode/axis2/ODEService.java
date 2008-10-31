@@ -134,7 +134,7 @@ public class ODEService {
             throw new OdeFault("An exception occured while invoking ODE.", e);
         } finally {
             if (!success) {
-                if (odeMex != null) odeMex.release();
+                if (odeMex != null) odeMex.release(success);
                 try {
                     _txManager.rollback();
                 } catch (Exception e) {
@@ -180,7 +180,7 @@ public class ODEService {
                     __log.error("Error processing response for MEX " + odeMex, e);
                     throw new OdeFault("An exception occured when invoking ODE.", e);
                 } finally {
-                    odeMex.release();
+                    odeMex.release(commit);
                     if (commit) {
                         try {
                             if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
@@ -202,7 +202,7 @@ public class ODEService {
             }
         } else {
             // One ways cleanup
-            odeMex.release();
+            odeMex.release(true);
         }
     }
 

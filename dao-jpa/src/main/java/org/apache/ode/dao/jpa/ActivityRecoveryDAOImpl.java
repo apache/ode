@@ -34,16 +34,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.util.Date;
 
 
 @Entity
 @Table(name="ODE_ACTIVITY_RECOVERY")
+@NamedQueries({
+	@NamedQuery(name=ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS, query="delete from ActivityRecoveryDAOImpl as a where a._instance._process = :process")
+})
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
-
+	public final static String DELETE_ACTIVITY_RECOVERIES_BY_PROCESS = "DELETE_ACTIVITY_RECOVERIES_BY_PROCESS";
+	
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _id;
 
 	@Basic @Column(name="ACTIVITY_ID")
@@ -62,7 +69,6 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
     private int _retries;
 
     // _instances is unused because this is a one-way relationship at the database level
-    @SuppressWarnings("unused")
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE_ID")
     private ProcessInstanceDAOImpl _instance;
 

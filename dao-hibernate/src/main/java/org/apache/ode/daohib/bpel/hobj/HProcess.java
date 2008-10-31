@@ -74,9 +74,8 @@ public class HProcess extends HObject{
      * @hibernate.set
      *  lazy="true"
      *  inverse="true"
-     *  cascade="delete"
      * @hibernate.collection-key
-     *  column="PROCESS"
+     *  column="PROCESS" foreign-key="none"
      * @hibernate.collection-one-to-many
      *   class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
      */
@@ -94,7 +93,7 @@ public class HProcess extends HObject{
      *  inverse="true"
      *  cascade="delete"
      * @hibernate.collection-key
-     *  column="PROCESS_ID"
+     *  column="PROCESS_ID" foreign-key="none"
      * @hibernate.collection-one-to-many
      *   class="org.apache.ode.daohib.bpel.hobj.HCorrelator"
      */
@@ -110,9 +109,8 @@ public class HProcess extends HObject{
      * @hibernate.bag
      *  lazy="true"
      *  inverse="true"
-     *  cascade="delete"
      * @hibernate.collection-key
-     *  column="PROCESS_ID"
+     *  column="PROCESS_ID" foreign-key="none"
      * @hibernate.collection-one-to-many
      *  class="org.apache.ode.daohib.bpel.hobj.HProcessInstance"
      */
@@ -128,9 +126,8 @@ public class HProcess extends HObject{
      * @hibernate.bag
      *  lazy="true"
      *  inverse="true"
-     *  cascade="delete"
      * @hibernate.collection-key
-     *  column="PID"
+     *  column="PID" foreign-key="none"
      * @hibernate.collection-one-to-many
      *  class="org.apache.ode.daohib.bpel.hobj.HBpelEvent"
      */
@@ -146,8 +143,8 @@ public class HProcess extends HObject{
      * Get the partner links values as deployed.
      *
      * @return {@link Set}&lt;{@link HPartnerLink}&gt; with variable values
-     * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PROCESS"
+     * @hibernate.set lazy="true" inverse="true"
+     * @hibernate.collection-key column="PROCESS" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HPartnerLink"
      */
     public Set<HPartnerLink> getDeploymentPartnerLinks() {

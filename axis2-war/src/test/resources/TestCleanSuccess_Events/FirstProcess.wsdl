@@ -1,0 +1,11 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:FirstProcess="http://example.com/FirstProcess/FirstProcess" xmlns:Client="http://example.com/FirstProcess/Client" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:TimeService="http://ws.intalio.com/TimeService/" xmlns:diag="http://example.com/FirstProcess" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://example.com/FirstProcess">
+    <wsdl:import namespace="http://example.com/FirstProcess/FirstProcess" location="FirstProcess-FirstProcess.wsdl"/>
+    <wsdl:import namespace="http://ws.intalio.com/TimeService/" location="TimeService.wsdl"/>
+    <pnlk:partnerLinkType name="TimeServerAndFirstProcessForPortTimeServiceSoapPlk">
+        <pnlk:role name="TimeServer_for_FirstProcess" portType="TimeService:TimeServiceSoap"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="FirstProcessAndClient">
+        <pnlk:role name="FirstProcess_for_Client" portType="FirstProcess:ForClient"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

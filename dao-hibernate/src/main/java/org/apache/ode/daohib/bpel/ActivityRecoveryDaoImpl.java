@@ -33,8 +33,6 @@ import java.util.Date;
  * Hibernate based {@link ActivityRecoveryDao} implementation
  */
 public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRecoveryDAO {
-
-
     HActivityRecovery _self;
 
     public ActivityRecoveryDaoImpl(SessionManager sm, HActivityRecovery recovery) {
@@ -82,5 +80,4 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     public int getRetries() {
         return _self.getRetries();
     }
-
 }

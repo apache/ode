@@ -55,7 +55,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	
 	static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
 	
-	EntityManager _em;
+	protected EntityManager _em;
 
     public BPELDAOConnectionImpl(EntityManager em) {
         _em = em;
@@ -94,6 +94,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return ret;
     }
 
+    @SuppressWarnings("unchecked")
     public ProcessDAO getProcess(QName processId) {
         List l = _em.createQuery("select x from ProcessDAOImpl x where x._processId = ?1")
                 .setParameter(1, processId.toString()).getResultList();
@@ -297,6 +298,10 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return _em.find(MessageExchangeDAOImpl.class, mexid);
     }
 
+    public void deleteMessageExchange(MessageExchangeDAO mexDao) {
+    	_em.remove(mexDao);
+    }
+    
     public EntityManager getEntityManager() {
         return _em;
     }

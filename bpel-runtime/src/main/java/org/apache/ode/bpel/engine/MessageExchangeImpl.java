@@ -234,7 +234,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
     
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
-        _dao.release();
+        // for a one-way, message exchanges are always deleted
+        _dao.release(true);
         _dao = null;
     }
 

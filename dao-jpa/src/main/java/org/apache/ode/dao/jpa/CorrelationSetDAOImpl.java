@@ -32,6 +32,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
@@ -42,8 +44,14 @@ import java.util.Map;
 
 @Entity
 @Table(name="ODE_CORRELATION_SET")
+@NamedQueries({
+    @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_PROCESS, query="delete from CorrelationSetDAOImpl as c where c._scope in (select s from ScopeDAOImpl s where s._processInstance._process = :process)"),
+    @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_INSTANCE, query="delete from CorrelationSetDAOImpl as c where c._scope in (select s from ScopeDAOImpl s where s._processInstance = :instance)")
+})
 public class CorrelationSetDAOImpl implements CorrelationSetDAO {
-
+	public final static String DELETE_CORRELATION_SETS_BY_PROCESS = "DELETE_CORRELATION_SETS_BY_PROCESS";
+	public final static String DELETE_CORRELATION_SETS_BY_INSTANCE = "DELETE_CORRELATION_SETS_BY_INSTANCE";
+	
 	@Id @Column(name="CORRELATION_SET_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _correlationSetId;
@@ -52,7 +60,7 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	@Basic @Column(name="CORRELATION_KEY")
     private String _correlationKey;
 
-    @OneToMany(targetEntity=CorrSetProperty.class,mappedBy="_corrSet",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=CorrSetProperty.class,mappedBy="_corrSet",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Collection<CorrSetProperty> _props = new ArrayList<CorrSetProperty>();
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     private ScopeDAOImpl _scope;

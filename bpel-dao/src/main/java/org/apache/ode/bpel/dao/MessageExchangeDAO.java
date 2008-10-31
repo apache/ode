@@ -244,6 +244,6 @@ public interface MessageExchangeDAO {
     int getSubscriberCount();
     void setSubscriberCount(int subscriberCount);
 
-    void release();
+    void release(boolean doClean);
 
 }

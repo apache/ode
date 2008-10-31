@@ -30,16 +30,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
 
 
 @Entity
 @Table(name="ODE_FAULT")
+@NamedQueries({
+	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_PROCESS, query="delete from FaultDAOImpl as f where f._id in(select i._fault from ProcessInstanceDAOImpl as i where i._process = :process)"),
+	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_INSTANCE, query="delete from FaultDAOImpl as f where f._id in(select i._fault from ProcessInstanceDAOImpl as i where i = :instance)")
+})
 public class FaultDAOImpl implements FaultDAO {
-
+	public final static String DELETE_FAULTS_BY_PROCESS = "DELETE_FAULTS_BY_PROCESS";
+	public final static String DELETE_FAULTS_BY_INSTANCE = "DELETE_FAULTS_BY_INSTANCE";
+	
 	@Id @Column(name="FAULT_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@SuppressWarnings("unused")
 	private Long _id;
 	@Basic @Column(name="NAME")
     private String _name;

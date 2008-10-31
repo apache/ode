@@ -91,7 +91,7 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
@@ -434,8 +434,10 @@ define "ode" do
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
                            :drop=>"no", :create=>"yes", :output=>target) do
-            ant.fileset(:dir=>source.to_s) { ant.include :name=>"**/*.hbm.xml" }
-                           end
+            ant.fileset(:dir=>source.to_s) { 
+              ant.include :name=>"**/*.hbm.xml"
+              ant.exclude :name=>"**/HMessageExchangeProperty.hbm.xml"}
+          end
         end
       end
     end

@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -200,7 +201,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
         default:
             __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus());
         }
-        mex.release();
+        mex.release(mex.getStatus() == MessageExchange.Status.RESPONSE);
     }
 
     /**

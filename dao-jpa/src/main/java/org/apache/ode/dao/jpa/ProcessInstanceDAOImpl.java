@@ -19,18 +19,22 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.w3c.dom.Element;
 
 import javax.persistence.Basic;
@@ -47,7 +51,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -60,10 +63,13 @@ import java.util.Set;
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
 @NamedQueries({
-    @NamedQuery(name="ScopeById", query="SELECT s FROM ScopeDAOImpl as s WHERE s._scopeInstanceId = :sid and s._processInstance = :instance")
-        })
+	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process")
+})
 public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanceDAO {
-
+	private static final Log __log = LogFactory.getLog(ProcessInstanceDAOImpl.class);
+	
+	public final static String DELETE_INSTANCES_BY_PROCESS = "DELETE_INSTANCES_BY_PROCESS";
+	
     @Id @Column(name="ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long _instanceId;
@@ -82,25 +88,29 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	@Basic @Column(name="DATE_CREATED")
     private Date _dateCreated = new Date();
 	
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="ROOT_SCOPE_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="ROOT_SCOPE_ID")
 	private ScopeDAOImpl _rootScope;
-	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="FAULT_ID")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANTIATING_CORRELATOR_ID")
 	private CorrelatorDAOImpl _instantiatingCorrelator;
+
+	@OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_processInst",fetch=FetchType.LAZY)
+	@SuppressWarnings("unused")
+	private Collection<MessageExchangeDAO> _messageExchanges = new ArrayList<MessageExchangeDAO>();
 	
 	public ProcessInstanceDAOImpl() {}
 	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process) {
 		_instantiatingCorrelator = correlator;
 		_process = process;
 	}
-	
+
 	public void createActivityRecovery(String channel, long activityId,
 			String reason, Date dateTime, Element data, String[] actions,
 			int retries) {
@@ -121,12 +131,58 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 		return ret;
 	}
 
-	public void delete() {
-		if (getEM() != null ) {
-			getEM().remove(this);
+	public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
+		if(__log.isDebugEnabled()) __log.debug("Cleaning up instance Data with " + cleanupCategories);
+		
+		// remove jacob state
+		setExecutionState(null);
+		if (getEM() != null) {
+			if (cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS)) {
+				deleteEvents();
+			}
+			if (cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS)) {
+				deleteCorrelations();
+			}
+			if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
+				deleteMessageRoutes();
+			}
+			if (cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES)) {
+				deleteVariables();
+			}
+			if (cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE)) {
+				deleteInstance();
+			}
+
+			getEM().flush();
 		}
 	}
+	
+	private void deleteInstance() {
+		getEM().createNamedQuery(FaultDAOImpl.DELETE_FAULTS_BY_INSTANCE).setParameter("instance", this).executeUpdate();		
+		getEM().remove(this); // This deletes ActivityRecoveryDAO 
+	}
+	
+	private void deleteVariables() {
+		getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_INSTANCE).setParameter("instance", this).executeUpdate();
 
+		getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+	}
+
+	private void deleteMessageRoutes() {
+		getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
+	}
+	
+	private void deleteCorrelations() {
+		getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+	}
+
+	private void deleteEvents() {
+		getEM().createNamedQuery(EventDAOImpl.DELETE_EVENTS_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
+	}
+	
 	public void deleteActivityRecovery(String channel) {
         ActivityRecoveryDAOImpl toRemove = null;
         for (ActivityRecoveryDAO _recovery : _recoveries) {
@@ -142,7 +198,7 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
         }
 
     }
-
+	
 	public void finishCompletion() {
 	    // make sure we have completed.
 	    assert (ProcessState.isFinished(this.getState()));

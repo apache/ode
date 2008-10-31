@@ -19,12 +19,15 @@
 
 package org.apache.ode.daohib.bpel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
@@ -38,9 +41,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
-public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
-
-    private HMessageExchange _hself;
+public class MessageExchangeDaoImpl extends HibernateDao implements
+		MessageExchangeDAO {
+	@SuppressWarnings("unused")
+	private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
+	
+	private HMessageExchange _hself;
 
     // Used when provided process and instance aren't hibernate implementations. The relation
     // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
@@ -337,7 +343,6 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         _hself.setPipedMessageExchangeId(mexId);
     }
 
-
 	public int getSubscriberCount() {
 		return _hself.getSubscriberCount();
 	}
@@ -345,12 +350,22 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
 	public void setSubscriberCount(int subscriberCount) {
 		_hself.setSubscriberCount(subscriberCount);		
 	}
+	
+	public void release(boolean doClean) {
+		if( doClean ) {
+			deleteMessages();
+		}
+	}
 
 	public void incrementSubscriberCount() {
 		_hself.incrementSubscriberCount();
 	}
 	
-    public void release() {
-        // no-op for now, could be used to do some cleanup
-    }
+	public void deleteMessages() {
+  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).setParameter("mex2", _hself).executeUpdate();
+  		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
+  		
+		getSession().delete(_hself);
+		// This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
+	}
 }
