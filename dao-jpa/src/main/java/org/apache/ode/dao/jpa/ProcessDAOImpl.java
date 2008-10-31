@@ -19,8 +19,11 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
@@ -36,18 +39,15 @@ import java.util.List;
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
-    @NamedQuery(name="InstanceByCKey", query="SELECT cs._scope._processInstance " +
-            "FROM CorrelationSetDAOImpl as cs " +
-            "WHERE cs._correlationKey = :ckey"),
-            
-    @NamedQuery(name="CorrelatorByKey", query="SELECT c " +
-            "FROM CorrelatorDAOImpl as c" +
-            " WHERE c._correlatorKey = :ckey AND c._process = :process")
+    @NamedQuery(name="InstanceByCKey", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey"),
+    @NamedQuery(name="CorrelatorByKey", query="select c from CorrelatorDAOImpl as c where c._correlatorKey = :ckey and c._process = :process")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
-
+	private static final Log __log = LogFactory.getLog(ProcessDAOImpl.class);
+	
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _id;
 
     @Basic @Column(name="PROCESS_ID")
@@ -78,6 +78,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         return corr;
     }
 
+	@SuppressWarnings("unchecked")
     public CorrelatorDAO getCorrelator(String correlatorId) {
         Query qry = getEM().createNamedQuery("CorrelatorByKey");
         qry.setParameter("ckey", correlatorId);
@@ -95,7 +96,15 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 		return inst;
 	}
 
-	@SuppressWarnings("unchecked")
+    public ProcessInstanceDAO createInstance(
+			CorrelatorDAO instantiatingCorrelator, MessageExchangeDAO mex) {
+		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
+		getEM().persist(inst);
+		_numInstances++;
+		return inst;
+	}
+
+    @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey) {
 		Query qry = getEM().createNamedQuery("InstanceByCKey");
         qry.setParameter("ckey", ckey.toCanonicalString());
@@ -115,8 +124,47 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 	}
 
     public void delete() {
-        getEM().remove(this);
+		if(__log.isDebugEnabled()) __log.debug("Cleaning up process data.");
+
+        deleteEvents();
+        deleteCorrelations();
+		deleteMessages();
+		deleteVariables();
+		deleteProcessInstances();
+        getEM().remove(this); // This deletes CorrelatorDAO
+        getEM().flush();
     }
+
+    private void deleteProcessInstances() {
+  		getEM().createNamedQuery(FaultDAOImpl.DELETE_FAULTS_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS).setParameter("process", this).executeUpdate();
+    }
+
+    private void deleteVariables() {
+  		getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_PROCESS).setParameter("process", this).executeUpdate();
+
+  		getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_PROCESS).setParameter("process", this).executeUpdate();
+    }
+
+  	private void deleteMessages() {
+  		getEM().createNamedQuery(MessageDAOImpl.DELETE_MESSAGES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(MexProperty.DELETE_MEX_PROPERTIES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(MessageExchangeDAOImpl.DELETE_MEXS_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", this).executeUpdate();
+  	}
+
+    private void deleteCorrelations() {
+  		getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROCESS).setParameter("process", this).executeUpdate();
+  		getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_PROCESS).setParameter("process", this).executeUpdate();
+    }
+
+    private void deleteEvents() {
+  		getEM().createNamedQuery(EventDAOImpl.DELETE_EVENTS_BY_PROCESS).setParameter("process", this).executeUpdate();
+  	}
 
     public int getNumInstances() {
         return _numInstances;

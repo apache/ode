@@ -83,7 +83,7 @@ public class SessionManager {
    * @return
    * @throws MappingException
    */
-  public static final Configuration getDefaultConfiguration() throws MappingException {
+  public Configuration getDefaultConfiguration() throws MappingException {
     return new Configuration()
             .addClass(HProcess.class)
             .addClass(HProcessInstance.class)
@@ -100,8 +100,9 @@ public class SessionManager {
             .addClass(HVariableProperty.class)
             .addClass(HBpelEvent.class)
 	        .addClass(HFaultData.class)
-	    .addClass(HActivityRecovery.class)
-            .addClass(HLargeData.class);
+	        .addClass(HActivityRecovery.class)
+            .addClass(HLargeData.class)
+            .addClass(HMessageExchangeProperty.class);
   }
 
   public static TransactionManager getTransactionManager(Properties props) {

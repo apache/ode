@@ -31,6 +31,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 
@@ -39,8 +41,14 @@ import java.sql.Timestamp;
  */
 @Entity
 @Table(name="ODE_EVENT")
+@NamedQueries({
+    @NamedQuery(name=EventDAOImpl.DELETE_EVENTS_BY_PROCESS, query="delete from EventDAOImpl as e where e._instance._process = :process"),
+    @NamedQuery(name=EventDAOImpl.DELETE_EVENTS_BY_INSTANCE, query="delete from EventDAOImpl as e where e._instance = :instance")
+})
 public class EventDAOImpl {
-
+	public final static String DELETE_EVENTS_BY_PROCESS = "DELETE_EVENTS_BY_PROCESS";
+	public final static String DELETE_EVENTS_BY_INSTANCE = "DELETE_EVENTS_BY_INSTANCE";
+	
     @Id @Column(name="EVENT_ID")
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	private Long _id;

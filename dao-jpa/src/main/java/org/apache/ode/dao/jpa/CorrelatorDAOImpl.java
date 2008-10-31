@@ -34,22 +34,21 @@ import java.util.List;
 @Entity
 @Table(name="ODE_CORRELATOR")
 @NamedQueries({
-    @NamedQuery(name="RouteByCKey", query="SELECT route " +
-            "FROM MessageRouteDAOImpl as route " +
-            "WHERE route._correlationKey like :ckey " +
-                   "and route._correlator._process._processType = :ptype " +
-                   "and route._correlator._correlatorKey = :corrkey")
-        })
+    @NamedQuery(name="RouteByCKey", query="select route from MessageRouteDAOImpl as route where route._correlationKey = :ckey and route._correlator._process._processType = :ptype and route._correlator._correlatorKey = :corrkey"),
+    @NamedQuery(name=CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS, query="delete from CorrelatorDAOImpl as c where c._process = :process")
+})
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
-
+	public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
+	
     @Id @Column(name="CORRELATOR_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _correlatorId;
     @Basic @Column(name="CORRELATOR_KEY")
     private String _correlatorKey;
-    @OneToMany(targetEntity=MessageRouteDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=MessageRouteDAOImpl.class,mappedBy="_correlator",fetch=FetchType.EAGER,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Collection<MessageRouteDAOImpl> _routes = new ArrayList<MessageRouteDAOImpl>();
-    @OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_correlator",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_correlator",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Collection<MessageExchangeDAOImpl> _exchanges = new ArrayList<MessageExchangeDAOImpl>();
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROC_ID")
     private ProcessDAOImpl _process;
@@ -88,6 +87,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
     }
 
+    @SuppressWarnings("unchecked")
     public List<MessageRouteDAO> findRoute(CorrelationKey correlationKey) {
         Query qry = getEM().createNamedQuery("RouteByCKey");
         qry.setParameter("ckey", correlationKey == null ? "%" : correlationKey.toCanonicalString());

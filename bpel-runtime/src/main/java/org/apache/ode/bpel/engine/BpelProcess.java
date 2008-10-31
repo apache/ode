@@ -36,7 +36,6 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -48,6 +47,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OElementVarType;
@@ -900,5 +900,13 @@ public class BpelProcess {
                 throw new BpelEngineException(msg, e);
             }
         }
+    }
+    
+    public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
+    	return _pconf.isCleanupCategoryEnabled(instanceSucceeded, category);
+    }
+
+    public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
+    	return _pconf.getCleanupCategories(instanceSucceeded);
     }
 }

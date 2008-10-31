@@ -36,6 +36,7 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -104,6 +105,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public Future invoke(Message request) {
         if (request == null) {
             String errmsg = "Must pass non-null message to invoke()!";
@@ -183,6 +185,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
     public boolean isAsynchronous() {
         return true;
     }
+
+    public void release(boolean instanceSucceeded) {
+        if(__log.isDebugEnabled()) __log.debug("Releasing mex " + getMessageExchangeId());
+        _dao.release(_process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+        _dao = null;
+    }
     
     /**
      * Return a deep clone of the given message
@@ -204,7 +212,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 		return clone;
 	}
     
-
+	@SuppressWarnings("unchecked")
     static class ResponseFuture implements Future {
         private String _clientId;
         private boolean _done = false;

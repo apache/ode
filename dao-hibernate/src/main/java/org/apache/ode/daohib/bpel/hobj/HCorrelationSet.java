@@ -25,8 +25,13 @@ import java.util.Collection;
 /**
  * Hibernate table representing correlation set values.
  * @hibernate.class table="BPEL_CORRELATION_SET"
+ * @hibernate.query name="DELETE_CORSETS_BY_INSTANCE" query="delete from HCorrelationSet as c where c.instance = :instance"
+ * @hibernate.query name="DELETE_CORSETS_BY_PROCESS" query="delete from HCorrelationSet as c where c.process = :process"
  */
 public class HCorrelationSet extends HObject{
+  public static final String DELETE_CORSETS_BY_INSTANCE = "DELETE_CORSETS_BY_INSTANCE";
+  public static final String DELETE_CORSETS_BY_PROCESS = "DELETE_CORSETS_BY_PROCESS";
+
   private HProcess _process;
   private HProcessInstance _instance;
   private Collection<HCorrelationProperty> _properties = new HashSet<HCorrelationProperty>();
@@ -77,7 +82,7 @@ public class HCorrelationSet extends HObject{
 
   /**
    * @hibernate.many-to-one
-   *  column="SCOPE_ID"
+   *  column="SCOPE_ID" foreign-key="none"
    */
 	public HScope getScope() {
 		return _scope;
@@ -85,7 +90,7 @@ public class HCorrelationSet extends HObject{
 
   /**
    * @hibernate.many-to-one
-   *  column="PIID"
+   *  column="PIID" foreign-key="none"
    */
   public HProcessInstance getInstance() {
     return _instance;
@@ -97,7 +102,7 @@ public class HCorrelationSet extends HObject{
 
   /**
    * @hibernate.many-to-one
-   *  column="PROCESS_ID"
+   *  column="PROCESS_ID" foreign-key="none"
    */
   public HProcess getProcess() {
     return _process;
@@ -113,7 +118,7 @@ public class HCorrelationSet extends HObject{
    *  inverse="true"
    *  cascade="delete"
    * @hibernate.collection-key
-   *  column="CORR_SET_ID"
+   *  column="CORR_SET_ID" foreign-key="none"
    * @hibernate.collection-one-to-many
    *  class="org.apache.ode.daohib.bpel.hobj.HCorrelationProperty"
    */

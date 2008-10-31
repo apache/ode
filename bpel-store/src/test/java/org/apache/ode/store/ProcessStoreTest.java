@@ -21,6 +21,7 @@ package org.apache.ode.store;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -28,6 +29,7 @@ import javax.xml.namespace.QName;
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 
 public class ProcessStoreTest extends TestCase {
 
@@ -78,5 +80,28 @@ public class ProcessStoreTest extends TestCase {
         assertEquals(pname,pconfs.get(0));
     }
     
-    
+    public void testCleanupConfigurations() {
+        Collection<QName> deployed = _ps.deploy(_testdd);
+        QName pname = deployed.iterator().next();
+        assertNotNull(deployed);
+        assertEquals(1,deployed.size());
+        ProcessConf pconf = _ps.getProcessConfiguration(pname);
+        assertNotNull(pconf);
+        assertEquals(_testdd.getName(),pconf.getPackage());
+        assertEquals(pname, pconf.getProcessId());
+        
+        assertEquals(EnumSet.allOf(CLEANUP_CATEGORY.class), pconf.getCleanupCategories(true));
+        assertEquals(EnumSet.of(CLEANUP_CATEGORY.MESSAGES, CLEANUP_CATEGORY.EVENTS), pconf.getCleanupCategories(false));
+        
+        assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.INSTANCE));
+        assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.VARIABLES));
+        assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.MESSAGES));
+        assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.CORRELATIONS));
+        assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.EVENTS));
+        assertFalse(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.INSTANCE));
+        assertFalse(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.VARIABLES));
+        assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.MESSAGES));
+        assertFalse(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.CORRELATIONS));
+        assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.EVENTS));
+    } 
 }

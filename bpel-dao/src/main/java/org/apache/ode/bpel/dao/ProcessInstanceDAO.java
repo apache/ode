@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.dao;
 
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.w3c.dom.Element;
 
 import java.util.Collection;
@@ -194,7 +195,7 @@ public interface ProcessInstanceDAO {
     /**
      * Delete the process instance object from the database.
      */
-    void delete();
+    void delete(Set<CLEANUP_CATEGORY> cleanupCategories);
 
     /**
      * Insert a BPEL event to the database (associating with this process).

@@ -37,6 +37,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -48,10 +50,17 @@ import java.util.Collection;
  */
 @Entity
 @Table(name="ODE_XML_DATA")
+@NamedQueries({
+    @NamedQuery(name=XmlDataDAOImpl.DELETE_XMLDATA_BY_PROCESS, query="delete from XmlDataDAOImpl as x where x._scope in (select s from ScopeDAOImpl s where s._processInstance._process = :process)"),
+    @NamedQuery(name=XmlDataDAOImpl.DELETE_XMLDATA_BY_INSTANCE, query="delete from XmlDataDAOImpl as x where x._scope in (select s from ScopeDAOImpl s where s._processInstance = :instance)")
+})
 public class XmlDataDAOImpl implements XmlDataDAO {
+	public final static String DELETE_XMLDATA_BY_PROCESS = "DELETE_XMLDATA_BY_PROCESS";
+	public final static String DELETE_XMLDATA_BY_INSTANCE = "DELETE_XMLDATA_BY_INSTANCE";
 	
 	@Id @Column(name="XML_DATA_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@SuppressWarnings("unused")
 	private Long _id;
 	@Lob @Column(name="DATA")
     private String _data;

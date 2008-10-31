@@ -21,15 +21,19 @@ package org.apache.ode.daohib.bpel.hobj;
 
 /**
  * @hibernate.class table="BPEL_UNMATCHED" lazy="true"
+ * @hibernate.query name="DELETE_CORMESSAGES_BY_PROCESS" query="delete from HCorrelatorMessage as m where m.correlator in(select c from HCorrelator as c where c.process = :process)"
+ * @hibernate.query name="DELETE_CORMESSAGES_BY_MEX" query="delete from HCorrelatorMessage as m where m.messageExchange = :mex"
  */
 public class HCorrelatorMessage extends HObject {
-
+	public final static String DELETE_CORMESSAGES_BY_PROCESS = "DELETE_CORMESSAGES_BY_PROCESS";
+	public final static String DELETE_CORMESSAGES_BY_MEX = "DELETE_CORMESSAGES_BY_MEX";
+	
     private HMessageExchange _messageExchange;
     private HCorrelator _correlator;
     private String _correlationKey;
 
     /**
-     * @hibernate.many-to-one column="MEX"
+     * @hibernate.many-to-one column="MEX" foreign-key="none"
      */
     public HMessageExchange getMessageExchange() {
         return _messageExchange;
@@ -60,7 +64,7 @@ public class HCorrelatorMessage extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one
+     * @hibernate.many-to-one foreign-key="none"
      * @hibernate.column name="CORRELATOR" index="IDX_UNMATCHED_CORRELATOR" not-null="true"
      */
     public HCorrelator getCorrelator() {

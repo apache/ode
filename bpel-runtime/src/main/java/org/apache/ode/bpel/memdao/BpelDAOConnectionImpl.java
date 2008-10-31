@@ -90,6 +90,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter filter) {
         if(filter.getLimit()==0) {
             return Collections.EMPTY_LIST;

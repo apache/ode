@@ -25,8 +25,13 @@ import java.util.Set;
 /**
  * Hibernate table representing a BPEL scope instance. 
  * @hibernate.class table="BPEL_SCOPE"
+ * @hibernate.query name="DELETE_SCOPES_BY_INSTANCE" query="delete from HScope as s where s.instance = :instance"
+ * @hibernate.query name="DELETE_SCOPES_BY_PROCESS" query="delete from HScope as s where s.instance in (select i from HProcessInstance as i where i.process = :process)"
  */
 public class HScope extends HObject{
+	public final static String DELETE_SCOPES_BY_INSTANCE = "DELETE_SCOPES_BY_INSTANCE";
+	public final static String DELETE_SCOPES_BY_PROCESS = "DELETE_SCOPES_BY_PROCESS";
+
   /** Process instance to which this scope belongs. */
   private HProcessInstance _instance;
 
@@ -58,7 +63,7 @@ public class HScope extends HObject{
    *  inverse="true"
    *  cascade="delete"
    * @hibernate.collection-key
-   *  column="SCOPE_ID"
+   *  column="SCOPE_ID" foreign-key="none"
    * @hibernate.collection-one-to-many
    *  class="org.apache.ode.daohib.bpel.hobj.HCorrelationSet"
    */
@@ -73,7 +78,7 @@ public class HScope extends HObject{
   /**
    * Get the {@link HProcessInstance} to which this scope object belongs.
    * @hibernate.many-to-one
-   *  column="PIID"
+   *  column="PIID" foreign-key="none"
    */
 	public HProcessInstance getInstance() {
 		return _instance;
@@ -86,7 +91,7 @@ public class HScope extends HObject{
 
   /**
    * Get the "parent" {@link HScope} of this scope.
-   * @hibernate.many-to-one column="PARENT_SCOPE_ID"
+   * @hibernate.many-to-one column="PARENT_SCOPE_ID" foreign-key="none"
    */
 	public HScope getParentScope() {
 		return _parentScope;
@@ -128,7 +133,7 @@ public class HScope extends HObject{
    *
    * @return {@link Set}&lt;{@link HXmlData}&gt; with variable values
    * @hibernate.set lazy="true" inverse="true" cascade="delete"
-   * @hibernate.collection-key column="SCOPE_ID"
+   * @hibernate.collection-key column="SCOPE_ID" foreign-key="none"
    * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HXmlData"
    */
   public Set<HXmlData> getVariables() {
@@ -144,7 +149,7 @@ public class HScope extends HObject{
    *
    * @return {@link Set}&lt;{@link HPartnerLink}&gt; with variable values
    * @hibernate.set lazy="true" inverse="true" cascade="delete"
-   * @hibernate.collection-key column="SCOPE"
+   * @hibernate.collection-key column="SCOPE" foreign-key="none"
    * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HPartnerLink"
    */
   public Set<HPartnerLink> getPartnerLinks() {

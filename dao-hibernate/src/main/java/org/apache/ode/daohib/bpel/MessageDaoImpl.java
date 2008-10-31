@@ -37,7 +37,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     private HMessage _hself;
     private Session _session;
 
-    protected MessageDaoImpl(SessionManager sessionManager, HMessage hobj) {
+    public MessageDaoImpl(SessionManager sessionManager, HMessage hobj) {
         super(sessionManager, hobj);
         entering("MessageDaoImpl.MessageDaoImpl");
         _hself = hobj;

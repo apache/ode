@@ -18,9 +18,12 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.utils.DOMUtils;
@@ -40,7 +43,9 @@ import java.util.*;
 /**
  * Hibernate-based {@link ProcessInstanceDAO} implementation.
  */
-class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
+public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
+	private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
+
   /** Query for removing selectors. */
   private static final String QRY_DELSELECTORS = "delete from "  + 
     HCorrelatorSelector.class.getName() + " where instance = ?";
@@ -285,6 +290,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
      * TODO this is never used, except by test cases - should be removed
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getVariables(java.lang.String, int)
      */
+    @SuppressWarnings("unchecked")
 	public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
         entering("ProcessInstanceDaoImpl.getVariables");
     List<XmlDataDAO> results = new ArrayList<XmlDataDAO>();
@@ -315,21 +321,82 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     this.getProcess().instanceCompleted(this);
   }
 
-  public void delete() {
+  public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
       entering("ProcessInstanceDaoImpl.delete");
-    _sm.getSession().delete(_instance);
+	  if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
+      
+	  getSession().delete(_instance.getJacobState());
+	  
+      if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
+    	  deleteEvents();
+      }
+      
+      if( cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS) ) {
+    	  deleteCorrelations();
+      }
+      
+      if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
+    	  deleteMessages();
+      }
+      
+      if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
+    	  deleteVariables();
+      }
+      
+      if( cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE) ) {
+    	  deleteInstance();
+      }
+
+      getSession().flush();
+      
+	  if(__log.isDebugEnabled()) __log.debug("Instance data cleaned up and flushed.");
   }
+  
+  	private void deleteInstance() {
+  		getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_INSTANCE_ID).setParameter ("instanceId", _instance.getId()).executeUpdate();
+		getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+		getSession().delete(_instance); // this deletes JcobState, HActivityRecovery -> ActivityRecovery-LData
+  	}
+  	
+  	private void deleteVariables() {
+		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+  		getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+		getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+		getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+		getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_INSTANCE).setParameter ("instance", _instance).setParameter ("instance2", _instance).executeUpdate();
+		getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+		getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+  	}
+
+    private void deleteMessages() {
+  		getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+  	}
+  
+  	private void deleteCorrelations() {
+		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+  	}
+
+  	private void deleteEvents() {
+		getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+		getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();		
+	}
 
   public void insertBpelEvent(ProcessInstanceEvent event) {
       entering("ProcessInstanceDaoImpl.insertBpelEvent");
     // Defer to the BpelDAOConnectionImpl
-    BpelDAOConnectionImpl._insertBpelEvent(_sm.getSession(),event, this.getProcess(), this);
+    BpelDAOConnectionImpl._insertBpelEvent(getSession(), event, this.getProcess(), this);
   }
 
   public EventsFirstLastCountTuple getEventsFirstLastCount() {
       entering("ProcessInstanceDaoImpl.getEventsFirstLastCount");
     // Using a criteria, find the min,max, and count of event tstamps.
-    Criteria c = _sm.getSession().createCriteria(HBpelEvent.class);
+    Criteria c = getSession().createCriteria(HBpelEvent.class);
     c.add(Restrictions.eq("instance",_instance));
     c.setProjection(Projections.projectionList().add(Projections.min("tstamp"))
                                                 .add(Projections.max("tstamp"))
@@ -343,6 +410,16 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     return flc;
   }
 
+  public Collection<MessageExchangeDAO> getMessageExchanges() {
+	  Collection<MessageExchangeDAO> exchanges = new ArrayList<MessageExchangeDAO>();
+	  
+	  for( HMessageExchange exchange : _instance.getMessageExchanges() ) {
+		  exchanges.add(new MessageExchangeDaoImpl(_sm, exchange));
+	  }
+	  
+	  return exchanges;
+  }
+  
   public long genMonotonic() {
       entering("ProcessInstanceDaoImpl.genMonotonic");
     long seq = _instance.getSequence()+1;
@@ -365,6 +442,7 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
     return _instance.getActivityFailureDateTime();
   }
 
+  @SuppressWarnings("unchecked")
   public Collection<ActivityRecoveryDAO> getActivityRecoveries() {
       entering("ProcessInstanceDaoImpl.getActivityRecoveries");
     List<ActivityRecoveryDAO> results = new ArrayList<ActivityRecoveryDAO>();

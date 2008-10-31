@@ -28,6 +28,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -35,10 +37,17 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="ODE_XML_DATA_PROP")
+@NamedQueries({
+	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_PROCESS, query="delete from XmlDataProperty as p where p._xmlData._scope._processInstance._process = :process"),
+	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_INSTANCE, query="delete from XmlDataProperty as p where p._xmlData._scope._processInstance = :instance")
+})
 public class XmlDataProperty {
-
+	public final static String DELETE_XML_DATA_PROPERTIES_BY_PROCESS = "DELETE_XML_DATA_PROPERTIES_BY_PROCESS";
+	public final static String DELETE_XML_DATA_PROPERTIES_BY_INSTANCE = "DELETE_XML_DATA_PROPERTIES_BY_INSTANCE";
+	
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _id;
     @Basic @Column(name="PROP_KEY")
     private String propertyKey;
@@ -46,6 +55,7 @@ public class XmlDataProperty {
     private String propertyValue;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="XML_DATA_ID")
+    @SuppressWarnings("unused")
     private XmlDataDAOImpl _xmlData;
 
     public XmlDataProperty() {

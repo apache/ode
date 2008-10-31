@@ -23,12 +23,15 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * @hibernate.class
- *  table="BPEL_XML_DATA"
+ * @hibernate.class table="BPEL_XML_DATA"
+ * @hibernate.query name="DELETE_XMLDATA_BY_PROCESS" query="delete from HXmlData as x where x.instance in(select i from HProcessInstance as i where i.process = :process)"
+ * @hibernate.query name="DELETE_XMLDATA_BY_INSTANCE" query="delete from HXmlData as x where x.instance = :instance"
  */
 public class HXmlData extends HObject{
-  
-	private boolean _simpleType;
+  public static final String DELETE_XMLDATA_BY_PROCESS = "DELETE_XMLDATA_BY_PROCESS";
+  public static final String DELETE_XMLDATA_BY_INSTANCE = "DELETE_XMLDATA_BY_INSTANCE";
+	  
+  private boolean _simpleType;
   private HLargeData _data;
   private Collection<HVariableProperty> _properties = new HashSet<HVariableProperty>();
   private String _name;
@@ -41,7 +44,7 @@ public class HXmlData extends HObject{
 	}
 
   /**
-   * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
+   * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
    */
   public HLargeData getData() {
     return _data;
@@ -71,8 +74,7 @@ public class HXmlData extends HObject{
    *  lazy="true"
    *  inverse="true"
    *  cascade="delete"
-   * @hibernate.collection-key
-   *  column="XML_DATA_ID"
+   * @hibernate.collection-key column="XML_DATA_ID" foreign-key="none"
    * @hibernate.collection-one-to-many
    *  class="org.apache.ode.daohib.bpel.hobj.HVariableProperty"
    */
@@ -85,8 +87,7 @@ public class HXmlData extends HObject{
 	}
 
   /**
-   * @hibernate.many-to-one
-   *  column="SCOPE_ID"
+   * @hibernate.many-to-one column="SCOPE_ID" foreign-key="none"
    */
   public HScope getScope() {
     return _scope;
@@ -102,7 +103,7 @@ public class HXmlData extends HObject{
 
   /**
    * @hibernate.many-to-one
-   *  column="PIID"
+   *  column="PIID" foreign-key="none"
    */
   public HProcessInstance getInstance() {
     return _instance;

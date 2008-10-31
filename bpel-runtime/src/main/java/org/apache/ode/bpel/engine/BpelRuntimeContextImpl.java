@@ -56,8 +56,10 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -214,6 +216,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.finishCompletion();
 
         faultOutstandingMessageExchanges(faultData);
+
+        _bpelProcess._engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+            }
+            public void beforeCompletion() { 
+                _dao.delete(_bpelProcess.getCleanupCategories(false));
+            }
+        });
     }
 
     /**
@@ -235,6 +245,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.finishCompletion();
 
         completeOutstandingMessageExchanges();
+
+        _bpelProcess._engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+            }
+            public void beforeCompletion() { 
+                _dao.delete(_bpelProcess.getCleanupCategories(true));
+            }
+        });
     }
 
     /**
@@ -555,7 +573,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                         break;
                 }
             } finally {
-                mex.release();
+                mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
             }
         } else _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
 
@@ -789,7 +807,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
             mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
             // This mex can now be released
-            mexDao.release();
+            boolean succeeded = mex.getStatus() != MessageExchange.Status.FAILURE && mex.getStatus() != MessageExchange.Status.FAULT; 
+            mexDao.release(_bpelProcess.isCleanupCategoryEnabled(succeeded, CLEANUP_CATEGORY.MESSAGES));
         }
         // Check if there is a synchronous response, if so, we need to inject the
         // message on the response channel.
@@ -1092,7 +1111,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     default:
                         mex.setFailure(FailureType.OTHER, "No response.", null);
                         _bpelProcess._engine._contexts.mexContext.onAsyncReply(mex);
-                        mex.release();
+                        mex.release(_bpelProcess.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.MESSAGES));
                 }
             }
         }
@@ -1247,9 +1266,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return response;
     }
 
-    public void releasePartnerMex(String mexId) {
+    public void releasePartnerMex(String mexId, boolean instanceSucceeded) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        dao.release();
+        dao.release(_bpelProcess.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES) );
 
         // Canceling invocation check job
         String jobId = dao.getProperty("invokeCheckJobId");
@@ -1401,5 +1420,4 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	public URI getBaseResourceURI() {
 		return _bpelProcess.getBaseResourceURI();
 	}
-
 }

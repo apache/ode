@@ -1,10 +1,16 @@
-target
-reports
-derby.log
-*.cbp
-.classpath
-.project
+# for those of us using git internally
+# before committing in the central svn repository.
+
+*.class
+*.pyc
 *.iml
 *.ipr
-*.iwl
-*.swp
+*.iws
+*.zip
+*.jar
+.classpath
+.project
+.metadata
+bin
+target
+reports

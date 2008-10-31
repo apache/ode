@@ -24,8 +24,10 @@ import java.util.Date;
 /**
  * Persistent representation of activity recovery information.
  * @hibernate.class table="BPEL_ACTIVITY_RECOVERY"
+ * @hibernate.query name="DELETE_ACTIVITY_RECOVERIES_BY_PROCESS" query="delete from HActivityRecovery as a where a.instance in(select i from HProcessInstance as i where i.process = :process)"
  */
 public class HActivityRecovery extends HObject {
+	public final static String DELETE_ACTIVITY_RECOVERIES_BY_PROCESS = "DELETE_ACTIVITY_RECOVERIES_BY_PROCESS";
 
   /** Process instance to which this scope belongs. */
   private HProcessInstance _instance;
@@ -40,7 +42,7 @@ public class HActivityRecovery extends HObject {
   /**
    * Get the {@link HProcessInstance} to which this scope object belongs.
    * @hibernate.many-to-one
-   *  column="PIID"
+   *  column="PIID" foreign-key="none"
    */
 	public HProcessInstance getInstance() {
 		return _instance;
@@ -96,7 +98,7 @@ public class HActivityRecovery extends HObject {
 	}
 
   /**
-   * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
+   * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
    */
   public HLargeData getDetails() {
     return _details;

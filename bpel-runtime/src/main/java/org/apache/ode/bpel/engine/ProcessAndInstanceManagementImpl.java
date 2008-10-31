@@ -61,6 +61,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -124,6 +125,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -424,7 +426,11 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
                     for (ProcessInstanceDAO instance : instances) {
-                        instance.delete();
+						ProcessConf proc = _store.getProcessConfiguration(instance.getProcess().getProcessId());
+						if (proc == null)
+						    throw new ProcessNotFoundException("ProcessNotFound:" + instance.getProcess().getProcessId());
+						// delete the instance and all related data
+                        instance.delete(EnumSet.allOf(CLEANUP_CATEGORY.class));
                         ret.add(instance.getInstanceId());
                     }
                     return null;

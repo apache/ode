@@ -28,6 +28,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -35,10 +37,15 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="ODE_MEX_PROP")
+@NamedQueries({
+	@NamedQuery(name=MexProperty.DELETE_MEX_PROPERTIES_BY_PROCESS, query="delete from MexProperty as p where p._mex._process = :process")
+})
 public class MexProperty {
+	public final static String DELETE_MEX_PROPERTIES_BY_PROCESS = "DELETE_MEX_PROPERTIES_BY_PROCESS";
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _id;
     @Basic @Column(name="PROP_KEY")
     private String propertyKey;
@@ -46,6 +53,7 @@ public class MexProperty {
     private String propertyValue;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="MEX_ID")
+    @SuppressWarnings("unused")
     private MessageExchangeDAOImpl _mex;
 
     public MexProperty() {

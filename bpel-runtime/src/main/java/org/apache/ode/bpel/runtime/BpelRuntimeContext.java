@@ -250,7 +250,7 @@ public interface BpelRuntimeContext {
 
     String getSourceSessionId(String mexId);
 
-    void releasePartnerMex(String mexId);
+    void releasePartnerMex(String mexId, boolean instanceSucceeded);
 
     /**
      * Read an external variable. 

@@ -32,11 +32,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="ODE_MESSAGE_ROUTE")
+@NamedQueries ({
+	@NamedQuery(name=MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_PROCESS, query="delete from MessageRouteDAOImpl as r where r._processInst._process = :process"),
+	@NamedQuery(name=MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE, query="delete from MessageRouteDAOImpl as r where r._processInst = :instance")
+})
 public class MessageRouteDAOImpl implements MessageRouteDAO {
+	public final static String DELETE_MESSAGE_ROUTES_BY_PROCESS = "DELETE_MESSAGE_ROUTES_BY_PROCESS";
+	public final static String DELETE_MESSAGE_ROUTES_BY_INSTANCE = "DELETE_MESSAGE_ROUTES_BY_INSTANCE";
 	
 	@Id @Column(name="MESSAGE_ROUTE_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -53,6 +61,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
     private ProcessInstanceDAOImpl _processInst;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
+    @SuppressWarnings("unused")
     private CorrelatorDAOImpl _correlator;
 
     public MessageRouteDAOImpl() {}

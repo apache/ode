@@ -18,14 +18,16 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-
 /**
  * Hibernate-managed table for keeping track of messages.
  *
- * @hibernate.class
- *  table="BPEL_MESSAGE"
+ * @hibernate.class table="BPEL_MESSAGE"
+ * @hibernate.query name="DELETE_MESSAGES_BY_MEX" query="delete from HMessage as m WHERE m.messageExchange = :messageExchange"
+ * @hibernate.query name="DELETE_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.process = :process)"
  */
 public class HMessage extends HObject {
+	public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
+	public final static String DELETE_MESSAGES_BY_PROCESS = "DELETE_MESSAGES_BY_PROCESS";
 
   private HMessageExchange _mex;
   private String _type;
@@ -36,7 +38,7 @@ public class HMessage extends HObject {
     _mex = mex;
   }
   
-  /** @hibernate.many-to-one column="MEX" */
+  /** @hibernate.many-to-one column="MEX" foreign-key="none"*/
   public HMessageExchange getMessageExchange() {
     return _mex;
   }
@@ -51,7 +53,7 @@ public class HMessage extends HObject {
   }
 
   /**
-   * @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" 
+   * @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" foreign-key="none"
    * */
   public HLargeData getMessageData() {
     return _data;
@@ -61,7 +63,7 @@ public class HMessage extends HObject {
     _data = data;
   }
 
-  /** @hibernate.many-to-one column="HEADER"  lazy="false" outer-join="true" */
+  /** @hibernate.many-to-one column="HEADER"  lazy="false" outer-join="true" foreign-key="none" */
   public HLargeData getHeader() {
     return _header;
   }

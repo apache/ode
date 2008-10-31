@@ -24,11 +24,9 @@ package org.apache.ode.daohib.bpel.hobj;
  * targetted at the BPEL process with no matching instance at the time of
  * receipt (and createInstance is not possible).
  *
- * @hibernate.class
- *   table="BPEL_CORRELATOR_MESSAGE_CKEY"
+ * @hibernate.class table="BPEL_CORRELATOR_MESSAGE_CKEY"
  */
 public class HCorrelatorMessageKey extends HObject {
-
   /** Correlation Key canonical string representation. */
   private String _keyCanonical;
 
@@ -61,7 +59,7 @@ public class HCorrelatorMessageKey extends HObject {
   /**
    * The message with which this correlation key value is associated.
    * @hibernate.many-to-one
-   *   column="CORRELATOR_MESSAGE_ID"
+   *   column="CORRELATOR_MESSAGE_ID" foreign-key="none"
    */
   public HCorrelatorMessage getOwner() {
     return _owner;
