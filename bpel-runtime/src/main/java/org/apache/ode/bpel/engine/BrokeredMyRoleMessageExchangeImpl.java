@@ -94,7 +94,7 @@ public class BrokeredMyRoleMessageExchangeImpl
     @Override
     public void setSubscriberCount(int subscriberCount) {
     	for (MyRoleMessageExchange subscriber : subscribers) {
-	    	subscriber.setSubscriberCount(subscriberCount);
+	    	((MyRoleMessageExchangeImpl) subscriber).setSubscriberCount(subscriberCount);
     	}
     }
 }
