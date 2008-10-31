@@ -206,7 +206,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setProcessType(target.getProcess().getType().toString());
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
-        hsel.setRoutePolicy(routePolicy);
+        hsel.setRoute(routePolicy);
 //        _hobj.addSelector(hsel);
         getSession().save(hsel);
 
