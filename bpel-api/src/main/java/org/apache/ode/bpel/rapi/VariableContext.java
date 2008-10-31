@@ -89,6 +89,9 @@ public interface VariableContext {
     void initializePartnerLinks(Long parentScopeId,
                                 Collection<? extends PartnerLinkModel> partnerLinks);
 
+    void initializeResource(Long parentScopeId, ResourceModel resource, String url);
+
+    void checkResourceRoute(Resource instance, String pickResponseChannel, int selectorIdx);
 
     /**
      * Fetches the my-role endpoint reference data.

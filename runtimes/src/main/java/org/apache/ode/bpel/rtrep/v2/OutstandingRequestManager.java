@@ -106,25 +106,26 @@ class OutstandingRequestManager implements Serializable {
         _byChannel.put(pickResponseChannel, entry);
     }
 
-    void register(String pickResponseChannel, String url, String method, String mexRef) {
+    void register(String pickResponseChannel, ResourceInstance resource, String method, String mexRef) {
         if (__log.isTraceEnabled())
             __log.trace(ObjectPrinter.stringifyMethodEnter("register", new Object[] {
                     "pickResponseChannel", pickResponseChannel}) );
 
-        if (_byChannel.containsKey(pickResponseChannel)) {
+        if (_byRestChannel.containsKey(pickResponseChannel)) {
             String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
             __log.fatal(errmsg);
             throw new IllegalArgumentException(errmsg);
         }
 
-        final RequestResTuple rid = new RequestResTuple(url, method, mexRef);
-        if (_byRid.containsKey(rid)) {
+        final RequestResTuple rid = new RequestResTuple(resource, method, mexRef);
+        if (_byRestRid.containsKey(rid)) {
             String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
             __log.fatal(errmsg);
             throw new IllegalStateException(errmsg);
         }
-        _byRestRid.put(rid,  new RestEntry(pickResponseChannel));
-        _byRestChannel.put(pickResponseChannel, new RestEntry(pickResponseChannel));
+        RestEntry entry = new RestEntry(pickResponseChannel);
+        _byRestRid.put(rid,  entry);
+        _byRestChannel.put(pickResponseChannel, entry);
     }
 
     /**
@@ -212,12 +213,12 @@ class OutstandingRequestManager implements Serializable {
         return entry.mexRef;
     }
 
-    public String release(String url, String method, String mexId) {
+    public String release(ResourceInstance resourceInstance, String method, String mexId) {
         if (__log.isTraceEnabled())
             __log.trace(ObjectPrinter.stringifyMethodEnter("release", new Object[] {
-                    "url", url, "method", method, "mexId", mexId }) );
+                    "resource", resourceInstance, "method", method, "mexId", mexId }) );
 
-        final RequestResTuple rid = new RequestResTuple(url, method, mexId);
+        final RequestResTuple rid = new RequestResTuple(resourceInstance, method, mexId);
         RestEntry entry = _byRestRid.get(rid);
         if (entry == null) {
             if (__log.isDebugEnabled()) {
@@ -300,30 +301,30 @@ class OutstandingRequestManager implements Serializable {
     private class RequestResTuple  implements Serializable {
         private static final long serialVersionUID = -1059359612839777482L;
         /** Name of the operation. */
-        String url;
+        ResourceInstance resource;
         /** Message exchange identifier. */
         String method;
         /** Message exchange identifier. */
         String mexId;
 
         /** Constructor. */
-        private RequestResTuple(String url, String method, String mexId) {
-            this.url = url;
+        private RequestResTuple(ResourceInstance resource, String method, String mexId) {
+            this.resource = resource;
             this.method = method;
             this.mexId = mexId;
         }
 
         public int hashCode() {
-            return this.url.hashCode() ^ this.method.hashCode() ^ this.mexId.hashCode();
+            return this.resource.hashCode() ^ this.method.hashCode() ^ this.mexId.hashCode();
         }
 
         public boolean equals(Object obj) {
             RequestResTuple other = (RequestResTuple) obj;
-            return other.url.equals(url) && other.method.equals(method) && other.mexId.equals(mexId);
+            return other.resource.equals(resource) && other.method.equals(method) && other.mexId.equals(mexId);
         }
 
         public String toString() {
-            return ObjectPrinter.toString(this, new Object[] {"url", url, "method", method, "mexId", mexId});
+            return ObjectPrinter.toString(this, new Object[] {"url", resource, "method", method, "mexId", mexId});
         }
     }
 

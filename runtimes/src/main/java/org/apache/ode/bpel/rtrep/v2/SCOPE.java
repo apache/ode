@@ -19,12 +19,7 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.namespace.QName;
 
@@ -41,8 +36,11 @@ import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.ResourceModel;
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.utils.GUID;
 import org.w3c.dom.Element;
 
 /**
@@ -93,6 +91,21 @@ class SCOPE extends ACTIVITY {
 
         getBpelRuntime().initializePartnerLinks(_scopeFrame.scopeInstanceId,
             _oscope.partnerLinks.values());
+
+        // Initializing resource values
+        for (Map.Entry<String,OResource> resource : _oscope.resource.entrySet()) {
+            try {
+                String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
+                        resource.getValue().getSubpath(), getEvaluationContext());
+                // TODO implement a better URL building heuristic
+                url = url + "/" + new GUID().toString();
+
+                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource.getValue(), url);
+            } catch (FaultException e) {
+                _self.parent.completed(new FaultData(e.getQName(), resource.getValue(),
+                        "Error in resource evaluation: " + e.toString()), CompensationHandler.emptySet());
+            }
+        }
 
         sendEvent(new ScopeStartEvent());
         instance(new ACTIVE());

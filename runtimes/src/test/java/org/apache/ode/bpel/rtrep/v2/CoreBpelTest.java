@@ -112,7 +112,15 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void checkResourceRoute(String url, String method, PickResponseChannel pickResponseChannel, int selectorIdx) {
+    public void initializeResource(Long parentScopeId, OResource resource, String url) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void checkResourceRoute(ResourceInstance resourceInstance, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

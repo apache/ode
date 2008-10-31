@@ -102,6 +102,10 @@ class ScopeFrame implements Serializable {
         else return null;
     }
 
+    public ResourceInstance resolve(OResource resource) {
+        return new ResourceInstance(find(resource.getDeclaringScope()).scopeInstanceId, resource);
+    }
+
     public PartnerLinkInstance resolve(OPartnerLink partnerLink) {
         return new PartnerLinkInstance(find(partnerLink.declaringScope).scopeInstanceId, partnerLink);
     }

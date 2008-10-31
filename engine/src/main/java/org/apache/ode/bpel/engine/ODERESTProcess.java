@@ -20,8 +20,8 @@ public class ODERESTProcess extends ODEProcess {
 
     private ArrayList<Resource> _resources = new ArrayList<Resource>();
 
-    public ODERESTProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
-        super(server, conf, debugger);
+    public ODERESTProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, IncomingMessageExchangeCache mexCache) {
+        super(server, conf, debugger, mexCache);
         _processModel = conf.getProcessModel();
         _runtime = buildRuntime(_processModel.getModelVersion());
         _runtime.init(_pconf, _processModel);
@@ -94,6 +94,19 @@ public class ODERESTProcess extends ODEProcess {
         }
     }
 
+    void onRestMexAck(MessageExchangeDAO mexdao, MessageExchange.Status old, String url) {
+        if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
+            p2pCall(mexdao, old);
+        } else /* not p2p */{
+            if (old == MessageExchange.Status.ASYNC) {
+                RESTMessageExchangeImpl mymex = (RESTMessageExchangeImpl) _incomingMexCache.get(mexdao, this);
+                // Updating url for instantiating mexs so that the created resource url can be returned to the caller
+                mymex.getResource().setUrl(url);
+                mymex.onAsyncAck(mexdao);
+            }
+        }
+    }
+
     // Restful processes don't lazy load their OModel, they need it right away to access the instantiating resource
     protected void latch(int s) { }
     protected void releaseLatch(int s) { }
@@ -103,7 +116,14 @@ public class ODERESTProcess extends ODEProcess {
 
     public RESTMessageExchange createRESTMessageExchange(Resource resource, String clientKey) {
         // TODO check the resource matches a provided one
-        return new RESTMessageExchangeImpl(this, clientKey, resource);
+        RESTMessageExchangeImpl mex = new RESTMessageExchangeImpl(this, clientKey, resource);
+        _incomingMexCache.put(mex);
+        return mex;
+    }
+
+    MessageExchangeImpl recreateIncomingMex(MessageExchangeDAO mexdao) {
+        Resource resource = getResource(mexdao.getResource());
+        return new RESTMessageExchangeImpl(this, mexdao.getMessageExchangeId(), resource);
     }
 
     public Resource getResource(String url, String method) {

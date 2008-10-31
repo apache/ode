@@ -98,7 +98,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private final HashMap<String, ODERESTProcess> _restServiceMap = new HashMap<String, ODERESTProcess>();
 
     /** Weak-reference cache of all the my-role message exchange objects. */
-    private final MyRoleMessageExchangeCache _myRoleMexCache = new MyRoleMessageExchangeCache();
+    private final IncomingMessageExchangeCache _incomingMexCache = new IncomingMessageExchangeCache();
 
     private State _state = State.SHUTDOWN;
 
@@ -345,13 +345,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             ODEProcess process;
             if (conf.isRestful()) {
-                ODERESTProcess restProcess = new ODERESTProcess(this, conf, null);
+                ODERESTProcess restProcess = new ODERESTProcess(this, conf, null, _incomingMexCache);
                 for (String resUrl : restProcess.getInitialResourceUrls()) {
                     _restServiceMap.put(resUrl, restProcess);
                 }
                 process = restProcess;
             } else {
-                ODEWSProcess wsProcess = new ODEWSProcess(this, conf, null, _myRoleMexCache);
+                ODEWSProcess wsProcess = new ODEWSProcess(this, conf, null, _incomingMexCache);
                 for (Endpoint e : wsProcess.getServiceNames()) {
                     __log.debug("Register process: serviceId=" + e + ", process=" + wsProcess);
                     // Get the list of processes associated with the given service

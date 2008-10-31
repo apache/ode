@@ -107,6 +107,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.initializePartnerLinks(parentScopeId, partnerLinks);
     }
 
+    public void initializeResource(Long scopeInstanceId, OResource resource, String url) {        
+        _brc.initializeResource(scopeInstanceId, resource, url);
+    }
+
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException {
 
@@ -121,10 +125,11 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.select(pickResponseChannelStr, timeout, selectors);
     }
 
-    public void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
+    public void checkResourceRoute(ResourceInstance resourceInstance, String mexRef,
+                                   PickResponseChannel pickResponseChannel, int selectorIdx) {
         final String pickResponseChannelStr = pickResponseChannel.export();
-        getORM().register(pickResponseChannelStr, url, method, mexRef);
-        _brc.checkResourceRoute(url, method, pickResponseChannelStr, selectorIdx);
+        getORM().register(pickResponseChannelStr, resourceInstance, resourceInstance.getModel().getMethod(), mexRef);
+        _brc.checkResourceRoute(resourceInstance, pickResponseChannelStr, selectorIdx);
     }
 
     public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
@@ -436,9 +441,6 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.sendEvent(evt);
     }
 
-    /**
-     * Proxy to {@link IOContext#reply(PartnerLink, String, String, Element, QName) }.
-     */
     public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {
         String mexid = getORM().release(plink, opName, bpelmex);
         if (mexid == null)
@@ -450,6 +452,20 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
                     "Undefined two-way operation \"" + opName + "\".");
+        }
+    }
+
+    public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {
+        String mexid = getORM().release(resource, resource.getModel().getMethod(), bpelmex);
+        if (mexid == null)
+            throw new FaultException(_runtime._oprocess.constants.qnMissingRequest);
+
+        try {
+            _brc.reply(mexid, resource, element, fault);
+        } catch (NoSuchOperationException e) {
+            // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
+            throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
+                    "Undefined two-way operation \"" + resource + "\".");
         }
     }
 

@@ -37,6 +37,8 @@ public interface OdeInternalInstance {
 
     void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks);
 
+    void initializeResource(Long parentScopeId, OResource resource, String url);
+
     String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
             throws FaultException;
 
@@ -74,7 +76,8 @@ public interface OdeInternalInstance {
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
 
-    void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx);
+    void checkResourceRoute(ResourceInstance resourceInstance, String mexRef,
+                            PickResponseChannel pickResponseChannel, int selectorIdx);
 
     CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
@@ -119,4 +122,7 @@ public interface OdeInternalInstance {
 
     void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
             throws FaultException;
+
+    void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException;
+
 }

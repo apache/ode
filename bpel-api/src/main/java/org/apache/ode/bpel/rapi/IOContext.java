@@ -44,6 +44,8 @@ public interface IOContext {
      */
     void reply(String mexId, PartnerLink plink, String opName, Element msg, QName fault) throws NoSuchOperationException;
 
+    void reply(String mexId, Resource resource, Element msg, QName fault) throws NoSuchOperationException;
+
     /**
      * Invoke a partner.
      * 

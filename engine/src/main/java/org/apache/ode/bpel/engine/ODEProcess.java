@@ -73,6 +73,7 @@ public abstract class ODEProcess {
     protected final Set<InvocationStyle> _invocationStyles;
     protected final BpelDAOConnectionFactoryImpl _inMemDao;
     protected final BpelServerImpl _server;
+    protected IncomingMessageExchangeCache _incomingMexCache;
 
     /** Last time the process was used. */
     protected volatile long _lastUsed;
@@ -87,12 +88,13 @@ public abstract class ODEProcess {
     protected ExternalVariableConf _extVarConf;
         protected ExternalVariableManager _evm;
     
-    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger) {
+    ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, IncomingMessageExchangeCache mexCache) {
         _server = server;
         _pid = conf.getProcessId();
         _pconf = conf;
         _contexts = server._contexts;
         _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
+        _incomingMexCache = mexCache;
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
         HashSet<InvocationStyle> istyles = new HashSet<InvocationStyle>();
@@ -109,6 +111,7 @@ public abstract class ODEProcess {
     abstract void dehydrate();
 
     abstract void invokeProcess(final MessageExchangeDAO mexdao);
+    abstract MessageExchangeImpl recreateIncomingMex(MessageExchangeDAO mexdao);
 
     protected abstract void latch(int s);
     protected abstract void releaseLatch(int s);
@@ -415,6 +418,33 @@ public abstract class ODEProcess {
             executeContinueInstanceMatcherEvent(instanceDAO, we.getCorrelatorId(), we.getCorrelationKey());
             break;
         }
+    }
+
+    void p2pCall(MessageExchangeDAO mexdao, MessageExchange.Status old) {
+        ODEProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
+        // process no longer deployed....
+        if (caller == null) return;
+
+        MessageExchangeDAO pmex = caller.loadMexDao(mexdao.getPipedMessageExchangeId());
+        // Mex no longer there.... odd..
+        if (pmex == null) return;
+
+        // Need to copy the response and state from myrolemex --> partnerrolemex
+        boolean compat = !(caller.isInMemory() ^ isInMemory());
+        if (compat) {
+            // both processes are in-mem or both are persisted, can share the message
+            pmex.setResponse(mexdao.getResponse());
+        } else /* one process in-mem, other persisted */{
+            MessageDAO presponse = pmex.createMessage(mexdao.getResponse().getType());
+            presponse.setData(mexdao.getResponse().getData());
+            presponse.setHeader(mexdao.getResponse().getHeader());
+            pmex.setResponse(presponse);
+        }
+        pmex.setStatus(mexdao.getStatus());
+        pmex.setAckType(mexdao.getAckType());
+        pmex.setFailureType(mexdao.getFailureType());
+
+        if (old == MessageExchange.Status.ASYNC) caller.p2pWakeup(pmex);        
     }
 
     MessageExchangeDAO loadMexDao(String mexId) {

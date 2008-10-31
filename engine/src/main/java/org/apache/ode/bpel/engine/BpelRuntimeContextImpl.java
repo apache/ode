@@ -60,12 +60,10 @@ import org.apache.ode.utils.*;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.rapi.Resource;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
@@ -207,6 +205,22 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
     }
 
+    public void initializeResource(Long parentScopeId, ResourceModel resource, String url) {
+        ScopeDAO parent = _dao.getScope(parentScopeId);
+        // Storing the resource as a variable
+        XmlDataDAO resourceData = parent.getVariable(resource.getName());
+        Document doc = DOMUtils.newDocument();
+        resourceData.set(doc.createTextNode(url));
+    }
+
+    public String readResource(Long parentScopeId, ResourceModel resource) {
+        ScopeDAO parent = _dao.getScope(parentScopeId);
+        XmlDataDAO resourceData = parent.getVariable(resource.getName());
+        Node resourceNode = resourceData.get();
+        if (resourceData.isNull()) return null;
+        else return ((Text)resourceNode).getWholeText();
+    }
+
     public void select(String selectChannelId, Date timeout, Selector[] selectors) {
         if (ODEProcess.__log.isTraceEnabled())
             ODEProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select", new Object[] { "pickResponseChannel",
@@ -272,7 +286,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
     }
 
-    public void checkResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+    public void checkResourceRoute(Resource resourceInstance, String pickResponseChannel, int selectorIdx) {
         // check if this is first pick
         if (_dao.getState() == ProcessState.STATE_NEW) {
             // send event
@@ -283,11 +297,13 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             sendEvent(evt);
         }
 
+        String method = resourceInstance.getModel().getMethod();
         if (_instantiatingMessageExchange != null && method.equals("POST") && _dao.getState() == ProcessState.STATE_READY)
             injectMyRoleMessageExchange(pickResponseChannel, selectorIdx, _instantiatingMessageExchange);
         else {
+            String url = readResource(resourceInstance.getScopeInstanceId(), resourceInstance.getModel());
             _dao.createResourceRoute(url, method, pickResponseChannel, selectorIdx);
-            Resource res = new Resource(url, "application/xml", method);
+            org.apache.ode.bpel.iapi.Resource res = new org.apache.ode.bpel.iapi.Resource(url, "application/xml", method);
             _bpelProcess._contexts.bindingContext.activateProvidedResource(res);
         }
 
@@ -423,6 +439,36 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         myrolemex.setStatus(Status.ACK);
         myrolemex.setAckType(ackType);
         ((ODEWSProcess)_bpelProcess).onMyRoleMexAck(myrolemex, previousStatus);
+        sendEvent(evt);
+    }
+
+    public void reply(String mexId, Resource resource, Element msg, QName fault) throws NoSuchOperationException {
+        // prepare event
+        ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
+        evt.setMexId(mexId);
+        evt.setResource(resource.getName());
+
+        MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexId);
+        MessageDAO message = mex.createMessage(null);
+        buildOutgoingMessage(message, msg);
+        mex.setResponse(message);
+
+        AckType ackType;
+        if (fault != null) {
+            ackType = AckType.FAULT;
+            mex.setFault(fault);
+            evt.setAspect(ProcessMessageExchangeEvent.PROCESS_FAULT);
+        } else {
+            ackType = AckType.RESPONSE;
+            evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
+        }
+
+        String url = readResource(resource.getScopeInstanceId(), resource.getModel());
+
+        Status previousStatus = mex.getStatus();
+        mex.setStatus(Status.ACK);
+        mex.setAckType(ackType);
+        ((ODERESTProcess)_bpelProcess).onRestMexAck(mex, previousStatus, url);
         sendEvent(evt);
     }
 

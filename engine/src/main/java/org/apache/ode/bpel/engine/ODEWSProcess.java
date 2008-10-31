@@ -39,12 +39,9 @@ public class ODEWSProcess extends ODEProcess {
     /** Latch-like thing to control hydration/dehydration. */
     HydrationLatch _hydrationLatch;
 
-    private MyRoleMessageExchangeCache _myRoleMexCache;
-
-    ODEWSProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, MyRoleMessageExchangeCache mexCache) {
-        super(server, conf, debugger);
+    ODEWSProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, IncomingMessageExchangeCache mexCache) {
+        super(server, conf, debugger, mexCache);
         _hydrationLatch = new HydrationLatch();
-        _myRoleMexCache = mexCache;
     }
 
     private PartnerLinkMyRoleImpl getMyRoleForService(QName serviceName) {
@@ -465,7 +462,7 @@ public class ODEWSProcess extends ODEProcess {
             throw new AssertionError("Unexpected invocation style: " + istyle);
         }
 
-        _myRoleMexCache.put(mex);
+        _incomingMexCache.put(mex);
         return mex;
     }
 
@@ -477,17 +474,17 @@ public class ODEWSProcess extends ODEProcess {
      * @return client representation
      */
     MyRoleMessageExchangeImpl lookupMyRoleMex(MessageExchangeDAO mexdao) {
-        return _myRoleMexCache.get(mexdao, this); // this will re-create if necessary
+        return (MyRoleMessageExchangeImpl) _incomingMexCache.get(mexdao, this); // this will re-create if necessary
     }
 
     /**
      * Create (or recreate) a {@link MyRoleMessageExchangeImpl} object from data in the db. This method is used by the
-     * {@link MyRoleMessageExchangeCache} to re-create objects when they are not found in the cache.
+     * {@link IncomingMessageExchangeCache} to re-create objects when they are not found in the cache.
      *
      * @param mexdao
      * @return
      */
-    MyRoleMessageExchangeImpl recreateMyRoleMex(MessageExchangeDAO mexdao) {
+    MyRoleMessageExchangeImpl recreateIncomingMex(MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
 
         latch(1);
@@ -539,35 +536,12 @@ public class ODEWSProcess extends ODEProcess {
 
     void onMyRoleMexAck(MessageExchangeDAO mexdao, MessageExchange.Status old) {
         if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
-            ODEProcess caller = _server.getBpelProcess(mexdao.getPipedPID());
-            // process no longer deployed....
-            if (caller == null) return;
-
-            MessageExchangeDAO pmex = caller.loadMexDao(mexdao.getPipedMessageExchangeId());
-            // Mex no longer there.... odd..
-            if (pmex == null) return;
-
-            // Need to copy the response and state from myrolemex --> partnerrolemex
-            boolean compat = !(caller.isInMemory() ^ isInMemory());
-            if (compat) {
-                // both processes are in-mem or both are persisted, can share the message
-                pmex.setResponse(mexdao.getResponse());
-            } else /* one process in-mem, other persisted */{
-                MessageDAO presponse = pmex.createMessage(mexdao.getResponse().getType());
-                presponse.setData(mexdao.getResponse().getData());
-                presponse.setHeader(mexdao.getResponse().getHeader());
-                pmex.setResponse(presponse);
-            }
-            pmex.setStatus(mexdao.getStatus());
-            pmex.setAckType(mexdao.getAckType());
-            pmex.setFailureType(mexdao.getFailureType());
-
-            if (old == MessageExchange.Status.ASYNC) caller.p2pWakeup(pmex);
+            p2pCall(mexdao, old);
         } else /* not p2p */{
             // Do an Async wakeup if we are in the ASYNC state. If we're not, we'll pick up the ACK when we unwind
             // the stack.
             if (old == MessageExchange.Status.ASYNC) {
-                MyRoleMessageExchangeImpl mymex = _myRoleMexCache.get(mexdao, this);
+                MyRoleMessageExchangeImpl mymex = (MyRoleMessageExchangeImpl) _incomingMexCache.get(mexdao, this);
                 mymex.onAsyncAck(mexdao);
                 try {
                     _contexts.mexContext.onMyRoleMessageExchangeStateChanged(mymex);

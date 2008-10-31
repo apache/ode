@@ -87,11 +87,7 @@ class PICK extends ACTIVITY {
             int idx = 0;
             for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
                 if (onMessage.isRestful()) {
-                    // TODO here we should resolved a resource url value that's been previously instantiated by a scope
-                    String url = getBpelRuntime().getExpLangRuntime()
-                            .evaluateAsString(onMessage.resource.getSubpath(), getEvaluationContext());
-                    url = url + "/" + new GUID().toString();
-                    getBpelRuntime().checkResourceRoute(url, onMessage.resource.getMethod(),
+                    getBpelRuntime().checkResourceRoute(_scopeFrame.resolve(onMessage.resource),
                             onMessage.messageExchangeId, pickResponseChannel, idx);
                 } else {
                     CorrelationKey key = null;
@@ -170,56 +166,57 @@ class PICK extends ACTIVITY {
             return;
         }
 
-        Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
+        if (!onMessage.isRestful()) {
+            Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
 
-        // Let's do some sanity checks here so that we don't get weird errors in assignment later.
-        // The engine should have checked to make sure that the messages that are  delivered conform 
-        // to the correct format; but you know what they say, don't trust anyone.  
-        if (!(onMessage.variable.type instanceof OMessageVarType)) {
-            String errmsg = "Non-message variable for receive: should have been picked up by static analysis.";
-            __log.fatal(errmsg);
-            throw new InvalidProcessException(errmsg);
-        }
-
-        OMessageVarType vartype = (OMessageVarType) onMessage.variable.type;
-
-        // Check that each part contains what we expect. 
-        for (String pName : partNames) {
-            QName partName = new QName(null, pName);
-            Element msgPart = DOMUtils.findChildByName(msgEl, partName);
-            OMessageVarType.Part part = vartype.parts.get(pName);
-            if (part == null) {
-                String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.messageType;
+            // Let's do some sanity checks here so that we don't get weird errors in assignment later.
+            // The engine should have checked to make sure that the messages that are  delivered conform
+            // to the correct format; but you know what they say, don't trust anyone.
+            if (!(onMessage.variable.type instanceof OMessageVarType)) {
+                String errmsg = "Non-message variable for receive: should have been picked up by static analysis.";
                 __log.fatal(errmsg);
                 throw new InvalidProcessException(errmsg);
             }
-            if (msgPart == null) {
-                String errmsg = "Message missing part: " + pName;
-                __log.fatal(errmsg);
-                throw new InvalidContextException(errmsg);
-            }           
-            
-            if (part.type instanceof OElementVarType) {
-                OElementVarType ptype = (OElementVarType) part.type; 
-                Element e  = DOMUtils.getFirstChildElement(msgPart);
-                if (e == null) {
-                    String errmsg = "Message (element) part " + pName + " did not contain child element.";
+
+            OMessageVarType vartype = (OMessageVarType) onMessage.variable.type;
+            // Check that each part contains what we expect.
+            for (String pName : partNames) {
+                QName partName = new QName(null, pName);
+                Element msgPart = DOMUtils.findChildByName(msgEl, partName);
+                OMessageVarType.Part part = vartype.parts.get(pName);
+                if (part == null) {
+                    String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.messageType;
+                    __log.fatal(errmsg);
+                    throw new InvalidProcessException(errmsg);
+                }
+                if (msgPart == null) {
+                    String errmsg = "Message missing part: " + pName;
                     __log.fatal(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
 
-                // Relaxing that check a bit for SimPEL
-                if (!ptype.elementType.getLocalPart().equals("simpelWrapper")) {
-                    QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
-                    if(!qn.equals(ptype.elementType)) {
-                        String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
-                                + ptype.elementType + " but got " + qn;
+                if (part.type instanceof OElementVarType) {
+                    OElementVarType ptype = (OElementVarType) part.type;
+                    Element e  = DOMUtils.getFirstChildElement(msgPart);
+                    if (e == null) {
+                        String errmsg = "Message (element) part " + pName + " did not contain child element.";
                         __log.fatal(errmsg);
                         throw new InvalidContextException(errmsg);
                     }
+
+                    // Relaxing that check a bit for SimPEL
+                    if (!ptype.elementType.getLocalPart().equals("simpelWrapper")) {
+                        QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
+                        if(!qn.equals(ptype.elementType)) {
+                            String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
+                                    + ptype.elementType + " but got " + qn;
+                            __log.fatal(errmsg);
+                            throw new InvalidContextException(errmsg);
+                        }
+                    }
                 }
+
             }
-            
         }
 
         VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
@@ -235,8 +232,7 @@ class PICK extends ACTIVITY {
         // Generating event
         VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
         se.setNewValue(msgEl);
-        if (_opick.debugInfo != null)
-            se.setLineNo(_opick.debugInfo.startLine);
+        if (_opick.debugInfo != null) se.setLineNo(_opick.debugInfo.startLine);
         sendEvent(se);
     }
 
@@ -276,10 +272,8 @@ class PICK extends ACTIVITY {
                         for (OScope.CorrelationSet cset : onMessage.initCorrelations) {
                             initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
                         }
-                        if (onMessage.partnerLink.hasPartnerRole()) {
-                            // Trying to initialize partner epr based on a
-                            // message-provided epr/session.
-
+                        if (onMessage.partnerLink != null && onMessage.partnerLink.hasPartnerRole()) {
+                            // Trying to initialize partner epr based on a message-provided epr/session.
                             if (!getBpelRuntime().isPartnerRoleEndpointInitialized(
                                     _scopeFrame.resolve(onMessage.partnerLink))
                                     || !onMessage.partnerLink.initializePartnerRole) {

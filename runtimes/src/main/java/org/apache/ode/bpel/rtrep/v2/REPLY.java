@@ -55,9 +55,13 @@ class REPLY extends ACTIVITY {
             for (OScope.CorrelationSet cset : oreply.initCorrelations)
                 initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(oreply.variable));
 
-            //		send reply
-            getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                    oreply.messageExchangeId, (Element)msg, oreply.fault);
+            // send reply
+            if (oreply.resource != null)
+                getBpelRuntime().reply(_scopeFrame.resolve(oreply.resource), 
+                        oreply.messageExchangeId, (Element)msg, oreply.fault);
+            else
+                getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
+                        oreply.messageExchangeId, (Element)msg, oreply.fault);
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);

@@ -2,6 +2,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -124,6 +125,14 @@ public class RESTMessageExchangeImpl extends MessageExchangeImpl implements REST
     void save(MessageExchangeDAO dao) {
         super.save(dao);
         dao.setResource(_resource.getUrl() + "~" + _resource.getMethod());
+
+        if (_changes.contains(Change.REQUEST)) {
+            _changes.remove(Change.REQUEST);
+            MessageDAO requestDao = dao.createMessage(_request.getType());
+            requestDao.setData(_request.getMessage());
+            requestDao.setHeader(_request.getHeader());
+            dao.setRequest(requestDao);
+        }
     }
 
     @Override
