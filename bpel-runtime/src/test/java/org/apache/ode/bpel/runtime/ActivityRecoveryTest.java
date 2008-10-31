@@ -145,16 +145,16 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         assertRecovery(1, ACTIONS);
     }
 
-    public void testImmediateFailureAndFault() throws Exception {
-        // This process responds to failure with a fault.
-        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
-        _testService.expects(never()).method("completed").after("invoke");
-
-        execute("FailureToFault");
-        assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
-        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
-        assertNoFailures();
-    }
+//    public void testImmediateFailureAndFault() throws Exception {
+//        // This process responds to failure with a fault.
+//        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
+//        _testService.expects(never()).method("completed").after("invoke");
+//
+//        execute("FailureToFault");
+//        assertTrue(lastInstance().getStatus() == TInstanceStatus.FAILED);
+//        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance().getFaultInfo().getName()));
+//        assertNoFailures();
+//    }
 
     public void testFailureHandlingInheritence() throws Exception {
         // Since the invocation is repeated 3 times, the process completes after

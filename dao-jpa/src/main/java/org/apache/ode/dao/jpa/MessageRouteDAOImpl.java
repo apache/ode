@@ -47,7 +47,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     private int _index;
 	@Basic @Column(name="CORRELATION_KEY")
     private String _correlationKey;
-	@Basic @Column(name="ROUTE_POLICY")
+	@Basic @Column(name="ROUTE_POLICY", length=16)
     private String _routePolicy;	
 
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
