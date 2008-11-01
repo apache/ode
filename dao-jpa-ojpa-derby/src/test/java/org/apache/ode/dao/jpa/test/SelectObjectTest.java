@@ -46,6 +46,7 @@ import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.List;
 
 public class SelectObjectTest extends TestCase {
 	
@@ -105,7 +106,11 @@ public class SelectObjectTest extends TestCase {
 		assertEquals(corr.getCorrelatorId(),CORRELATOR_ID1);
 		
 		// Assert the MessageRouteDAO
-		MessageRouteDAO route = corr.findRoute(key1);
+		List<MessageRouteDAO> routes = corr.findRoute(key1);
+        MessageRouteDAO route = null;
+        if (routes != null && routes.size() > 0) {
+            route = routes.get(0);
+        }
 		assertNotNull( route );
 		assertEquals(route.getGroupId(),"testRoute" );
 		assertEquals(route.getIndex() , 1 );
