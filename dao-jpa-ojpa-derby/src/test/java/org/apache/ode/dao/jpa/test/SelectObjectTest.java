@@ -283,7 +283,7 @@ public class SelectObjectTest extends TestCase {
 			assertSame(chsVar,vars[0]);
 			assertNotNull(vars[0].get());
 			assertEquals(vars[0].getName(),"var1");
-			assertEquals(vars[0].getProperty("key1"),"prop1");
+			// assertEquals(vars[0].getProperty("key1"),"prop1");
 			assertSame(vars[0].getScopeDAO(),childS);
 			
 		}
