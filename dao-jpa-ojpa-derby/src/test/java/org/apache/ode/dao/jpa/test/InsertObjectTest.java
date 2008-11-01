@@ -183,7 +183,7 @@ public class InsertObjectTest extends TestCase {
 		
 		MessageExchangeDAO mex = createMessageExchange(process,pi,pl1);
 		
-		corr.addRoute("testRoute", pi, 1, key1);
+		corr.addRoute("testRoute", pi, 1, key1, "one");
 		corr.enqueueMessage(mex, corrkeys);
 		
 		return pi;
