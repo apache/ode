@@ -91,6 +91,10 @@ public interface VariableContext {
 
     void initializeResource(Long parentScopeId, ResourceModel resource, String url);
 
+    void initializeInstantiatingUrl(String url);
+
+    String getInstantiatingUrl();
+
     void checkResourceRoute(Resource instance, String pickResponseChannel, int selectorIdx);
 
     /**

@@ -36,7 +36,6 @@ import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
-import org.apache.ode.bpel.rapi.ResourceModel;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
@@ -98,7 +97,12 @@ class SCOPE extends ACTIVITY {
                 String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
                         resource.getValue().getSubpath(), getEvaluationContext());
                 // TODO implement a better URL building heuristic
-                url = url + "/" + new GUID().toString();
+                if (resource.getValue().isInstantiateResource()) {
+                    url = url + "/" + getBpelRuntime().getInstanceId();
+                    getBpelRuntime().initializeInstantiatingUrl(url);
+                } else {
+                    url = getBpelRuntime().getInstantiatingUrl() + "/" + url;
+                }
 
                 getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource.getValue(), url);
             } catch (FaultException e) {

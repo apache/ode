@@ -386,7 +386,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
      * Proxy to {@link org.apache.ode.bpel.rapi.ProcessControlContext# }.
      */
     public Long getPid() {
-        return _brc.getPid();
+        return _brc.getInstanceId();
     }
 
     /**

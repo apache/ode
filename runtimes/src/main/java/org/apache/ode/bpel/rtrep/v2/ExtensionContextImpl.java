@@ -56,7 +56,7 @@ public class ExtensionContextImpl implements ExtensionContext {
 	}
 	
 	public Long getProcessId() {
-		return _context.getPid();
+		return _context.getInstanceId();
 	}
 
 	public Map<String, OScope.Variable> getVisibleVariables() throws FaultException {

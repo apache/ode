@@ -10,9 +10,6 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 
 /**
  * Manage {@link IncomingMessageExchangeCache} object references.
- * 
- * @author Maciej Szefler <mszefler at gmail dot com>
- * 
  */
 class IncomingMessageExchangeCache {
 

@@ -39,6 +39,10 @@ public interface OdeInternalInstance {
 
     void initializeResource(Long parentScopeId, OResource resource, String url);
 
+    void initializeInstantiatingUrl(String url);
+
+    String getInstantiatingUrl();
+
     String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
             throws FaultException;
 
@@ -102,7 +106,7 @@ public interface OdeInternalInstance {
 
     void sendEvent(ProcessInstanceStartedEvent evt);
 
-    Long getPid();
+    Long getInstanceId();
 
     URI getBaseResourceURI();
 

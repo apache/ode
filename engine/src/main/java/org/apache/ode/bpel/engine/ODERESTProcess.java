@@ -98,10 +98,10 @@ public class ODERESTProcess extends ODEProcess {
         if (mexdao.getPipedMessageExchangeId() != null) /* p2p */{
             p2pCall(mexdao, old);
         } else /* not p2p */{
+            RESTMessageExchangeImpl mymex = (RESTMessageExchangeImpl) _incomingMexCache.get(mexdao, this);
+            mymex.getResource().setUrl(url);
             if (old == MessageExchange.Status.ASYNC) {
-                RESTMessageExchangeImpl mymex = (RESTMessageExchangeImpl) _incomingMexCache.get(mexdao, this);
                 // Updating url for instantiating mexs so that the created resource url can be returned to the caller
-                mymex.getResource().setUrl(url);
                 mymex.onAsyncAck(mexdao);
             }
         }

@@ -116,7 +116,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 	}
 
 	public Long getProcessId() {
-		return _native.getPid();
+		return _native.getInstanceId();
 	}
 
 	public boolean narrowTypes() {

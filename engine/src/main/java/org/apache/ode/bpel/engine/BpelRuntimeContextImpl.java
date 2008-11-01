@@ -105,7 +105,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         return "{BpelRuntimeCtx PID=" + _bpelProcess.getPID() + ", IID=" + _iid + "}";
     }
 
-    public Long getPid() {
+    public Long getInstanceId() {
         return _iid;
     }
 
@@ -211,6 +211,15 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         XmlDataDAO resourceData = parent.getVariable(resource.getName());
         Document doc = DOMUtils.newDocument();
         resourceData.set(doc.createTextNode(url));
+    }
+
+    public void initializeInstantiatingUrl(String url) {
+        _dao.setInstantiatingUrl(url);
+        _instantiatingMessageExchange.setResource(url + "~POST");
+    }
+
+    public String getInstantiatingUrl() {
+        return _dao.getInstantiatingUrl();
     }
 
     public String readResource(Long parentScopeId, ResourceModel resource) {

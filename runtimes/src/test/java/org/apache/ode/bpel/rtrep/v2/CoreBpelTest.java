@@ -72,7 +72,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         _pid = (long) 19355;
     }
 
-    public Long getPid() {
+    public Long getInstanceId() {
         return _pid;
     }
 
@@ -118,6 +118,14 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 
     public void checkResourceRoute(ResourceInstance resourceInstance, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void initializeInstantiatingUrl(String url) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String getInstantiatingUrl() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {

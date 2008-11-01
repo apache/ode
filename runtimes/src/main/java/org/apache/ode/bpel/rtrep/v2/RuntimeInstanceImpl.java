@@ -111,6 +111,14 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.initializeResource(scopeInstanceId, resource, url);
     }
 
+    public void initializeInstantiatingUrl(String url) {
+        _brc.initializeInstantiatingUrl(url);
+    }
+
+    public String getInstantiatingUrl() {
+        return _brc.getInstantiatingUrl();
+    }
+
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException {
 
@@ -395,8 +403,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     /**
      * Proxy to {@link ProcessControlContext# }.
      */
-    public Long getPid() {
-        return _brc.getPid();
+    public Long getInstanceId() {
+        return _brc.getInstanceId();
     }
 
     /**
