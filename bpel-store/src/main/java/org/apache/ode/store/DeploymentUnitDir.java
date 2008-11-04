@@ -218,7 +218,7 @@ class DeploymentUnitDir {
     public TreeSet<File> getEndpointConfigFiles() {
         File[] files = getDeployDir().listFiles(_endpointFilter);
         TreeSet<File> set = new TreeSet<File>();
-        set.addAll(Arrays.asList(files));
+        if(files!=null) set.addAll(Arrays.asList(files));
         return set;
     }
 
