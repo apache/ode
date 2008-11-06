@@ -138,6 +138,7 @@ abstract class BpelCompiler implements CompilerContext {
 
     private Date _generatedDate;
 
+    @SuppressWarnings("unchecked")
     private HashMap<Class, ActivityGenerator> _actGenerators = new HashMap<Class, ActivityGenerator>();
 
     private boolean _supressJoinFailure = false;
@@ -1294,7 +1295,8 @@ abstract class BpelCompiler implements CompilerContext {
                         oevent.initCorrelations.add(cset);
                         break;
                     case JOIN:
-                        throw new CompilationException(__cmsgs.errTODO("Rendezvous."));
+                        oevent.joinCorrelation = cset;
+                        oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset);
                     }
 
                     for (OProcess.OProperty property : cset.properties) {
@@ -1590,6 +1592,7 @@ abstract class BpelCompiler implements CompilerContext {
         return type;
     }
 
+    @SuppressWarnings("unchecked")
     private ActivityGenerator findActivityGen(Activity source) {
 
         Class actClass = source.getClass();
@@ -1606,6 +1609,7 @@ abstract class BpelCompiler implements CompilerContext {
         throw new CompilationException(__cmsgs.errUnknownActivity(actClass.getName()).setSource(source));
     }
 
+    @SuppressWarnings("unchecked")
     protected void registerActivityCompiler(Class defClass, ActivityGenerator generator) {
         if (__log.isDebugEnabled()) {
             __log.debug("Adding compiler for nodes class \"" + defClass.getName() + " = " + generator);
@@ -1640,6 +1644,7 @@ abstract class BpelCompiler implements CompilerContext {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);
     }
 
+    @SuppressWarnings("unchecked")
     protected void registerExpressionLanguage(String expLangUri, String classname) throws Exception {
         Class cls = Class.forName(classname);
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());

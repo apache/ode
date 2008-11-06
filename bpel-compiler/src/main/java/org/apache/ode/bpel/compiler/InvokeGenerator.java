@@ -105,21 +105,23 @@ class InvokeGenerator extends DefaultActivityGenerator {
 
         if (oinvoke.inputVar != null) {
             doCorrelations(outcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput);
+                    oinvoke.initCorrelationsInput, oinvoke.joinCorrelationsInput);
             doCorrelations(inoutcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput);
+                    oinvoke.initCorrelationsInput, oinvoke.joinCorrelationsInput);
         }
         if (oinvoke.outputVar != null) {
             doCorrelations(incorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
+                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput, oinvoke.joinCorrelationsOutput);
             doCorrelations(inoutcorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
+                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput, oinvoke.joinCorrelationsOutput);
         }
         
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var,
-            Collection<OScope.CorrelationSet> assertCorrelations, Collection<OScope.CorrelationSet> initCorrelations) {
+            Collection<OScope.CorrelationSet> assertCorrelations, 
+            Collection<OScope.CorrelationSet> initCorrelations,
+            Collection<OScope.CorrelationSet> joinCorrelations) {
         for (Correlation correlation : correlations) {
             OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
             switch (correlation.getInitiate()) {
@@ -130,8 +132,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 initCorrelations.add(cset);
                 break;
             case JOIN:
-                // TODO: fixe errror
-                throw new UnsupportedOperationException();
+                joinCorrelations.add(cset);
             }
             for (OProcess.OProperty property : cset.properties) {
                 // Force resolution of alias, to make sure that we have one for

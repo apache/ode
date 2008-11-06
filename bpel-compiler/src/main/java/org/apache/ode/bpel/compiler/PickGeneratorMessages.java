@@ -28,8 +28,8 @@ public class PickGeneratorMessages extends CompilationMessageBundle {
      * Attempt to use multiple non-initiate correlation sets; second set was
      * "{0}".
      */
-    public CompilationMessage errSecondNonInitiateCorrelationSet(String setName) {
-        return this.formatCompilationMessage("Attempt to use multiple non-initiate correlation sets;"
+    public CompilationMessage errSecondNonInitiateOrJoinCorrelationSet(String setName) {
+        return this.formatCompilationMessage("Attempt to use multiple non-initiate or join correlation sets;"
                 + " second set was \"{0}\".", setName);
     }
 

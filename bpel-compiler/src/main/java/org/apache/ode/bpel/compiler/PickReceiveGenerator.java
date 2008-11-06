@@ -90,8 +90,8 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 if (createInstance)
                     throw new CompilationException(__cmsgsGeneral.errUseOfUninitializedCorrelationSet(correlation
                             .getCorrelationSet()));
-                if (onMessage.matchCorrelation != null)
-                    throw new CompilationException(__cmsgs.errSecondNonInitiateCorrelationSet(correlation
+                if (onMessage.matchCorrelation != null || onMessage.joinCorrelation != null)
+                    throw new CompilationException(__cmsgs.errSecondNonInitiateOrJoinCorrelationSet(correlation
                             .getCorrelationSet()));
                 onMessage.matchCorrelation = cset;
                 onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
@@ -101,17 +101,14 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                 break;
             case JOIN:
-                if (createInstance) {
-                    onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
-                    onMessage.initCorrelations.add(cset);
-                    onMessage.matchCorrelation = cset;
-                } else {
-                    throw new CompilationException(__cmsgs.errRendezvousNotSupported());
-
-                }
+                if (onMessage.matchCorrelation != null || onMessage.joinCorrelation != null)
+                    throw new CompilationException(__cmsgs.errSecondNonInitiateOrJoinCorrelationSet(correlation
+                            .getCorrelationSet()));
+            	onMessage.joinCorrelation = cset;
+                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                 break;
 
-                default:
+            default:
                     throw new AssertionError("Unexpected value for correlation set enumeration!");
             }
 
