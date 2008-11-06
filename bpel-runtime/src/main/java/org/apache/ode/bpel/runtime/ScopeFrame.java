@@ -246,7 +246,8 @@ class ScopeFrame implements Serializable {
 
     Node writeVariable(BpelRuntimeContext context, VariableInstance var, Node value) throws ExternalVariableModuleException {
         if (var.declaration.extVar != null) /* external variable */ {
-            __log.debug("Write external variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+        	if(__log.isDebugEnabled())
+        		__log.debug("Write external variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
             VariableInstance related = resolve(var.declaration.extVar.related);
             Node reference = null;
             try {
@@ -259,7 +260,8 @@ class ScopeFrame implements Serializable {
             writeVariable(context, related, vrp.reference);
             return vrp.value;
         } else /* normal variable */ {
-            __log.debug("Write variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+        	if(__log.isDebugEnabled())
+        		__log.debug("Write variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
             return context.writeVariable(var, value);
         }
     }

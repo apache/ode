@@ -29,11 +29,17 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * Singleton wrapping the basic <code>javax.xml.transform</code> operations. The
@@ -111,11 +117,11 @@ public class XslTransformHandler {
    * by the provided URI. The stylesheet MUST have been parsed previously.
    * @param uri referencing the stylesheet
    * @param source XML document
-   * @param result of the transformation (XSL, HTML or text depending of the output method specified in stylesheet
    * @param parameters passed to the stylesheet
    * @param resolver used to resolve includes and imports
+   * @return result of the transformation (XSL, HTML or text depending of the output method specified in stylesheet.
    */
-  public void transform(URI uri, Source source, Result result,
+  public Object transform(URI uri, Source source,
                         Map<QName, Object> parameters, URIResolver resolver) {
     Templates tm;
     synchronized (_templateCache) {
@@ -131,7 +137,21 @@ public class XslTransformHandler {
           tf.setParameter(param.getKey().getLocalPart(), param.getValue());
         }
       }
-      tf.transform(source, result);
+      String method = tf.getOutputProperties().getProperty("method");
+      if(method.equals("xml") || method.equals("html")) {
+    	  DOMResult result = new DOMResult();
+    	  tf.transform(source, result);
+    	  Node node = result.getNode();
+    	  if(node.getNodeType() == Node.DOCUMENT_NODE)
+    		  node = ((Document)node).getDocumentElement();
+    	  return node;
+      } else {
+          StringWriter writerResult = new StringWriter();
+          StreamResult result = new StreamResult(writerResult);
+    	  tf.transform(source, result);
+          writerResult.flush();
+          return writerResult.toString();
+      }
     } catch (TransformerConfigurationException e) {
       throw new XslTransformException(e);
     } catch (TransformerException e) {
