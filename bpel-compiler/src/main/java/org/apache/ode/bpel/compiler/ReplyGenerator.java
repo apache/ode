@@ -98,6 +98,9 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                 case YES:
                     oreply.initCorrelations.add(cset);
                     break;
+                case JOIN:
+                	oreply.joinCorrelations.add(cset);
+                	break;
                 default:
                     // TODO: Make error for this.
                     throw new AssertionError();

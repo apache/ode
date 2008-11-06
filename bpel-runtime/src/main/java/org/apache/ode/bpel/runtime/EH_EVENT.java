@@ -36,7 +36,6 @@ import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
@@ -114,9 +113,15 @@ class EH_EVENT extends BpelJacobRunnable {
             Selector selector;
             try {
                 PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
-                CorrelationKey key;
+                CorrelationKey key = null;
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
-                if (_oevent.matchCorrelation == null) {
+                if(_oevent.joinCorrelation != null) {
+                	if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(_oevent.joinCorrelation))) {
+                		key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(_oevent.joinCorrelation));
+
+                		assert key != null;
+                	}
+                } else if (_oevent.matchCorrelation == null ) {
                     // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
                     String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
                     key = new CorrelationKey(-1, new String[] {sessionId});
@@ -153,6 +158,7 @@ class EH_EVENT extends BpelJacobRunnable {
             _pickResponseChannel = pickResponseChannel;
         }
 
+        @SuppressWarnings("unchecked")
         public void run() {
 
             if (!_active.isEmpty() || _pickResponseChannel != null) {
@@ -250,6 +256,10 @@ class EH_EVENT extends BpelJacobRunnable {
                             try {
                                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
+                                }
+                                if( _oevent.joinCorrelation != null ) {
+                                	// will be ignored if already initialized
+                                    initializeCorrelation(ehScopeFrame.resolve(_oevent.joinCorrelation), ehScopeFrame.resolve(_oevent.variable));
                                 }
 
                                 if (_oevent.partnerLink.hasPartnerRole()) {

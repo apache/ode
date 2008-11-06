@@ -37,7 +37,7 @@ public class OInvoke extends OActivity {
     /** Correlation sets initialized on the input message. */
     public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
 
-    /** Correlation sets initialized on the input message. */
+    /** Correlation sets initialized on the output message. */
     public final List <OScope.CorrelationSet> initCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
 
     /** Correlation sets asserted on input. */
@@ -45,6 +45,12 @@ public class OInvoke extends OActivity {
 
     /** Correlation sets asserted on output. */
     public final List<OScope.CorrelationSet> assertCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
+
+    /** Correlation sets joined on input. */
+    public final List <OScope.CorrelationSet> joinCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
+
+    /** Correlation sets joined on output. */
+    public final List<OScope.CorrelationSet> joinCorrelationsOutput = new ArrayList<OScope.CorrelationSet>();
 
     public OInvoke(OProcess owner, OActivity parent) {
         super(owner, parent);

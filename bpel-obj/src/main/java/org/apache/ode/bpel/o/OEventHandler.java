@@ -58,6 +58,9 @@ public class OEventHandler extends OAgent {
         /** Correlation set to match on. */
         public OScope.CorrelationSet matchCorrelation;
 
+        /** Correlation set to join on. */
+        public OScope.CorrelationSet joinCorrelation;
+
         public OPartnerLink partnerLink;
         public Operation operation;
         public OScope.Variable variable;

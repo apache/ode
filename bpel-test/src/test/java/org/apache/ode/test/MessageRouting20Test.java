@@ -31,6 +31,30 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		go("/bpel/2.0/TestCorrelation1");
 	}
 
+	@Test public void testCorrelationJoin() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoin");
+	}
+
+	@Test public void testCorrelationJoinReceive() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinReceive");
+	}
+
+	@Test public void testCorrelationJoinInvoke() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinInvoke");
+	}
+
+	@Test public void testCorrelationJoinOnMessage() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinOnMessage");
+	}
+
+	@Test public void testCorrelationJoinEvent() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinEvent");
+	}
+
+	@Test public void testCorrelationJoinReply() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinReply");
+	}
+
 	@Ignore("fix test bed for handling ASYNC mex") @Test public void testCorrelationOpaque() throws Throwable {
 		//TODO Fix me, we need to capture the session id to send it in the second test message
 		go("/bpel/2.0/TestCorrelationOpaque");

@@ -47,6 +47,9 @@ public class OReply extends OActivity {
     /** Correlation sets asserted. */
     public final List<OScope.CorrelationSet> assertCorrelations = new ArrayList<OScope.CorrelationSet>();
 
+    /** Correlation sets joined. */
+    public final List<OScope.CorrelationSet> joinCorrelations = new ArrayList<OScope.CorrelationSet>();
+
     /** OASIS modification - Message Exchange Id. */
     public String messageExchangeId = "";
 
