@@ -70,8 +70,8 @@ public class InstanceManagementTest extends Axis2TestBase {
     }
 
     // ODE-385 please fix me
-    @Test(enabled = false)
-    public void ode_385_testListAllInstances() throws Exception {
+    @Test
+    public void testListAllInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
         // We shold have only one instance (so 2 opening/closing elmts)
@@ -123,8 +123,8 @@ public class InstanceManagementTest extends Axis2TestBase {
     }
 
     // ODE-385 please fix me
-    @Test(enabled = false)
-    public void ode_385_testGetScopeInfo() throws Exception {
+    @Test
+    public void testGetScopeInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
         String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
@@ -168,8 +168,8 @@ public class InstanceManagementTest extends Axis2TestBase {
 //    }
 
     // ODE-385 please fix me
-    @Test(enabled = false)
-    public void ode_385_testDeleteInstances() throws Exception {
+    @Test
+    public void testDeleteInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
         String iid = result.getFirstElement().getFirstElement().getText();
