@@ -23,6 +23,7 @@ require "buildr/hibernate"
 require "tasks/xmlbeans"
 
 
+
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.3-SNAPSHOT"
 NEXT_VERSION = "1.3"
