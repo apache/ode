@@ -284,43 +284,20 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             Document varDoc = DOMUtils.newDocument();
             varDoc.appendChild(varDoc.importNode(varElmt, true));
 
+            Object result;
             DOMSource source = new DOMSource(varDoc);
-            // Using a StreamResult as a DOMResult doesn't behaves properly when the result
-            // of the transformation is just a string.
-            StringWriter writerResult = new StringWriter();
-            StreamResult result = new StreamResult(writerResult);
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _ectx.getBaseResourceURI());
             XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
             try {
-                XslTransformHandler.getInstance().transform(xslUri, source, result, parametersMap, resolver);
+                result = XslTransformHandler.getInstance().transform(xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
                                 e.toString()));
             }
-            writerResult.flush();
-
-            String output = writerResult.toString();
-            if (__log.isDebugEnabled())
-                __log.debug("Returned by XSL Sheet: " + output);
-            // I'm not really proud of that but hey, it does the job and I don't think there's
-            // any other easy way.
-            if (output.startsWith("<?xml")) {
-                try {
-                    return DOMUtils.stringToDOM(output).getChildNodes();
-                } catch (SAXException e) {
-                    throw new XPathFunctionException("Parsing the result of the XSL sheet " + args.get(0) +
-                            " didn't produce a parsable XML result: " + output);
-                } catch (IOException e) {
-                    throw new XPathFunctionException(e);
-                } catch (Exception e) {
-                    throw new XPathFunctionException("Parsing the result of the XSL sheet " + args.get(0) +
-                            " didn't produce a parsable XML result: " + output);
-                }
-            } else {
-                return output;
-            }
+            if(result instanceof Node) return ((Node)result).getChildNodes();
+            else return result;
         }
     }
     
