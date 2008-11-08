@@ -35,13 +35,9 @@ import org.jaxen.XPathFunctionContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -349,36 +345,18 @@ class JaxenContexts implements FunctionContext, VariableContext {
             Document varDoc = DOMUtils.newDocument();
             varDoc.appendChild(varDoc.importNode(varElmt, true));
 
+            Object result;
             DOMSource source = new DOMSource(varDoc);
-            // Using a StreamResult as a DOMResult doesn't behaves properly when the result
-            // of the transformation is just a string.
-            StringWriter writerResult = new StringWriter();
-            StreamResult result = new StreamResult(writerResult);
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
             XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
             try {
-                XslTransformHandler.getInstance().transform(xslUri, source, result, parametersMap, resolver);
+                result = XslTransformHandler.getInstance().transform(xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 throw new WrappedFaultException.JaxenFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
                                 e.toString()));
             }
-            writerResult.flush();
-
-            String output = writerResult.toString();
-            // I'm not really proud of that but hey, it does the job and I don't think there's
-            // any other easy way.
-            if (output.startsWith("<?xml")) {
-                try {
-                    return DOMUtils.stringToDOM(writerResult.toString());
-                } catch (SAXException e) {
-                    throw new FunctionCallException(e);
-                } catch (IOException e) {
-                    throw new FunctionCallException(e);
-                }
-            } else {
-                return output;
-            }
+            return result;
         }
     }
 
