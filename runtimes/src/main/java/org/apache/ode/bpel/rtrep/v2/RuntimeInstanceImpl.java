@@ -285,7 +285,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 
     public void commitChanges(VariableInstance var, ScopeFrame scopeFrame, Node value) throws ExternalVariableModuleException {
         if (var.declaration.extVar != null) /* external variable */ {
-            __log.debug("Write external variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+            if (__log.isDebugEnabled())
+                __log.debug("Write external variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
             VariableInstance related = scopeFrame.resolve(var.declaration.extVar.related);
             Node reference = null;
             try {
@@ -296,7 +297,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             VariableContext.ValueReferencePair vrp  = _brc.writeExtVar(var, reference, value);
             commitChanges(related, scopeFrame, vrp.reference);
         } else /* normal variable */ {
-            __log.debug("Write variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
+            if (__log.isDebugEnabled())
+                __log.debug("Write variable: name="+var.declaration + " value="+DOMUtils.domToString(value));
             _brc.commitChanges(var, value);
         }
         writeProperties(var, value);
