@@ -1094,6 +1094,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     }
 
     /**
+     * @deprecated use listInstances instead
      * @see org.apache.ode.bpel.pmapi.InstanceManagement#queryInstances(java.lang.String)
      */
     public InstanceInfoListDocument queryInstances(final String query) {

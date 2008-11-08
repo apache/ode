@@ -124,6 +124,7 @@ public interface InstanceManagement {
      */
     InstanceInfoListDocument listInstances(String filter, String order, int limit);
 
+    /** @deprecated use listInstances instead */
     InstanceInfoListDocument queryInstances(String query);
 
     /**
