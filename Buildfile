@@ -191,7 +191,7 @@ class Release
     def tag_with_apache_ode(version)
       tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
     end
-    alias :tag_without_apache_ode :tag
+    #alias :tag_without_apache_ode :tag
     alias :tag :tag_with_apache_ode 
   end
 end
@@ -639,7 +639,7 @@ define "ode-extensions", :base_dir => "extensions" do
               "ode:bpel-dao", "ode:engine", "ode:bpel-store", "ode:il-common", "ode:dao-jpa"),
               COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
               JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN,
-              DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
+              DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, JAVAX.transaction
     package :jar
   end
 
