@@ -420,7 +420,7 @@ public class ODEServer {
             _connector.setBpelServer(_server);
             _connector.setProcessStore(_store);
             _connector.setPort(_odeConfig.getConnectorPort());
-            _connector.setId("jcaServer");
+            _connector.setId(_odeConfig.getConnectorName());
             try {
                 _connector.start();
             } catch (Exception e) {
