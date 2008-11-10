@@ -2,21 +2,46 @@
   Apache ODE - Extension Installation Guide
 =============================================
 
-BPEL 2.0 introduces extensibility mechanisms, which allow you to extend
-the set of activities and/or variable assignment mechanisms.
-With BPEL 2.0 it is possible to extend the language by user-defined
-activities and custom assignment logic.
+Since BPEL 2.0 it is possible to extend the language by user-defined
+activities and custom variable assignment mechanisms.
 
-Since version 1.2 Apache ODE supports these extensibility mechanismns
+Apache ODE supports these extensibility mechanismns
 and provides a plug-in architecture that allows for registering
 third-party extensions.
 
 1.) Installation of extensions (WAR)
   1) Copy the extension 
-      TBC
-  
-2.) Installation of extensions (JBI)
-      TBW
+        The extension bundle and its dependencies must be part of the 
+        class path. The easiest way to achieve this is to copy the 
+        extension jar to /WEB-INF/lib.
 
-3.) Writing ODE extensions
-      TBW
+  2) Register the extension
+        Open /WEB-INF/conf/ode-axis2.properties and add/uncomment the
+        following lines:
+        
+        ode-axis2.extension.bundles.runtime = fqcn.to.extension.bundle
+        ode-axis2.extension.bundles.validation = fqcn.to.extension.bundle
+        
+        The validation entry is only necessary if your extension bundle
+        also provides compile-time validators
+        
+  3) Start/Restart Apache ODE
+        
+2.) Installation of extensions (JBI)
+  1) Embed the extension 
+        The extension bundle and its dependencies must be part of the 
+        class path. The easiest way is to add the extension jar to the JBI 
+        deployable.
+        
+  2) Register the extension
+        Extract and open ode-jbi.properties from ODE SE and add/uncomment the
+        following lines:
+        
+        ode-jbi.extension.bundles.runtime = fqcn.to.extension.bundle
+        ode-jbi.extension.bundles.validation = fqcn.to.extension.bundle
+        
+        The validation entry is only necessary if your extension bundle
+        also provides compile-time validators.
+        
+        Re-add the properties file to the service engine archive and deploy
+        it to the JBI container of choice.
