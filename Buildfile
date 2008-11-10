@@ -83,7 +83,7 @@ AXIS2_DEPS = [
 
     "wsdl4j:wsdl4j:jar:1.6.2",
     "woodstox:wstx-asl:jar:3.2.4",
-    "org.apache.ode:xalan:jar:2.7.0",
+    "org.apache.ode:xalan:jar:2.7.0-2",
     "xerces:xercesImpl:jar:2.8.1",
     "org.apache.xmlbeans:xmlbeans:jar:2.3.0",
     "org.apache.ws.commons.schema:XmlSchema:jar:1.4.2",
@@ -164,7 +164,7 @@ SPRING              = group("spring-beans", "spring-context", "spring-core", "sp
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 WOODSTOX            = findArtifacts(AXIS2_DEPS, "woodstox:wstx-asl") #"woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = findArtifacts(AXIS2_DEPS, "wsdl4j:wsdl4j") #"wsdl4j:wsdl4j:jar:1.6.2"
-XALAN               = findArtifacts(AXIS2_DEPS, "org.apache.ode:xalan") #"org.apache.ode:xalan:jar:2.7.0"
+XALAN               = findArtifacts(AXIS2_DEPS, "org.apache.ode:xalan") #"org.apache.ode:xalan:jar:2.7.0-2"
 XERCES              = findArtifacts(AXIS2_DEPS, "xerces:xercesImpl") #"xerces:xercesImpl:jar:2.9.0"
 XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
