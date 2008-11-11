@@ -5,7 +5,7 @@
 Since BPEL 2.0 it is possible to extend the language by user-defined
 activities and custom variable assignment mechanisms.
 
-Apache ODE supports these extensibility mechanismns
+Apache ODE supports these extensibility mechanisms
 and provides a plug-in architecture that allows for registering
 third-party extensions.
 
