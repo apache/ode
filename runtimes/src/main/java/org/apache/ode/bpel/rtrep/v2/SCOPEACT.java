@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,6 +36,8 @@ import org.apache.ode.bpel.rtrep.v2.channels.LinkStatusChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.SynchChannelListener;
@@ -43,20 +46,19 @@ import org.apache.ode.jacob.ValChannelListener;
 import org.w3c.dom.Element;
 
 /**
- * A scope activity. The scope activity creates a new scope frame and proceeeds using the {@link SCOPE} template.
+ * A scope activity. The scope activity creates a new scope frame and proceeds using the {@link SCOPE} template.
  */
 public class SCOPEACT extends ACTIVITY {
     private static final Log __log = LogFactory.getLog(SCOPEACT.class);
     
     private static final long serialVersionUID = -4593029783757994939L;
-
+    
     public SCOPEACT(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
     }
 
     public void run() {
-
-        
+    	
         if (((OScope) _self.o).isolatedScope) {
             __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
             instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class), _scopeFrame));
@@ -67,16 +69,25 @@ public class SCOPEACT extends ACTIVITY {
 
             // Depending on whether we are ATOMIC or not, we'll need to create outgoing link status interceptors
             LinkFrame linkframe;
-            if (((OScope) _self.o).atomicScope && !_self.o.outgoingLinks.isEmpty()) {
+        	if (((OScope) _self.o).atomicScope) {
+        		getBpelRuntime().setAtomicScope(true);
+        		if (!((OScope)_self.o).inboundMessageChildActivity) {
+	        		getBpelRuntime().forceFlush();
+        		}
+        		instance(new SLEEPER());
                 ValChannel linkInterceptorControl = newChannel(ValChannel.class);
                 ParentScopeChannel psc = newChannel(ParentScopeChannel.class);
                 linkframe = createInterceptorLinkFrame();
-                instance(new LINKSTATUSINTERCEPTOR(linkInterceptorControl,linkframe));
+                if (!_self.o.outgoingLinks.isEmpty()) {
+	                instance(new LINKSTATUSINTERCEPTOR(linkInterceptorControl, linkframe));
+                }
                 instance(new UNLOCKER(psc, _self.parent, null, Collections.<IsolationLock>emptyList(), linkInterceptorControl));
                 _self.parent = psc;
-            } else
+        	} else {
+        		getBpelRuntime().setAtomicScope(false);
                 linkframe = _linkFrame;
-            
+        	}
+        	
             instance(new SCOPE(_self, newFrame, linkframe));
         }
 
@@ -312,8 +323,8 @@ public class SCOPEACT extends ACTIVITY {
 
                 public void cancelled() {
                     _parent.cancelled();
-                    unlockAll();
                     _linkStatusInterceptor.val(false);
+                    unlockAll(false);
                     // no more listening.
                 }
 
@@ -324,18 +335,31 @@ public class SCOPEACT extends ACTIVITY {
                 }
 
                 public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
-                    _parent.completed(faultData, compensations);
-                    _linkStatusInterceptor.val(faultData == null);
-                    unlockAll();
-                    // no more listening
-
+                	if (faultData != null) {
+                        if (!isScopeRetryable()) {
+                        	FaultData fault = createFault(getConstants().qnScopeRollback, faultData.getFaultMessage(), null, SCOPEACT.this._self.o);
+                            _parent.completed(fault, CompensationHandler.emptySet());
+                            _linkStatusInterceptor.val(false);
+                            unlockAll(false);
+                        } else {
+                        	unlockAll(true);
+                        }
+                	} else {
+                        _parent.completed(faultData, compensations);
+                        _linkStatusInterceptor.val(faultData == null);
+                        unlockAll(false);
+                        // no more listening
+                	}
+                	getBpelRuntime().setRetriedOnce();
                 }
 
                 public void failure(String reason, Element data) {
-                    _parent.failure(reason, data);
-                    _linkStatusInterceptor.val(false);
-                    unlockAll();
-                    // no more listening
+                	unlockAll(true);
+                    if (!isScopeRetryable()) {
+                    	FaultData fault = createFault(getConstants().qnScopeRollback, data, null, SCOPEACT.this._self.o);
+                        _parent.completed(fault, CompensationHandler.emptySet());
+                        _linkStatusInterceptor.val(false);
+                    }
                 }
 
             });
@@ -345,19 +369,80 @@ public class SCOPEACT extends ACTIVITY {
          * Unlock all the acquired locks.
          * 
          */
-        private void unlockAll() {
+        private void unlockAll(boolean rollback) {
             __log.debug("UNLOCKER: unlockAll: " + _locks);
 
-            if (((OScope)SCOPEACT.this._self.o).atomicScope)
-                getBpelRuntime().forceFlush();
+            if (((OScope)SCOPEACT.this._self.o).atomicScope) {
+            	if (rollback) {
+            		getBpelRuntime().forceRollback();
+            	} else {
+                    getBpelRuntime().forceFlush();
+            	}
+            }
                 
             for (IsolationLock il : _locks)
                 il.lockChannel.unlock(_synchChannel);
             _locks.clear();
         }
+        
+        private boolean isScopeRetryable() {
+    		// in case of atomic scopes, the following retry logic applies 
+    		if (!getBpelRuntime().isFirstTry()) {
+    			// this is not the first time we're trying this scope
+    			if (getBpelRuntime().isRetryable()) {
+                    return true;
+    			} else {
+    				// we tried and tried to no avail, just give up by doing nothing!
+    				return false;
+    			}
+    		} else {  
+    			return true;
+    		}
+    			
+        }
 
     }
 
+    /**
+     * Interceptor that goes to sleep for sometime before retrying the failed atomic scope
+     *
+     */
+    private class SLEEPER extends BpelJacobRunnable {
+
+        private static final long serialVersionUID = -476393080609348172L;
+
+        public SLEEPER() {
+        }
+
+        @Override
+        public void run() {
+            __log.debug("running SLEEPER");
+            
+    		// in case of atomic scopes, the following retry logic applies 
+    		if (!getBpelRuntime().isFirstTry()) {
+    			// this is not the first time we're trying this scope
+    			if (getBpelRuntime().isRetryable()) {
+    				// we need to retry after injecting a certain amount of delay
+                    Date future = new Date(new Date().getTime() + 
+                            getBpelRuntime().getRetryDelay() * 1000);
+                    final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
+                    getBpelRuntime().registerTimer(timerChannel, future);
+                    object(false, new TimerResponseChannelListener(timerChannel) {
+                        private static final long serialVersionUID = -261911108068231376L;
+                            public void onTimeout() {
+                                getBpelRuntime().setRetriedOnce();
+                            }
+                            public void onCancel() {
+                                getBpelRuntime().setRetriesDone();
+                            }
+                    });
+    			} else {
+    				// we tried and tried to no avail, just give up by doing nothing!
+    			}
+    		}
+        }
+    }
+    
     /**
      * Representation of a lock needed by an isolated scope.
      * 

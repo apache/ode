@@ -49,6 +49,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     static {
         HashSet<InvocationStyle> styles = new HashSet<InvocationStyle>();
         styles.add(InvocationStyle.UNRELIABLE);
+        styles.add(InvocationStyle.TRANSACTED);
         __supportedInvocationStyles = Collections.unmodifiableSet(styles);
     }
     

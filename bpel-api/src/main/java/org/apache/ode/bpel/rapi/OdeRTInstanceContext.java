@@ -57,5 +57,17 @@ public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, 
      * @param optionalFaultData
      */
     void noreply(String mexId, FaultInfo optionalFaultData);
+
+	int getAtomicScopeRetryDelay();
+
+	boolean isAtomicScopeFirstTry();
+
+	boolean isAtomicScopeRetryable();
+
+	void setAtomicScopeRetriedOnce();
+
+	void setAtomicScopeRetriesDone();
+
+	void setAtomicScope(boolean atomicScope);
 	
 }

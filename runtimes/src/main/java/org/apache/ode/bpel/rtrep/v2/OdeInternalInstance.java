@@ -115,6 +115,20 @@ public interface OdeInternalInstance {
 
     void forceFlush();
 
+    void forceRollback();
+    
     void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
             throws FaultException;
+
+	int getRetryDelay();
+	
+	boolean isFirstTry();
+
+	boolean isRetryable();
+
+	void setRetriedOnce();
+
+	void setRetriesDone();
+
+	void setAtomicScope(boolean atomicScope);
 }

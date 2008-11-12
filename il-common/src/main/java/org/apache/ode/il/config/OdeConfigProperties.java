@@ -79,6 +79,10 @@ public class OdeConfigProperties {
 
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
+    public static final String PROP_ATOMIC_SCOPES_RETRY_COUNT = "scopes.atomic.retry.count";
+    
+    public static final String PROP_ATOMIC_SCOPES_RETRY_DELAY = "scopes.atomic.retry.delay";
+    
     public static final String PROP_DAOCF = "dao.factory";
     
     public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
@@ -273,4 +277,11 @@ public class OdeConfigProperties {
     	return getProperty(PROP_EXTENSION_BUNDLES_VAL);
     }
 
+    public int getAtomicScopeRetryCount() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_ATOMIC_SCOPES_RETRY_COUNT, "3"));
+    }
+
+    public int getAtomicScopeRetryDelay() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_ATOMIC_SCOPES_RETRY_DELAY, "60"));
+    }
 }

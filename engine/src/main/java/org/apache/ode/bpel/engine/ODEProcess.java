@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -49,6 +50,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.AtomicScopeProperties;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -71,8 +73,13 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.rapi.FaultInfo;
+import org.apache.ode.bpel.rapi.OdeRTInstance;
+import org.apache.ode.bpel.rapi.OdeRuntime;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.utils.GUID;
@@ -185,7 +192,10 @@ public class ODEProcess {
         _evm = new ExternalVariableManager(_pid, _extVarConf, _contexts.externalVariableEngines);
     }
     
-
+    public OdeConfigProperties getProperties() {
+    	return _server.getConfigProperties();
+    }
+    
     public String toString() {
         return "ODEProcess[" + _pid + "]";
     }
@@ -297,6 +307,8 @@ public class ODEProcess {
                             return null;
                         }
                     });
+                } else if (istyle == InvocationStyle.P2P_TRANSACTED) /* transact p2p invoke in the same thread */ {
+                    executeContinueInstanceMyRoleRequestReceived(mexdao);
                 } else /* non-transacted style */{
                     WorkEvent we = new WorkEvent();
                     we.setType(WorkEvent.Type.MYROLE_INVOKE);
@@ -346,12 +358,13 @@ public class ODEProcess {
         instance.execute();
     }
 
-    void executeContinueInstanceResume(ProcessInstanceDAO instanceDao) {
+    void executeContinueInstanceResume(ProcessInstanceDAO instanceDao, int retryCount) {
         BpelInstanceWorker worker = _instanceWorkerCache.get(instanceDao.getInstanceId());
         assert worker.isWorkerThread();
 
         OdeRTInstance rti = _runtime.newInstance(getState(worker, instanceDao));
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
+        brc.setRetryCount(retryCount);
         brc.execute();
 
     }
@@ -569,7 +582,7 @@ public class ODEProcess {
             executeContinueInstanceTimerReceived(instanceDAO, we.getChannel());
             break;
         case RESUME:
-            executeContinueInstanceResume(instanceDAO);
+            executeContinueInstanceResume(instanceDAO, we.getRetryCount());
             break;
         case PARTNER_RESPONSE:
             executeContinueInstancePartnerRoleResponseReceived(mexDao);
@@ -1307,8 +1320,12 @@ public class ODEProcess {
         if (ODEProcess.__log.isDebugEnabled())
             __log.debug("Invoking in a p2p interaction, partnerrole " + partnerRoleMex.getMessageExchangeId()
                     + " target=" + target);
-
-        partnerRoleMex.setInvocationStyle(InvocationStyle.P2P);
+        
+        partnerRoleMex.setInvocationStyle(
+        		Boolean.parseBoolean(
+        				partnerRoleMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED))
+        			? InvocationStyle.P2P_TRANSACTED 
+        			: InvocationStyle.P2P);
 
         // Plumbing
         MessageExchangeDAO myRoleMex = target.createMessageExchange(new GUID().toString(),

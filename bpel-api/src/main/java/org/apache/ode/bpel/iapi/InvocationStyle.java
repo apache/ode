@@ -27,5 +27,13 @@ public enum InvocationStyle {
     /**
      * Process-2-Process, used when "including" one process in another. 
      */
-    P2P
+    P2P,
+    
+    /**
+     * Process-2-Process, used when "including" one process in another.
+     * Transacted style -- the IL/engine will enroll the operation with the current transaction. The IL/engine will
+     * block until the operation completes. 
+     */
+    P2P_TRANSACTED
+    
 }

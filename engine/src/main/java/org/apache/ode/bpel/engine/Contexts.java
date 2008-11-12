@@ -104,7 +104,7 @@ class Contexts {
         boolean success = false;
         try {
             T retval = transaction.call();
-            success = true;
+            success = (txManager.getStatus() != Status.STATUS_MARKED_ROLLBACK);
             return retval;
         } catch (Exception ex) {
             throw ex;
@@ -123,6 +123,14 @@ class Contexts {
                     __log.error("Transaction rollback failed.", ex);
                 }
         }
+    }
+    
+    public void setRollbackOnly() {
+    	try {
+	    	txManager.setRollbackOnly();
+    	} catch (SystemException se) {
+            __log.error("Transaction set rollback only failed.", se);
+    	}
     }
 
     public void registerCommitSynchronizer(final Runnable runnable) {

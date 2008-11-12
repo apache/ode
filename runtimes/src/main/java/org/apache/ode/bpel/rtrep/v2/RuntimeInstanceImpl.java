@@ -88,7 +88,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     public boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink) {
         return _brc.isPartnerRoleEndpointInitialized(pLink);
     }
-
+    
     public void completedFault(FaultData faultData) {
         cleanupOutstandingMyRoleExchanges(faultData);
         _brc.completedFault(faultData);
@@ -458,6 +458,13 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     }
 
     /**
+     * Proxy to {@link ProcessControlContext#forceRollback() }.
+     */
+    public void forceRollback() {
+        _brc.forceRollback();
+    }
+    
+    /**
      * Proxy to {@link ProcessControlContext#terminate()}.
      */
     public void terminate() {
@@ -710,7 +717,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         if (bos != null) _soup.write(bos);
         return _soup;
     }
-
+    
     /* (non-Javadoc)
      * @see org.apache.ode.bpel.engine.rapi.OdeInternalInstance#createInstance(java.lang.String)
      */
@@ -728,4 +735,29 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     public URI getBaseResourceURI() {
         return _runtime._pconf.getBaseURI();
     }
+    
+    public int getRetryDelay() {
+    	return _brc.getAtomicScopeRetryDelay();
+    }
+
+	public boolean isFirstTry() {
+		return _brc.isAtomicScopeFirstTry();
+	}
+
+	public boolean isRetryable() {
+		return _brc.isAtomicScopeRetryable();
+	}
+
+	public void setRetriedOnce() {
+		_brc.setAtomicScopeRetriedOnce();		
+	}
+
+	public void setRetriesDone() {
+		_brc.setAtomicScopeRetriesDone();
+	}
+
+	public void setAtomicScope(boolean atomicScope) {
+		_brc.setAtomicScope(atomicScope);
+	}
+    
 }

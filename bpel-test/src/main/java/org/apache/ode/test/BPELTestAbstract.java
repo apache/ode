@@ -135,7 +135,7 @@ public abstract class BPELTestAbstract {
 //                }
 //            }
 //        });
-        _server.setConfigProperties(getConfigProperties());
+        _server.setConfigProperties(new OdeConfigProperties(getConfigProperties(), ""));
         // _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
@@ -249,9 +249,19 @@ public abstract class BPELTestAbstract {
         inv.operation = operation;
         inv.request = DOMUtils.stringToDOM(request);
         if (responsePattern != null) {
-            inv.expectedFinalStatus = AckType.RESPONSE;
-
-            inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
+            if ("ONEWAY".equals(responsePattern)) {
+            	inv.expectedFinalStatus = AckType.ONEWAY;
+            	inv.expectedResponsePattern = null;
+            } else if ("FAULT".equals(responsePattern)) {
+            	inv.expectedFinalStatus = AckType.FAULT;
+            	inv.expectedResponsePattern = null;
+            } else if ("FAILURE".equals(responsePattern)) {
+            	inv.expectedFinalStatus = AckType.FAILURE;
+            	inv.expectedResponsePattern = null;
+            } else {
+                inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
+                inv.expectedFinalStatus = AckType.RESPONSE;
+            }
         } else
             inv.expectedFinalStatus = AckType.ONEWAY;
 
@@ -349,7 +359,15 @@ public abstract class BPELTestAbstract {
             store.undeploy(d.deployDir);
         }
     }
+    
+    protected int getMaximumWaitInMillis() {
+    	return 60 * 1000;
+    }
 
+    protected int getMinimumWaitInMillis() {
+    	return -1;
+    }
+    
     protected void doInvokes() throws Exception {
         ArrayList<Thread> testThreads = new ArrayList<Thread>();
         for (Invocation i : _invocations) {
@@ -412,7 +430,7 @@ public abstract class BPELTestAbstract {
         // could also return null, returning an empty properties
         // object is more fail-safe.
         Properties p = new Properties();
-        p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);
+        p.setProperty("debugeventlistener.dumpToStdOut", SHOW_EVENTS_ON_CONSOLE);        
         return p;
     }
 
@@ -513,7 +531,7 @@ public abstract class BPELTestAbstract {
         public long maximumWaitMs = 60 * 1000;
 
         /** If non-null, minimum number of ms before a response should be available. */
-        public Long minimumWaitMs = null;
+        public long minimumWaitMs = -1;
 
         long invokeTime;
 
@@ -528,7 +546,7 @@ public abstract class BPELTestAbstract {
         public String toString() {
             return "Invocation#" + id;
         }
-
+        
     }
 
     class InvokerThread extends Thread {
@@ -536,6 +554,8 @@ public abstract class BPELTestAbstract {
 
         InvokerThread(Invocation invocation) {
             _invocation = invocation;
+            _invocation.maximumWaitMs = getMaximumWaitInMillis();
+            _invocation.minimumWaitMs = getMinimumWaitInMillis();
         }
 
         public void run() {
@@ -544,7 +564,7 @@ public abstract class BPELTestAbstract {
 
             // Wait for it....
             try {
-                Thread.sleep(_invocation.invokeDelayMs);
+                Thread.sleep(_invocation.invokeDelayMs * 1000 );
             } catch (Exception ex) {
             }
 
@@ -579,7 +599,7 @@ public abstract class BPELTestAbstract {
 
             long ctime = System.currentTimeMillis();
             long itime = ctime - _invocation.invokeTime;
-            if (_invocation.minimumWaitMs != null && _invocation.minimumWaitMs >= itime)
+            if (_invocation.minimumWaitMs != -1 && _invocation.minimumWaitMs >= itime)
                 failure(_invocation, "Response received too soon.", _invocation.minimumWaitMs, itime);
 
             if (_invocation.maximumWaitMs <= itime)

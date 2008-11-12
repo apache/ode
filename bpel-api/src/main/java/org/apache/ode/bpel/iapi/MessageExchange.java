@@ -256,4 +256,5 @@ public interface MessageExchange {
     public static final String PROPERTY_SEP_MYROLE_SESSIONID = "org.apache.ode.bpel.myRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_SESSIONID = "org.apache.ode.bpel.partnerRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_EPR = "org.apache.ode.bpel.partnerRoleEPR";
+    public static final String PROPERTY_SEP_MYROLE_TRANSACTED = "org.apache.ode.bpel.myRoleTransacted";
 }

@@ -75,6 +75,9 @@ public class OScope extends OActivity {
 
     /** Is this scope <em>isolated</em> i.e. protected against concurrent access to its variables. */
     public boolean isolatedScope;
+    
+    /** Is this scope's child an inbound message activity? */
+    public boolean inboundMessageChildActivity;
 
     public OScope(OProcess owner, OActivity parent) {
         super(owner, parent);

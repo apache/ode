@@ -405,6 +405,7 @@ public class ODEServer {
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
             if (__logTx.isDebugEnabled() && System.getProperty("ode.debug.tx") != null)
                 _txMgr = new DebugTxMgr(_txMgr);
+            _axisConfig.addParameter("ode.transaction.manager", _txMgr);
         } catch (Exception e) {
             __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
             throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
@@ -484,7 +485,7 @@ public class ODEServer {
             // dehy.setProcessMaxAge(10000);
             _server.setDehydrationPolicy(dehy);
         }
-        _server.setConfigProperties(_odeConfig.getProperties());
+        _server.setConfigProperties(_odeConfig);
         _server.init();
     }
 

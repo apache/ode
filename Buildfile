@@ -406,7 +406,7 @@ define "ode" do
   desc "ODE Runtime Engine"
   define "engine" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-schemas",
-      "bpel-store", "jacob", "jacob-ap", "utils"),
+      "bpel-store", "jacob", "jacob-ap", "utils", "il-common"),
       BACKPORT, COMMONS.logging, COMMONS.httpclient, COMMONS.collections, COMMONS.lang, JAXEN, JAVAX.persistence, 
       JAVAX.stream, SAXON, WSDL4J, XMLBEANS, JAVAX.transaction
 

@@ -658,6 +658,12 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         } else {
             _oprocess.processName = _processDef.getName();
         }
+        
+        if (process.getAtomicScope() == null) {
+        	_oprocess.atomicScope = false;
+        } else {
+        	_oprocess.atomicScope = _processDef.getAtomicScope().booleanValue();
+        }
 
         _oprocess.compileDate = _generatedDate;
 
@@ -708,10 +714,11 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         	compileExtension(e);
         }
 
-        OScope procesScope = new OScope(_oprocess, null);
-        procesScope.name = "__PROCESS_SCOPE:" + process.getName();
-        procesScope.debugInfo = createDebugInfo(process, null);
-        _oprocess.processScope = compileScope(procesScope, process, new Runnable() {
+        OScope processScope = new OScope(_oprocess, null);
+        processScope.atomicScope = _oprocess.atomicScope;
+        processScope.name = "__PROCESS_SCOPE:" + process.getName();
+        processScope.debugInfo = createDebugInfo(process, null);
+        _oprocess.processScope = compileScope(processScope, process, new Runnable() {
             public void run() {
                 if (process.getRootActivity() == null) {
                     throw new CompilationException(__cmsgs.errNoRootActivity());
@@ -732,6 +739,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                     }
                 }
                 _structureStack.topScope().activity = compile(process.getRootActivity());
+                _structureStack.topScope().inboundMessageChildActivity = "OPickReceive".equals(_structureStack.topScope().activity.getType());
             }
         });
 
@@ -753,7 +761,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         }
         return _oprocess;
     }
-
+    
     // TODO unused?
     // private String getBpelPartnerLinkUri(){
     // switch(_processDef.getBpelVersion()){
@@ -848,6 +856,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         implicitScope.implicitScope = true;
         implicitScope.name = createName(source, "implicit-scope");
         implicitScope.debugInfo = createDebugInfo(source, "Scope-like construct " + source);
+        implicitScope.atomicScope = _oprocess.atomicScope;
         compileScope(implicitScope, source.getScope(), new Runnable() {
             public void run() {
                 compileLinks(source);
@@ -860,9 +869,14 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                     if (scopeChild == null)
                         throw new CompilationException(__cmsgs.errEmptyScope().setSource(source));
                     implicitScope.activity = compile(scopeChild);
+                    if (source.getScope() != null && source.getScope().getAtomicScope() != null) {
+	                    implicitScope.atomicScope = source.getScope().getAtomicScope().booleanValue();
+                    }
                 } else {
                     implicitScope.activity = compileActivity(false, source);
                 }
+                implicitScope.inboundMessageChildActivity = 
+                	"OPickReceive".equals(implicitScope.activity);
             }
         });
 
@@ -1095,7 +1109,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                 oscope.isolatedScope = _isolatedScope = true;
             }
         }
-
+        
         try {
             compile(oscope, src, new Runnable() {
                 public void run() {
@@ -1250,6 +1264,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                     oevent.variable = new OScope.Variable(_oprocess, varType);
                     oevent.variable.name = onEvent.getVariable();
                     oevent.variable.declaringScope = _structureStack.topScope();
+                    oevent.atomicScope = onEvent.isAtomic();
 
                     oevent.addLocalVariable(oevent.variable);
                     break;

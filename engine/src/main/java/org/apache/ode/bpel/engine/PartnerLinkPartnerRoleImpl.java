@@ -31,6 +31,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
@@ -130,7 +131,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
     private void invokePersisted(MessageExchangeDAO mexDao, EndpointReference partnerEpr, EndpointReference myRoleEpr,
             Operation operation, Set<InvocationStyle> supportedStyles) {
-        if (supportedStyles.contains(InvocationStyle.TRANSACTED)) {
+    	boolean transactionalMex = Boolean.parseBoolean(mexDao.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED));
+        if (supportedStyles.contains(InvocationStyle.TRANSACTED) && transactionalMex) {
             mexDao.setInvocationStyle(InvocationStyle.TRANSACTED);
             invokeTransacted(mexDao, partnerEpr, myRoleEpr, operation);
         } else if (supportedStyles.contains(InvocationStyle.RELIABLE)) {

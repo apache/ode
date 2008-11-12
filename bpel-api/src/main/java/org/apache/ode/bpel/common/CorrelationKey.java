@@ -67,8 +67,11 @@ public class CorrelationKey implements Serializable {
     }
 
     public CorrelationKey(String canonicalForm) {
-        int firstTilde = canonicalForm.indexOf('~');
-        _csetId = Integer.parseInt(canonicalForm.substring(0, firstTilde == -1 ? canonicalForm.length() : firstTilde));
+        int firstTilde = -1;
+        if (canonicalForm != null) {
+        	firstTilde = canonicalForm.indexOf('~') ;
+            _csetId = Integer.parseInt(canonicalForm.substring(0, firstTilde == -1 ? canonicalForm.length() : firstTilde));
+        }
 
         if (firstTilde != -1) {
             List<String> keys = new ArrayList<String>();

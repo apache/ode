@@ -57,6 +57,9 @@ public class OProcess extends OBase implements ProcessModel {
 
     /** ProcessImpl-level scope. */
     public OScope processScope;
+    
+    /** Process-level atomic scope flag */
+    public boolean atomicScope;
 
     /** All partner links in the process. */
     public final Set<PartnerLinkModel> allPartnerLinks = new HashSet<PartnerLinkModel>();

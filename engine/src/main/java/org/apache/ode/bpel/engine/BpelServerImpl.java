@@ -46,17 +46,32 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.iapi.AtomicScopeProperties;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.OdeRuntime;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * <p>
@@ -105,7 +120,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     private DehydrationPolicy _dehydrationPolicy;
 
-    private Properties _configProperties;
+    private OdeConfigProperties _properties;
 
     private ExecutorService _exec;
 
@@ -229,7 +244,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * @param listener
      */
     public void registerBpelEventListener(BpelEventListener listener) {
-        listener.startup(_configProperties);
+        listener.startup(_properties.getProperties());
 
         // Do not synchronize, eventListeners is copy-on-write array.
         _contexts.eventListeners.add(listener);
@@ -534,8 +549,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _dehydrationPolicy = dehydrationPolicy;
     }
 
-    public void setConfigProperties(Properties configProperties) {
-        _configProperties = configProperties;
+    public void setConfigProperties(OdeConfigProperties properties) {
+    	_properties = properties;
+    }
+    
+    public OdeConfigProperties getConfigProperties() {
+    	return _properties;
     }
 
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
@@ -964,4 +983,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _contexts.execTransaction(_work);
         }
     }
+    
+	public void setTransacted(boolean atomicScope) {
+	}
 }
