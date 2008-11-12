@@ -124,6 +124,15 @@
             <soap:body use="literal"/>
          </wsdl:output>
       </wsdl:operation>
+       <wsdl:operation name="longOperation">
+         <soap:operation soapAction="urn:longOperation" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:service name="DummyService">
       <wsdl:port name="DummyServiceSOAP11port_http" binding="ns1:DummyServiceSOAP11Binding">

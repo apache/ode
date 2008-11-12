@@ -4,6 +4,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 
@@ -11,18 +13,24 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class DummyService {
+
+    private static final Log log = LogFactory.getLog(DummyService.class);
+
     public String hello(String in) {
-        System.out.println("#### IN HELLO ####");
+        log.debug("#### IN HELLO ####");
         return in + " world";
     }
 
     public String longOperation(String in) {
-        System.out.println("#### IN LONG OP ####");
+        long delay = 120000; // == Properties.DEFAULT_MEX_TIMEOUT
         try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            delay = Long.parseLong(in);
+        } catch (NumberFormatException ignore) {}
+        try {
+            log.debug("#### IN LONG OP: "+delay+"ms ####");
+            Thread.sleep(delay);
+        } catch (InterruptedException ignore) { }
+        log.debug("#### WENT THROUGH ###");
         return "Went through " + in;
     }
 
