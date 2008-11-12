@@ -11,6 +11,8 @@ public interface ProcessControlContext {
 
 	void forceFlush();
 
+	void forceRollback();
+	
 	/**
 	 * Should be invoked by process template, signalling process completion with
 	 * no faults.

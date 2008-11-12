@@ -86,7 +86,7 @@ public class OnMessage extends BpelObject implements Communication {
     public String getVariable() {
         return getAttribute("variable", null);
     }
-
+    
     public String getOperation() {
         return _commHelper.getOperation();
     }

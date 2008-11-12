@@ -43,6 +43,8 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.ProcessCompletionEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -59,13 +61,24 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.utils.*;
-
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
-import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-
+import org.apache.ode.bpel.rapi.CorrelationSet;
+import org.apache.ode.bpel.rapi.FaultInfo;
+import org.apache.ode.bpel.rapi.NoSuchOperationException;
+import org.apache.ode.bpel.rapi.OdeRTInstance;
+import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
+import org.apache.ode.bpel.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.Selector;
+import org.apache.ode.bpel.rapi.UninitializedPartnerEPR;
+import org.apache.ode.bpel.rapi.UninitializedVariableException;
+import org.apache.ode.bpel.rapi.Variable;
+import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -90,11 +103,17 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     private Contexts _contexts;
 
     private boolean _forceFlush;
-
+    
+    private boolean _forceRollback;
+    
+    private int _retryCount;
+    
+    private boolean _atomicScope;
+    
     /** Process instance as represented by runtime. */
     final OdeRTInstance _rti;
 
-    /** Five second maximum for continous execution. */
+    /** Five second maximum for continuous execution. */
     private long _maxReductionTimeMs = 2000000;
 
     public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO instanceDAO, OdeRTInstance rti) {
@@ -106,7 +125,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _rti = rti;
         _rti.setContext(this);
     }
-
+    
     public String toString() {
         return "{BpelRuntimeCtx PID=" + _bpelProcess.getPID() + ", IID=" + _iid + "}";
     }
@@ -118,7 +137,15 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     public long genId() {
         return _dao.genMonotonic();
     }
-
+    
+    public int getRetryCount() {
+    	return _retryCount;
+    }
+    
+    public  void setRetryCount(int retryCount) {
+    	_retryCount = retryCount;
+    }
+    
     public boolean isCorrelationInitialized(CorrelationSet correlationSet) {
         ScopeDAO scopeDAO = _dao.getScope(correlationSet.getScopeId());
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(correlationSet.getName());
@@ -486,6 +513,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
         mexDao.setRequest(message);
         mexDao.setTimeout(30000);
+        mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED, Boolean.valueOf(_atomicScope).toString());
         message.setType(operation.getInput().getMessage().getQName());
         buildOutgoingMessage(message, outgoingMessage);
 
@@ -542,22 +570,26 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _rti.onCreateInstance(instantiatingMessageExchange.getMessageExchangeId());
         execute();
     }
-
+    
     void execute() {
         if (!_contexts.isTransacted())
             throw new BpelEngineException("MUST RUN IN TRANSACTION!");
-
+        
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
 
         // Execute the process state reductions
         boolean canReduce = true;
-        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce && !_forceFlush) {
+        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce && !_forceFlush && !_forceRollback) {
             canReduce = _rti.execute();
         }
-
+        
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
-            saveState();
+            if (_forceRollback) {
+            	rollbackState();
+            } else {
+            	saveState();            	
+            }
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
                 // Max time exceeded (possibly an infinite loop).
@@ -567,6 +599,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
                 try {
                     WorkEvent we = new WorkEvent();
                     we.setIID(_iid);
+                    we.setRetryCount(_retryCount);
                     we.setProcessId(_bpelProcess.getPID());
                     we.setType(WorkEvent.Type.RESUME);
                     _contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
@@ -599,6 +632,14 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             _instanceWorker.setCachedState(newcount, cachedState);
             __log.debug("CACHE SAVE: #" + newcount + " for instance " + _dao.getInstanceId());
         }
+    }
+    
+    private void rollbackState() {
+		_contexts.setRollbackOnly();    		
+        int newcount = _dao.getExecutionStateCounter();
+        _dao.setExecutionStateCounter(newcount);
+        _instanceWorker.setCachedState(newcount, null);
+        __log.debug("CACHE SAVE: #" + newcount + " for instance " + _dao.getInstanceId());
     }
 
     void injectMyRoleMessageExchange(final String responseChannelId, final int idx, MessageExchangeDAO mexdao) {
@@ -903,6 +944,10 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _forceFlush = true;
     }
     
+    public void forceRollback() {
+        _forceRollback = true;
+    }
+    
 	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
 		Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
 		return val.value;
@@ -921,5 +966,38 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 	public URI getBaseResourceURI() {
 		return _bpelProcess.getBaseResourceURI();
 	}
+	
+	protected OdeConfigProperties getProperties() {
+		return _bpelProcess.getProperties();
+	}
+	
+	public int getAtomicScopeRetryDelay() {
+		return getProperties().getAtomicScopeRetryDelay();
+	}
+	
+	public boolean isAtomicScopeFirstTry() {
+		return _retryCount == 0;
+	}
 
+	public boolean isAtomicScopeRetryable() {
+		return _retryCount < getProperties().getAtomicScopeRetryCount();
+	}
+
+	public void setAtomicScopeRetriedOnce() {
+		++_retryCount;
+	}
+
+	public void setAtomicScopeRetriesDone() {
+		_retryCount = getProperties().getAtomicScopeRetryCount();
+	}
+	
+	public void setAtomicScope(boolean atomicScope) {
+		_atomicScope = atomicScope;
+		_bpelProcess._server.setTransacted(atomicScope);
+	}
+	
+	public boolean isAtomicScope() {
+		return _atomicScope;
+	}
+	
 }

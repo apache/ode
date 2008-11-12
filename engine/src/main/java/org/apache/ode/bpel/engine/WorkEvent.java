@@ -126,5 +126,13 @@ public class WorkEvent {
     public QName getProcessId() {
         return _jobDetail.get("pid") != null? QName.valueOf((String) _jobDetail.get("pid")) : null;
     }
+    
+    public void setRetryCount(int retryCount) {
+    	_jobDetail.put("retryCount", String.valueOf(retryCount));
+    }
+    
+    public int getRetryCount() {
+    	return _jobDetail.get("retryCount") != null ? Integer.parseInt((String) _jobDetail.get("retryCount")) : 0;
+    }
 }
 

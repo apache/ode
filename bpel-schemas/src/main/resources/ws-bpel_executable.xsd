@@ -205,6 +205,7 @@
 				<xsd:attribute name="expressionLanguage" type="xsd:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
 				<xsd:attribute name="suppressJoinFailure" type="tBoolean" default="no"/>
 				<xsd:attribute name="exitOnStandardFault" type="tBoolean" default="no"/>
+				<xsd:attribute name="atomic" type="tBoolean" default="no"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
@@ -484,6 +485,7 @@
 				</xsd:sequence>
 				<xsd:attribute name="messageType" type="xsd:QName" use="optional"/>
 				<xsd:attribute name="element" type="xsd:QName" use="optional"/>
+				<xsd:attribute name="atomic" type="tBoolean" default="no"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
@@ -1098,6 +1100,7 @@
 					<xsd:group ref="activity" minOccurs="1"/>
 				</xsd:sequence>
 				<xsd:attribute name="isolated" type="tBoolean" default="no"/>
+				<xsd:attribute name="atomic" type="tBoolean" default="no"/>
 				<xsd:attribute name="exitOnStandardFault" type="tBoolean"/>
 			</xsd:extension>
 		</xsd:complexContent>

@@ -42,6 +42,7 @@ public class OConstants extends OBase {
     public QName qnForEachCounterError;
     public QName qnInvalidBranchCondition;
     public QName qnInvalidExpressionValue;
+    public QName qnScopeRollback;
 
 
     public OConstants(OProcess owner) {

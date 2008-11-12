@@ -29,9 +29,14 @@ public abstract class BaseCompiler {
         constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
         constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
+        constants.qnScopeRollback = new QName(getOdeNamespace(), "scopeRollback");
         return constants;
     }
 
     protected abstract String getBpwsNamespace();
+    
+    protected String getOdeNamespace() {
+    	return "ode";
+    }
 
 }

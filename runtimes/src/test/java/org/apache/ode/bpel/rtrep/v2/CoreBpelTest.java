@@ -420,6 +420,11 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         
     }
 
+    public void forceRollback() {
+        // TODO Auto-generated method stub
+        
+    }
+    
 	public ExtensionOperation createExtensionActivityImplementation(QName name) {
 		// TODO Auto-generated method stub
 		return null;
@@ -456,4 +461,33 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 		return null;
 	}
 
+	public int getRetryDelay() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean isFirstTry() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean isRetryable() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void setRetriedOnce() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setRetriesDone() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setAtomicScope(boolean atomicScope) {
+		// TODO Auto-generated method stub
+		
+	}
 }

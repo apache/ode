@@ -235,7 +235,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
         _ode._server.setTransactionManager(_ode.getTransactionManager());
-        _ode._server.setConfigProperties(_ode._config.getProperties());
+        _ode._server.setConfigProperties(_ode._config);
         _ode._server.registerBpelEventListener(new DebugBpelEventListener());
 
         _ode._server.init();
