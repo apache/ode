@@ -101,60 +101,9 @@
          </wsdl:output>
       </wsdl:operation>
    </wsdl:binding>
-   <wsdl:binding name="DummyServiceSOAP12Binding" type="ns1:DummyServicePortType">
-      <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-      <wsdl:operation name="faultTest">
-         <soap12:operation soapAction="urn:faultTest" style="document"/>
-         <wsdl:input>
-            <soap12:body use="literal"/>
-         </wsdl:input>
-         <wsdl:output>
-            <soap12:body use="literal"/>
-         </wsdl:output>
-         <wsdl:fault name="DummyException">
-            <soap12:fault use="literal" name="DummyException"/>
-         </wsdl:fault>
-      </wsdl:operation>
-      <wsdl:operation name="hello">
-         <soap12:operation soapAction="urn:hello" style="document"/>
-         <wsdl:input>
-            <soap12:body use="literal"/>
-         </wsdl:input>
-         <wsdl:output>
-            <soap12:body use="literal"/>
-         </wsdl:output>
-      </wsdl:operation>
-   </wsdl:binding>
-   <wsdl:binding name="DummyServiceHttpBinding" type="ns1:DummyServicePortType">
-      <http:binding verb="POST"/>
-      <wsdl:operation name="faultTest">
-         <http:operation location="DummyService/faultTest"/>
-         <wsdl:input>
-            <mime:content type="text/xml" part="faultTest"/>
-         </wsdl:input>
-         <wsdl:output>
-            <mime:content type="text/xml" part="faultTest"/>
-         </wsdl:output>
-      </wsdl:operation>
-      <wsdl:operation name="hello">
-         <http:operation location="DummyService/hello"/>
-         <wsdl:input>
-            <mime:content type="text/xml" part="hello"/>
-         </wsdl:input>
-         <wsdl:output>
-            <mime:content type="text/xml" part="hello"/>
-         </wsdl:output>
-      </wsdl:operation>
-   </wsdl:binding>
    <wsdl:service name="DummyService">
       <wsdl:port name="DummyServiceSOAP11port_http" binding="ns1:DummyServiceSOAP11Binding">
          <soap:address location="http://localhost:8888/processes/DummyService"/>
-      </wsdl:port>
-      <wsdl:port name="DummyServiceSOAP12port_http" binding="ns1:DummyServiceSOAP12Binding">
-         <soap12:address location="http://localhost:8888/processes/DummyService"/>
-      </wsdl:port>
-      <wsdl:port name="DummyServiceHttpport" binding="ns1:DummyServiceHttpBinding">
-         <http:address location="http://localhost:8888/processes/DummyService"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>
