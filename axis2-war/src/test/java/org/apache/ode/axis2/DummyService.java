@@ -4,6 +4,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 
@@ -11,7 +13,10 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class DummyService {
-    public String hello(String in) {
+
+  private static final Log log = LogFactory.getLog(DummyService.class);
+
+  public String hello(String in) {
         return in + " world";
     }
 
@@ -24,4 +29,17 @@ public class DummyService {
         throw new AxisFault(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Client"), "dummy reason",
                 "dummy node", "dummy role", root);
     }
+
+      public String longOperation(String in) {
+         long delay = 120000; // == Properties.DEFAULT_MEX_TIMEOUT
+         try {
+             delay = Long.parseLong(in);
+         } catch (NumberFormatException ignore) {}
+          try {
+             log.debug("#### IN LONG OP: "+delay+"ms ####");
+             Thread.sleep(delay);
+         } catch (InterruptedException ignore) { }
+         log.debug("#### WENT THROUGH ###");
+          return "Went through " + in;
+      }
 }
