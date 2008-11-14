@@ -62,7 +62,7 @@
                <sequence>
                    <assign>
                        <copy>
-                           <from>$faultVar.parameters/dummy:reason</from>
+                           <from>$faultVar.parameters/reason</from>
                            <to>$myVar.TestPart</to>
                        </copy>
                    </assign>

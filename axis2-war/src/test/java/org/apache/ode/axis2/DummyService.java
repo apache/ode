@@ -23,7 +23,7 @@ public class DummyService {
     public String faultTest(String in) throws DummyException, AxisFault {
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement root = factory.createOMElement(new QName("http://axis2.ode.apache.org", "DummyException"));
-        OMElement reason = factory.createOMElement(new QName("http://axis2.ode.apache.org", "reason"));
+        OMElement reason = factory.createOMElement(new QName("", "reason"));
         reason.setText("Something went wrong. Fortunately, it was meant to be.");
         root.addChild(reason);
         throw new AxisFault(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Client"), "dummy reason",
