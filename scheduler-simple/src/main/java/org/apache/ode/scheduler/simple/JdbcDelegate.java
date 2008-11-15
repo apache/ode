@@ -286,7 +286,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                     d = Dialect.SQLSERVER;
                 } else if (dbProductName.indexOf("MySQL") >= 0) {
                     d = Dialect.MYSQL;
-                } else if (dbProductName.indexOf("Sybase") >= 0) {
+                } else if (dbProductName.indexOf("Sybase") >= 0 || dbProductName.indexOf("Adaptive") >= 0) {
                     d = Dialect.SYBASE;
                 }
             }
