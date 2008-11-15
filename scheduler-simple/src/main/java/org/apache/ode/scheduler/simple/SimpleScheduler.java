@@ -43,7 +43,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
  * A reliable and relatively simple scheduler that uses a database to persist information about 
  * scheduled tasks.
  * 
- * The challange is to achieve high performance in a small memory footprint without loss of reliability
+ * The challenge is to achieve high performance in a small memory footprint without loss of reliability
  * while supporting distributed/clustered configurations.
  * 
  * The design is based around three time horizons: "immediate", "near future", and "everything else". 
@@ -119,10 +119,26 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
-        _todoLimit = Integer.parseInt(conf.getProperty("ode.scheduler.queueLength", "10000"));
+        _todoLimit = getIntProperty(conf, "ode.scheduler.queueLength", _todoLimit);
+        _immediateInterval = getLongProperty(conf, "ode.scheduler.immediateInterval", _immediateInterval);
+        _nearFutureInterval = getLongProperty(conf, "ode.scheduler.nearFutureInterval", _nearFutureInterval);
+        _staleInterval = getLongProperty(conf, "ode.scheduler.staleInterval", _staleInterval);
+        _tps = getIntProperty(conf, "ode.scheduler.transactionsPerSecond", _tps);
         _todo = new SchedulerThread(this);
     }
 
+    private int getIntProperty(Properties props, String propName, int defaultValue) {
+        String s = props.getProperty(propName);
+        if (s != null) return Integer.parseInt(s);
+        else return defaultValue;
+    }
+
+    private long getLongProperty(Properties props, String propName, long defaultValue) {
+        String s = props.getProperty(propName);
+        if (s != null) return Long.parseLong(s);
+        else return defaultValue;
+    }
+        
     public void setNodeId(String nodeId) {
         _nodeId = nodeId;
     }
@@ -139,7 +155,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _nearFutureInterval = nearFutureInterval;
     }
 
-    public void setTransactionPerSecond(int tps) {
+    public void setTransactionsPerSecond(int tps) {
         _tps = tps;
     }
 
@@ -318,15 +334,19 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _todo.enqueue(new LoadImmediateTask(now));
 
         // schedule check for stale nodes, make it random so that the nodes don't overlap.
-        _todo.enqueue(new CheckStaleNodes(now + (long) (_random.nextDouble() * _staleInterval + (_staleInterval/2))));
+        _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
 
         // do the upgrade sometime (random) in the immediate interval.
-        _todo.enqueue(new UpgradeJobsTask(now + (long) (_random.nextDouble() * _immediateInterval + (_immediateInterval/2))));
+        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
 
         _todo.start();
         _running = true;
     }
-
+    
+    private long randomMean(long mean) {
+        return (long) _random.nextDouble() * mean + (mean/2);
+    }
+        
     public synchronized void stop() {
         if (!_running)
             return;
