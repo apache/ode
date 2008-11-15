@@ -52,7 +52,7 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
         _st.start();
         long schedtime = System.currentTimeMillis() + 300;
         _st.enqueue(new Task(schedtime));
-        Thread.sleep(600);
+        Thread.sleep(1000);
         assertEquals(1,_tasks.size());
         assertTrue(_tasks.get(0).time < schedtime + SCHED_TOLERANCE / 2);
         assertTrue(_tasks.get(0).time > schedtime - SCHED_TOLERANCE / 2);

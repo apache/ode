@@ -25,7 +25,7 @@ import org.apache.ode.utils.GUID;
 
 /**
  * Like a task, but a little bit better.
- *
+ * 
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class Job extends Task {
@@ -37,7 +37,7 @@ class Job extends Task {
     public Job(long when, boolean transacted, Map<String, Object> jobDetail) {
         this(when, new GUID().toString(),transacted,jobDetail);
     }
-
+    
     public Job(long when, String jobId, boolean transacted,Map<String, Object> jobDetail) {
         super(when);
         this.jobId = jobId;
@@ -54,5 +54,9 @@ class Job extends Task {
     public boolean equals(Object obj) {
         return obj instanceof Job && jobId.equals(((Job) obj).jobId);
     }
-
+    
+    @Override
+    public String toString() {
+        return "Job "+jobId+" transacted: "+transacted+" persisted: "+persisted+" details: "+detail;
+    }
 }

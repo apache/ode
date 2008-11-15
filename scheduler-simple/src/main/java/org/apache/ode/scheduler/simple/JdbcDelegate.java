@@ -51,10 +51,10 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String UPDATE_REASSIGN = "update ODE_JOB set nodeid = ?, scheduled = 0 where nodeid = ?";
 
-    private static final String UPGRADE_JOB_DEFAULT = "update ODE_JOB set nodeid = ? where nodeid is null and scheduled = 0 "
+    private static final String UPGRADE_JOB_DEFAULT = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and mod(ts,?) = ? and ts < ?";
 
-    private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null and scheduled = 0 "
+    private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null "
         + "and (ts % ?) = ? and ts < ?";
 
     private static final String SAVE_JOB = "insert into ODE_JOB "
@@ -63,7 +63,7 @@ public class JdbcDelegate implements DatabaseDelegate {
     private static final String GET_NODEIDS = "select distinct nodeid from ODE_JOB";
 
     private static final String SCHEDULE_IMMEDIATE = "select jobid, ts, transacted, scheduled, details from ODE_JOB "
-            + "where nodeid = ? and scheduled = 0 and ts < ? order by ts";
+            + "where nodeid = ? and ts < ? order by ts";
 
     private static final String UPDATE_SCHEDULED = "update ODE_JOB set scheduled = 1 where jobid in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -179,24 +179,6 @@ public class JdbcDelegate implements DatabaseDelegate {
             }
             rs.close();
             ps.close();
-            
-            // mark jobs as scheduled, UPDATE_SCHEDULED_SLOTS at a time
-            int j = 0;
-            int updateCount = 0;
-            ps = con.prepareStatement(UPDATE_SCHEDULED);
-            for (int updates = 1; updates <= (ret.size() / UPDATE_SCHEDULED_SLOTS) + 1; updates++) {
-                for (int i = 1; i <= UPDATE_SCHEDULED_SLOTS; i++) {
-                    ps.setString(i, j < ret.size() ? ret.get(j).jobId : "");
-                    j++;
-                }
-                ps.execute();
-                updateCount += ps.getUpdateCount();
-            }
-            if (updateCount != ret.size()) {
-                throw new DatabaseException(
-                        "Updating scheduled jobs failed to update all jobs; expected=" + ret.size()
-                                + " actual=" + updateCount);
-            }
         } catch (SQLException se) {
             throw new DatabaseException(se);
         } finally {
@@ -304,7 +286,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                     d = Dialect.SQLSERVER;
                 } else if (dbProductName.indexOf("MySQL") >= 0) {
                     d = Dialect.MYSQL;
-                } else if (dbProductName.indexOf("Sybase") >= 0) {
+                } else if (dbProductName.indexOf("Sybase") >= 0 || dbProductName.indexOf("Adaptive") >= 0) {
                     d = Dialect.SYBASE;
                 }
             }
