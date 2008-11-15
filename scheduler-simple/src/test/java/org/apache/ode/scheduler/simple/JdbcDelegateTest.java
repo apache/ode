@@ -43,7 +43,7 @@ public class JdbcDelegateTest extends TestCase {
         _ds = new DelegateSupport();
         _del = _ds.delegate();
     }
-    
+     
     
     public void testGetNodeIds() throws Exception {
         // should have no node ids in the db, empty list (not null)
@@ -91,9 +91,8 @@ public class JdbcDelegateTest extends TestCase {
         assertEquals("j1",jobs.get(0).jobId);
         jobs = _del.dequeueImmediate("n1", 250L, 1000);
         assertNotNull(jobs);
-        assertEquals(2, jobs.size());
-        assertEquals("j1",jobs.get(0).jobId);
-        assertEquals("j2",jobs.get(1).jobId);
+        assertEquals(1, jobs.size());
+        assertEquals("j2",jobs.get(0).jobId);
     }
     
     public void testScheduleImmediateMaxRows() throws Exception {
@@ -104,6 +103,10 @@ public class JdbcDelegateTest extends TestCase {
         assertNotNull(jobs);
         assertEquals(1, jobs.size());
         assertEquals("j1",jobs.get(0).jobId);
+        jobs = _del.dequeueImmediate("n1", 250L, 1000);
+        assertNotNull(jobs);
+        assertEquals(1, jobs.size());
+        assertEquals("j2",jobs.get(0).jobId);
     }
 
     public void testScheduleImmediateNodeFilter() throws Exception {
