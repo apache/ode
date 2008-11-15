@@ -23,14 +23,10 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
@@ -40,22 +36,19 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
- * A reliable and relatively simple scheduler that uses a database to persist information about 
- * scheduled tasks.
- * 
- * The challenge is to achieve high performance in a small memory footprint without loss of reliability
- * while supporting distributed/clustered configurations.
- * 
- * The design is based around three time horizons: "immediate", "near future", and "everything else". 
- * Immediate jobs (i.e. jobs that are about to be up) are written to the database and kept in
- * an in-memory priority queue. When they execute, they are removed from the database. Near future
- * jobs are placed in the database and assigned to the current node, however they are not stored in
- * memory. Periodically jobs are "upgraded" from near-future to immediate status, at which point they
- * get loaded into memory. Jobs that are further out in time, are placed in the database without a 
- * node identifer; when they are ready to be "upgraded" to near-future jobs they are assigned to one
- * of the known live nodes. Recovery is rather straighforward, with stale node identifiers being 
- * reassigned to known good nodes.       
- * 
+ * A reliable and relatively simple scheduler that uses a database to persist information about scheduled tasks.
+ *
+ * The challange is to achieve high performance in a small memory footprint without loss of reliability while supporting
+ * distributed/clustered configurations.
+ *
+ * The design is based around three time horizons: "immediate", "near future", and "everything else". Immediate jobs (i.e. jobs that
+ * are about to be up) are written to the database and kept in an in-memory priority queue. When they execute, they are removed from
+ * the database. Near future jobs are placed in the database and assigned to the current node, however they are not stored in
+ * memory. Periodically jobs are "upgraded" from near-future to immediate status, at which point they get loaded into memory. Jobs
+ * that are further out in time, are placed in the database without a node identifer; when they are ready to be "upgraded" to
+ * near-future jobs they are assigned to one of the known live nodes. Recovery is rather straighforward, with stale node identifiers
+ * being reassigned to known good nodes.
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  *
  */
@@ -69,7 +62,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     long _immediateInterval = 30000;
 
     /**
-     * Jobs scheduled with a time that is between (now+immediateInterval,now+nearFutureInterval) will be assigned to the current
+     * Jobs sccheduled with a time that is between (now+immediateInterval,now+nearFutureInterval) will be assigned to the current
      * node, but will not be placed on the todo queue (the promoter will pick them up).
      */
     long _nearFutureInterval = 10 * 60 * 1000;
@@ -77,16 +70,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     /** 10s of no communication and you are deemed dead. */
     long _staleInterval = 10000;
 
-    /**
-     * Estimated sustained transaction per second capacity of the system.
-     * e.g. 100 means the system can process 100 jobs per seconds, on average
-     * This number is used to determine how many jobs to load from the database at once.
-     */
-    int _tps = 100;
-
     TransactionManager _txm;
-
-    ExecutorService _exec;
 
     String _nodeId;
 
@@ -119,26 +103,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
-        _todoLimit = getIntProperty(conf, "ode.scheduler.queueLength", _todoLimit);
-        _immediateInterval = getLongProperty(conf, "ode.scheduler.immediateInterval", _immediateInterval);
-        _nearFutureInterval = getLongProperty(conf, "ode.scheduler.nearFutureInterval", _nearFutureInterval);
-        _staleInterval = getLongProperty(conf, "ode.scheduler.staleInterval", _staleInterval);
-        _tps = getIntProperty(conf, "ode.scheduler.transactionsPerSecond", _tps);
+        _todoLimit = Integer.parseInt(conf.getProperty("ode.scheduler.queueLength", "10000"));
         _todo = new SchedulerThread(this);
     }
 
-    private int getIntProperty(Properties props, String propName, int defaultValue) {
-        String s = props.getProperty(propName);
-        if (s != null) return Integer.parseInt(s);
-        else return defaultValue;
-    }
-
-    private long getLongProperty(Properties props, String propName, long defaultValue) {
-        String s = props.getProperty(propName);
-        if (s != null) return Long.parseLong(s);
-        else return defaultValue;
-    }
-        
     public void setNodeId(String nodeId) {
         _nodeId = nodeId;
     }
@@ -155,20 +123,12 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _nearFutureInterval = nearFutureInterval;
     }
 
-    public void setTransactionsPerSecond(int tps) {
-        _tps = tps;
-    }
-
     public void setTransactionManager(TransactionManager txm) {
         _txm = txm;
     }
 
     public void setDatabaseDelegate(DatabaseDelegate dbd) {
         _db = dbd;
-    }
-
-    public void setExecutorService(ExecutorService executorService) {
-        _exec = executorService;
     }
 
     public void cancelJob(String jobId) throws ContextException {
@@ -179,20 +139,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             __log.debug("Job removal failed.", e);
             throw new ContextException("Job removal failed.", e);
         }
-    }
-
-    public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
-        return _exec.submit(new Callable<T>() {
-            public T call() throws Exception {
-                try {
-                    return execTransaction(transaction);
-                } catch (Exception e) {
-                    __log.error("An exception occured while executing an isolated transaction, " +
-                            "the transaction is going to be abandoned.", e);
-                    return null;
-                }
-            }
-        });
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
@@ -221,24 +167,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
     }
 
-    public void registerSynchronizer(final Synchronizer synch) throws ContextException {
-        try {
-            _txm.getTransaction().registerSynchronization(new Synchronization() {
-
-                public void beforeCompletion() {
-                    synch.beforeCompletion();
-                }
-
-                public void afterCompletion(int status) {
-                    synch.afterCompletion(status == Status.STATUS_COMMITTED);
-                }
-
-            });
-        } catch (Exception e) {
-            throw new ContextException("Unable to register synchronizer.", e);
-        }
-    }
-
     public String schedulePersistedJob(final Map<String, Object> jobDetail, Date when) throws ContextException {
         long ctime = System.currentTimeMillis();
         if (when == null)
@@ -254,20 +182,25 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
         try {
             if (immediate) {
+                // If we have too many jobs in the queue, we don't allow any new ones
+                if (_todo.size() > _todoLimit) {
+                    __log.error("The execution queue is backed up, the engine can't keep up with the load. Either " +
+                            "increase the queue size or regulate the flow.");
+                    return null;
+                }
+
                 // Immediate scheduling means we put it in the DB for safe keeping
                 _db.insertJob(job, _nodeId, true);
-                
                 // And add it to our todo list .
-                if (_todo.size() < _todoLimit) {
-                    addTodoOnCommit(job);
-                }
+                addTodoOnCommit(job);
+
                 __log.debug("scheduled immediate job: " + job.jobId);
             } else if (nearfuture) {
                 // Near future, assign the job to ourselves (why? -- this makes it very unlikely that we
                 // would get two nodes trying to process the same instance, which causes unsightly rollbacks).
                 _db.insertJob(job, _nodeId, false);
                 __log.debug("scheduled near-future job: " + job.jobId);
-            } else /* far future */ {
+            } else /* far future */{
                 // Not the near future, we don't assign a node-id, we'll assign it later.
                 _db.insertJob(job, null, false);
                 __log.debug("scheduled far-future job: " + job.jobId);
@@ -302,9 +235,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (_running)
             return;
 
-        if (_exec == null)
-            _exec = Executors.newCachedThreadPool();
-
         _todo.clearTasks(UpgradeJobsTask.class);
         _todo.clearTasks(LoadImmediateTask.class);
         _todo.clearTasks(CheckStaleNodes.class);
@@ -325,28 +255,23 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             throw new ContextException("Error retrieving node list.", ex);
         }
 
-        long now = System.currentTimeMillis();
-        
         // Pretend we got a heartbeat...
-        for (String s : _knownNodes) _lastHeartBeat.put(s, now);
+        for (String s : _knownNodes)
+            _lastHeartBeat.put(s, System.currentTimeMillis());
 
         // schedule immediate job loading for now!
-        _todo.enqueue(new LoadImmediateTask(now));
+        _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis()));
 
         // schedule check for stale nodes, make it random so that the nodes don't overlap.
-        _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
+        _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + (long) (_random.nextDouble() * _staleInterval)));
 
         // do the upgrade sometime (random) in the immediate interval.
-        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
+        _todo.enqueue(new UpgradeJobsTask(System.currentTimeMillis() + (long) (_random.nextDouble() * _immediateInterval)));
 
         _todo.start();
         _running = true;
     }
-    
-    private long randomMean(long mean) {
-        return (long) _random.nextDouble() * mean + (mean/2);
-    }
-        
+
     public synchronized void stop() {
         if (!_running)
             return;
@@ -358,6 +283,28 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _running = false;
     }
 
+    public void jobCompleted(String jobId) {
+        boolean deleted = false;
+        try {
+            deleted = _db.deleteJob(jobId, _nodeId);
+        } catch (DatabaseException de) {
+            String errmsg = "Database error.";
+            __log.error(errmsg, de);
+            throw new ContextException(errmsg, de);
+        }
+
+        if (!deleted) {
+            try {
+                _txm.getTransaction().setRollbackOnly();
+            } catch (Exception ex) {
+                __log.error("Transaction manager error; setRollbackOnly() failed.", ex);
+            }
+
+            throw new ContextException("Job no longer in database: jobId=" + jobId);
+        }
+    }
+
+
     /**
      * Run a job in the current thread.
      *
@@ -368,70 +315,53 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
                 (Integer)(job.detail.get("retry") != null ? job.detail.get("retry") : 0));
 
-        _exec.submit(new Callable<Void>() {
-            public Void call() throws Exception {
-                if (job.transacted) {
-                    try {
-                        execTransaction(new Callable<Void>() {
-                            public Void call() throws Exception {
-                                if (job.persisted)
-                                    if (!_db.deleteJob(job.jobId, _nodeId))
-                                        throw new JobNoLongerInDbException(job.jobId,_nodeId);
-                                    
-                                try {
-                                    _jobProcessor.onScheduledJob(jobInfo);
-                                } catch (JobProcessorException jpe) {
-                                    if (jpe.retry) {
-                                        int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
-                                        if (retry <= 10) {
-                                            long delay = doRetry(job);
-                                            __log.error("Error while processing transaction, retrying in " + delay + "s");
-                                        } else {
-                                            __log.error("Error while processing transaction after 10 retries, no more retries:"+job);
-                                        }
-                                    } else {
-                                        __log.error("Error while processing transaction, no retry.", jpe);
-                                    }
-                                }
-                                return null;
-                            }
-                        });
-                    } catch (JobNoLongerInDbException jde) {
-                        // This may happen if two node try to do the same job... we try to avoid
-                        // it the synchronization is a best-effort but not perfect.
-                        __log.debug("job no longer in db forced rollback.");
-                    } catch (Exception ex) {
-                        __log.error("Error while executing transaction", ex);
-                    }
-                } else {
-                    _jobProcessor.onScheduledJob(jobInfo);
-                }
-                return null;
+        try {
+            try {
+                _jobProcessor.onScheduledJob(jobInfo);
+            } catch (JobProcessorException jpe) {
+                if (jpe.retry)
+                    __log.error("Error while processing transaction, retrying in " + doRetry(job) + "s");
+                else
+                    __log.error("Error while processing transaction, no retry.", jpe);
             }
-        });
+        } catch (Exception ex) {
+            __log.error("Error in scheduler processor.", ex);
+        }
+
     }
 
     private void addTodoOnCommit(final Job job) {
-        registerSynchronizer(new Synchronizer() {
 
-            public void afterCompletion(boolean success) {
-                if (success) {
-                    _todo.enqueue(job);
-                }
-            }
-
-            public void beforeCompletion() {
-            }
-
-        });
-    }
-
-    public boolean isTransacted() {
+        Transaction tx;
         try {
-            Transaction tx = _txm.getTransaction();
-            return (tx != null && tx.getStatus() != Status.STATUS_NO_TRANSACTION);
-        } catch (SystemException e) {
-            throw new ContextException("Internal Error: Could not obtain transaction status.");
+            tx = _txm.getTransaction();
+        } catch (Exception ex) {
+            String errmsg = "Transaction manager error; unable to obtain transaction.";
+            __log.error(errmsg, ex);
+            throw new ContextException(errmsg, ex);
+        }
+
+        if (tx == null)
+            throw new ContextException("Missing required transaction in thread " + Thread.currentThread());
+
+        try {
+            tx.registerSynchronization(new Synchronization() {
+
+                public void afterCompletion(int status) {
+                    if (status == Status.STATUS_COMMITTED) {
+                        _todo.enqueue(job);
+                    }
+                }
+
+                public void beforeCompletion() {
+                }
+
+            });
+
+        } catch (Exception e) {
+            String errmsg = "Unable to registrer synchronizer. ";
+            __log.error(errmsg, e);
+            throw new ContextException(errmsg, e);
         }
     }
 
@@ -455,25 +385,21 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     boolean doLoadImmediate() {
         __log.debug("LOAD IMMEDIATE started");
-        
-        // don't load anything if we're already half-full;  we've got plenty to do already
-        if (_todo.size() > _todoLimit/2) return true;
-        
         List<Job> jobs;
         try {
-            final int batch = (int) (_immediateInterval * _tps / 1000);
-            jobs = execTransaction(new Callable<List<Job>>() {
-                public List<Job> call() throws Exception {
-                    return _db.dequeueImmediate(_nodeId, System.currentTimeMillis() + _immediateInterval, batch);
-                }
-            });
-            for (Job j : jobs) {
-                if (__log.isDebugEnabled())
-                    __log.debug("todo.enqueue job from db: " + j.jobId + " for " + j.schedDate);
+            do {
+                jobs = execTransaction(new Callable<List<Job>>() {
+                    public List<Job> call() throws Exception {
+                        return _db.dequeueImmediate(_nodeId, System.currentTimeMillis() + _immediateInterval, 10);
+                    }
+                });
+                for (Job j : jobs) {
+                    if (__log.isDebugEnabled())
+                        __log.debug("todo.enqueue job from db: " + j.jobId + " for " + j.schedDate);
 
-                if (_todo.size() < _todoLimit) 
                     _todo.enqueue(j);
-            }
+                }
+            } while (jobs.size() == 10);
             return true;
         } catch (Exception ex) {
             __log.error("Error loading immediate jobs from database.", ex);
@@ -521,6 +447,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     /**
      * Re-assign stale node's jobs to self.
+     *
      * @param nodeId
      */
     void recoverStaleNode(final String nodeId) {
@@ -549,7 +476,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         } finally {
             __log.debug("node recovery complete");
         }
-
     }
 
     private long doRetry(Job job) throws DatabaseException {
@@ -581,9 +507,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 success = doLoadImmediate();
             } finally {
                 if (success)
-                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + (long) (_immediateInterval * .90)));
+                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + (long) (_immediateInterval * .75)));
                 else
-                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + 1000));
+                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + 100));
             }
         }
 
@@ -591,6 +517,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     /**
      * Upgrade jobs from far future to immediate future (basically, assign them to a node).
+     *
      * @author mszefler
      *
      */
@@ -617,7 +544,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             try {
                 success = doUpgrade();
             } finally {
-                long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 1000);
+                long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 100);
                 _nextUpgrade.set(future);
                 _todo.enqueue(new UpgradeJobsTask(future));
                 __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
@@ -640,16 +567,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             __log.debug("CHECK STALE NODES started");
             for (String nodeId : _knownNodes) {
                 Long lastSeen = _lastHeartBeat.get(nodeId);
-                if ((lastSeen == null || (System.currentTimeMillis() - lastSeen) > _staleInterval)
-                    && !_nodeId.equals(nodeId))
-                {
+                if (lastSeen == null || (System.currentTimeMillis() - lastSeen) > _staleInterval)
                     recoverStaleNode(nodeId);
-                }
             }
         }
 
-
     }
-
 
 }

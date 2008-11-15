@@ -51,7 +51,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         _tried++;
-        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 3);
+        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 2);
     }
 
     Map<String, Object> newDetail(String x) {
