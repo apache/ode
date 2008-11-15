@@ -57,24 +57,25 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
     public void testConcurrentExec() throws Exception  {
         _scheduler.start();
-        _txm.begin();
-        String jobId;
-        try {
-            jobId = _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 200));
-            Thread.sleep(100);
-            // Make sure we don't schedule until commit.
-            assertEquals(0, _jobs.size());
-        } finally {
-            _txm.commit();
+        for (int i=0; i<10; i++) {
+            _txm.begin();
+            String jobId;
+            try {
+                int jobs = _jobs.size();
+                jobId = _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 200));
+                Thread.sleep(100);
+                // Make sure we don't schedule until commit.
+                assertEquals(jobs, _jobs.size());
+            } finally {
+                _txm.commit();
+            }
+            // Delete from DB
+            assertEquals(true,_ds.delegate().deleteJob(jobId, "n1"));
+            // Wait for the job to be execed.
+            Thread.sleep(250);
+            // We should always have same number of jobs/commits
+            assertEquals(_jobs.size(), _commit.size());
         }
-        // Delete from DB
-        assertEquals(true,_ds.delegate().deleteJob(jobId, "n1"));
-        // Wait for the job to be execed.
-        Thread.sleep(250);
-        // Should execute job,
-        assertEquals(1, _jobs.size());
-        // But should not commit.
-        assertEquals(0, _commit.size());
     }
     
     public void testImmediateScheduling() throws Exception {
