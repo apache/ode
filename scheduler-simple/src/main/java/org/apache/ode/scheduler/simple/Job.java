@@ -54,4 +54,9 @@ class Job extends Task {
     public boolean equals(Object obj) {
         return obj instanceof Job && jobId.equals(((Job) obj).jobId);
     }
+    
+    @Override
+    public String toString() {
+        return "Job "+jobId+" transacted: "+transacted+" persisted: "+persisted+" details: "+detail;
+    }
 }
