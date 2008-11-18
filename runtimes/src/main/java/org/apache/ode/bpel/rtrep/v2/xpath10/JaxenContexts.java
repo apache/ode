@@ -172,19 +172,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 }
 
                 if (_xpathEvalCtx.narrowTypes() && type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
-                    String text = variableNode.getTextContent();
-                    try {
-                        return XSTypes.toJavaObject(((OXsdTypeVarType)variable.type).xsdType,
-                                text);
-                    } catch (Exception e) { }
-                    // Elegant way failed, trying brute force
-                    try {
-                        return Integer.valueOf(text);
-                    } catch (NumberFormatException e) { }
-                    try {
-                        return Double.valueOf(text);
-                    } catch (NumberFormatException e) { }
-                    return text;
+                    return variableNode.getTextContent();
                 } else {
                     return variableNode;
                 }
