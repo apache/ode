@@ -139,6 +139,17 @@ public class ProcessStoreImpl implements ProcessStore {
 
     }
 
+    /**
+     * Constructor that hardwires OpenJPA on a new in-memory database. Suitable for tests.
+     */
+    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource inMemDs) {
+        this.eprContext = eprContext;
+        DataSource hsqlds = createInternalDS(new GUID().toString());
+        //when in memory we always create the model as we are starting from scratch
+        _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
+        _inMemDs = inMemDs;
+    }
+
     public void shutdown() {
         if (_inMemDs != null) {
             shutdownInternalDB(_inMemDs);
