@@ -86,9 +86,6 @@ public class ProcessStoreImpl implements ProcessStore {
     /** Guards access to the _processes and _deploymentUnits */
     private final ReadWriteLock _rw = new ReentrantReadWriteLock();
 
-    /** GUID used to create a unique in-memory db. */
-    private String _guid = new GUID().toString();
-
     private ConfStoreConnectionFactory _cf;
 
     private EndpointReferenceContext eprContext;
@@ -125,7 +122,7 @@ public class ProcessStoreImpl implements ProcessStore {
         } else {
             // If the datasource is not provided, then we create a HSQL-based in-memory
             // database. Makes testing a bit simpler.
-            DataSource hsqlds = createInternalDS(_guid);
+            DataSource hsqlds = createInternalDS(new GUID().toString());
             if ("hibernate".equalsIgnoreCase(persistenceType))
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel);
             else
@@ -133,6 +130,17 @@ public class ProcessStoreImpl implements ProcessStore {
             _inMemDs = hsqlds;
         }
 
+    }
+
+    /**
+     * Constructor that hardwires OpenJPA on a new in-memory database. Suitable for tests.
+     */
+    public ProcessStoreImpl(EndpointReferenceContext eprContext, ConfStoreConnectionFactory cf, DataSource inMemDs) {
+        this.eprContext = eprContext;
+        DataSource hsqlds = createInternalDS(new GUID().toString());
+        //when in memory we always create the model as we are starting from scratch
+        _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
+        _inMemDs = inMemDs;
     }
 
     public void shutdown() {
@@ -503,15 +511,15 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
-        case ACTIVE:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
-            break;
-        case DISABLED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId, duname));
-            break;
-        case RETIRED:
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId, duname));
-            break;
+            case ACTIVE:
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
+                break;
+            case DISABLED:
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DISABLED, processId, duname));
+                break;
+            case RETIRED:
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.RETIRED, processId, duname));
+                break;
         }
 
     }
