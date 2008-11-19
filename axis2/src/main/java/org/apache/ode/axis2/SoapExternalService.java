@@ -33,6 +33,7 @@ import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.OutOnlyAxisOperation;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -318,6 +319,45 @@ public class SoapExternalService implements ExternalService {
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
             options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
+            
+            // Map My Session ID to JMS Correlation ID
+            Document callbackEprXml = odeMex.getMyRoleEndpointReference().toXML();
+            Element serviceElement = callbackEprXml.getDocumentElement();
+            Element address = DOMUtils.findChildByName(serviceElement, 
+            		new QName(Namespaces.WS_ADDRESSING_NS, "Address"), true);
+            if (address != null) {
+	            String jmsUrl = address.getTextContent();
+	            String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
+	            if (jmsDestination == null || "".equals(jmsDestination.trim())) {
+	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
+		            int jmsStartIndex = jmsUrl.indexOf("jms:/");
+		            if (jmsStartIndex != -1) {
+		            	if (myRoleSessionId != null) {
+				            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+		            	} else {
+		            		Element sessionElement = DOMUtils.findChildByName(serviceElement, 
+		            				new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
+		            		myRoleSessionId = sessionElement.getNodeValue();
+		            		if (myRoleSessionId != null) {
+					            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+		            		}
+		            	}
+		            	jmsStartIndex += "jms:/".length();
+		            	if (jmsUrl.charAt(jmsStartIndex + 1) == '/') {
+		            		jmsStartIndex++;
+		            	}
+		            	if (jmsUrl.startsWith("dynamic")) {
+		            		jmsStartIndex += "dynamicQueues".length();
+		            	}
+		            	int jmsEndIndex = jmsUrl.indexOf("?", jmsStartIndex);
+		            	if (jmsEndIndex == -1) {
+		            		jmsEndIndex = jmsUrl.length();
+		            	}
+		        		jmsDestination = jmsUrl.substring(jmsStartIndex, jmsEndIndex);
+		                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+		            }
+	            }
+            }
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
         }

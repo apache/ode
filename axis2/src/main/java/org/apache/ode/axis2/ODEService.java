@@ -25,6 +25,7 @@ import org.apache.axiom.soap.SOAPFault;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.util.SoapMessageConverter;
@@ -42,6 +43,7 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -51,6 +53,9 @@ import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.http.HTTPAddress;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
+
+import java.io.IOException;
+import java.io.StringBufferInputStream;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -97,12 +102,12 @@ public class ODEService {
             _txManager.begin();
             if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
 
-            // Creating mesage exchange
+            // Creating message exchange
             String messageId = new GUID().toString();
             odeMex = _server.getEngine().createMessageExchange("" + messageId, _serviceName,
                     msgContext.getAxisOperation().getName().getLocalPart());
             __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
-
+            
             if (odeMex.getOperation() != null) {
                 // Preparing message to send to ODE
                 Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
@@ -259,15 +264,21 @@ public class ODEService {
      * headers) to stuff them into ODE mesage exchange.
      */
     private void readHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-        Object otse = msgContext.getProperty("targetSessionEndpoint");
+    	String correlationId = (String) msgContext.getProperty(JMSConstants.JMS_COORELATION_ID);
+    	if (correlationId != null) {
+            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, correlationId);
+    	} else {
+            Object otse = msgContext.getProperty("targetSessionEndpoint");
+	        if (otse != null) {
+	            Element serviceEpr = (Element) otse;
+	            WSAEndpoint endpoint = new WSAEndpoint();
+	            endpoint.set(serviceEpr);
+	            // Extract the session ID for the local process.
+	            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
+	        }
+    	}
+    	
         Object ocse = msgContext.getProperty("callbackSessionEndpoint");
-        if (otse != null) {
-            Element serviceEpr = (Element) otse;
-            WSAEndpoint endpoint = new WSAEndpoint();
-            endpoint.set(serviceEpr);
-            // Extract the session ID for the local process.
-            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
-        }
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
             WSAEndpoint endpoint = new WSAEndpoint();
