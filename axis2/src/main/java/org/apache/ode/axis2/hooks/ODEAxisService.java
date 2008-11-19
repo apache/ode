@@ -225,8 +225,8 @@ public class ODEAxisService extends AxisService {
     	// Assume that path is HTTP-based, by default
     	String servicePrefix = "/processes/";
     	// Don't assume JMS-based paths start the same way 
-    	if (path.startsWith("jms")) {
-    		servicePrefix = "jms://";
+    	if (path.startsWith("jms:/")) {
+    		servicePrefix = "jms:/";
     	}
         int index = path.indexOf(servicePrefix);
         if (-1 != index) {
@@ -241,7 +241,7 @@ public class ODEAxisService extends AxisService {
                     service = service.substring(0, queryIndex);
                 }
                 // Qualify shared JMS names with unique baseUri
-                if (path.startsWith("jms")) {
+                if (path.startsWith("jms:/")) {
                 	boolean slashPresent = baseUri.endsWith("/") || service.startsWith("/");
                 	service = baseUri + (slashPresent ? "" : "/") + service;
                 }
