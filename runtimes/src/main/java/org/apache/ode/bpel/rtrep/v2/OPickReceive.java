@@ -52,7 +52,7 @@ public class OPickReceive extends OActivity{
         }
     }
     
-    public static class OnMessage extends OBase {
+    public static class OnMessage extends OBase implements OComm {
       
         static final long serialVersionUID = -1L  ;
         
@@ -81,6 +81,18 @@ public class OPickReceive extends OActivity{
 
         public boolean isRestful() {
             return partnerLink == null && resource != null;
+        }
+
+        public OPartnerLink getPartnerLink() {
+            return partnerLink;
+        }
+
+        public Operation getOperation() {
+            return operation;
+        }
+
+        public OResource getResource() {
+            return resource;
         }
     }
 }

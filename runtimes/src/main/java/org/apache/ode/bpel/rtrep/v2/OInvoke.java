@@ -26,7 +26,7 @@ import javax.wsdl.Operation;
 /**
  * Compiled rerpresentation of the BPEL <code>&lt;invoke&gt;</code> activity.
  */
-public class OInvoke extends OActivity {
+public class OInvoke extends OActivity implements OComm {
   
     static final long serialVersionUID = -1L  ;
     public OPartnerLink partnerLink;
@@ -49,4 +49,20 @@ public class OInvoke extends OActivity {
     public OInvoke(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
+
+    public OPartnerLink getPartnerLink() {
+        return partnerLink;
+    }
+
+    public Operation getOperation() {
+        return operation;
+    }
+
+    public OResource getResource() {
+        return null;
+    }
+    public boolean isRestful() {
+        return false;
+    }
+
 }
