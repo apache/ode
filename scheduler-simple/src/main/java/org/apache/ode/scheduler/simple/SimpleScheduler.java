@@ -392,6 +392,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                                     } else {
                                         __log.error("Error while processing transaction, no retry.", jpe);
                                     }
+                                    // Let execTransaction know that shit happened.
+                                    throw jpe;
                                 }
                                 return null;
                             }
