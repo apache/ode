@@ -42,6 +42,8 @@ import javax.wsdl.PortType;
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,6 +122,7 @@ import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -1693,6 +1696,16 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         return rval;
     }
 
+    public Map<URI, Source> getSchemaSources() {    	
+    	Map<URI, Document> schemaBytes = _wsdlRegistry.getSchemaDocuments();
+    	Map<URI, Source> schemaSources = new HashMap<URI, Source>();
+    	for (URI uri : schemaBytes.keySet()) {
+    		Document document = schemaBytes.get(uri);
+    		schemaSources.put(uri, new DOMSource(document));
+    	}
+    	return schemaSources;
+    }
+    
     /**
      * Compile external variable declaration.
      * @param src variable object

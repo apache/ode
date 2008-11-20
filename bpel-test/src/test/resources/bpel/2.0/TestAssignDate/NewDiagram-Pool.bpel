@@ -29,11 +29,11 @@
     </bpel:assign>
     <bpel:assign bpmn:label="Task" bpmn:id="_e0Xz0Nw9Edye_tsy8V393Q">
       <bpel:copy>
-        <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">xs:dateTime($variable) + xdt:dayTimeDuration ("P1D")</bpel:from>
+        <bpel:from>xs:dateTime($variable) + xs:dayTimeDuration ("P1D")</bpel:from>
         <bpel:to>$variable</bpel:to>
       </bpel:copy>
         <bpel:copy>
-          <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">$variable + xdt:dayTimeDuration ("P1D")</bpel:from>
+          <bpel:from>$variable + xs:dayTimeDuration ("P1D")</bpel:from>
           <bpel:to>$variable</bpel:to>
         </bpel:copy>
     </bpel:assign>

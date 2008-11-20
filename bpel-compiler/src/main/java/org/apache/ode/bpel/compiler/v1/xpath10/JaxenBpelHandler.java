@@ -118,7 +118,7 @@ class JaxenBpelHandler extends JaxenHandler {
       try {
         if (Constants.EXT_FUNCTION_GETVARIABLEDATA.equals(c.getFunctionName())) {
           compileGetVariableData(c);
-        } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(c
+        } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPERTY.equals(c
                 .getFunctionName())) {
           compileGetVariableProperty(c);
         } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(c.getFunctionName())) {
@@ -191,7 +191,7 @@ class JaxenBpelHandler extends JaxenHandler {
 
     if (params.size() != 2) {
       throw new CompilationException(
-                          __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEPROPRTY));
+                          __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEPROPERTY));
     }
 
     String varName = getLiteralFromExpression((Expr)params.get(0));

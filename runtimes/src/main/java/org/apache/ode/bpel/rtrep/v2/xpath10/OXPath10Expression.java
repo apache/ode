@@ -18,13 +18,21 @@
  */
 package org.apache.ode.bpel.rtrep.v2.xpath10;
 
-import org.apache.ode.utils.NSContext;
-import org.apache.ode.bpel.rtrep.v2.*;
-
-import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.rtrep.v2.OBase;
+import org.apache.ode.bpel.rtrep.v2.OExpression;
+import org.apache.ode.bpel.rtrep.v2.OLValueExpression;
+import org.apache.ode.bpel.rtrep.v2.OLink;
+import org.apache.ode.bpel.rtrep.v2.OMessageVarType;
+import org.apache.ode.bpel.rtrep.v2.OProcess;
+import org.apache.ode.bpel.rtrep.v2.OScope;
+import org.apache.ode.bpel.rtrep.v2.OXslSheet;
+import org.apache.ode.utils.NSContext;
 
 
 /**

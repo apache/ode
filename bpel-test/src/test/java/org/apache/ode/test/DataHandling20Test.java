@@ -76,5 +76,7 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testAssignMissingData() throws Throwable {
         go("/bpel/2.0/TestAssignMissingData");
     }
-    
+    @Test public void testXQueryExpression() throws Throwable {
+        go("/bpel/2.0/TestXQueryExpression");
+    }
 }

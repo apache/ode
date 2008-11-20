@@ -18,16 +18,30 @@
  */
 package org.apache.ode.bpel.compiler.v1;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
-import org.apache.ode.utils.NSContext;
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.SourceLocation;
-import org.apache.ode.bpel.rtrep.v1.*;
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.rtrep.v1.OActivity;
+import org.apache.ode.bpel.rtrep.v1.OExpression;
+import org.apache.ode.bpel.rtrep.v1.OLValueExpression;
+import org.apache.ode.bpel.rtrep.v1.OLink;
+import org.apache.ode.bpel.rtrep.v1.OMessageVarType;
+import org.apache.ode.bpel.rtrep.v1.OPartnerLink;
+import org.apache.ode.bpel.rtrep.v1.OProcess;
+import org.apache.ode.bpel.rtrep.v1.OScope;
+import org.apache.ode.bpel.rtrep.v1.OXsdTypeVarType;
+import org.apache.ode.bpel.rtrep.v1.OXslSheet;
+import org.apache.ode.utils.NSContext;
 
 
 /**
@@ -124,5 +138,6 @@ public interface CompilerContext {
 
     OActivity getCurrent();
 
+    Map<URI, Source> getSchemaSources();
 
 }

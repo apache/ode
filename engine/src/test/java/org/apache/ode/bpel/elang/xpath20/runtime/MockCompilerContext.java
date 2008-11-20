@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.extension.ExtensionValidator;
@@ -201,5 +203,7 @@ public class MockCompilerContext implements CompilerContext {
      public OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname) throws CompilationException {
          return null;
      }
-
+	public Map<URI, Source> getSchemaSources() {
+		return null;
+	}
 }

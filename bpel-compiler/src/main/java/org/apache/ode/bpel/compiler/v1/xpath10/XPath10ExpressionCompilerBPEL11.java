@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.compiler.v1.xpath10;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.rtrep.v1.OExpression;
 import org.apache.ode.bpel.rtrep.v1.OLValueExpression;
 import org.apache.ode.bpel.rtrep.v1.xpath10.OXPath10Expression;
-import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.utils.Namespaces;
 
 /**

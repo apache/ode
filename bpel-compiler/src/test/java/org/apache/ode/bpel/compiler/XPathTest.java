@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.compiler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
 import junit.framework.TestCase;
 
@@ -261,4 +263,8 @@ class MockCompilerContext implements CompilerContext {
     public OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname) throws CompilationException {
         return null;
     }
+    
+    public Map<URI, Source> getSchemaSources() {
+		return null;
+	}
 }
