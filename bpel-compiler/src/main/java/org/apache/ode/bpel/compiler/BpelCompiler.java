@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.wsdl.Definition;
@@ -175,7 +177,7 @@ abstract class BpelCompiler implements CompilerContext {
     private Map<QName, Node> _customProcessProperties;
 
     private URI _processURI;
-
+    
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
         _wsdlRegistry = new WSDLRegistry(this);
@@ -1280,23 +1282,28 @@ abstract class BpelCompiler implements CompilerContext {
                     throw new CompilationException(__cmsgs.errPortTypeMismatch(onEvent.getPortType(),
                             oevent.partnerLink.myRolePortType.getQName()));
 
+                Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
                 for (Correlation correlation : onEvent.getCorrelations()) {
-                    OScope.CorrelationSet cset = resolveCorrelationSet(correlation.getCorrelationSet());
+                	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+                        throw new CompilationException(__cmsgs.errDuplicateUseCorrelationSet(correlation
+                                .getCorrelationSet()));
+                	}
+
+                	OScope.CorrelationSet cset = resolveCorrelationSet(correlation.getCorrelationSet());
 
                     switch (correlation.getInitiate()) {
                     case UNSET:
                     case NO:
-                        if (oevent.matchCorrelation != null)
-                            throw new CompilationException(__cmsgs.errTODO("Matching multiple correlations sets."));
-                        oevent.matchCorrelation = cset;
-                        oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset);
+                        oevent.matchCorrelations.add(cset);
+                        oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset, false);
                         break;
                     case YES:
                         oevent.initCorrelations.add(cset);
                         break;
                     case JOIN:
-                        oevent.joinCorrelation = cset;
-                        oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset);
+                    	cset.hasJoinUseCases = true;
+                        oevent.joinCorrelations.add(cset);
+                        oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset, true);
                     }
 
                     for (OProcess.OProperty property : cset.properties) {
@@ -1305,8 +1312,9 @@ abstract class BpelCompiler implements CompilerContext {
                         resolvePropertyAlias(oevent.variable, property.name);
                     }
 
+                    csetNames.add(correlation.getCorrelationSet());
                 }
-
+                
                 if (onEvent.getActivity() == null) throw new CompilationException(__cmsgs.errInvalidAlarm().setSource(onEvent));
                 oevent.activity = compile(onEvent.getActivity());
             }
@@ -1329,7 +1337,7 @@ abstract class BpelCompiler implements CompilerContext {
 
         oscope.eventHandler.onMessages.add(oevent);
     }
-
+    
     private DebugInfo createDebugInfo(BpelObject bpelObject, String description) {
         int lineNo = bpelObject == null ? -1 : bpelObject.getLineNo();
         String str = description == null && bpelObject != null ? bpelObject.toString() : null;

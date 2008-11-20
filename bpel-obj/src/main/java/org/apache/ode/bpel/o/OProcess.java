@@ -18,9 +18,6 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.utils.stl.CollectionsX;
-import org.apache.ode.utils.stl.MemberOfFunction;
-
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.io.IOException;
@@ -117,10 +114,12 @@ public class OProcess extends OBase {
         return processName;
     }
 
+    @SuppressWarnings("unchecked")
     public Collection getExpressionLanguages() {
         throw new UnsupportedOperationException(); // TODO: implement me!
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> getCorrelators() {
         // MOVED from ProcessSchemaGenerator
         List<String> correlators = new ArrayList<String>();

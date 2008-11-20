@@ -35,6 +35,7 @@ package org.apache.ode.daohib.bpel.hobj;
  * 
  * @hibernate.query name="DELETE_EVENT_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.instance = :instance)"
  * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m.messageExchange = :mex) or d IN(select m.header from HMessage m where m.messageExchange = :mex2)"
+ * @hibernate.query name="DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select m.messageData from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance = :instance) or d IN(select m.header from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance = :instance2)"
  * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance = :instance)"
  * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance = :instance) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance = :instance2)"
  * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_ID" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id = :instanceId)"
@@ -51,6 +52,7 @@ public class HLargeData extends HObject {
 
 	public final static String DELETE_EVENT_LDATA_BY_INSTANCE = "DELETE_EVENT_LDATA_BY_INSTANCE";
 	public final static String DELETE_MESSAGE_LDATA_BY_MEX = "DELETE_MESSAGE_LDATA_BY_MEX";
+	public final static String DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE = "DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE";
 	public final static String DELETE_XMLDATA_LDATA_BY_INSTANCE = "DELETE_XMLDATA_LDATA_BY_INSTANCE";
 	public final static String DELETE_PARTNER_LINK_LDATA_BY_INSTANCE = "DELETE_PARTNER_LINK_LDATA_BY_INSTANCE";
 	public final static String DELETE_FAULT_LDATA_BY_INSTANCE_ID = "DELETE_FAULT_LDATA_BY_INSTANCE_ID";

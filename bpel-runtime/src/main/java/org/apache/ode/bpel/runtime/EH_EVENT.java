@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
@@ -113,27 +114,26 @@ class EH_EVENT extends BpelJacobRunnable {
             Selector selector;
             try {
                 PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
-                CorrelationKey key = null;
+                CorrelationKeySet keySet = new CorrelationKeySet();
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
-                if(_oevent.joinCorrelation != null) {
-                	if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(_oevent.joinCorrelation))) {
-                		key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(_oevent.joinCorrelation));
-
-                		assert key != null;
+                for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
+                	if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
+                		keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
                 	}
-                } else if (_oevent.matchCorrelation == null ) {
-                    // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
-                    String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
-                    key = new CorrelationKey(-1, new String[] {sessionId});
-                } else {
-                    if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
+                }
+                for( OScope.CorrelationSet cset : _oevent.matchCorrelations ) {
+                    if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
                         throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
                     }
-                    key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(_oevent.matchCorrelation));
-                    assert key != null;
+                	keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
+                }
+                if( keySet.isEmpty() ) {
+                    // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
+                    String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
+                    keySet.add(new CorrelationKey(-1, new String[] {sessionId}));
                 }
 
-                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key, _oevent.route);
+                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, keySet, _oevent.route);
                 getBpelRuntimeContext().select(pickResponseChannel, null, false, new Selector[] { selector} );
                 instance(new WAITING(pickResponseChannel));
             } catch(FaultException e){
@@ -252,14 +252,13 @@ class EH_EVENT extends BpelJacobRunnable {
                                 }
                             }
 
-
                             try {
                                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
-                                if( _oevent.joinCorrelation != null ) {
+                                for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
                                 	// will be ignored if already initialized
-                                    initializeCorrelation(ehScopeFrame.resolve(_oevent.joinCorrelation), ehScopeFrame.resolve(_oevent.variable));
+                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
 
                                 if (_oevent.partnerLink.hasPartnerRole()) {
@@ -278,10 +277,6 @@ class EH_EVENT extends BpelJacobRunnable {
                                         getBpelRuntimeContext().initializePartnersSessionId(ehScopeFrame.resolve(_oevent.partnerLink),
                                                 partnersSessionId);
                                 }
-
-
-
-
                             } catch (FaultException e) {
                                 __log.error(e);
                                 if (_fault == null) {

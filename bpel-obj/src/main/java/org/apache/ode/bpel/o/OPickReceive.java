@@ -18,11 +18,13 @@
  */
 package org.apache.ode.bpel.o;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.wsdl.Operation;
-
 
 /**
  * Compiled rerperesentation of the BPEL <code>&lt;pick&gt;</code> and
@@ -53,17 +55,20 @@ public class OPickReceive extends OActivity{
     }
     
     public static class OnMessage extends OBase {
-      
         static final long serialVersionUID = -1L  ;
         
         /** Correlations to initialize. */
-        public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
+        public final List<OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
-        /** Correlation set to match on. */
-        public OScope.CorrelationSet matchCorrelation;
-
-        /** Correlation to join on. */
-        public OScope.CorrelationSet joinCorrelation;
+        /** Correlations to match on. */
+        public final List<OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
+        // left out for backward-compatibility, java serialization is lenient about scope
+        private OScope.CorrelationSet matchCorrelation;
+        
+		/** Correlations to join on. */
+        public final List<OScope.CorrelationSet> joinCorrelations = new ArrayList<OScope.CorrelationSet>();
+        // left out for backward-compatibility, java serialization is lenient about scope
+        private OScope.CorrelationSet joinCorrelation;
 
         public OPartnerLink partnerLink;
         public Operation operation;
@@ -81,6 +86,32 @@ public class OPickReceive extends OActivity{
 
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();
+        }
+        
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        	in.defaultReadObject();
+
+        	// backward compatibility; matchCorrelation could have a value if read from old definition
+        	if( matchCorrelation != null ) {
+        		matchCorrelations.add(matchCorrelation);
+        	}
+        	// backward compatibility; joinCorrelations could be null if read from old definition
+        	if( joinCorrelations == null ) {
+        		try {
+        			Field field = OnMessage.class.getDeclaredField("joinCorrelations");
+        			field.setAccessible(true);
+        			field.set(this, new ArrayList<OScope.CorrelationSet>());
+        		} catch( NoSuchFieldException nfe ) {
+        			throw new IOException(nfe.getMessage());
+        		} catch( IllegalAccessException iae ) {
+        			throw new IOException(iae.getMessage());
+        		}
+        	}
+        	// backward compatibility; joinCorrelation could have a value if read from old definition
+        	if( joinCorrelation != null ) {
+        		joinCorrelation.hasJoinUseCases = true;
+        		joinCorrelations.add(joinCorrelation);
+        	}
         }
     }
 }

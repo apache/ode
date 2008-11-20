@@ -54,6 +54,9 @@ public class OPartnerLink extends OBase {
     /** The set of CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
     private final HashMap<String,Set<OScope.CorrelationSet>> _nonIntitiatingCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
 
+    /** The set of joining CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
+    private final HashMap<String,Set<OScope.CorrelationSet>> _joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
+
     /** The set of {@link Operation}s that can be used to create a process instance. */
     private final HashSet<String> _createInstanceOperations = new HashSet<String>();
 
@@ -90,14 +93,22 @@ public class OPartnerLink extends OBase {
      * @param operation WSDL {@link Operation}
      * @param cset non-initiating correlation used in this operation
      */
-    public void addCorrelationSetForOperation(Operation operation, OScope.CorrelationSet cset) {
-        Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
-        if (ret == null) {
-            ret = new HashSet<OScope.CorrelationSet>();
-            _nonIntitiatingCorrelationSets.put(operation.getName(), ret);
-        }
-        ret.add(cset);
-
+    public void addCorrelationSetForOperation(Operation operation, OScope.CorrelationSet cset, boolean isJoin) {
+    	if( !isJoin ) {
+	        Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
+	        if (ret == null) {
+	            ret = new HashSet<OScope.CorrelationSet>();
+	            _nonIntitiatingCorrelationSets.put(operation.getName(), ret);
+	        }
+	        ret.add(cset);
+    	} else {
+	        Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
+	        if (ret == null) {
+	            ret = new HashSet<OScope.CorrelationSet>();
+	            _joiningCorrelationSets.put(operation.getName(), ret);
+	        }
+	        ret.add(cset);
+    	}
     }
 
     /**
@@ -107,8 +118,23 @@ public class OPartnerLink extends OBase {
      * @return all non-initiating correlation sets used in the given operation
      */
     @SuppressWarnings("unchecked")
-    public Set<OScope.CorrelationSet> getCorrelationSetsForOperation(Operation operation) {
+    public Set<OScope.CorrelationSet> getNonInitiatingCorrelationSetsForOperation(Operation operation) {
         Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
+        if (ret == null) {
+            return Collections.EMPTY_SET;
+        }
+        return Collections.unmodifiableSet(ret);
+    }
+
+    /**
+     * Get all joining correlation sets that are ever used to qualify a receive for a the given
+     * operation.
+     * @param operation the operation
+     * @return all non-initiating correlation sets used in the given operation
+     */
+    @SuppressWarnings("unchecked")
+    public Set<OScope.CorrelationSet> getJoinningCorrelationSetsForOperation(Operation operation) {
+        Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
         if (ret == null) {
             return Collections.EMPTY_SET;
         }

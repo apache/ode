@@ -21,6 +21,7 @@ package org.apache.ode.dao.jpa.test;
 
 import junit.framework.TestCase;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
@@ -183,8 +184,8 @@ public class InsertObjectTest extends TestCase {
 		
 		MessageExchangeDAO mex = createMessageExchange(process,pi,pl1);
 		
-		corr.addRoute("testRoute", pi, 1, key1, "one");
-		corr.enqueueMessage(mex, corrkeys);
+		corr.addRoute("testRoute", pi, 1, new CorrelationKeySet().add(key1), "one");
+		corr.enqueueMessage(mex, new CorrelationKeySet().add(corrkeys[0]).add(corrkeys[1]));
 		
 		return pi;
 	}

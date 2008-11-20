@@ -21,12 +21,15 @@ package org.apache.ode.bpel.runtime;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -35,7 +38,6 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OScope.CorrelationSet;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
@@ -78,20 +80,20 @@ class PICK extends ACTIVITY {
             selectors = new Selector[_opick.onMessages.size()];
             int idx = 0;
             for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
-                CorrelationSet matchCorrelation = null;
-                if( onMessage.joinCorrelation != null &&
-                		getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(onMessage.joinCorrelation))) {
-                	// use this join correlation as a match correlation to resolve the correlation key
-                	matchCorrelation = onMessage.joinCorrelation;
-                } else {
-                	matchCorrelation = onMessage.matchCorrelation;
-                }
+            	// collect all initiated correlations
+            	Set<OScope.CorrelationSet> matchCorrelations = new HashSet<OScope.CorrelationSet>();
+            	matchCorrelations.addAll(onMessage.matchCorrelations);
+            	for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
+            		if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
+            			matchCorrelations.add(cset);
+            		}
+            	}
 
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
-                CorrelationKey key = resolveCorrelationKey(pLinkInstance, matchCorrelation);
+                CorrelationKeySet keySet = resolveCorrelationKey(pLinkInstance, matchCorrelations);
 
                 selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
-                        .getOutput() == null, onMessage.messageExchangeId, key, onMessage.route);
+                        .getOutput() == null, onMessage.messageExchangeId, keySet, onMessage.route);
                 idx++;
             }
 
@@ -137,29 +139,36 @@ class PICK extends ACTIVITY {
      * @return returns the resolved CorrelationKey
      * @throws FaultException thrown when the correlation is not initialized and createInstance flag is not set
      */
-    private CorrelationKey resolveCorrelationKey(PartnerLinkInstance pLinkInstance, OScope.CorrelationSet matchCorrelation) throws FaultException {
-        CorrelationKey key = null; // this will be the case for the
-        // createInstance activity
+    private CorrelationKeySet resolveCorrelationKey(PartnerLinkInstance pLinkInstance, Set<OScope.CorrelationSet> matchCorrelations) throws FaultException {
+        CorrelationKeySet keySet = new CorrelationKeySet(); // is empty for the case of the createInstance activity
 
-        if (matchCorrelation == null && !_opick.createInstanceFlag) {
+        if (matchCorrelations.isEmpty() && !_opick.createInstanceFlag) {
             // Adding a route for opaque correlation. In this case,
             // correlation is on "out-of-band" session-id
             String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
-            key = new CorrelationKey(-1, new String[] { sessionId });
-        } else if (matchCorrelation != null) {
-            if (!getBpelRuntimeContext().isCorrelationInitialized(
-                    _scopeFrame.resolve(matchCorrelation))) {
-                if (!_opick.createInstanceFlag)
-                    throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
-                            "Correlation not initialized.");
-            } else {
-                key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(matchCorrelation));
-
-                assert key != null;
-            }
+            keySet.add(new CorrelationKey(-1, new String[] { sessionId }));
+        } else if (!matchCorrelations.isEmpty()) {
+    		for( OScope.CorrelationSet cset : matchCorrelations ) {
+    			CorrelationKey key = null;
+    			
+        		if(!getBpelRuntimeContext().isCorrelationInitialized(
+                    _scopeFrame.resolve(cset))) {
+                    if (!_opick.createInstanceFlag) {
+	                    throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
+	                    "Correlation not initialized.");
+                    }
+        		} else {
+        			key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset));
+                    assert key != null;
+        		}
+        		
+        		if( key != null ) {
+        			keySet.add(key);
+        		}
+    		}
         }
         
-        return key;
+        return keySet;
     }
     
     /**
@@ -269,7 +278,6 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-
             object(false, new PickResponseChannelListener(_pickResponseChannel) {
                 private static final long serialVersionUID = -8237296827418738011L;
 
@@ -294,11 +302,10 @@ class PICK extends ACTIVITY {
                         for (OScope.CorrelationSet cset : onMessage.initCorrelations) {
                             initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
                         }
-                        OScope.CorrelationSet cset = onMessage.joinCorrelation;
-                        if( cset != null ) {
+                        for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
                         	// will be ignored if already initialized
                         	initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
-                    	}
+                        }
                         if (onMessage.partnerLink.hasPartnerRole()) {
                             // Trying to initialize partner epr based on a
                             // message-provided epr/session.

@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.dao;
 
+import org.apache.ode.bpel.common.CorrelationKeySet;
+
 /**
  * Data access object representing a message consumer. A message consumer
  * represents an unsatisfied BPEL <code>pick</code> or <code>receive</code>
@@ -37,4 +39,10 @@ public interface MessageRouteDAO  {
   int getIndex();
   
   String getRoute();
+  
+  /**
+   * Returns a correlation key set for the message route
+   * @return
+   */
+  public CorrelationKeySet getCorrelationKeySet();
 }

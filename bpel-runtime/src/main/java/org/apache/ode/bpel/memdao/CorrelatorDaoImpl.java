@@ -21,18 +21,15 @@ package org.apache.ode.bpel.memdao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.utils.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 
 /**
  * A very simple, in-memory implementation of the {@link CorrelatorDAO} interface.
@@ -52,14 +49,14 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         _conn = conn;
     }
 
-    public MessageExchangeDAO dequeueMessage(CorrelationKey key) {
+    public MessageExchangeDAO dequeueMessage(CorrelationKeySet instanceKeySet) {
         if (__log.isDebugEnabled()) {
-            __log.debug("dequeueEarliest: MATCHING correlationKey=" + key);
+            __log.debug("dequeueEarliest: MATCHING correlationKey=" + instanceKeySet);
         }
-        for (Iterator i = _messages.iterator(); i.hasNext();) {
-            MsgQueueEntry mqe = (MsgQueueEntry)i.next();
-            Set<CorrelationKey> keyset = (Set<CorrelationKey>) CollectionUtils.makeCollection(HashSet.class, mqe.keys);
-            if ((key == null) || (key.getValues().length == 0) || keyset.contains(key)) {
+        for (Iterator<MsgQueueEntry> i = _messages.iterator(); i.hasNext();) {
+            MsgQueueEntry mqe = i.next();
+            CorrelationKeySet aKeySet = mqe.keySet;
+            if (aKeySet.isRoutableTo(instanceKeySet, false)) {
                 i.remove();
                 return mqe.message;
             }
@@ -70,34 +67,24 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         return null;
     }
 
-    public List<MessageRouteDAO> findRoute(CorrelationKey key) {
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet) {
     	List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+
+    	assert keySet != null;
     	
         if (__log.isDebugEnabled()) {
-            __log.debug("findRoute: key=" + key);
+            __log.debug("findRoute: keySet=" + keySet);
         }
         List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
         for (MessageRouteDaoImpl we : _routes) {
-        	if ("all".equals(we.getRoute())) {
-                if ((we._ckey == null && key == null) ||
-                		((we._ckey != null && key == null) &&
-								(we._ckey.getCSetId() == -1)) ||
-                		 (we._ckey != null && key != null && 
-                				((we._ckey.getCSetId() == -1 && key.getCSetId() == -1) ||                						
-                						we._ckey.equals(key)))) {
-	                routes.add(we);
-	                targets.add(we.getTargetInstance());
-            	}
-        	} else if ("one".equals(we.getRoute())) {
-                if (!targets.contains(we.getTargetInstance()) &&
-                		((we._ckey == null && key == null) || 
-                		 (we._ckey != null && key != null && 
-                				we._ckey.equals(key)))) {
-	                routes.add(we);
-	                targets.add(we.getTargetInstance());
-            	}
-        	}
+    		assert we._ckeySet != null;
+
+    		if( keySet.isRoutableTo(we._ckeySet, "all".equals(we.getRoute())) ) {
+                routes.add(we);
+                targets.add(we.getTargetInstance());
+    		}
         }
+        
         return routes;
     }
 
@@ -109,22 +96,21 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         ((ProcessInstanceDaoImpl)target).removeRoutes(routeGroupId);
     }
 
-    public void enqueueMessage(MessageExchangeDAO mex, CorrelationKey[] keys) {
+    public void enqueueMessage(MessageExchangeDAO mex, CorrelationKeySet keySet) {
         if (__log.isDebugEnabled()) {
-            __log.debug("enqueueProcessInvocation: data=" + mex + " keys="
-                    + CollectionUtils.makeCollection(ArrayList.class, keys));
+            __log.debug("enqueueProcessInvocation: data=" + mex + " keys=" + keySet);
         }
 
-        MsgQueueEntry mqe = new MsgQueueEntry(mex, keys);
+        MsgQueueEntry mqe = new MsgQueueEntry(mex, keySet);
         _messages.add(mqe);
     }
 
-    public void addRoute(String routeId,ProcessInstanceDAO target, int idx, CorrelationKey key, String routePolicy) {
+    public void addRoute(String routeId,ProcessInstanceDAO target, int idx, CorrelationKeySet keySet, String routePolicy) {
         if (__log.isDebugEnabled()) {
-            __log.debug("addRoute: target=" + target + " correlationKey=" + key);
+            __log.debug("addRoute: target=" + target + " correlationKeySet=" + keySet);
         }
 
-        final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, key, idx, routePolicy);
+        final MessageRouteDaoImpl mr = new MessageRouteDaoImpl((ProcessInstanceDaoImpl)target, routeId, keySet, idx, routePolicy);
         _conn.defer(new Runnable() {
             public void run() {
                 _routes.add(mr);
@@ -163,12 +149,12 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
 
     private class MsgQueueEntry {
         public final MessageExchangeDAO message;
-        public final CorrelationKey[] keys;
+        public final CorrelationKeySet keySet;
 
         private MsgQueueEntry(MessageExchangeDAO mex,
-                              CorrelationKey[] keys) {
+                              CorrelationKeySet keySet) {
             this.message = mex;
-            this.keys = keys;
+            this.keySet = keySet;
         }
     }
 }

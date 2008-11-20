@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
@@ -29,14 +29,14 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
   ProcessInstanceDaoImpl _instance;
   String _groupId;
-  CorrelationKey _ckey;
+  CorrelationKeySet _ckeySet;
   int _idx;
   String _route;
 
-  MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKey ckey, int idx, String routePolicy) {
+  MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKeySet ckeySet, int idx, String routePolicy) {
     _instance = owner;
     _groupId = groupId;
-    _ckey = ckey;
+    _ckeySet = ckeySet;
     _idx = idx;
     _route = routePolicy;
   }
@@ -55,5 +55,9 @@ class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
   
   public String getRoute() {
 	  return _route;
+  }
+  
+  public CorrelationKeySet getCorrelationKeySet() {
+	  return _ckeySet;
   }
 }

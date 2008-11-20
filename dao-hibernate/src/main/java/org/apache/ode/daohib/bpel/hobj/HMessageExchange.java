@@ -28,11 +28,13 @@ import java.util.Map;
  * 
  * @hibernate.class table="BPEL_MESSAGE_EXCHANGE" dynamic-update="true"
  * @hibernate.query name="DELETE_MEX_BY_INSTANCE" query="delete from HMessageExchange as m where m.instance = :instance"
+ * @hibernate.query name="DELETE_UNMATCHED_MEX_BY_INSTANCE" query="delete from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance = :instance)"
  * @hibernate.query name="DELETE_MEX_BY_PROCESS" query="delete from HMessageExchange as m where m.process = :process"
  * hibernate.query name="DELETE_MEX_PROPERTIES_BY_PROCESS" query="delete from HMessageExchange.properties as m where key(m).process = :process"
  */
 public class HMessageExchange extends HObject {
 	public final static String DELETE_MEX_BY_INSTANCE = "DELETE_MEX_BY_INSTANCE";
+	public final static String DELETE_UNMATCHED_MEX_BY_INSTANCE = "DELETE_UNMATCHED_MEX_BY_INSTANCE";
 	public final static String DELETE_MEX_BY_PROCESS = "DELETE_MEX_BY_PROCESS";
 
     private String _channelName;

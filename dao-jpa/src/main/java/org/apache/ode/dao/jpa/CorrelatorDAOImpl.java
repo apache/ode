@@ -19,7 +19,7 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
@@ -34,11 +34,11 @@ import java.util.List;
 @Entity
 @Table(name="ODE_CORRELATOR")
 @NamedQueries({
-    @NamedQuery(name="RouteByCKey", query="select route from MessageRouteDAOImpl as route where route._correlationKey = :ckey and route._correlator._process._processType = :ptype and route._correlator._correlatorKey = :corrkey"),
     @NamedQuery(name=CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS, query="delete from CorrelatorDAOImpl as c where c._process = :process")
 })
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 	public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
+	private final static String ROUTE_BY_CKEY_HEADER = "select route from MessageRouteDAOImpl as route where route._correlator._process._processType = :ptype and route._correlator._correlatorKey = :corrkey";
 	
     @Id @Column(name="CORRELATOR_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -59,16 +59,17 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         _process = process;
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKey correlationKey, String routePolicy) {
-        MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKey,
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKeySet correlationKeySet, String routePolicy) {
+        MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKeySet,
                 routeGroupId, index, (ProcessInstanceDAOImpl) target, this, routePolicy);
         _routes.add(mr);
     }
 
-    public MessageExchangeDAO dequeueMessage(CorrelationKey correlationKey) {
+    public MessageExchangeDAO dequeueMessage(CorrelationKeySet correlationKeySet) {
+    	// TODO: this thing does not seem to be scalable: loading up based on a correlator???
         for (Iterator<MessageExchangeDAOImpl> itr=_exchanges.iterator(); itr.hasNext();){
             MessageExchangeDAOImpl mex = itr.next();
-            if (mex.getCorrelationKeys().contains(correlationKey)) {
+            if (mex.getCorrelationKeySet().isRoutableTo(correlationKeySet, false)) {
                 itr.remove();
                 return mex;
             }
@@ -77,22 +78,24 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     public void enqueueMessage(MessageExchangeDAO mex,
-                               CorrelationKey[] correlationKeys) {
+                               CorrelationKeySet correlationKeySet) {
         MessageExchangeDAOImpl mexImpl = (MessageExchangeDAOImpl) mex;
-        for (CorrelationKey key : correlationKeys ) {
-            mexImpl.addCorrelationKey(key);
-        }
+        mexImpl.setCorrelationKeySet(correlationKeySet);
         _exchanges.add(mexImpl);
         mexImpl.setCorrelator(this);
 
     }
 
     @SuppressWarnings("unchecked")
-    public List<MessageRouteDAO> findRoute(CorrelationKey correlationKey) {
-        Query qry = getEM().createNamedQuery("RouteByCKey");
-        qry.setParameter("ckey", correlationKey == null ? "%" : correlationKey.toCanonicalString());
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet) {
+    	List<CorrelationKeySet> subSets = correlationKeySet.findSubSets();
+    	Query qry = getEM().createQuery(generateSelectorQuery(ROUTE_BY_CKEY_HEADER, subSets));
         qry.setParameter("ptype", _process.getType().toString());
         qry.setParameter("corrkey", _correlatorKey);
+    	for( int i = 0; i < subSets.size(); i++ ) {
+    		qry.setParameter("s" + i, subSets.get(i).toCanonicalString());
+    	}
+    	
         List<MessageRouteDAO> routes = (List<MessageRouteDAO>) qry.getResultList();
         if (routes.size() > 0) {
         	List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
@@ -109,6 +112,25 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         } else {
         	return null;
         }
+    }
+
+    private String generateSelectorQuery(String header, List<CorrelationKeySet> subSets) {
+    	StringBuffer filterQuery = new StringBuffer(header);
+    	
+    	if( subSets.size() == 1 ) {
+    		filterQuery.append(" and route._correlationKey = :s0");
+    	} else if( subSets.size() > 1 ) {
+    		filterQuery.append(" and route._correlationKey in(");
+        	for( int i = 0; i < subSets.size(); i++ ) {
+        		if( i > 0 ) {
+        			filterQuery.append(", ");
+        		}
+        		filterQuery.append(":s").append(i);
+        	}
+        	filterQuery.append(")");
+    	}
+    	
+    	return filterQuery.toString();
     }
 
     public String getCorrelatorId() {

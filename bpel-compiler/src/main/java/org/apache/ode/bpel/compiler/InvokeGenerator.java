@@ -34,12 +34,15 @@ import org.apache.ode.utils.stl.MemberOfFunction;
 import javax.wsdl.OperationType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Generates code for <code>&lt;invoke&gt;</code> activities.
  */
 class InvokeGenerator extends DefaultActivityGenerator {
+    private static final CommonCompilationMessages __cmsgsGeneral = MessageBundle.getMessages(CommonCompilationMessages.class);
 
     private static final InvokeGeneratorMessages __imsgs = MessageBundle.getMessages(InvokeGeneratorMessages.class);
 
@@ -122,8 +125,14 @@ class InvokeGenerator extends DefaultActivityGenerator {
             Collection<OScope.CorrelationSet> assertCorrelations, 
             Collection<OScope.CorrelationSet> initCorrelations,
             Collection<OScope.CorrelationSet> joinCorrelations) {
+        Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation : correlations) {
-            OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
+        	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+                throw new CompilationException(__cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
+                        .getCorrelationSet()));
+        	}
+
+        	OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
             switch (correlation.getInitiate()) {
             case NO:
                 assertCorrelations.add(cset);
@@ -132,6 +141,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 initCorrelations.add(cset);
                 break;
             case JOIN:
+            	cset.hasJoinUseCases = true;
                 joinCorrelations.add(cset);
             }
             for (OProcess.OProperty property : cset.properties) {
@@ -147,6 +157,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 }
                 // onMessage.
             }
+            csetNames.add(correlation.getCorrelationSet());
         }
     }
 }
